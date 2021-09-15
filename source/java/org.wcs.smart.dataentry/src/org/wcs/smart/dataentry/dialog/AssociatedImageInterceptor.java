@@ -242,8 +242,8 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 					SmartUtils.createDirectory(to.getParent());
 				}
 				
-				try {
-					Files.list( to.getParent() ).forEach(file ->{
+				try(Stream<Path> stream = Files.list(to.getParent())){
+					stream.forEach(file ->{
 						if (file.getFileName().toString().startsWith(to.getFileName().toString() + ".")) { //$NON-NLS-1$
 							try {
 								Files.delete(file);
@@ -266,8 +266,8 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 					SmartUtils.createDirectory(to.getParent());
 				}
 				final String fName2 = fName;
-				try {
-					Files.list( to.getParent() ).forEach(file ->{
+				try(Stream<Path> stream = Files.list(to.getParent())){
+					stream.forEach(file ->{
 						if (file.getFileName().toString().startsWith(fName2 + ".")) { //$NON-NLS-1$
 							try {
 								Files.delete(file);

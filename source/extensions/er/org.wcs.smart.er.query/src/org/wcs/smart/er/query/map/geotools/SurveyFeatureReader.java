@@ -81,7 +81,7 @@ public class SurveyFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	 */
 	@Override
 	public void close() throws IOException {
-		fIterator.close();
+		if (fIterator != null) fIterator.close();
 	}
 
 	/**

@@ -67,8 +67,8 @@ public class Packagei18nNew {
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
 //	public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
 //	public static final String[] LANGUAGES =  new String[] {"es","pt"};
-
-	public static final String[] LANGUAGES = {"ro", "si"};
+//	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
+	public static final String[] LANGUAGES = {"hi", "kar"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
@@ -147,9 +147,20 @@ public class Packagei18nNew {
 					
 					Path toFile = getToPath(sourceDir,  file, outputPath);
 					
-					Files.createDirectories(toFile.getParent());
-					System.out.println(file.toString() + " to " + toFile.toString());
-					Files.copy(file, toFile);
+					boolean copy = true;
+//					boolean copy = false;
+//					List<String> data = Files.readAllLines(file, StandardCharsets.UTF_8);
+//					for (String d : data) {
+//						if (d.contains("**NEW**")) {
+//							copy = true;
+//							break;
+//						}
+//					}
+					if (copy) {
+						Files.createDirectories(toFile.getParent());
+						System.out.println(file.toString() + " to " + toFile.toString());
+						Files.copy(file, toFile);
+					}
 					
 				}
 						

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -114,12 +115,19 @@ public class CyberTrackerImporter {
 		progress.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 		try {
 			
-			for (final Path file : Files.list(cxtDataFolder).collect(Collectors.toList())) {
+			List<Path> fall = null;
+			try(Stream<Path> stream = Files.list(cxtDataFolder)){
+				fall = stream.collect(Collectors.toList());
+			}
+			for (final Path file : fall) {
 				if (!Files.isDirectory(file))
 					extractRawXml(appPath, file, xmlTempDir);
 			}
 			
-			List<Path> items = Files.list(xmlTempDir).collect(Collectors.toList());
+			List<Path> items = null;
+			try(Stream<Path> stream = Files.list(xmlTempDir)){
+				items = stream.collect(Collectors.toList());
+			}
 			
 			progress.setWorkRemaining(items.size()+1);
 			//now all raw xml data is in temporary directory, importing it
@@ -130,7 +138,11 @@ public class CyberTrackerImporter {
 			//move processed files to storage
 			Path storageFolder = ICyberTrackerConstants.getStorageFolder(ca);
 			
-			for (final Path file : Files.list(cxtDataFolder).collect(Collectors.toList())) {
+			List<Path> all = null;
+			try(Stream<Path> stream = Files.list(cxtDataFolder)){
+				all = stream.collect(Collectors.toList());
+			}
+			for (final Path file : all) {
 				if (!Files.isDirectory(file) && file.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".ctx")) { //$NON-NLS-1$
 					if (patrols.isEmpty()) {
 						Files.delete(file);

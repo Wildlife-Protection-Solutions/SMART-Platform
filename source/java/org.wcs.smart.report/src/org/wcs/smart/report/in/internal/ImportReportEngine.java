@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -145,10 +146,13 @@ public class ImportReportEngine {
 		//find the and read the .rpt file
 		Path reportPropFile = null;
 		
-		for (Path r : Files.list(tmpDir).collect(Collectors.toList())) {
-			if (r.getFileName().toString().endsWith(".rpt")) { //$NON-NLS-1$
-				reportPropFile = r;
-				break;
+		try(Stream<Path> files = Files.list(tmpDir)){
+			List<Path> all = files.collect(Collectors.toList()); 
+			for (Path r : all) {
+				if (r.getFileName().toString().endsWith(".rpt")) { //$NON-NLS-1$
+					reportPropFile = r;
+					break;
+				}
 			}
 		}
 		if (reportPropFile == null){

@@ -107,7 +107,8 @@ public class MissionIdGroupByDropItem extends DropItem implements IGroupByDropIt
 					filters[1] = cb.equal(from.join("survey").get("surveyDesign"), currentDesign); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				c.where(cb.and(filters));
-				c.orderBy(cb.asc(from.join("survey").join("surveyDesign").get("keyId")), cb.desc(from.get("startDate")), cb.desc(from.join("survey").get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				c.orderBy(cb.asc(from.join("survey").join("surveyDesign").get("keyId")),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						cb.desc(from.get("startDate"))); //$NON-NLS-1$
 				
 				List<Mission> ss = s.createQuery(c).getResultList();
 				for (Mission mission : ss){

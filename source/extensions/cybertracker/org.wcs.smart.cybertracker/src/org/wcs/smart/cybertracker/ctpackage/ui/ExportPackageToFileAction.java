@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -77,7 +78,8 @@ public class ExportPackageToFileAction implements ICtExportAction {
 			fd.setFilterExtensions(new String[] { "*.zip", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
 			fd.setFilterNames(new String[] { Messages.ExportPackageToFileAction_MobilePackageType, Messages.ExportPackageToFileAction_AllFilesType });
 
-			String name = towrite.get(0).getName().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			String name = URLUtils.cleanFilename(towrite.get(0).getName());
 			name += "." + UuidUtils.uuidToString(towrite.get(0).getUuid()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
 			
 			fd.setFileName(name);
@@ -128,7 +130,7 @@ public class ExportPackageToFileAction implements ICtExportAction {
 			int cnt = 0;
 			for (ICtPackage w : towrite) {
 				try {
-					String name = w.getName().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					String name =  URLUtils.cleanFilename(w.getName());
 					Path export = exportPath.resolve(name + "." + UuidUtils.uuidToString(w.getUuid()) + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
 					Files.copy(w.getLocalFile(), export, StandardCopyOption.REPLACE_EXISTING);
 					cnt++;

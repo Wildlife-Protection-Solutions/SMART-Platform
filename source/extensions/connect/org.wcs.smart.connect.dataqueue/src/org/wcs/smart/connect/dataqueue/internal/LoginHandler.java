@@ -208,7 +208,6 @@ public class LoginHandler implements ILoginHandler {
 				s.getTransaction().rollback();
 			}
 		}
-		if (files.isEmpty()) return;
 		
 		Path p = FileSystems.getDefault().getPath(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), ConnectDataQueuePlugin.DATA_QUEUE_DIR);
 		if (Files.exists(p)){

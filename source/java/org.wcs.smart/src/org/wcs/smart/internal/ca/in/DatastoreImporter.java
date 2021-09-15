@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -95,18 +96,20 @@ public class DatastoreImporter implements ICaDataImporter {
 		//by one of the existing plugins
 		List<String> validDirs = getFilestoreDirections();
 		
-		Files.list(destLocation).forEach(f->{
-			if (Files.isDirectory(f)) {
-				if (!validDirs.contains(f.getFileName().toString())){
-					//this is not supported by any of the plugins so we want to remove it
-					try{
-						SmartUtils.deleteDirectory(f);
-					}catch (IOException ex){
-						SmartPlugIn.log(ex.getMessage(), ex);
+		try(Stream<Path> stream = Files.list(destLocation)){
+			stream.forEach(f->{
+				if (Files.isDirectory(f)) {
+					if (!validDirs.contains(f.getFileName().toString())){
+						//this is not supported by any of the plugins so we want to remove it
+						try{
+							SmartUtils.deleteDirectory(f);
+						}catch (IOException ex){
+							SmartPlugIn.log(ex.getMessage(), ex);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	/**

@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -166,6 +167,7 @@ public class ZipUtil {
 	    	String entryName = base + path.getFileName().toString();
 	        progress.checkCanceled();
 	       
+	        
 	        if (!Files.exists(path)) {
 	    		//assume empty directory and ignore
 	        }else if (!Files.isDirectory(path)) {
@@ -175,21 +177,27 @@ public class ZipUtil {
 	            	zOut.write(in.readAllBytes());
 	            }
 	            zOut.closeEntry();
-	        }else if (Files.isDirectory(path) && Files.list(path).count() == 0){
-	        	//empty directory
-	        	ZipEntry zipEntry = new ZipEntry(entryName + DIR_PATH_SEPERATOR);  
-	            zOut.putNextEntry(zipEntry);
-	            zOut.closeEntry();
-	        } else {
-	        	List<Path> kids = Files.list(path).collect(Collectors.toList());
-	            progress.setWorkRemaining(kids.size());
-	            for (Path child : kids) {
-	                if (!itemsToExclude.contains(child)) {
-	                	if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, itemsToExclude, progress.split(1))){
-	                		return false;
-	                	}
-	                }
-	            }
+	        }else {
+	        	List<Path> kids = null;
+	        	try(Stream<Path> stream = Files.list(path)){
+	        		kids = stream.collect(Collectors.toList());
+	        	}
+	        
+	        	if (Files.isDirectory(path) && kids.size() == 0) {
+	        		//empty directory
+		        	ZipEntry zipEntry = new ZipEntry(entryName + DIR_PATH_SEPERATOR);  
+		            zOut.putNextEntry(zipEntry);
+		            zOut.closeEntry();
+	        	}else {
+	        		progress.setWorkRemaining(kids.size());
+	        		for (Path child : kids) {
+	        			if (!itemsToExclude.contains(child)) {
+	        				if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, itemsToExclude, progress.split(1))){
+	        					return false;
+	        				}
+	        			}
+	        		}
+	        	}
 	        }
     	}catch (OperationCanceledException ex) {
     		return false;

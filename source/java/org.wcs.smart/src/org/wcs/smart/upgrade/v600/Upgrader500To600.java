@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -204,9 +205,8 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 					
 					List<Path> allFiles = null;
 					//walk directory recursively and encrypt files
-					try {
-						allFiles = Files.walk(p)
-								.filter(Files::isRegularFile)
+					try (Stream<Path> stream = Files.walk(p)){
+						allFiles = stream.filter(Files::isRegularFile)
 								.collect(Collectors.toList());
 					}catch (Exception ex) {
 						throw new Exception("Unable to determine files to encrypt in filestore: " + p.toString(), ex); //$NON-NLS-1$

@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -52,10 +53,12 @@ public class PawsResultManager {
 		
 		if (!Files.exists(resultsDirectory)) return;
 		
-		Files.walk(resultsDirectory, 1).forEach(f->{
-			if (!Files.isDirectory(f) && f.getFileName().toString().endsWith("csv"))  //$NON-NLS-1$
-				resultFiles.add(new PawsResultFile(run, f));
-		});
+		try(Stream<Path> stream = Files.walk(resultsDirectory, 1)){
+			stream.forEach(f->{
+				if (!Files.isDirectory(f) && f.getFileName().toString().endsWith("csv"))  //$NON-NLS-1$
+					resultFiles.add(new PawsResultFile(run, f));
+			});
+		}
 	}
 
 	public PawsRun getRun() {

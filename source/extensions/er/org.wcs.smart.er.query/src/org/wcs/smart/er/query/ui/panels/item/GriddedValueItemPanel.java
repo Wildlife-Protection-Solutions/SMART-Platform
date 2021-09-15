@@ -94,7 +94,7 @@ public class GriddedValueItemPanel  extends AbstractQueryItemPanel{
 		filterTreeViewer.setInput(LOADING_TEXT);
 
 		createAddButton(filterTreeViewer, main);
-		
+
 		refreshPanel();
 		return main;
 

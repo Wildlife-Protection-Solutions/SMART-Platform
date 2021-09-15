@@ -107,15 +107,7 @@ public class CustomHourRangeValueDropItem extends PatrolValueDropItem{
 		initValues = new int[] {sTime.getTimeInSeconds(), eTime.getTimeInSeconds()};
 		super.queryChanged();
 	}
-	
-	@Override
-	protected void updateUi(){
-		super.updateUi();
-		
-		main.layout();
-		main.redraw();
-	}
-	
+
 	/**
 	 * @param data expects a list of numbers {starttime, endtime}
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)

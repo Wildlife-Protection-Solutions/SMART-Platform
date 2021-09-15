@@ -822,6 +822,8 @@ public class Messages extends NLS {
 	public static String SurveyFilterDialog_Message;
 
 	public static String SurveyFilterDialog_MissionDatesFilter;
+	public static String SurveyFilterDialog_SaveDefault;
+
 	public static String SurveyFilterDialog_SelectedLabel;
 	public static String SurveyFilterDialog_StateOnlyLabel;
 	public static String SurveyFilterDialog_SurveyIdFieldLabel;

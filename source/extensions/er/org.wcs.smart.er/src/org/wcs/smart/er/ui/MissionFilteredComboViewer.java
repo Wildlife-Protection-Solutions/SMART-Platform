@@ -85,7 +85,7 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> {
 
 	public synchronized SurveyFilter getFilter() {
 		if (filter == null){
-			filter = new SurveyFilter();
+			filter = SurveyFilter.newInstance();
 		}
 		return filter;
 	}

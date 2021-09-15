@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -160,9 +161,12 @@ public class HibernateDataImporter implements ICaDataImporter{
 	private HashMap<String, List<TableInfo>> scanTables(Path dir) throws Exception{
 		Path dataFileDir = dir.resolve(ICaDataExportEngine.DATABASE_DIR);
 		//list all .def file
-		List<Path> files = Files.list(dataFileDir)
-				.filter(e->e.getFileName().toString().endsWith(".def")) //$NON-NLS-1$
-				.collect(Collectors.toList());
+		List<Path> files = null;
+		try(Stream<Path> stream = Files.list(dataFileDir)){
+			files = stream.filter(e->e.getFileName().toString().endsWith(".def")) //$NON-NLS-1$
+					.collect(Collectors.toList());
+		}
+				
 		//read info in files
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
 		for (Path file : files) {

@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -822,7 +823,11 @@ public class MapSettings {
 		
 		try {
 			final String flayerName = layerName;
-			List<Path> items = Files.list(dir).filter(e->e.getFileName().toString().startsWith(flayerName +".")).collect(Collectors.toList()); //$NON-NLS-1$
+
+			List<Path> items = null;
+			try(Stream<Path> stream = Files.list(dir)){
+				items = stream.filter(e->e.getFileName().toString().startsWith(flayerName +".")).collect(Collectors.toList()); //$NON-NLS-1$
+			}
 			return items.toArray(new Path[items.size()]);
 		}catch (IOException ex) {
 			SmartPlugIn.log(ex.getMessage(), ex);

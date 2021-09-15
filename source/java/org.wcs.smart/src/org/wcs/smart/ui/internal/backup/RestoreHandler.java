@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -49,7 +50,8 @@ import org.wcs.smart.internal.Messages;
 public class RestoreHandler {
 
 	private long fileSize(Path p) throws IOException{
-		return Files.walk(p).mapToLong(f->{
+		try(Stream<Path> stream = Files.walk(p)){
+			return stream.mapToLong(f->{
 				try {
 					return Files.size(f);
 				} catch (IOException e) {
@@ -58,8 +60,9 @@ public class RestoreHandler {
 				}
 				return 0;
 			}).sum();
-		
+		}
 	}
+	
 	/**
 	 * Runs the handler
 	 * @param shell the current shell

@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.query.common.ui.EncounterRateDialog;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.IValueDropItem;
@@ -202,6 +203,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 		main.layout();
 		main.redraw();
 		
+		SmartUiUtils.makeTransparent(main);
 	}
 	
 	/**

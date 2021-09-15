@@ -192,6 +192,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 						//copy all observations into existing group
 						mgroup = currentLink.getWaypoint().getObservationGroups().get(0);
 					}
+					currentLink.setObservationGroup(mgroup);
 					
 					for (WaypointObservationGroup g : parsedWp.getObservationGroups()) {
 						for (WaypointObservation wo : g.getObservations()) {

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -133,12 +134,14 @@ public class CmXmlToSmartImporter {
 			Path[] xmlFile = {null};
 			fileLookup = new HashMap<>();
 			
-			Files.list(tempFolder).forEach(file->{
-				fileLookup.put(file.getFileName().toString(), file);
-				if (file.getFileName().toString().endsWith(".xml")) { //$NON-NLS-1$
-					xmlFile[0] = file;
-				}
-			});
+			try(Stream<Path> stream = Files.list(tempFolder)){
+				stream.forEach(file->{
+					fileLookup.put(file.getFileName().toString(), file);
+					if (file.getFileName().toString().endsWith(".xml")) { //$NON-NLS-1$
+						xmlFile[0] = file;
+					}
+				});
+			}
 			if (xmlFile[0] != null) {
 				return importXml(xmlFile[0], monitor);
 			}

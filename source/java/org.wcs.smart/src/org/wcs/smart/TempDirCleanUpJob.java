@@ -24,6 +24,7 @@ package org.wcs.smart;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,20 +53,21 @@ public class TempDirCleanUpJob extends Job{
 		//clean up queries directory
 		Path dir = SmartContext.INSTANCE.getTempFilestoreLocation();
 		
-		
 		if (Files.exists(dir) && Files.isDirectory(dir)){
 			try {
-				Files.list(dir).forEach(file->{
-					try {
-						if (Files.isDirectory(file)) {
-							SmartUtils.deleteDirectory(file);
-						}else {
-							Files.delete(file);
+				try(Stream<Path> files = Files.list(dir)){
+					files.forEach(file->{
+						try {
+							if (Files.isDirectory(file)) {
+								SmartUtils.deleteDirectory(file);
+							}else {
+								Files.delete(file);
+							}
+						} catch (IOException e) {
+							SmartPlugIn.log(e.getMessage(), e);
 						}
-					} catch (IOException e) {
-						SmartPlugIn.log(e.getMessage(), e);
-					}
-				});
+					});
+				}
 			}catch (IOException e) {
 				SmartPlugIn.log(e.getMessage(), e);
 			}

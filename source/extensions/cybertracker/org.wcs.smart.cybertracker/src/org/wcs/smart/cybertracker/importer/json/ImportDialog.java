@@ -36,6 +36,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -255,7 +256,11 @@ public class ImportDialog extends SmartStyledTitleDialog{
 		
 		List<Path> allFiles = new ArrayList<>();
 		try {
-			if (Files.exists(storageFolder)) Files.walk(storageFolder).filter(e->Files.isRegularFile(e)).forEach(p->allFiles.add(p));
+			if (Files.exists(storageFolder)) {
+				try(Stream<Path> stream = Files.walk(storageFolder)){
+					stream.filter(e->Files.isRegularFile(e)).forEach(p->allFiles.add(p));
+				}
+			}
 		} catch (IOException e1) {
 			CyberTrackerPlugIn.log(e1.getMessage(), e1);
 		}
@@ -394,8 +399,8 @@ public class ImportDialog extends SmartStyledTitleDialog{
 
 			//move files to archive folder
 			List<Path> importedFiles = new ArrayList<>();
-			try {
-				Files.list(importPath).forEach(fp->importedFiles.add(fp));
+			try (Stream<Path> stream = Files.list(importPath)){
+				stream.forEach(fp->importedFiles.add(fp));
 			}catch (Exception ex) {
 				CyberTrackerPlugIn.displayError(Messages.ImportDialog_Error, MessageFormat.format(Messages.ImportDialog_ReadError, importPath.toString(), ex.getMessage()), ex);
 				return;

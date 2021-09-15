@@ -30,6 +30,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -462,7 +463,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							
 							Path dataFolder = cm.getFileDataStoreLocation();
 							if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
-								Files.list(dataFolder).forEach(file->toZip.add(file));							
+								try(Stream<Path> stream = Files.list(dataFolder)){
+									stream.forEach(file->toZip.add(file));
+								}
 							}
 							//we don't add the data model icons here as they are not required
 							//for importing the configurable model

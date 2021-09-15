@@ -84,7 +84,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog {
 		if (defaultFilter != null) {
 			currentFilter = defaultFilter;
 		}else {
-			currentFilter = new SurveyFilter();
+			currentFilter =  SurveyFilter.newInstance();
 		}	
 	}
 

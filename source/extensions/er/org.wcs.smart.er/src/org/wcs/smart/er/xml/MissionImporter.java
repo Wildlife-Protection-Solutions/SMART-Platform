@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -99,7 +100,9 @@ public class MissionImporter {
 				throw new Exception (MessageFormat.format(Messages.MissionImporter_1, new Object[]{ zipFile.toAbsolutePath().toString()}));
 			}
 			//file xml file
-			files = Files.list(directory).collect(Collectors.toList());
+			try(Stream<Path> stream = Files.list(directory)){
+				files = stream.collect(Collectors.toList());
+			}
 		}else{
 			files = Collections.singletonList(zipFile);
 			directory = zipFile;

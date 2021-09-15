@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -101,7 +102,10 @@ public class ProfileToXml {
 			toXml(p, tempDir, progress.split(1));
 			
 			progress.subTask(Messages.ProfileToXml_zippingTaskName);
-			List<Path> toInclude = Files.list(tempDir).collect(Collectors.toList());
+			List<Path> toInclude = null;
+			try(Stream<Path> stream = Files.list(tempDir)){
+				toInclude = stream.collect(Collectors.toList());
+			}
 			ZipUtil.createZip(toInclude, outputFile, progress.split(1));
 		}finally {
 			//clean up

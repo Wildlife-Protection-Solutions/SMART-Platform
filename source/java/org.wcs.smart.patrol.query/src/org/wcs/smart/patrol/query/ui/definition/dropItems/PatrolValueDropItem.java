@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
@@ -125,6 +126,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 		main.layout();
 		main.redraw();
 		
+		SmartUiUtils.makeTransparent(main);
 	}
 	/*
 	 * by default include all data

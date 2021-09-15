@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -94,7 +95,11 @@ public class AttachmentInterceptor extends SessionInterceptor {
 				}
 				//if there are no more files then we delete the directory too
 				try {
-					if (Files.list(f.getParent()).count() == 0) {
+					long cnt = 0;
+					try(Stream<Path> stream = Files.list(f.getParent())){
+						cnt = stream.count();
+					}
+					if (cnt == 0) {
 						SmartUtils.deleteDirectory(f.getParent());
 					}
 				}catch (Exception ex) {

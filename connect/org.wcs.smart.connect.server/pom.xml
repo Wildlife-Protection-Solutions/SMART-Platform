@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wcs.smart.connect</groupId>
         <artifactId>org.wcs.smart.connect</artifactId>
-        <version>7.1.0-SNAPSHOT</version>
+        <version>7.2.0-SNAPSHOT</version>
     </parent>
     
     <groupId>org.wcs.smart.connect.server</groupId>
@@ -470,6 +470,12 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+        	<!-- required for Graticule mapgraphic -->
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-grid</artifactId>
             <version>${geotools.version}</version>
         </dependency>
         <dependency>

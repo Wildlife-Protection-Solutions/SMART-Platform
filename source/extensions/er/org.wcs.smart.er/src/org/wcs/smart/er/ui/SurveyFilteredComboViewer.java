@@ -174,7 +174,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 
 	public synchronized SurveyFilter getFilter() {
 		if (filter == null){
-			filter = new SurveyFilter();
+			filter = SurveyFilter.newInstance();
 			filter.setMissionDateFilter(DateFilter.ALL,null,null);
 		}
 		return filter;

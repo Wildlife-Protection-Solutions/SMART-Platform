@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -146,6 +146,6 @@ public class Smart6Database implements Closeable{
 		}
 		
 		//delete temporary file
-		FileUtils.deleteDirectory(root.toFile());
+		SmartUtils.deleteDirectory(root);
 	}
 }

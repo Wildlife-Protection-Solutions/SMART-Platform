@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -164,7 +165,11 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 					private void delete() {
 						super.deleteLocalFile();
 						try {
-							if (Files.list(tempDir).count() == 0) Files.delete(tempDir);
+							long cnt = 0;
+							try(Stream<Path> stream = Files.list(tempDir)){
+								cnt = stream.count();
+							}
+							if (cnt == 0) Files.delete(tempDir);
 						}catch (Exception ex) {
 							ConnectPlugIn.log(ex.getMessage(), ex);
 						}

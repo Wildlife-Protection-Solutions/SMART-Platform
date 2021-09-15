@@ -42,6 +42,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -108,32 +109,36 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	 */
 	@Override
 	protected void updateFilterModel(){
+		updateFilterModel(this.filter);
+	}
+	
+	protected void updateFilterModel(SurveyFilter sfilter){
 		if (opActive.getSelection()){
-			filter.setSurveyState(State.ACTIVE);
+			sfilter.setSurveyState(State.ACTIVE);
 		}else if (opInactive.getSelection()){
-			filter.setSurveyState(State.INACTIVE);
+			sfilter.setSurveyState(State.INACTIVE);
 		}else if (opAll.getSelection()){
-			filter.setSurveyState(null);
-			filter.setSurveyDesignKeyFilters(null);
+			sfilter.setSurveyState(null);
+			sfilter.setSurveyDesignKeyFilters(null);
 		}else if (opSelected.getSelection()){
-			filter.setSurveyState(null);
+			sfilter.setSurveyState(null);
 			Object[] c = lstDesigns.getCheckedElements();
 			String[] keys = new String[c.length];
 			int i = 0;
 			for (Object cc : c){
 				keys[i++] = ((SurveyDesignEditorInput)cc).getSurveyDesignKey();
 			}
-			filter.setSurveyDesignKeyFilters(keys);
+			sfilter.setSurveyDesignKeyFilters(keys);
 			
 			if (keys.length == 0){
 				MessageDialog.openWarning(getParentShell(), Messages.SurveyFilterDialog_WarnTitle, Messages.SurveyFilterDialog_WarnInfo); 
 			}
 		}
 		if (dateFilterCmp != null) {
-			filter.setMissionDateFilter(dateFilterCmp.getDateFilterForModel(), dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
+			sfilter.setMissionDateFilter(dateFilterCmp.getDateFilterForModel(), dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
 		}
 
-		filter.setSurveyNameFilter(nameFilter.getComparisonForModel(), nameFilter.getFilterValueForModel());
+		sfilter.setSurveyNameFilter(nameFilter.getComparisonForModel(), nameFilter.getFilterValueForModel());
 	}
 
 	/**
@@ -147,6 +152,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		opInactive.setSelection(false);
 		opAll.setSelection(false);
 		opSelected.setSelection(false);
+		
 		if (state != null){
 			if (state == State.ACTIVE){
 				opActive.setSelection(true);
@@ -161,7 +167,14 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				initDesignSelection();
 			}
 		}
-		if (dateFilterCmp != null) dateFilterCmp.applyState(filter.getMissionDateFilter(), filter.getMissionStartDate(), filter.getMissionEndDate());
+		
+		if (dateFilterCmp != null) {
+			if (filter.getMissionDateFilter() == null) {
+				dateFilterCmp.applyState(null, null, null);
+			}else {
+				dateFilterCmp.applyState(filter.getMissionDateFilter(), filter.getMissionStartDate(), filter.getMissionEndDate());	
+			}
+		}
 		nameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
 		updateDesignEnabled();
 	}
@@ -252,6 +265,20 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		
 		opAll.setSelection(true);
 //		lstDesignOps.setSelection(new StructuredSelection(DesignOps.ACTIVE));
+		
+		
+		Link linkSave = new Link(main, SWT.NONE);
+		linkSave.setText("<a>" +Messages.SurveyFilterDialog_SaveDefault + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
+		linkSave.setToolTipText(Messages.SurveyFilterDialog_SaveDefault);
+		linkSave.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		linkSave.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SurveyFilter temp = filter.clone();
+				updateFilterModel(temp);
+				temp.saveAsPreference();
+			}
+		});
 		
 		setTitle(Messages.SurveyFilterDialog_Title);
 		getShell().setText(Messages.SurveyFilterDialog_Title);
