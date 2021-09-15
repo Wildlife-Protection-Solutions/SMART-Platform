@@ -76,6 +76,22 @@ public class HibernateDataImporter implements ICaDataImporter{
 	private void processDatabaseFiles(Path dir, Session session, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaImporter_Progress_processingTables, 20);
 		
+		//replication status
+		boolean trg = true;
+		try {
+			//this trigger prevents records from being logged to the connect_change_log table
+			//when replication is not enabled
+			//replication is not enabled when we import ca but we still want
+			//this table to get populated otherwise sync'ing won't work correctly
+			//so we temporarily drop it here and add it back after
+			//the table data has been imported
+			session.createNativeQuery("DROP TRIGGER trg_change_log_insert").executeUpdate(); //$NON-NLS-1$
+		}catch (Exception ex) {
+			//thrown if trigger doesn't exist
+			trg = false;
+		}
+		
+		
 		HashMap<String, List<TableInfo>> tables = scanTables(dir);
 		//for each table check to ensure the table exists in the database
 		//if it does not exist we cannot import it
@@ -139,6 +155,12 @@ public class HibernateDataImporter implements ICaDataImporter{
 				last = tableName;
 			}
 		}
+		
+		if (trg) {
+			session.createNativeQuery("CREATE TRIGGER trg_change_log_insert AFTER INSERT ON smart.connect_change_log REFERENCING NEW AS new FOR EACH ROW WHEN (smart.is_replication_enabled_ca(new.ca_uuid) = false) delete from smart.connect_change_log where uuid = new.uuid"). //$NON-NLS-1$
+				executeUpdate();
+		}
+		
 	}
 
 	/**
@@ -166,7 +188,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 			files = stream.filter(e->e.getFileName().toString().endsWith(".def")) //$NON-NLS-1$
 					.collect(Collectors.toList());
 		}
-				
+
 		//read info in files
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
 		for (Path file : files) {
