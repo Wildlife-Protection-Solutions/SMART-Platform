@@ -112,19 +112,6 @@ public class PatrolAreaBufferValueDropItem extends AbstractValueDropItem{
 		initDrag(lbl);
 		initDrag(temp);
 	}
-	
-	/*
-	 * Creates the ui element
-	 */
-	@Override
-	protected void updateUi(){
-		super.updateUi();
-		
-		main.layout();
-		main.redraw();
-		
-	}
-
 
 	/**
 	 * Does nothing
