@@ -81,9 +81,11 @@ import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.CsvExporter;
-import org.wcs.smart.connect.query.engine.GeoJsonExporter;
+import org.wcs.smart.connect.query.engine.GeoJsonStreamingExporter;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
-import org.wcs.smart.connect.query.engine.HtmlExporter;
+import org.wcs.smart.connect.query.engine.HtmlStreamingExporter;
+import org.wcs.smart.connect.query.engine.HtmlStreamingGridQueryExporter;
+import org.wcs.smart.connect.query.engine.HtmlStreamingSummaryQueryExporter;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
@@ -252,8 +254,10 @@ public class QueryApi extends HttpServlet{
 			df = new DateFilter(dateField, dfilter);
 		}
 
+		//TODO:
 		IQueryResult result = null;
-		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+//		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+		Session s = HibernateManager.openNewSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		try {
 			Query query = QueryManager.INSTANCE.findQuery(uuid, s);
@@ -283,17 +287,17 @@ public class QueryApi extends HttpServlet{
 		}finally {
 			s.getTransaction().rollback();
 			
-			Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
-			session.beginTransaction();
-			try {
-				if (result != null){
-					result.dispose(session);
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}finally {
-				session.getTransaction().commit();
-			}
+//			Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+//			session.beginTransaction();
+//			try {
+//				if (result != null){
+//					result.dispose(session);
+//				}
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}finally {
+//				session.getTransaction().commit();
+//			}
 		}
 		
 	}
@@ -428,43 +432,55 @@ public class QueryApi extends HttpServlet{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
 			return new QueryResult(writeBinary(outputFile), result);
-		}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
-			GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
+		}else if (format.equalsIgnoreCase(GeoJsonStreamingExporter.FORMAT_KEY)){
+			
+			
+			
+//			GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 			
 			if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){
-				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
+//				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
+				StreamingOutput exporter= new GeoJsonStreamingExporter((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, request.getLocale(), prjProvider, context); 
+				return new QueryResult( Response
+						.status(Status.OK)
+						.type(MediaType.APPLICATION_JSON)
+						.entity( (StreamingOutput)exporter )
+						.build(), new NoDisposeQueryResult());
+				
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
-			return new QueryResult(Response
-					.status(Status.OK)
-					.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
-					.entity(exporter.getGeoJsonOutput() )
-					.build(), result);
-		}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
-			HtmlExporter exporter = new HtmlExporter(request.getLocale());
-			
+//			return new QueryResult(Response
+//					.status(Status.OK)
+//					.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+//					.entity(exporter.getGeoJsonOutput() )
+//					.build(), result);
+		}else if (format.equalsIgnoreCase(HtmlStreamingExporter.FORMAT_KEY)){
+			StreamingOutput exporter = null;
 			if (result instanceof AbstractDbFeatureResultSet
 					&& query instanceof SimpleQuery){
-						if(sortColumnName != null){
-						((AbstractDbFeatureResultSet<IResultItem>)result).setSorting(sortColumnName, sortDirectionInt);
-						((AbstractDbFeatureResultSet<IResultItem>)result).updateSortColumn(s);
-					}
-					
-					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
-				}else if (result instanceof IMemoryTableResultSet
-					&& query instanceof GriddedQuery){
-					exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, s);
-				}else if (result instanceof SummaryQueryResult){
-					exporter.exportResults(query, (SummaryQueryResult)result, s);
-				}else{
-					return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
+
+				if(sortColumnName != null){
+					((AbstractDbFeatureResultSet<IResultItem>)result).setSorting(sortColumnName, sortDirectionInt);
+					((AbstractDbFeatureResultSet<IResultItem>)result).updateSortColumn(s);
 				}
+					
+				exporter = new HtmlStreamingExporter((SimpleQuery)query,
+							(AbstractDbFeatureResultSet<IResultItem>)result, request.getLocale(), context);
+			}else if (result instanceof IMemoryTableResultSet && query instanceof GriddedQuery){
+				exporter = new HtmlStreamingGridQueryExporter((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, request.getLocale(), context);
+			}else if (result instanceof SummaryQueryResult){
+				exporter = new HtmlStreamingSummaryQueryExporter(query, (SummaryQueryResult)result, request.getLocale(), context);
+			}else{
+				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
+			}
+			
 			return new QueryResult( Response
 					.status(Status.OK)
-					.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
-					.entity(exporter.getHtml() )
+					.type(MediaType.TEXT_HTML)
+					.entity( (StreamingOutput)exporter )
 					.build(), result);
+
 		}else{
 			return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
 		}
@@ -536,14 +552,22 @@ public class QueryApi extends HttpServlet{
 		if (result instanceof IntelObservationQueryResults){
 			((IntelObservationQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 			
-			if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
-				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
-				exporter.exportResults( (IntelObservationQueryResults)result, s);
-				return new QueryResult(Response
+			if (format.equalsIgnoreCase(GeoJsonStreamingExporter.FORMAT_KEY)){
+				
+				StreamingOutput exporter= new GeoJsonStreamingExporter((IntelObservationQueryResults)result, request.getLocale(), prjProvider, context); 
+				return new QueryResult( Response
 						.status(Status.OK)
-						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
-						.entity(exporter.getGeoJsonOutput() )
+						.type(MediaType.APPLICATION_JSON)
+						.entity( (StreamingOutput)exporter )
 						.build(), new NoDisposeQueryResult());
+				
+//				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
+//				exporter.exportResults( (IntelObservationQueryResults)result, s);
+//				return new QueryResult(Response
+//						.status(Status.OK)
+//						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+//						.entity(exporter.getGeoJsonOutput() )
+//						.build(), new NoDisposeQueryResult());
 			}
 		}
 		if (result instanceof IPagedQueryResultSet){
@@ -555,13 +579,14 @@ public class QueryApi extends HttpServlet{
 				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 				exporter.exportResults( (IPagedQueryResultSet)result, s);
 				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
-			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
-				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (IPagedQueryResultSet)result, query.getName(), s);
+			}else if (format.equalsIgnoreCase(HtmlStreamingExporter.FORMAT_KEY)){
+				
+				StreamingOutput exporter = new HtmlStreamingExporter(query.getName(),
+						(IPagedQueryResultSet)result, request.getLocale(), context);
 				return new QueryResult( Response
 						.status(Status.OK)
-						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
-						.entity(exporter.getHtml() )
+						.type(MediaType.TEXT_HTML)
+						.entity( (StreamingOutput)exporter )
 						.build(), new NoDisposeQueryResult());
 			}
 		}
@@ -578,17 +603,19 @@ public class QueryApi extends HttpServlet{
 				
 				//TODO: delete temporary file??
 				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
-			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)) {
-				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (org.wcs.smart.i2.query.SummaryQueryResult )result, query.getName(), s);
+			}else if (format.equalsIgnoreCase(HtmlStreamingExporter.FORMAT_KEY)) {
+				StreamingOutput exporter = new HtmlStreamingSummaryQueryExporter(query.getName(),
+						(org.wcs.smart.i2.query.SummaryQueryResult)result, request.getLocale(), context);
 				return new QueryResult( Response
 						.status(Status.OK)
-						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
-						.entity(exporter.getHtml() )
-						.build(), new NoDisposeQueryResult());	
+						.type(MediaType.TEXT_HTML)
+						.entity( (StreamingOutput)exporter )
+						.build(), new NoDisposeQueryResult());
 			}
 		}
-		return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), new NoDisposeQueryResult()); //$NON-NLS-1$
+		return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED,
+				Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))),  //$NON-NLS-1$ 
+				new NoDisposeQueryResult());
 	}
 	
 	private Response writeText(java.nio.file.Path thisfile){
