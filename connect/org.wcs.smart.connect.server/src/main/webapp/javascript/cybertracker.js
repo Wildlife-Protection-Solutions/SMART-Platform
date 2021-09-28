@@ -208,7 +208,7 @@ function createPrivatePackageTable(){
  	
  	for (var i = 0; i < packages.length; i ++){
  		
-		var link = smartmobilelink + packages[i].uuid;
+		var link = packages[i].appLink;
 		
  		tableCreateRow(parent, 
  				[packages[i].name, packages[i].caLabel, link], 

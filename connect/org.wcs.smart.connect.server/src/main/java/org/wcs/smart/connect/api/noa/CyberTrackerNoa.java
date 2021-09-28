@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
@@ -112,6 +114,13 @@ public class CyberTrackerNoa {
 	@Context private HttpServletRequest request;
 	@Context private HttpHeaders headers;
 	
+	private URL getRootUrl() throws MalformedURLException{
+		URL url = new URL(request.getRequestURL().toString());
+		String sp = context.getContextPath();
+		URL rootUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), sp);
+		return rootUrl;
+	}
+	
 	/**
 	 * Validation is done via api_key in query or X-API-KEY header
 	 * and returns the ConservationArea uuid associated with 
@@ -180,9 +189,18 @@ public class CyberTrackerNoa {
 			if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN);
 			if (ctpackage.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			
-			return ctpackage.asProxy();
+			return ctpackage.asProxy(getRootUrl());
+		}catch (SmartConnectException ex) {
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not get package details", ex); //$NON-NLS-1$
 		}finally {
-			s.getTransaction().commit();
+			if (s.getTransaction().isActive()) s.getTransaction().commit();
 		}
 	}
 	
@@ -209,12 +227,17 @@ public class CyberTrackerNoa {
 			
 			for (CyberTrackerPackage p : ctpackages) {
 				if (p.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) continue;
-				proxies.add(p.asProxy());
+				proxies.add(p.asProxy(getRootUrl()));
 			}
 		
 			return proxies;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not get package details", ex); //$NON-NLS-1$
 		}finally {
-			s.getTransaction().commit();
+			if (s.getTransaction().isActive()) s.getTransaction().commit();
 		}
 	}
 	

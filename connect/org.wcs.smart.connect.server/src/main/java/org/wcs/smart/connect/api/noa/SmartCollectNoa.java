@@ -23,15 +23,17 @@ package org.wcs.smart.connect.api.noa;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +72,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 /**
  * SMARTCollect api that is visible to the public
+ * 
  * @author Emily
  *
  */
@@ -85,6 +88,14 @@ public class SmartCollectNoa {
 	@Context private HttpServletRequest request;
 	@Context private HttpHeaders headers;
 	
+	private URL getRootUrl() throws MalformedURLException{
+		URL url = new URL(request.getRequestURL().toString());
+		String sp = context.getContextPath();
+		URL rootUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), sp);
+		return rootUrl;
+	}
+	
+	
 	@GET
     @Path("packages/")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -98,12 +109,20 @@ public class SmartCollectNoa {
 			List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
 					"type", SmartCollectPackage.PACKAGE_TYPENAME).list(); //$NON-NLS-1$
 		
-			List<CyberTrackerPackageProxy> proxies = ctpackages.stream()
-					.filter(e->!e.getIsPrivate())
-					.map(e->e.asProxy()).collect(Collectors.toList());
+			
+			List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
+			for (CyberTrackerPackage e : ctpackages) {
+				if (e.getIsPrivate()) continue;
+				proxies.add(e.asProxy(getRootUrl()));
+			}
 			return proxies;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not get package details", ex); //$NON-NLS-1$
 		}finally {
-			s.getTransaction().commit();
+			if (s.getTransaction().isActive()) s.getTransaction().commit();
 		}
 	}
 	
@@ -195,9 +214,14 @@ public class SmartCollectNoa {
 			
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			if (!ctpackage.getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			return ctpackage.asProxy();
+			return ctpackage.asProxy(getRootUrl());
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not get package details", ex); //$NON-NLS-1$
 		}finally {
-			s.getTransaction().commit();
+			if (s.getTransaction().isActive()) s.getTransaction().commit();
 		}
 	}
 

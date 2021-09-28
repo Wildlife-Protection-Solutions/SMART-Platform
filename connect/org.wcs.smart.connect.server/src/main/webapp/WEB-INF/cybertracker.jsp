@@ -10,7 +10,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/cybertracker.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript"> 
-var smartmobilelink = "${smartmobilelink}";
+
 </script>
 
 

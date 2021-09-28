@@ -22,6 +22,8 @@ package org.wcs.smart.connect.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -106,6 +108,12 @@ public class CyberTracker extends HttpServlet{
 	@Context private HttpServletRequest request;
 	@Context private HttpHeaders headers;
 	
+	private URL getRootUrl() throws MalformedURLException{
+		URL url = new URL(request.getRequestURL().toString());
+		String sp = context.getContextPath();
+		URL rootUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), sp);
+		return rootUrl;
+	}
 	/**
 	 * Lists all CyberTracker packages uploaded 
 	 * to the system that the current user has access
@@ -137,16 +145,17 @@ public class CyberTracker extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			
 			List<CyberTrackerPackage> items = QueryFactory.buildQuery(s, CyberTrackerPackage.class).getResultList();
 			
 			for (CyberTrackerPackage ca : items) {
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, ca.getConservationArea().getUuid())){
 					if (caUuid == null || caUuid.equals(ca.getConservationArea().getUuid())) {
 						if (onlyprivate) {
-							if (ca.getIsPrivate()) proxies.add(ca.asProxy());
+							if (ca.getIsPrivate()) {
+								proxies.add(ca.asProxy(getRootUrl()));
+							}
 						}else {
-							proxies.add(ca.asProxy());
+							proxies.add(ca.asProxy(getRootUrl()));
 						}
 					}
 				}
@@ -159,7 +168,6 @@ public class CyberTracker extends HttpServlet{
 			
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					"Could not list cybertracker packages", ex); //$NON-NLS-1$
 		}finally{
@@ -473,9 +481,18 @@ public class CyberTracker extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			
-			return ctpackage.asProxy();
+			return ctpackage.asProxy(getRootUrl());
+		}catch (SmartConnectException ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not get cybertracker package", ex); //$NON-NLS-1$
 		}finally {
-			s.getTransaction().commit();
+			if (s.getTransaction().isActive()) s.getTransaction().commit();
 		}
 	}
 	
@@ -813,6 +830,11 @@ public class CyberTracker extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		try{
 			s.beginTransaction();
+			
+			ca = s.get(ConservationAreaInfo.class, ca.getUuid());
+			if (ca == null) {
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found on SMART Connect."); //$NON-NLS-1$
+			}
 			//must be a cybertracker user to be able to create keys
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, ca.getUuid())) throw new SmartConnectException(Response.Status.FORBIDDEN);
 			key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, 

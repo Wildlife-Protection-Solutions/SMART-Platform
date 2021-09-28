@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
+import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -38,6 +39,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
+import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -159,8 +161,14 @@ public class CyberTrackerPackage extends UuidItem{
 	}
 	
 	@Transient
-	public CyberTrackerPackageProxy asProxy() {
-		CyberTrackerPackageProxy proxy = new CyberTrackerPackageProxy();
+	public CyberTrackerPackageProxy asProxy(URL rootUrl) {	
+		CyberTrackerPackageProxy proxy = null;		
+		if (getIsPrivate()) {
+			proxy = new CyberTrackerPrivatePackageProxy();
+			((CyberTrackerPrivatePackageProxy)proxy).setAppLink(SmartCollectPackage.generateSmartMobileAppLink(rootUrl, getCtPackageUuid()));
+		}else {
+			proxy = new CyberTrackerPackageProxy();
+		}
 		proxy.setCaLabel(getConservationArea().getLabel());
 		proxy.setCaUuid(getConservationArea().getUuid());
 		proxy.setUuid( getCtPackageUuid() );
@@ -168,6 +176,8 @@ public class CyberTrackerPackage extends UuidItem{
 		proxy.setUploadedDate(getUploadedDate());
 		proxy.setName(getName());
 		proxy.setType(getType());
+		proxy.setIsPrivate(getIsPrivate());
 		return proxy;
+		
 	}
 }

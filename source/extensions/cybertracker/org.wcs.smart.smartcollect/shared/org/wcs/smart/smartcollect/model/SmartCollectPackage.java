@@ -23,6 +23,7 @@ package org.wcs.smart.smartcollect.model;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -32,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.json.simple.JSONObject;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -114,20 +116,31 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@Transient
 	public static String generateSmartMobileAppLink(URL url, UUID ctPackageUuid) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("http://clientapp.cybertracker.org/install/"); //$NON-NLS-1$
-		sb.append(url.getProtocol());
-		sb.append("/"); //$NON-NLS-1$
-		sb.append(url.getHost());
+		
+		StringBuilder serverUrl = new StringBuilder();
+		serverUrl.append(url.getProtocol());
+		serverUrl.append("://"); //$NON-NLS-1$
+		serverUrl.append(url.getHost());
 		if (url.getPort() != -1) {
-			sb.append(":"); //$NON-NLS-1$
-			sb.append(url.getPort());
+			serverUrl.append(":"); //$NON-NLS-1$
+			serverUrl.append(url.getPort());
 		}
-		sb.append(url.getPath().replaceAll("/", "_")); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("_noa_smartcollect_packages_"); //$NON-NLS-1$
-		if (ctPackageUuid != null) sb.append(ctPackageUuid.toString());
+		serverUrl.append(url.getPath());
+		
+		JSONObject json = new JSONObject();
+		json.put("connector", "SMART"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (ctPackageUuid != null) {
+			json.put("packageUuid", ctPackageUuid.toString()); //$NON-NLS-1$
+		}
+		json.put("server", serverUrl.toString()); //$NON-NLS-1$
+		json.put("launch", Boolean.TRUE); //$NON-NLS-1$
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("https://cybertrackerwiki.org/applink-smart?"); //$NON-NLS-1$
+		sb.append(new String(Base64.getEncoder().encode(json.toString().getBytes())));
 		return sb.toString();
 	}
 	
