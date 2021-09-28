@@ -39,6 +39,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -174,9 +175,10 @@ public class ZipUtil {
 	            ZipEntry zipEntry = new ZipEntry(entryName); 
 	            zOut.putNextEntry(zipEntry);
 	            try(InputStream in = Files.newInputStream(path)){
-	            	zOut.write(in.readAllBytes());
+	            	IOUtils.copy(in, zOut);
 	            }
 	            zOut.closeEntry();
+	            
 	        }else {
 	        	List<Path> kids = null;
 	        	try(Stream<Path> stream = Files.list(path)){
