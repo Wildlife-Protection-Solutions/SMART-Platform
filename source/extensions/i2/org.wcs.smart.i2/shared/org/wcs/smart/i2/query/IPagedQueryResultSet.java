@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -118,11 +117,6 @@ public interface IPagedQueryResultSet extends IQueryResult{
 	 * @return the total item count
 	 */
 	public int getItemCount() ;
-	
-	/**
-	 * Disposes of the result set and any resources it uses.
-	 */
-	public void dispose(Session session) throws SQLException;
 	
 	/**
 	 * 

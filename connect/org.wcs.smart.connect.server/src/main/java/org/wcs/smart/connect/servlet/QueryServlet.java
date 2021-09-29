@@ -36,11 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.connect.query.engine.CsvExporter;
-import org.wcs.smart.connect.query.engine.GeoJsonStreamingExporter;
-import org.wcs.smart.connect.query.engine.HtmlStreamingExporter;
-import org.wcs.smart.connect.query.engine.ShpExporter;
-import org.wcs.smart.connect.query.engine.TiffRasterExporter;
+import org.wcs.smart.connect.query.engine.export.CsvExporter;
+import org.wcs.smart.connect.query.engine.export.GeoJsonStreamingExporter;
+import org.wcs.smart.connect.query.engine.export.HtmlStreamingExporter;
+import org.wcs.smart.connect.query.engine.export.ShpExporter;
+import org.wcs.smart.connect.query.engine.export.TiffRasterExporter;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 

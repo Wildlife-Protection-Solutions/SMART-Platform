@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.api;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.Principal;
@@ -58,7 +57,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
@@ -80,15 +78,15 @@ import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
-import org.wcs.smart.connect.query.engine.CsvExporter;
-import org.wcs.smart.connect.query.engine.GeoJsonStreamingExporter;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
-import org.wcs.smart.connect.query.engine.HtmlStreamingExporter;
-import org.wcs.smart.connect.query.engine.HtmlStreamingGridQueryExporter;
-import org.wcs.smart.connect.query.engine.HtmlStreamingSummaryQueryExporter;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
-import org.wcs.smart.connect.query.engine.ShpExporter;
-import org.wcs.smart.connect.query.engine.TiffRasterExporter;
+import org.wcs.smart.connect.query.engine.export.CsvExporter;
+import org.wcs.smart.connect.query.engine.export.GeoJsonStreamingExporter;
+import org.wcs.smart.connect.query.engine.export.HtmlStreamingExporter;
+import org.wcs.smart.connect.query.engine.export.HtmlStreamingGridQueryExporter;
+import org.wcs.smart.connect.query.engine.export.HtmlStreamingSummaryQueryExporter;
+import org.wcs.smart.connect.query.engine.export.ShpExporter;
+import org.wcs.smart.connect.query.engine.export.TiffRasterExporter;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
@@ -254,50 +252,55 @@ public class QueryApi extends HttpServlet{
 			df = new DateFilter(dateField, dfilter);
 		}
 
-		//TODO:
-		IQueryResult result = null;
-//		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
-		Session s = HibernateManager.openNewSession(request.getServletContext(), request.getLocale());
-		s.beginTransaction();
-		try {
-			Query query = QueryManager.INSTANCE.findQuery(uuid, s);
-			if (query != null) {
-				validateDateFilter(query.getTypeKey(), date_filter);
-				QueryResult results = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, includeUuids, s);
-				result = results.result;
-				return results.response;
-			}else {
-				AbstractIntelQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
-				if (query2 == null)  throw new SmartConnectException(Status.BAD_REQUEST, "Query not found."); //$NON-NLS-1$
-				validateDateFilter(query2.getTypeKey(), date_filter);
-				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, includeUuids, s);
-				result = results.result;
-				return results.response;
-			}
+		QueryResult qresults = null;
+		try{
+			Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+			s.beginTransaction();
+			try {
+				Query query = QueryManager.INSTANCE.findQuery(uuid, s);
+				if (query != null) {
+					validateDateFilter(query.getTypeKey(), date_filter);
+					qresults = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, includeUuids, s);
+					return qresults.response;
+				}else {
+					AbstractIntelQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
+					if (query2 == null)  throw new SmartConnectException(Status.BAD_REQUEST, "Query not found."); //$NON-NLS-1$
+					validateDateFilter(query2.getTypeKey(), date_filter);
+					qresults = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, includeUuids, s);
+					return qresults.response;
+				}
+				
+			}catch (Exception ex) {
+				String error = ex.getMessage();
+				if (ex instanceof JDBCException && ex.getCause() instanceof SQLException){
+					error = ex.getCause().getMessage();
+				}
+				logger.log(Level.SEVERE, error, ex);
+				//return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error); //$NON-NLS-1$
+				return createErrorResponse(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("QueryApi.ExecuteError", SmartUtils.getRequestLocale(request)), error)); //$NON-NLS-1$
 			
-		}catch (Exception ex) {
-			String error = ex.getMessage();
-			if (ex instanceof JDBCException && ex.getCause() instanceof SQLException){
-				error = ex.getCause().getMessage();
+			}finally {
+				s.getTransaction().commit();
 			}
-			logger.log(Level.SEVERE, error, ex);
-			//return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error); //$NON-NLS-1$
-			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("QueryApi.ExecuteError", SmartUtils.getRequestLocale(request)), error)); //$NON-NLS-1$
-		
 		}finally {
-			s.getTransaction().rollback();
+			//ensure query results get disposed; mostly
+			//this is done in the exporter but if an error occurs this might
+			//not get executed so dispose here if necessary 
+			if (qresults != null && qresults.canDispose()) {
+				
+				Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+				session.beginTransaction();
+				try {
+					if (qresults != null){
+						qresults.dispose(session);
+					}
+					session.getTransaction().commit();
+				} catch (SQLException ex) {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+				}
+			}
 			
-//			Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
-//			session.beginTransaction();
-//			try {
-//				if (result != null){
-//					result.dispose(session);
-//				}
-//			} catch (SQLException e) {
-//				e.printStackTrace();
-//			}finally {
-//				session.getTransaction().commit();
-//			}
 		}
 		
 	}
@@ -323,7 +326,7 @@ public class QueryApi extends HttpServlet{
 	@SuppressWarnings("unchecked")
 	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, 
 			String srid, String format, String delimiter, String sortColumnName, 
-			QueryApi.Direction sortDirectionInt, boolean includeUuids, Session s) throws Exception {
+			QueryApi.Direction sortDirectionInt, boolean includeUuids, Session session) throws Exception {
 		IQueryResult result = null;
 		if (query == null){
 			//query not found
@@ -338,15 +341,15 @@ public class QueryApi extends HttpServlet{
 		query.setId(oldId);
 		if (query.getConservationArea().getIsCcaa()){
 			//we use the ccaafilter; otherwise we ignore it
-			query.setConservationAreaFilter(parseCaFilter(cafilter, s));
+			query.setConservationAreaFilter(parseCaFilter(cafilter, session));
 		}
 			
 		//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
 		String name = request.getUserPrincipal().getName();
 			
 		//check for permission to this query for this user.
-		if (!SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY,  queryUuid)){
-			if (SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
+		if (!SecurityManager.INSTANCE.canAccess(session, name, QueryAction.RUNQUERY_KEY,  queryUuid)){
+			if (SecurityManager.INSTANCE.canAccess(session, name, QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 				//access is OK since they have access to All Queries in this CA.
 			}else{
 				return new QueryResult(createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request)))); //$NON-NLS-1$
@@ -365,7 +368,7 @@ public class QueryApi extends HttpServlet{
 		}
 
 		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put(Session.class.getName(), s);
+		params.put(Session.class.getName(), session);
 		params.put(Locale.class.getName(), request.getLocale());
 		params.put(AbstractQueryEngine.INCLUDE_UUID_PARAMETER, includeUuids);
 		result = engine.executeQuery(query, params);
@@ -382,95 +385,105 @@ public class QueryApi extends HttpServlet{
 			prjProvider = new ProjectionProvider(prj);
 		}
 		 
+		//CSV
 		if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-			java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
-			CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 			
+			CsvExporter exporter = null;
 			if (result instanceof AbstractDbFeatureResultSet
 				&& query instanceof SimpleQuery){
 
+				exporter = new CsvExporter((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, 
+						prjProvider, delimiter.charAt(0),request.getLocale(), context);
+				
 				if(sortColumnName != null){
 					((AbstractDbFeatureResultSet<?>)result).setSorting(sortColumnName, sortDirectionInt);
-					((AbstractDbFeatureResultSet<?>)result).updateSortColumn(s);
+					((AbstractDbFeatureResultSet<?>)result).updateSortColumn(session);
 				}
-				
-				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
-			}else if (result instanceof IMemoryTableResultSet
-				&& query instanceof GriddedQuery){
-				exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, s);
+			}else if (result instanceof IMemoryTableResultSet && query instanceof GriddedQuery){
+				exporter = new CsvExporter((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, prjProvider, delimiter.charAt(0), request.getLocale(), context);
 			}else if (result instanceof SummaryQueryResult){
-				exporter.exportResults(query, (SummaryQueryResult)result, s);
+				exporter = new CsvExporter(query, (SummaryQueryResult)result, prjProvider, delimiter.charAt(0), request.getLocale(), context);
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
 			}
-			return new QueryResult(writeText(outputFile), result);
-				
+
+			return new QueryResult( Response
+					.status(Status.OK)
+					.type(MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
+					.entity( exporter )
+					.build());
+			
+			
+		//SHAPEFILE	
 		}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
-			String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
-			java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(filename); 
-			
-			ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
-			exporter.setPrj(prjProvider);
-			
 			if (result instanceof AbstractDbFeatureResultSet &&
 					query instanceof SimpleQuery){
-				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
+				
+				ShpExporter exporter = new ShpExporter((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, prjProvider, request.getLocale(), context);
+				
+				return new QueryResult(Response.status(Status.OK)
+					.type(MediaType.APPLICATION_OCTET_STREAM)
+					.header("Content-Disposition", "attachment; filename=" + exporter.getFileName())  //$NON-NLS-1$//$NON-NLS-2$
+					.entity(exporter)
+					.build());
+				
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
-			return new QueryResult(writeBinary(outputFile), result);
+			
+		//TIFF FILE
 		}else if (format.equalsIgnoreCase(TiffRasterExporter.FORMAT_KEY)){
-			String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".tiff"; //$NON-NLS-1$ //$NON-NLS-2$
-			java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(filename); 
-			
-			TiffRasterExporter exporter = new TiffRasterExporter(outputFile, request.getLocale());
-			
 			if (result instanceof GridQueryResults &&
 					query instanceof GriddedQuery){
-				exporter.exportResults((GriddedQuery)query, (GridQueryResults)result, s);
+				 
+				TiffRasterExporter exporter = new TiffRasterExporter((GriddedQuery)query, (GridQueryResults)result, 
+						prjProvider, request.getLocale(), context);
+				
+				return new QueryResult(Response.status(Status.OK)
+						.type(MediaType.APPLICATION_OCTET_STREAM)
+						.header("Content-Disposition", "attachment; filename=" + exporter.getFileName()) //$NON-NLS-1$ //$NON-NLS-2$
+						.entity(exporter)
+						.build());
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
-			return new QueryResult(writeBinary(outputFile), result);
+			
+		//GEOJSON
 		}else if (format.equalsIgnoreCase(GeoJsonStreamingExporter.FORMAT_KEY)){
-			
-			
-			
-//			GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
-			
 			if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){
-//				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
-				StreamingOutput exporter= new GeoJsonStreamingExporter((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, request.getLocale(), prjProvider, context); 
+				StreamingOutput exporter= new GeoJsonStreamingExporter((SimpleQuery)query,
+						(AbstractDbFeatureResultSet<IResultItem>)result, prjProvider, request.getLocale(), context);
+				
 				return new QueryResult( Response
 						.status(Status.OK)
 						.type(MediaType.APPLICATION_JSON)
 						.entity( (StreamingOutput)exporter )
-						.build(), new NoDisposeQueryResult());
+						.build());
 				
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
-//			return new QueryResult(Response
-//					.status(Status.OK)
-//					.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
-//					.entity(exporter.getGeoJsonOutput() )
-//					.build(), result);
+			
+		//HTML
 		}else if (format.equalsIgnoreCase(HtmlStreamingExporter.FORMAT_KEY)){
 			StreamingOutput exporter = null;
+			
 			if (result instanceof AbstractDbFeatureResultSet
 					&& query instanceof SimpleQuery){
 
 				if(sortColumnName != null){
 					((AbstractDbFeatureResultSet<IResultItem>)result).setSorting(sortColumnName, sortDirectionInt);
-					((AbstractDbFeatureResultSet<IResultItem>)result).updateSortColumn(s);
+					((AbstractDbFeatureResultSet<IResultItem>)result).updateSortColumn(session);
 				}
 					
 				exporter = new HtmlStreamingExporter((SimpleQuery)query,
-							(AbstractDbFeatureResultSet<IResultItem>)result, request.getLocale(), context);
+							(AbstractDbFeatureResultSet<IResultItem>)result, prjProvider, request.getLocale(), context);
 			}else if (result instanceof IMemoryTableResultSet && query instanceof GriddedQuery){
-				exporter = new HtmlStreamingGridQueryExporter((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, request.getLocale(), context);
+				exporter = new HtmlStreamingGridQueryExporter((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, 
+							prjProvider, request.getLocale(), context);
 			}else if (result instanceof SummaryQueryResult){
-				exporter = new HtmlStreamingSummaryQueryExporter(query, (SummaryQueryResult)result, request.getLocale(), context);
+				exporter = new HtmlStreamingSummaryQueryExporter(query, (SummaryQueryResult)result, 
+							prjProvider, request.getLocale(), context);
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
 			}
@@ -479,7 +492,7 @@ public class QueryApi extends HttpServlet{
 					.status(Status.OK)
 					.type(MediaType.TEXT_HTML)
 					.entity( (StreamingOutput)exporter )
-					.build(), result);
+					.build());
 
 		}else{
 			return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
@@ -554,40 +567,40 @@ public class QueryApi extends HttpServlet{
 			
 			if (format.equalsIgnoreCase(GeoJsonStreamingExporter.FORMAT_KEY)){
 				
-				StreamingOutput exporter= new GeoJsonStreamingExporter((IntelObservationQueryResults)result, request.getLocale(), prjProvider, context); 
+				StreamingOutput exporter= new GeoJsonStreamingExporter((IntelObservationQueryResults)result, prjProvider, request.getLocale(), context); 
 				return new QueryResult( Response
 						.status(Status.OK)
 						.type(MediaType.APPLICATION_JSON)
 						.entity( (StreamingOutput)exporter )
-						.build(), new NoDisposeQueryResult());
-				
-//				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
-//				exporter.exportResults( (IntelObservationQueryResults)result, s);
-//				return new QueryResult(Response
-//						.status(Status.OK)
-//						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
-//						.entity(exporter.getGeoJsonOutput() )
-//						.build(), new NoDisposeQueryResult());
+						.build());
 			}
+
 		}
+		
 		if (result instanceof IPagedQueryResultSet){
 			//TODO: sorting
 //			((IntelEntityRecordQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 //			((IntelEntityRecordQueryResults)result).configureSort(s);
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
-				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
-				exporter.exportResults( (IPagedQueryResultSet)result, s);
-				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
+				
+				CsvExporter exporter = new CsvExporter((IPagedQueryResultSet)result, prjProvider,
+						delimiter.charAt(0), request.getLocale(), context);
+				return new QueryResult( Response
+						.status(Status.OK)
+						.type(MediaType.TEXT_PLAIN)
+						.entity( (StreamingOutput)exporter )
+						.build());
+			
 			}else if (format.equalsIgnoreCase(HtmlStreamingExporter.FORMAT_KEY)){
 				
 				StreamingOutput exporter = new HtmlStreamingExporter(query.getName(),
-						(IPagedQueryResultSet)result, request.getLocale(), context);
+						(IPagedQueryResultSet)result, prjProvider, request.getLocale(), context);
+				
 				return new QueryResult( Response
 						.status(Status.OK)
 						.type(MediaType.TEXT_HTML)
 						.entity( (StreamingOutput)exporter )
-						.build(), new NoDisposeQueryResult());
+						.build());
 			}
 		}
 
@@ -601,51 +614,39 @@ public class QueryApi extends HttpServlet{
 				CsvEntitySummaryQueryExporter exporter = new CsvEntitySummaryQueryExporter();
 				exporter.exportQuery( s, result, outputFile, exportOptions);
 				
-				//TODO: delete temporary file??
-				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
+				StreamingOutput out = (output)->{
+					try {
+		        		Files.copy(outputFile, output);
+			        } catch (IOException ex) {
+			        	logger.log(Level.SEVERE, ex.getMessage(), ex);
+			        }finally{
+			        	try {
+			        		Files.delete(outputFile);
+			        	}catch (IOException ex) {
+			        		logger.log(Level.SEVERE, ex.getMessage(), ex);
+			        	}
+			        }
+				};
+				return new QueryResult( Response
+						.status(Status.OK)
+						.type(MediaType.TEXT_PLAIN)
+						.entity( out )
+						.build(), result);
+				
 			}else if (format.equalsIgnoreCase(HtmlStreamingExporter.FORMAT_KEY)) {
+				
 				StreamingOutput exporter = new HtmlStreamingSummaryQueryExporter(query.getName(),
-						(org.wcs.smart.i2.query.SummaryQueryResult)result, request.getLocale(), context);
+						(org.wcs.smart.i2.query.SummaryQueryResult)result, prjProvider,  request.getLocale(), context);
 				return new QueryResult( Response
 						.status(Status.OK)
 						.type(MediaType.TEXT_HTML)
 						.entity( (StreamingOutput)exporter )
-						.build(), new NoDisposeQueryResult());
+						.build());
 			}
 		}
 		return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED,
 				Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))),  //$NON-NLS-1$ 
-				new NoDisposeQueryResult());
-	}
-	
-	private Response writeText(java.nio.file.Path thisfile){
-		Response rs = Response.ok(getStream(thisfile), MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
-	            .build();
-		return rs;
-	}
-	
-	private Response writeBinary(java.nio.file.Path thisfile){
-		Response rs = Response.ok(getStream(thisfile), MediaType.APPLICATION_OCTET_STREAM )
-				.header("Content-Disposition", "attachment; filename=" + thisfile.getFileName().toString()) //$NON-NLS-1$ //$NON-NLS-2$
-	            .build();
-		return rs;
-	}
-	
-	private StreamingOutput getStream(final java.nio.file.Path thisfile){
-		if (thisfile == null) throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error executing query request."); //$NON-NLS-1$
-		return new StreamingOutput() {
-		      @Override
-		      public void write(OutputStream output) throws IOException {
-		        try {
-	        		FileUtils.copyFile(thisfile.toFile(), output);
-		        } catch (Exception e) {
-		           e.printStackTrace();
-		        }finally{
-		        	Files.deleteIfExists(thisfile);
-		        	
-		        }
-		      }
-		    };
+				result);
 	}
 	
 	private List<ConservationArea> parseCaFilterToCa(String caFilter, Session session){
@@ -976,28 +977,33 @@ public class QueryApi extends HttpServlet{
 	}
 	
 
-	private class NoDisposeQueryResult implements IQueryResult {
-		@Override
-		public void dispose(Session session) throws SQLException {
-		}
-
-		@Override
-		public boolean isDisposed() {
-			return true;
-		}
-		
-	}
 	private class QueryResult{
 		Response response;
-		IQueryResult result;
+		IQueryResult result = null;
+		org.wcs.smart.i2.query.IQueryResult iresult = null;
+		
 		
 		public QueryResult(Response response) {
-			this(response, null);
+			this.response = response;
 		}
 		
 		public QueryResult(Response response, IQueryResult results) {
-			this.response = response;
+			this(response);
 			this.result = results;
+		}
+		
+		public QueryResult(Response response, org.wcs.smart.i2.query.IQueryResult results) {
+			this(response);
+			this.iresult = results;
+		}
+		
+		public boolean canDispose() {
+			return ((result != null && !result.isDisposed()) || iresult != null);
+		}
+		public void dispose(Session session) throws SQLException {
+			if (result != null && !result.isDisposed()) result.dispose(session);
+			if (iresult != null) iresult.dispose(session);
+			
 		}
 	}
 }
