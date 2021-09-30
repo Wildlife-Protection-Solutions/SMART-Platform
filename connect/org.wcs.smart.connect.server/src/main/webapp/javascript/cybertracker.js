@@ -210,8 +210,10 @@ function createPrivatePackageTable(){
  		
 		var link = packages[i].appLink;
 		
+		var linkhtml = "<p style=\"width:700px; overflow-wrap: break-word;\">" + link + "</p>";
+		
  		tableCreateRow(parent, 
- 				[packages[i].name, packages[i].caLabel, link], 
+ 				[packages[i].name, packages[i].caLabel, linkhtml], 
  				"pprow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		//row.dataset.packageuuid = packages[i].uuid;

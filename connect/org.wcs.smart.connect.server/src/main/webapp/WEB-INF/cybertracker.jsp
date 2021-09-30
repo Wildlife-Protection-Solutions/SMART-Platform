@@ -22,7 +22,7 @@
 
 <div id="main">
   <div class="tabheader pageheader"><fmt:message key="cybertracker.header"/></div>
-  <p class="infomessage"><fmt:message key="cybertracker.info"/></p>
+  <p class="infomessage" style="padding-bottom:10px"><fmt:message key="cybertracker.info"/></p>
   <div>
     <div id="message" class="msgsection"></div>
   </div>
