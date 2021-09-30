@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.sql.SQLException;
+
+import org.hibernate.Session;
+
 /**
  * Query results class
  * 
@@ -29,4 +33,10 @@ package org.wcs.smart.i2.query;
  */
 public interface IQueryResult {
 
+
+	/**
+	 * Disposes of the result set and any resources it uses.
+	 */
+	public void dispose(Session session) throws SQLException;
+	
 }

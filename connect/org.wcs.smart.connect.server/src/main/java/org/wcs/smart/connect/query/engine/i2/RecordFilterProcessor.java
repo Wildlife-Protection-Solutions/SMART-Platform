@@ -76,8 +76,11 @@ public class RecordFilterProcessor {
 		
 		String tempTable = createTemporaryRecordTable(session, profiles, dates, cas);
 		Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session);
-		tempTable = filterDataTable(session, tempTable, filter,filterColumns);
-		return tempTable;
+		String tempTable2 = filterDataTable(session, tempTable, filter,filterColumns);
+		
+		session.createNativeQuery("DROP TABLE " + tempTable).executeUpdate(); //$NON-NLS-1$
+		
+		return tempTable2;
 	}
 	/*
 	 * create temporary entity table and populate with all entities

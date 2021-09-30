@@ -36,14 +36,12 @@ public class ListItem {
 	private String fullName;
 	
 	public ListItem(String keyId, String name) {
-		this.keyId = keyId;
-		this.name = name;
+		this(keyId, name, name);
 	}
 	
 	public ListItem(String keyId, String name, String fullName) {
 		this.keyId = keyId;
 		this.name = name;
-		
 		this.fullName = fullName;
 	}
 	

@@ -36,11 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.connect.query.engine.CsvExporter;
-import org.wcs.smart.connect.query.engine.GeoJsonExporter;
-import org.wcs.smart.connect.query.engine.HtmlExporter;
-import org.wcs.smart.connect.query.engine.ShpExporter;
-import org.wcs.smart.connect.query.engine.TiffRasterExporter;
+import org.wcs.smart.connect.query.engine.export.CsvExporter;
+import org.wcs.smart.connect.query.engine.export.GeoJsonStreamingExporter;
+import org.wcs.smart.connect.query.engine.export.HtmlStreamingExporter;
+import org.wcs.smart.connect.query.engine.export.ShpExporter;
+import org.wcs.smart.connect.query.engine.export.TiffRasterExporter;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
@@ -68,9 +68,9 @@ public class QueryServlet extends HttpServlet {
 		}
 		String[][] exporters = new String[][]{
 				{CsvExporter.FORMAT_KEY, CsvExporter.getName(request.getLocale())},
-				{HtmlExporter.FORMAT_KEY, HtmlExporter.getName(request.getLocale())},
+				{HtmlStreamingExporter.FORMAT_KEY, HtmlStreamingExporter.getName(request.getLocale())},
 				{ShpExporter.FORMAT_KEY, ShpExporter.getName(request.getLocale())},
-				{GeoJsonExporter.FORMAT_KEY, GeoJsonExporter.getName(request.getLocale())},
+				{GeoJsonStreamingExporter.FORMAT_KEY, GeoJsonStreamingExporter.getName(request.getLocale())},
 				{TiffRasterExporter.FORMAT_KEY, TiffRasterExporter.getName(request.getLocale())}};
 		
 		
