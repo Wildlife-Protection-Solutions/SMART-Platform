@@ -588,7 +588,7 @@ public class FilterProcessor implements IFilterProcessor {
 			progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + listfilter.asString());
 			
 			//create temporary table for attribute observations
-			String columnName = engine.filterTables.get(listfilter).columnname;
+			String columnName = engine.filterTables.get(listfilter).primarykey;
 			
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$

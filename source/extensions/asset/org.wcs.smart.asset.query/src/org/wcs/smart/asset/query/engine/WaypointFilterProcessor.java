@@ -161,7 +161,7 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(table.tablename + " (" + table.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(table.tablename + " (" + table.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.wp_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
@@ -221,7 +221,7 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(table.tablename + " (" + table.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(table.tablename + " (" + table.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.wp_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$

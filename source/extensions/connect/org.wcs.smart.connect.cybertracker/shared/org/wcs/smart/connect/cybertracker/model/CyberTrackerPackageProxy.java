@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -36,6 +37,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Emily
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CyberTrackerPackageProxy {
 
 	private UUID uuid;

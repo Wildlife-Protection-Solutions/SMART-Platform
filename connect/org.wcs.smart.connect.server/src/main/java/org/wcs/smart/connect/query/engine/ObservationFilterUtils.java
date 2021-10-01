@@ -310,7 +310,7 @@ public class ObservationFilterUtils {
 			if (listfilter.getAttributeType() != Attribute.AttributeType.MLIST) throw new IllegalArgumentException();
 			
 			//create temporary table for attribute observations
-			String columnName = engine.filterTables.get(listfilter).columnname;
+			String columnName = engine.filterTables.get(listfilter).primarykey;
 			
 			StringBuilder sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$

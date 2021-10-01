@@ -222,7 +222,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename +"." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
@@ -274,14 +274,14 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 			
 			engine.createFilterTable(c, t);
 			
-			if ( lfilter instanceof AttributeFilter ||
+			 if (lfilter instanceof AssetAttributeFilter) {
+					processAssetAttributeFilter((AssetAttributeFilter)lfilter, t, c);
+			}else if (lfilter instanceof AssetFilter) {
+				processAssetFilter((AssetFilter)lfilter, t, c);
+			}else if ( lfilter instanceof AttributeFilter ||
 					lfilter instanceof CategoryFilter  ||	
 					lfilter instanceof CategoryAttributeFilter ){
 				engine.processWaypointDataModelFilter(t, lfilter, waypointTable, c);
-			}else if (lfilter instanceof AssetAttributeFilter) {
-				processAssetAttributeFilter((AssetAttributeFilter)lfilter, t, c);
-			}else if (lfilter instanceof AssetFilter) {
-				processAssetFilter((AssetFilter)lfilter, t, c);
 			}else {
 				throw new UnsupportedOperationException("Filter not supported for observation queries"); //$NON-NLS-1$
 			}
@@ -293,7 +293,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO  "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.wp_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
@@ -351,7 +351,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.wp_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$

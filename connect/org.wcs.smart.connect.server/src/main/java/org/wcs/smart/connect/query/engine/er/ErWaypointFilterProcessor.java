@@ -266,7 +266,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			usedTables.add(MissionTrack.class);
 		}
 		
-		sql.append(" left join "); //$NON-NLS-1$
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(namePrefix(SurveyWaypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(SurveyWaypoint.class) + ".mission_day_uuid = "); //$NON-NLS-1$
@@ -319,7 +319,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename +"." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
@@ -394,7 +394,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(ft.tablename + " (" + ft.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
 		sql.append(prefix(SurveyWaypoint.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$
@@ -491,7 +491,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			//observation
 			StringBuilder sql = new StringBuilder();
 			sql.append("INSERT INTO "); //$NON-NLS-1$
-			sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+			sql.append(ft.tablename + " (" + ft.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 			sql.append(" SELECT distinct ");  //$NON-NLS-1$
 			sql.append(prefix(SurveyWaypoint.class));
 			sql.append(".wp_uuid");  //$NON-NLS-1$
@@ -595,7 +595,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		//observation
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(ft.tablename + " (" + ft.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
 		sql.append(prefix(SurveyWaypoint.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$

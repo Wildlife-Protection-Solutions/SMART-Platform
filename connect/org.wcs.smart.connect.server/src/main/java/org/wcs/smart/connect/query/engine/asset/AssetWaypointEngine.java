@@ -286,7 +286,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IWOEngine<A
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
-		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
+		sql.append("wp_id varchar(256),"); //$NON-NLS-1$
 		sql.append("wp_x double precision,"); //$NON-NLS-1$
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction double precision,"); //$NON-NLS-1$

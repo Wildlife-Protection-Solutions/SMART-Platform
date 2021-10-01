@@ -95,21 +95,20 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" SELECT distinct "); //$NON-NLS-1$
+		sql.append(t.tablename + " (" + t.primarykey + ", " + t.secondarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" SELECT distinct a.wp_uuid, "); //$NON-NLS-1$ 
 		sql.append(prefix(WaypointObservation.class));
 		sql.append(".wp_group_uuid"); //$NON-NLS-1$
 
 		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(waypointTable);
+		sql.append(waypointTable + " a "); //$NON-NLS-1$
 
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservation.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(WaypointObservation.class));
 		sql.append(".wp_group_uuid = "); //$NON-NLS-1$
-		sql.append(waypointTable);
-		sql.append(".wp_group_uuid "); //$NON-NLS-1$
+		sql.append("a.wp_group_uuid "); //$NON-NLS-1$
 
 		// get the dm model attribute repesenting the entity
 		sql.append(" join "); //$NON-NLS-1$

@@ -993,13 +993,25 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return this.caFilter;
 	}
 	
+	//NOTE: the secondary key is for waypoint observation group filters
+	//these filters require both wp_id and wp_group_id in order to include
+	//waypoints with no observations when the query filter is filtering on 
+	//a waypoint (or higher ex. patrol id; waypoint type) level attribute 
+	//and not a data model filter
 	public static class FilterTable{
 		public String tablename;
-		public String columnname;
+		public String primarykey;
+		public String secondarykey;
 		
-		public FilterTable(String tablename, String columnname) {
+		public FilterTable(String tablename, String primarykey) {
 			this.tablename = tablename;
-			this.columnname = columnname;
+			this.primarykey = primarykey;
+		}
+		
+		public FilterTable(String tablename, String primarykey, String secondarykey) {
+			this.tablename = tablename;
+			this.primarykey = primarykey;
+			this.secondarykey = secondarykey;
 		}
 	}
 	
@@ -1008,7 +1020,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(t.tablename);
-		sql.append("(" + t.columnname + " uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("("); //$NON-NLS-1$
+		sql.append( t.primarykey + " uuid "); //$NON-NLS-1$
+		if (t.secondarykey != null) {
+			sql.append(","); //$NON-NLS-1$
+			sql.append( t.secondarykey + " uuid "); //$NON-NLS-1$	
+		}
+		sql.append(")"); //$NON-NLS-1$
+		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -1016,34 +1035,40 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX "); //$NON-NLS-1$
 		sql.append(getIndexName(t.tablename) + "_wp_uuid_idx on "); //$NON-NLS-1$
-		sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(t.tablename + "(" + t.primarykey + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 	
 	public void processWaypointGroupDataModelFilter(FilterTable t, IFilter lfilter, 
 			String waypointTable, Connection c) throws SQLException{
-		processDataModelFilter(t, lfilter, waypointTable, c, false);
+		processDataModelFilter(t, lfilter, waypointTable, c);
 	}
 	
 	public void processWaypointDataModelFilter(FilterTable t, IFilter lfilter, 
 			String waypointTable, Connection c) throws SQLException {
-		processDataModelFilter(t, lfilter, waypointTable, c, true);
+		processDataModelFilter(t, lfilter, waypointTable, c);
 	}
 	
 	private void processDataModelFilter(FilterTable t, IFilter lfilter, 
-			String waypointTable, Connection c, boolean iswp) throws SQLException {
+			String waypointTable, Connection c) throws SQLException {
 		
 		clearParameters();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey ); //$NON-NLS-1$ 
+		if (t.secondarykey != null) {
+			sql.append(", " + t.secondarykey); //$NON-NLS-1$
+		}
+		sql.append(")"); //$NON-NLS-1$
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
+		
 		sql.append(tablePrefix(WaypointObservationGroup.class));
-		if (iswp) {
-			sql.append(".wp_uuid");  //$NON-NLS-1$
-		}else{
+		sql.append(".wp_uuid");  //$NON-NLS-1$
+		if (t.secondarykey != null) {
+			sql.append(","); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservationGroup.class));
 			sql.append(".uuid");  //$NON-NLS-1$
 		}
 		
@@ -1065,15 +1090,10 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 
 		sql.append(" join ");  //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservationGroup.class));
-		if (iswp) {
-			sql.append(" on " + waypointTable + ".wp_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
-			sql.append(tablePrefix(WaypointObservationGroup.class));
-			sql.append(".wp_uuid "); //$NON-NLS-1$
-		}else {
-			sql.append(" on " + waypointTable + ".wp_group_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
-			sql.append(tablePrefix(WaypointObservationGroup.class));
-			sql.append(".uuid "); //$NON-NLS-1$
-		}
+		
+		sql.append(" on " + waypointTable + ".wp_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
+		sql.append(tablePrefix(WaypointObservationGroup.class));
+		sql.append(".wp_uuid "); //$NON-NLS-1$
 		
 		sql.append(" join ");  //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservation.class));
@@ -1339,7 +1359,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	public void createWaypointGroupTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid uuid, wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -1355,14 +1375,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
-		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("(wp_uuid, wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservationGroup.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 
 		sql.append(tableNamePrefix(Waypoint.class));
 
-		sql.append(" join "); //$NON-NLS-1$
+		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservationGroup.class));
 		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		

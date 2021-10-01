@@ -88,7 +88,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	
 	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 				
 		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
 	

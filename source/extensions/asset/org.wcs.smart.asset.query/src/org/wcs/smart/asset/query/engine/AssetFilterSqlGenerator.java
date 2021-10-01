@@ -112,7 +112,9 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	protected String toSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) {
+			return  t.tablename + "." + t.primarykey + " is not null";  //$NON-NLS-1$//$NON-NLS-2$			
+		}
 		
 		throw new SQLException(Messages.AssetFilterSqlGenerator_AssetFilterError);	
 	}

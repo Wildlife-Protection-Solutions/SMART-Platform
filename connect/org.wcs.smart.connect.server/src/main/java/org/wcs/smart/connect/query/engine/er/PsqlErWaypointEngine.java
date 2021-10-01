@@ -244,7 +244,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine implements IWOEngine<Surv
 		sql.append("samplingunit_id varchar(128),"); //$NON-NLS-1$
 
 		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
-		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
+		sql.append("wp_id varchar(256),"); //$NON-NLS-1$
 		sql.append("wp_x double precision,"); //$NON-NLS-1$
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$

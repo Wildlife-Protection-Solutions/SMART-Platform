@@ -438,13 +438,25 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @author Emily
 	 *
 	 */
+	//NOTE: the secondary key is for waypoint observation group filters
+	//these filters require both wp_id and wp_group_id in order to include
+	//waypoints with no observations when the query filter is filtering on 
+	//a waypoint (or higher ex. patrol id; waypoint type) level attribute 
+	//and not a data model filter
 	public static class FilterTable{
 		public String tablename;
-		public String columnname;
+		public String primarykey;
+		public String secondarykey;
 		
-		public FilterTable(String tablename, String columnname) {
+		public FilterTable(String tablename, String primarykey) {
 			this.tablename = tablename;
-			this.columnname = columnname;
+			this.primarykey = primarykey;
+		}
+		
+		public FilterTable(String tablename, String primarykey, String secondarykey) {
+			this.tablename = tablename;
+			this.primarykey = primarykey;
+			this.secondarykey = secondarykey;
 		}
 	}
 }

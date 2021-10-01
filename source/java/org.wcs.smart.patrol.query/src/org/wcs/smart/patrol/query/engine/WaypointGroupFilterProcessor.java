@@ -94,7 +94,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 	 * @throws SQLException
 	 */
 	@Override
-	public void populateTemporaryTable(IFilter queryFilter,
+	protected void populateTemporaryTable(IFilter queryFilter,
 			DateFilter dateFilter, 
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
@@ -212,8 +212,23 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(prefix(WaypointObservationGroup.class) + ".uuid "); //$NON-NLS-1$
+			
+			sql.append(t.tablename + "." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
+			
+			if (t.secondarykey != null) {
+				sql.append(" AND "); //$NON-NLS-1$
+				
+				sql.append("("); //$NON-NLS-1$
+				sql.append(t.tablename +"." + t.secondarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(prefix(WaypointObservationGroup.class) + ".uuid "); //$NON-NLS-1$
+			
+				sql.append(" OR ("); //$NON-NLS-1$
+				sql.append(t.tablename +"." + t.secondarykey + " is null and "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(prefix(WaypointObservationGroup.class) + ".uuid is null)"); //$NON-NLS-1$
+				
+				sql.append(")"); //$NON-NLS-1$
+			}
 		}
 			
 		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
@@ -245,7 +260,8 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable); //$NON-NLS-1$
+		sql.append("(wp_uuid char(16) for bit data, wp_group_uuid char(16) for bit data)"); //$NON-NLS-1$ 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
@@ -260,7 +276,9 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
-		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("(wp_uuid, wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class));
+		sql.append(".uuid, "); //$NON-NLS-1$
 		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$

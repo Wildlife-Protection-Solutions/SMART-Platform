@@ -57,7 +57,6 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 	}
 	
 	private Color redColor = null;
-	private Color defaultColor = null;
 	
 	private SamplingUnitFilter.Source source = null;	
 	private SamplingUnit su = null;
@@ -146,7 +145,6 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 		label.setText(getText());
 		initDrag(label);
 		initDrag(c);
-		defaultColor = label.getBackground();
 	}
 
 	private void updateLabel(){
@@ -155,8 +153,8 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 			label.setBackground(redColor);
 			label.getParent().getParent().setBackground(redColor);
 		}else{
-			label.setBackground(defaultColor);
-			label.getParent().getParent().setBackground(defaultColor);
+			label.setBackground(label.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			label.getParent().getParent().setBackground(label.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		}
 		label.setText(getText());
 		getTargetPanel().redraw();

@@ -97,7 +97,7 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(table.tablename + " (" + table.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(table.tablename + " (" + table.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
 		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$

@@ -91,9 +91,10 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		progress.subTask(Messages.WaypointFilterProcessor_TableTaskName);
 		
+		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid char(16) for bit data, wp_group_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
@@ -108,12 +109,14 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
-		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("(wp_uuid, wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class));
+		sql.append(".uuid, "); //$NON-NLS-1$
 		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
-		sql.append(" join "); //$NON-NLS-1$
+		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
@@ -161,18 +164,19 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 	
 	private void processAssetFilter(AssetFilter assetFilter, FilterTable t, Connection c) throws SQLException {
 		engine.clearParameters();
+		
 		createTemporaryFilterTable(t, c);
 		
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ", " + t.secondarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
 		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append("a.wp_group_uuid "); //$NON-NLS-1$
+		sql.append("a.wp_uuid, a.wp_group_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(waypointTable + " a"); //$NON-NLS-1$
+		sql.append(waypointTable + " a "); //$NON-NLS-1$
 		
-		sql.append(" JOIN "); //$NON-NLS-1$
+		sql.append(" LEFT JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" ON "); //$NON-NLS-1$
 		sql.append("a.wp_group_uuid = " + prefix(WaypointObservationGroup.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -180,7 +184,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(" JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetWaypoint.class));
 		sql.append(" ON "); //$NON-NLS-1$
-		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("a.wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		sql.append(" LEFT JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetDeployment.class));
@@ -227,17 +231,18 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 	
 	private void processAssetAttributeFilter(AssetAttributeFilter assetFilter, FilterTable t, Connection c) throws SQLException {
 		engine.clearParameters();
-		createTemporaryFilterTable(t, c);
 
+		createTemporaryFilterTable(t, c);
+		
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ", " + t.secondarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
 		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append("a.wp_group_uuid "); //$NON-NLS-1$
+		sql.append("a.wp_uuid, a.wp_group_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(waypointTable + " a"); //$NON-NLS-1$
-		sql.append(" JOIN "); //$NON-NLS-1$
+		sql.append(waypointTable + " a "); //$NON-NLS-1$
+		sql.append(" LEFT JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" ON "); //$NON-NLS-1$
 		sql.append("a.wp_group_uuid = " + prefix(WaypointObservationGroup.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -245,7 +250,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(" JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetWaypoint.class));
 		sql.append(" ON "); //$NON-NLS-1$
-		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("a.wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		sql.append(" LEFT JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetDeployment.class));

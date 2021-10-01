@@ -193,14 +193,14 @@ public class PsqlEntityWaypointGroupFilterProcessor implements IFilterProcessor{
 		
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(namePrefix(Waypoint.class));
+		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
 		sql.append(" join "); //$NON-NLS-1$
-		sql.append(namePrefix(WaypointObservationGroup.class));
+		sql.append(namePrefix(Waypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid"); //$NON-NLS-1$
-		sql.append(" join "); //$NON-NLS-1$
-		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
+		sql.append("waypointTable.wp_uuid "); //$NON-NLS-1$
+		sql.append(" left join "); //$NON-NLS-1$
+		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append("waypointTable.wp_group_uuid "); //$NON-NLS-1$
@@ -236,8 +236,23 @@ public class PsqlEntityWaypointGroupFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(prefix(WaypointObservationGroup.class) + ".uuid "); //$NON-NLS-1$
+			
+			sql.append(t.tablename + "." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
+			
+			if (t.secondarykey != null) {
+				sql.append(" AND "); //$NON-NLS-1$
+				
+				sql.append("("); //$NON-NLS-1$
+				sql.append(t.tablename +"." + t.secondarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(prefix(WaypointObservationGroup.class) + ".uuid "); //$NON-NLS-1$
+			
+				sql.append(" OR ("); //$NON-NLS-1$
+				sql.append(t.tablename +"." + t.secondarykey + " is null and "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(prefix(WaypointObservationGroup.class) + ".uuid is null)"); //$NON-NLS-1$
+				
+				sql.append(")"); //$NON-NLS-1$
+			}
 		}
 			
 		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
@@ -279,7 +294,7 @@ public class PsqlEntityWaypointGroupFilterProcessor implements IFilterProcessor{
 					filter instanceof EntityAttributeFilter){						
 					
 					String colName = engine.createTempTableName();
-					engine.filterTables.put(filter, new FilterTable(colName, "wp_group_uuid")); //$NON-NLS-1$
+					engine.filterTables.put(filter, new FilterTable(colName, "wp_uuid", "wp_group_uuid")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		};
@@ -309,22 +324,21 @@ public class PsqlEntityWaypointGroupFilterProcessor implements IFilterProcessor{
 			
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
-		sql.append(" SELECT distinct ");  //$NON-NLS-1$
+		sql.append(t.tablename + " (" + t.primarykey + ", " + t.secondarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" SELECT distinct wptbl.wp_uuid, "); //$NON-NLS-1$ 
 		sql.append(prefix(WaypointObservation.class));
 		sql.append(".wp_group_uuid");  //$NON-NLS-1$
 			
 			
 		sql.append(" FROM ");  //$NON-NLS-1$
-		sql.append(waypointTable);
+		sql.append(waypointTable + " wptbl "); //$NON-NLS-1$
 			
 		sql.append(" join ");  //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservation.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(WaypointObservation.class));
 		sql.append(".wp_group_uuid = "); //$NON-NLS-1$
-		sql.append(waypointTable);
-		sql.append(".wp_group_uuid "); //$NON-NLS-1$
+		sql.append("wptbl.wp_group_uuid "); //$NON-NLS-1$
 
 		
 		

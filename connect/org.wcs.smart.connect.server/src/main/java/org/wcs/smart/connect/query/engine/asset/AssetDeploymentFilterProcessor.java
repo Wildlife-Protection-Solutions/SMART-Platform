@@ -235,7 +235,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename +"." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(prefix(AssetDeployment.class) + ".uuid "); //$NON-NLS-1$
 		}
 		
@@ -384,14 +384,14 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 			StringBuilder sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(t.tablename);
-			sql.append("(" + t.columnname + " uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("(" + t.primarykey + " uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			c.createStatement().execute(sql.toString());
 
 
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
 			sql.append(engine.getIndexName(t.tablename) + "_deployment_uuid_idx on "); //$NON-NLS-1$
-			sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename + "(" + t.primarykey + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			c.createStatement().execute(sql.toString());
 						
 			if (lfilter instanceof AssetAttributeFilter) {
@@ -404,10 +404,12 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		}
 	}
 	private void processAssetFilter(AssetFilter assetFilter, FilterTable t, Connection c) throws SQLException {
+		engine.clearParameters();
+
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.deployment_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
@@ -455,10 +457,12 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 	}
 	
 	private void processAssetAttributeFilter(AssetAttributeFilter assetFilter, FilterTable t, Connection c) throws SQLException {
+		engine.clearParameters();
+
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.deployment_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$

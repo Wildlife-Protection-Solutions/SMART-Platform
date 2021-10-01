@@ -2182,7 +2182,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	public void createWaypointGroupTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid uuid, wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -2198,14 +2198,16 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
-		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("(wp_uuid, wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservationGroup.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 
 		sql.append(tableNamePrefix(Waypoint.class));
 
-		sql.append(" join "); //$NON-NLS-1$
+		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservationGroup.class));
 		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append (" JOIN "); //$NON-NLS-1$

@@ -180,7 +180,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (t != null){
-			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+			return t.tablename + "." + t.primarykey + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -219,7 +219,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (t != null){
-			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+			return t.tablename + "." + t.primarykey + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -231,7 +231,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (t != null){
-			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+			return t.tablename + "." + t.primarykey + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -313,7 +313,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(SamplingUnitAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (t != null){
-			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+			return t.tablename + "." + t.primarykey + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		if (filter.getAttributeType() == AttributeType.NUMERIC){
@@ -380,7 +380,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			throws SQLException {
 		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
 		if (t != null){
-			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+			return t.tablename + "." + t.primarykey + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		String attprefix = engine.tablePrefix(MissionAttribute.class);

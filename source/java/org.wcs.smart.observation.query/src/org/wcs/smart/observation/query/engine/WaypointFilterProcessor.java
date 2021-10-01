@@ -260,7 +260,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename +"." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
@@ -399,7 +399,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(table.tablename);
-		sql.append("(" + table.columnname + " char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("(" + table.primarykey + " char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -407,7 +407,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX "); //$NON-NLS-1$
 		sql.append(table.tablename + "_wp_uuid_idx on "); //$NON-NLS-1$
-		sql.append(table.tablename + "(" + table.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(table.tablename + "(" + table.primarykey + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
@@ -420,7 +420,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(table.tablename + " (" + table.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(table.tablename + " (" + table.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
 		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$

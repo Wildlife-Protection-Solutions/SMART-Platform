@@ -223,7 +223,7 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		throw new SQLException("Cannot process asset filter, no table data found.");	 //$NON-NLS-1$
 	}
@@ -331,7 +331,7 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		String attprefix = engine.tablePrefix(Attribute.class);
 		if (attprefix == null){
@@ -400,7 +400,7 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
@@ -417,7 +417,7 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}
 	
@@ -784,7 +784,7 @@ public enum PsqlFilterToSqlGenerator {
 	
 	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
 	
@@ -936,7 +936,7 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(SamplingUnitAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		if (filter.getAttributeType() == AttributeType.NUMERIC){
 			String p1 = engine.addParameterValue((Double)filter.getValue());
 			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + ") ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -1000,7 +1000,7 @@ public enum PsqlFilterToSqlGenerator {
 	protected String asSql(MissionPropertyFilter filter, IQueryEngine engine)
 			throws SQLException {
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 
 		if (filter.getAttributeType() == AttributeType.NUMERIC) {
 			String p1 = engine.addParameterValue((Double) filter.getValue());

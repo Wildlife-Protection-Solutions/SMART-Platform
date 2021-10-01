@@ -148,7 +148,7 @@ public class DerbyFilterToSqlGenerator {
 	 */
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
 
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
 			return " (qa.\"" + filter.getAttributeKey() + "\" > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
@@ -210,7 +210,7 @@ public class DerbyFilterToSqlGenerator {
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
 		
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
 		
 		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
@@ -228,7 +228,7 @@ public class DerbyFilterToSqlGenerator {
 	 */
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
+		if (t != null) return t.tablename + "." + t.primarykey + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
 		
 		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}

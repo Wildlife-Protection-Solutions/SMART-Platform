@@ -235,7 +235,7 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		for (FilterTable t : assetFilterTables.values()) {
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
-			sql.append(" on " + t.tablename + "." + t.columnname + " = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			sql.append(" on " + t.tablename + "." + t.primarykey + " = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		
 		engine.filterTables.putAll(assetFilterTables);

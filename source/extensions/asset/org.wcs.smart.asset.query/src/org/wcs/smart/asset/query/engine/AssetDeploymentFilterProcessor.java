@@ -243,7 +243,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename +"." + t.primarykey + " = "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(prefix(AssetDeployment.class) + ".uuid "); //$NON-NLS-1$
 		}
 
@@ -400,7 +400,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 			StringBuilder sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(t.tablename);
-			sql.append("(" + t.columnname + " char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("(" + t.primarykey + " char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 
@@ -408,7 +408,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
 			sql.append(t.tablename + "_deployment_uuid_idx on "); //$NON-NLS-1$
-			sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(t.tablename + "(" + t.primarykey + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 						
@@ -425,7 +425,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.deployment_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
@@ -477,7 +477,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		//create temporary table for attribute observations
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.primarykey + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append("a.deployment_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
