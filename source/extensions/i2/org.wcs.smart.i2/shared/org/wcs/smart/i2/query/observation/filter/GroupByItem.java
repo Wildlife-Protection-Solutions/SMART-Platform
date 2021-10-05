@@ -228,7 +228,7 @@ public class GroupByItem {
 	}
 
 	
-	private String otherTypeKey; //for entit_attribute this is the entity key otherwise it is the recordsource key
+	private String otherTypeKey; //for entity_attribute this is the entity key otherwise it is the recordsource key
 	private String attributeKey; //for record_attribute this is the intelrecordsourceattribute key otherwise its the intelattribute key
 	private IntelAttribute.AttributeType attributeType;
 	private List<String> optionKeys;

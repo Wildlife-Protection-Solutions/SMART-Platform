@@ -217,7 +217,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		LocalDate l1 = LocalDate.now();
 		LocalDate l2 = LocalDate.now();
 		if (items[0] != null) l1 = ((java.sql.Date)items[0]).toLocalDate();
-		if (items[1] != null) l1 = ((java.sql.Date)items[1]).toLocalDate();
+		if (items[1] != null) l2 = ((java.sql.Date)items[1]).toLocalDate();
 		return new LocalDate[] {l1, l2};
 	}
 	
@@ -282,6 +282,11 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				SystemAttributeFilter.SystemAttribute attribute = groupBy.getSystemAttribute();
 				
 				String columnName = attribute.name().toLowerCase(Locale.ROOT);
+				if (attribute == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED) {
+					columnName = "date_created"; //$NON-NLS-1$
+				}else if (attribute == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
+					columnName = "date_modified"; //$NON-NLS-1$
+				}
 
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {

@@ -67,7 +67,7 @@ public class SqlGenerator {
 		}else if (filter[0] != null && filter[1] == null){
 			return " ( cast(" + fieldName + " as date) >= '" + filter[0].toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (filter[0] != null && filter[1] != null){
-			return " ( cast(" + fieldName + " as date) >= '" + filter[0].toString() + "'  AND cast(" + fieldName + " as date) <= '" + filter[0].toString()  + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			return " ( cast(" + fieldName + " as date) >= '" + filter[0].toString() + "'  AND cast(" + fieldName + " as date) <= '" + filter[1].toString()  + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return null;
 	}
