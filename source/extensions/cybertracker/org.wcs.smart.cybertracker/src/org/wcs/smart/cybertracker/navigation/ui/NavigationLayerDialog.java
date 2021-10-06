@@ -29,6 +29,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -112,6 +114,7 @@ import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
@@ -207,6 +210,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	private List<Control> pointControls;
 	private List<Control> lineControls;
 	
+	private HashMap<NavigationTarget, String> errors = new HashMap<>();
 	
 	private static enum MarkerStyle{
 		CIRCLE("circle"), //$NON-NLS-1$
@@ -309,7 +313,26 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	}
 	
 	@Override
+	public void cancelPressed() {
+		
+		if (getButton(IDialogConstants.OK_ID).isEnabled()) {
+			boolean dosave = MessageDialog.openQuestion(getShell(), Messages.NavigationLayerDialog_ChangesTitle, Messages.NavigationLayerDialog_ChangesMessage);
+			if (dosave) {
+				if (!save()) {
+					return;
+				}
+			}
+			
+		}
+		
+		super.cancelPressed();
+	}
+	@Override
 	public void okPressed() {
+		save();
+	}
+	
+	private boolean save() {
 		nav.setName(txtName.getText());
 		for (NavigationTarget t : targets) {
 			if (t.isLine()) {
@@ -333,9 +356,11 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 					CyberTrackerPlugIn.log(ex.getMessage(), ex2);
 				}
 				CyberTrackerPlugIn.displayError(Messages.NavigationLayerDialog_ErrorTitle, Messages.NavigationLayerDialog_SaveError + ex.getMessage(), ex);
+				return false;
 			}
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		return true;
 	}
 	
 	@Override
@@ -361,13 +386,29 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		for (Control c : pointControls) c.setEnabled(haspoint);
 		for (Control c : lineControls) c.setEnabled(hasline);
 		
-		targetLayer.getStyleBlackboard().put(SLDContent.ID, getTargetStyle());
-		targetLayer.refresh(null);
+		if (targetLayer != null) {
+			targetLayer.getStyleBlackboard().put(SLDContent.ID, getTargetStyle());
+			targetLayer.refresh(null);
+		}
+	
+		errors.clear();
 		
+		for (NavigationTarget t : targets) {
+			Envelope env = t.getGeometry().getEnvelopeInternal();
+			if (env.getMinX() < -370 || env.getMaxX() > 370 ||
+					env.getMinY() < -100 || env.getMaxX() > 100) {
+				
+				errors.put(t, Messages.NavigationLayerDialog_InvalidTargetWarning);
+				
+			}
+		}
+		tblTargets.refresh();
 		validate(true);
 	}
+	
 	private void validate(boolean dirty) {
-		if (dirty) getButton(IDialogConstants.OK_ID).setEnabled(true);
+		if (dirty && getButton(IDialogConstants.OK_ID) != null) 
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
 	
 	
@@ -461,7 +502,11 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		c.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return ((NavigationTarget)element).getId();
+				String id = ((NavigationTarget)element).getId();
+				if (errors.containsKey(element)) {
+					id += " " + errors.get(element); //$NON-NLS-1$
+				}
+				return id;
 			}
 		});
 		c.setEditingSupport(new EditingSupport(c.getViewer()) {
@@ -799,6 +844,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 			CyberTrackerPlugIn.log(e1.getMessage(), e1);
 		}
 		
+		validate();
 		getShell().setText(MessageFormat.format(Messages.NavigationLayerDialog_ShellTitle, nav.getName()));
 		return parent;
 	}

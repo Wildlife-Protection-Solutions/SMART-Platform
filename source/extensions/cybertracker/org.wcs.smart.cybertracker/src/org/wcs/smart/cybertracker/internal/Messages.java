@@ -588,6 +588,8 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_circlestyle;
 	public static String NavigationLayerDialog_colorlabel;
 	public static String NavigationLayerDialog_crossstyle;
+	public static String NavigationLayerDialog_ChangesMessage;
+	public static String NavigationLayerDialog_ChangesTitle;
 	public static String NavigationLayerDialog_CreatedDateField;
 	public static String NavigationLayerDialog_DefaultTargetName;
 	public static String NavigationLayerDialog_DeleteTargetActionName;
@@ -597,6 +599,7 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_diamondstyle;
 	public static String NavigationLayerDialog_dotstyle;
 	public static String NavigationLayerDialog_ErrorTitle;
+	public static String NavigationLayerDialog_InvalidTargetWarning;
 	public static String NavigationLayerDialog_LinesHeader;
 	public static String NavigationLayerDialog_LineTargetLayerName;
 	public static String NavigationLayerDialog_MapName;
