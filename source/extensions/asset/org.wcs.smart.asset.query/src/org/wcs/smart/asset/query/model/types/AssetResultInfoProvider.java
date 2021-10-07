@@ -50,13 +50,12 @@ import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 public class AssetResultInfoProvider extends ShowItemInfoProvider  {
 
 	private void showItem(StationEditorInput in, UUID waypointUuid) {
-		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class).getActiveLeaf().createChild();
 		ctx.set(OpenStationHandler.STATION_PARAM, in);
 		if (waypointUuid != null){
 			ctx.set(OpenStationHandler.INIT_SELECTION_WP_UUID, waypointUuid);
 		}
-		ContextInjectionFactory.invoke(new OpenStationHandler(),
-				Execute.class, ctx.getActiveLeaf());
+		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
 	}
 	
 	@Override

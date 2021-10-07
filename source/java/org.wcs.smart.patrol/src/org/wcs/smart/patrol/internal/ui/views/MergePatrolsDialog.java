@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
@@ -263,16 +262,19 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 									ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
 
 									for (PatrolWaypoint pw : pld.getWaypoints()) {
-										Waypoint waypoint = pw.getWaypoint();
-										if (waypoint.getUuid() != null) {
-											waypoint = (Waypoint) session.merge(waypoint);
-										}
-										Waypoint wpClone = waypoint.clone(session);
-										session.delete(waypoint);
+										
+										//reuse waypoints so we don't fire new events
+										//#2990
+										session.createQuery("DELETE FROM PatrolWaypoint WHERE id.waypoint.uuid = :wpuuid and id.patrolLegDay.uuid = :leguuid") //$NON-NLS-1$
+											.setParameter("wpuuid", pw.getWaypoint().getUuid()) //$NON-NLS-1$
+											.setParameter("leguuid", pw.getPatrolLegDay().getUuid()) //$NON-NLS-1$
+											.executeUpdate();
+
 										PatrolWaypoint newPw = new PatrolWaypoint();
-										newPw.setWaypoint(wpClone);
+										newPw.setWaypoint(pw.getWaypoint());
 										newPw.setPatrolLegDay(legdayClone);
 										allWaypoints.add(newPw);
+										
 									}
 									legdayClone.setWaypoints(allWaypoints);
 									legdayClone.setPatrolLeg(legClone);

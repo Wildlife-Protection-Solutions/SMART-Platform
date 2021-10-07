@@ -350,6 +350,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			}	
 		}
+		if (pdate == null) return;
 		
 		final PatrolWaypoint wp2 = wp;
 		for (int i = 0; i < getPageCount(); i++){
@@ -528,8 +529,17 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					try{
 						/* delete waypoints */
 						for (PatrolWaypoint wp : toDelete) {
-							saveSession.delete(wp);
-							saveSession.delete(wp.getWaypoint());					
+							//moving we want to keep the original wp; just remove
+							//the patrol waypoint row so we'll specifically delete it here
+							//ie don't use session.delete(wp) as that cascades and deletes the wp
+							//as well
+							//doing it this way ensure no "new observation" hibernate events
+							//are created which we don't want.
+							//ticket: #2990
+							saveSession.createQuery("DELETE FROM PatrolWaypoint where id.waypoint.uuid = :wpuuid and id.patrolLegDay.uuid = :leguuid") //$NON-NLS-1$
+								.setParameter("wpuuid", wp.getWaypoint().getUuid()) //$NON-NLS-1$
+								.setParameter("leguuid", wp.getPatrolLegDay().getUuid()) //$NON-NLS-1$
+								.executeUpdate();
 						}
 						Patrol p = null;
 						Path rootFolder = null;

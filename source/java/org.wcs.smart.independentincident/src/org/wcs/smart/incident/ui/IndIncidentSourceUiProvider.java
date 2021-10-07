@@ -64,10 +64,10 @@ public class IndIncidentSourceUiProvider implements
 		}
 			
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		ctx = ctx.getActiveLeaf().createChild();
 		ctx.set(OpenIncidentHandler.UUID_PARAM, waypointUuid);
 		ctx.set(OpenIncidentHandler.SOURCE_PARAM, IndepedentIncidentSource.KEY);
-		ContextInjectionFactory.invoke(new OpenIncidentHandler(),
-					Execute.class, ctx.getActiveLeaf());
+		ContextInjectionFactory.invoke(new OpenIncidentHandler(), Execute.class, ctx);
 
 	}
 

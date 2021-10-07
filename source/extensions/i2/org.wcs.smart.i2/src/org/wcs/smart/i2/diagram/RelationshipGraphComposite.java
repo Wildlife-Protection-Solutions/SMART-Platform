@@ -379,15 +379,6 @@ public class RelationshipGraphComposite extends Composite {
 	}
 
 	private void delayedUpdateGraph(IRelationshipGraphData input, boolean refresh) {
-//		if (true) {
-//			Object[] x = graphViewer.getNodeElements();
-//			
-//			for (Object y : x) {
-//				System.out.println(y);
-//			}
-//			
-//			return ;
-//		}
 		IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		if (part == parentEditor) {
 			//graph is in active editor and we need to set input right away

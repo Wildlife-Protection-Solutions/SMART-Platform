@@ -17,6 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.Operator;
@@ -436,7 +437,7 @@ public class RecordFilterProcessor {
 		logme(sb.toString());
 	}
 	private void logme(String sb) {
-		System.out.println(sb.toString());
+		if (Intelligence2PlugIn.LOG_QUERY) System.out.println(sb.toString());
 	}
 	
 }

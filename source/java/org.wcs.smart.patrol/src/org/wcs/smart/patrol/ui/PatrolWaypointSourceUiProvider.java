@@ -77,6 +77,7 @@ public class PatrolWaypointSourceUiProvider implements
 		
 		PatrolEditorInput in = new PatrolEditorInput(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		ctx = ctx.getActiveLeaf().createChild();
 		ctx.set(OpenPatrolHandler.PATROL_PARAM, in);
 		ctx.set(OpenPatrolHandler.INIT_SELECTION_WP_UUID, waypointUuid);
 		

@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
 
@@ -143,6 +144,6 @@ public class SqlGenerator {
 	
 	
 	public static void logString(String string){
-//		System.out.println(string);
+		if (Intelligence2PlugIn.LOG_QUERY) System.out.println(string);
 	}
 }

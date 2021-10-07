@@ -69,7 +69,7 @@ public class AssetWaypointSourceUiProvider implements
 			station.getId();
 		}
 		
-		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();
+		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf().createChild();
 		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId()));
 		ctx.set(OpenStationHandler.INIT_SELECTION_WP_UUID, pw.getWaypoint().getUuid());
 		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);

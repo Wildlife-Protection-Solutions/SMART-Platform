@@ -58,12 +58,12 @@ public class PatrolResultInfoProvider extends ShowItemInfoProvider{
 	
 	private void showItem(PatrolEditorInput in, UUID waypointUuid) {
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		ctx = ctx.getActiveLeaf().createChild();
 		ctx.set(OpenPatrolHandler.PATROL_PARAM, in);
 		if (waypointUuid != null){
 			ctx.set(OpenPatrolHandler.INIT_SELECTION_WP_UUID, waypointUuid);
 		}
-		ContextInjectionFactory.invoke(new OpenPatrolHandler(),
-				Execute.class, ctx.getActiveLeaf());
+		ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, ctx);
 	}
 	
 	@Override

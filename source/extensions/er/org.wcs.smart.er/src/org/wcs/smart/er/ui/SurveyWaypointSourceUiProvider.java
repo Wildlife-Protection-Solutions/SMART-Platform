@@ -63,7 +63,7 @@ public class SurveyWaypointSourceUiProvider implements
 			pw.getMissionDay().getMission().getUuid();
 		}
 		
-		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();
+		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf().createChild();
 		(new ShowFieldDataPerspective()).execute(SurveyDesignListView.ID,ctx.get(MWindow.class));
 		EditSurveyElementHandler.editMission(ctx.get(Shell.class), pw.getMissionDay().getMission().getUuid(), pw.getMissionDay().getMission().getId(), pw.getWaypoint().getUuid());
 	}

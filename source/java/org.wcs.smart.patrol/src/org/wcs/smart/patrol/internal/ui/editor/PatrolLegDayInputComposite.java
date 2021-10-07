@@ -90,7 +90,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
@@ -98,11 +97,9 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.gpx.GPSDataImport;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -676,38 +673,19 @@ public class PatrolLegDayInputComposite {
 		ArrayList<PatrolWaypoint> added = new ArrayList<PatrolWaypoint>();
 		
 		final PatrolLegDay moveTo = dialog.getMoveToPosition();
-		try(Session session = HibernateManager.openSession()){
-			IStructuredSelection selection = observationTable.getStructuredSelection();
-			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-				PatrolWaypoint w = (PatrolWaypoint) iterator.next();
+		
+		IStructuredSelection selection = observationTable.getStructuredSelection();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			PatrolWaypoint w = (PatrolWaypoint) iterator.next();
 				
-				Waypoint toClone = w.getWaypoint();
-				if (toClone.getUuid() != null){
-					toClone = (Waypoint)session.merge(toClone);
-				}
-				
-				Waypoint cloned = toClone.clone(session);
-				
-				if (patrolLegDate.getWaypoints().remove(w)) {
-					w.setPatrolLegDay(null);
-					
-					PatrolWaypoint pw = new PatrolWaypoint();
-					pw.setWaypoint(cloned);
-					pw.setPatrolLegDay(moveTo);
-					moveTo.getWaypoints().add(pw);
-					
-					deleted.add(w);
-					added.add(pw);
-				}
-				
-				//ensure minimum is loaded for the patrol mapping service which assumes
-				//to a minimum that this information is already loaded 
-				if (cloned.getObservationGroups() != null && cloned.getObservationGroups().size() > 0){
-					for (WaypointObservationGroup g : cloned.getObservationGroups()){
-						for (WaypointObservation ob : g.getObservations()) ob.getCategory().getName();
-					}
-				}
-				
+			if (patrolLegDate.getWaypoints().remove(w)) {
+				PatrolWaypoint pw = new PatrolWaypoint();
+				pw.setWaypoint(w.getWaypoint());
+				pw.setPatrolLegDay(moveTo);
+				moveTo.getWaypoints().add(pw);
+
+				deleted.add(w);
+				added.add(pw);
 			}
 		}
 		

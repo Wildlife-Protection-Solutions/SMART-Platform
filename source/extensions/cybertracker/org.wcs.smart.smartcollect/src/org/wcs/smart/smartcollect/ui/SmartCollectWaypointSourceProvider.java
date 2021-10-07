@@ -59,9 +59,10 @@ public class SmartCollectWaypointSourceProvider implements IWaypointSourceProvid
 		}
 			
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		ctx = ctx.getActiveChild().createChild();
 		ctx.set(OpenIncidentHandler.UUID_PARAM, waypointUuid);
 		ctx.set(OpenIncidentHandler.SOURCE_PARAM, SmartCollectWaypointSource.KEY);
-		ContextInjectionFactory.invoke(new OpenIncidentHandler(), Execute.class, ctx.getActiveLeaf());
+		ContextInjectionFactory.invoke(new OpenIncidentHandler(), Execute.class, ctx);
 	}
 
 }

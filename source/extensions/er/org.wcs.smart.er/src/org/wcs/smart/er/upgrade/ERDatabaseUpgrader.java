@@ -73,9 +73,14 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
+			upgradeV3ToV4(session);
 		}
 		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_2)){
 			upgradeV2ToV3(session);
+			upgradeV3ToV4(session);
+		}
+		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_3)){
+			upgradeV3ToV4(session);
 		}
 	}
 	
@@ -182,4 +187,9 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_3, session);
 	}
 
+	private static void upgradeV3ToV4(Session session){
+		//this is version update is required to fix the issue with the survey_waypoint trigger
+		//see #3271
+		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_4, session);
+	}
 }
