@@ -320,8 +320,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 						groupBySql.append("cast(extract(year from " + columnName + ") as char(4)) || '-' || trim(cast(extract( month from " + columnName + ") as char(2)))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						break;
 					case YEAR:
-						selectSql.append("cast(extract(year from " + columnName + ")) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
-						groupBySql.append("cast(extract( year from " + columnName + "))"); //$NON-NLS-1$ //$NON-NLS-2$
+						selectSql.append("cast(date_part('year', " + columnName + ") as char(4)) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
+						groupBySql.append("cast(date_part('year', " + columnName + ") as char(4)) "); //$NON-NLS-1$ //$NON-NLS-2$
 						break;
 				}				
 			}

@@ -250,7 +250,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}
 			cnt++;
 			if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
-				String columnName = groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT) + "_" + groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+				String columnName = groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT);
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {
 					case DAY:
