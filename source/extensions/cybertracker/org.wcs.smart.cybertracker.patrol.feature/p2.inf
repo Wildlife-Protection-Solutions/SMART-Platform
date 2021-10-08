@@ -1,13 +1,14 @@
 metaRequirements.0.namespace=org.wcs.smart.cybertracker
 metaRequirements.0.name=onInstall
-
+metaRequirements.0.range=4.0.0
 
 metaRequirements.2.namespace=org.wcs.smart.cybertracker.patrol
 metaRequirements.2.name=onInstall
+metaRequirements.2.range=4.0.0
 
 metaRequirements.3.namespace=org.wcs.smart.cybertracker.patrol
 metaRequirements.3.name=onUninstall
-
+metaRequirements.3.range=4.0.0
 
 instructions.install=org.wcs.smart.cybertracker.onInstall();org.wcs.smart.cybertracker.patrol.onInstall();
 instructions.uninstall=org.wcs.smart.cybertracker.patrol.onUninstall();

@@ -20,3 +20,5 @@ END$$;
 
 update connect.connect_plugin_version set version = '4.0' where plugin_id = 'org.wcs.smart.er';
 update connect.ca_plugin_version set version = '4.0' where plugin_id = 'org.wcs.smart.er';
+
+update connect.connect_version set version = '7.3.0', last_updated = now();

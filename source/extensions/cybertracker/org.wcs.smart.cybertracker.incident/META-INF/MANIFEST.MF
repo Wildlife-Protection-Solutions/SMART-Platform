@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cybertracker Incident PlugIn
 Bundle-SymbolicName: org.wcs.smart.cybertracker.incident;singleton:=true
-Bundle-Version: 7.2.0.qualifier
+Bundle-Version: 7.3.0.qualifier
 Bundle-Activator: org.wcs.smart.cybertracker.incident.CtIncidentPlugIn
 Require-Bundle: org.wcs.smart.cybertracker;bundle-version="[7.0.0,8.0.0)",
  org.wcs.smart.independentincident;bundle-version="[7.0.0,8.0.0)"
