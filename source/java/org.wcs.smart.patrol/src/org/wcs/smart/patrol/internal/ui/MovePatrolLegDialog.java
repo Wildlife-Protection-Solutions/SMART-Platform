@@ -124,6 +124,7 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 					PatrolLegDay clone = pld.clone();
 					
 					ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
+					if (pld.getWaypoints() == null) pld.setWaypoints(new ArrayList<>());
 					
 					for(PatrolWaypoint wp : pld.getWaypoints()){
 						PatrolWaypoint pw = new PatrolWaypoint();

@@ -656,6 +656,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			
 			//if we made brand new patrols, save them and copy any plan and intel links there were
 			for(Patrol p2 : newPatrols){
+				p2.createLegDays(session);
 				session.saveOrUpdate(p2);
 				//save the waypoints, they are not cascaded like everything else.
 				for(PatrolLeg pl : p2.getLegs()){
