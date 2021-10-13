@@ -212,6 +212,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * we can determine the range for the summary headers
 	 */
 	private LocalDate[] computeDateRange(String queryTable, Session session) {
+		
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
 		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
@@ -283,11 +284,6 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				SystemAttributeFilter.SystemAttribute attribute = groupBy.getSystemAttribute();
 				
 				String columnName = attribute.name().toLowerCase(Locale.ROOT);
-				if (attribute == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED) {
-					columnName = "date_created"; //$NON-NLS-1$
-				}else if (attribute == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
-					columnName = "date_modified"; //$NON-NLS-1$
-				}
 
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {

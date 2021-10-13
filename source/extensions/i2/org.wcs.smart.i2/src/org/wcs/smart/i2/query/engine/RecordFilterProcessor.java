@@ -41,8 +41,8 @@ public class RecordFilterProcessor {
 		new String[] {"source_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 		new String[] {"ca_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 		new String[] {"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-		new String[] {"date_created", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
-		new String[] {"date_modified", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_date_created", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_date_modified", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
 		new String[] {"profile_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 	};
 	

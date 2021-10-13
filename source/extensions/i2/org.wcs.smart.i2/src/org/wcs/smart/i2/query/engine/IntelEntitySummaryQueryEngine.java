@@ -554,7 +554,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 					minDate = lminDate;
 				}
 				
-				if (lmaxDate != null && (maxDate == null || maxDate.isAfter(maxDate))) {
+				if (lmaxDate != null && (maxDate == null || lmaxDate.isAfter(maxDate))) {
 					maxDate = lmaxDate;
 				}
 			}
