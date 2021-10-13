@@ -216,9 +216,9 @@ public class RecordFilterProcessor {
 		if (filter.getAttributeType() == AttributeType.BOOLEAN) {
 			sb.append(" AND v.double_value > 0.5 "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.DATE) {
-			sb.append(" AND v.string_value is not null AND cast(v.string_value as date) "); //$NON-NLS-1$
+			sb.append(" AND v.string_value is not null AND case when r.type = 'DATE' then cast(v.string_value as date)  "); //$NON-NLS-1$
 			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-			sb.append(" :value and :value2 "); //$NON-NLS-1$
+			sb.append(" :value and :value2 else false end "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
 			sb.append(" AND v.double_value "); //$NON-NLS-1$
 			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
