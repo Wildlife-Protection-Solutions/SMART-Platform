@@ -30,10 +30,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.CopyOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -267,7 +269,38 @@ public class SmartUtils {
 	}
 	
 	public static void moveDirectory(Path source, Path target) throws IOException {
-		Files.move(source, target);
+		//SmartPlugIn.log("moving from " + source.toString() + " to " + target.toString(), null);
+		//this doesn't work when moving between drives, so use copy and delete instead
+		//https://app.asana.com/0/1199928770649381/1201025180297056
+		//Files.move(source, target);		
+		Files.walkFileTree(source, new FileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				Files.createDirectories(target.resolve(source.relativize(dir)));
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.copy(file, target.resolve(source.relativize(file)));
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				if (exc != null) SmartPlugIn.log(exc.getMessage(), exc);
+				return FileVisitResult.TERMINATE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if (exc != null) SmartPlugIn.log(exc.getMessage(), exc);
+				return FileVisitResult.CONTINUE;
+			}});
+		
+		deleteDirectory(source);
+
 	}
 	
 	

@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>org.wcs.smart.feature</artifactId>
-  <version>7.0.5-SNAPSHOT</version>
+  <version>7.3.1-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 
 </project>
