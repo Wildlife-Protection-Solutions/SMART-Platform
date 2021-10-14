@@ -6,7 +6,7 @@
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.i2"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.3.0.qualifier">
+      license-feature-version="7.4.0.qualifier">
 
    <description>
       A profiles plugin for tracking records, entities

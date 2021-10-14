@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wcs.smart.connect</groupId>
         <artifactId>org.wcs.smart.connect</artifactId>
-        <version>7.3.1-SNAPSHOT</version>
+        <version>7.4.0-SNAPSHOT</version>
     </parent>
     
     <groupId>org.wcs.smart.connect.server</groupId>
