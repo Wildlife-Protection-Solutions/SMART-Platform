@@ -562,7 +562,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		((GridLayout)otherComposite.getLayout()).marginWidth = 0;
 		((GridLayout)otherComposite.getLayout()).marginHeight = 0;
 		
-		lstOther = new TableViewer(otherComposite, SWT.BORDER);
+		lstOther = new TableViewer(otherComposite, SWT.BORDER | SWT.MULTI);
 		lstOther.setContentProvider(ArrayContentProvider.getInstance());
 		lstOther.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
@@ -784,7 +784,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 						txtBounds.setData(RE_KEY, re);
 						txtBounds.setText(re.toString());
 					}catch (Exception ex) {
-						throw new InvocationTargetException(ex);
+						txtBounds.setText(Messages.MapPackageUiContribution_BoundsComputationError);
+						txtBounds.setData(RE_KEY, new ReferencedEnvelope( -180, 180, -85, 85, SmartDB.DATABASE_CRS));
 					}
 				}
 			});

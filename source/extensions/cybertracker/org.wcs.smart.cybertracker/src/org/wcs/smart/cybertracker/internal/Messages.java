@@ -554,6 +554,7 @@ public class Messages extends NLS {
 	public static String MapPackageUiContribution_AddError;
 	public static String MapPackageUiContribution_addtooltip;
 	public static String MapPackageUiContribution_BasemapSection;
+	public static String MapPackageUiContribution_BoundsComputationError;
 	public static String MapPackageUiContribution_CreateDirFail;
 	public static String MapPackageUiContribution_DeleteDirFail;
 	public static String MapPackageUiContribution_DeleteFail;
