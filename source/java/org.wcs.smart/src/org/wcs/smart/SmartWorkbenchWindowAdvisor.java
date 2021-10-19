@@ -282,6 +282,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				
+				if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null) return Status.OK_STATUS;
 				
 				try(Session s = HibernateManager.openSession()){
 					ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
