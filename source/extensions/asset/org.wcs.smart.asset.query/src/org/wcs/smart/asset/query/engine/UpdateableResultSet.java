@@ -537,7 +537,7 @@ public class UpdateableResultSet {
 		LocalDateTime ldt = LocalDateTime.of(wp.getDateTime().toLocalDate(), newTime);
 		wp.setDateTime(ldt);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_date = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_time = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("id", wp.getDateTime()); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
