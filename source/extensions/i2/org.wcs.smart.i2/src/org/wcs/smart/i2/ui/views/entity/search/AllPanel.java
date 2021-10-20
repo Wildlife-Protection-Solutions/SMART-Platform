@@ -147,7 +147,7 @@ public class AllPanel extends Composite {
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					//don't worry about it;
-					ex.printStackTrace();
+					//ex.printStackTrace();
 				}
 			}
 			if (entitySearch != null) {
