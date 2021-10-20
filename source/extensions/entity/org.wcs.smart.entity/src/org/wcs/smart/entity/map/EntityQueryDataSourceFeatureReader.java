@@ -83,7 +83,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 	 */
 	@Override
 	public void close() throws IOException {
-		fIterator.close();
+		if (fIterator != null) fIterator.close();
 	}
 
 	/**

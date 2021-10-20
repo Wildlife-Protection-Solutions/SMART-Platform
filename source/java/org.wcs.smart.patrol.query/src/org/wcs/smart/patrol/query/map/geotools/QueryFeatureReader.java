@@ -81,7 +81,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public void close() throws IOException {
-		fIterator.close();
+		if (fIterator != null) fIterator.close();
 	}
 
 	/**

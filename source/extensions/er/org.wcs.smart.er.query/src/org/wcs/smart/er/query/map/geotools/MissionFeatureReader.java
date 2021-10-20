@@ -93,7 +93,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	 */
 	@Override
 	public void close() throws IOException {
-		if (fIterator instanceof Closeable){
+		if (fIterator != null && fIterator instanceof Closeable){
 			((Closeable) fIterator).close();
 		}
 		if (session != null){
