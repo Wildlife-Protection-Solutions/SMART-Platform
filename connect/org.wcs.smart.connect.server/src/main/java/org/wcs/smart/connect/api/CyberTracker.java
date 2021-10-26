@@ -71,7 +71,6 @@ import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.CyberTrackerPackage.Status;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
-import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.CyberTrackerAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -252,7 +251,7 @@ public class CyberTracker extends HttpServlet{
 			if (p == null) {
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, p.getUuid())){
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, p.getConservationArea().getUuid())){
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 			
@@ -305,7 +304,8 @@ public class CyberTracker extends HttpServlet{
 			if (p == null) {
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, p.getUuid())){
+			
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, p.getConservationArea().getUuid())){
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 			
@@ -552,15 +552,15 @@ public class CyberTracker extends HttpServlet{
 			ConservationAreaInfo cainfo = s.get(ConservationAreaInfo.class, proxy.getCaUuid());
 			if (cainfo == null) throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTracker.CaNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY)) {
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			}
-			
-			
 			if (cainfo.getStatus() == ConservationAreaInfo.Status.CCAA){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area"); //$NON-NLS-1$
 			}
 			
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, cainfo.getUuid())) {
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			}
+			
+
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
 			if (lengthHeader == null){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
@@ -694,14 +694,13 @@ public class CyberTracker extends HttpServlet{
 		try{
 			ConservationAreaInfo cainfo = s.get(ConservationAreaInfo.class, proxy.getCaUuid());
 			if (cainfo == null) throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTracker.CaNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY)) {
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			}
-			
-			
+
 			if (cainfo.getStatus() == ConservationAreaInfo.Status.CCAA){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area"); //$NON-NLS-1$
+			}
+
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, cainfo.getUuid())) {
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 			
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
@@ -838,8 +837,8 @@ public class CyberTracker extends HttpServlet{
 			//must be a cybertracker user to be able to create keys
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, ca.getUuid())) throw new SmartConnectException(Response.Status.FORBIDDEN);
 			key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, 
-					new Object[] {"conservationArea",ca}, //$NON-NLS-1$
-					new Object[] {"type", keytype}).uniqueResult(); //$NON-NLS-1$
+					new Object[] {"id.conservationArea",ca}, //$NON-NLS-1$
+					new Object[] {"id.type", keytype}).uniqueResult(); //$NON-NLS-1$
 		}finally {
 			s.getTransaction().rollback();
 		}
@@ -850,8 +849,8 @@ public class CyberTracker extends HttpServlet{
 				s.beginTransaction();
 				try {
 					key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, 
-							new Object[] {"conservationArea",ca}, //$NON-NLS-1$
-							new Object[] {"type",keytype}).uniqueResult(); //$NON-NLS-1$
+							new Object[] {"id.conservationArea",ca}, //$NON-NLS-1$
+							new Object[] {"id.type",keytype}).uniqueResult(); //$NON-NLS-1$
 					if (key == null) {
 						key = new CyberTrackerApiKey();
 						key.setConservationArea(ca);
@@ -942,14 +941,15 @@ public class CyberTracker extends HttpServlet{
 		try{
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY, ca.getUuid())) throw new SmartConnectException(Response.Status.FORBIDDEN);
 			key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class,
-					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-					new Object[] {"type", keytype}).uniqueResult(); //$NON-NLS-1$
+					new Object[] {"id.conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"id.type", keytype}).uniqueResult(); //$NON-NLS-1$
 			if (key != null) s.delete(key);
 			s.getTransaction().commit();
 		}catch(SmartConnectException ex) {
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
 			if (ex instanceof SmartConnectException) throw ex;
 		}catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex);
 		}
 		return true;
