@@ -5,7 +5,7 @@
 
 	<groupId>org.wcs.smart.connect</groupId>
 	<artifactId>org.wcs.smart.connect</artifactId>
-	<version>7.4.0-SNAPSHOT</version>
+	<version>7.4.1-SNAPSHOT</version>
 	<name>SMART Connect</name>
 	<packaging>pom</packaging>
 	
