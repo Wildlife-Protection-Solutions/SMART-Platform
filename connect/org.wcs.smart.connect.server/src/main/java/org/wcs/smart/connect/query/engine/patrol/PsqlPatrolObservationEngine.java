@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -69,7 +70,8 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine implements 
 	
 	private String queryDataTable;
 	private SimpleQuery query;
-
+	private List<String> patrolAttributes = null;
+	
 	public PsqlPatrolObservationEngine(){
 	}
 	
@@ -82,6 +84,9 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine implements 
 		return getQueryDataTable() +"_labels"; //$NON-NLS-1$
 	}
 
+	public List<String> getPatrolAttributes(){
+		return this.patrolAttributes;
+	}
 	
 	@Override
 	public IQueryResult executeQuery(Query lquery, HashMap<String, Object> params) throws SQLException {
@@ -241,7 +246,9 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine implements 
 		//populating categories
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
 		createLabelTable(session, getObservationLabelTable());
-		populateListTreeDataTable(session, getQueryDataTable(), getObservationLabelTable());		
+		populateListTreeDataTable(session, getQueryDataTable(), getObservationLabelTable());
+		
+		patrolAttributes = PatrolQueryUtils.addPatrolAttributesToQueryResult(queryDataTable, c, session, this);
 	}
 
 	

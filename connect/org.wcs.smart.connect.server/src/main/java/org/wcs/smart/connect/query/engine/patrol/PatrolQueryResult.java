@@ -38,6 +38,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -145,24 +146,27 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 		it.setConservationAreaUuid(cauuid); 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setPatrolUuid((UUID)rs.getObject("r_p_uuid")); //$NON-NLS-1$
-		it.setPatrolId(rs.getString("r_p_id")); //$NON-NLS-1$
-		it.setPatrolStartDate(rs.getDate("r_p_start_date").toLocalDate()); //$NON-NLS-1$
-		it.setPatrolEndDate(rs.getDate("r_p_end_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolUuid((UUID)rs.getObject("p_uuid")); //$NON-NLS-1$
+		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
+		it.setPatrolStartDate(rs.getDate("p_start_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolEndDate(rs.getDate("p_end_date").toLocalDate()); //$NON-NLS-1$
 		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
 		it.setTeam(rs.getString("p_team"));				 //$NON-NLS-1$
-		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
+		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
 		it.setMandate(rs.getString("pl_mandate")); //$NON-NLS-1$
-		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("r_p_type"))); //$NON-NLS-1$
-		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
+		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("p_type"))); //$NON-NLS-1$
+		it.setArmed(rs.getBoolean("p_is_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
-		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
-		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date").toLocalDate()); //$NON-NLS-1$
-		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date").toLocalDate()); //$NON-NLS-1$
-		it.setLeader(engine.getEmployeeName((UUID)rs.getObject("r_plm_leader"), session)); //$NON-NLS-1$
-		it.setPilot(engine.getEmployeeName((UUID)rs.getObject("r_plm_pilot"), session)); //$NON-NLS-1$
+		it.setPatrolLegId(rs.getString("pl_id")); //$NON-NLS-1$
+		it.setPatrolLegStartDate(rs.getDate("pl_start_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolLegEndDate(rs.getDate("pl_end_date").toLocalDate()); //$NON-NLS-1$
+		it.setLeader(engine.getEmployeeName((UUID)rs.getObject("plm_leader"), session)); //$NON-NLS-1$
+		it.setPilot(engine.getEmployeeName((UUID)rs.getObject("plm_pilot"), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("track")); //$NON-NLS-1$
 	
+		for (String attribute : engine.getPatrolAttributes()) {
+			it.setPatrolAttribute(attribute.substring(PatrolAttributeQueryColumn.PREFIX.length() + 1), rs.getObject(attribute));
+		}
 		return it;
 	}
 	

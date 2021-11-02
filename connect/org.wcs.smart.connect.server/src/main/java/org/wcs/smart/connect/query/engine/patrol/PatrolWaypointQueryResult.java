@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.engine.patrol;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -31,6 +32,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolWaypointAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 
 /**
@@ -93,44 +95,13 @@ public class PatrolWaypointQueryResult extends WaypointQueryResult<PatrolWaypoin
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
 		
+		List<String> patrolAttributes = ((PsqlPatrolWaypointEngine)engine).getPatrolAttributes();
+		if (patrolAttributes != null) {
+			for (String p : patrolAttributes) {
+				it.setPatrolAttribute(p.substring(PatrolAttributeQueryColumn.PREFIX.length() + 1), rs.getObject(p));
+			}
+		}
 		
 	}
 	
-//	@Override
-//	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
-//		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
-//	}
-//	
-//	@Override
-//	public int getImageCount() {
-//		return imageCount;
-//	}
-//
-//	@Override
-//	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
-//		
-//		imageDataTable = engine.createTempTableName();
-//		imageCount = createImageDataWaypoint(session, engine.getQueryDataTable(), imageDataTable);
-//		
-//		String query = getImageQueryWaypoint(engine.getQueryDataTable(), imageDataTable);
-//		return new AttachmentResultSetIterator(session, 
-//				e->asAttachmentQueryResultItem(e, session),
-//				()->query);
-//	}
-//	
-//	
-//	@Override
-//	public void dispose(Session session) throws SQLException {
-//		super.dispose(session);
-//		if (imageDataTable != null) {
-//			engine.dropTable(session, imageDataTable);
-//		}
-//		engine.cleanUp(session);
-//	}
-//	
-//
-//	@Override
-//	public void updateSortColumn(Session session) throws SQLException {
-//		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(),"value", ".ob_", "_LIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-//	}
 }

@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -58,6 +59,8 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	
 	private String filterTable;
 	private String queryDataTable;
+	private List<String> patrolAttributes = null;
+
 	
 	public static IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, AbstractQueryEngine engine) {
 		if (filterType == FilterType.OBSERVATION){
@@ -69,6 +72,9 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		}
 	}
 	
+	public List<String> getPatrolAttributes(){
+		return this.patrolAttributes;
+	}
 	public String getQueryDataTable() {
 		return queryDataTable;
 	}
@@ -84,12 +90,18 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 
 	private String getDataQuery(boolean includetrack, String[] sortFields){
 		StringBuilder fields = new StringBuilder();
-		fields.append("ca_id,ca_name, ca_uuid, r_p_uuid,"); //$NON-NLS-1$
-		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,"); //$NON-NLS-1$
-		fields.append("r_p_team_uuid,r_p_objective,r_pl_mandate_uuid,r_p_type,"); //$NON-NLS-1$
-		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,"); //$NON-NLS-1$
-		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,"); //$NON-NLS-1$
+		fields.append("ca_id,ca_name, ca_uuid, p_uuid,"); //$NON-NLS-1$
+		fields.append("p_id,p_start_date,p_end_date,p_station_uuid,"); //$NON-NLS-1$
+		fields.append("p_team_uuid,p_objective,pl_mandate_uuid,p_type,"); //$NON-NLS-1$
+		fields.append("p_is_armed,pl_transport_uuid,pl_id,pl_start_date,"); //$NON-NLS-1$
+		fields.append("pl_end_date,plm_leader,plm_pilot,pl_uuid,"); //$NON-NLS-1$
 		fields.append("p_station,p_team,pl_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
+		if (this.patrolAttributes != null) {
+			for (String s : patrolAttributes) {
+				fields.append(","); //$NON-NLS-1$
+				fields.append(s);
+			}
+		}
 		if (sortFields != null){
 			for (String s : sortFields){
 				fields.append(","); //$NON-NLS-1$
@@ -101,7 +113,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sb.append(fields.toString());
 		//TODO: cann't make the 3d geometries work here
 		if (includetrack){
-			sb.append(",st_asbinary(st_force2d(st_collect(st_geomfromwkb(r_track)))) as track "); //$NON-NLS-1$
+			sb.append(",st_asbinary(st_force2d(st_collect(st_geomfromwkb(pt_track)))) as track "); //$NON-NLS-1$
 		}
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(queryDataTable);
@@ -156,7 +168,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 					parseConservationAreaFilterInternal(lquery);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, query, caFilter, false, false);
 					getResults(c, session);
-					
+
 					c.commit();
 
 					//item cnt
@@ -232,23 +244,23 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 			c.createStatement().executeUpdate(sql);
 		}
 		
-		updateLabel(c, queryDataTable, "r_p_station_uuid", "p_station");  //$NON-NLS-1$//$NON-NLS-2$
-		updateLabel(c, queryDataTable, "r_p_team_uuid", "p_team");  //$NON-NLS-1$//$NON-NLS-2$
-		updateLabel(c, queryDataTable, "r_pl_mandate_uuid", "pl_mandate");  //$NON-NLS-1$//$NON-NLS-2$
-		updateLabel(c, queryDataTable, "r_pl_transport_uuid", "p_transporttype");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_station_uuid", "p_station");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_team_uuid", "p_team");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "pl_mandate_uuid", "pl_mandate");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "pl_transport_uuid", "p_transporttype");  //$NON-NLS-1$//$NON-NLS-2$
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT DISTINCT r_plm_leader FROM "); //$NON-NLS-1$
+		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
-		sql.append(" UNION SELECT DISTINCT r_plm_pilot FROM "); //$NON-NLS-1$
+		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
 		logger.finest(sql.toString());
 		
 		
 		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String q1 = updateSql + "p_leader = ? where r_plm_leader = ?"; //$NON-NLS-1$
-		String q2 = updateSql + "p_pilot = ? where r_plm_pilot = ?"; //$NON-NLS-1$
+		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
+		String q2 = updateSql + "p_pilot = ? where plm_pilot = ?"; //$NON-NLS-1$
 		logger.finest(q1);
 		logger.finest(q2);
 		PreparedStatement leaderSt = c.prepareStatement(q1);
@@ -280,6 +292,9 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 			pilotSt.executeBatch();
 			leaderSt.executeBatch();
 		}	
+		
+		patrolAttributes = PatrolQueryUtils.addPatrolAttributesToQueryResult(queryDataTable, c, session, PsqlPatrolEngine.this);
+
 	}
 
 	
@@ -311,9 +326,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		
 		for (int i = 0; i < results.length; i++) {
 			sb.append(","); //$NON-NLS-1$
-			sb.append("r." + results[i] + " as r_" + results[i]); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append("r." + results[i] + " as " + results[i]); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		sb.append(", t.geometry as r_track"); //$NON-NLS-1$
+		sb.append(", t.geometry as pt_track"); //$NON-NLS-1$
+
 		return sb.toString();
 	}
 
@@ -466,5 +482,4 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	public String getDateFilterField() throws SQLException{
 		return "patrol_day"; //$NON-NLS-1$
 	}
-
 }
