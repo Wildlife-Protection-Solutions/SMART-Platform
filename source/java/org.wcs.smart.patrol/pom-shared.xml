@@ -13,6 +13,7 @@
 	<artifactId>org.wcs.smart.core.patrol</artifactId>
 	<name>Patrol Module</name>
 	<packaging>jar</packaging>
+	<version>7.4.1-SNAPSHOT</version>
 	
 	<dependencies>
 		<dependency>
