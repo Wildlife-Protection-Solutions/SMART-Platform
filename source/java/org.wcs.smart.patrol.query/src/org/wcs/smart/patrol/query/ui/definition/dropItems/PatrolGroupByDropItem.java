@@ -97,7 +97,6 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	@Override
 	public String asQueryPart() {
 		StringBuilder queryPart = new StringBuilder();
-		queryPart.append("patrol:"); //$NON-NLS-1$
 		queryPart.append(groupBy.getKey());
 		queryPart.append(":"); //$NON-NLS-1$
 		if (filteredValues.size() > 0){

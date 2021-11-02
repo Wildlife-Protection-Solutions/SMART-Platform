@@ -85,9 +85,7 @@ public class PatrolFilter implements IFilter {
 	 */
 	private PatrolFilter (String patrolKey){
 		this.patrolKey = patrolKey;
-		
-		String patrolItem = patrolKey.split(":")[1]; //$NON-NLS-1$
-        option = PatrolQueryOptions.findPatrolQueryOption(patrolItem);
+		option = PatrolQueryOptions.findPatrolQueryOption(patrolKey);
 	}
 	
 	/**

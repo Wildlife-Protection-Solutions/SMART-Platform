@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.patrol.query.hibernate;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -36,6 +40,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -121,5 +127,135 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		items.addAll(getNamedKeyItem(session, PatrolTransportType.class, true));
 		return items;
+	}
+	
+	
+	@Override
+	public List<PatrolAttribute> getCustomPatrolAttributes(Session session) {
+		List<PatrolAttribute> pas = session.createQuery("FROM PatrolAttribute a WHERE a.conservationArea in (:cas)", //$NON-NLS-1$
+				PatrolAttribute.class)
+				.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
+				.list();
+		
+		HashMap<String, PatrolAttribute> attributes = new HashMap<>();
+		HashSet<String> toExclude = new HashSet<>();
+		
+		for (PatrolAttribute pa : pas) {
+			PatrolAttribute current = attributes.get(pa.getKeyId());
+			if (current == null && !toExclude.contains(pa.getKeyId())) {
+				PatrolAttribute temp = new PatrolAttribute();
+				temp.setKeyId(pa.getKeyId());
+				temp.setIsActive(true);
+				temp.setName(pa.getName());
+				temp.setType(pa.getType());
+				if (pa.getAttributeList() != null) {
+					temp.setAttributeList(new ArrayList<>());
+					for (PatrolAttributeListItem li : pa.getAttributeList()) {
+						PatrolAttributeListItem clone = new PatrolAttributeListItem();
+						clone.setIsActive(true);
+						clone.setKeyId(li.getKeyId());
+						clone.setName(li.getName());
+						clone.setListOrder(li.getListOrder());
+						temp.getAttributeList().add(clone);
+					}
+				}
+				attributes.put(pa.getKeyId(), temp);
+			}else {
+				if (pa.getType() != current.getType()) {
+					toExclude.add(pa.getKeyId());
+					attributes.remove(pa.getKeyId());
+				}else {
+					//merge list items
+					if (pa.getAttributeList() != null) {
+						HashMap<String, PatrolAttributeListItem> items = new HashMap<>();
+						for (PatrolAttributeListItem i : current.getAttributeList()) items.put(i.getKeyId(), i);
+						
+						for (PatrolAttributeListItem i : pa.getAttributeList()) {
+							if (!items.containsKey(i.getKeyId())) {
+								PatrolAttributeListItem clone = new PatrolAttributeListItem();
+								clone.setIsActive(true);
+								clone.setKeyId(i.getKeyId());
+								clone.setName(i.getName());
+								clone.setListOrder(i.getListOrder());
+								items.put(clone.getKeyId(), clone);
+							}
+						}
+						
+						current.getAttributeList().clear();
+						current.getAttributeList().addAll(items.values());
+					}
+				}
+			}
+		}
+		
+		pas = new ArrayList<>(attributes.values());
+		for (PatrolAttribute pa : pas) {
+			if (pa.getAttributeList() != null) Collections.sort(pa.getAttributeList(), (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		}
+		Collections.sort(pas, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		
+		return pas;
+	}
+
+	@Override
+	public PatrolAttribute getPatrolAttribute(Session session, String value) {
+
+		List<PatrolAttribute> pas = session.createQuery("FROM PatrolAttribute a WHERE a.conservationArea in (:cas) AND a.keyId = :keyid", //$NON-NLS-1$
+				PatrolAttribute.class)
+				.setParameter("keyid", value) //$NON-NLS-1$
+				.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
+				.list();
+		//anything found?
+		if (pas.isEmpty()) return null;
+		
+		PatrolAttribute pa = pas.get(0);
+		
+		//validate all are the same type otherwise return null
+		for(PatrolAttribute p : pas) {
+			if (p.getType() != pa.getType()) return null;
+		}
+		
+		//make a clone and sort out list items
+		PatrolAttribute temp = new PatrolAttribute();
+		temp.setKeyId(pa.getKeyId());
+		temp.setIsActive(true);
+		temp.setName(pa.getName());
+		temp.setType(pa.getType());
+
+		if (pa.getAttributeList() != null) {
+			temp.setAttributeList(new ArrayList<>());
+			
+			Set<String> listItems = new HashSet<>();
+			
+			for (PatrolAttributeListItem li : pa.getAttributeList()) {
+				PatrolAttributeListItem clone = new PatrolAttributeListItem();
+				clone.setIsActive(true);
+				clone.setKeyId(li.getKeyId());
+				clone.setName(li.getName());
+				clone.setListOrder(li.getListOrder());
+				temp.getAttributeList().add(clone);
+				listItems.add(li.getKeyId());
+			}
+			
+			for (int i = 1; i < pas.size(); i ++) {
+				PatrolAttribute p = pas.get(i);
+				if (p.getAttributeList() == null) continue;
+				for (PatrolAttributeListItem li : p.getAttributeList()) {	
+					if (listItems.contains(li.getKeyId())) continue;
+					PatrolAttributeListItem clone = new PatrolAttributeListItem();
+					clone.setIsActive(true);
+					clone.setKeyId(li.getKeyId());
+					clone.setName(li.getName());
+					clone.setListOrder(li.getListOrder());
+					temp.getAttributeList().add(clone);
+					listItems.add(li.getKeyId());
+				}
+			}
+			
+			Collections.sort(temp.getAttributeList(), (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		}
+		
+		return temp;
+		
 	}
 }

@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.filter.BooleanFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
@@ -51,8 +52,10 @@ import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolAttributeFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
@@ -65,9 +68,11 @@ import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.CustomHourRangeValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolAreaBufferValueDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDateDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolInputDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
@@ -140,6 +145,12 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			}else{
 				items = new DropItem[]{createPatrolFilterDropItem((PatrolQueryOption) source)};
 			}
+		}else if (source instanceof PatrolAttributeQueryOption) {
+			if (queryItemPanelId == SummaryFilterPanel.ID){
+				items = new DropItem[]{createPatrolGroupByDropItem((PatrolAttributeQueryOption) source)};
+			}else{
+				items = new DropItem[]{createPatrolFilterDropItem((IPatrolQueryOption) source)};
+			}
 		} else if (source instanceof IDateGroupBy) {
 			items = new DropItem[]{createDateGroupByDropItem(
 							(IDateGroupBy) source)};
@@ -211,6 +222,18 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 	}
 	
 	/**
+	 * Creates a new patrol group by drop item
+	 * @param item
+	 * @return
+	 */
+	public DropItem createPatrolGroupByDropItem(PatrolAttributeQueryOption item){
+		if (item.getPatrolAttribute().getType() != AttributeType.LIST) return null;
+		DropItem di = new PatrolGroupByDropItem(item);
+		di.initializeData(new Object[]{new PatrolOptionData(item)});
+		return di;
+	}
+	
+	/**
 	 * Creates a patrol drop item.
 	 * @param option
 	 * @return
@@ -240,18 +263,31 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 				item = new BooleanPatrolDropItem(option);
 				break;
 			case STRING:
-				item = new PatrolIdDropItem(option);
+				if (option == PatrolQueryOption.ID) {
+					item = new PatrolIdDropItem(option);
+				}else {
+					item = new PatrolInputDropItem(option);
+				}
 				break;
 			case UUID:
 				item = new PatrolListDropItem(option);
+				break;
+			case KEY:
+				item = new PatrolListDropItem(option);
+				break;
+			case NUMBER:
+				item = new PatrolInputDropItem(option);
+				break;
+			case DATE:
+				item = new PatrolDateDropItem(option);
 				break;
 			default:
 				break;
 			}
 		}
 		if (item instanceof PatrolListDropItem &&
-				option instanceof PatrolQueryOption){
-			item.initializeData(new Object[]{new PatrolOptionData((PatrolQueryOption)option)});
+				option instanceof IPatrolQueryOption){
+			item.initializeData(new Object[]{new PatrolOptionData((IPatrolQueryOption)option)});
 		}
 		return item;		
 	}
@@ -484,6 +520,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			return createDropItems((PatrolFilter)f, session);
 		}else if (f instanceof PatrolUuidFilter){
 			return createDropItems((PatrolUuidFilter)f, session);
+		}else if (f instanceof PatrolAttributeFilter) {
+			return createDropItems((PatrolAttributeFilter)f, session);
 		}else if (f instanceof IExtensionFilter){
 			return createDropItems((IExtensionFilter)f, session);
 		}else if (f instanceof BooleanFilter){
@@ -554,9 +592,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			}
 		}
 		return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.PatrolDropItemFactory_ProcessError, f.asString()))};
-		
-	
 	}
+	
 	private DropItem[] createDropItems(PatrolFilter f, Session session) throws Exception {
 		PatrolQueryOption option = f.getPatrolOption();
 		Object value = f.getValue();
@@ -685,6 +722,30 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 		return new DropItem[] { it };
 	}
 	
+	private DropItem[] createDropItems(PatrolAttributeFilter f, Session session) throws Exception {
+		
+		PatrolAttribute pa = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session, f.getAttributeKey());
+		if (!pa.getType().equals(f.getAttributeType())){
+			return new DropItem[] {new ErrorDropItem(Messages.PatrolDropItemFactory_InvalidTypes)};
+		}
+		
+		PatrolAttributeQueryOption op = new PatrolAttributeQueryOption(pa);
+		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(op);
+
+		if (pa.getType() == Attribute.AttributeType.LIST) {
+			String listkey = SharedUtils.stripQuotes(f.getValue1().toString());
+			ListItem li = new ListItem(null, listkey, listkey);
+			it.initializeData(new Object[]{new PatrolOptionData(op), li});
+			
+		}else {
+			String[] data = new String[3];
+			if (f.getOperator() != null) data[0] = f.getOperator().getGuiValue();
+			if (f.getValue1() != null) data[1] = SharedUtils.stripQuotes( f.getValue1().toString() );
+			if (f.getValue2() != null) data[2] = f.getValue2().toString();
+			it.initializeData(data);
+		}
+		return new DropItem[] { it };
+	}
 	/**
 	 * Converts the group by part into a collection of
 	 * drop items.
@@ -718,6 +779,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 		}
 		if (groupBy instanceof PatrolGroupBy){
 			return new PatrolGroupByViewer((PatrolGroupBy) groupBy, new PatrolOptionData(((PatrolGroupBy)groupBy).getOption()));
+		}
+		if (groupBy instanceof PatrolAttributeGroupBy) {
+			return new PatrolAttributeGroupByViewer( (PatrolAttributeGroupBy)groupBy );
 		}
 		return super.findViewer(groupBy);
 	}

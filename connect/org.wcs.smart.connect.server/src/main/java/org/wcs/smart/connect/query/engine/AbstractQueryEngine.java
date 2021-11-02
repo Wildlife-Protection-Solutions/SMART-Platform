@@ -93,6 +93,9 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -161,6 +164,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(Team.class, "smart.team"); //$NON-NLS-1$
 		tablePrefix.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
 		tablePrefix.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttribute.class, "spa"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttributeListItem.class, "spal"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttributeValue.class, "spav"); //$NON-NLS-1$
 		
 		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
@@ -222,6 +228,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(Team.class, "smart.team"); //$NON-NLS-1$
 		tableNames.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
 		tableNames.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
+		tableNames.put(PatrolAttribute.class, "smart.patrol_attribute"); //$NON-NLS-1$
+		tableNames.put(PatrolAttributeListItem.class, "smart.patrol_attribute_list"); //$NON-NLS-1$
+		tableNames.put(PatrolAttributeValue.class, "smart.patrol_attribute_value"); //$NON-NLS-1$
 		
 		tableNames.put(Entity.class, "smart.entity"); //$NON-NLS-1$
 		tableNames.put(EntityType.class, "smart.entity_type"); //$NON-NLS-1$

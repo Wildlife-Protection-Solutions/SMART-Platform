@@ -27,9 +27,12 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolAttributeQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.ui.PatrolQueryLabelProvider;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -77,8 +80,8 @@ public class PatrolGroupByTreeItem implements IItemTreeNode{
 	private static final LabelProvider lblProvider = new LabelProvider(){
 		
 		public String getText(Object element){
-			if (element instanceof PatrolQueryOption){
-				return ((PatrolQueryOption) element).getGuiName(Locale.getDefault());
+			if (element instanceof IPatrolQueryOption){
+				return ((IPatrolQueryOption) element).getGuiName(Locale.getDefault());
 			}else if (element instanceof IExtensionGroupByViewer){
 				return ((IExtensionGroupByViewer) element).getName();
 			}
@@ -88,6 +91,9 @@ public class PatrolGroupByTreeItem implements IItemTreeNode{
 		public Image getImage(Object element){
 			if (element instanceof PatrolQueryOption){
 				return PatrolQueryLabelProvider.getImage((PatrolQueryOption)element);
+			}else if (element instanceof PatrolAttributeQueryOption) {
+				
+				return DataModel.getAttributeImage( ((PatrolAttributeQueryOption)element).getPatrolAttribute().getType() );
 			}else if (element instanceof IExtensionGroupByViewer){
 				return ((IExtensionGroupByViewer) element).getImage();
 			}

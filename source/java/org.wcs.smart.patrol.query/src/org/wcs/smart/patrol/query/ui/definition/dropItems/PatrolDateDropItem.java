@@ -1,0 +1,210 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.query.ui.definition.dropItems;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.filter.Operator;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
+import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.util.SmartUtils;
+
+/**
+ * Patrol custom attribute drop item for date operators.
+ *  
+ * @author Emily
+ * @since 7.4.0
+ */
+public class PatrolDateDropItem  extends DropItem implements IFilterDropItem{
+
+	private DateTime dtime1;
+	private DateTime dtime2;
+	
+	protected String text;
+	protected String key;
+	
+	private String currentValue2 = null;
+	private String currentValue = null;
+	private String currentOp = null;	
+	
+	private Label lblAttribute;
+	private Combo operators;
+	
+	private Font smallerFont;
+	
+	/**
+	 * Creates a new patrol text drop item
+	 * 
+	 * @param parent parent
+	 * @param target drop panel target
+	 * @param PatrolFilterOption id patrol filter option
+	 */
+	public PatrolDateDropItem(IPatrolQueryOption option) {
+		this.text = option.getGuiName(Locale.getDefault());
+		this.key = option.getKey(); 
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
+	 */
+	@Override
+	public String getText() {
+		return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " " ;//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
+	 */
+	@Override
+	public String asQueryPart() {
+		StringBuilder querypart = new StringBuilder();
+		querypart.append(this.key);
+		querypart.append( " "); //$NON-NLS-1$
+		querypart.append(Operator.DATE_OPS[operators.getSelectionIndex()].asSmartValue());
+		querypart.append( " "); //$NON-NLS-1$
+		querypart.append(DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1)));
+		querypart.append( " "); //$NON-NLS-1$
+		querypart.append( Operator.AND.asSmartValue() );
+		querypart.append( " "); //$NON-NLS-1$
+		querypart.append(DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2)));
+		return querypart.toString();
+	}
+
+	/**
+	 * @see org.eclipse.swt.widgets.Widget#dispose()
+	 */
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (smallerFont != null){
+			smallerFont.dispose();
+		}
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected void createComposite(Composite parent) {
+		Composite main = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(4, false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		main.setLayout(layout);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		
+		lblAttribute = new Label(main, SWT.NONE);
+		
+		operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		operators.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (currentOp != null
+						&& currentOp.equals(operators.getText())) {
+					// no change
+				} else {
+					currentOp = operators.getText();
+					queryChanged();
+				}
+			}
+		});
+		FontData fd = (operators.getFont().getFontData()[0]);
+		fd.setHeight(fd.getHeight() - 1);
+		smallerFont = new Font(Display.getCurrent(), fd);
+		operators.setFont(smallerFont);
+			
+		dtime1 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
+		dtime1.addListener(SWT.Selection, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
+				if (!newValue.equals(currentValue)){
+					queryChanged();
+					currentValue = newValue;
+				}
+			}});
+		
+		dtime2 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
+		dtime2.addListener(SWT.Selection, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
+				if (!newValue.equals(currentValue2)){
+					queryChanged();
+					currentValue2 = newValue;
+				}
+			}});
+		
+		Operator[] options = Operator.DATE_OPS;
+		int index = 0;
+		for (int i = 0; i < options.length; i++) {
+			operators.add(options[i].getGuiValue());
+			if (currentOp != null
+					&& currentOp.equals(options[i].getGuiValue())) {
+				index = i;
+			}
+		}
+		operators.select(index);
+	
+		initDrag(main);
+		initDrag(lblAttribute);
+		
+		lblAttribute.setText(formatStringForLabel(this.text));
+		if (currentValue != null){
+			
+			if (dtime1 != null && currentValue != null){
+				SmartUtils.initDateTimeWidget(dtime1, LocalDate.parse(currentValue, DateTimeFormatter.ISO_LOCAL_DATE));	
+			}
+			if (dtime2 != null && currentValue2 != null){
+				SmartUtils.initDateTimeWidget(dtime2, LocalDate.parse(currentValue2, DateTimeFormatter.ISO_LOCAL_DATE));	
+			}
+		}
+	}
+
+	/**
+	 * @param data an array of string containing the operator gui value and filter value
+	 */
+	@Override
+	public void initializeData(Object data) {
+		this.currentOp = ((String[])data)[0];
+		this.currentValue = ((String[])data)[1];
+		this.currentValue2 = ((String[])data)[2];
+	}
+	
+}

@@ -131,7 +131,7 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 	 * @param option patrol filter option
 	 */
 	public PatrolListDropItem(IPatrolQueryOption option) {
-		this.keyPart = "patrol:" + option.getKey(); //$NON-NLS-1$
+		this.keyPart = option.getKey();
 		this.text = option.getGuiName(Locale.getDefault());
 		this.option = option;
 	}

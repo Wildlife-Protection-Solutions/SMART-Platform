@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,62 +25,93 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 
 /**
- * Interface that represents patrol query options
+ * Query option representing custom patrol attributes
  * 
- * @author elitvin
- * @author egouge
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public interface IPatrolQueryOption {
-
-	/**
-	 * MANDATORY prefix for the key for all boolean contribution options
-	 */
-	public static final String BOOLEAN_CONTRIBUTION_KEY_PREFIX = "patrol:contribution:boolean:"; //$NON-NLS-1$
-
-	/**
-	 * MANDATORY prefix for the key for all string contribution options
-	 */
-	public static final String STRING_CONTRIBUTION_KEY_PREFIX = "patrol:contribution:string:";  //$NON-NLS-1$
+public class PatrolAttributeQueryOption implements IPatrolQueryOption {
+	
+	private PatrolAttribute pattribute;
+	
+	public PatrolAttributeQueryOption(PatrolAttribute pattribute){
+		this.pattribute = pattribute;
+	}
+	
+	public PatrolAttribute getPatrolAttribute() {
+		return this.pattribute;
+	}
 	
 	/**
 	 * @return <code>true</code> if this option involved employees
 	 */
-	public boolean isEmployeeItem();
+	@Override
+	public boolean isEmployeeItem(){
+		return false;
+	}
 	
 	/**
 	 * @return gui name
 	 */
-	public String getGuiName(Locale l);
+	@Override
+	public String getGuiName(Locale l){
+		return pattribute.getName();
+	}
 	
 	/**
 	 * @return the option key
 	 */
-	public String getKey();
+	@Override
+	public String getKey(){
+		return "patrol:attribute:" + this.pattribute.getType().typeKey + ":" + this.pattribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 	
 	/**
 	 * @return the database column name
 	 */
-	public String getColumnName();
+	@Override
+	public String getColumnName(){
+		return null;
+	}
 	
 	/**
 	 * @return option type
 	 */
-	public PatrolQueryOptionType getType();
+	@Override
+	public PatrolQueryOptionType getType(){
+		switch(pattribute.getType()) {
+		case BOOLEAN: return PatrolQueryOptionType.BOOLEAN;
+		case DATE: return PatrolQueryOptionType.DATE;
+		case LIST: return PatrolQueryOptionType.KEY;
+		case NUMERIC: return PatrolQueryOptionType.NUMBER;
+		case TEXT: return PatrolQueryOptionType.STRING;
+		case MLIST:
+		case TREE:
+		}
+		throw new UnsupportedOperationException();
+	}
 	
 	/**
 	 * 
 	 * @return the class this patrol option is an attribute of
 	 */
-	public Class<?> getPatrolAttributeClass();
+	public Class<?> getPatrolAttributeClass(){
+		return PatrolAttribute.class;
+	}
 
 	/**
 	 * @return the class that represents the option
 	 */
-	public Class<?> getSourceClass();
+	public Class<?> getSourceClass(){
+		return PatrolAttribute.class;
+	}
 
+	
 	/**
 	 * Given a particular uuid (key) determine the string
 	 * name for the given option.
@@ -89,7 +120,16 @@ public interface IPatrolQueryOption {
 	 * @param uuid
 	 * @return
 	 */
-	public String getName(Session session, UUID uuid, Locale l);
+	public String getName(Session session, UUID uuid, Locale l){
+		PatrolAttribute temp = session.get(PatrolAttribute.class, pattribute.getUuid());
+		if (temp == null) return null;
+		if (temp.getType() == Attribute.AttributeType.LIST) {
+			for (PatrolAttributeListItem item : temp.getAttributeList()) {
+				if (item.getUuid().equals(uuid)) return item.getName();
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Return an array of names that represent
@@ -103,15 +143,22 @@ public interface IPatrolQueryOption {
 	 * otherwise a simple element array with the object 
 	 * name is returned.
 	 */
-	public String[] getNames(Session session, UUID uuid, Locale l);
+	public String[] getNames(Session session, UUID uuid, Locale l){
+		String name = getName(session, uuid, l);
+		if (name != null) return new String[] {name};
+		return null;
+	}
 	
 	/**
-	 * Give a particular uuid return the source 
+	 * Given a particular uuid return the source 
 	 * object (returns a Team, Station etc. object)
 	 * @param session
 	 * @param uuid
 	 * @return
 	 */
-	public Object getObject(Session session, UUID uuid);
+	public Object getObject(Session session, UUID uuid){
+		return session.get(PatrolAttributeListItem.class, uuid);
+	}
+	
 
 }

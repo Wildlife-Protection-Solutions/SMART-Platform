@@ -51,7 +51,7 @@ public class BooleanPatrolDropItem extends DropItem implements IFilterDropItem{
 	public BooleanPatrolDropItem(IPatrolQueryOption filter) {
 		//super(parent, target);
 		this.text = filter.getGuiName(Locale.getDefault());
-		this.key = "patrol:" + filter.getKey(); //$NON-NLS-1$
+		this.key = filter.getKey(); 
 	}
 
 	/**

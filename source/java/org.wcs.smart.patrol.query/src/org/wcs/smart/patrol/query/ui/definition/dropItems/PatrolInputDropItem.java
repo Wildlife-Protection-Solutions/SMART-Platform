@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,13 +21,10 @@
  */
 package org.wcs.smart.patrol.query.ui.definition.dropItems;
 
-import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -39,79 +36,55 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
+import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.filter.Operator;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
-import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
- * Patrol id drop item. This consists of a list of 
- * all the patrol ids along that can also be typed into.
+ * Patrol attribute drop item for string and numeric attributes
  *  
  * @author Emily
- * @since 1.0.0
+ * @since 7.4.0
  */
-public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
+public class PatrolInputDropItem  extends DropItem implements IFilterDropItem{
 
 	private String text;
 	private String key;
 	
 	private Label lblAttribute;
-	private Combo value;
+	private Text value;
 	private Combo operators;
 	
 	private Font smallerFont;
-	private Font smallerFont2;
+	private ControlDecoration cd;
 	
 	private String currentValue = null;
 	private String currentOp = null;
-	/*
-	 * job to load all patrol ids
-	 */
-	private Job loadPIdJob = new Job(Messages.PatrolIdDropItem_LoadIdsJobName){
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			if (value.isDisposed()){
-				return Status.OK_STATUS;
-			}
-			List<String> data = null;
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				try{
-					data = PatrolHibernateManager.getPatrolIds(s);
-				}finally {
-					s.getTransaction().rollback();
-				}
-			}
-			final List<String> fdata = data;
-			Display.getDefault().asyncExec(new Runnable(){
-				@Override
-				public void run() {
-					if (value.isDisposed()){
-						return ;
-					}
-					for (String id : fdata){
-						value.add(id);
-					}		
-				}});
-			return Status.OK_STATUS;
-		}};
-		
+
+	private Operator[] ops;
+	
+	private IPatrolQueryOption poption;
+	
 	/**
-	 * Creates a new patrol id drop item
+	 * Creates a new patrol text drop item
 	 * 
 	 * @param parent parent
 	 * @param target drop panel target
 	 * @param PatrolFilterOption id patrol filter option
 	 */
-	public PatrolIdDropItem(IPatrolQueryOption option) {
+	public PatrolInputDropItem(IPatrolQueryOption option) {
 		//super(parent, target);
-		assert option == PatrolQueryOption.ID;
+		this.poption = option;
+		if (option.getType() == PatrolQueryOptionType.STRING) {
+			ops =  Operator.STRING_OPS;
+		}else if (option.getType() == PatrolQueryOptionType.NUMBER) {
+			ops = Operator.NUMERIC_OPS;
+		}
+		
 		this.text = option.getGuiName(Locale.getDefault());
 		this.key = option.getKey();
 	}
@@ -121,7 +94,7 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public String getText() {
-		return this.text + " " + Operator.STRING_OPS[operators.getSelectionIndex()].getGuiValue() + " " ;//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
+		return this.text + " " + ops[operators.getSelectionIndex()].getGuiValue() + " " ;//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -129,7 +102,10 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public String asQueryPart() {
-		return this.key + " " +  Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue() + " \"" + value.getText() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (poption.getType() == PatrolQueryOptionType.NUMBER) {
+			return this.key + " " +  ops[operators.getSelectionIndex()].asSmartValue() + " " + value.getText() + ""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
+		}
+		return this.key + " " +  ops[operators.getSelectionIndex()].asSmartValue() + " \"" + value.getText() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -140,9 +116,6 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 		super.dispose();
 		if (smallerFont != null){
 			smallerFont.dispose();
-		}
-		if (smallerFont2 != null){
-			smallerFont2.dispose();
 		}
 	}
 
@@ -178,7 +151,14 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 			}
 		});
 		
-		value = new Combo(main, SWT.BORDER | SWT.DROP_DOWN);
+		value = new Text(main, SWT.BORDER);
+		value.setFont(smallerFont);
+		
+		GridData gd = new GridData();
+		gd.minimumWidth = 50;
+		gd.widthHint = 100;
+		value.setLayoutData(gd);
+		
 		value.addModifyListener(new ModifyListener() {			
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -189,18 +169,27 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 					value.setToolTipText(value.getText());
 					currentValue = value.getText();
 				}
+				if (poption.getType() == PatrolQueryOptionType.NUMBER){
+					try {
+						Double.parseDouble(currentValue);
+						cd.hide();
+					}catch (Exception ex) {
+						cd.show();
+					}
+				}
 			}
 		});
 		
-		fd = (value.getFont().getFontData()[0]);
-		fd.setHeight(fd.getHeight() - 1);
-		smallerFont2 = new Font(Display.getCurrent(), fd);
-		value.setFont(smallerFont2);
+		if (poption.getType() == PatrolQueryOptionType.NUMBER){
+			
+			cd = new ControlDecoration(value, SWT.LEFT);
+			cd.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+			cd.setDescriptionText(Messages.PatrolInputDropItem_invalidnumber);
+			cd.show();
+			((GridData)value.getLayoutData()).horizontalIndent = 5;
+
+		}
 		
-		GridData gd = new GridData();
-		gd.minimumWidth = 50;
-		gd.widthHint = 100;
-		value.setLayoutData(gd);
 		
 		initDrag(main);
 		initDrag(lblAttribute);
@@ -209,9 +198,9 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 		lblAttribute.setText(formatStringForLabel(this.text));
 		
 		int index = 0;
-		for (int i = 0; i < Operator.STRING_OPS.length; i ++){
-			operators.add(Operator.STRING_OPS[i].getGuiValue());
-			if (currentOp != null && Operator.STRING_OPS[i].getGuiValue().equals(currentOp)){
+		for (int i = 0; i < ops.length; i ++){
+			operators.add(ops[i].getGuiValue());
+			if (currentOp != null && ops[i].getGuiValue().equals(currentOp)){
 				index =i;
 			}
 		}
@@ -219,9 +208,6 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 		if (currentValue != null){
 			value.setText(currentValue);
 		}
-		
-		
-		loadPIdJob.schedule();
 	}
 
 	/**
@@ -231,7 +217,6 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 	public void initializeData(Object data) {
 		this.currentOp = ((String[])data)[0];
 		this.currentValue = ((String[])data)[1];
-		
 	}
 	
 }

@@ -91,7 +91,7 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	 * @return the option key
 	 */
 	public String getKey(){
-		return this.key;
+		return "patrol:" + this.key; //$NON-NLS-1$
 	}
 	
 	/**

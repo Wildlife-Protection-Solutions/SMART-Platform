@@ -22,6 +22,9 @@
 package org.wcs.smart.patrol.query.engine;
 
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -54,6 +57,9 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tablePrefix.put(Team.class, "smart.team"); //$NON-NLS-1$
 		tablePrefix.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
 		tablePrefix.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttribute.class, "spa"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttributeValue.class, "spav"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttributeListItem.class, "spali"); //$NON-NLS-1$
 
 	}
 
@@ -71,6 +77,9 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tableNames.put(Team.class, "smart.team"); //$NON-NLS-1$
 		tableNames.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
 		tableNames.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
+		tableNames.put(PatrolAttribute.class, "smart.patrol_attribute"); //$NON-NLS-1$
+		tableNames.put(PatrolAttributeValue.class, "smart.patrol_attribute_value"); //$NON-NLS-1$
+		tableNames.put(PatrolAttributeListItem.class, "smart.patrol_attribute_list"); //$NON-NLS-1$
 	}
 
 

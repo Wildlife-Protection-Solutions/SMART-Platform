@@ -89,7 +89,7 @@ public class PlanPatrolQueryFilter implements IExtensionFilter {
 
 	@Override
 	public IFilter createFilter(String key, Operator op, Object value) {
-		if (key.equalsIgnoreCase("patrol:" + PlanPatrolQueryOption.KEY)){ //$NON-NLS-1$
+		if (key.equalsIgnoreCase(PlanPatrolQueryOption.KEY)){ 
 			return new PlanPatrolQueryFilter(new PlanPatrolQueryOption(), op, value);
 		}
 		return null;
