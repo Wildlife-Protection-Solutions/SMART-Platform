@@ -13,7 +13,7 @@
 	<artifactId>org.wcs.smart.core.patrol.query</artifactId>
 	<name>Patrol Query Module</name>
 	<packaging>bundle</packaging>
-	
+	<version>7.4.1-SNAPSHOT</version>
 	
 	<!-- without using the eclipse complier we get -->
 	<!--  code too large for try statement errors -->

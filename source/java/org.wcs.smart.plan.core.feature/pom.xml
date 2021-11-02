@@ -11,5 +11,5 @@
 
   <artifactId>org.wcs.smart.plan.core.feature</artifactId>
   <packaging>eclipse-feature</packaging>
-  <version>7.4.0-SNAPSHOT</version>
+  <version>7.4.1-SNAPSHOT</version>
 </project>
