@@ -174,7 +174,8 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 			Object v = field.getValue();
 			if (v != null) {
 				if (v instanceof AttributeListItem) {
-					for (PatrolAttributeListItem li : value.getPatrolAttribute().getAttributeList()) {
+					PatrolAttribute temp = session.get(PatrolAttribute.class, value.getPatrolAttribute().getUuid());
+					for (PatrolAttributeListItem li : temp.getAttributeList()) {
 						if (li.getKeyId().equals(((AttributeListItem) v).getKeyId())) {
 							v = li;
 							break;

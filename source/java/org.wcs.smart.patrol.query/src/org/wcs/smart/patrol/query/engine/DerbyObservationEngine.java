@@ -60,6 +60,7 @@ import org.wcs.smart.patrol.query.model.PatrolObservationAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -89,6 +90,8 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 	private String queryDataTable;
 	private int categoryCount;
 	private Session session;
+	
+	private List<String> patrolAttributes = null;
 	
 	
 	@Override
@@ -171,6 +174,13 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 						}
 					}
 
+					//looking for patrol attribute columns that have at least one value
+					for (String pa : patrolAttributes) {
+						if (checkColumnHasValues(c, queryDataTable, pa)) {
+							dataColumns.add(pa.replaceAll("_", ":")); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
+					
 					//looking for category columns that have at least one value
 					int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 					for (int i = 0; i < numCategory; i++) {
@@ -455,6 +465,8 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		progress.split(4);
 		populateListTreeDataTable(c, session);
 
+		patrolAttributes = addPatrolAttributesToQueryResult(queryDataTable, c, session);
+		
 	}
 
 	/**
@@ -615,7 +627,13 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 			sb.append(s);
 			sb.append(","); //$NON-NLS-1$
 		}
-		
+		if (patrolAttributes != null) {
+			for (String s : patrolAttributes) {
+				sb.append(prefix);
+				sb.append(s);
+				sb.append(","); //$NON-NLS-1$
+			}
+		}
 		if (includeObservation) {
 			sb.append(prefix);
 			sb.append("ob_observer,"); //$NON-NLS-1$
@@ -662,8 +680,6 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
-		
-		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
@@ -702,6 +718,12 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		}
 		
 		it.setCategory(categories.toArray(new String[categories.size()]));
+		
+		if (patrolAttributes != null) {
+			for (String s : patrolAttributes) {
+				it.setPatrolAttribute(s.substring(PatrolAttributeQueryColumn.PREFIX.length()+1), rs.getObject(s));
+			}
+		}
 		return it;
 	}
 

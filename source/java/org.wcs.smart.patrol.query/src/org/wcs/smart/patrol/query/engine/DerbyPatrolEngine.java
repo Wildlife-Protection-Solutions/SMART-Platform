@@ -48,6 +48,7 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -71,6 +72,8 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 	private String queryDataTable;
 	private Session session;
 	
+	private List<String> patrolAttributes = null;
+
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolQuery.KEY.equals(querytype);
@@ -129,6 +132,8 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 					}catch (Exception ex){
 						throw new SQLException (ex);
 					}
+					
+					patrolAttributes = addPatrolAttributesToQueryResult(queryDataTable, c, session);
 					
 					progress.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
 					progress.split(1);
@@ -230,6 +235,10 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 		}
 		
 		sb.append(", t.geometry as r_track"); //$NON-NLS-1$
+		for (String s : patrolAttributes) {
+			sb.append(","); //$NON-NLS-1$
+			sb.append(s);
+		}
 		return sb.toString();
 	}
 
@@ -385,6 +394,12 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 		it.setPilot(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_pilot")), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
 		it.setPatrolLegUuid(UuidUtils.byteToUUID(rs.getBytes("r_pl_uuid"))); //$NON-NLS-1$
+		
+		if (patrolAttributes != null) {
+			for (String s : patrolAttributes) {
+				it.setPatrolAttribute(s.substring(PatrolAttributeQueryColumn.PREFIX.length() + 1), rs.getObject(s));
+			}
+		}
 		
 		return it;
 	}

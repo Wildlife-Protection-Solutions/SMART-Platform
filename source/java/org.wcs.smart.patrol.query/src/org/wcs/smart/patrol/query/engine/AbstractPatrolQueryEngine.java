@@ -21,6 +21,16 @@
  */
 package org.wcs.smart.patrol.query.engine;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
@@ -33,10 +43,14 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.FilterType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing 
@@ -102,5 +116,129 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		}
 	}
 	
+	
+	/**
+	 * Adds all the custom patrol query attributes to the results table and populates the values. Returns
+	 * the list of added columns;
+	 * @param queryDataTable
+	 * @param c
+	 * @param session
+	 * @return
+	 * @throws SQLException
+	 */
+	protected List<String> addPatrolAttributesToQueryResult(String queryDataTable, Connection c, Session session)
+			throws SQLException {
+		// patrol attributes
+		// custom patrol attributes
+		List<PatrolAttribute> pattributes = PatrolQueryHibernateManager.getInstance()
+				.getCustomPatrolAttributes(session);
+		List<String> columns = new ArrayList<>();
+		for (PatrolAttribute pattribute : pattributes) {
+			String cname = PatrolAttributeQueryColumn.PREFIX + "_" + pattribute.getKeyId(); //$NON-NLS-1$
+			String type = "varchar(8200)"; //$NON-NLS-1$
+			if (pattribute.getType() == AttributeType.BOOLEAN || pattribute.getType() == AttributeType.NUMERIC) {
+				type = "double"; //$NON-NLS-1$
+			} else if (pattribute.getType() == AttributeType.DATE) {
+				type = "varchar(10)"; //$NON-NLS-1$
+			} else if (pattribute.getType() == AttributeType.LIST) {
+				type = "varchar(1024)"; //$NON-NLS-1$
+			} else if (pattribute.getType() == AttributeType.TEXT) {
+
+			} else {
+				// attribute type not supported
+				continue;
+			}
+			columns.add(cname);
+			
+			String query = "ALTER TABLE " + queryDataTable + " ADD " + cname + " " + type; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			QueryPlugIn.logSql(query);
+			c.createStatement().execute(query);
+
+			if (pattribute.getType() == AttributeType.LIST) {
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT distinct "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".list_item_uuid, b.p_uuid"); //$NON-NLS-1$
+				sql.append(" FROM "); //$NON-NLS-1$
+				sql.append(queryDataTable + " b join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(PatrolAttributeValue.class));
+				sql.append(" on b.p_uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".patrol_uuid"); //$NON-NLS-1$
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(PatrolAttribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttribute.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".patrol_attribute_uuid"); //$NON-NLS-1$
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".list_item_uuid IS NOT NULL "); //$NON-NLS-1$
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttribute.class) + ".keyid = ? "); //$NON-NLS-1$
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("UPDATE "); //$NON-NLS-1$
+				sb.append(queryDataTable);
+				sb.append(" SET "); //$NON-NLS-1$
+				sb.append(cname);
+				sb.append(" = ? "); //$NON-NLS-1$
+				sb.append(" WHERE p_uuid = ?"); //$NON-NLS-1$
+
+				try (PreparedStatement psUpdate = c.prepareStatement(sb.toString())) {
+					try(PreparedStatement psQuery = c.prepareStatement(sql.toString())){
+						psQuery.setString(1, pattribute.getKeyId());						
+						try (ResultSet rs = psQuery.executeQuery()) {
+							while (rs.next()) {
+								UUID liuuid = UuidUtils.byteToUUID(rs.getBytes(1));
+								PatrolAttributeListItem li = session.get(PatrolAttributeListItem.class, liuuid);
+	
+								UUID puuid = UuidUtils.byteToUUID(rs.getBytes(2));
+	
+								psUpdate.setString(1, li.getName());
+								psUpdate.setBytes(2, UuidUtils.uuidToByte(puuid));
+								psUpdate.addBatch();
+							}
+						}
+					}
+					psUpdate.executeBatch();
+				}
+
+			} else {
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE " + queryDataTable); //$NON-NLS-1$
+				sql.append(" SET "); //$NON-NLS-1$
+				sql.append(cname);
+				sql.append(" = ("); //$NON-NLS-1$
+				sql.append(" SELECT "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class));
+				if (pattribute.getType() == AttributeType.BOOLEAN || pattribute.getType() == AttributeType.NUMERIC) {
+					sql.append(".number_value"); //$NON-NLS-1$
+				} else if (pattribute.getType() == AttributeType.DATE || pattribute.getType() == AttributeType.TEXT) {
+					sql.append(".string_value"); //$NON-NLS-1$
+				} else {
+					throw new UnsupportedOperationException();
+				}
+				sql.append(" FROM "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(PatrolAttributeValue.class));
+				sql.append(" JOIN "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(PatrolAttribute.class));
+				sql.append(" ON "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttribute.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".patrol_attribute_uuid "); //$NON-NLS-1$
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttribute.class) + ".keyid = ? "); //$NON-NLS-1$
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".patrol_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable + ".p_uuid"); //$NON-NLS-1$
+				sql.append(")"); //$NON-NLS-1$
+				
+				QueryPlugIn.logSql(sql.toString());
+				
+				try(PreparedStatement ps = c.prepareStatement(sql.toString())){
+					ps.setString(1, pattribute.getKeyId());
+					ps.execute();
+				}
+			}
+		}
+
+		return columns;
+	}
 
 }

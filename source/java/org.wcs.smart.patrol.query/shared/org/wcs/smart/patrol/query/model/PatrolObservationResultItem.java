@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.query.model;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -59,16 +61,15 @@ public class PatrolObservationResultItem extends ObservationQueryResultItem impl
 	private String leader;
 	private String pilot;
 	
-	
+	private Map<String, Object> patrolAttributes = new HashMap<>();
+
 	/**
 	 * @return the patrol id
 	 */
 	public String getPatrolId() {
 		return patrolId;
 	}
-	
-	
-	
+		
 	/**
 	 * @return the patrol-leg leader
 	 */
@@ -281,6 +282,14 @@ public class PatrolObservationResultItem extends ObservationQueryResultItem impl
 	}
 	public LocalDate getPatrolLegEndDate(){
 		return this.plEndDate;
+	}
+	
+	public Object getPatrolAttribute(String keyId) {
+		return patrolAttributes.get(keyId);
+	}
+	
+	public void setPatrolAttribute(String keyId, Object value) {
+		patrolAttributes.put(keyId, value);
 	}
 	
 	@Override

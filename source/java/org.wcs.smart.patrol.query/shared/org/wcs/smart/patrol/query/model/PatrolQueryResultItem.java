@@ -23,7 +23,9 @@ package org.wcs.smart.patrol.query.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -83,6 +85,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	
 	private List<byte[]> tracks = null;
 	
+	private Map<String, Object> patrolAttributes = new HashMap<>();
 
 	/**
 	 * @return the patrol id
@@ -415,6 +418,13 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 		return null;
 	}
 	
+	public Object getPatrolAttribute(String keyId) {
+		return patrolAttributes.get(keyId);
+	}
+	
+	public void setPatrolAttribute(String keyId, Object value) {
+		patrolAttributes.put(keyId, value);
+	}
 	
 	@Override
 	public int hashCode(){
