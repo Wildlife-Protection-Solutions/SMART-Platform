@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,51 +21,53 @@
  */
 package org.wcs.smart.patrol.query.parser.internal.summary;
 
-import org.wcs.smart.patrol.query.model.PatrolQueryOption;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.model.summary.IGroupBy;
-import org.wcs.smart.util.SharedUtils;
 
 /**
- * A patrol group by option
+ * Patrol group for custom patrol attributes. Only supports
+ * list patrol attributes
+ * 
  * @author egouge
  * @since 1.0.0
+ * 
  */
-public class PatrolGroupBy implements IGroupBy {
+public class PatrolAttributeGroupBy implements IGroupBy {
 
 	/**
 	 * Creates a new patrol group by option
 	 * @param key patrol group by key of the form
-	 * "patrol:<key>:<uniqueid>,<uniqueid>,<uniqueid>"
+	 * "patrol:attribute:l:<key>:<listkey>,<listkey>,<listkey>"
 	 * 
-	 * Where <key> is one of the PatrolQueryOption and uniqueid
-	 * is a hex encoded uuid or unique string value.
+	 * Where <key> is the patrol attribute key and listkey
+	 * is key for the individual list values
 	 * 
 	 * @return
 	 */
-	public static final PatrolGroupBy createGroupBy(String key){
-		return new PatrolGroupBy(key);
+	public static final PatrolAttributeGroupBy createGroupBy(String key){
+		return new PatrolAttributeGroupBy(key);
 	}
 
 	private String[] items;
-	private PatrolQueryOption option;
+	private String attributeKey;
+	private Attribute.AttributeType attributeType;
+	
 	/**
 	 * Creates a new patrol group by option
-	 * @param key patrol group by item key of the format "patrol:key:<uuid>:<uuid>..."
+	 * @param key patrol group by item key of the format "patrol:attribute:l:<key>:<item>:<item>..."
 	 */
-	public PatrolGroupBy(String key){
+	public PatrolAttributeGroupBy(String key){
 		String[] bits = key.split(":"); //$NON-NLS-1$
-		option = PatrolQueryOptions.findPatrolQueryOption(bits[0] + ":" + bits[1]); //$NON-NLS-1$
-		if (bits.length > 2){
-			items = new String[bits.length - 2];
-			for (int i = 2; i < bits.length; i ++){
-				if (option.getType() == PatrolQueryOptionType.UUID){
-					items[i-2] = bits[i];
-				}else{
-					items[i-2] = SharedUtils.stripQuotes(bits[i]);
-				}
+		
+		this.attributeKey = bits[3];
+		this.attributeType = Attribute.decodeAttributeTypeKey(bits[2]);
+		assert(attributeType == Attribute.AttributeType.LIST);
+		
+		if (bits.length > 4){
+			items = new String[bits.length - 4];
+			for (int i = 4; i < bits.length; i ++){
+				items[i-4] = bits[i];
 			}
 		}else{
 			items = null;
@@ -77,14 +79,15 @@ public class PatrolGroupBy implements IGroupBy {
 	 */
 	public String getKeyPart(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("patrol:"); //$NON-NLS-1$
-		sb.append(option.getKey());
+		sb.append("patrol:attribute:"); //$NON-NLS-1$
+		sb.append(attributeType.typeKey);
+		sb.append(":"); //$NON-NLS-1$
+		sb.append(attributeKey);
+		sb.append(":"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
-	public PatrolQueryOption getOption(){
-		return this.option;
-	}
+
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asString()
 	 */
@@ -92,16 +95,9 @@ public class PatrolGroupBy implements IGroupBy {
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getKeyPart());
-		sb.append(":"); //$NON-NLS-1$
 		if (items != null) {
 			for (int i = 0; i < items.length; i++) {
-				if (option.getType() == PatrolQueryOptionType.STRING){
-					sb.append("\""); //$NON-NLS-1$
-					sb.append(items[i]);
-					sb.append("\""); //$NON-NLS-1$
-				}else{
-					sb.append(items[i]);
-				}
+				sb.append(items[i]);
 				if (i < items.length - 1) {
 					sb.append(":"); //$NON-NLS-1$
 				}
@@ -114,18 +110,12 @@ public class PatrolGroupBy implements IGroupBy {
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getType()
 	 */
 	public GroupByType getType(){
-		if (option.getType() == PatrolQueryOptionType.UUID){
-			return GroupByType.BYTE;
-		}else if (option.getType() == PatrolQueryOptionType.STRING){
-			return GroupByType.STRING;
-		}else if (option.getType() == PatrolQueryOptionType.KEY){
-			return GroupByType.KEY;
-		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
-			return GroupByType.BOOLEAN;
-		}
-		return GroupByType.STRING;
+		return GroupByType.KEY;
 	}
 	
+	public String getAttributeKey() {
+		return this.attributeKey;
+	}
 	
 	/**
 	 * 

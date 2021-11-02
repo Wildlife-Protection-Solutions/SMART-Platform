@@ -89,6 +89,7 @@ public class Messages extends NLS {
 	public static String PatrolAttachmentTooltipProvider_WpDateLbl;
 	public static String PatrolAttachmentTooltipProvider_WpIdLbl;
 	public static String PatrolAttachmentTooltipProvider_WpObsLbl;
+	public static String PatrolAttributeGroupByViewer_PatrolAttributeNotFound;
 	public static String PatrolAttributeValueItem_AttributeNotFound;
 	public static String PatrolAttributeValueItem_CategoryNotFound;
 	public static String PatrolAttributeValueItem_ListItemNotFound;
@@ -96,6 +97,7 @@ public class Messages extends NLS {
 	public static String PatrolCategoryValueItem_CategoryNotFound;
 	public static String PatrolContributionFactory_ParseContribution_Error;
 	public static String PatrolDropItemFactory_AgencyNotFound;
+	public static String PatrolDropItemFactory_InvalidTypes;
 	public static String PatrolDropItemFactory_ProcessError;
 	public static String PatrolDropItemFactory_RankNotFound;
 	public static String PatrolFilter_EmployeeNotFound;
@@ -128,6 +130,7 @@ public class Messages extends NLS {
 	public static String PatrolGroupByDropItem_IncludedLabel;
 	public static String PatrolGroupByTreeItem_PatrolGroupBys;
 	public static String PatrolIdDropItem_LoadIdsJobName;
+	public static String PatrolInputDropItem_invalidnumber;
 	public static String PatrolListDropItem_ErrorLoadingItems;
 	public static String PatrolListDropItem_LoadingJobName;
 	public static String PatrolListDropItem_LoadingLabel;

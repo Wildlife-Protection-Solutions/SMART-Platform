@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.WaypointQueryResult;
@@ -63,6 +64,14 @@ public class DerbyPagedWaypointResult extends WaypointQueryResult<PatrolWaypoint
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
+			String key = sortColumn.getKey();
+			key = FixedQueryColumn.getDbColumnName(key);
+			if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
+			}else{
+				result = "order by r."+key; //$NON-NLS-1$
+			}
+		}else if (sortColumn instanceof PatrolAttributeQueryColumn) {
 			String key = sortColumn.getKey();
 			key = FixedQueryColumn.getDbColumnName(key);
 			if (sortColumn.getType() == ColumnType.STRING){

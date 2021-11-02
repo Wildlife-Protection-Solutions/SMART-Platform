@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.query.ui.itempanel;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,14 +43,19 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.filter.Operator;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
+import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolAttributeQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -174,11 +182,13 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.SHARED_PATROL_FILTER_OPTIONS));
 				options.addAll(findContributedPatrolQueryOptions());
+				options.addAll(getPatrolAttributes());
 				input.put(PatrolFilterTreeItem.KEY, options.toArray());
 			}else{
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_FILTER_OPTIONS));
 				options.addAll(findContributedPatrolQueryOptions());
+				options.addAll(getPatrolAttributes());
 				input.put(PatrolFilterTreeItem.KEY, options.toArray());
 			}
 
@@ -191,6 +201,15 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				
 			});
 			return Status.OK_STATUS;
+		}
+		
+		private List<PatrolAttributeQueryOption> getPatrolAttributes(){
+			try(Session session = HibernateManager.openSession()){
+				List<PatrolAttribute> pa = PatrolQueryHibernateManager.getInstance().getCustomPatrolAttributes(session);
+				Collections.sort(pa, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				List<PatrolAttributeQueryOption> atts = pa.stream().map(a->new PatrolAttributeQueryOption(a)).collect(Collectors.toList());
+				return atts;
+			}
 		}
 
 	};

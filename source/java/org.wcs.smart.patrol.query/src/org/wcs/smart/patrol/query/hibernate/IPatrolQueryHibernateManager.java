@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.hibernate;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
@@ -103,4 +104,8 @@ public interface IPatrolQueryHibernateManager {
 	 * @return  list of all active transport types
 	 */
 	public List<ListItem> getActiveTransportTypes(Session session);
+	
+	public List<PatrolAttribute> getCustomPatrolAttributes(Session session);
+	
+	public PatrolAttribute getPatrolAttribute(Session session, String value);
 }

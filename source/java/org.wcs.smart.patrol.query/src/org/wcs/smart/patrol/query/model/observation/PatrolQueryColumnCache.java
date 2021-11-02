@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,6 +26,8 @@ import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -164,7 +167,9 @@ public class PatrolQueryColumnCache {
 					}
 				}
 
-				
+				try (Session session = HibernateManager.openSession()){
+					cols.addAll(getPatrolAttributeQueryColumns(session));
+				}
 				
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
@@ -288,6 +293,9 @@ public class PatrolQueryColumnCache {
 						}
 					}
 				}
+				try (Session session = HibernateManager.openSession()){
+					cols.addAll(getPatrolAttributeQueryColumns(session));
+				}
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}
@@ -373,7 +381,7 @@ public class PatrolQueryColumnCache {
 								}
 									
 							}
-	
+							cols.addAll(getPatrolAttributeQueryColumns(session));
 							patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 						
 						} finally {
@@ -423,4 +431,9 @@ public class PatrolQueryColumnCache {
 		return copies;
 	}
 	
+	public List<QueryColumn> getPatrolAttributeQueryColumns(Session session) {
+		List<PatrolAttribute> attributes = PatrolQueryHibernateManager.getInstance().getCustomPatrolAttributes(session);
+		return attributes.stream().sorted((a,b)->Collator.getInstance().compare(a.getName(), b.getName())).map(e->new PatrolAttributeQueryColumn(e)).collect(Collectors.toList());
+		
+	}
 }

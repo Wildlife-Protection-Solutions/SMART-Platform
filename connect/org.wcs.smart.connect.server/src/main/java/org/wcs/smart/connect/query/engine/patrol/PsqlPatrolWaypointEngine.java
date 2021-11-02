@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -65,6 +66,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine implements IWO
 	
 	private String queryDataTable;
 	private SimpleQuery query;
+	private List<String> patrolAttributes = null;
 	
 	public PsqlPatrolWaypointEngine(){
 	}
@@ -78,6 +80,9 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine implements IWO
 		return PatrolWaypointQuery.KEY.equals(querytype);
 	}
 
+	public List<String> getPatrolAttributes(){
+		return this.patrolAttributes;
+	}
 	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
@@ -224,6 +229,9 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine implements IWO
 		
 		//last modified
 		populatedLastModifiedName(c, session, queryDataTable);
+		
+		patrolAttributes = PatrolQueryUtils.addPatrolAttributesToQueryResult(queryDataTable, c, session, this);
+
 	}
 
 	@Override

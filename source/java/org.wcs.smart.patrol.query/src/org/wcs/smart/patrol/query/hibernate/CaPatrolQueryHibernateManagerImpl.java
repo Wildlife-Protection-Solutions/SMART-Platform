@@ -27,8 +27,10 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -79,5 +81,19 @@ public class CaPatrolQueryHibernateManagerImpl extends AbstractPatrolQueryHibern
 			items.add(new ListItem(t.getUuid(), t.getName(), t.getKeyId()));
 		}
 		return items;
+	}
+
+	@Override
+	public List<PatrolAttribute> getCustomPatrolAttributes(Session session) {
+		List<PatrolAttribute> pas = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+		return pas;
+	}
+
+	@Override
+	public PatrolAttribute getPatrolAttribute(Session session, String value) {
+		return QueryFactory.buildQuery(session, PatrolAttribute.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", value}).uniqueResult(); //$NON-NLS-1$
 	}
 }

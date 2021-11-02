@@ -53,6 +53,9 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -70,6 +73,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
@@ -694,9 +698,11 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 			option == PatrolValueOption.MAN_DAYS  ||
 			option == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNamePrefix(PatrolLegMember.class));
+			fromSql.append(tableName(PatrolLegMember.class));
+			fromSql.append(" "); //$NON-NLS-1$
+			fromSql.append(tablePrefix(PatrolLegMember.class) + "_value"); //$NON-NLS-1$
 			fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
-			fromSql.append( tablePrefix(PatrolLegMember.class));
+			fromSql.append( tablePrefix(PatrolLegMember.class) + "_value"); //$NON-NLS-1$
 			fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
 		}
 		if (option == PatrolValueOption.NUM_FIELDHOURS ||
@@ -1498,7 +1504,9 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 						usedTables.add(PatrolLegMember.class);
 					}
 					
-				}else if (option == PatrolQueryOption.AGENCY || option == PatrolQueryOption.AGENCY_KEY || option == PatrolQueryOption.RANK) {
+				}else if (option == PatrolQueryOption.AGENCY || option == PatrolQueryOption.AGENCY_KEY || 
+						option == PatrolQueryOption.RANK) {
+					
 					if (!usedTables.contains(PatrolLegMember.class)) {
 						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(PatrolLegMember.class));
@@ -1566,6 +1574,42 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 					groupBySql.append("endminute_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("pld_uuid,((hour(pld_end_time) * 60 + minute(pld_end_time)) / 30)* 30 as endminute_" + itemcnt); //$NON-NLS-1$
 				}
+			}else if (gb instanceof PatrolAttributeGroupBy){
+				
+				PatrolAttributeGroupBy option = ((PatrolAttributeGroupBy) gb);
+				
+				String valueprefix = tablePrefix(PatrolAttributeValue.class) + "_" + itemcnt; //$NON-NLS-1$
+				String listprefix = tablePrefix(PatrolAttributeListItem.class) + "_" + itemcnt; //$NON-NLS-1$
+				String attributeprefix = tablePrefix(PatrolAttribute.class) + "_" + itemcnt; //$NON-NLS-1$
+				
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableName(PatrolAttributeValue.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(valueprefix);
+				fromSql.append(" on temp.p_uuid = " + valueprefix + ".patrol_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableName(PatrolAttribute.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(attributeprefix);
+				fromSql.append(" on "); //$NON-NLS-1$
+				fromSql.append(valueprefix + ".patrol_attribute_uuid = "); //$NON-NLS-1$
+				fromSql.append(attributeprefix + ".uuid  AND "); //$NON-NLS-1$
+				String p1 = addParameterValue(option.getAttributeKey());
+				fromSql.append(attributeprefix + ".keyid = " + p1); //$NON-NLS-1$
+				
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableName(PatrolAttributeListItem.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(listprefix);
+				fromSql.append(" on "); //$NON-NLS-1$
+				fromSql.append(listprefix);
+				fromSql.append(".uuid = " ); //$NON-NLS-1$
+				fromSql.append(valueprefix);
+				fromSql.append(".list_item_uuid " ); //$NON-NLS-1$
+				
+				groupByInnerSql.append(listprefix + ".keyid" + " as gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);
 
@@ -1840,7 +1884,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				return valueSql.toString();
 			}
 		case NUM_MEMBERS:
-			return tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+			return tablePrefix(PatrolLegMember.class) + "_value.employee_uuid as pl_member"; //$NON-NLS-1$
 		case MAN_HOURS:
 		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
@@ -1851,7 +1895,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".rest_minutes as pld_rest_minutes," + //$NON-NLS-1$
-						tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member "; //$NON-NLS-1$
+						tablePrefix(PatrolLegMember.class) + "_value.employee_uuid as pl_member "; //$NON-NLS-1$
 			}else{
 				//we don't need to check include no data here because 
 				//this computation is based on the track which means their is data
@@ -1872,7 +1916,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				valueSql.append(".geometry)"); //$NON-NLS-1$
 				valueSql.append(" as hours, "); //$NON-NLS-1$
 				valueSql.append(tablePrefix(PatrolLegMember.class));
-				valueSql.append(".employee_uuid as pl_member"); //$NON-NLS-1$
+				valueSql.append("_value.employee_uuid as pl_member"); //$NON-NLS-1$
 				return valueSql.toString();
 			}
 		case MAN_DAYS:
@@ -1881,7 +1925,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$
 				sbWhere.append(" has_data is not null ");	 //$NON-NLS-1$
 			}	
-			return "pld_patrol_day, " + tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "pld_patrol_day, " + tablePrefix(PatrolLegMember.class) + "_value.employee_uuid as pl_member"; //$NON-NLS-1$ //$NON-NLS-2$
 		case PATROLHOURS_TRACK:
 			throw new UnsupportedOperationException();
 		}
@@ -1933,7 +1977,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 		case EMPLOYEE:
 			return "employee_uuid"; //$NON-NLS-1$
 		case CONSERVATION_AREA:
-			return "ca_uuid"; //$NON-NLS-1$
+			return "temp.ca_uuid"; //$NON-NLS-1$
 		case TEAM_KEY:
 			return tablePrefix.get(Team.class) + ".keyid"; //$NON-NLS-1$
 		case MANDATE_KEY:

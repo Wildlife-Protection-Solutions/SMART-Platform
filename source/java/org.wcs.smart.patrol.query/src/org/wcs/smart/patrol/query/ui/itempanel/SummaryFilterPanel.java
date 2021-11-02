@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.query.ui.itempanel;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,13 +43,19 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
+import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolAttributeQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -184,11 +193,13 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.SHARED_PATROL_GROUBY_OPTIONS));
 				options.addAll(findContributedPatrolGroupByOptions());
+				options.addAll(getPatrolAttributes());
 				input.put(PatrolGroupByTreeItem.KEY, options.toArray());
 			}else{
 				List<Object> options = new ArrayList<Object>();
 				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_GROUBY_OPTIONS));
 				options.addAll(findContributedPatrolGroupByOptions());
+				options.addAll(getPatrolAttributes());
 				input.put(PatrolGroupByTreeItem.KEY, options.toArray());
 				
 			}
@@ -206,6 +217,14 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			return Status.OK_STATUS;
 		}
 		
+		private List<PatrolAttributeQueryOption> getPatrolAttributes(){
+			try(Session session = HibernateManager.openSession()){
+				List<PatrolAttribute> pas = PatrolQueryHibernateManager.getInstance().getCustomPatrolAttributes(session);
+				Collections.sort(pas, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				return pas.stream().filter(e->e.getType() == AttributeType.LIST)
+						.map(e->new PatrolAttributeQueryOption(e)).collect(Collectors.toList());
+			}
+		}
 	};
 
 	@Override

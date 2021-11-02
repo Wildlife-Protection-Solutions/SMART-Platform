@@ -22,12 +22,13 @@
 package org.wcs.smart.patrol.query.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -45,11 +46,14 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.hibernate.MultiCaPatrolQueryHibernateManagerImpl;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolAttributeQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.query.QueryPlugIn;
@@ -67,7 +71,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 	
 	private IPatrolQueryOption option;
 	
-	public PatrolOptionData(PatrolQueryOption option){
+	public PatrolOptionData(IPatrolQueryOption option){
 		this.option = option;
 	}
 	
@@ -82,99 +86,113 @@ public class PatrolOptionData implements IPatrolOptionData{
 	 */
 	public List<ListItem> getValues(Session session, String[] keys){
 		List<ListItem> results = new ArrayList<ListItem>();
-		PatrolQueryOptionType type = option.getType();
-		if (type == PatrolQueryOptionType.UUID){
-			List<UUID> uuidkeys = new ArrayList<UUID>(keys.length);
-			try {
-				for (int i = 0; i < keys.length; i++) {
-					uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
-				}
-			} catch (Exception ex) {
-				QueryPlugIn.log(
-						Messages.PatrolQueryOptions_ErrorInvalidPatrolFilterValue
-								+ ex.getLocalizedMessage(), ex);
-				return results;
-			}
+		
+		Set<String> skeys = new HashSet<>();
+		for (String k : keys) skeys.add(k);
+		
+		if (option instanceof PatrolAttributeQueryOption) {
+			PatrolAttributeQueryOption op = (PatrolAttributeQueryOption)option;
 			
-			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<?> c = cb.createQuery(option.getSourceClass());
-			Root<?> root = c.from(option.getSourceClass());
-			c.where(root.get("uuid").in(uuidkeys)); //$NON-NLS-1$
-			Collection<?> data = session.createQuery(c).getResultList();
-			
-			for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
-				Object object = (Object) iterator.next();
-				if (object instanceof NamedItem){
-					results.add(new ListItem(((NamedItem) object).getUuid(), ((NamedItem) object).getName()));
-				}else if (object instanceof Employee){
-					Employee e = (Employee)object;
-					if (e.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-						results.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel((Employee) e), e.isActive()));
+			PatrolAttribute temp = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session, op.getPatrolAttribute().getKeyId());
+			for (PatrolAttributeListItem it : temp.getAttributeList()) {
+				if (skeys.contains(it.getKeyId())) {
+					results.add(new ListItem(null, it.getName(), it.getKeyId(), it.getName()));
+				}
+			}
+		} else {
+		
+			PatrolQueryOptionType type = option.getType();
+			if (type == PatrolQueryOptionType.UUID){
+				List<UUID> uuidkeys = new ArrayList<UUID>(keys.length);
+				try {
+					for (int i = 0; i < keys.length; i++) {
+						uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
 					}
-				}else if (object instanceof ConservationArea){
-					ConservationArea ca = (ConservationArea)object;
-					results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
-				}else if (object instanceof ListItem){
-					results.add((ListItem)object);
+				} catch (Exception ex) {
+					QueryPlugIn.log(
+							Messages.PatrolQueryOptions_ErrorInvalidPatrolFilterValue
+									+ ex.getLocalizedMessage(), ex);
+					return results;
 				}
-			}
-		}else if (type == PatrolQueryOptionType.KEY){
-			Collection<?> data = null;
-			if (SmartDB.isMultipleAnalysis()){
-				if (option == PatrolQueryOption.TEAM_KEY){
-					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTeams(session);
-				}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
-					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTransportTypes(session);
-				}else if (option == PatrolQueryOption.MANDATE_KEY){
-					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getMandates(session);
-				}else if (option ==  PatrolQueryOption.AGENCY_KEY) {
-					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getAgencies(session);
-				}
-			}
-			if (data != null){
-				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
-					ListItem it = (ListItem) iterator.next();
-					if (Arrays.asList(keys).contains(it.getKey())){
-						results.add(it);
-					}
-				}
-			}
-		}else if (type == PatrolQueryOptionType.STRING){
-			if (option == PatrolQueryOption.ID){
-				List<String> keyCollection = new ArrayList<String>(keys.length);
-				for (String k : keys) keyCollection.add(k);
 				
 				CriteriaBuilder cb = session.getCriteriaBuilder();
 				CriteriaQuery<?> c = cb.createQuery(option.getSourceClass());
 				Root<?> root = c.from(option.getSourceClass());
-				c.where(cb.and(
-						cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-						root.get(option.getColumnName()).in(keyCollection) 
-						));
-				List<?> data = session.createQuery(c).getResultList();
+				c.where(root.get("uuid").in(uuidkeys)); //$NON-NLS-1$
+				Collection<?> data = session.createQuery(c).getResultList();
 				
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					Object object = (Object) iterator.next();
-					if (object instanceof Patrol){
-						//results.add(new ListItem(((Patrol) object).getUuid(), ((Patrol) object).getId()));
-						results.add(new ListItem( null, ((Patrol) object).getId(),((Patrol) object).getId() ));
+					if (object instanceof NamedItem){
+						results.add(new ListItem(((NamedItem) object).getUuid(), ((NamedItem) object).getName()));
+					}else if (object instanceof Employee){
+						Employee e = (Employee)object;
+						if (e.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+							results.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel((Employee) e), e.isActive()));
+						}
+					}else if (object instanceof ConservationArea){
+						ConservationArea ca = (ConservationArea)object;
+						results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+					}else if (object instanceof ListItem){
+						results.add((ListItem)object);
 					}
 				}
-			}else if (option == PatrolQueryOption.PATROL_TYPE){
-				for (int i = 0; i < keys.length; i ++){
-					results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(Locale.getDefault()), keys[i]));
+			}else if (type == PatrolQueryOptionType.KEY){
+				Collection<?> data = null;
+				if (SmartDB.isMultipleAnalysis()){
+					if (option == PatrolQueryOption.TEAM_KEY){
+						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTeams(session);
+					}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
+						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTransportTypes(session);
+					}else if (option == PatrolQueryOption.MANDATE_KEY){
+						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getMandates(session);
+					}else if (option ==  PatrolQueryOption.AGENCY_KEY) {
+						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getAgencies(session);
+					}
 				}
-			}
-		}else if (type == PatrolQueryOptionType.BOOLEAN) {
-			for (int i = 0; i < keys.length; i ++) {
-				if (keys[i].equalsIgnoreCase(Boolean.TRUE.toString())) {
-					results.add(new ListItem(null, SmartLabelProvider.BOOLEAN_TRUE_LABEL, Boolean.TRUE.toString()));		
-				}else if (keys[i].equalsIgnoreCase(Boolean.FALSE.toString())) {
-					results.add(new ListItem(null, SmartLabelProvider.BOOLEAN_FALSE_LABEL, Boolean.FALSE.toString()));		
+				if (data != null){
+					for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
+						ListItem it = (ListItem) iterator.next();
+						if (skeys.contains(it.getKey())){
+							results.add(it);
+						}
+					}
 				}
+			}else if (type == PatrolQueryOptionType.STRING){
+				if (option == PatrolQueryOption.ID){
+					List<String> keyCollection = new ArrayList<String>(keys.length);
+					for (String k : keys) keyCollection.add(k);
+					
+					CriteriaBuilder cb = session.getCriteriaBuilder();
+					CriteriaQuery<?> c = cb.createQuery(option.getSourceClass());
+					Root<?> root = c.from(option.getSourceClass());
+					c.where(cb.and(
+							cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+							root.get(option.getColumnName()).in(keyCollection) 
+							));
+					List<?> data = session.createQuery(c).getResultList();
+					
+					for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
+						Object object = (Object) iterator.next();
+						if (object instanceof Patrol){
+							//results.add(new ListItem(((Patrol) object).getUuid(), ((Patrol) object).getId()));
+							results.add(new ListItem( null, ((Patrol) object).getId(),((Patrol) object).getId() ));
+						}
+					}
+				}else if (option == PatrolQueryOption.PATROL_TYPE){
+					for (int i = 0; i < keys.length; i ++){
+						results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(Locale.getDefault()), keys[i]));
+					}
+				}
+			}else if (type == PatrolQueryOptionType.BOOLEAN) {
+				for (int i = 0; i < keys.length; i ++) {
+					if (keys[i].equalsIgnoreCase(Boolean.TRUE.toString())) {
+						results.add(new ListItem(null, SmartLabelProvider.BOOLEAN_TRUE_LABEL, Boolean.TRUE.toString()));		
+					}else if (keys[i].equalsIgnoreCase(Boolean.FALSE.toString())) {
+						results.add(new ListItem(null, SmartLabelProvider.BOOLEAN_FALSE_LABEL, Boolean.FALSE.toString()));		
+					}
+				}		
 			}
-			
-			
 		}
 		Collections.sort(results);
 		return results;
@@ -187,7 +205,14 @@ public class PatrolOptionData implements IPatrolOptionData{
 	 */
 	public List<ListItem> getAllValues(Session session){
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		if (option == PatrolQueryOption.ID){
+		
+		if (option instanceof PatrolAttributeQueryOption) {
+			PatrolAttributeQueryOption op = (PatrolAttributeQueryOption)option;
+			PatrolAttribute temp = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session, op.getPatrolAttribute().getKeyId());
+			for (PatrolAttributeListItem it : temp.getAttributeList()) {
+				items.add(new ListItem(null, it.getName(), it.getKeyId(), it.getName()));
+			}
+		}else if (option == PatrolQueryOption.ID){
 			List<String> pids = PatrolHibernateManager.getPatrolIds(session);
 			for (String pid : pids){
 				items.add(new ListItem(null, pid, pid));

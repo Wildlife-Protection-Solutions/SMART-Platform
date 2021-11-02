@@ -167,6 +167,11 @@ TOKEN :
  | < PATROLLEG_AGENCY_KEY : "patrol:agency" >
  | < PATROLLEG_AGENCY_KEY_KEY : "patrol:agencykey" >
  | < PATROLLEG_RANK_KEY : "patrol:rank" >
+ | < PATROL_ATTRIBUTE_BOOLEAN_KEY : "patrol:attribute:b:"< DM_KEY> >
+ | < PATROL_ATTRIBUTE_STRING_KEY : "patrol:attribute:s:"< DM_KEY > >
+ | < PATROL_ATTRIBUTE_LIST_KEY : "patrol:attribute:l:"< DM_KEY > >
+ | < PATROL_ATTRIBUTE_NUMBER_KEY : "patrol:attribute:n:"< DM_KEY > >
+ | < PATROL_ATTRIBUTE_DATE_KEY : "patrol:attribute:d:"< DM_KEY > >
  | < PATROL_CONTRIBUTION : "patrol:contribution" >
  | < PATROL_CONTRIBUTION_BOOL_KEY : (< PATROL_CONTRIBUTION > ":boolean:"(< LETTER >)*) >
  | < PATROL_CONTRIBUTION_STRING_KEY : (< PATROL_CONTRIBUTION >":string:"(< LETTER >)*) >
@@ -220,7 +225,7 @@ TOKEN :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_MLIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > 
-
+|	< PATROL_ATTRIBUTE_LIST_GROUPBYITEM : "patrol:attribute:l:"< DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 }
 
 
@@ -505,8 +510,12 @@ IGroupBy GroupByItem() :
 		< CATEGORY_ATTRIBUTE_GROUPBY_ITEM >
 		{
 		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
-		}	
-			 
+		}
+	|
+		< PATROL_ATTRIBUTE_LIST_GROUPBYITEM > 	
+		{
+		  	item = PatrolAttributeGroupBy.createGroupBy(token.image);
+		}	 
 	)
 	{
 		 return item;
@@ -596,6 +605,11 @@ IFilter BooleanItemExpression():
     	{
       		filter = PatrolContributionFactory.createFilter(token.image);
     	}
+   |
+    	< PATROL_ATTRIBUTE_BOOLEAN_KEY >
+    	{
+      		filter = PatrolAttributeFilter.createFilter(token.image);
+    	}    	
 	)	
  {
    return filter;
@@ -630,6 +644,15 @@ IFilter NumberExpression():
 		)
 		{
   			filter = CategoryAttributeFilter.createValueFilter(key, op, value);
+		}
+	| 
+		(
+			< PATROL_ATTRIBUTE_NUMBER_KEY> {key = token.image;}
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = PatrolAttributeFilter.createFilter(key, op, value);
 		}
 	)
 	{
@@ -756,6 +779,17 @@ IFilter DateItemExpression():
 		{
   			filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
 		}
+	|
+ 		(
+			< PATROL_ATTRIBUTE_DATE_KEY > {key = token.image;}
+			op = DateOp()
+			< DATE_STRING >  {date1 = token.image;}
+			< K_AND >
+			< DATE_STRING > {date2 = token.image;}
+		)
+		{
+  			filter = PatrolAttributeFilter.createFilter(key, op, date1, date2);
+		}
 	)
 	{
 		return filter;
@@ -844,7 +878,32 @@ IFilter StringExpression():
 		{
   			filter = PatrolContributionFactory.createFilter(key, op, value);
 		}
-
+	|
+ 		(
+			(
+  				< PATROL_ATTRIBUTE_STRING_KEY >
+ 			) 
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = PatrolAttributeFilter.createFilter(key, op, value);
+		}
+	|
+ 		(
+			(
+  				< PATROL_ATTRIBUTE_LIST_KEY >
+ 			) 
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = PatrolAttributeFilter.createFilter(key, op, value);
+		}
 	)
 	{
   		return filter;

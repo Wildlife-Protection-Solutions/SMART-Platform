@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,6 +50,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolWaypointAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -74,6 +76,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 
 	private String queryDataTable;
 	private Session session;
+	private List<String> patrolAttributes = null;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -320,6 +323,9 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		
+		patrolAttributes = addPatrolAttributesToQueryResult(queryDataTable, c, session);
+
+		
 	}
 
 	@Override
@@ -456,6 +462,13 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
+		
+		if (patrolAttributes != null) {
+			for (String s : patrolAttributes) {
+				it.setPatrolAttribute(s.substring(PatrolAttributeQueryColumn.PREFIX.length()+1), rs.getObject(s));
+			}
+		}
+		
 		return it;
 	}
 	

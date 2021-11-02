@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.engine.patrol;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -31,6 +32,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolObservationAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 
 /**
@@ -90,6 +92,13 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$	
+		
+		List<String> patrolAttributes = ((PsqlPatrolObservationEngine)engine).getPatrolAttributes();
+		if (patrolAttributes != null) {
+			for (String p : patrolAttributes) {
+				it.setPatrolAttribute(p.substring(PatrolAttributeQueryColumn.PREFIX.length() + 1), rs.getObject(p));
+			}
+		}
 	}
 	
 	@Override
@@ -111,6 +120,15 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 			sb.append(prefix);
 			sb.append(s);
 			sb.append(","); //$NON-NLS-1$
+		}
+		
+		List<String> patrolAttributes = ((PsqlPatrolObservationEngine)engine).getPatrolAttributes();
+		if (patrolAttributes != null) {
+			for (String p : patrolAttributes) {
+				sb.append(prefix);
+				sb.append(p);
+				sb.append(","); //$NON-NLS-1$
+			}
 		}
 		
 		if (includeObservation) {

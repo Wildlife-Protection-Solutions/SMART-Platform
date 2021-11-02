@@ -22,22 +22,27 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.patrol.PatrolQueryUtils;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -98,6 +103,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
+		keys.addAll(getPatrolAttributeQueryColumns(q, session));
 //		keys.add(new QueryColumn("Patrol Track", "track",ColumnType.STRING){
 //			@Override
 //			public QueryColumn clone() {
@@ -149,7 +155,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY,l));
-		
+		keys.addAll(getPatrolAttributeQueryColumns(q, session));
 		for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(qc);
 		}
@@ -192,6 +198,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY,l));
 		
+		keys.addAll(getPatrolAttributeQueryColumns(q, session));
+		
 		return keys;
 	}
 	
@@ -203,4 +211,9 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return cols;
 	}
 
+	private List<QueryColumn> getPatrolAttributeQueryColumns(Query query, Session session) {
+		List<PatrolAttribute> attributes = PatrolQueryUtils.getPatrolAttributes(AbstractQueryEngine.parseConservationAreaFilter(query), session);
+		return attributes.stream().sorted((a,b)->Collator.getInstance().compare(a.getName(), b.getName())).map(e->new PatrolAttributeQueryColumn(e)).collect(Collectors.toList());
+		
+	}
 }

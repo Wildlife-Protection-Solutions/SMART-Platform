@@ -29,10 +29,14 @@ import java.util.Locale;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -46,6 +50,7 @@ import org.wcs.smart.patrol.query.model.PatrolLegDateField;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolAttributeFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -86,6 +91,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof PatrolFilter){
 			return asSql((PatrolFilter)filter, engine);
+		}else if (filter instanceof PatrolAttributeFilter){
+				return asSql((PatrolAttributeFilter)filter, engine);
 		}else if (filter instanceof PatrolUuidFilter){
 			return asSql((PatrolUuidFilter)filter, engine);
 		}else if (filter instanceof IExtensionFilter){
@@ -266,6 +273,81 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			
 		}
 		return ""; //$NON-NLS-1$	
+	}
+	
+	
+	protected String asSql(PatrolAttributeFilter filter, IQueryEngine engine) throws SQLException{
+		
+		String p1 = engine.addParameterValue(filter.getAttributeKey());
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(Patrol.class));
+		sb.append(".uuid IN (SELECT " + engine.tablePrefix(PatrolAttributeValue.class) + ".patrol_uuid FROM "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(engine.tableNamePrefix(PatrolAttribute.class));
+		sb.append(" join "); //$NON-NLS-1$
+		sb.append(engine.tableNamePrefix(PatrolAttributeValue.class));
+		sb.append(" on "); //$NON-NLS-1$
+		sb.append(engine.tablePrefix(PatrolAttribute.class) + ".uuid = "); //$NON-NLS-1$
+		sb.append(engine.tablePrefix(PatrolAttributeValue.class) + ".patrol_attribute_uuid "); //$NON-NLS-1$
+		
+		if (filter.getAttributeType() == AttributeType.LIST) {
+			sb.append(" join "); //$NON-NLS-1$
+			sb.append(engine.tableNamePrefix(PatrolAttributeListItem.class));
+			sb.append(" on "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeListItem.class) + ".uuid = "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeValue.class) + ".list_item_uuid "); //$NON-NLS-1$
+		}
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(engine.tablePrefix(PatrolAttribute.class) + ".keyid =  "); //$NON-NLS-1$
+		sb.append( p1 );
+		sb.append(" AND "); //$NON-NLS-1$
+		
+		if (filter.getAttributeType() == AttributeType.BOOLEAN) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeValue.class));
+			sb.append(".number_value > 0.5 "); //$NON-NLS-1$
+		}else if (filter.getAttributeType() == AttributeType.DATE) {
+			String p2 = engine.addParameterValue(filter.getValue1()); 
+			String p3 = engine.addParameterValue(filter.getValue2()); 
+			sb.append("( " + engine.tablePrefix(PatrolAttributeValue.class)); //$NON-NLS-1$
+			sb.append(".string_value is not null AND "); //$NON-NLS-1$
+			sb.append(" DATE( " + engine.tablePrefix(PatrolAttributeValue.class) + ".string_value) "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append( asSql(filter.getOperator()));
+			sb.append(" CAST(" + p2 + " as DATE) " ); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append( asSql(Operator.AND) );
+			sb.append(" CAST(" + p3 + " as DATE) )"); //$NON-NLS-1$ //$NON-NLS-2$
+		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeValue.class));
+			sb.append(".number_value "); //$NON-NLS-1$
+			sb.append(asSql(filter.getOperator()));
+			sb.append(" "); //$NON-NLS-1$
+			String p2 = engine.addParameterValue(filter.getValue1());
+			sb.append(p2);
+			
+		}else if (filter.getAttributeType() == AttributeType.LIST) {
+			sb.append( " " ); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeListItem.class));
+			sb.append(".keyid "); //$NON-NLS-1$
+			sb.append(" = "); //$NON-NLS-1$
+			String p2 = engine.addParameterValue(SharedUtils.stripQuotes(filter.getValue1().toString()));
+			sb.append(p2);
+		}else if (filter.getAttributeType() == AttributeType.TEXT) {
+			sb.append(" LOWER(" + engine.tablePrefix(PatrolAttributeValue.class) + ".string_value) "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(asSql(filter.getOperator()));
+			sb.append(" "); //$NON-NLS-1$
+			String value = SharedUtils.stripQuotes(filter.getValue1().toString().toLowerCase(Locale.ROOT));
+			if (filter.getOperator() == Operator.STR_CONTAINS || filter.getOperator() == Operator.STR_NOTCONTAINS) {
+				value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			String p2 = engine.addParameterValue(value);
+			sb.append(p2);
+		}else {
+			throw new UnsupportedOperationException();
+		}
+		sb.append(")"); //$NON-NLS-1$
+		
+		return sb.toString();	
 	}
 	
 	/**

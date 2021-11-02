@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -91,12 +92,15 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.plan.query.PlanPatrolGroupBy;
@@ -365,6 +369,8 @@ public class SummaryItemLabelProvider {
 			results = getName((ObserverGroupBy)item);
 		}else if (item instanceof PatrolGroupBy){
 			results = getName((PatrolGroupBy)item);
+		}else if (item instanceof PatrolAttributeGroupBy){
+			results = getName((PatrolAttributeGroupBy)item);
 		}else if (item instanceof SamplingUnitAttributeGroupBy){
 			results = getName((SamplingUnitAttributeGroupBy)item);	
 		}else if (item instanceof WaypointSourceGroupBy){
@@ -1000,10 +1006,58 @@ public class SummaryItemLabelProvider {
 					if (k.equalsIgnoreCase(Boolean.TRUE.toString())) results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l), Boolean.TRUE.toString()));
 					if (k.equalsIgnoreCase(Boolean.FALSE.toString())) results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l), Boolean.FALSE.toString()));
 				}
+			}	
+		}
+		sortItems(results);
+		return results;
+	}
+	
+	private List<ListItem> getName(PatrolAttributeGroupBy item){
+		List<ListItem> results = new ArrayList<ListItem>();
+		
+		List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
+		if (caUuids.size() == 1) {
+
+			//single ca get patrol attribute and return list items
+			PatrolAttribute pa = QueryFactory.buildQuery(s, PatrolAttribute.class,
+					new Object[] {"keyId", item.getAttributeKey()}, //$NON-NLS-1$
+					new Object[] {"conservationArea.uuid", caUuids.get(0)}).uniqueResult(); //$NON-NLS-1$
+			
+			if (pa == null || pa.getType() != AttributeType.LIST) return results;
+			
+			Set<String> keys = null;
+			if (item.getItems() != null) {
+				keys = new HashSet<>();
+				for (String i : item.getItems()) keys.add(i);
 			}
 			
+			for (PatrolAttributeListItem li : pa.getAttributeList()) {
+				if (keys == null || keys.contains(li.getKeyId())) {
+					results.add(new ListItem(null, li.getName(), li.getKeyId()));
+				}	
+			}
+		}else {
+			//merge together items
+			
+			List<PatrolAttribute> pas = s.createQuery("FROM patrolAttribute WHERE conservationArea.uuid in (:cas) and keyId = :keyid", PatrolAttribute.class) //$NON-NLS-1$
+					.setParameterList("cas", caUuids) //$NON-NLS-1$
+					.setParameter("keyid", item.getAttributeKey()) //$NON-NLS-1$
+					.list();
+			if (pas.isEmpty()) return results;
+			
+			for (PatrolAttribute pa : pas) if (pa.getType() != AttributeType.LIST) return results;
+			
+			HashMap<String, ListItem> items = new HashMap<>();
+			for (PatrolAttribute pa : pas) {
+				for (PatrolAttributeListItem li : pa.getAttributeList()) {
+					if (!items.containsKey(li.getKeyId())) {
+						ListItem litem = new ListItem(null, li.getKeyId(), li.getName());
+						items.put(li.getKeyId(), litem);
+					}
+				}
+			}
+			results.addAll(items.values());
 		}
-//		if (sort) sortItems(results);
 		sortItems(results);
 		return results;
 	}
