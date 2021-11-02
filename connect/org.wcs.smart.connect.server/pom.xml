@@ -272,7 +272,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.patrol</artifactId>
-            <version>${smart.version}</version>
+            <version>${smart741.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
