@@ -773,7 +773,7 @@ public enum PsqlFilterToSqlGenerator {
 			String p2 = engine.addParameterValue(filter.getValue1()); 
 			String p3 = engine.addParameterValue(filter.getValue2()); 
 			sb.append("( case when ") ; //$NON-NLS-1$
-			sb.append(engine.tablePrefix(PatrolAttribute.class) + ".att_type != 'LIST' OR "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttribute.class) + ".att_type != '" + Attribute.AttributeType.DATE.name() + "' OR "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append( engine.tablePrefix(PatrolAttributeValue.class)) ;
 			sb.append(".string_value is null then false else "); //$NON-NLS-1$
 			sb.append(" DATE( " + engine.tablePrefix(PatrolAttributeValue.class) + ".string_value) "); //$NON-NLS-1$ //$NON-NLS-2$
