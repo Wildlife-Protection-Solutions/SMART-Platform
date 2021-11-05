@@ -29,6 +29,7 @@ import java.util.Locale;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
@@ -309,6 +310,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter.getAttributeType() == AttributeType.DATE) {
 			String p2 = engine.addParameterValue(filter.getValue1()); 
 			String p3 = engine.addParameterValue(filter.getValue2()); 
+			sb.append(" CASE WHEN "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttribute.class));
+			sb.append(".att_type = '" + Attribute.AttributeType.DATE.name() + "' THEN "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append("( " + engine.tablePrefix(PatrolAttributeValue.class)); //$NON-NLS-1$
 			sb.append(".string_value is not null AND "); //$NON-NLS-1$
 			sb.append(" DATE( " + engine.tablePrefix(PatrolAttributeValue.class) + ".string_value) "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -316,6 +320,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			sb.append(" CAST(" + p2 + " as DATE) " ); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append( asSql(Operator.AND) );
 			sb.append(" CAST(" + p3 + " as DATE) )"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" ELSE false END "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
 			sb.append(" "); //$NON-NLS-1$
 			sb.append(engine.tablePrefix(PatrolAttributeValue.class));

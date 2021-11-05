@@ -25,9 +25,11 @@ import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -42,6 +44,8 @@ import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
+import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;
@@ -122,7 +126,12 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 					}
 					
 					for (CompoundMapQueryLayer l : cquery.getLayers()){
-						org.wcs.smart.query.model.Query q = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
+						UUID qUuid = l.getQueryUuid();
+						IQueryType type = QueryTypeManager.INSTANCE.findQueryType(l.getQueryType());
+						if (type == null) {
+							throw new Exception(MessageFormat.format(Messages.CompoundQueryDefinitionExporter_QueryTypeNotSupported, l.getQueryType()));
+						}
+						org.wcs.smart.query.model.Query q = QueryHibernateManager.getInstance().findQuery(s, qUuid, type);
 						toExport.add(q);
 					}
 				} finally {
