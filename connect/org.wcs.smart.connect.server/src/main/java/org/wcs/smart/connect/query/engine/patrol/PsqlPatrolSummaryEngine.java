@@ -705,16 +705,19 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			sql.append(valueSql);
 			sql.append(" FROM "); //$NON-NLS-1$
 			sql.append(fromSql);
-			
-			if (innerWhere.length() > 0) {
-				sql.append(" WHERE "); //$NON-NLS-1$
-				sql.append(innerWhere);
+			if (!hasAreaGroupBy) {
+				sql.append(" JOIN "); //$NON-NLS-1$
+				sql.append( tableNamePrefix(Track.class) );
+				sql.append(" ON "); //$NON-NLS-1$
+				sql.append( tablePrefix(Track.class) );
+				sql.append(".patrol_leg_day_uuid = temp.pld_uuid"); //$NON-NLS-1$
 			}
 			
 			if (innerWhere.length() > 0) {
 				sql.append(" WHERE "); //$NON-NLS-1$
 				sql.append(innerWhere);
 			}
+
 			sql.append(") bar"); //$NON-NLS-1$
 			sql.append(" join smart.track t on t.uuid = bar.trackuuid "); //$NON-NLS-1$
 			if (hasAreaGroupBy) {
