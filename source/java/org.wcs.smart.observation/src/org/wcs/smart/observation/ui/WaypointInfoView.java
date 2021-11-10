@@ -582,25 +582,24 @@ public class WaypointInfoView {
 	
 	private void createHeader(Composite parent) {
 		Composite header = toolkit.createComposite(parent);
-		header.setLayout(new GridLayout(4, false));
+		header.setLayout(new GridLayout(2, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
 		Label l = toolkit.createLabel(header, Messages.WaypointInfoView_WaypointIdLabel);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		FontData fd = l.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(parent.getDisplay(), fd);
-		//l.setFont(boldFont);
 		
 		lblWaypointId = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblWaypointId.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		l = toolkit.createLabel(header,  Messages.WaypointInfoView_DateTimeLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		//l.setFont(boldFont);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		lblDateTime = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblDateTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		FontData fd = lblWaypointId.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(parent.getDisplay(), fd);
 	}
 
 	/**
