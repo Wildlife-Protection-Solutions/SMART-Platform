@@ -36,7 +36,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
@@ -45,6 +44,7 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
@@ -52,6 +52,7 @@ import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSmartServiceLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.upgrade.StartUpDatabaseUpgrader;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -220,6 +221,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String BROWSER_STOP = "org.wsc.smart.browser.stop"; //$NON-NLS-1$
 	public static final String BROWSER_OPEN = "org.wsc.smart.browser.open"; //$NON-NLS-1$
 	
+	public static final String BROWSER_FORWARD64 = "org.wsc.smart.browser.forward64"; //$NON-NLS-1$
+	public static final String BROWSER_BACKWARD64 = "org.wsc.smart.browser.backward64"; //$NON-NLS-1$
+	
 	public static final String SAVE_ICON = "org.wsc.smart.save"; //$NON-NLS-1$
 	public static final String SAVEAS_ICON = "org.wsc.smart.saveas"; //$NON-NLS-1$
 	public static final String SAVEALL_ICON = "org.wsc.smart.saveall"; //$NON-NLS-1$
@@ -383,26 +387,41 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static void versionCheck() throws Exception{
 		boolean isokay = false;
-		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
+		String currentVersion = Messages.SmartPlugIn_UnknownVersion;
 		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
 		
 		try(Session s = HibernateManager.openSession()){
-			NativeQuery<?> q = s.createNativeQuery("SELECT version FROM smart.db_version WHERE plugin_id = ?"); //$NON-NLS-1$
-			q.setParameter(1, SmartPlugIn.PLUGIN_ID);
-			@SuppressWarnings("rawtypes")
-			List results = q.list();
-			if (results.size() > 0){
-				dbVersion = (String)results.get(0);
-				if (dbVersion.equals(smartDbVersion) ){
-					isokay = true;
-				}
-			}
+			currentVersion = HibernateManager.getPlugInVersion(SmartPlugIn.PLUGIN_ID, s);
 		}catch (Exception ex){
 			//we cannot determine db version so we don't let the user login
 			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
 		}
+		if (currentVersion.equals(smartDbVersion) ){
+			isokay = true;
+		}else {
+			//attempt an upgrade and try again
+			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+			try {
+				(new StartUpDatabaseUpgrader()).doUpgrade(currentVersion);
+			}catch (Exception ex) {
+				HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());	
+				throw ex;
+			}
+			currentVersion = null;
+			try(Session s = HibernateManager.openSession()){
+				currentVersion = HibernateManager.getPlugInVersion(SmartPlugIn.PLUGIN_ID, s);
+			}catch (Exception ex){
+				//we cannot determine db version so we don't let the user login
+				throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
+			}
+			if (currentVersion.equals(smartDbVersion) ){
+				isokay = true;
+			}
+		}
+		
+		
 		if (!isokay){
-			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{dbVersion, smartDbVersion}));
+			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{currentVersion, smartDbVersion}));
 		}
 	}
 	
@@ -467,6 +486,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(BROWSER_FORWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_BACKWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_left.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_FORWARD64, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj64/arrow_right_64.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_BACKWARD64, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj64/arrow_left_64.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_GO, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/refresh.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_HOME, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/home.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_STOP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/stop.png")); //$NON-NLS-1$
