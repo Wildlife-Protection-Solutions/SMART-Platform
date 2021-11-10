@@ -1887,7 +1887,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		case EMPLOYEE:
 			return "employee_uuid"; //$NON-NLS-1$
 		case CONSERVATION_AREA:
-			return "ca_uuid"; //$NON-NLS-1$
+			return "temp.ca_uuid"; //$NON-NLS-1$
 		case TEAM_KEY:
 			return tablePrefix.get(Team.class) + ".keyid"; //$NON-NLS-1$
 		case MANDATE_KEY:
