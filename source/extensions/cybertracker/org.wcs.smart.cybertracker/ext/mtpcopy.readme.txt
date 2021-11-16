@@ -23,6 +23,10 @@ If folder does not exist on device when writing; the folder will not be created 
 
 
 ** UPDATE **
+Nov 16, 2021
+Google is enforcing their new, "Scoped Storage policy" now so there are 
+changes in this version to avoid the issues that can cause. 
+
 May 5, 2020
 New KioskModeWizard tool provided.
 
