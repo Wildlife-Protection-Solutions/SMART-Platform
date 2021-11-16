@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.upgrade;
 
 import java.io.InputStream;
@@ -40,6 +61,7 @@ import org.wcs.smart.upgrade.v600.Upgrader601To610;
 import org.wcs.smart.upgrade.v600.Upgrader610To620;
 import org.wcs.smart.upgrade.v600.Upgrader620To630;
 import org.wcs.smart.upgrade.v700.Upgrader630To700;
+import org.wcs.smart.upgrade.v700.Upgrader700To741;
 
 
 /**
@@ -73,7 +95,8 @@ public class UpgradeEngine {
 		V610("6.0.1", "6.1.0", Upgrader601To610.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V620("6.1.0", "6.2.0", Upgrader610To620.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V630("6.2.0", "6.3.0", Upgrader620To630.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V700("6.3.0", "7.0.0", Upgrader630To700.class); //$NON-NLS-1$ //$NON-NLS-2$
+		V700("6.3.0", "7.0.0", Upgrader630To700.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V741("7.0.0", "7.4.1", Upgrader700To741.class); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		public String fromVersion;
 		public String toVersion;

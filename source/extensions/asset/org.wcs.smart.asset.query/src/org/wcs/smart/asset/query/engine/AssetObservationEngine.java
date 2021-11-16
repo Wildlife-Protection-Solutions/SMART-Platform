@@ -191,13 +191,18 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 					progress.subTask(Messages.DerbyObservationEngine_LoadingResultTask);
 				}catch ( OperationCanceledException ex) {
 					return;
+				}catch (Exception ex){
+					checkForOutOfMemory(ex);
+					throw new SQLException(ex.getMessage(), ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
-					if (progress.isCanceled()) dropTables(c);
-					c.setAutoCommit(false);
+					if (c.isValid(500)) {
+						if (filterer != null) filterer.dropTemporaryTables(c);
+						if (progress.isCanceled()) dropTables(c);
+						c.setAutoCommit(false);
+					}
+					
 				}
 			}
-
 		});
 		return result;
 	}

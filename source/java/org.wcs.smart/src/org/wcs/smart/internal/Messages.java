@@ -1394,6 +1394,7 @@ public class Messages extends NLS {
 	public static String StartUpAdvancedDialog_DialogContent_Label;
 	public static String StartUpAdvancedDialog_DialogHeader;
 	public static String StartUpAdvancedDialog_DialogTitle;
+	public static String StartUpDatabaseUpgrader_UpgradeError;
 	public static String StartUpDialog_DialogHeader;
 	public static String StartUpDialog_DialogMessage;
 	public static String StartUpDialog_DialogTitle;
@@ -1539,6 +1540,8 @@ public class Messages extends NLS {
 	public static String Upgrader630To700_TaskError;
 	public static String Upgrader630To700_TaskName;
 	public static String Upgrader630To700_WarningTitle;
+	public static String Upgrader700To741_UpgradeErrorMsage;
+	public static String Upgrader700To741_UpgradeMsg;
 	public static String UserLoginInfo_ReadError;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;

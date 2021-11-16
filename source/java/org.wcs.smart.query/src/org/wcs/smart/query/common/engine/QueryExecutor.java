@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
@@ -63,8 +64,12 @@ public enum QueryExecutor {
 			return results;
 		}finally{
 			if (session == null && lSession.isOpen()){
-				lSession.getTransaction().commit();
-				lSession.close();
+				try {
+					lSession.getTransaction().commit();
+					lSession.close();
+				}catch (Exception ex) {
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
 			}
 		}
 	}

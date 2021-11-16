@@ -133,9 +133,17 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 	IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
 	            if (partRef.getPart(false) == getParentEditor()) {
-	                IToolManager toolManager = ApplicationGIS.getToolManager();
-	                toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
-                	SmartMapEditorPart.this.tools.selectLastTool();
+	            	if (getParentEditor() instanceof MultiPageEditorPart){
+	            		if ( ((MultiPageEditorPart)getParentEditor()).getSelectedPage() == SmartMapEditorPart.this  ) {
+	            			IToolManager toolManager = ApplicationGIS.getToolManager();
+		            		toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
+		            		SmartMapEditorPart.this.tools.selectLastTool();
+	            		}
+	            	} else {
+	            		IToolManager toolManager = ApplicationGIS.getToolManager();
+	            		toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
+	            		SmartMapEditorPart.this.tools.selectLastTool();
+	            	}
 	            }
 	        }
 
@@ -292,7 +300,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 	      
-        ApplicationGIS.getToolManager().setCurrentEditor(this);
+		ApplicationGIS.getToolManager().setCurrentEditor(SmartMapEditorPart.this);
         if (mapTools == null || mapTools.length == 0){
         	tools = new MapToolComposite();
         }else{
@@ -385,7 +393,6 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		});   
         mapViewer.init(this);
  
-        
         getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
 
@@ -396,7 +403,9 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 				@Override
 				public void pageChanged(PageChangedEvent event) {
 					if (event.getSelectedPage().equals(SmartMapEditorPart.this)){
-						tools.selectLastTool();
+						IToolManager toolManager = ApplicationGIS.getToolManager();
+			            toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
+		                SmartMapEditorPart.this.tools.selectLastTool();
 					}
 				}
 			});
