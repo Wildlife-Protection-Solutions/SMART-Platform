@@ -146,11 +146,14 @@ public class AssetWaypointEngine extends AssetQueryEngine implements WaypointQue
 				}catch( OperationCanceledException ex) {
 					return ;
 				}catch (Exception ex){
-					throw new SQLException(ex);
+					checkForOutOfMemory(ex);
+					throw new SQLException(ex.getMessage(), ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
-					if (progress.isCanceled()) dropTables(c);
-					c.setAutoCommit(false);
+					if (c.isValid(500)) {
+						if (filterer != null) filterer.dropTemporaryTables(c);
+						if (progress.isCanceled()) dropTables(c);
+						c.setAutoCommit(false);
+					}
 				}
 			}
 
