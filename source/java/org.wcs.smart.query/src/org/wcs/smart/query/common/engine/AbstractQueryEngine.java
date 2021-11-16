@@ -428,6 +428,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return true; //it is safer to assume that column that we were unable to find may have values and display it to user
 	}
 	
+	public void checkForOutOfMemory(Exception ex) throws SQLException{
+		Throwable temp = ex;
+		while(temp != null) {
+			if (temp instanceof SQLException) {
+				if (((SQLException)temp).getSQLState().equals("XJ001")) {
+					throw new SQLException("Not enough memory to run query. Try adding reducing date range or adding filters to reduce amount of data returned.");
+				}
+			}
+		}
+	}
 	
 	
 
@@ -459,4 +469,5 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			this.secondarykey = secondarykey;
 		}
 	}
+	
 }

@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -179,12 +181,15 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 				}catch(OperationCanceledException ex) {
 					return;
 				}catch (Exception ex){
-					throw new SQLException(ex);
+					checkForOutOfMemory(ex);
+					throw new SQLException(ex.getMessage(), ex);
 				} finally {
-					if (filterer != null) filterer.dropTemporaryTables(c);
-					if (progress.isCanceled()) dropTables(c);
+					if (c.isValid(500)) {
+						if (filterer != null) filterer.dropTemporaryTables(c);
+						if (progress.isCanceled()) dropTables(c);
+						c.setAutoCommit(false);
+					}
 					
-					c.setAutoCommit(false);
 				}
 			}
 
