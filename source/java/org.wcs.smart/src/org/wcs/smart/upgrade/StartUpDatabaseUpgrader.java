@@ -70,6 +70,7 @@ public class StartUpDatabaseUpgrader   {
 			
 			SmartPlugIn.log(MessageFormat.format("Upgrading core table from {0}", fromVersion.fromVersion), null); //$NON-NLS-1$
 			//disable change tracking - we don't want to log changes for this
+			boolean isChangeLogInstalled = ChangeLogInstaller.INSTANCE.isChangeLoggingEnabled();
 			ChangeLogInstaller.INSTANCE.setEnabled(false);
 			try {
 				for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++) {
@@ -77,7 +78,7 @@ public class StartUpDatabaseUpgrader   {
 					upgrader.upgrade(new NullProgressMonitor());
 				}
 			}finally {
-				ChangeLogInstaller.INSTANCE.setEnabled(true);
+				ChangeLogInstaller.INSTANCE.setEnabled(isChangeLogInstalled);
 			}
 		}catch (Exception ex) {
 			throw new Exception(Messages.StartUpDatabaseUpgrader_UpgradeError + ex.getMessage(), ex);
