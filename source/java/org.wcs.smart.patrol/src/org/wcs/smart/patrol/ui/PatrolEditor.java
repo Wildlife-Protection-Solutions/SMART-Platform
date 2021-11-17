@@ -84,6 +84,7 @@ import org.wcs.smart.patrol.internal.ui.editor.PatrolContributionPageEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditorInput;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolPresentationPart;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -116,6 +117,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private ObservationOptions ops = null;
 	private PatrolSummaryEditor summaryEditor;
 	private PatrolMapPageEditor mapPage;
+	private PatrolPresentationPart presentationPage;
+	private int presentationIndex = -1;
 	private Projection[] projections;
 	private Font noDataFont = null;
 	
@@ -253,6 +256,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		this.mapPage = null;
 		this.summaryEditor = null;
+		this.presentationPage = null;
 	}
 
 	public ObservationOptions getOptions(){
@@ -397,6 +401,11 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				int index = addPage(contributionPage, getEditorInput());
 				setPageText(index, Messages.PatrolEditor_OtherPatrolTabName);
 			}
+			
+			
+			presentationPage = new PatrolPresentationPart(PatrolEditor.this);
+			presentationIndex = addPage(presentationPage, getEditorInput());
+			setPageText(presentationIndex, "Presentation");
 			
 			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {
@@ -756,9 +765,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 */
 	@Override
 	public Map getMap() {
-		if (mapPage == null){
-			return null;
-		}
+		if (getActivePage() >= 0 && getActivePage() == presentationIndex) return presentationPage.getMap();
+//		if (presentationPage != null && getSelectedPage() == presentationPage) return presentationPage.getMap();
+		if (mapPage == null) return null;
 		return 	mapPage.getMap();
 	}
 
@@ -767,7 +776,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 */
 	@Override
 	public void openContextMenu() {
-		mapPage.openContextMenu();
+		if (getSelectedPage() == presentationPage) presentationPage.openContextMenu();
+		if (getSelectedPage() == mapPage) mapPage.openContextMenu();
 		
 	}
 
@@ -777,6 +787,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	@Override
 	public void setFont(Control textArea) {
 		mapPage.setFont(textArea);
+		presentationPage.setFont(textArea);
 		
 	}
 
@@ -787,6 +798,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void setSelectionProvider(
 			IMapEditorSelectionProvider selectionProvider) {
 		mapPage.setSelectionProvider(selectionProvider);
+		presentationPage.setSelectionProvider(selectionProvider);
 		
 	}
 

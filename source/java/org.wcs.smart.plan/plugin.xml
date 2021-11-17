@@ -926,6 +926,9 @@
       <edit
             class="org.wcs.smart.plan.internal.patrol.PatrolPlanLinkCopyContribution">
       </edit>
+      <presentationui
+            class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanPresentationSummary">
+      </presentationui>
    </extension>
    
    <extension

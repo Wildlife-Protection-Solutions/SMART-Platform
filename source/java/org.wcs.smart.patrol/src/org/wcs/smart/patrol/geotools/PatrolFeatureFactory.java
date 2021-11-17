@@ -41,26 +41,53 @@ public class PatrolFeatureFactory {
 	private static final DateTimeFormatter TRACK_DT_FORMAT = DateTimeFormatter.ofPattern("MMMddyyyy");  //$NON-NLS-1$
 	
 	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
-		String spec = "the_geom:LineString:srid=4326,fid:String,id:String,date:java.time.LocalDate,time:java.time.LocalTime,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_PRJ_TYPE, spec);
+		StringBuilder sb = new StringBuilder();
+		sb.append("the_geom:LineString:srid=4326,"); //$NON-NLS-1$
+		sb.append("fid:String,"); //$NON-NLS-1$
+		sb.append("id:String,"); //$NON-NLS-1$
+		sb.append("date:java.time.LocalDate,"); //$NON-NLS-1$
+		sb.append("time:java.time.LocalTime,"); //$NON-NLS-1$
+		sb.append("rawx:Double,"); //$NON-NLS-1$
+		sb.append("rawy:Double,"); //$NON-NLS-1$
+		sb.append("distance:Double,"); //$NON-NLS-1$
+		sb.append("bearing:Double,"); //$NON-NLS-1$
+		sb.append("x:Double,"); //$NON-NLS-1$
+		sb.append("y:Double,"); //$NON-NLS-1$
+		sb.append("wp_uuid:String"); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_PRJ_TYPE, sb.toString());
 		return type;
 	}
 	
 	public static SimpleFeatureType createWaypointSchema() throws SchemaException{
-		String spec = "the_geom:Point:srid=4326,fid:String,id:String,date:java.time.LocalDate,time:java.time.LocalTime,obs:String,comment:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_TYPE, spec);
+		StringBuilder sb = new StringBuilder();
+		sb.append("the_geom:Point:srid=4326,"); //$NON-NLS-1$
+		sb.append("fid:String,"); //$NON-NLS-1$
+		sb.append("id:String,"); //$NON-NLS-1$
+		sb.append("date:java.time.LocalDate,"); //$NON-NLS-1$
+		sb.append("time:java.time.LocalTime,"); //$NON-NLS-1$
+		sb.append("obs:String,"); //$NON-NLS-1$
+		sb.append("comment:String,"); //$NON-NLS-1$
+		sb.append("wp_uuid:String"); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_TYPE, sb.toString());
 		return type;
 	}
 	
 	public static SimpleFeatureType createTrackPartSchema() throws SchemaException{
-		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:java.time.LocalDate,leg:String,uid:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_PART_TYPE, spec);
+		StringBuilder sb = new StringBuilder();
+		sb.append("the_geom:LineString:srid=4326,"); //$NON-NLS-1$
+		sb.append("fid:String,"); //$NON-NLS-1$
+		sb.append("distance:Double,"); //$NON-NLS-1$
+		sb.append("day:java.time.LocalDate,"); //$NON-NLS-1$
+		sb.append("leg:String,"); //$NON-NLS-1$
+		sb.append("transport_type_key:String,"); //$NON-NLS-1$
+		sb.append("uid:String"); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_PART_TYPE, sb.toString());
 		return type;
 	}
 
 	public static SimpleFeature getWaypointAsFeature(SimpleFeatureType ftype, PatrolWaypoint waypoint){
-		//String spec = "geom:Point:srid=4326,fid:String,id:integer,date:Date,time:Time,comment:String";
-		Object data[] = new Object[7];
+		//
+		Object data[] = new Object[8];
 		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
 		data[1] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = waypoint.getWaypoint().getId();
@@ -71,13 +98,13 @@ public class PatrolFeatureFactory {
 		data[5] = obs;
 		
 		data[6] = waypoint.getWaypoint().getComment();
+		data[7] = UuidUtils.uuidToString(waypoint.getWaypoint().getUuid());
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 	public static SimpleFeature getWaypointAsPrjFeature(SimpleFeatureType ftype, PatrolWaypoint waypoint){
-		//String spec = "geom:Point:srid=4326,fid:String,id:integer,date:Date,time:Time,comment:String";
-		Object data[] = new Object[11];
+		Object data[] = new Object[12];
 		data[0] = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[] {
 				new Coordinate(waypoint.getWaypoint().getRawX(), waypoint.getWaypoint().getRawY()),
 				new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()),
@@ -95,15 +122,14 @@ public class PatrolFeatureFactory {
 		
 		data[9] = waypoint.getWaypoint().getX();
 		data[10] = waypoint.getWaypoint().getY();
-		
+		data[11] = UuidUtils.uuidToString(waypoint.getWaypoint().getUuid());
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 	public static SimpleFeature getTrackAsFeature(SimpleFeatureType ftype, Track track){
-		//String spec = "the_geom:MultiLineString:srid=4326,fid:String,distance:Double,day:Date,leg:String";
 		String fid = ftype.getName() + "." + TRACK_DT_FORMAT.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
-		Object data[] = new Object[5];
+		Object data[] = new Object[7];
 		try{
 			data[0] = track.getGeometry();
 		}catch (Exception ex){
@@ -113,15 +139,15 @@ public class PatrolFeatureFactory {
 		data[2] = track.getDistance();
 		data[3] = track.getPatrolLegDay().getDate();
 		data[4] = track.getPatrolLegDay().getPatrolLeg().getId();
-		
+		data[5] = track.getPatrolLegDay().getPatrolLeg().getType().getKeyId();
+		data[6] = track.getUuid();
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 
 	public static SimpleFeature getTrackPartAsFeature(SimpleFeatureType ftype, TrackPart trackPart){
-		//String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String,uid:String";
 		Track track = trackPart.getTrack();
 		String fid = ftype.getName() + "." + TRACK_DT_FORMAT.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
-		Object data[] = new Object[6];
+		Object data[] = new Object[7];
 		try{
 			data[0] = trackPart.getLineString();
 		}catch (Exception ex){
@@ -131,8 +157,10 @@ public class PatrolFeatureFactory {
 		data[2] = track.getDistance();
 		data[3] = track.getPatrolLegDay().getDate();
 		data[4] = track.getPatrolLegDay().getPatrolLeg().getId();
-		data[5] = trackPart.getUid();
+		data[5] = track.getPatrolLegDay().getPatrolLeg().getType().getKeyId();
+		data[6] = trackPart.getUid();
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 }
+
