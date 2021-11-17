@@ -54,7 +54,7 @@ import org.wcs.smart.plan.model.PlanTargetStatus;
  */
 public class TargetProgressViewer{
 	
-	private enum TargetTableColumn{
+	public enum TargetTableColumn{
 		PLANNAME(Messages.TargetProgressViewer_Column_Plan,15),
 		TARGETNAME(Messages.TargetProgressViewer_Column_Name, 20),
 		SUMMARY(Messages.TargetProgressViewer_Column_Summary,45),
@@ -125,7 +125,7 @@ public class TargetProgressViewer{
 		
 	}
 		
-	private TargetProgressViewer(Composite parent, TargetTableColumn[] columns, FormToolkit toolkit){
+	public TargetProgressViewer(Composite parent, TargetTableColumn[] columns, FormToolkit toolkit){
 		this.myColumns = columns;
 		create(parent, toolkit);
 	}
@@ -134,6 +134,9 @@ public class TargetProgressViewer{
 	private void create(Composite parent, FormToolkit toolkit){
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
+		((GridLayout)container.getLayout()).marginWidth = 0;
+		((GridLayout)container.getLayout()).marginHeight = 0;
+		
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lbl = toolkit.createLabel(container, Messages.TargetProgressViewer_TargetsComplete_Label); 

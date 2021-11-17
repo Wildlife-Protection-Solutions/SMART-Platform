@@ -20,6 +20,7 @@
          <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="uieditor" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="edit" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="presentationui" minOccurs="0" maxOccurs="1"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -72,6 +73,21 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.IPatrolEditContribution"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="presentationui">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.ui.IPatrolPresentationContribution"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -125,6 +125,8 @@ public class PatrolListView implements IPatrolFilteringView {
 	
 	private PatrolTreeContentProvider contentProvider;
 	
+	private boolean processevent = true;
+	
 	@Inject private IEclipseContext context;
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
@@ -212,14 +214,23 @@ public class PatrolListView implements IPatrolFilteringView {
 	
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
-		if (partEvent == null) return;
-		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-		Object lpart = E3Utils.getSourceObject(activePart);
-		if (lpart instanceof PatrolEditor){
-			Patrol p = ((PatrolEditor)lpart).getPatrol();
-			PatrolEditorInput pi = new PatrolEditorInput(p);	
-			patrolListViewer.setSelection(new StructuredSelection(pi));
-			pService.bringToTop(localPart);
+		if (!processevent) return;
+		try {
+			processevent = false;
+		
+			if (partEvent == null) return;
+			MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+			Object lpart = E3Utils.getSourceObject(activePart);
+			if (lpart instanceof PatrolEditor){
+				Patrol p = ((PatrolEditor)lpart).getPatrol();
+				PatrolEditorInput pi = new PatrolEditorInput(p);
+				patrolListViewer.setSelection(new StructuredSelection(pi));
+				
+				pService.bringToTop(localPart);
+				pService.activate(activePart);
+			}
+		}finally {
+			processevent = true;
 		}
 	}
 	

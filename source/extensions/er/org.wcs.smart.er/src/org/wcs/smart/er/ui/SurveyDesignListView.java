@@ -109,6 +109,8 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	
 	private CTabFolder bar;
 	
+	private boolean processevent = true;
+	
 	@Inject private MPart localPart;
 	@Inject private IMenuService menuService;
 	@Inject private ESelectionService selService; 
@@ -150,19 +152,26 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
 		if (partEvent == null) return;
-		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-		Object src = E3Utils.getSourceObject(activePart);
-		if (src instanceof SurveyDesignEditor){
-			designViewer.setSelection(new StructuredSelection( ((SurveyDesignEditor) E3Utils.getSourceObject(activePart)).getEditorInput() ));
-			bar.setSelection(1);
-			pService.bringToTop(localPart);
-		}else if (src instanceof MissionEditor){
-			UUID missionUuid = ((MissionEditorInput)((MissionEditor)src).getEditorInput()).getUuid();
-			
-			SurveyMissionProxy proxy = new SurveyMissionProxy(null, missionUuid, null, null);
-			lstViewer.setSelection(new StructuredSelection(proxy));
-			bar.setSelection(0);
-			pService.bringToTop(localPart);
+		if (!processevent) return;
+		try {
+			processevent = false;
+			MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+			Object src = E3Utils.getSourceObject(activePart);
+			if (src instanceof SurveyDesignEditor){
+				designViewer.setSelection(new StructuredSelection( ((SurveyDesignEditor) E3Utils.getSourceObject(activePart)).getEditorInput() ));
+				bar.setSelection(1);
+				pService.bringToTop(localPart);
+			}else if (src instanceof MissionEditor){
+				UUID missionUuid = ((MissionEditorInput)((MissionEditor)src).getEditorInput()).getUuid();
+				
+				SurveyMissionProxy proxy = new SurveyMissionProxy(null, missionUuid, null, null);
+				lstViewer.setSelection(new StructuredSelection(proxy));
+				bar.setSelection(0);
+				pService.bringToTop(localPart);
+				pService.activate(activePart);
+			}
+		}finally {
+			processevent = true;
 		}
 	}
 	

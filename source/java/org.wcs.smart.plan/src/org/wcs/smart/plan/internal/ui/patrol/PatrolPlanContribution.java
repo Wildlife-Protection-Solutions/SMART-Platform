@@ -274,6 +274,8 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 	}
 	
 	private void initContent() {
+		if (main == null || main.isDisposed()) return;
+		
 		for (Control child : main.getChildren()) {
 			child.dispose();
 		}
