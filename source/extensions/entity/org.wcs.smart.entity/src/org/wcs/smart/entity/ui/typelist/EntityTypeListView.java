@@ -95,6 +95,7 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 	public static final String ID = "org.wcs.smart.entity.typelist"; //$NON-NLS-1$
 	private TableViewer entityListViewer;
 	private EntityTypeFilter filter = new EntityTypeFilter();
+	private boolean processevent = true;
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
 	@Inject private ESelectionService selService;
@@ -193,11 +194,18 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
 		if (partEvent == null) return;
-		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-		Object lpart = E3Utils.getSourceObject(activePart);
-		if (lpart instanceof EntityTypeEditor){
-			entityListViewer.setSelection(new StructuredSelection(((EntityTypeEditor)lpart).getEditorInput()));
-			pService.bringToTop(localPart);
+		if (!processevent) return;
+		try {
+			processevent = false;
+			MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+			Object lpart = E3Utils.getSourceObject(activePart);
+			if (lpart instanceof EntityTypeEditor){
+				entityListViewer.setSelection(new StructuredSelection(((EntityTypeEditor)lpart).getEditorInput()));
+				pService.bringToTop(localPart);
+				pService.activate(activePart);
+			}
+		}finally {
+			processevent = true;
 		}
 	}
 	

@@ -95,6 +95,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 	private IncidentFilter filter = new IncidentFilter();
 	
 	private Object[] loadingInput = new Object[]{Messages.IndIncidentListView_LoadingLabel};
+	private boolean processevent = true;
 	
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
@@ -162,19 +163,26 @@ public class IndIncidentListView implements IIncidentFilteringView {
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
 		if (partEvent == null) return;
-		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-		Object lpart = E3Utils.getSourceObject(activePart);
-		
-		if (lpart instanceof IEditorPart){
-			String id = ((IEditorPart)lpart).getEditorSite().getId();
-			for (IIncidentProvider p : IncidentManager.getInstance().getIncidentProviders()) {
-				if (p.getEditorID().equals(id)) {
-					incidentListViewer.setSelection(new StructuredSelection(((IEditorPart)lpart).getEditorInput()));
-					pService.bringToTop(localPart);
-					return;
-				}
-			}
+		if (!processevent) return;
+		try {
+			processevent = false;
+			MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+			Object lpart = E3Utils.getSourceObject(activePart);
 			
+			if (lpart instanceof IEditorPart){
+				String id = ((IEditorPart)lpart).getEditorSite().getId();
+				for (IIncidentProvider p : IncidentManager.getInstance().getIncidentProviders()) {
+					if (p.getEditorID().equals(id)) {
+						incidentListViewer.setSelection(new StructuredSelection(((IEditorPart)lpart).getEditorInput()));
+						pService.bringToTop(localPart);
+						pService.activate(activePart);
+						return;
+					}
+				}
+				
+			}
+		}finally {
+			processevent = true;
 		}
 	}
 	
