@@ -18,12 +18,14 @@
    <feature id="org.wcs.smart.er.feature">
       <category name="ecologicalrecords"/>
    </feature>
+   <feature id="org.wcs.smart.independentincident.feature"/>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
          The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
       </description>
    </category-def>
    <category-def name="independentincident" label="SMART Independent Incident Plug-in">
+      <category name="independentincident"/>
       <description>
          The SMART Independent Incident plug-in provides the ability to record observations (using the data model) that are not associated with a patrol (or any other data collection object within SMART).
       </description>
