@@ -58,6 +58,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Patrol Day editor.  This consists of 
@@ -183,10 +184,24 @@ public class PatrolDayEditor extends EditorPart {
 					
 				}else if (plds.size() == 1){
 					children = new PatrolLegDayInputComposite[1];
-					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
-					comp.createComposite(frmSummary.getBody(), toolkit);
-					comp.setData((PatrolLegDay)plds.get(0));
-					children[0] = comp;
+					if (legs.size() == 1) {
+						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
+						comp.createComposite(frmSummary.getBody(), toolkit);
+						comp.setData((PatrolLegDay)plds.get(0));
+						children[0] = comp;
+					}else {
+						PatrolLegDay pld = plds.get(0);
+						final Section sec = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED);
+						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+						sec.setText(MessageFormat.format("Leg: {0}          Type: {1}         Mandate: {2}         Leader: {3}", pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
+
+						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
+						Composite comp2 = comp.createComposite(sec, toolkit);
+						comp.setData(pld);
+						children[0] = comp;
+						sec.setClient(comp2);
+						
+					}
 					
 				}else{
 					//sort legs by start date
@@ -227,8 +242,9 @@ public class PatrolDayEditor extends EditorPart {
 								
 							}
 						});
-						sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
-						
+//						sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
+						sec.setText(MessageFormat.format("Leg: {0}          Type: {1}         Mandate: {2}         Leader: {3}", pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
+
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 						Composite comp2 = comp.createComposite(sec, toolkit);
 						comp.setData(pld);

@@ -283,7 +283,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					//load patrol items so don't have lazy loading issues later.
 					
 					this.patrol = (Patrol) session.load(Patrol.class, puuid);
-					this.patrol.getLegs().size();
 					this.patrol.getPatrolDatastorePath();
 					List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 					this.projections = tmp.toArray(new Projection[tmp.size()]);
@@ -439,6 +438,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	public void updateSummaryPage(){
 		summaryEditor.refreshPatrolSummaryTable();
+		presentationPage.refresh();
 	}
 
 	public void updateTabStyling() {

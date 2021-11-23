@@ -109,7 +109,6 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		outer.setLayout(new GridLayout());
 		
 		item.createComponent(outer, SWT.NONE);
-		item.addChangeListener(listener);
 		
 		Job init = new Job("initialize") { //$NON-NLS-1$
 			@Override
@@ -117,7 +116,11 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				parent.getDisplay().syncExec(()->{
 					try(Session s = HibernateManager.openSession()){
 						item.setValues(patrol, s);
-					}		
+					}finally {
+						//add listener after item is configured so listener
+						//doesn't get fired when initializing values
+						item.addChangeListener(listener);
+					}
 				});
 				return Status.OK_STATUS;
 			}

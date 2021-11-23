@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -72,6 +73,7 @@ public class ObservationItemList {
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	private Font boldFont= null;
+	private ScrolledComposite scomp;
 	
 	private List<ObservationItem> items = new ArrayList<>();
 	
@@ -82,6 +84,7 @@ public class ObservationItemList {
 	
 	private int lastIndex = -1;
 	private Composite parent;
+	
 	public ObservationItemList(Composite parent, ObservationWizard wizard) {
 		
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
@@ -101,6 +104,41 @@ public class ObservationItemList {
 		this.wizard = wizard;
 		this.parent = parent;
 		buildObservations();
+	}
+	
+	/**
+	 * Set the current observation to select.  If null
+	 * nothing is modified. If none of the observations
+	 * match the provided observation everything in blank.
+	 * Will also scroll to the selected observation.
+	 * @param wo
+	 */
+	public void setSelection(WaypointObservation wo) {
+		if (wo == null) return;
+		ObservationItem makeVisible = null;
+		for (ObservationItem i : items) {
+			if (i.wo.equals(wo)) {
+				makeVisible = i;
+				i.setSelection(true);
+			}else {
+				i.setSelection(false);
+			}
+		}
+		
+		//listener to scroll to visible item when
+		//first drawn
+		if (makeVisible != null) {
+			final ObservationItem fmakeVisible = makeVisible;
+			Listener scrollto = new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					scomp.showControl(fmakeVisible);
+					scomp.getParent().removeListener(SWT.Paint, this);
+				}
+				
+			};
+			scomp.getParent().addListener(SWT.Paint, scrollto);
+		}
 	}
 	
 	private void createMenu() {
@@ -238,7 +276,7 @@ public class ObservationItemList {
 		}
 		
 		parent.layout(true);
-		ScrolledComposite scomp = (ScrolledComposite) parent.getParent();
+		scomp = (ScrolledComposite) parent.getParent();
 		int newWidth = parent.getSize().x - scomp.getVerticalBar().getSize().x;
 		scomp.setMinHeight(parent.computeSize(newWidth, SWT.DEFAULT).y);
 	}
@@ -263,6 +301,9 @@ public class ObservationItemList {
 		}
 		
 		private void createComposite() {
+			//do this so initial highlighting is respected
+			//otherwise it is overwritten
+			WidgetElement.setCSSClass(this, "DO-NOT-STYLE");
 			setLayout(new GridLayout(2, true));
 
 			Composite left = new Composite(this, SWT.NONE);
@@ -363,6 +404,7 @@ public class ObservationItemList {
 				buildObservations();
 			});
 			configureChildren();
+			
 		}
 		
 		

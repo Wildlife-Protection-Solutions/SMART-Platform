@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -62,12 +63,27 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	private ObservationWizardPage nextPage = null;
 	private ComboViewer employeeViewer;
 	private ScrolledComposite scrolled ;
+	private ObservationItemList observationList;
+	
+	private WaypointObservation selectObservation;
 	
 	protected ObservationSummaryWizardPage(Wizard wizard) {
 		super(PAGE_NAME);
 		wizard.addPage(this);
 	}
 
+	/**
+	 * Sets the initial observation to select
+	 * on the summary page
+	 *  
+	 * @param observation
+	 */
+	public void setSelectedItem(WaypointObservation observation) {
+		this.selectObservation = observation;
+		if (observationList != null) {
+			observationList.setSelection(observation);
+		}
+	}
 	/**
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -156,7 +172,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		((GridLayout)main.getLayout()).marginWidth = 0;
 		((GridLayout)main.getLayout()).marginHeight = 0;
 		
-		new ObservationItemList(main, getWizardLocal());
+		observationList = new ObservationItemList(main, getWizardLocal());
+		if (selectObservation != null) observationList.setSelection(selectObservation);
 		
 		setTitle(Messages.ObservationSummaryWizardPage_PageTitle);
 		super.setMessage(Messages.ObservationSummaryWizardPage_PageMessage);
