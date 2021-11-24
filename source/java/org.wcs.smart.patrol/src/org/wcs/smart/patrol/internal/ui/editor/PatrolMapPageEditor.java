@@ -182,7 +182,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		public void eventFired(int attributeChanged, Object source) {
 			Patrol p = null;
 			if (source instanceof Patrol){
-				p = (Patrol) p;
+				p = (Patrol) source;
 			}else if (source instanceof PatrolLegDay){
 				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
 			}

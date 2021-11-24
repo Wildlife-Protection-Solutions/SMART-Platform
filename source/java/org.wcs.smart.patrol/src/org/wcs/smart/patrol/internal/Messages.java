@@ -289,6 +289,8 @@ public class Messages extends NLS {
 	public static String PatrolDayEditor_CanNotEditPatrol;
 	public static String PatrolDayEditor_Error_LoadingPatrolData;
 	public static String PatrolDayEditor_LegSectionNamePrefix;
+
+	public static String PatrolDayEditor_SectionHeaderString;
 	public static String PatrolDayEditorInput_DayEditor_Tooltip;
 	public static String PatrolDayEditorInput_DayEditorName_Prefix;
 	public static String PatrolEditor_AttachmentError;
@@ -655,6 +657,80 @@ public class Messages extends NLS {
 	public static String PatrolMetaConfigDialog_ShellTitle;
 	public static String PatrolObjectiveWizardPage_PageMessage;
 	public static String PatrolObjectiveWizardPage_Title;
+	public static String PatrolPresentationImageViewer_AttachmentsSummary;
+
+	public static String PatrolPresentationImageViewer_exapndTooltip;
+
+	public static String PatrolPresentationImageViewer_ExpandMenuItem;
+
+	public static String PatrolPresentationImageViewer_InvalidDialogMessage;
+
+	public static String PatrolPresentationImageViewer_InvalidDialogTitle;
+
+	public static String PatrolPresentationImageViewer_loadingjobname;
+
+	public static String PatrolPresentationImageViewer_nextTooltip;
+
+	public static String PatrolPresentationImageViewer_NoAttachmentsText;
+
+	public static String PatrolPresentationImageViewer_OpenSystemMenuItem;
+
+	public static String PatrolPresentationImageViewer_previousTooltip;
+
+	public static String PatrolPresentationImageViewer_PropertiesMenuItem;
+
+	public static String PatrolPresentationPart_ActiveTime;
+
+	public static String PatrolPresentationPart_attachmentscolumn;
+
+	public static String PatrolPresentationPart_attachmentslabel;
+
+	public static String PatrolPresentationPart_categorycolumn;
+
+	public static String PatrolPresentationPart_Days;
+
+	public static String PatrolPresentationPart_DaysAndLegs;
+
+	public static String PatrolPresentationPart_EndDate;
+
+	public static String PatrolPresentationPart_GotoMenuItme;
+
+	public static String PatrolPresentationPart_IdColumn;
+
+	public static String PatrolPresentationPart_km;
+
+	public static String PatrolPresentationPart_Leaders;
+
+	public static String PatrolPresentationPart_Mandate;
+
+	public static String PatrolPresentationPart_Members;
+
+	public static String PatrolPresentationPart_Objective;
+
+	public static String PatrolPresentationPart_refreshjobname;
+
+	public static String PatrolPresentationPart_StartDate;
+
+	public static String PatrolPresentationPart_Station;
+
+	public static String PatrolPresentationPart_SummaryAreaLabel;
+
+	public static String PatrolPresentationPart_tabname;
+
+	public static String PatrolPresentationPart_timecolumn;
+
+	public static String PatrolPresentationPart_TotalDays;
+
+	public static String PatrolPresentationPart_TotalDistance;
+
+	public static String PatrolPresentationPart_TotalTime;
+
+	public static String PatrolPresentationPart_xcolumn;
+
+	public static String PatrolPresentationPart_ycolumn;
+
+	public static String PatrolPresentationPart_ZoomToMenu;
+
 	public static String PatrolSummaryEditor_Armed_Label;
 	public static String PatrolSummaryEditor_Button_UpdateTime;
 	public static String PatrolSummaryEditor_Button_UpdateTime_Tooltip1;
@@ -810,6 +886,12 @@ public class Messages extends NLS {
 	public static String PatrolXmlImportDialog_KeepIdsTooltip;
 	public static String PatrolXmlImportDialog_NewId;
 	public static String PatrolXmlImportDialog_WarningsOpLabel;
+	public static String PresentationHeader_autozoomtooltip;
+
+	public static String PresentationHeader_pickpagetooltip;
+
+	public static String PresentationHeader_SummaryPageName;
+
 	public static String SavePatrolPartJob_Name;
 	public static String ScreenOption_Armed;
 	public static String ScreenOption_Comment;

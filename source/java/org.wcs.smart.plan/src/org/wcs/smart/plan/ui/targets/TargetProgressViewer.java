@@ -97,6 +97,8 @@ public class TargetProgressViewer{
 	private Label lbl;
 	
 	private TargetTableColumn[] myColumns = null;
+	private Composite summaryComposite = null;
+	
 	
 	/**
 	 * Creates a new target progress viewer with
@@ -130,6 +132,9 @@ public class TargetProgressViewer{
 		create(parent, toolkit);
 	}
 	
+	public Composite getSummaryComposite() {
+		return summaryComposite;
+	}
 	
 	private void create(Composite parent, FormToolkit toolkit){
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
@@ -139,8 +144,13 @@ public class TargetProgressViewer{
 		
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lbl = toolkit.createLabel(container, Messages.TargetProgressViewer_TargetsComplete_Label); 
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		summaryComposite = new Composite(container, SWT.NONE);
+		summaryComposite.setLayout(new GridLayout());
+		summaryComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)summaryComposite.getLayout()).marginWidth = 0;
+		((GridLayout)summaryComposite.getLayout()).marginHeight = 0;
+		lbl = toolkit.createLabel(summaryComposite, Messages.TargetProgressViewer_TargetsComplete_Label); 
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite table = new Composite(container, SWT.NONE);
 		TableColumnLayout layout = new TableColumnLayout();

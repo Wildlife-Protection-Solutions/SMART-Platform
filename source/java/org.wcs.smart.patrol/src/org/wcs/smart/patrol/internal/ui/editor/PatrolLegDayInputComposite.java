@@ -90,6 +90,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
@@ -97,7 +98,9 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.gpx.GPSDataImport;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
@@ -109,6 +112,7 @@ import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.PatrolImportGpsDataWizard;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -186,6 +190,29 @@ public class PatrolLegDayInputComposite {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
 			if (attributeChanged == PatrolEventManager.PATROL_WAYPOINTS && source.equals(patrolLegDate)){
+				//reload the patrol leg day (for edit in the presentation viewer)
+				PatrolLegDay pld = patrolLegDate;
+				try(Session session = HibernateManager.openSession()){
+					pld = session.get(PatrolLegDay.class, patrolLegDate.getUuid());
+					pld.getTracks().forEach(t->t.getDistance());
+					pld.getWaypoints().forEach(pw->{
+						try {
+							ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}	
+					});
+					setData(pld);
+					
+				}
+				//link it back into the main patrol editor object
+				for (PatrolLeg pl : editor.getPatrolEditor().getPatrol().getLegs()) {
+					int index = pl.getPatrolLegDays().indexOf(pld);
+					pld.setPatrolLeg(pl);
+					pl.getPatrolLegDays().set(index, pld);
+					
+				}
+				PatrolLegDayInputComposite.this.patrolLegDate = pld;
 				refreshObservationTable();
 			}
 			

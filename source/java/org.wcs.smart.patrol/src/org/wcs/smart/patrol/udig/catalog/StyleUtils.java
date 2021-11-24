@@ -79,12 +79,20 @@ public enum StyleUtils {
 
 		Rule r= sf.createRule();
 		r.symbolizers().add(endpoint);
-		r.setName("Point Selection Style");
+		r.setName("Point Selection Style"); //$NON-NLS-1$
 		fts.rules().add(r);
 
 		return style;
 	}
 	
+	/**
+	 * Styles each track by patrol type. Requires transport_type_key on attribute
+	 *  
+	 * @param patrol
+	 * @return
+	 * @throws WorkbenchException
+	 * @throws IOException
+	 */
 	public IStyleBlackboard getPatrolTrackStyle(Patrol patrol) throws WorkbenchException, IOException {
 		
 		Set<PatrolTransportType> types = new HashSet<>();
@@ -106,7 +114,7 @@ public enum StyleUtils {
 		style.featureTypeStyles().add(fts);
 		
 		
-		String[] colors = new String[]{"#1f78b4","#33a02c","#e31a1c","#ff7f00","#6a3d9a","#b15928","#a6cee3","#b2df8a","#fb9a99","#fdbf6f","#cab2d6","#ffff99"};
+		String[] colors = new String[]{"#1f78b4","#33a02c","#e31a1c","#ff7f00","#6a3d9a","#b15928","#a6cee3","#b2df8a","#fb9a99","#fdbf6f","#cab2d6","#ffff99"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$
 		int cnt = 0;
 		for (PatrolTransportType type : types) {
 			String color = colors[cnt++ % colors.length];
@@ -114,7 +122,7 @@ public enum StyleUtils {
 			ls.setStroke(sf.createStroke(ff.literal(color), ff.literal(1)));
 			
 			Rule r= sf.createRule();
-			r.setFilter(ff.equal(ff.property("transport_type_key"), ff.literal(type.getKeyId()), false));
+			r.setFilter(ff.equal(ff.property("transport_type_key"), ff.literal(type.getKeyId()), false)); //$NON-NLS-1$
 			r.setName(type.getName());
 			r.symbolizers().add(ls);
 			fts.rules().add(r);

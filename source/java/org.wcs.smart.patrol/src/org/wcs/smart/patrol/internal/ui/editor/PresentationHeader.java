@@ -44,7 +44,10 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Header for the presentation page that
@@ -58,14 +61,14 @@ public class PresentationHeader extends Composite{
 
 	public static final String TAB_BAR_CLASS = "SMARTTabBar"; //$NON-NLS-1$
 
-	private static final String SUMMARY_PAGE = "Summary";
+	private static final String SUMMARY_PAGE = Messages.PresentationHeader_SummaryPageName;
 	
 	private List<Object> dates;
 	private Object currentDate;
 	private Label dateLabel;
 	
 	private Label back, next;
-	private Label pick;
+	private ToolItem tiPick, tiZoomToggle;
 	private Listener dateModified;
 	
 	/**
@@ -85,6 +88,9 @@ public class PresentationHeader extends Composite{
 		createComponent();
 	}
 
+	public boolean getAutoZoomOption() {
+		return this.tiZoomToggle.getSelection();
+	}
 	private void fireModified() {
 		dateModified.handleEvent(new Event());
 	}
@@ -128,15 +134,20 @@ public class PresentationHeader extends Composite{
 		next.addListener(SWT.MouseEnter, e->getShell().setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
 		next.addListener(SWT.MouseExit, e->getShell().setCursor(null));
 				
+		ToolBar tb = new ToolBar(this, SWT.FLAT);
 		
-		pick = new Label(this, SWT.NONE);
-		pick.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON));
-//		pick.setText("<a>...</a>");
-		pick.addListener(SWT.MouseUp, e->{
-			showDateSelection(pick);
+		tiZoomToggle = new ToolItem(tb, SWT.CHECK);
+		tiZoomToggle.setToolTipText(Messages.PresentationHeader_autozoomtooltip);
+		tiZoomToggle.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ZOOM_IMAGE));
+		tiZoomToggle.setSelection(true);
+		
+		tiPick = new ToolItem(tb, SWT.PUSH);
+		tiPick.setToolTipText(Messages.PresentationHeader_pickpagetooltip);
+		tiPick.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON));
+		tiPick.addListener(SWT.Selection, e->{
+			showDateSelection(tb);
 		});
-		pick.addListener(SWT.MouseEnter, e->getShell().setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
-		pick.addListener(SWT.MouseExit, e->getShell().setCursor(null));
+		
 	}
 	
 		
@@ -160,9 +171,9 @@ public class PresentationHeader extends Composite{
 		back.setEnabled(!currentDate.equals(dates.get(0)));
 		next.setEnabled(!currentDate.equals(dates.get(dates.size() - 1)));
 		
-		pick.setEnabled(dates.size() > 1);
-		
+		tiPick.setEnabled(dates.size() > 1);
 		layout(true);
+		fireModified();
 	}
 	
 	public LocalDate getCurrentDate() {

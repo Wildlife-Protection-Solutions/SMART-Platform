@@ -269,6 +269,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String AUDIO_CLIP_IMG = "images/icons/audio_clip.svg"; //$NON-NLS-1$
 	
 	public static final String DELETE_MINI_ICON = "org.wcs.smart.deletemini"; //$NON-NLS-1$
+	public static final String ICON_IMG_ZOOMIN = "org.wcs.smart.icon.zoom.in"; //$NON-NLS-1$
+	public static final String ICON_IMG_ZOOMOUT = "org.wcs.smart.icon.zoom.out"; //$NON-NLS-1$
+	public static final String ICON_EXPAND = "org.wcs.smart.icon32.expand"; //$NON-NLS-1$
+	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.
@@ -533,6 +537,12 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/run.png")); //$NON-NLS-1$
 
 	     reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/delete_mini.png")); //$NON-NLS-1$
+	     
+	     reg.put(ICON_IMG_ZOOMIN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_in.png")); //$NON-NLS-1$);
+	     reg.put(ICON_IMG_ZOOMOUT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_out.png")); //$NON-NLS-1$);
+	     reg.put(ICON_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/expand.png")); //$NON-NLS-1$);
+	     
+	     
 	}
 	
 	/**

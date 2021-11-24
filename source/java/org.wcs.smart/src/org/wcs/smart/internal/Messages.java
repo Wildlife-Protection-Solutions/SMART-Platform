@@ -142,6 +142,9 @@ public class Messages extends NLS {
 	public static String AttachmentPropertiesDialog_PathSection;
 	public static String AttachmentPropertiesDialog_PropertyColumnName;
 	public static String AttachmentPropertiesDialog_ValueColumnName;
+	public static String AttachmentViewDialog_resettooltip;
+	public static String AttachmentViewDialog_zoomintooltip;
+	public static String AttachmentViewDialog_zoomouttooltip;
 	public static String Attribute_BooleanAttribute_False_Label;
 	public static String Attribute_BooleanAttribute_True_Label;
 	public static String AttributeDMAdvisor_Error_AttributeReferenced2;

@@ -188,8 +188,11 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 					}catch (DateTimeParseException ex){
 						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
 					}
-					if (e.getEndEmploymentDate().isBefore(e.getStartEmploymentDate()) || e.getEndEmploymentDate().isBefore(e.getBirthDate())){
-						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndAfterStartDate, new Object[]{line})); 
+					if (e.getEndEmploymentDate() != null) {
+						if (e.getEndEmploymentDate().isBefore(e.getStartEmploymentDate()) || 
+								(e.getBirthDate() != null && e.getEndEmploymentDate().isBefore(e.getBirthDate()))){
+							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndAfterStartDate, new Object[]{line}));
+						}
 					}
 				}
 				

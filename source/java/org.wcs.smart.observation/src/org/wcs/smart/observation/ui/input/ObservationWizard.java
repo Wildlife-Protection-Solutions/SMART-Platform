@@ -86,6 +86,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	
 	private WaypointObservation toEdit;
 	private List<Category> selectedCategories;
+	private WaypointObservation toSelect = null;
 	
 	private IconSet iset;
 
@@ -225,6 +226,14 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		getContainer().showPage( wizardPage );
 	}
 	
+	/**
+	 * Sets the observation to select on the summary
+	 * page
+	 * @param wo
+	 */
+	public void selectObservation(WaypointObservation wo) {
+		this.toSelect = wo;
+	}
 	public void setToEdit(WaypointObservation toEdit) {
 		this.toEdit = toEdit;
 	}
@@ -430,7 +439,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			new ObservationWizardPage(this);
 		}else{
 			if (toEdit == null) {
-				new ObservationSummaryWizardPage(this);
+				ObservationSummaryWizardPage wp = new ObservationSummaryWizardPage(this);
+				wp.setSelectedItem(toSelect);
+				toSelect = null;
 			}else {
 				new AttributeWizardPage(this, toEdit);
 			}
