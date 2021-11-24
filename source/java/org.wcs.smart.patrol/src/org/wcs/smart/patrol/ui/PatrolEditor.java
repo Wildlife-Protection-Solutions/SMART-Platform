@@ -46,6 +46,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.CTabFolder;
@@ -56,6 +58,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
@@ -404,9 +407,23 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			presentationPage = new PatrolPresentationPart(PatrolEditor.this);
 			presentationIndex = addPage(presentationPage, getEditorInput());
-			setPageText(presentationIndex, "Presentation");
+			setPageText(presentationIndex, PatrolPresentationPart.TAB_NAME);
 			
 			getSite().setSelectionProvider(selectionProvider);
+			
+			addPageChangedListener(new IPageChangedListener() {
+				
+				@Override
+				public void pageChanged(PageChangedEvent event) {
+					if (event.getSelectedPage() == presentationPage) {
+						//maximize editor
+						getActiveEditor().getSite().getPage().setPartState(
+								getActiveEditor().getSite().getPage().getActivePartReference(), 
+								IWorkbenchPage.STATE_MAXIMIZED);
+					}
+					
+				}
+			});
 		} catch (final Throwable t) {
 			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override

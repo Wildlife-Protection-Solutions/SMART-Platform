@@ -51,7 +51,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -111,12 +111,12 @@ public class AttachmentViewDialog {
 		ToolItem btnZoomIn = new ToolItem(toolbar, SWT.PUSH);
 		btnZoomIn.addListener(SWT.Selection, e->zoomIn());
 		btnZoomIn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ICON_IMG_ZOOMIN));
-		btnZoomIn.setToolTipText("zoom in");
+		btnZoomIn.setToolTipText(Messages.AttachmentViewDialog_zoomintooltip);
 		
 		ToolItem btnZoomOut = new ToolItem(toolbar, SWT.PUSH);
 		btnZoomOut.addListener(SWT.Selection, e->zoomOut());
 		btnZoomOut.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ICON_IMG_ZOOMOUT));
-		btnZoomOut.setToolTipText("zoom out");
+		btnZoomOut.setToolTipText(Messages.AttachmentViewDialog_zoomouttooltip);
 		
 		ToolItem btnRefresh = new ToolItem(toolbar, SWT.PUSH);
 		btnRefresh.addListener(SWT.Selection, e->{
@@ -124,7 +124,7 @@ public class AttachmentViewDialog {
 			draw.redraw();
 		});
 		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
-		btnRefresh.setToolTipText("reset zoom level");
+		btnRefresh.setToolTipText(Messages.AttachmentViewDialog_resettooltip);
 		
 		Point tbsize = toolbar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		toolbar.setBounds(5, 5, tbsize.x, tbsize.y);

@@ -72,6 +72,7 @@ public class PatrolDayEditor extends EditorPart {
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolDayEditor"; //$NON-NLS-1$
 
+	private static final String HEADER_STRING = Messages.PatrolDayEditor_SectionHeaderString;
 	private PatrolEditor editor = null;
 	
 	private PatrolLegDayInputComposite[] children ;
@@ -193,7 +194,7 @@ public class PatrolDayEditor extends EditorPart {
 						PatrolLegDay pld = plds.get(0);
 						final Section sec = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED);
 						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-						sec.setText(MessageFormat.format("Leg: {0}          Type: {1}         Mandate: {2}         Leader: {3}", pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
+						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
 
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 						Composite comp2 = comp.createComposite(sec, toolkit);
@@ -243,7 +244,7 @@ public class PatrolDayEditor extends EditorPart {
 							}
 						});
 //						sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
-						sec.setText(MessageFormat.format("Leg: {0}          Type: {1}         Mandate: {2}         Leader: {3}", pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
+						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
 
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 						Composite comp2 = comp.createComposite(sec, toolkit);

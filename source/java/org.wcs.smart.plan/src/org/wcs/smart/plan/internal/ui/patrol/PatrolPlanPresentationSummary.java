@@ -62,7 +62,12 @@ import org.wcs.smart.plan.ui.handlers.OpenPlanHandler;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer.TargetTableColumn;
 
-
+/**
+ * Plan contribution to patrol presentation view
+ * 
+ * @author Emily
+ *
+ */
 public class PatrolPlanPresentationSummary implements IPatrolPresentationContribution {
 
 	private TargetProgressViewer tblPlans ;
@@ -81,7 +86,7 @@ public class PatrolPlanPresentationSummary implements IPatrolPresentationContrib
 		this.patrol = patrol;
 		
 		List<PatrolPlan> plans = QueryFactory.buildQuery(session, PatrolPlan.class, 
-				new Object[] {"id.patrol", patrol}).list();
+				new Object[] {"id.patrol", patrol}).list(); //$NON-NLS-1$
 		if (plans.isEmpty()) {
 			return null;
 		}
@@ -92,7 +97,7 @@ public class PatrolPlanPresentationSummary implements IPatrolPresentationContrib
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
 		Section summaryArea = toolkit.createSection(part, Section.TITLE_BAR);
-    	summaryArea.setText("Plan Summary");
+    	summaryArea.setText(Messages.PatrolPlanPresentationSummary_SectionName);
     	summaryArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	Composite planArea = toolkit.createComposite(summaryArea);
@@ -115,7 +120,7 @@ public class PatrolPlanPresentationSummary implements IPatrolPresentationContrib
     	((GridLayout)tblPlans.getSummaryComposite().getLayout()).marginHeight = 0;
     	ToolBar tb = new ToolBar(tblPlans.getSummaryComposite(), SWT.FLAT);
     	ToolItem tiRefresh = new ToolItem(tb, SWT.PUSH);
-    	tiRefresh.setToolTipText("refresh plan status");
+    	tiRefresh.setToolTipText(Messages.PatrolPlanPresentationSummary_refreshtooltip);
     	tiRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
     	tiRefresh.addListener(SWT.Selection,e->{
     		getTargetsJob.schedule();
@@ -130,7 +135,7 @@ public class PatrolPlanPresentationSummary implements IPatrolPresentationContrib
     	
     	Menu mnu = new Menu(tblPlans.getViewer().getControl());
     	MenuItem miOpen = new MenuItem(mnu, SWT.PUSH);
-    	miOpen.setText("Open Plan");
+    	miOpen.setText(Messages.PatrolPlanPresentationSummary_OpenMenuItem);
     	miOpen.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
     	miOpen.addListener(SWT.Selection, e->openPlan());
     	mnu.addMenuListener(new MenuListener() {
@@ -169,7 +174,7 @@ public class PatrolPlanPresentationSummary implements IPatrolPresentationContrib
 		(new OpenPlanHandler()).openPlan(plan.getUuid(), mwindow);
 	}
 
-	private Job getTargetsJob = new Job("loading targets") {
+	private Job getTargetsJob = new Job(Messages.PatrolPlanPresentationSummary_refreshjobname) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Display.getDefault().syncExec(()->{

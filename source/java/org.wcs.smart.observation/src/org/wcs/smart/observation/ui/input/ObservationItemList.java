@@ -303,7 +303,7 @@ public class ObservationItemList {
 		private void createComposite() {
 			//do this so initial highlighting is respected
 			//otherwise it is overwritten
-			WidgetElement.setCSSClass(this, "DO-NOT-STYLE");
+			WidgetElement.setCSSClass(this, "DO-NOT-STYLE"); //$NON-NLS-1$
 			setLayout(new GridLayout(2, true));
 
 			Composite left = new Composite(this, SWT.NONE);

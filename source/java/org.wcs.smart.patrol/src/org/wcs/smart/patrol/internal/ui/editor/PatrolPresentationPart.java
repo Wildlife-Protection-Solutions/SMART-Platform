@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -63,7 +62,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -107,7 +105,6 @@ import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -148,6 +145,7 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.ui.map.tool.IInfoToolShellProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.ReprojectUtils;
@@ -165,6 +163,8 @@ import org.wcs.smart.util.UuidUtils;
 public class PatrolPresentationPart extends SmartMapEditorPart {
 	
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolPresentationPart"; //$NON-NLS-1$
+	
+	public static final String TAB_NAME = Messages.PatrolPresentationPart_tabname;
 	
 	private PatrolEditor parentEditor; 
 	
@@ -314,7 +314,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			try(Session session = HibernateManager.openSession()){
 				pw = QueryFactory.buildQuery(session, 
 						PatrolWaypoint.class,
-						new Object[] {"id.waypoint", wp}).uniqueResult();
+						new Object[] {"id.waypoint", wp}).uniqueResult(); //$NON-NLS-1$
 			
 				if (pw == null || !pw.getPatrolLegDay().getPatrolLeg().getPatrol().equals(parentEditor.getPatrol())) {
 					return;
@@ -440,7 +440,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
         getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getMapInfoProvider());
         getMap().getBlackboard().put(IInfoToolShellProvider.BLACKBOARD_KEY, getInfoShellProvider());
         
-        getMap().setName("PRESENTATION MAP");
+        getMap().setName("PRESENTATION MAP"); //$NON-NLS-1$
         initData();
         
 	}
@@ -459,6 +459,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		tblData = new TableViewer(dataSection, SWT.FULL_SELECTION);
 		tblData.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblData.setContentProvider(ArrayContentProvider.getInstance());
+//		tblData.getTable().setLinesVisible(true);
 		tblData.getTable().setHeaderVisible(true);
 		tblData.addDoubleClickListener(e->{
 			editWaypoint();
@@ -489,7 +490,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			}else {
 				if (!wp.equals(findWaypoint(lastSelection))) {
 					FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-					Filter filter = ff.equal(ff.property("wp_uuid"), ff.literal(UuidUtils.uuidToString(wp.getUuid())), false);
+					Filter filter = ff.equal(ff.property("wp_uuid"), ff.literal(UuidUtils.uuidToString(wp.getUuid())), false); //$NON-NLS-1$
 					waypointLayer.setFilter(filter);
 					if(header1.getAutoZoomOption()) zoomTo(wp);
 				}
@@ -506,7 +507,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				
 			PatrolLeg pl = (PatrolLeg)element;
 			GC gc = event.gc;
-			String text = MessageFormat.format("{0}                  {1}                  {2}", pl.getId(), pl.getType().getName(), pl.getMandate().getName());
+			String text = MessageFormat.format("{0}                  {1}                  {2}", pl.getId(), pl.getType().getName(), pl.getMandate().getName()); //$NON-NLS-1$
 			final Point extent = gc.stringExtent(text);
 
 			switch(event.type) {
@@ -545,13 +546,13 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 //		
 //		for (int i = catcnt; i >=0; i --) createTableColumn(i);
 		
-		for (Column c : new Column[] {Column.X, Column.Y}) createTableColumn(c);
+		for (Column c : new Column[] {Column.X, Column.Y, Column.ATTACHMENTS}) createTableColumn(c);
 					
 		Menu wpMenu = new Menu(tblData.getControl());
 		tblData.getControl().setMenu(wpMenu);
 		
 		MenuItem miZoom = new MenuItem(wpMenu,SWT.PUSH);
-		miZoom.setText("Zoom To");
+		miZoom.setText(Messages.PatrolPresentationPart_ZoomToMenu);
 		miZoom.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ZOOM_IMAGE));
 		miZoom.addListener(SWT.Selection,e->{
 			Object x = tblData.getStructuredSelection().getFirstElement();
@@ -559,7 +560,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		});
 		
 		MenuItem miEdit = new MenuItem(wpMenu,SWT.PUSH);
-		miEdit.setText("Edit");
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		miEdit.addListener(SWT.Selection,e->{
 			editWaypoint();
@@ -568,7 +569,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		new MenuItem(wpMenu, SWT.SEPARATOR);
 		
 		MenuItem miGoto = new MenuItem(wpMenu,SWT.PUSH);
-		miGoto.setText("GoTo Source");
+		miGoto.setText(Messages.PatrolPresentationPart_GotoMenuItme);
 		miGoto.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
 		miGoto.addListener(SWT.Selection,e->{
 			Object x = tblData.getStructuredSelection().getFirstElement();
@@ -581,7 +582,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			
 			@Override
 			public void menuShown(MenuEvent e) {
-				// TODO Auto-generated method stub
 				Object x = tblData.getStructuredSelection().getFirstElement();
 				boolean iswp = x != null && x instanceof Waypoint || x instanceof WaypointObservation || x instanceof FirstWaypointObservation;
 				
@@ -642,42 +642,43 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		wp.getObservationGroups().clear();
 		wp.getObservationGroups().addAll(wizard.getWaypoint().getObservationGroups());
 
-		//TODO: fire change to ensure day pages are updated
+		//fire change to ensure day pages are updated
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, legDay);
 	}
 	
 	
-	private void createTableColumn(int index) {
-		TableViewerColumn catColumn = new TableViewerColumn(tblData, SWT.NONE);
-		catColumn.getColumn().setText(MessageFormat.format("Category {0}", index+1));
-		catColumn.getColumn().setWidth( 100 );
-
-		catColumn.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				if (element instanceof FirstWaypointObservation) {
-					element = ((FirstWaypointObservation)element).wo;
-				}
-				if (element instanceof WaypointObservation) {
-					Category c = ((WaypointObservation)element).getCategory();
-					
-					int size = Category.hkeyLength(c.getHkey());
-					if (size >= index) {
-						while(size != index) {
-						c = c.getParent();
-							size --;
-						}
-						return c.getName();	
-					}
-				}
-				return "";
-
-			}
-			public Color getBackground(Object element) {
-				if (element instanceof PatrolLeg) return parentEditor.getSite().getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY);
-				return null;
-			}
-		});
-	}
+//	private void createTableColumn(int index) {
+//		TableViewerColumn catColumn = new TableViewerColumn(tblData, SWT.NONE);
+//		catColumn.getColumn().setText(MessageFormat.format("Category {0}", index+1));
+//		catColumn.getColumn().setWidth( 100 );
+//
+//		catColumn.setLabelProvider(new ColumnLabelProvider() {
+//			public String getText(Object element) {
+//				if (element instanceof FirstWaypointObservation) {
+//					element = ((FirstWaypointObservation)element).wo;
+//				}
+//				if (element instanceof WaypointObservation) {
+//					Category c = ((WaypointObservation)element).getCategory();
+//					
+//					int size = Category.hkeyLength(c.getHkey());
+//					if (size >= index) {
+//						while(size != index) {
+//						c = c.getParent();
+//							size --;
+//						}
+//						return c.getName();	
+//					}
+//				}
+//				return ""; //$NON-NLS-1$
+//
+//			}
+//			public Color getBackground(Object element) {
+//				if (element instanceof PatrolLeg) return parentEditor.getSite().getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+//				return null;
+//			}
+//		});
+//	}
+	
 	private void createTableColumn(Column c) {
 		TableViewerColumn tblColumn = new TableViewerColumn(tblData, SWT.NONE);
 		tblColumn.getColumn().setText(c.getName());
@@ -813,7 +814,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 
     	//scroll.setContent(scrollComposite);
     	summaryArea = toolkit.createSection(scrollComposite, Section.TITLE_BAR);
-    	summaryArea.setText("Patrol Summary");
+    	summaryArea.setText(Messages.PatrolPresentationPart_SummaryAreaLabel);
     	summaryArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	
     	Composite sarea = toolkit.createComposite(summaryArea);
@@ -855,16 +856,16 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 
 			Patrol patrol = session.get(Patrol.class, parentEditor.getPatrol().getUuid());
 
-			toolkit.createLabel(left, "Start:");
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_StartDate);
 			toolkit.createLabel(left, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrol.getStartDate()));
 			
-			toolkit.createLabel(left, "End:");
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_EndDate);
 			toolkit.createLabel(left, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrol.getEndDate()));
 			
-			toolkit.createLabel(left, "Total Days:");
-			String msg = MessageFormat.format("{0} days", ChronoUnit.DAYS.between(patrol.getStartDate(), patrol.getEndDate()) + 1);
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_TotalDays);
+			String msg = MessageFormat.format(Messages.PatrolPresentationPart_Days, ChronoUnit.DAYS.between(patrol.getStartDate(), patrol.getEndDate()) + 1);
 			if (patrol.getLegs().size() > 1) {
-				msg = MessageFormat.format("{0} days ({1} legs)", ChronoUnit.DAYS.between(patrol.getStartDate(), patrol.getEndDate()) + 1, patrol.getLegs().size());	
+				msg = MessageFormat.format(Messages.PatrolPresentationPart_DaysAndLegs, ChronoUnit.DAYS.between(patrol.getStartDate(), patrol.getEndDate()) + 1, patrol.getLegs().size());	
 			}
 			toolkit.createLabel(left, msg);
 			
@@ -872,10 +873,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			new Label(left, SWT.NONE);
 			
 			
-			toolkit.createLabel(left, "Station:");
-			toolkit.createLabel(left, patrol.getStation() == null ? "" : patrol.getStation().getName());
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_Station);
+			toolkit.createLabel(left, patrol.getStation() == null ? "" : patrol.getStation().getName()); //$NON-NLS-1$
 			
-			toolkit.createLabel(left, "Mandate:");
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_Mandate);
 			
 			Set<PatrolMandate> mandates = new HashSet<>();
 			mandates.add(patrol.getLegs().get(0).getMandate());
@@ -919,20 +920,20 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				}
 			}
 			
-			toolkit.createLabel(left, "Total Time:");
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_TotalTime);
 			toolkit.createLabel(left, PatrolEditor.formatTimeRange(totalTime));
 			
-			toolkit.createLabel(left, "Active Time:");
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_ActiveTime);
 			toolkit.createLabel(left, PatrolEditor.formatTimeRange(activeTime));
 			
-			toolkit.createLabel(left, "Total Distance:");
-			toolkit.createLabel(left, PatrolEditor.DISTANCE_FORMATTER.format(distance) + " km");
+			toolkit.createLabel(left, Messages.PatrolPresentationPart_TotalDistance);
+			toolkit.createLabel(left, PatrolEditor.DISTANCE_FORMATTER.format(distance) + Messages.PatrolPresentationPart_km);
 			
 			tdistance.keySet().stream().sorted((a,b)->Collator.getInstance().compare(a.getName(),  b.getName())).forEach(pt->{
-				Label ll = toolkit.createLabel(left, pt.getName() + ":");
+				Label ll = toolkit.createLabel(left, pt.getName() + ":"); //$NON-NLS-1$
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				
-				toolkit.createLabel(left, PatrolEditor.DISTANCE_FORMATTER.format(tdistance.get(pt)) + " km");
+				toolkit.createLabel(left, PatrolEditor.DISTANCE_FORMATTER.format(tdistance.get(pt)) + Messages.PatrolPresentationPart_km);
 			});
 			
 			Set<Employee> members = new HashSet<>();
@@ -943,7 +944,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			}
 			members.removeAll(leaders);
 			
-			toolkit.createLabel(right, "Leader(s):");
+			toolkit.createLabel(right, Messages.PatrolPresentationPart_Leaders);
 			
 			TableViewer tblLeaders = new TableViewer(right, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 			tblLeaders.setContentProvider(ArrayContentProvider.getInstance());
@@ -961,7 +962,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				((GridData)tblLeaders.getControl().getLayoutData()).heightHint = 60;
 			((GridData)tblLeaders.getControl().getLayoutData()).widthHint = 100;
 			
-			toolkit.createLabel(right,"Members(s):");
+			toolkit.createLabel(right,Messages.PatrolPresentationPart_Members);
 			
 			TableViewer tblMembers = new TableViewer(right, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 			tblMembers.setContentProvider(ArrayContentProvider.getInstance());
@@ -980,10 +981,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			
 			if (patrol.getObjective() != null && !patrol.getObjective().isEmpty()) {
 				
-				Label l = toolkit.createLabel(sarea, "Objective:");
+				Label l = toolkit.createLabel(sarea, Messages.PatrolPresentationPart_Objective);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 				
-				Text txtObj = toolkit.createText(sarea, patrol.getObjective() == null ? "" : patrol.getObjective(), SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+				Text txtObj = toolkit.createText(sarea, patrol.getObjective() == null ? "" : patrol.getObjective(), SWT.MULTI | SWT.V_SCROLL | SWT.WRAP); //$NON-NLS-1$
 				txtObj.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				((GridData)txtObj.getLayoutData()).heightHint = 60;
 			}
@@ -1015,7 +1016,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
     	getSite().getShell().getDisplay().syncExec(()->tblData.setInput(null));
     	
     	
-		Job j = new Job("refresh waypoint data") {
+		Job j = new Job(Messages.PatrolPresentationPart_refreshjobname) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -1061,12 +1062,14 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 								.stream()
 								.sorted((a,b)->a.getWaypoint().getDateTime().compareTo(b.getWaypoint().getDateTime()))
 								.forEach(pw->{
+									pw.getWaypoint().getAttachments().size();
 									if (pw.getWaypoint().getAllObservations().isEmpty()) {
 										fpdaydata.add(pw.getWaypoint());
 									}else {
 										pw.getWaypoint().getAllObservations().forEach(wp->wp.getCategory().getFullCategoryName());
 										List<WaypointObservation> obs = pw.getWaypoint().getAllObservations();
 										obs.forEach(oo->oo.getAttributes().forEach(a->{a.getAttribute().getName(); a.getAttributeValueAsString(Locale.getDefault());}));
+										obs.forEach(oo->oo.getAttachments().size());
 										FirstWaypointObservation first = new FirstWaypointObservation(obs.get(0));
 										fpdaydata.add(first);
 										for (int i = 1; i < obs.size(); i ++) fpdaydata.add(obs.get(i));
@@ -1128,11 +1131,12 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	}
 	
 	private enum Column{
-		ID("ID"),
-		X("X"),
-		Y("Y"),
-		TIME("Time"),
-		CATEGORY("Category");
+		ID(Messages.PatrolPresentationPart_IdColumn),
+		X(Messages.PatrolPresentationPart_xcolumn),
+		Y(Messages.PatrolPresentationPart_ycolumn),
+		TIME(Messages.PatrolPresentationPart_timecolumn),
+		CATEGORY(Messages.PatrolPresentationPart_categorycolumn),
+		ATTACHMENTS(Messages.PatrolPresentationPart_attachmentscolumn);
 		
 		private String name;
 		
@@ -1154,10 +1158,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				
 				sb.append(SmartUtils.formatStringForLabel(wo.getCategory().getFullCategoryName()));
 				
-				if (!wo.getAttributes().isEmpty()) sb.append("\n\n");
+				if (!wo.getAttributes().isEmpty()) sb.append("\n\n"); //$NON-NLS-1$
 				for (WaypointObservationAttribute a : wo.getAttributes()) {
-					sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault())));
-					sb.append("\n");
+					sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
+					sb.append("\n"); //$NON-NLS-1$
 				}
 				if (!wo.getAttributes().isEmpty()) sb.deleteCharAt(sb.length() - 1);
 				return sb.toString();
@@ -1168,7 +1172,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		
 		
 		public String getValue(Object value, Projection viewProjection) {
-			if (value == null) return "";
+			if (value == null) return ""; //$NON-NLS-1$
 			
 			WaypointObservation wo = findObservation(value);
 			Waypoint wp = null;
@@ -1183,11 +1187,11 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			case ID:
 				if (value instanceof FirstWaypointObservation) return wo.getWaypoint().getId();
 				if (wp != null) return wp.getId();
-				return "";
+				return ""; //$NON-NLS-1$
 			case TIME:
 				if (value instanceof FirstWaypointObservation) return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format( wo.getWaypoint().getDateTime().toLocalTime() );
 				if (wp != null) return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format( wp.getDateTime().toLocalTime() );
-				return "";
+				return ""; //$NON-NLS-1$
 			case X:
 				
 				if (value instanceof FirstWaypointObservation) {
@@ -1200,7 +1204,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				if (x != null && y != null) {
 					return String.valueOf(ReprojectUtils.transform(x, y, viewProjection.getParsedCoordinateReferenceSystem()).getX());
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			case Y:
 				if (value instanceof FirstWaypointObservation) {
 					y = wo.getWaypoint().getY();
@@ -1212,12 +1216,21 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				if (x != null && y != null) {
 					return String.valueOf(ReprojectUtils.transform(x, y, viewProjection.getParsedCoordinateReferenceSystem()).getX());
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			case CATEGORY:
 				if (wo != null) return wo.getCategory().getName();
-				return "";
+				return ""; //$NON-NLS-1$
+			case ATTACHMENTS:
+				int cnt = 0;
+				Waypoint tmp = findWaypoint(value);
+				if (tmp != null) cnt += tmp.getAttachments().size();
+				if (wo != null) cnt += wo.getAttachments().size();
+				if (cnt > 0) {
+					return MessageFormat.format(Messages.PatrolPresentationPart_attachmentslabel, cnt);
+				}
+				return ""; //$NON-NLS-1$
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 	}

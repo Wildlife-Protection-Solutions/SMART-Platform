@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -53,6 +52,8 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.ui.AttachmentPropertiesDialog;
 import org.wcs.smart.ui.AttachmentViewDialog;
 import org.wcs.smart.ui.Thumbnail;
@@ -66,26 +67,29 @@ import org.wcs.smart.ui.Thumbnail;
  */
 public class PatrolPresentationImageViewer extends Composite {
 
-	public PatrolPresentationImageViewer(Composite parent, int style) {
-		super(parent, style);
-		createControl();
-	}
-
 	private Waypoint wpsource;
 	private WaypointObservation obssource;
 	private Composite image = null;
 	
 	private Label lblBack, lblNext, lblInfo;
 	private ToolItem lblExpand;
-	
-	private MenuItem mnuOpen;
-	private MenuItem mnuOpenSystem;
-	private MenuItem mnuDetails;
-	
+		
 	private List<ISmartAttachment> attachments;
 	
 	private int currentIndex = -1;
+
 	
+	public PatrolPresentationImageViewer(Composite parent, int style) {
+		super(parent, style);
+		createControl();
+	}
+
+	/**
+	 * Sets the current source of images - 
+	 * can either be Waypoint or WaypointObservation.
+	 * 
+	 * @param source
+	 */
 	public void setSource(Object source) {
 		this.wpsource = null;
 		this.obssource = null;
@@ -122,7 +126,7 @@ public class PatrolPresentationImageViewer extends Composite {
 				rawImage = null;
 			}
 			if (rawImage == null) {
-				MessageDialog.openInformation(getShell(), "Invalid Image", "SMART can not read the image file. Trying opening the file instead.");
+				MessageDialog.openInformation(getShell(), Messages.PatrolPresentationImageViewer_InvalidDialogTitle, Messages.PatrolPresentationImageViewer_InvalidDialogMessage);
 				return;
 			}
 			AttachmentViewDialog dialog = new AttachmentViewDialog(getShell(), attachment, rawImage);
@@ -145,11 +149,11 @@ public class PatrolPresentationImageViewer extends Composite {
 		c.setMenu(attachmentMenu);
 		
 		MenuItem mnuOpen = new MenuItem(attachmentMenu, SWT.PUSH);
-		mnuOpen.setText("Expand");
+		mnuOpen.setText(Messages.PatrolPresentationImageViewer_ExpandMenuItem);
 		mnuOpen.addListener(SWT.Selection, e->expandImage());
 		
 		MenuItem mnuOpenSystem = new MenuItem(attachmentMenu, SWT.PUSH);
-		mnuOpenSystem.setText("Open with System Editor");
+		mnuOpenSystem.setText(Messages.PatrolPresentationImageViewer_OpenSystemMenuItem);
 		mnuOpenSystem.addListener(SWT.Selection, e->{
 			if (currentIndex >= 0) {
 				AttachmentUtil.openAttachment(attachments.get(currentIndex));
@@ -159,7 +163,7 @@ public class PatrolPresentationImageViewer extends Composite {
 		new MenuItem(attachmentMenu, SWT.SEPARATOR);
 		
 		MenuItem mnuDetails = new MenuItem(attachmentMenu, SWT.PUSH);
-		mnuDetails.setText("Properties...");
+		mnuDetails.setText(Messages.PatrolPresentationImageViewer_PropertiesMenuItem);
 		mnuDetails.addListener(SWT.Selection, e->{
 			if (currentIndex >= 0) {
 				AttachmentPropertiesDialog dialog = new AttachmentPropertiesDialog(getShell(), attachments.get(currentIndex));
@@ -192,13 +196,13 @@ public class PatrolPresentationImageViewer extends Composite {
 	private void updateControls() {
 		lblBack.setEnabled(currentIndex > 0);
 		lblNext.setEnabled(currentIndex < attachments.size() -1);
-		lblInfo.setText(MessageFormat.format("Attachment {0} of {1}", currentIndex+1, attachments.size()));
+		lblInfo.setText(MessageFormat.format(Messages.PatrolPresentationImageViewer_AttachmentsSummary, currentIndex+1, attachments.size()));
 		
 		boolean isImage = false;
 		if (currentIndex >= 0 && !attachments.isEmpty()) {
 			ISmartAttachment a = attachments.get(currentIndex);
 			try {
-				if (Files.probeContentType(a.getAttachmentFile()).startsWith("image")) {
+				if (Files.probeContentType(a.getAttachmentFile()).startsWith("image")) { //$NON-NLS-1$
 					isImage = true;
 				}
 			}catch (Exception ex) {
@@ -221,7 +225,7 @@ public class PatrolPresentationImageViewer extends Composite {
 		lblBack.addListener(SWT.MouseExit, e->getShell().setCursor(null));
 		lblBack.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, true));
 		lblBack.addListener(SWT.MouseUp, e->previousImage());
-		lblBack.setToolTipText("show previous image");
+		lblBack.setToolTipText(Messages.PatrolPresentationImageViewer_previousTooltip);
 		
 		image = new Composite(this, SWT.BORDER);
 		image.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -240,7 +244,7 @@ public class PatrolPresentationImageViewer extends Composite {
 		lblNext.addListener(SWT.MouseExit, e->getShell().setCursor(null));
 		lblNext.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, true));
 		lblNext.addListener(SWT.MouseUp, e->nextImage());
-		lblNext.setToolTipText("show next image");
+		lblNext.setToolTipText(Messages.PatrolPresentationImageViewer_nextTooltip);
 		((GridData)lblNext.getLayoutData()).verticalIndent = 21;
 		
 		ToolBar tb = new ToolBar(temp, SWT.FLAT);
@@ -249,11 +253,11 @@ public class PatrolPresentationImageViewer extends Composite {
 		lblExpand = new ToolItem(tb, SWT.PUSH);
 		lblExpand.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ICON_EXPAND));
 		lblExpand.addListener(SWT.Selection, e->expandImage());
-		lblExpand.setToolTipText("expand image");
+		lblExpand.setToolTipText(Messages.PatrolPresentationImageViewer_exapndTooltip);
 		
 	}
 	
-	Job loadAttachments = new Job("loading attachments") {
+	Job loadAttachments = new Job(Messages.PatrolPresentationImageViewer_loadingjobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -277,8 +281,7 @@ public class PatrolPresentationImageViewer extends Composite {
 					try {
 						a.computeFileLocation(session);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						SmartPatrolPlugIn.log(e.getMessage(),e);
 					}
 				}
 			}
@@ -290,10 +293,10 @@ public class PatrolPresentationImageViewer extends Composite {
 					currentIndex = -1;
 					lblBack.setEnabled(false);
 					lblNext.setEnabled(false);
-					lblInfo.setText("");
+					lblInfo.setText(""); //$NON-NLS-1$
 					if (obssource != null || wpsource != null) {
 						Label l = new Label(image, SWT.NONE);
-						l.setText("No Attachments");
+						l.setText(Messages.PatrolPresentationImageViewer_NoAttachmentsText);
 						l.setSize(l.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 						l.setLocation((image.getSize().x - l.getSize().x) / 2, (image.getSize().y - l.getSize().y) / 2 );
 					}
