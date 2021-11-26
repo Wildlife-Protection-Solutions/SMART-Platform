@@ -65,7 +65,7 @@ public enum CurrentQuarterDateFilter implements IDateFilter {
 	public String getLabel() {
 		LocalDate[] bits = getDates();
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
-		return( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	@Override

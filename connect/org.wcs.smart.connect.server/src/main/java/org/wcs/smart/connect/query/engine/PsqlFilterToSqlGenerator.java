@@ -119,6 +119,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.ObserverFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -490,6 +491,10 @@ public enum PsqlFilterToSqlGenerator {
 				table = engine.tablePrefix(Waypoint.class);
 				field = "datetime"; //$NON-NLS-1$
 			}
+		}else if (filter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE){
+			//TODO: test this
+			table = engine.tablePrefix(Waypoint.class);
+			field = "last_modified"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
 			table = engine.tablePrefix(PatrolLegDay.class);
 			field = "patrol_day"; //$NON-NLS-1$

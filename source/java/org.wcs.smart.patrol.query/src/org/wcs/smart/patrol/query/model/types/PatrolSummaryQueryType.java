@@ -57,6 +57,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -235,7 +236,8 @@ public class PatrolSummaryQueryType implements IQueryType {
 	public IDateFieldFilter[] getDateFilterOptions() {
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE,
 				PatrolStartDateField.INSTANCE,
-				PatrolEndDateField.INSTANCE};
+				PatrolEndDateField.INSTANCE,
+				WaypointLastModifiedDateField.INSTANCE};
 	}
 	
 	

@@ -432,10 +432,11 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		Throwable temp = ex;
 		while(temp != null) {
 			if (temp instanceof SQLException) {
-				if (((SQLException)temp).getSQLState().equals("XJ001")) {
+				if ("XJ001".equals(((SQLException)temp).getSQLState())) {
 					throw new SQLException("Not enough memory to run query. Try adding reducing date range or adding filters to reduce amount of data returned.");
 				}
 			}
+			temp = temp.getCause();
 		}
 	}
 	

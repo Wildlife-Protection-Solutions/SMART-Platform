@@ -61,6 +61,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 
 /**
  * Processes an query filter creating a temporary table
@@ -172,6 +173,13 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 		sql.append(prefix(MissionDay.class));
 		sql.append(".mission_uuid "); //$NON-NLS-1$
 		
+		if (dateFilter != null && dateFilter.getDateFieldOption() != WaypointLastModifiedDateField.INSTANCE) {
+			String filter = getSqlGenerator().toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(filter);
+			}
+		}
 		
 		//do need join mission tracks?
 		HasTrackFilterVisitor missionTracks = new HasTrackFilterVisitor();
@@ -188,53 +196,66 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 			usedTables.add(MissionTrack.class);
 		}
 		
-		sql.append(" join "); //$NON-NLS-1$
-		sql.append(namePrefix(SurveyWaypoint.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(prefix(SurveyWaypoint.class) + ".mission_day_uuid = "); //$NON-NLS-1$
-		sql.append(prefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$
+		if (populateObservation || 
+			(dateFilter != null && dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE)){
 		
-		sql.append(" left join "); //$NON-NLS-1$
-		sql.append(namePrefix(Waypoint.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-		sql.append(prefix(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
-
-		if (dateFilter != null) {
-			String filter = getSqlGenerator().toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
+			String joinType = " left join "; //$NON-NLS-1$
+			if (onlyObservations || 
+					(dateFilter != null && dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE)) {
+				joinType = " inner join "; //$NON-NLS-1$
 			}
-		}
-		sql.append(" left join "); //$NON-NLS-1$
-		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-		sql.append("waypointTable.wp_uuid "); //$NON-NLS-1$
-		
-		sql.append(" left join "); //$NON-NLS-1$
-		sql.append(namePrefix(SamplingUnit.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(prefix(SurveyWaypoint.class));
-		sql.append(".sampling_unit_uuid = "); //$NON-NLS-1$
-		sql.append(prefix(SamplingUnit.class));
-		sql.append(".uuid "); //$NON-NLS-1$
-		
-		if (populateObservation){
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservationGroup.class));
+			
+			sql.append(joinType); 
+			sql.append(namePrefix(SurveyWaypoint.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(SurveyWaypoint.class) + ".mission_day_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$
+			
+			sql.append(joinType); 
+			sql.append(namePrefix(Waypoint.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$
-			
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservation.class));
-			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$
-		}
+			sql.append(prefix(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
 	
+			if (dateFilter != null && dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+				String filter = getSqlGenerator().toSql(dateFilter, engine);
+				if (filter.length() > 0) {
+					sql.append(" and "); //$NON-NLS-1$
+					sql.append(filter);
+				}
+			}
+			
+			if (populateObservation){
+				
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append("waypointTable.wp_uuid "); //$NON-NLS-1$
+				
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(namePrefix(SamplingUnit.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(SurveyWaypoint.class));
+				sql.append(".sampling_unit_uuid = "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnit.class));
+				sql.append(".uuid "); //$NON-NLS-1$
+				
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(namePrefix(WaypointObservationGroup.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$
+				
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(namePrefix(WaypointObservation.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$
+			}
+		}
+		
+		
 		for (Entry<IFilter, FilterTable> cols : engine.filterTables.entrySet()){
 			FilterTable t = cols.getValue();
 			sql.append(" left join "); //$NON-NLS-1$

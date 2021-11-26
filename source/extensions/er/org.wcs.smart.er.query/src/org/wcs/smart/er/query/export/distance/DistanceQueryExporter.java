@@ -288,21 +288,22 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 				
 				//compute effort
 				String sql = "SELECT t FROM Mission m JOIN m.missionDays d JOIN d.tracks t ";  //$NON-NLS-1$
+				sql += " WHERE t.samplingUnit in (select s from SamplingUnit s WHERE s.surveyDesign.keyId = :sd) "; //$NON-NLS-1$
 				DateFilter df = ((SimpleQuery)query).getDateFilter();
 				boolean params = false;
 				if (df.getDateFilterOption() != AllDatesFilter.INSTANCE) {
 					if (df.getDateFieldOption() == MissionEndDateField.INSTANCE) {
-						sql += " WHERE m.endDate > :date1 and m.endDate <";  //$NON-NLS-1$
+						sql += " AND m.endDate > :date1 and m.endDate <";  //$NON-NLS-1$
 						if (df.getDateFilterOption().isEndDateInclusive()) sql += "=";  //$NON-NLS-1$
 						sql += " :date2 ";  //$NON-NLS-1$
 						params = true;
 					}else if (df.getDateFieldOption() == MissionStartDateField.INSTANCE) {
-						sql += " WHERE m.startDate > :date1 and m.startDate <";  //$NON-NLS-1$
+						sql += " AND m.startDate > :date1 and m.startDate <";  //$NON-NLS-1$
 						if (df.getDateFilterOption().isEndDateInclusive()) sql += "=";  //$NON-NLS-1$
 						sql += " :date2 ";  //$NON-NLS-1$
 						params = true;
 					}else if (df.getDateFieldOption() == WaypointDateField.INSTANCE) {
-						sql += " WHERE d.date > :date1 and d.date <";  //$NON-NLS-1$
+						sql += " AND d.date > :date1 and d.date <";  //$NON-NLS-1$
 						if (df.getDateFilterOption().isEndDateInclusive()) sql += "=";  //$NON-NLS-1$
 						sql += " :date2 ";  //$NON-NLS-1$
 						params = true;
@@ -316,6 +317,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 					q.setParameter("date1",  df.getDateFilterOption().getDates()[0]);  //$NON-NLS-1$
 					q.setParameter("date2",  df.getDateFilterOption().getDates()[1]);  //$NON-NLS-1$
 				}
+				q.setParameter("sd",  sd.getKeyId() ); //$NON-NLS-1$
 				List<MissionTrack> tracks = q.list();
 				for (MissionTrack t : tracks) {
 					if (t.getSamplingUnit() == null) continue;
