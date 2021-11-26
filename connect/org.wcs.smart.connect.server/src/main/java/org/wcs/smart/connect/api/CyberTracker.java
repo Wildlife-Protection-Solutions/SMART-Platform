@@ -626,11 +626,8 @@ public class CyberTracker extends HttpServlet{
 			ctpackage.setWorkItem(up.getUuid());
 
 			java.nio.file.Path p = Paths.get(CT_PACKAGE_DATASTORE_LOCATION);
-			if (!Files.exists(p)) {
-				Files.createDirectories(p);
-			}
-
-			up.setLocalFilename(p.resolve(ctpackage.getFilename()).toString()); 
+			up.setLocalFilename(p.resolve(ctpackage.getFilename()).toString());
+			
 			java.nio.file.Path upFile = DataStoreManager.INSTANCE.getRootDirectory().resolve(up.getLocalFilename());
 			if (Files.exists(upFile)) Files.delete(upFile);
 			
