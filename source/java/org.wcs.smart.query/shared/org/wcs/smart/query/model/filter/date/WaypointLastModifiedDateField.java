@@ -19,67 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.wcs.smart.query.model.filter.date;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 
 /**
- * Last quarter date filter
+ * Waypoint date field filter
  * @author Emily
  *
  */
-public enum LastQuarterDateFilter implements IDateFilter {
+public class WaypointLastModifiedDateField implements IDateFieldFilter {
 
-	INSTANCE;
-
+	public static WaypointLastModifiedDateField INSTANCE = new WaypointLastModifiedDateField();
+	
+	private WaypointLastModifiedDateField(){}
+	
 	@Override
 	public String getGuiName(Locale l) {
 		return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).getLabel(this, l);
 	}
-
+	
 	@Override
-	public String getQueryKey() {
-		return "lastquarter"; //$NON-NLS-1$
+	public String getKey() {
+		return "waypointlastmodified"; //$NON-NLS-1$
 	}
 
-	@Override
-	public LocalDate[] getDates() {
-		int thisQuarter = (LocalDate.now().getMonthValue()-1) / 3;
-		int thisYear = LocalDate.now().getYear();
-		
-		int lastQuarter = thisQuarter;
-		int lastYear = thisYear;
-		lastQuarter = lastQuarter -1;
-		if (lastQuarter < 0){
-			lastQuarter = 3;
-			lastYear = lastYear - 1;
-		}
-		
-		LocalDate from = LocalDate.of(lastYear, lastQuarter*3+1, 1);
-		LocalDate to = LocalDate.of(thisYear, thisQuarter*3+1, 1);
-		return new LocalDate[] {from, to};
-	}
-
-	@Override
-	public String getLabel() {
-		LocalDate[] bits = getDates();
-		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
-		return( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
-	@Override
-	public String validate() {
-		return null;
-	}
-
-	@Override
-	public boolean isEndDateInclusive() {
-		return false;
-	}
 }
-

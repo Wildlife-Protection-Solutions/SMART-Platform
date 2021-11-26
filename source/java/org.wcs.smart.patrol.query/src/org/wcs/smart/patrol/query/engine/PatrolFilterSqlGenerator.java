@@ -61,6 +61,7 @@ import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -400,6 +401,10 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 				filter.getDateFieldOption() == WaypointDateField.INSTANCE) {
 			table = engine.tablePrefix(PatrolLegDay.class);
 			field = "patrol_day"; //$NON-NLS-1$
+		}else if (filter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+			//need to use waypoint table
+			table = engine.tablePrefix(Waypoint.class);
+			field = "last_modified"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName(Locale.getDefault())}));
 		}
@@ -413,15 +418,15 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}
 		if (bits.length == 1){
 			String p1 = engine.addParameterValue(bits[0].toString());
-			f = " ( " +field + " >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			f = " ( cast (" +field + " as date) >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
 			String p1 = engine.addParameterValue(bits[0].toString());
 			String p2 = engine.addParameterValue(bits[1].toString());
-			f = " ( " + field + " >= " + p1 + " and " + field  + " <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast( " + field + " as date ) >= " + p1 + " and cast(" + field  + " as date ) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
 			String p1 = engine.addParameterValue(bits[0].toString());
 			String p2 = engine.addParameterValue(bits[1].toString());
-			f = " ( " + field + " >= " + p1 + " and " + field  + " < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast(" + field + " as date ) >= " + p1 + " and cast(" + field  + " as date ) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		return f;

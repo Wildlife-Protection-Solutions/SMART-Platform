@@ -48,6 +48,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 
 /**
  * Processes an query filter that queries across observation
@@ -141,12 +142,20 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
 		
-
-		if (dateFilter != null) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
+		String joinType = " left join "; //$NON-NLS-1$
+		if (onlyObservations){
+			joinType = " inner join "; //$NON-NLS-1$
+		}
+		
+		if (dateFilter != null ) {
+			if (dateFilter.getDateFieldOption() != WaypointLastModifiedDateField.INSTANCE) {
+				String filter = getSqlGenerator().toSql(dateFilter, engine);
+				if (filter.length() > 0) {
+					sql.append(" and "); //$NON-NLS-1$
+					sql.append(filter);
+				}
+			}else {
+				joinType = " inner join "; //$NON-NLS-1$
 			}
 		}
 		
@@ -166,25 +175,28 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(prefix(PatrolLegMember.class) + "_pilot.patrol_leg_uuid and  "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegMember.class) + "_pilot.is_pilot "); //$NON-NLS-1$
 		
-		if (onlyObservations){
-			sql.append(" inner join "); //$NON-NLS-1$
-		}else{
-			sql.append(" left join "); //$NON-NLS-1$
-		}
+		sql.append(joinType);
 			
 		sql.append(namePrefix(PatrolWaypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(PatrolWaypoint.class) + ".leg_day_uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class) + ".uuid "); //$NON-NLS-1$
-		if (onlyObservations){
-			sql.append(" inner join "); //$NON-NLS-1$
-		}else{
-			sql.append(" left join "); //$NON-NLS-1$
-		}
+		sql.append(joinType); 
+		
 		sql.append(namePrefix(Waypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
+		
+		if (dateFilter != null ) {
+			if (dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+				String filter = getSqlGenerator().toSql(dateFilter, engine);
+				if (filter.length() > 0) {
+					sql.append(" and "); //$NON-NLS-1$
+					sql.append(filter);
+				}
+			}
+		}
 		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
@@ -305,15 +317,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(" as ");//$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class)); 
 		sql.append(" ON " + prefix(PatrolLegDay.class) + ".patrol_leg_uuid = " + prefix(PatrolLeg.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		
-		if (dateFilter != null) {
-			String dfilter = getSqlGenerator().toSql(dateFilter, engine);
-			if (dfilter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(dfilter);
-			}
-		}
-		
+
 		sql.append(" join "); //$NON-NLS-1$
 		
 		sql.append(name(PatrolWaypoint.class));
@@ -327,14 +331,20 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(prefix(Waypoint.class)); 
 		sql.append(" on " + prefix(PatrolWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		
-		
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(name(WaypointObservationGroup.class));
 		sql.append(" as ");//$NON-NLS-1$
 		sql.append(prefix(WaypointObservationGroup.class)); 
 		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
+		if (dateFilter != null) {
+			String dfilter = getSqlGenerator().toSql(dateFilter, engine);
+			if (dfilter.length() > 0) {
+				sql.append(" where "); //$NON-NLS-1$
+				sql.append(dfilter);
+			}
+		}
+		
 		QueryPlugIn.logSql(sql.toString());
 		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 			ps.executeUpdate();

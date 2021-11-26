@@ -55,6 +55,7 @@ import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -332,7 +333,8 @@ public class SurveySummaryQueryType implements IQueryType {
 	public IDateFieldFilter[] getDateFilterOptions() {
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE, 
 				MissionStartDateField.INSTANCE,
-				MissionEndDateField.INSTANCE};
+				MissionEndDateField.INSTANCE,
+				WaypointLastModifiedDateField.INSTANCE};
 	}
 	
 	@Override

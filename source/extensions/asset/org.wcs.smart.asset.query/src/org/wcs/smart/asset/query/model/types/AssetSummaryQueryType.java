@@ -52,6 +52,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
 import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
@@ -215,7 +216,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public IDateFieldFilter[] getDateFilterOptions() {
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
+		return new IDateFieldFilter[]{WaypointDateField.INSTANCE, WaypointLastModifiedDateField.INSTANCE};
 	}
 
 	

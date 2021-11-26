@@ -274,6 +274,12 @@ public class ErWaypointGroupFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(SurveyWaypoint.class) + ".mission_day_uuid = "); //$NON-NLS-1$
 		sql.append(prefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$
 
+		sql.append(" left join "); //$NON-NLS-1$
+		sql.append(namePrefix(Waypoint.class));
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
+		sql.append(prefix(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
+		
 		if (dateFilter != null) {
 			String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (filter.length() > 0) {
@@ -281,13 +287,6 @@ public class ErWaypointGroupFilterProcessor implements IFilterProcessor{
 				sql.append(filter);
 			}
 		}
-		
-		
-		sql.append(" left join "); //$NON-NLS-1$
-		sql.append(namePrefix(Waypoint.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-		sql.append(prefix(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
 		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));

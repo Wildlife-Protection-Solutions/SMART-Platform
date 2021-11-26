@@ -75,6 +75,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 
 /**
  * Processes an query filter creating a temporary table
@@ -274,7 +275,9 @@ public class ErFilterProcessor implements IFilterProcessor {
 
 		if (dateFilter != null && dateFilter.getDateFieldOption() != MissionStartDateField.INSTANCE 
 				&& dateFilter.getDateFieldOption() != MissionEndDateField.INSTANCE
-				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE){
+				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE
+				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE
+				&& dateFilter.getDateFieldOption() != WaypointLastModifiedDateField.INSTANCE){
 			throw new SQLException(MessageFormat.format(Messages.getString("ErFilterProcessor.DateFilteRNotSupported", engine.getLocale()), new Object[]{dateFilter.getDateFilterOption().getGuiName(Locale.getDefault())})); //$NON-NLS-1$
 		}
 		
@@ -333,7 +336,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 		sql.append(prefix(MissionDay.class));
 		sql.append(".mission_uuid "); //$NON-NLS-1$
 		
-		if (dateFilter != null){
+		if (dateFilter != null && dateFilter.getDateFieldOption() != WaypointLastModifiedDateField.INSTANCE){
 			String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (filter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
@@ -350,38 +353,53 @@ public class ErFilterProcessor implements IFilterProcessor {
 			sql.append(".uuid = mt.mission_uuid"); //$NON-NLS-1$
 		}
 
-		if (populateObservation ){
-			sql.append(" left join "); //$NON-NLS-1$
+		if (populateObservation || 
+				(dateFilter != null && dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE)){
+
+			String joinType = " left join "; //$NON-NLS-1$
+			if (onlyObservations || 
+					(dateFilter != null && dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE)) {
+				joinType = " inner join "; //$NON-NLS-1$
+			}
+			sql.append(joinType); 
 			sql.append(namePrefix(SurveyWaypoint.class));
+			
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(SurveyWaypoint.class));
 			sql.append(".mission_day_uuid = "); //$NON-NLS-1$
 			sql.append(prefix(MissionDay.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-		
-			if (onlyObservations){
-				sql.append(" inner join "); //$NON-NLS-1$
-			}else{
-				sql.append(" left join "); //$NON-NLS-1$
-			}
+			
+			sql.append(joinType); 
 			sql.append(namePrefix(Waypoint.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(SurveyWaypoint.class));
 			sql.append(".wp_uuid = "); //$NON-NLS-1$
 			sql.append(prefix(Waypoint.class));
 			sql.append(".uuid "); //$NON-NLS-1$
+			
+			if (dateFilter != null && 
+					dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE){
+				String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+				if (filter.length() > 0) {
+					sql.append(" and "); //$NON-NLS-1$
+					sql.append(filter);
+				}
+			}			
+			
 			usedTables.add(Waypoint.class);
 			usedTables.add(SurveyWaypoint.class);
-
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(SamplingUnit.class));
-			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(SurveyWaypoint.class));
-			sql.append(".sampling_unit_uuid = "); //$NON-NLS-1$
-			sql.append(prefix(SamplingUnit.class));
-			sql.append(".uuid "); //$NON-NLS-1$
 				
 			if (populateObservation){
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(namePrefix(SamplingUnit.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(SurveyWaypoint.class));
+				sql.append(".sampling_unit_uuid = "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnit.class));
+				sql.append(".uuid "); //$NON-NLS-1$
+
+				
 				sql.append(" left join "); //$NON-NLS-1$
 				sql.append(namePrefix(WaypointObservationGroup.class));
 				usedTables.add(WaypointObservationGroup.class);

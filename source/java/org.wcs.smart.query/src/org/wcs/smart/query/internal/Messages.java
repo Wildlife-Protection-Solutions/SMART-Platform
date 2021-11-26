@@ -334,6 +334,7 @@ public class Messages extends NLS {
 	public static String QueryDateLabelProvider_StartEndDateError;
 	public static String QueryDateLabelProvider_StartHourLabel;
 	public static String QueryDateLabelProvider_SummaryDateGroupByError;
+	public static String QueryDateLabelProvider_WaypointLaskModifiedDateFieldName;
 	public static String QueryDefinitionValidator_AggregationNotSupported;
 	public static String QueryDefPanel_QueryTypeNotSupported;
 	public static String QueryDropItem_clearstyletooltip;

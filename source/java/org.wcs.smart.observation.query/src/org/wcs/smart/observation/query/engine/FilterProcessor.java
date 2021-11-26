@@ -63,6 +63,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 
 /**
  * Processes an query filter creating a temporary table
@@ -365,7 +366,9 @@ public class FilterProcessor implements IFilterProcessor {
 	
 	protected void processDatFilter(DateFilter dateFilter, StringBuilder fromSql) throws SQLException {
 		if (dateFilter == null) return;
-		if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+		if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE || 
+				dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+			
 			String cfilter = getSqlGenerator().toSql(dateFilter, engine);
 			if (cfilter.length() > 0) {
 				fromSql.append(" and "); //$NON-NLS-1$

@@ -116,6 +116,7 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 
 /**
  * Query manager for SMART Connect queries.
@@ -243,6 +244,7 @@ public enum QueryManager {
 		PatrolEndDateField.INSTANCE, 
 		PatrolStartDateField.INSTANCE, 
 		WaypointDateField.INSTANCE, 
+		WaypointLastModifiedDateField.INSTANCE,
 //		ReceivedDateFilter.INSTANCE,
 		RecordDateDateField.INSTANCE,
 		AssetDeploymentDateField.INSTANCE,
@@ -250,25 +252,25 @@ public enum QueryManager {
 	
 	public static HashMap<String, String[]> DATE_FILTERS = new HashMap<String, String[]>();
 	static{
-		DATE_FILTERS.put(PatrolGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(PatrolObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(PatrolSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(PatrolWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(PatrolQuery.KEY, new String[]{PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolQuery.KEY, new String[]{PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(SurveyGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(SurveyObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(SurveySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(SurveyWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveyGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveyObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveyWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(MissionQuery.KEY, new String[]{MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(MissionTrackQuery.KEY, new String[]{MissionTrackDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(ObservationGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(ObsObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(ObservationSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(ObservationWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObservationGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObsObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObservationSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObservationWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(EntityGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(EntityObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
@@ -282,9 +284,9 @@ public enum QueryManager {
 		DATE_FILTERS.put(IntelRecordQuery.KEY.toLowerCase(Locale.ROOT), new String[]{RecordDateDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(IntelRecordSummaryQuery.KEY.toLowerCase(Locale.ROOT), new String[]{RecordDateDateField.INSTANCE.getKey()});
 
-		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(AssetSummaryQuery.ASSET_SUMMARY_KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetSummaryQuery.ASSET_SUMMARY_KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY.toLowerCase(Locale.ROOT), new String[]{AssetDeploymentDateField.INSTANCE.getKey()});
 	}
 	

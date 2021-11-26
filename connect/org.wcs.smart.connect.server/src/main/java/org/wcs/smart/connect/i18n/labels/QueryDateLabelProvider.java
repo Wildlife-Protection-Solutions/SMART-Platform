@@ -38,6 +38,7 @@ import org.wcs.smart.query.model.filter.date.LastYearDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthToDateDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearToDateDateFilter;
 
@@ -66,6 +67,7 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 		labels.put(MonthDateGroupBy.class, "QueryDateLabelProvider.MonthDatesFilterOp"); //$NON-NLS-1$
 		labels.put(YearDateGroupBy.class, "QueryDateLabelProvider.YearDatesFilterOp"); //$NON-NLS-1$
 		labels.put(WaypointDateField.class,"QueryDateLabelProvider.WpDateDatesFilterOp"); //$NON-NLS-1$
+		labels.put(WaypointLastModifiedDateField.class,"Waypoint Last Modified"); 
 		
 	}
 	
