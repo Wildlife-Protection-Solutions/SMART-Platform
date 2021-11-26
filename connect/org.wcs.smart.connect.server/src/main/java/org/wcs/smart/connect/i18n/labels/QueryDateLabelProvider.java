@@ -67,7 +67,7 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 		labels.put(MonthDateGroupBy.class, "QueryDateLabelProvider.MonthDatesFilterOp"); //$NON-NLS-1$
 		labels.put(YearDateGroupBy.class, "QueryDateLabelProvider.YearDatesFilterOp"); //$NON-NLS-1$
 		labels.put(WaypointDateField.class,"QueryDateLabelProvider.WpDateDatesFilterOp"); //$NON-NLS-1$
-		labels.put(WaypointLastModifiedDateField.class,"Waypoint Last Modified"); 
+		labels.put(WaypointLastModifiedDateField.class,"QueryDateLabelProvider.WpLastModifiedFilterOp");  //$NON-NLS-1$
 		
 	}
 	
