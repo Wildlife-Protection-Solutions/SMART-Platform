@@ -250,8 +250,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				wp.setId(String.valueOf(observationCounter));
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
+
 				allSize = JsonCtParser.processImages(wp, allSize, session);
-				
 				
 				boolean noObservation = false;
 				//patrol paused; no observation; record only as track point
@@ -423,7 +423,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					addToExistingLeg(link.getPatrolLeg(), wp, session);
 				}else {
 					//we want to find the waypoint and/or observation group to add to
-					//first see if we can find the waypoint and observation group					
+					//first see if we can find the waypoint and observation group
 					Waypoint mwp = null;
 					WaypointObservationGroup mwpg = null;
 					if(link != null && link.getWaypointLinks() != null) {
@@ -435,7 +435,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 								}
 							}
 						}
-						
+
 						if (mwp != null && mwp.getUuid() != null) {
 							mwp = session.get(Waypoint.class, mwp.getUuid());
 							if (mwpg != null) {
@@ -468,6 +468,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 										.resolve(wa.getFilename()));
 							
 							}
+							for(WaypointObservation wo : wp.getAllObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment a : wo.getAttachments()){
+										a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+												.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
+												.resolve(a.getFilename()));
+									}
+								}
+							}
 						}
 					}else if (mwp != null) {
 						//create a new group with these observations
@@ -491,6 +500,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
 										.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
 										.resolve(wa.getFilename()));
+							}
+							for(WaypointObservation wo : wp.getAllObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment a : wo.getAttachments()){
+										a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+												.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
+												.resolve(a.getFilename()));
+									}
+								}
 							}
 						}
 						
@@ -539,6 +557,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				link.setLastObservationCnt(observationCounter);
 				processedFeatures.add(feature);
 				
+				session.flush();
 			}catch (Exception ex){
 				//TODO: if there is a session.flush error we have a problem we need to stop and rollback
 				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
