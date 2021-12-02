@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,7 @@ import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.PatrolUtils;
@@ -83,13 +85,16 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 	private static final String JSON_PATROLLEGUUID = "patrolLegUuid"; //$NON-NLS-1$
 	private static final String JSON_PATROLUUID = "patrolUuid"; //$NON-NLS-1$
 	
+	//links
 	private static final String PATROL_DATATYPE = "patrol"; //$NON-NLS-1$
 	private static final String INCIDENT_DATATYPE = "patrolincident"; //$NON-NLS-1$
 	private static final String LEG_DATATYPE = "patrolleg"; //$NON-NLS-1$
 	
-	public static final String JSON_FT_START = "start"; //$NON-NLS-1$
-	public static final String JSON_FT_END = "end"; //$NON-NLS-1$
-	public static final String JSON_FT_NEWLEG = "newleg"; //$NON-NLS-1$
+	public static final String JSON_FT_START = "patrol/new"; //$NON-NLS-1$
+	public static final String JSON_FT_END = "leg/end"; //$NON-NLS-1$
+	public static final String JSON_FT_PATROLUPDATE = "patrol"; //$NON-NLS-1$
+	public static final String JSON_FT_NEWLEG = "leg/new"; //$NON-NLS-1$
+	public static final String JSON_FT_LEGUPDATE = "leg"; //$NON-NLS-1$
 	public static final String JSON_FT_TRACKPOINT = "trackpoint"; //$NON-NLS-1$
 	
 	public enum Messages{
@@ -141,6 +146,36 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		return this.modifiedFeatures;
 	}
 	
+//	@Override
+//	public void processUpdateFeature(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception {
+//		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+//
+//		String dtype = props.get(JSON_SMARTDATATYPE).toString(); 
+//		if (!dtype.equalsIgnoreCase(PATROL_DATATYPE))
+//			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, PATROL_DATATYPE));
+//
+//		if (!props.containsKey(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES)) {
+//			throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), IJsonFeatureProcessor.JSON_SMARTATTRIBUTES));
+//		}
+//		
+//		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
+//		if (ftype.equalsIgnoreCase(JSON_FT_OBSERVATION)) {
+////			processObservation(feature, ca, session, l);
+//		}else if (ftype.equalsIgnoreCase(JSON_FT_START)) {
+//			processPatrolUpdate(feature, ca, session, l);
+//			
+//		}else if (ftype.equalsIgnoreCase(JSON_FT_END)) {
+////			processEndPatrolLeg(feature, ca, session, l);
+//		}else if (ftype.equalsIgnoreCase(JSON_FT_NEWLEG)) {
+////			processNewLeg(feature, ca, session, l);
+//			processPatrolLegUpdate(feature, ca, session , l);
+//		}else if (ftype.equalsIgnoreCase(JSON_FT_TRACKPOINT)) {
+////			processTrackPoint(feature, ca, session, l);
+//		}else {
+//			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_OBSERVATION));
+//		}
+//	}
+	
 	@Override
 	public void processFeature(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception {
 
@@ -155,9 +190,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
-		if (ftype.equalsIgnoreCase(JSON_FT_OBSERVATION)) {
-			processObservation(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_START)) {
+		
+		
+		if (ftype.equalsIgnoreCase(JSON_FT_START)) {
 			processStartPatrol(feature, ca, session, l);
 		}else if (ftype.equalsIgnoreCase(JSON_FT_END)) {
 			processEndPatrolLeg(feature, ca, session, l);
@@ -165,13 +200,35 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			processNewLeg(feature, ca, session, l);
 		}else if (ftype.equalsIgnoreCase(JSON_FT_TRACKPOINT)) {
 			processTrackPoint(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(JSON_FT_PATROLUPDATE)) {
+			processPatrolUpdate(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(JSON_FT_LEGUPDATE)) {
+			processPatrolLegUpdate(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(JSON_FT_WP_ADD)) {
+			processingWaypoint(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(JSON_FT_WP_OBSERVATION)) {
+			processObservationUpdate(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(JSON_FT_WP_UPDATE)) {
+			processWaypointUpdate(feature, ca, session, l);
 		}else {
-			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_OBSERVATION));
+			StringJoiner j = new StringJoiner(",");
+			j.add(JSON_FT_START);
+			j.add(JSON_FT_END);
+			j.add(JSON_FT_NEWLEG);
+			j.add(JSON_FT_TRACKPOINT);
+			j.add(JSON_FT_PATROLUPDATE);
+			j.add(JSON_FT_LEGUPDATE);
+			j.add(JSON_FT_WP_ADD);
+			j.add(JSON_FT_WP_OBSERVATION);
+			j.add(JSON_FT_WP_UPDATE);
+			
+			
+			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, j.toString()));
 		}
 
 	}
 	
-	private void processObservation(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+	private void processingWaypoint(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
@@ -226,7 +283,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
-		HashMap<WaypointObservationGroup, UUID> links = new HashMap<>();
+		
+		HashMap<WaypointObservationGroup, UUID> groupLinks = new HashMap<>();
+		HashMap<WaypointObservation, UUID> observationLinks = new HashMap<>();		
 
 		if (existingWp == null) {
 			UUID src = wp.getUuid();
@@ -238,9 +297,19 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 					session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
 						.setParameter("uuid", g.getUuid()) //$NON-NLS-1$
 						.executeUpdate();
-					links.put(g,g.getUuid());
+					groupLinks.put(g,g.getUuid());
 					g.setUuid(null);
 					
+				}
+				for (WaypointObservation wo : g.getObservations()) {
+					if (wo.getUuid() != null) {
+						//clear any old link
+						session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+							.setParameter("uuid", wo.getUuid()) //$NON-NLS-1$
+							.executeUpdate();	
+						observationLinks.put(wo,  wo.getUuid());
+						wo.setUuid(null);
+					}
 				}
 			}
 
@@ -284,9 +353,21 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 						}
 					}
 				}
+				for (WaypointObservation wo : group.getObservations()) {
+					if (wo.getUuid() != null) {
+						observationLinks.put(wo, wo.getUuid());
+						WaypointObservation existing = findObservationLink(wo.getUuid(), ca, session);
+						if (existing != null) {
+							//throw an error - should not be updating observations this way
+							//TODO:
+							throw new Exception("Invalid JSON - should not be using this api to update observations");
+						}
+						wo.setUuid(null);
+					}
+				}
 			}
 			for (WaypointObservationGroup g : add) {
-				if (g.getUuid() != null) links.put(g, g.getUuid());
+				if (g.getUuid() != null) groupLinks.put(g, g.getUuid());
 				g.setUuid(null);
 				existingWp.getObservationGroups().add(g);
 				g.setWaypoint(existingWp);
@@ -297,7 +378,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		session.flush();
-		for (Entry<WaypointObservationGroup, UUID> link : links.entrySet()) {
+		for (Entry<WaypointObservationGroup, UUID> link : groupLinks.entrySet()) {
 			DataLink dlink = new DataLink();
 			dlink.setConservationArea(ca);
 			dlink.setProviderId(link.getValue());
@@ -305,7 +386,14 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dlink.setDataType(OBSGROUP_DATATYPE);
 			session.save(dlink);
 		}
-		
+		for (Entry<WaypointObservation, UUID> link : observationLinks.entrySet()) {
+			DataLink dlink = new DataLink();
+			dlink.setConservationArea(ca);
+			dlink.setProviderId(link.getValue());
+			dlink.setSmartId(link.getKey().getUuid());
+			dlink.setDataType(OBSERVATION_DATATYPE);
+			session.save(dlink);
+		}
 
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
@@ -315,59 +403,87 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 	}
 	
-	private void processStartPatrol(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+	
+	private void processWaypointUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
-		//configure date/time
-		LocalDateTime date = super.getDateTime(props);
-		Patrol newPatrol = new Patrol();
-		newPatrol.setStartDate(date.toLocalDate());
-		newPatrol.setEndDate(date.toLocalDate());
-		newPatrol.setConservationArea(ca);
-		modifiedFeatures.add(newPatrol);
-		PatrolLeg newLeg = newPatrol.addLeg();
-		
-		createLegDays(newLeg, session);
-		newLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
-		newLeg.getPatrolLegDays().get(0).setEndTime(date.toLocalTime());
+		//find the incident
+		if (!attributes.containsKey("incidentUuid")) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), "incidentUuid"));
 
-		String[] required = new String[] {
-				JSON_PATROLUUID, JSON_PATROLLEGUUID, PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey(),
-				PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey(),
-				PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey(),
-				PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey()
-		};
-		for (String r : required) {
-			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
-		}
-		
-		UUID srcPatrolUuid = null;
-		try {
-			srcPatrolUuid = UuidUtils.stringToUuid((String)attributes.get(JSON_PATROLUUID));
-		}catch (Exception ex) {
-			throw new Exception(MessageFormat.format(Messages.INVALID_PATROL_UUID.getMessage(l), props.get(JSON_PATROLUUID)));
-		}
+		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 
-		Patrol temp = findPatrolLink(srcPatrolUuid, ca, session, l);
-		if (temp != null) {
-			//a link to a patrol already exists in the database for this uuid; 
-			throw new Exception(MessageFormat.format(Messages.PATROL_EXISTS.getMessage(l), srcPatrolUuid));
+
+		Waypoint toUpdate = findIncidentLink(wp.getUuid(), ca, session, l);
+		//find patrol with associated waypoint
+		
+		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class)
+				.setParameter("wp",toUpdate)
+				.uniqueResult();
+		if (pw == null) throw new Exception("Patrol link to waypoint not found.");
+		modifiedFeatures.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
+		
+		if (wp.getId() != null) toUpdate.setId(wp.getId());
+		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
+		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
+		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
+		
+		session.save(toUpdate);
+		session.flush();
+		
+	}
+	
+	private void processObservationUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		//find the incident
+		if (!attributes.containsKey("observationUuid")) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), "observationUuid"));
+
+		WaypointObservation observation = super.createWaypointObservation(feature, ca, session, l);
+		WaypointObservation toUpdate = findObservationLink(observation.getUuid(), ca, session);
+		
+		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class)
+				.setParameter("wp",toUpdate.getWaypoint())
+				.uniqueResult();
+		if (pw == null) throw new Exception("Patrol link to waypoint not found.");
+		modifiedFeatures.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
+		
+
+		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
+			toUpdate.setObserver(observation.getObserver());
 		}
-		
-		UUID srcLegUuid = getSourcePatrolLegUuid(attributes, l);
-		PatrolLeg temp2 = findPatrolLegLink(srcLegUuid, ca, session, l);
-		if (temp2 != null) {
-			//a link to a patrol leg already exists in the database for this uuid; 
-			throw new Exception(MessageFormat.format(Messages.PATROLLEG_EXISTS.getMessage(l), srcLegUuid));
-		}
-		
-		newPatrol.setArmed(false);
-		
-		String teamKey = null;
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey())) {
-			teamKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey());
 			
+		toUpdate.getAttributes().clear();
+		session.flush();
+			
+		toUpdate.setCategory(observation.getCategory());
+		for (WaypointObservationAttribute a : observation.getAttributes()) {
+			a.setObservation(toUpdate);
+			toUpdate.getAttributes().add(a);
+		}
+		session.save(toUpdate);
+		session.flush();
+	}
+
+	private Patrol parsePatrol(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		Patrol newPatrol = new Patrol();
+		
+		newPatrol.setUuid(getSourcePatrolUuid(attributes, l));
+		
+		//configure date/time
+		if (props.containsKey("dateTime")) {
+			LocalDateTime date = super.getDateTime(props);
+			newPatrol.setStartDate(date.toLocalDate());
+		}
+		
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey())) {
+			String teamKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey());
 			Team pTeam = session.createQuery("FROM Team WHERE conservationArea = :ca and keyId = :key", Team.class) //$NON-NLS-1$
 					.setParameter("ca",ca ) //$NON-NLS-1$
 					.setParameter("key", teamKey) //$NON-NLS-1$
@@ -380,14 +496,13 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			
 		}
 		
-		String stationKey = null;
+		
 		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.STATION.getKey())) {
-			stationKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.STATION.getKey());
-			
+			String stationKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.STATION.getKey());
 			try {
 				UUID stationUuid = UuidUtils.stringToUuid(stationKey);
 				Station station = session.get(Station.class, stationUuid);
-				if (station == null) throw new Exception();
+				if (station == null) throw new Exception(MessageFormat.format(Messages.STATION_MISSING.getMessage(l), stationKey));
 				if (!station.getConservationArea().equals(ca)) throw new Exception(MessageFormat.format(Messages.STATION_MISSING.getMessage(l), stationKey));
 				newPatrol.setStation(station);
 			}catch (Exception ex) {
@@ -401,8 +516,8 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.OBJECTIVE.getKey())) {
-			String comment = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.OBJECTIVE.getKey());
-			newPatrol.setObjective(comment);
+			String objective = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.OBJECTIVE.getKey());
+			newPatrol.setObjective(objective);
 		}
 		
 		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PATROLID.getKey())) {
@@ -411,60 +526,18 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.ARMED.getKey())) {
-			String armed = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.ARMED.getKey());
-			if (armed.equalsIgnoreCase(Boolean.TRUE.toString())) {
-				newPatrol.setArmed(true);
-			}
-		}
-		
-		newLeg.setMandate(findPatrolMandate(ca, session,attributes, l));
-		
-		newLeg.setType(findTransportType(ca, session, attributes, l));
-		newPatrol.recalculateType();
-		
-		//members leader & pilot
-		newLeg.setMembers(new ArrayList<>());
-		JSONArray employees = (JSONArray) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey());
-		
-		String leader = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey());
-		String pilot = null;
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey())) {
-			pilot = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey());
-		}
-		boolean hasleader = false;
-		boolean haspilot = false;
-		for (int i = 0; i < employees.size(); i ++) {
-			String euuid = (String) employees.get(i);
-			
-			UUID e = UuidUtils.stringToUuid(euuid);
-			Employee employee = session.get(Employee.class, e);
-			if (employee == null || !employee.getConservationArea().equals(ca)) {
-				warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), euuid));
+			Object x = attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.ARMED.getKey());
+			if (x instanceof Boolean) {
+				newPatrol.setArmed(((Boolean)x));
 			}else {
-				PatrolLegMember member = new PatrolLegMember();
-				member.setPatrolLeg(newLeg);
-				member.setMember(employee);
-				if (euuid.equalsIgnoreCase(leader)) {
-					hasleader = true;
-					member.setIsLeader(true);
+				if (x.toString().equalsIgnoreCase(Boolean.TRUE.toString())) {
+					newPatrol.setArmed(true);
+				}else {
+					newPatrol.setArmed(false);
 				}
-				if (euuid.equalsIgnoreCase(pilot)) {
-					haspilot = true;
-					member.setIsPilot(true);
-				}
-				newLeg.getMembers().add(member);
 			}
 		}
-		if (newLeg.getMembers().isEmpty()) {
-			throw new Exception(Messages.NO_EMPLOYEES.getMessage(l));
-		}
-		if (!hasleader) {
-			throw new Exception(Messages.NO_LEADER.getMessage(l));
-		}
-		if (newLeg.getType().getPatrolType().requiresPilot() && !haspilot) {
-			throw new Exception(MessageFormat.format(Messages.NO_PILOT.getMessage(l), newLeg.getType().getName()));
-		}
-
+		
 		//custom patrol attributes
 		List<PatrolAttribute> customAttributes = session.createQuery("FROM PatrolAttribute WHERE conservationArea = :ca", PatrolAttribute.class) //$NON-NLS-1$
 				.setParameter("ca", ca) //$NON-NLS-1$
@@ -475,7 +548,6 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		for (PatrolAttribute custom : customAttributes) {
 			String key = custom.getKeyId();
 			if (!attributes.containsKey(key)) continue;
-			
 			
 			PatrolAttributeValue pvalue = new PatrolAttributeValue();
 			pvalue.setPatrol(newPatrol);
@@ -515,12 +587,345 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			newPatrol.getCustomAttributes().add(pvalue);
 		}
 		
+		return newPatrol;
+	}
+	
+	private PatrolLeg parsePatrolLeg(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		PatrolLeg newPatrolLeg = new PatrolLeg();
+		newPatrolLeg.setUuid(getSourcePatrolLegUuid(attributes, l));
+
+		//configure date/time
+		if (props.containsKey("dateTime")) {
+			LocalDateTime date = super.getDateTime(props);
+			newPatrolLeg.setStartDate(date.toLocalDate());
+		}
+		
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey())) {
+			newPatrolLeg.setMandate(findPatrolMandate(ca, session,attributes, l));
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey())) {
+			newPatrolLeg.setType(findTransportType(ca, session, attributes, l));
+		}
+		
+		//members leader & pilot
+		newPatrolLeg.setMembers(new ArrayList<>());
+		
+		
+		String leader = null;
+		String pilot = null;
+		
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey())) {
+			leader = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey())) {
+			pilot = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey());
+		}
+		
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey())) {
+			JSONArray employees = (JSONArray) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey());
+			
+			for (int i = 0; i < employees.size(); i ++) {
+				String euuid = (String) employees.get(i);
+				
+				UUID e = UuidUtils.stringToUuid(euuid);
+				Employee employee = session.get(Employee.class, e);
+				if (employee == null || !employee.getConservationArea().equals(ca)) {
+					warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), euuid));
+				}else {
+					PatrolLegMember member = new PatrolLegMember();
+					member.setPatrolLeg(newPatrolLeg);
+					member.setMember(employee);
+					if (euuid.equalsIgnoreCase(leader)) {
+						member.setIsLeader(true);
+					}
+					if (euuid.equalsIgnoreCase(pilot)) {
+						member.setIsPilot(true);
+					}
+					newPatrolLeg.getMembers().add(member);
+				}
+			}
+		}else {
+			//no employees set leader and pilot
+			if (leader != null) {
+				UUID e = UuidUtils.stringToUuid(leader);
+				Employee employee = session.get(Employee.class, e);
+				if (employee == null || !employee.getConservationArea().equals(ca)) {
+					warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), leader));
+				}else {
+					PatrolLegMember member = new PatrolLegMember();
+					member.setPatrolLeg(newPatrolLeg);
+					member.setMember(employee);
+					member.setIsLeader(true);
+					if (leader.equals(pilot)) member.setIsPilot(true);
+					newPatrolLeg.getMembers().add(member);
+				}
+			}
+			if (pilot != null && !pilot.equals(leader)) {
+				UUID e = UuidUtils.stringToUuid(pilot);
+				Employee employee = session.get(Employee.class, e);
+				if (employee == null || !employee.getConservationArea().equals(ca)) {
+					warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), pilot));
+				}else {
+					PatrolLegMember member = new PatrolLegMember();
+					member.setPatrolLeg(newPatrolLeg);
+					member.setMember(employee);
+					 member.setIsPilot(true);
+					newPatrolLeg.getMembers().add(member);
+				}
+			}
+		}
+		return newPatrolLeg;
+	}
+	
+	private void processPatrolUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+
+		Patrol updatedPatrol = parsePatrol(feature, ca, session, l);
+		
+		//find the patrol
+		if (updatedPatrol.getUuid() == null) {
+			//not found
+			throw new Exception("Patrol to update not found.");
+		}
+		
+		Patrol toUpdate = findPatrolLink(updatedPatrol.getUuid(), ca, session, l);
+		if (toUpdate == null) {
+			throw new Exception("Patrol to update not found.");
+		}
+		
+		modifiedFeatures.add(toUpdate);
+		
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.ARMED.getKey())) {
+			toUpdate.setArmed(updatedPatrol.isArmed());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.COMMENT.getKey())) {
+			toUpdate.setComment(updatedPatrol.getComment());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PATROLID.getKey())) {
+			toUpdate.setId(updatedPatrol.getId());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.OBJECTIVE.getKey())) {
+			toUpdate.setObjective(updatedPatrol.getObjective());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.STATION.getKey())) {
+			toUpdate.setStation(updatedPatrol.getStation());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey())) {
+			toUpdate.setTeam(updatedPatrol.getTeam());
+		}
+	
+		if (toUpdate.getCustomAttributes() == null) toUpdate.setCustomAttributes(new ArrayList<>());
+		if (updatedPatrol.getCustomAttributes() != null) {
+			for (PatrolAttributeValue value : updatedPatrol.getCustomAttributes()) {
+				PatrolAttributeValue current = null;
+				
+				for (PatrolAttributeValue cv : toUpdate.getCustomAttributes()) {
+					if (cv.getPatrolAttribute().equals(value.getPatrolAttribute())) {
+						current = cv;
+						break;
+					}
+				}
+				if (current == null) {
+					current = new PatrolAttributeValue();
+					current.setPatrol(toUpdate);
+					toUpdate.getCustomAttributes().add(current);
+				}
+				current.setAttributeValue(value.getAttributeValue());
+			}
+		}
+		session.save(toUpdate);
+		session.flush();
+	}
+	
+	private void processPatrolLegUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+
+		PatrolLeg updatedPatrolLeg = parsePatrolLeg(feature, ca, session, l);
+		
+		//find the patrol
+		if (updatedPatrolLeg.getUuid() == null) {
+			//not found
+			throw new Exception("Patrol leg to update not found.");
+		}
+		
+		PatrolLeg toUpdate = findPatrolLegLink(updatedPatrolLeg.getUuid(), ca, session, l);
+		if (toUpdate == null) {
+			throw new Exception("Patrol leg to update not found.");
+		}
+		
+		modifiedFeatures.add(toUpdate.getPatrol());
+		
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		//TODO: patrol leg id
+//		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.ID.getKey())) {
+//			toUpdate.setId(updatedPatrolLeg.getId());
+//		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey())) {
+			toUpdate.setMandate(updatedPatrolLeg.getMandate());
+		}
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey())) {
+			toUpdate.setType(updatedPatrolLeg.getType());
+		}
+		
+		toUpdate.getPatrol().recalculateType();
+		
+		//
+		//if employees is provided by not leader/pilot then use existing leader/pilot
+		//if leader/pilot is provided by not employees then try to set based on current employees
+		
+		UUID leaderUuid = null;
+		UUID pilotUuid = null;
+		
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey())) {
+			leaderUuid = updatedPatrolLeg.getLeader().getMember().getUuid();
+		}else {
+			leaderUuid = toUpdate.getLeader().getMember().getUuid();
+		}
+
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey())) {
+			pilotUuid = updatedPatrolLeg.getPilot().getMember().getUuid();
+		}else {
+			if (toUpdate.getPilot() != null) pilotUuid = toUpdate.getPilot().getMember().getUuid();
+		}
+		
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey())) {
+			Set<Employee> required = updatedPatrolLeg.getMembers().stream().map(e->e.getMember()).collect(Collectors.toSet());
+			
+			List<PatrolLegMember> toRemove = new ArrayList<>();
+			for (PatrolLegMember m : toUpdate.getMembers()) {
+				if (!required.contains(m.getMember())) toRemove.add(m);
+			}
+			toUpdate.getMembers().removeAll(toRemove);
+			Set<Employee> current = toUpdate.getMembers().stream().map(e->e.getMember()).collect(Collectors.toSet());
+			
+			for (Employee e : required) {
+				if (!current.contains(e)) {
+					PatrolLegMember m = new PatrolLegMember();
+					m.setMember(e);
+					m.setPatrolLeg(toUpdate);
+					toUpdate.getMembers().add(m);
+				}
+			}
+		}
+		
+		if (toUpdate.getMembers().isEmpty()) {
+			throw new Exception(Messages.NO_EMPLOYEES.getMessage(l));
+		}
+		
+		boolean hasleader = false;
+		boolean haspilot = false;
+		for (PatrolLegMember m : toUpdate.getMembers()) {
+			if (m.getMember().getUuid().equals(leaderUuid)) {
+				m.setIsLeader(true);
+				hasleader = true;
+			}else {
+				m.setIsLeader(false);
+			}
+			if (toUpdate.getType().getPatrolType().requiresPilot() && m.getMember().getUuid().equals(pilotUuid)) {
+				m.setIsPilot(true);
+				haspilot = true;
+			}else {
+				m.setIsPilot(false);
+			}
+		}
+		
+		if (!hasleader) {
+			throw new Exception(Messages.NO_LEADER.getMessage(l));
+		}
+		if (toUpdate.getType().getPatrolType().requiresPilot() && !haspilot) {
+			throw new Exception(MessageFormat.format(Messages.NO_PILOT.getMessage(l), toUpdate.getType().getName()));
+		}
+	
+		session.save(toUpdate);
+		session.flush();
+	}
+	
+	private void processStartPatrol(JSONObject feature, ConservationArea ca,  Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		
+		String[] required = new String[] {
+				JSON_PATROLUUID, JSON_PATROLLEGUUID, PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey()
+		};
+		for (String r : required) {
+			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
+		}
+		
+		//configure date/time
+
+		Patrol newPatrol = parsePatrol(feature, ca, session, l);
+		PatrolLeg newPatrolLeg = parsePatrolLeg(feature, ca, session, l);
+		
+		LocalDateTime date = super.getDateTime(props);
+		newPatrol.setEndDate(date.toLocalDate());
+		newPatrol.setConservationArea(ca);
+		modifiedFeatures.add(newPatrol);
+		
+		newPatrolLeg.setStartDate(newPatrol.getStartDate());
+		newPatrolLeg.setEndDate(newPatrol.getEndDate());
+		
+		newPatrol.setLegs(new ArrayList<>());
+		newPatrol.getLegs().add(newPatrolLeg);
+		newPatrolLeg.setPatrol(newPatrol);
+		//TODO: should this be specified in the JSON
+		newPatrolLeg.setId("1"); //$NON-NLS-1$
+		
+		createLegDays(newPatrolLeg, session);
+		newPatrolLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
+		newPatrolLeg.getPatrolLegDays().get(0).setEndTime(date.toLocalTime());
+		
+		UUID srcPatrolUuid = newPatrol.getUuid();
+		newPatrol.setUuid(null);
+
+		newPatrol.recalculateType();
+		
+		Patrol temp = findPatrolLink(srcPatrolUuid, ca, session, l);
+		if (temp != null) {
+			//a link to a patrol already exists in the database for this uuid; 
+			throw new Exception(MessageFormat.format(Messages.PATROL_EXISTS.getMessage(l), srcPatrolUuid));
+		}
+		
+		UUID srcLegUuid = newPatrolLeg.getUuid();
+		newPatrolLeg.setUuid(null);
+		PatrolLeg temp2 = findPatrolLegLink(srcLegUuid, ca, session, l);
+		if (temp2 != null) {
+			//a link to a patrol leg already exists in the database for this uuid; 
+			throw new Exception(MessageFormat.format(Messages.PATROLLEG_EXISTS.getMessage(l), srcLegUuid));
+		}
+		
+		boolean hasleader = false;
+		boolean haspilot = false;
+		for (PatrolLegMember member : newPatrolLeg.getMembers()) {
+			if (member.getIsLeader()) hasleader = true;
+			if (member.getIsPilot()) haspilot = true;
+		}
+
+		if (newPatrolLeg.getMembers().isEmpty()) {
+			throw new Exception(Messages.NO_EMPLOYEES.getMessage(l));
+		}
+		if (!hasleader) {
+			throw new Exception(Messages.NO_LEADER.getMessage(l));
+		}
+		if (newPatrolLeg.getType().getPatrolType().requiresPilot() && !haspilot) {
+			throw new Exception(MessageFormat.format(Messages.NO_PILOT.getMessage(l), newPatrolLeg.getType().getName()));
+		}
+
 		//add a track point
 		Coordinate position = super.getPosition(feature);
-		PatrolLegDay pday = newLeg.getPatrolLegDays().get(0);
+		PatrolLegDay pday = newPatrolLeg.getPatrolLegDays().get(0);
 		
 		addTrackPoint(pday, position);		
-		
 		
 		if (newPatrol.getId() == null || newPatrol.getId().trim().isEmpty()) {
 			newPatrol.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(newPatrol, session));
@@ -540,7 +945,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		link.setConservationArea(ca);
 		link.setProviderId(srcLegUuid);
 		link.setDataType(LEG_DATATYPE);
-		link.setSmartId(newLeg.getUuid());
+		link.setSmartId(newPatrolLeg.getUuid());
 		session.save(link);
 	}
 	
@@ -989,4 +1394,6 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		link.setLastModified(LocalDateTime.now());
 		return waypoint;
 	}	
+	
+	
 }

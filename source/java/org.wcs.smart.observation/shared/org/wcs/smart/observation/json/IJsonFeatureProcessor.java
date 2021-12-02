@@ -77,22 +77,32 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class IJsonFeatureProcessor {
 
+	public static final String JSON_OBSGROUPUUID_KEY = "groupUuid";
+
+	public static final String JSON_INCIDENTUUID_KEY = "incidentUuid";
+
+	public static final String JSON_OBSERVER_KEY = "observer";
+
 	public static final String JSON_SIGNATURETYPE_KEY = "signatureType"; //$NON-NLS-1$
 
 	public static final String OBSGROUP_DATATYPE = "obsgroup"; //$NON-NLS-1$
+	public static final String OBSERVATION_DATATYPE = "observation"; //$NON-NLS-1$
 	
 	public static final String JSON_SMARTATTRIBUTES = "smartAttributes";  //$NON-NLS-1$
 	private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'H:m:s"; //$NON-NLS-1$
 	public static final String JSON_PROPERTIES = "properties"; //$NON-NLS-1$
 	public static final String JSON_SMARTDATATYPE = "smartDataType"; //$NON-NLS-1$
 	public static final String JSON_SMARTFEATURETYPE = "smartFeatureType"; //$NON-NLS-1$
-	public static final String JSON_FT_OBSERVATION = "observation"; //$NON-NLS-1$
+	
+	public static final String JSON_FT_WP_OBSERVATION = "waypoint/observation"; //$NON-NLS-1$
+	public static final String JSON_FT_WP_ADD = "waypoint/new"; //$NON-NLS-1$
+	public static final String JSON_FT_WP_UPDATE = "waypoint"; //$NON-NLS-1$
 	
 	public enum WaypointMetadata{
 		DISTANCE("distance"), //$NON-NLS-1$
 		BEARING("bearing"), //$NON-NLS-1$
 		COMMENT("comment"), //$NON-NLS-1$
-		OBSERVER("observer"); //$NON-NLS-1$
+		OBSERVER(JSON_OBSERVER_KEY); //$NON-NLS-1$
 		
 		String key;
 		
@@ -141,11 +151,9 @@ public abstract class IJsonFeatureProcessor {
 	 */
 	public abstract boolean canProcess(String featureType);
 	
-	
-	
 	/**
-	 * Processes the given GeoJSON feature.  Returns a string
-	 * that describes which features have been processed
+	 * Processes the given GeoJSON feature as new database features.  
+	 * Returns a string that describes which features have been processed. 
 	 * 
 	 * @param feature
 	 * @param ca
@@ -154,6 +162,7 @@ public abstract class IJsonFeatureProcessor {
 	 */
 	public abstract void processFeature(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception;
 
+	
 	/**
 	 * disposes of any temporary resources created while loading data
 	 */
@@ -214,6 +223,89 @@ public abstract class IJsonFeatureProcessor {
 		
 		return new Coordinate(x, y, time);
 	}
+	
+	protected WaypointObservation createWaypointObservation(JSONObject feature, ConservationArea ca, Session session, Locale locale) throws IOException{
+		
+		WaypointObservation wo = new WaypointObservation();
+		wo.setAttachments(new ArrayList<>());
+		wo.setAttributes(new ArrayList<>());
+		
+
+		if (feature.containsKey("observationUuid")) { //$NON-NLS-1$
+			//observation to update
+			UUID observationUuid = UuidUtils.stringToUuid(feature.get("observationUuid").toString()); //$NON-NLS-1$
+			wo.setUuid(observationUuid);
+		}
+		
+		
+		if (feature.containsKey(JSON_OBSERVER_KEY)) { //$NON-NLS-1$
+			String euuid = feature.get(JSON_OBSERVER_KEY).toString(); //$NON-NLS-1$
+			Employee e = findEmployee(euuid, ca, session);
+			if (e == null) {
+				warnings.add(MessageFormat
+						.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(locale), euuid));
+			} else {
+				wo.setObserver(e);
+			}
+		}
+
+		Category c = null;
+		String categoryKey = null;
+		if (feature.containsKey("category")) { //$NON-NLS-1$
+			categoryKey = feature.get("category").toString(); //$NON-NLS-1$
+			c = findCategory(categoryKey, ca, session);
+		}
+		
+		if (feature.containsKey("attachments")) { //$NON-NLS-1$
+			List<WaypointAttachment> attachments = parseAttachments(feature, ca, session, locale);
+			attachments.forEach(a->{
+				ObservationAttachment oa = new ObservationAttachment();
+				oa.setFilename(a.getFilename());
+				oa.setCopyFromLocation(a.getCopyFromLocation());
+				oa.setObservation(wo);
+				wo.getAttachments().add(oa);
+			});
+		}
+
+		if (c == null) {
+			warnings.add(MessageFormat.format(
+					Messages.CATEGORY_NOT_FOUND.getMessage(locale),
+					categoryKey));
+
+		} else {
+			wo.setCategory(c);
+			if (feature.containsKey("attributes")) { //$NON-NLS-1$
+				JSONObject obatts = (JSONObject) feature.get("attributes"); //$NON-NLS-1$
+				for (Object s : obatts.keySet()) {
+					String attributeKey = s.toString();
+					Object attributeValue = obatts.get(s);
+
+					if (attributeValue == null) continue;
+					
+					Attribute a = findAttribute(attributeKey, c, session);
+					if (a == null) {
+						warnings.add(MessageFormat.format(
+								Messages.ATTRIBUTE_NOT_FOUND.getMessage(locale),
+								attributeKey, c.getName()));
+					} else {
+						WaypointObservationAttribute woa = new WaypointObservationAttribute();
+						woa.setAttribute(a);
+						try {
+							updateObservationAttribute(woa, attributeValue, locale);
+							wo.getAttributes().add(woa);
+							woa.setObservation(wo);
+						} catch (Exception ex) {
+							warnings.add(ex.getMessage());
+						}
+					}
+				}
+
+			}
+		}
+		return wo;
+	}
+
+		
 	/**
 	 * Converts a GeoJSON feature into a SMART Waypoint object.
 	 * 
@@ -271,15 +363,15 @@ public abstract class IJsonFeatureProcessor {
 			});
 		}
 		
-		if (atts.containsKey("incidentUuid")) { //$NON-NLS-1$
+		if (atts.containsKey(JSON_INCIDENTUUID_KEY)) { //$NON-NLS-1$
 			//incident to update 
-			UUID incidentUuid = UuidUtils.stringToUuid((String)atts.get("incidentUuid")); //$NON-NLS-1$
+			UUID incidentUuid = UuidUtils.stringToUuid((String)atts.get(JSON_INCIDENTUUID_KEY)); //$NON-NLS-1$
 			wp.setUuid(incidentUuid);
 		}
 		
 		Employee wpobserver = null;
-		if (atts.containsKey("observer")) { //$NON-NLS-1$
-			String euuid = atts.get("observer").toString(); //$NON-NLS-1$
+		if (atts.containsKey(JSON_OBSERVER_KEY)) { //$NON-NLS-1$
+			String euuid = atts.get(JSON_OBSERVER_KEY).toString(); //$NON-NLS-1$
 			wpobserver = findEmployee(euuid, ca, session);
 			if (wpobserver == null) {
 				warnings.add(MessageFormat
@@ -295,9 +387,9 @@ public abstract class IJsonFeatureProcessor {
 
 				WaypointObservationGroup wgroup = new WaypointObservationGroup();
 		
-				if (group.containsKey("groupUuid")) { //$NON-NLS-1$
+				if (group.containsKey(JSON_OBSGROUPUUID_KEY)) { //$NON-NLS-1$
 					//group to update
-					UUID groupUuid = UuidUtils.stringToUuid(group.get("groupUuid").toString()); //$NON-NLS-1$
+					UUID groupUuid = UuidUtils.stringToUuid(group.get(JSON_OBSGROUPUUID_KEY).toString()); //$NON-NLS-1$
 					wgroup.setUuid(groupUuid);
 				}
 				
@@ -310,77 +402,12 @@ public abstract class IJsonFeatureProcessor {
 
 					for (int i = 0; i < obs.size(); i++) {
 
-						WaypointObservation wo = new WaypointObservation();
-						wo.setObservationGroup(wgroup);
-						wo.setAttachments(new ArrayList<>());
-						wo.setAttributes(new ArrayList<>());
-						
-
 						JSONObject ob = (JSONObject) obs.get(i);
-						wo.setObserver(wpobserver);
-						if (ob.containsKey("observer")) { //$NON-NLS-1$
-							String euuid = ob.get("observer").toString(); //$NON-NLS-1$
-							Employee e = findEmployee(euuid, ca, session);
-							if (e == null) {
-								warnings.add(MessageFormat
-										.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(locale), euuid));
-							} else {
-								wo.setObserver(e);
-							}
-						}
-
-						String categoryKey = ob.get("category").toString(); //$NON-NLS-1$
-						Category c = findCategory(categoryKey, ca, session);
-
-						if (ob.containsKey("attachments")) { //$NON-NLS-1$
-							List<WaypointAttachment> attachments = parseAttachments(ob, ca, session, locale);
-							attachments.forEach(a->{
-								ObservationAttachment oa = new ObservationAttachment();
-								oa.setFilename(a.getFilename());
-								oa.setCopyFromLocation(a.getCopyFromLocation());
-								oa.setObservation(wo);
-								wo.getAttachments().add(oa);
-							});
-						}
-
-						if (c == null) {
-							warnings.add(MessageFormat.format(
-									Messages.CATEGORY_NOT_FOUND.getMessage(locale),
-									categoryKey));
-
-						} else {
-							wo.setCategory(c);
-
-							wgroup.getObservations().add(wo);
-							
-							if (ob.containsKey("attributes")) { //$NON-NLS-1$
-								JSONObject obatts = (JSONObject) ob.get("attributes"); //$NON-NLS-1$
-								for (Object s : obatts.keySet()) {
-									String attributeKey = s.toString();
-									Object attributeValue = obatts.get(s);
-
-									if (attributeValue == null) continue;
-									
-									Attribute a = findAttribute(attributeKey, c, session);
-									if (a == null) {
-										warnings.add(MessageFormat.format(
-												Messages.ATTRIBUTE_NOT_FOUND.getMessage(locale),
-												attributeKey, c.getName()));
-									} else {
-										WaypointObservationAttribute woa = new WaypointObservationAttribute();
-										woa.setAttribute(a);
-										try {
-											updateObservationAttribute(woa, attributeValue, locale);
-											wo.getAttributes().add(woa);
-											woa.setObservation(wo);
-										} catch (Exception ex) {
-											warnings.add(ex.getMessage());
-										}
-									}
-								}
-
-							}
-						}
+						WaypointObservation wo = createWaypointObservation(ob, ca, session, locale);
+						wo.setObservationGroup(wgroup);
+						
+						if (wo.getObserver() == null) wo.setObserver(wpobserver);
+						wgroup.getObservations().add(wo);
 					}
 				}
 			}
@@ -623,4 +650,24 @@ public abstract class IJsonFeatureProcessor {
 		link.setLastModified(LocalDateTime.now());
 		return p;
 	}
+	
+	protected WaypointObservation findObservationLink(UUID providerUuid, ConservationArea ca, Session session) throws Exception{
+		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
+			.setParameter("ca",ca) //$NON-NLS-1$
+			.setParameter("puuid", providerUuid) //$NON-NLS-1$
+			.setParameter("datatype", OBSERVATION_DATATYPE) //$NON-NLS-1$
+			.uniqueResult();
+		
+		if (link == null) return null;
+		
+		WaypointObservation observation = session.get(WaypointObservation.class, link.getSmartId());
+		if (observation == null) {
+			session.delete(link);
+			return null;
+		}
+		if (!observation.getWaypoint().getConservationArea().equals(ca)) return null;
+		
+		link.setLastModified(LocalDateTime.now());
+		return observation;
+	}	
 }

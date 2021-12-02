@@ -225,7 +225,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
-		if (ftype.equalsIgnoreCase(JSON_FT_OBSERVATION)) {
+		if (ftype.equalsIgnoreCase(JSON_FT_WP_ADD)) {
 			processObservation(feature, ca, session, l);
 		}else if (ftype.equalsIgnoreCase(JSON_FT_START)) {
 			processStartMission(feature, ca, session, l);
@@ -235,7 +235,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			processTrackPoint(feature, ca, session, l);
 		}else {
 			StringBuilder sb = new StringBuilder();
-			sb.append(JSON_FT_OBSERVATION);
+			sb.append(JSON_FT_WP_ADD);
 			sb.append(", "); //$NON-NLS-1$
 			sb.append(JSON_FT_START);
 			sb.append(", "); //$NON-NLS-1$

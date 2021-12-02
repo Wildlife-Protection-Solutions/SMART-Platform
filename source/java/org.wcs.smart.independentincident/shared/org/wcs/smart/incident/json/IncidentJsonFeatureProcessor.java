@@ -91,7 +91,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 	public Set<Waypoint> getCreatedFeatures(IWaypointSource source){
 		return this.createdFeatures.get(source.getKey());
 	}
-	
+		
 	@Override
 	public void processFeature(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception {
 
@@ -102,8 +102,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, INCIDENT_DATATYPE));
 
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
-		if (!ftype.equalsIgnoreCase(JSON_FT_OBSERVATION))
-		throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_OBSERVATION));
+		if (!ftype.equalsIgnoreCase(JSON_FT_WP_ADD))
+		throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_WP_ADD));
 
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 		wp.setSourceId(IndepedentIncidentSource.KEY);

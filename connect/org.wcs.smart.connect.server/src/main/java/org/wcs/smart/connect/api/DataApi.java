@@ -245,7 +245,8 @@ public class DataApi extends HttpServlet{
 					}
 					
 					try(InputStream is = new ByteArrayInputStream(body.getBytes())){
-						processor.processData(is, s);
+						//TODO: fix this
+						processor.processData(is, false, s);
 					}catch(Exception ex) {
 						logger.log(Level.INFO, ex.getMessage(),ex);
 						throw new SmartConnectException(Response.Status.BAD_REQUEST, ex.getMessage(), ex);
