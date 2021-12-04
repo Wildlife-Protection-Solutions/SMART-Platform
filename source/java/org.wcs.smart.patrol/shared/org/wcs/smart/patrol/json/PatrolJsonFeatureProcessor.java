@@ -82,20 +82,47 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 
+	//Link data types for patrols
+	public enum PatrolLinkDataType{
+		PATROL("patrol"), //$NON-NLS-1$
+		INCIDENT("patrolincident"), //$NON-NLS-1$
+		LEG("patrolleg"); //$NON-NLS-1$
+		
+		private String key;
+		PatrolLinkDataType(String key){
+			this.key = key;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
+	}
+	
+	//json field keys
 	private static final String JSON_PATROLLEGUUID = "patrolLegUuid"; //$NON-NLS-1$
 	private static final String JSON_PATROLUUID = "patrolUuid"; //$NON-NLS-1$
 	
-	//links
+	//Patrol related JSON data type
 	private static final String PATROL_DATATYPE = "patrol"; //$NON-NLS-1$
-	private static final String INCIDENT_DATATYPE = "patrolincident"; //$NON-NLS-1$
-	private static final String LEG_DATATYPE = "patrolleg"; //$NON-NLS-1$
 	
-	public static final String JSON_FT_START = "patrol/new"; //$NON-NLS-1$
-	public static final String JSON_FT_END = "leg/end"; //$NON-NLS-1$
-	public static final String JSON_FT_PATROLUPDATE = "patrol"; //$NON-NLS-1$
-	public static final String JSON_FT_NEWLEG = "leg/new"; //$NON-NLS-1$
-	public static final String JSON_FT_LEGUPDATE = "leg"; //$NON-NLS-1$
-	public static final String JSON_FT_TRACKPOINT = "trackpoint"; //$NON-NLS-1$
+	//Patrol related JSON feature types
+	private enum PatrolSmartFeatureType{
+		PATROL_NEW ("patrol/new"), //$NON-NLS-1$
+		PATROL("patrol"), //$NON-NLS-1$
+		LEG_NEW("leg/new"), //$NON-NLS-1$
+		LEG_END("leg/end"), //$NON-NLS-1$
+		LEG("leg"), //$NON-NLS-1$
+		TRACKPOINT("trackpoint"); //$NON-NLS-1$
+		
+		private String key;
+		
+		PatrolSmartFeatureType(String key){
+			this.key = key;
+		}
+		public String getKey() {
+			return this.key;
+		}
+	}
 	
 	public enum Messages{
 		INVALID_DATA_TYPE,
@@ -120,7 +147,10 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		TEAM_MISSING,
 		STATION_MISSING,
 		CUSTOM_ATTRIBUTE_ERROR,
-		COMPLETE_MSG;
+		COMPLETE_MSG,
+		OBSERVATION_EXISTS,
+		WAYPOINT_NOT_FOUND,
+		OBSERVATION_NOT_FOUND;
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, l);
@@ -146,35 +176,6 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		return this.modifiedFeatures;
 	}
 	
-//	@Override
-//	public void processUpdateFeature(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception {
-//		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
-//
-//		String dtype = props.get(JSON_SMARTDATATYPE).toString(); 
-//		if (!dtype.equalsIgnoreCase(PATROL_DATATYPE))
-//			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, PATROL_DATATYPE));
-//
-//		if (!props.containsKey(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES)) {
-//			throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), IJsonFeatureProcessor.JSON_SMARTATTRIBUTES));
-//		}
-//		
-//		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
-//		if (ftype.equalsIgnoreCase(JSON_FT_OBSERVATION)) {
-////			processObservation(feature, ca, session, l);
-//		}else if (ftype.equalsIgnoreCase(JSON_FT_START)) {
-//			processPatrolUpdate(feature, ca, session, l);
-//			
-//		}else if (ftype.equalsIgnoreCase(JSON_FT_END)) {
-////			processEndPatrolLeg(feature, ca, session, l);
-//		}else if (ftype.equalsIgnoreCase(JSON_FT_NEWLEG)) {
-////			processNewLeg(feature, ca, session, l);
-//			processPatrolLegUpdate(feature, ca, session , l);
-//		}else if (ftype.equalsIgnoreCase(JSON_FT_TRACKPOINT)) {
-////			processTrackPoint(feature, ca, session, l);
-//		}else {
-//			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_OBSERVATION));
-//		}
-//	}
 	
 	@Override
 	public void processFeature(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception {
@@ -192,37 +193,32 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
 		
 		
-		if (ftype.equalsIgnoreCase(JSON_FT_START)) {
+		if (ftype.equalsIgnoreCase(PatrolSmartFeatureType.PATROL_NEW.getKey())) {
 			processStartPatrol(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_END)) {
+		}else if (ftype.equalsIgnoreCase(PatrolSmartFeatureType.LEG_END.getKey())) {
 			processEndPatrolLeg(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_NEWLEG)) {
+		}else if (ftype.equalsIgnoreCase(PatrolSmartFeatureType.LEG_NEW.getKey())) {
 			processNewLeg(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_TRACKPOINT)) {
+		}else if (ftype.equalsIgnoreCase(PatrolSmartFeatureType.TRACKPOINT.getKey())) {
 			processTrackPoint(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_PATROLUPDATE)) {
+		}else if (ftype.equalsIgnoreCase(PatrolSmartFeatureType.PATROL.getKey())) {
 			processPatrolUpdate(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_LEGUPDATE)) {
+		}else if (ftype.equalsIgnoreCase(PatrolSmartFeatureType.LEG.getKey())) {
 			processPatrolLegUpdate(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_WP_ADD)) {
+		}else if (ftype.equalsIgnoreCase(SmartFeatureType.WAYPOINT_NEW.getKey())) {
 			processingWaypoint(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_WP_OBSERVATION)) {
+		}else if (ftype.equalsIgnoreCase(SmartFeatureType.OBSERVATION.getKey())) {
 			processObservationUpdate(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_WP_UPDATE)) {
+		}else if (ftype.equalsIgnoreCase(SmartFeatureType.WAYPOINT.getKey())) {
 			processWaypointUpdate(feature, ca, session, l);
 		}else {
-			StringJoiner j = new StringJoiner(",");
-			j.add(JSON_FT_START);
-			j.add(JSON_FT_END);
-			j.add(JSON_FT_NEWLEG);
-			j.add(JSON_FT_TRACKPOINT);
-			j.add(JSON_FT_PATROLUPDATE);
-			j.add(JSON_FT_LEGUPDATE);
-			j.add(JSON_FT_WP_ADD);
-			j.add(JSON_FT_WP_OBSERVATION);
-			j.add(JSON_FT_WP_UPDATE);
-			
-			
+			StringJoiner j = new StringJoiner(","); //$NON-NLS-1$
+			for (PatrolSmartFeatureType t : PatrolSmartFeatureType.values()) {
+				j.add(t.getKey());
+			}
+			for (SmartFeatureType t : SmartFeatureType.values()) {
+				j.add(t.getKey());
+			}
 			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, j.toString()));
 		}
 
@@ -327,7 +323,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dlink.setConservationArea(ca);
 				dlink.setProviderId(src);
 				dlink.setSmartId(wp.getUuid());
-				dlink.setDataType(INCIDENT_DATATYPE);
+				dlink.setDataType(PatrolLinkDataType.INCIDENT.getKey());
 				session.save(dlink);
 			}
 			
@@ -335,6 +331,18 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			
 		}else {
 			//merge observation groups with existing wp
+			
+			for (WaypointObservation wo : wp.getAllObservations()) {
+				if (wo.getUuid() != null) {
+					WaypointObservation existing = findObservationLink(wo.getUuid(), ca, session);
+					if (existing != null) {
+						//throw an error - should not be updating observations this way
+						throw new Exception(MessageFormat.format(Messages.OBSERVATION_EXISTS.getMessage(l), SmartFeatureType.OBSERVATION.getKey()));
+					}	
+					observationLinks.put(wo,  wo.getUuid());
+					wo.setUuid(null);
+				}
+			}
 			
 			//add observations
 			List<WaypointObservationGroup> add = new ArrayList<>();
@@ -353,18 +361,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 						}
 					}
 				}
-				for (WaypointObservation wo : group.getObservations()) {
-					if (wo.getUuid() != null) {
-						observationLinks.put(wo, wo.getUuid());
-						WaypointObservation existing = findObservationLink(wo.getUuid(), ca, session);
-						if (existing != null) {
-							//throw an error - should not be updating observations this way
-							//TODO:
-							throw new Exception("Invalid JSON - should not be using this api to update observations");
-						}
-						wo.setUuid(null);
-					}
-				}
+				
 			}
 			for (WaypointObservationGroup g : add) {
 				if (g.getUuid() != null) groupLinks.put(g, g.getUuid());
@@ -383,7 +380,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dlink.setConservationArea(ca);
 			dlink.setProviderId(link.getValue());
 			dlink.setSmartId(link.getKey().getUuid());
-			dlink.setDataType(OBSGROUP_DATATYPE);
+			dlink.setDataType(LinkDataType.OBSERVATION_GROUP.getKey());
 			session.save(dlink);
 		}
 		for (Entry<WaypointObservation, UUID> link : observationLinks.entrySet()) {
@@ -391,7 +388,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dlink.setConservationArea(ca);
 			dlink.setProviderId(link.getValue());
 			dlink.setSmartId(link.getKey().getUuid());
-			dlink.setDataType(OBSERVATION_DATATYPE);
+			dlink.setDataType(LinkDataType.OBSERVATION.getKey());
 			session.save(dlink);
 		}
 
@@ -410,24 +407,25 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
 		//find the incident
-		if (!attributes.containsKey("incidentUuid")) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), "incidentUuid"));
+		if (!attributes.containsKey(JSON_INCIDENTUUID_KEY)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_INCIDENTUUID_KEY));
 
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
-
-
 		Waypoint toUpdate = findIncidentLink(wp.getUuid(), ca, session, l);
+		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
+
 		//find patrol with associated waypoint
-		
-		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class)
-				.setParameter("wp",toUpdate)
+		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class) //$NON-NLS-1$
+				.setParameter("wp",toUpdate) //$NON-NLS-1$
 				.uniqueResult();
-		if (pw == null) throw new Exception("Patrol link to waypoint not found.");
+		if (pw == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
 		modifiedFeatures.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
 		
 		if (wp.getId() != null) toUpdate.setId(wp.getId());
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
+
+		updateObserver(toUpdate, attributes, ca, session, l);
 		
 		session.save(toUpdate);
 		session.flush();
@@ -440,22 +438,24 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
 		//find the incident
-		if (!attributes.containsKey("observationUuid")) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), "observationUuid"));
+		if (!attributes.containsKey(JSON_OBSERVATIONUUID_KEY)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_OBSERVATIONUUID_KEY));
 
-		WaypointObservation observation = super.createWaypointObservation(feature, ca, session, l);
+		WaypointObservation observation = super.createWaypointObservation(attributes, ca, session, l);
 		WaypointObservation toUpdate = findObservationLink(observation.getUuid(), ca, session);
 		
-		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class)
-				.setParameter("wp",toUpdate.getWaypoint())
+		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.OBSERVATION_NOT_FOUND.getMessage(l), observation.getUuid().toString()));
+		
+		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class) //$NON-NLS-1$
+				.setParameter("wp", toUpdate.getWaypoint()) //$NON-NLS-1$
 				.uniqueResult();
-		if (pw == null) throw new Exception("Patrol link to waypoint not found.");
+		if (pw == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), toUpdate.getWaypoint().getUuid().toString()));
 		modifiedFeatures.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
 		
 
 		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
 			toUpdate.setObserver(observation.getObserver());
 		}
-			
+		//TODO: process attachments	
 		toUpdate.getAttributes().clear();
 		session.flush();
 			
@@ -477,7 +477,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		newPatrol.setUuid(getSourcePatrolUuid(attributes, l));
 		
 		//configure date/time
-		if (props.containsKey("dateTime")) {
+		if (props.containsKey(JSON_DATETIME_KEY)) {
 			LocalDateTime date = super.getDateTime(props);
 			newPatrol.setStartDate(date.toLocalDate());
 		}
@@ -598,7 +598,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		newPatrolLeg.setUuid(getSourcePatrolLegUuid(attributes, l));
 
 		//configure date/time
-		if (props.containsKey("dateTime")) {
+		if (props.containsKey(JSON_DATETIME_KEY)) {
 			LocalDateTime date = super.getDateTime(props);
 			newPatrolLeg.setStartDate(date.toLocalDate());
 		}
@@ -687,12 +687,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//find the patrol
 		if (updatedPatrol.getUuid() == null) {
 			//not found
-			throw new Exception("Patrol to update not found.");
+			throw new Exception(MessageFormat.format(Messages.PATROL_LINK_MISSING.getMessage(l), "null")); //$NON-NLS-1$
 		}
 		
 		Patrol toUpdate = findPatrolLink(updatedPatrol.getUuid(), ca, session, l);
 		if (toUpdate == null) {
-			throw new Exception("Patrol to update not found.");
+			throw new Exception(MessageFormat.format(Messages.PATROL_LINK_MISSING.getMessage(l), updatedPatrol.getUuid().toString()));
 		}
 		
 		modifiedFeatures.add(toUpdate);
@@ -750,12 +750,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//find the patrol
 		if (updatedPatrolLeg.getUuid() == null) {
 			//not found
-			throw new Exception("Patrol leg to update not found.");
+			throw new Exception(MessageFormat.format(Messages.PATROLLEG_LINK_MISSING.getMessage(l), "null")); //$NON-NLS-1$
 		}
 		
 		PatrolLeg toUpdate = findPatrolLegLink(updatedPatrolLeg.getUuid(), ca, session, l);
 		if (toUpdate == null) {
-			throw new Exception("Patrol leg to update not found.");
+			throw new Exception(MessageFormat.format(Messages.PATROLLEG_LINK_MISSING.getMessage(l), updatedPatrolLeg.getUuid().toString()));
 		}
 		
 		modifiedFeatures.add(toUpdate.getPatrol());
@@ -937,14 +937,14 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		DataLink link = new DataLink();
 		link.setConservationArea(ca);
 		link.setProviderId(srcPatrolUuid);
-		link.setDataType(PATROL_DATATYPE);
+		link.setDataType(PatrolLinkDataType.PATROL.getKey());
 		link.setSmartId(newPatrol.getUuid());
 		session.save(link);
 		
 		link = new DataLink();
 		link.setConservationArea(ca);
 		link.setProviderId(srcLegUuid);
-		link.setDataType(LEG_DATATYPE);
+		link.setDataType(PatrolLinkDataType.LEG.getKey());
 		link.setSmartId(newPatrolLeg.getUuid());
 		session.save(link);
 	}
@@ -1201,7 +1201,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		DataLink legLink = new DataLink();
 		legLink.setConservationArea(ca);
-		legLink.setDataType(LEG_DATATYPE);
+		legLink.setDataType(PatrolLinkDataType.LEG.getKey());
 		legLink.setProviderId(srcLegUuid);
 		legLink.setSmartId(newLeg.getUuid());
 		session.save(legLink);
@@ -1265,12 +1265,20 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 				modifiedFeatures.stream().map(p->p.getId()).collect(Collectors.joining(", "))); //$NON-NLS-1$
 	}
 	
-	
+	/**
+	 * Find the patrol linked with to the provided uuid.  Will return null if no patrol found.
+	 * @param providerUuid
+	 * @param ca
+	 * @param session
+	 * @param l
+	 * @return
+	 * @throws Exception
+	 */
 	private Patrol findPatrolLink(UUID providerUuid, ConservationArea ca, Session session, Locale l) throws Exception{
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 		.setParameter("ca",ca) //$NON-NLS-1$
 		.setParameter("puuid", providerUuid) //$NON-NLS-1$
-		.setParameter("datatype", PATROL_DATATYPE) //$NON-NLS-1$
+		.setParameter("datatype", PatrolLinkDataType.PATROL.getKey()) //$NON-NLS-1$
 		.uniqueResult();
 		
 		if (link == null) return null;
@@ -1292,11 +1300,20 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 	}
 	
 
+	/**
+	 * Find the patrol leg linked to the uuid provided.  Will return null if link or leg not found.
+	 * @param providerUuid
+	 * @param ca
+	 * @param session
+	 * @param l
+	 * @return
+	 * @throws Exception
+	 */
 	private PatrolLeg findPatrolLegLink(UUID providerUuid, ConservationArea ca, Session session, Locale l) throws Exception{
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 			.setParameter("ca",ca) //$NON-NLS-1$
 			.setParameter("puuid", providerUuid) //$NON-NLS-1$
-			.setParameter("datatype", LEG_DATATYPE) //$NON-NLS-1$
+			.setParameter("datatype", PatrolLinkDataType.LEG.getKey()) //$NON-NLS-1$
 			.uniqueResult();
 		
 		if (link == null) return null;
@@ -1369,11 +1386,21 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		});
 	}
 	
+	/**
+	 * Finds the waypoint that is linked to the uuid provided.  Will return null if not found. Will thrown an exception
+	 * if linked to a different conservation area then currently being processed.
+	 * @param providerUuid
+	 * @param ca
+	 * @param session
+	 * @param l
+	 * @return
+	 * @throws Exception
+	 */
 	private Waypoint findIncidentLink(UUID providerUuid, ConservationArea ca, Session session, Locale l) throws Exception{
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 			.setParameter("ca",ca) //$NON-NLS-1$
 			.setParameter("puuid", providerUuid) //$NON-NLS-1$
-			.setParameter("datatype", INCIDENT_DATATYPE) //$NON-NLS-1$
+			.setParameter("datatype", PatrolLinkDataType.INCIDENT.getKey()) //$NON-NLS-1$
 			.uniqueResult();
 		
 		if (link == null) return null;

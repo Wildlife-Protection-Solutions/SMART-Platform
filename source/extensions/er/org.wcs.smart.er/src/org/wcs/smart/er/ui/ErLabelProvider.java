@@ -193,6 +193,9 @@ public class ErLabelProvider implements IErLabelProvider{
 			case DESIGN_MISSING: return Messages.ErLabelProvider_MissionJsonMessage18;
 			case SURVEY_EXISTS: return Messages.ErLabelProvider_ErLabelProvider_MissionJsonMessage19;
 			case SURVEY_LINK_EXISTS: return Messages.ErLabelProvider_ErLabelProvider_MissionJsonMessage20;
+			case OBSERVATION_EXISTS: return Messages.ErLabelProvider_ObservationExists;
+			case WAYPOINT_NOT_FOUND: return Messages.ErLabelProvider_WaypointNotFound;
+			case OBSERVATION_NOT_FOUND: return Messages.ErLabelProvider_ObservationNotFound;
 		}
 		return ""; //$NON-NLS-1$
 	}

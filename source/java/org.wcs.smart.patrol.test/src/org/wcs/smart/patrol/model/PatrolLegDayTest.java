@@ -30,7 +30,6 @@ import org.junit.Test;
 
 public class PatrolLegDayTest {
 
-	
 	@Test
 	public void testPatrolLegDayCreation2(){
 		Patrol p = new Patrol();

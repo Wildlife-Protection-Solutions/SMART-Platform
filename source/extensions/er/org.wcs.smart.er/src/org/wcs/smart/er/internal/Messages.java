@@ -229,12 +229,18 @@ public class Messages extends NLS {
 	public static String ErLabelProvider_MissionMetadataSamplingUnit;
 
 	public static String ErLabelProvider_NameColumn;
+
+	public static String ErLabelProvider_ObservationExists;
+
+	public static String ErLabelProvider_ObservationNotFound;
 	public static String ErLabelProvider_sd_table_name;
 	public static String ErLabelProvider_StartDateColumn;
 	public static String ErLabelProvider_StatusColumn;
 
 	public static String ErLabelProvider_SurveyLabel;
 	public static String ErLabelProvider_su_table_name;
+
+	public static String ErLabelProvider_WaypointNotFound;
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;
 	public static String ExportWizard_ExportError;

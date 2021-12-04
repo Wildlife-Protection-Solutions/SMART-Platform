@@ -480,7 +480,8 @@ public class CyberTrackerNoa {
 		}
 		
 		if (thrown == null) {
-			try(OutputStream out = Files.newOutputStream(upfile, StandardOpenOption.CREATE)){ 
+			try(OutputStream out = Files.newOutputStream(upfile, StandardOpenOption.CREATE)){
+//				throw new IOException("Test exception when stream cannot be writtin/read");
 				IOUtils.copy(data, out);
 				item.setStatus(Status.QUEUED);
 			} catch (IOException ex) {

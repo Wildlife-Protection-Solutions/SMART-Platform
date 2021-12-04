@@ -62,6 +62,7 @@ import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.TrackUtil;
 import org.wcs.smart.util.UuidUtils;
@@ -74,19 +75,49 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 
+	//Link data types for surveys
+	public enum SurveyLinkDataType{
+		MISSION("mission"), //$NON-NLS-1$
+		INCIDENT("missionincident"), //$NON-NLS-1$
+		SURVEY("survey"); //$NON-NLS-1$
+			
+		private String key;
+		SurveyLinkDataType(String key){
+			this.key = key;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
+	}
+		
 	private static final String SURVEY_KEY_ID = "id"; //$NON-NLS-1$
 
 	private static final String MISSION_DATATYPE = "mission"; //$NON-NLS-1$
 	private static final String SURVEY_DATATYPE = "survey"; //$NON-NLS-1$
-	private static final String INCIDENT_DATATYPE = "missionincident"; //$NON-NLS-1$
 
 	private static final String JSON_MISSIONUUID = "missionUuid"; //$NON-NLS-1$
 	private static final String JSON_SURVEYUUID = "surveyUuid"; //$NON-NLS-1$
 	
-	public static final String JSON_FT_START = "start"; //$NON-NLS-1$
-	public static final String JSON_FT_END = "end"; //$NON-NLS-1$
-	public static final String JSON_FT_NEW = "new"; //$NON-NLS-1$
-	public static final String JSON_FT_TRACKPOINT = "trackpoint"; //$NON-NLS-1$
+	//Survey/Mission related JSON feature types
+	private enum SurveySmartFeatureType{
+		SURVEY ("survey"), //$NON-NLS-1$
+		SURVEY_NEW ("survey/new"), //$NON-NLS-1$
+		MISSION("mission"), //$NON-NLS-1$
+		MISSION_NEW("mission/new"), //$NON-NLS-1$
+		MISSION_END("mission/end"), //$NON-NLS-1$
+		TRACKPOINT("trackpoint"); //$NON-NLS-1$
+		
+		private String key;
+			
+		SurveySmartFeatureType(String key){
+			this.key = key;
+		}
+		public String getKey() {
+			return this.key;
+		}
+	}
+		
 	
 	public enum Messages{
 		INVALID_DATA_TYPE,
@@ -108,7 +139,10 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		TRACKID,
 		SURVEY_EXISTS,
 		SURVEY_LINK_EXISTS,
-		COMPLETE_MSG;
+		COMPLETE_MSG,
+		OBSERVATION_EXISTS,
+		WAYPOINT_NOT_FOUND,
+		OBSERVATION_NOT_FOUND;
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(IErLabelProvider.class).getLabel(this, l);
@@ -161,10 +195,45 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
 		
-		if (!ftype.equalsIgnoreCase(JSON_FT_NEW)) {
-			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_NEW));
+		if (ftype.equalsIgnoreCase(SurveySmartFeatureType.SURVEY_NEW.getKey())) {
+			processNewSurvey(props, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.SURVEY.getKey())) {
+			processUpdateSurvey(props, ca, session, l);
+		}else {
+			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, SurveySmartFeatureType.SURVEY_NEW.getKey() + ", " + SurveySmartFeatureType.SURVEY.getKey())); //$NON-NLS-1$
 		}
 		
+		
+	}
+
+	private void processUpdateSurvey(JSONObject props, ConservationArea ca, Session session, Locale l) throws Exception {
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+
+		String[] required = new String[] {JSON_SURVEYUUID};
+		for (String r : required) {
+			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
+		}
+		
+		UUID srcSurveyUuid = null;
+		try {
+			srcSurveyUuid = UuidUtils.stringToUuid((String)attributes.get(JSON_SURVEYUUID));
+		}catch (Exception ex) {
+			throw new Exception(MessageFormat.format(Messages.INVALID_SURVEY_UUID.getMessage(l), props.get(JSON_SURVEYUUID)));
+		}
+
+		Survey toUpdate = findSurveyLink(srcSurveyUuid, ca, session, l);
+		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.SURVEY_NOT_FOUND.getMessage(l), srcSurveyUuid));
+		
+		if (attributes.containsKey(SURVEY_KEY_ID)) {
+			String id = (String)attributes.get(SURVEY_KEY_ID);
+			toUpdate.setId(id);
+		}
+
+		session.save(toUpdate);
+		session.flush();		
+	}
+	
+	private void processNewSurvey(JSONObject props, ConservationArea ca, Session session, Locale l) throws Exception {
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 
 		String[] required = new String[] {JSON_SURVEYUUID,
@@ -212,10 +281,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		dlink.setConservationArea(ca);
 		dlink.setProviderId(srcSurveyUuid);
 		dlink.setSmartId(survey.getUuid());
-		dlink.setDataType(SURVEY_DATATYPE);
+		dlink.setDataType(SurveyLinkDataType.SURVEY.getKey());
 		session.save(dlink);
 	}
-	
 	
 	private void processMissionDataType(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
@@ -225,29 +293,42 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
-		if (ftype.equalsIgnoreCase(JSON_FT_WP_ADD)) {
-			processObservation(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_START)) {
+		if (ftype.equalsIgnoreCase(SmartFeatureType.WAYPOINT_NEW.getKey())) {
+			processWaypoint(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(SmartFeatureType.WAYPOINT.getKey())) {
+			processWaypointUpdate(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(SmartFeatureType.OBSERVATION.getKey())) {
+			processObservationUpdate(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.MISSION_NEW.getKey())) {
 			processStartMission(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_END)) {
+		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.MISSION_END.getKey())) {
 			processEndMission(feature, ca, session, l);
-		}else if (ftype.equalsIgnoreCase(JSON_FT_TRACKPOINT)) {
+		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.TRACKPOINT.getKey())) {
 			processTrackPoint(feature, ca, session, l);
+		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.MISSION.getKey())) {
+			//TODO: uypdateMission(feature, ca, session, l);
+			processMissionUpdate(feature, ca, session, l);
 		}else {
 			StringBuilder sb = new StringBuilder();
-			sb.append(JSON_FT_WP_ADD);
+			sb.append(SmartFeatureType.WAYPOINT.getKey());
 			sb.append(", "); //$NON-NLS-1$
-			sb.append(JSON_FT_START);
+			sb.append(SmartFeatureType.WAYPOINT_NEW.getKey());
 			sb.append(", "); //$NON-NLS-1$
-			sb.append(JSON_FT_END);
+			sb.append(SmartFeatureType.OBSERVATION.getKey());
 			sb.append(", "); //$NON-NLS-1$
-			sb.append(JSON_FT_TRACKPOINT);
+			sb.append(SurveySmartFeatureType.MISSION_END.getKey());
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(SurveySmartFeatureType.MISSION_NEW.getKey());
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(SurveySmartFeatureType.MISSION.getKey());
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(SurveySmartFeatureType.TRACKPOINT.getKey());
 			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, sb.toString()));
 		}
 
 	}
 	
-	private void processObservation(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+	private void processWaypoint(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
@@ -303,10 +384,12 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
 		HashMap<WaypointObservationGroup, UUID> links = new HashMap<>();
+		HashMap<WaypointObservation, UUID> obslinks = new HashMap<>();
 
 		if (existingWp == null) {
 			UUID src = wp.getUuid();
 			wp.setUuid(null);
+
 			//create a new waypoint & associated links
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				if (g.getUuid() != null) {
@@ -317,6 +400,17 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 					links.put(g,g.getUuid());
 					g.setUuid(null);
 					
+				}
+				
+				for (WaypointObservation wo : g.getObservations()) {
+					if (wo.getUuid() != null) {
+						//clear any old link
+						session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+							.setParameter("uuid", wo.getUuid()) //$NON-NLS-1$
+							.executeUpdate();	
+						obslinks.put(wo,  wo.getUuid());
+						wo.setUuid(null);
+					}
 				}
 			}
 
@@ -341,12 +435,24 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dlink.setConservationArea(ca);
 				dlink.setProviderId(src);
 				dlink.setSmartId(wp.getUuid());
-				dlink.setDataType(INCIDENT_DATATYPE);
+				dlink.setDataType(SurveyLinkDataType.INCIDENT.getKey());
 				session.save(dlink);
 			}
 			
 		}else {
 			//merge observation groups with existing wp
+			for (WaypointObservation wo : wp.getAllObservations()) {
+				if (wo.getUuid() != null) {
+					WaypointObservation existing = findObservationLink(wo.getUuid(), ca, session);
+					if (existing != null) {
+						//throw an error - should not be updating observations this way
+						throw new Exception(MessageFormat.format(Messages.OBSERVATION_EXISTS.getMessage(l), SmartFeatureType.OBSERVATION.getKey()));
+					}	
+					obslinks.put(wo,  wo.getUuid());
+					wo.setUuid(null);
+				}
+			}
+			
 			List<WaypointObservationGroup> add = new ArrayList<>();
 			for (WaypointObservationGroup group : wp.getObservationGroups()) {
 				if (group.getUuid() == null) {
@@ -381,10 +487,17 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dlink.setConservationArea(ca);
 			dlink.setProviderId(link.getValue());
 			dlink.setSmartId(link.getKey().getUuid());
-			dlink.setDataType(OBSGROUP_DATATYPE);
+			dlink.setDataType(LinkDataType.OBSERVATION_GROUP.getKey());
 			session.save(dlink);
 		}
-		
+		for (Entry<WaypointObservation, UUID> link : obslinks.entrySet()) {
+			DataLink dlink = new DataLink();
+			dlink.setConservationArea(ca);
+			dlink.setProviderId(link.getValue());
+			dlink.setSmartId(link.getKey().getUuid());
+			dlink.setDataType(LinkDataType.OBSERVATION.getKey());
+			session.save(dlink);
+		}
 		
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
@@ -398,58 +511,25 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
-		//configure date/time
-		LocalDateTime date = super.getDateTime(props);
 		
-		Mission newMission = new Mission();
-		newMission.setStartDate(date.toLocalDate());
-		newMission.setEndDate(date.toLocalDate());
+		Mission newMission = parseMission(feature, ca, session, l);
+		UUID srcMissionUuid = newMission.getUuid();
+		newMission.setUuid(null);
 		
 		modifiedFeatures.add(newMission);
 		
-		createMissingDays(newMission);
-		
-		newMission.getMissionDays().get(0).setStartTime(date.toLocalTime());
-		newMission.getMissionDays().get(0).setEndTime(date.toLocalTime());
-
 		String[] required = new String[] {JSON_MISSIONUUID};
 		for (String r : required) {
 			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
 		}
 		
-		UUID srcMissionUuid = null;
-		try {
-			srcMissionUuid = UuidUtils.stringToUuid((String)attributes.get(JSON_MISSIONUUID));
-		}catch (Exception ex) {
-			throw new Exception(MessageFormat.format(Messages.INVALID_MISSION_UUID.getMessage(l), props.get(JSON_MISSIONUUID)));
-		}
-
 		Mission temp = findMissionLink(srcMissionUuid, ca, session, l);
 		if (temp != null) {
 			//a link to a mission already exists in the database for this uuid; 
 			throw new Exception(MessageFormat.format(Messages.MISSION_EXISTS.getMessage(l), srcMissionUuid));
 		}
 		
-		
-		UUID srcSurveyUuid = null;
-		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.SURVEY.getKey())) {
-			try {
-				srcSurveyUuid = UuidUtils.stringToUuid((String)attributes.get(MissionAttributeMetadata.MissionMetadata.SURVEY.getKey()));
-			}catch (Exception ex) {
-				throw new Exception(MessageFormat.format(Messages.INVALID_SURVEY_UUID.getMessage(l), props.get(JSON_MISSIONUUID)));
-			}
-		}
-		
-		Survey survey;
-		if (srcSurveyUuid != null) {
-			survey = findSurvey(srcSurveyUuid, ca, session, l);
-			if (survey == null) {
-				survey = findSurveyLink(srcSurveyUuid, ca, session, l);
-			}
-			if (survey == null) {
-				throw new Exception(MessageFormat.format(Messages.SURVEY_NOT_FOUND.getMessage(l), srcSurveyUuid));
-			}
-		}else {
+		if (newMission.getSurvey() == null) {
 			//check for survey design
 			String sd = (String)attributes.get(MissionAttributeMetadata.MissionMetadata.SURVEYDESIGN.getKey());
 			SurveyDesign design = findSurveyDesign(sd, ca, session, l);
@@ -458,110 +538,19 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}
 			
 			//create new Survey
-			survey = new Survey();
+			Survey survey = new Survey();
 			survey.setMissions(new ArrayList<>());
 			survey.setSurveyDesign(design);
-			survey.setId(  MissionIdGenerator.INSTANCE.generateSurveyId(survey, session, l) );
+			survey.setId(MissionIdGenerator.INSTANCE.generateSurveyId(survey, session, l) );
 			session.save(survey);
+			newMission.setSurvey(survey);
 		}
 		
-		newMission.setSurvey(survey);
-		
-		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.COMMENT.getKey())) {
-			String comment = (String) attributes.get(MissionAttributeMetadata.MissionMetadata.COMMENT.getKey());
-			newMission.setComment(comment);
-		}
-		
-		
-		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.MISSIONID.getKey())) {
-			String id = (String) attributes.get(MissionAttributeMetadata.MissionMetadata.MISSIONID.getKey());
-			newMission.setId(id.trim());
-		}
-		
-		//members leader & pilot
-		newMission.setMembers(new ArrayList<>());
-		JSONArray employees = (JSONArray) attributes.get(MissionAttributeMetadata.MissionMetadata.EMPLOYEES.getKey());
-		
-		String leader = (String) attributes.get(MissionAttributeMetadata.MissionMetadata.LEADER.getKey());
-		boolean hasleader = false;
-		
-		for (int i = 0; i < employees.size(); i ++) {
-			String euuid = (String) employees.get(i);
-			
-			UUID e = UuidUtils.stringToUuid(euuid);
-			Employee employee = session.get(Employee.class, e);
-			if (employee == null || !employee.getConservationArea().equals(ca)) {
-				warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), euuid));
-			}else {
-				MissionMember member = new MissionMember();
-				member.setMission(newMission);
-				member.setMember(employee);
-				if (euuid.equalsIgnoreCase(leader)) {
-					hasleader = true;
-					member.setIsLeader(true);
-				}
-				newMission.getMembers().add(member);
-			}
-		}
 		if (newMission.getMembers().isEmpty()) {
 			throw new Exception(Messages.NO_EMPLOYEES.getMessage(l));
 		}
-		if (!hasleader) {
+		if (newMission.getLeader() == null) {
 			throw new Exception(Messages.NO_LEADER.getMessage(l));
-		}
-		
-		//custom mission attributes
-		List<MissionAttribute> customAttributes = session.createQuery("FROM MissionAttribute WHERE conservationArea = :ca", MissionAttribute.class) //$NON-NLS-1$
-				.setParameter("ca", ca) //$NON-NLS-1$
-				.list();
-		
-		newMission.setMissionPropertyValues(new ArrayList<>());
-		
-		for (MissionAttribute custom : customAttributes) {
-			String key = custom.getKeyId();
-			if (!attributes.containsKey(key)) continue;
-			
-			
-			MissionPropertyValue pvalue = new MissionPropertyValue();
-			pvalue.setMission(newMission);
-			pvalue.setMissionAttribute(custom);
-			Object jsonValue = attributes.get(key);
-			
-			try {
-				
-				if (custom.getType() == AttributeType.BOOLEAN) {
-					Boolean value = parseBoolean(jsonValue);
-					pvalue.setNumberValue(value ? 1.0 : 0.0);
-				}else if (custom.getType() == AttributeType.DATE) {
-					LocalDate value = parseDate(jsonValue);
-					pvalue.setDateValue(value);
-				}else if (custom.getType() == AttributeType.TEXT) {
-					String value = jsonValue.toString();
-					pvalue.setStringValue(value);
-				}else if (custom.getType() == AttributeType.LIST) {
-					String itemkey = jsonValue.toString();
-					MissionAttributeListItem value = null;
-					for (MissionAttributeListItem item : custom.getAttributeList()) {
-						if (item.getKeyId().equalsIgnoreCase(itemkey)) {
-							value = item;
-							break;
-						}
-					}
-					if (value == null) {
-						throw new Exception(MessageFormat.format("List item with key {0} not found for custom mission attribute {1}.", key, custom.getName())); //$NON-NLS-1$
-					}
-					pvalue.setAttributeListItem(value);
-				}else if (custom.getType() == AttributeType.NUMERIC) {
-					Double value = parseNumeric(jsonValue);
-					pvalue.setNumberValue(value);
-				}
-					
-			}catch (Exception ex) {
-				warnings.add(MessageFormat.format(Messages.CUSTOM_ATTRIBUTE_ERROR.getMessage(l), custom.getName(), jsonValue));
-				continue;
-			}
-			
-			newMission.getMissionPropertyValues().add(pvalue);
 		}
 		
 		//add a track point
@@ -578,7 +567,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		addTrackPoint(newMission.getMissionDays().get(0), position, su, l);		
 		
-		
+		//generate id
 		if (newMission.getId() == null || newMission.getId().trim().isEmpty()) {
 			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
 		}
@@ -589,7 +578,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		DataLink link = new DataLink();
 		link.setConservationArea(ca);
 		link.setProviderId(srcMissionUuid);
-		link.setDataType(MISSION_DATATYPE);
+		link.setDataType(SurveyLinkDataType.MISSION.getKey());
 		link.setSmartId(newMission.getUuid());
 		session.save(link);
 		
@@ -802,7 +791,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 		.setParameter("ca",ca) //$NON-NLS-1$
 		.setParameter("puuid", providerUuid) //$NON-NLS-1$
-		.setParameter("datatype", MISSION_DATATYPE) //$NON-NLS-1$
+		.setParameter("datatype", SurveyLinkDataType.MISSION.getKey()) //$NON-NLS-1$
 		.uniqueResult();
 		
 		if (link == null) return null;
@@ -827,7 +816,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 		.setParameter("ca",ca) //$NON-NLS-1$
 		.setParameter("puuid", providerUuid) //$NON-NLS-1$
-		.setParameter("datatype", SURVEY_DATATYPE) //$NON-NLS-1$
+		.setParameter("datatype", SurveyLinkDataType.SURVEY.getKey()) //$NON-NLS-1$
 		.uniqueResult();
 		
 		if (link == null) return null;
@@ -878,7 +867,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 			.setParameter("ca",ca) //$NON-NLS-1$
 			.setParameter("puuid", providerUuid) //$NON-NLS-1$
-			.setParameter("datatype", INCIDENT_DATATYPE) //$NON-NLS-1$
+			.setParameter("datatype", SurveyLinkDataType.INCIDENT.getKey()) //$NON-NLS-1$
 			.uniqueResult();
 		
 		if (link == null) return null;
@@ -899,4 +888,324 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		link.setLastModified(LocalDateTime.now());
 		return waypoint;
 	}	
+	
+	private void processWaypointUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		//find the incident
+		if (!attributes.containsKey(JSON_INCIDENTUUID_KEY)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_INCIDENTUUID_KEY));
+
+		Waypoint wp = super.createWaypoint(feature, ca, session, l);
+		Waypoint toUpdate = findIncidentLink(wp.getUuid(), ca, session, l);
+		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
+
+		//find mission with associated waypoint
+		SurveyWaypoint sw = session.createQuery("FROM SurveyWaypoint WHERE id.waypoint = :wp ", SurveyWaypoint.class) //$NON-NLS-1$
+				.setParameter("wp",toUpdate) //$NON-NLS-1$
+				.uniqueResult();
+		if (sw == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
+		modifiedFeatures.add(sw.getMissionDay().getMission());
+		
+		if (wp.getId() != null) toUpdate.setId(wp.getId());
+		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
+		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
+		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
+
+		updateObserver(toUpdate, attributes, ca, session, l);
+	
+		session.save(toUpdate);
+		session.flush();
+		
+	}
+	
+	private void processObservationUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		//find the incident
+		if (!attributes.containsKey(JSON_OBSERVATIONUUID_KEY)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_OBSERVATIONUUID_KEY));
+
+		WaypointObservation observation = super.createWaypointObservation(attributes, ca, session, l);
+		WaypointObservation toUpdate = findObservationLink(observation.getUuid(), ca, session);
+		
+		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.OBSERVATION_NOT_FOUND.getMessage(l), observation.getUuid().toString()));
+		
+		SurveyWaypoint sw = session.createQuery("FROM SurveyWaypoint WHERE id.waypoint = :wp ", SurveyWaypoint.class) //$NON-NLS-1$
+				.setParameter("wp",toUpdate.getWaypoint()) //$NON-NLS-1$
+				.uniqueResult();
+		if (sw == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), toUpdate.getUuid().toString()));
+		modifiedFeatures.add(sw.getMissionDay().getMission());
+
+		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
+			toUpdate.setObserver(observation.getObserver());
+		}
+		//TODO: process attachments	
+		toUpdate.getAttributes().clear();
+		session.flush();
+			
+		toUpdate.setCategory(observation.getCategory());
+		for (WaypointObservationAttribute a : observation.getAttributes()) {
+			a.setObservation(toUpdate);
+			toUpdate.getAttributes().add(a);
+		}
+		session.save(toUpdate);
+		session.flush();
+	}
+	
+	private Mission parseMission(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		//configure date/time
+		LocalDateTime date = super.getDateTime(props);
+		
+		Mission newMission = new Mission();
+		newMission.setStartDate(date.toLocalDate());
+		newMission.setEndDate(date.toLocalDate());
+		
+		createMissingDays(newMission);
+		
+		newMission.getMissionDays().get(0).setStartTime(date.toLocalTime());
+		newMission.getMissionDays().get(0).setEndTime(date.toLocalTime());
+
+		if (attributes.containsKey(JSON_MISSIONUUID)) {
+			try {
+				UUID srcMissionUuid = UuidUtils.stringToUuid((String)attributes.get(JSON_MISSIONUUID));
+				newMission.setUuid(srcMissionUuid);
+			}catch (Exception ex) {
+				throw new Exception(MessageFormat.format(Messages.INVALID_MISSION_UUID.getMessage(l), props.get(JSON_MISSIONUUID)));
+			}	
+		}
+		
+		
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.SURVEY.getKey())) {
+			UUID surveyUuid = null;
+			try {
+				surveyUuid = UuidUtils.stringToUuid((String)attributes.get(MissionAttributeMetadata.MissionMetadata.SURVEY.getKey()));
+			}catch (Exception ex) {
+				throw new Exception(MessageFormat.format(Messages.INVALID_SURVEY_UUID.getMessage(l), props.get(JSON_MISSIONUUID)));
+			}
+			Survey survey;
+			survey = findSurvey(surveyUuid, ca, session, l);
+			if (survey == null) {
+				survey = findSurveyLink(surveyUuid, ca, session, l);
+			}
+			if (survey == null) {
+				throw new Exception(MessageFormat.format(Messages.SURVEY_NOT_FOUND.getMessage(l), surveyUuid));
+			}
+			newMission.setSurvey(survey);
+		}
+		
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.COMMENT.getKey())) {
+			String comment = (String) attributes.get(MissionAttributeMetadata.MissionMetadata.COMMENT.getKey());
+			newMission.setComment(comment);
+		}
+		
+		
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.MISSIONID.getKey())) {
+			String id = (String) attributes.get(MissionAttributeMetadata.MissionMetadata.MISSIONID.getKey());
+			newMission.setId(id.trim());
+		}
+		
+		//members leader & pilot
+		newMission.setMembers(new ArrayList<>());
+		
+		String leader = null;
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.LEADER.getKey())) {
+			leader = (String) attributes.get(MissionAttributeMetadata.MissionMetadata.LEADER.getKey());
+		}
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.EMPLOYEES.getKey())) {
+			JSONArray employees = (JSONArray) attributes.get(MissionAttributeMetadata.MissionMetadata.EMPLOYEES.getKey());
+			
+			for (int i = 0; i < employees.size(); i ++) {
+				String euuid = (String) employees.get(i);
+				
+				UUID e = UuidUtils.stringToUuid(euuid);
+				Employee employee = session.get(Employee.class, e);
+				if (employee == null || !employee.getConservationArea().equals(ca)) {
+					warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), euuid));
+				}else {
+					MissionMember member = new MissionMember();
+					member.setMission(newMission);
+					member.setMember(employee);
+					if (euuid.equalsIgnoreCase(leader)) {
+						member.setIsLeader(true);
+					}
+					newMission.getMembers().add(member);
+				}
+			}
+		}else {
+			//no employees set leader and pilot
+			if (leader != null) {
+				UUID e = UuidUtils.stringToUuid(leader);
+				Employee employee = session.get(Employee.class, e);
+				if (employee == null || !employee.getConservationArea().equals(ca)) {
+					warnings.add(MessageFormat.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(l), leader));
+				}else {
+					MissionMember member = new MissionMember();
+					member.setMission(newMission);
+					member.setMember(employee);
+					member.setIsLeader(true);
+					newMission.getMembers().add(member);
+				}
+			}
+		}
+		
+		//custom mission attributes
+		List<MissionAttribute> customAttributes = session.createQuery("FROM MissionAttribute WHERE conservationArea = :ca", MissionAttribute.class) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.list();
+		
+		newMission.setMissionPropertyValues(new ArrayList<>());
+		
+		for (MissionAttribute custom : customAttributes) {
+			String key = custom.getKeyId();
+			if (!attributes.containsKey(key)) continue;
+			
+			
+			MissionPropertyValue pvalue = new MissionPropertyValue();
+			pvalue.setMission(newMission);
+			pvalue.setMissionAttribute(custom);
+			Object jsonValue = attributes.get(key);
+			
+			try {
+				
+				if (custom.getType() == AttributeType.BOOLEAN) {
+					Boolean value = parseBoolean(jsonValue);
+					pvalue.setNumberValue(value ? 1.0 : 0.0);
+				}else if (custom.getType() == AttributeType.DATE) {
+					LocalDate value = parseDate(jsonValue);
+					pvalue.setDateValue(value);
+				}else if (custom.getType() == AttributeType.TEXT) {
+					String value = jsonValue.toString();
+					pvalue.setStringValue(value);
+				}else if (custom.getType() == AttributeType.LIST) {
+					String itemkey = jsonValue.toString();
+					MissionAttributeListItem value = null;
+					for (MissionAttributeListItem item : custom.getAttributeList()) {
+						if (item.getKeyId().equalsIgnoreCase(itemkey)) {
+							value = item;
+							break;
+						}
+					}
+					if (value == null) {
+						throw new Exception(MessageFormat.format("List item with key {0} not found for custom mission attribute {1}.", key, custom.getName())); //$NON-NLS-1$
+					}
+					pvalue.setAttributeListItem(value);
+				}else if (custom.getType() == AttributeType.NUMERIC) {
+					Double value = parseNumeric(jsonValue);
+					pvalue.setNumberValue(value);
+				}
+					
+			}catch (Exception ex) {
+				warnings.add(MessageFormat.format(Messages.CUSTOM_ATTRIBUTE_ERROR.getMessage(l), custom.getName(), jsonValue));
+				continue;
+			}
+			
+			newMission.getMissionPropertyValues().add(pvalue);
+		}
+		
+		return newMission;
+	}
+		
+	private void processMissionUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
+		
+		Mission newMission = parseMission(feature, ca, session, l);
+		if (newMission.getUuid() == null)  throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_MISSIONUUID));
+		
+		Mission toUpdate = findMissionLink(newMission.getUuid(), ca, session, l);
+		if (toUpdate == null)  
+			throw new Exception(MessageFormat.format(Messages.MISSION_LINK_MISSING.getMessage(l), newMission.getUuid().toString()));
+		
+		modifiedFeatures.add(toUpdate);
+
+		//if survey is updated make sure part of same design
+		if (newMission.getSurvey() != null &&  
+				!toUpdate.getSurvey().getSurveyDesign().equals(newMission.getSurvey().getSurveyDesign())) {
+			throw new Exception("Cannot change the survey design associated with a mission."); //$NON-NLS-1$
+		}
+		if (newMission.getSurvey() != null) toUpdate.setSurvey(newMission.getSurvey());
+		
+		
+		
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.COMMENT.getKey())) {
+			toUpdate.setComment(newMission.getComment());
+		}
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.MISSIONID.getKey())) {
+			toUpdate.setId(newMission.getId());
+		}
+		
+		UUID leaderUuid = null;
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.LEADER.getKey())) {
+			leaderUuid = newMission.getLeader().getMember().getUuid();
+		}else {
+			leaderUuid = toUpdate.getLeader().getMember().getUuid();
+		}
+		
+		if (attributes.containsKey(MissionAttributeMetadata.MissionMetadata.EMPLOYEES.getKey())) {
+			Set<Employee> required = newMission.getMembers().stream().map(e->e.getMember()).collect(Collectors.toSet());
+			
+			List<MissionMember> toRemove = new ArrayList<>();
+			for (MissionMember m : toUpdate.getMembers()) {
+				if (!required.contains(m.getMember())) toRemove.add(m);
+			}
+			toUpdate.getMembers().removeAll(toRemove);
+			Set<Employee> current = toUpdate.getMembers().stream().map(e->e.getMember()).collect(Collectors.toSet());
+			
+			for (Employee e : required) {
+				if (!current.contains(e)) {
+					MissionMember m = new MissionMember();
+					m.setMember(e);
+					m.setMission(toUpdate);
+					toUpdate.getMembers().add(m);
+				}
+			}
+		}
+		
+		if (toUpdate.getMembers().isEmpty()) {
+			throw new Exception(Messages.NO_EMPLOYEES.getMessage(l));
+		}
+		
+		boolean hasleader = false;
+		for (MissionMember m : toUpdate.getMembers()) {
+			if (m.getMember().getUuid().equals(leaderUuid)) {
+				m.setIsLeader(true);
+				hasleader = true;
+			}else {
+				m.setIsLeader(false);
+			}
+		}
+		
+		if (!hasleader) throw new Exception(Messages.NO_LEADER.getMessage(l));
+		
+		//custom mission attributes
+		for (MissionPropertyValue value : newMission.getMissionPropertyValues()) {
+		
+			MissionPropertyValue propToUpdate = null;
+			for (MissionPropertyValue v : toUpdate.getMissionPropertyValues()) {
+				if (value.getMissionAttribute().equals(v.getMissionAttribute())) {
+					propToUpdate= v;
+					break;
+				}
+			}
+			if (propToUpdate == null) {
+				propToUpdate = new MissionPropertyValue();
+				propToUpdate.setMission(toUpdate);
+				toUpdate.getMissionPropertyValues().add(propToUpdate);
+				propToUpdate.setMissionAttribute(value.getMissionAttribute());
+			}
+			propToUpdate.setValue(value.getValue());
+		}
+
+		if (newMission.getId() == null || newMission.getId().trim().isEmpty()) {
+			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
+		}
+		session.save(toUpdate);
+		session.flush();
+	}
 }

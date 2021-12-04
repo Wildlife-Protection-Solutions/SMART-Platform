@@ -437,6 +437,12 @@ public class Messages extends NLS {
 
 	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_22;
 
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_23;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_24;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_25;
+
 	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_3;
 
 	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_4;

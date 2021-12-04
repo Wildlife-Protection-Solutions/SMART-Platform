@@ -144,7 +144,11 @@ public class Messages extends NLS {
 	public static String IncidentLabelProvider_invaliddatatype;
 	public static String IncidentLabelProvider_invalidfeaturetype;
 	public static String IncidentLabelProvider_jsonloaded;
+	public static String IncidentLabelProvider_JsonMissing;
+	public static String IncidentLabelProvider_ObservationExistsCannotUpdate;
+	public static String IncidentLabelProvider_ObservationNotFound;
 	public static String IncidentLabelProvider_SmartIntegrateIncident;
+	public static String IncidentLabelProvider_WpNotFound;
 	public static String IncidentManager_IncidentTooOldToEdit;
 	public static String IncidentManager_Insufficientprivleges;
 	public static String IncidentMapLayer_IncidentPositionName;

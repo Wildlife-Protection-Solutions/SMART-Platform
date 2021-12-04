@@ -95,6 +95,9 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case TEAM_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_20;
 		case STATION_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_21;
 		case CUSTOM_ATTRIBUTE_ERROR: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_22;
+		case OBSERVATION_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_23;
+		case WAYPOINT_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_24;
+		case OBSERVATION_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_25;
 		}
 		return ""; //$NON-NLS-1$
 	}
