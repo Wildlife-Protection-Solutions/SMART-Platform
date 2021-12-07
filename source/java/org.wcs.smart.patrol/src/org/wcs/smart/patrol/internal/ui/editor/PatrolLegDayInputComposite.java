@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -769,9 +768,10 @@ public class PatrolLegDayInputComposite {
 	
 	
 	private void updateTotalHours(){
-		double totalTime = ChronoUnit.MILLIS.between(SmartUtils.toTime(dtStartTime), SmartUtils.toTime(dtEndTime));
-		double restMinutes = Double.parseDouble(this.restMinutes.getText());
-		double totalPatrolHoursTime = totalTime / (1000 * 60 * 60);
+		if (this.patrolLegDate == null) return;
+		
+		double totalPatrolHoursTime = this.patrolLegDate.getPatrolHoursWorked();
+		double totalFieldHoursTime = this.patrolLegDate.getFieldHoursWorked();
 		
 		lblTotalPatrolHours.setText(PatrolEditor.formatTimeRange(totalPatrolHoursTime));
 		if (totalPatrolHoursTime < 0){
@@ -783,8 +783,6 @@ public class PatrolLegDayInputComposite {
 			lblTotalPatrolHours.setForeground(lblTotalFieldHours.getDisplay().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
 			lblTotalPatrolHours.setToolTipText(null);
 		}
-		double totalFieldHoursTime = totalTime - restMinutes * 60 * 1000;
-		totalFieldHoursTime = totalFieldHoursTime / (1000 * 60 * 60);
 		
 		lblTotalFieldHours.setText(PatrolEditor.formatTimeRange(totalFieldHoursTime));
 		if (totalFieldHoursTime < 0){
