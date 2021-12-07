@@ -181,7 +181,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					
 					if (link != null) {					
 						//update the leg end time
-						PatrolLegDay pd = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MAX, session);
+						PatrolLegDay pd = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MIN, session);
 						//PatrolLegDay pd = findLegDay(link.getPatrolLeg(), dt, true, null, session);
 						pd.setEndTime(dt.toLocalTime());
 						
@@ -231,9 +231,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//update patrol end date and end time for last patrol leg day
 					link.getPatrolLeg().getPatrol().setEndDate(dt.toLocalDate());
 					link.getPatrolLeg().setEndDate(dt.toLocalDate());
-					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), link.getPatrolLeg().getEndDate(), true, null, session);
+					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), link.getPatrolLeg().getEndDate(), true, LocalTime.MIN, session);
 					pd.setEndTime(dt.toLocalTime());
-						
+					
 					//add point to track
 					addPointToTrack(pd, parser.readXYFromProperties(feature),dt);
 					
@@ -272,7 +272,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//compute rest times
 					if (link != null) {
 						LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
-						PatrolLegDay currentDay = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MAX, session);
+						PatrolLegDay currentDay = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MIN, session);
 						//the pause event is recorded as a track point; not a waypoint
 						//so find the previous track point
 						List<PatrolLegDay> sorts = new ArrayList<PatrolLegDay>(currentDay.getPatrolLeg().getPatrolLegDays());
@@ -863,7 +863,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			throws Exception {
 		
 //		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, null, session);
-		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime().toLocalDate(), true, LocalTime.MAX, session);
+		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime().toLocalDate(), true, LocalTime.MIN, session);
 		PatrolWaypoint pw = addWaypointToLegDay(addToD, wp);
 		
 		if (addTo.getUuid() != null){
@@ -999,7 +999,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	
 	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
 		if (pnt == null) return;
-		PatrolLegDay pld = findLegDay(leg, time.toLocalDate(), true, null, session);
+		PatrolLegDay pld = findLegDay(leg, time.toLocalDate(), true, LocalTime.MIN, session);
 		addPointToTrack(pld, pnt, time);
 	}
 
