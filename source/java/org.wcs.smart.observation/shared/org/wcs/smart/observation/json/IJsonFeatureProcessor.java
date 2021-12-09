@@ -219,6 +219,8 @@ public abstract class IJsonFeatureProcessor {
 	 * @return
 	 */
 	protected LocalDateTime getDateTime(JSONObject properties) {
+		if (!properties.containsKey(JSON_DATETIME_KEY)) return null;
+		
 		String strDateTime = properties.get(JSON_DATETIME_KEY).toString();
 
 		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
@@ -235,14 +237,17 @@ public abstract class IJsonFeatureProcessor {
 	 * @return
 	 */
 	protected Coordinate getPosition(JSONObject feature) {
-		JSONArray cs = (JSONArray) ((JSONObject) feature.get("geometry")).get("coordinates"); //$NON-NLS-1$ //$NON-NLS-2$
-		double x = ((Number) cs.get(0)).doubleValue();
-		double y = ((Number) cs.get(1)).doubleValue();
-		
-		LocalDateTime dt = getDateTime((JSONObject)feature.get(JSON_PROPERTIES));
-		Long time = SharedUtils.toLongTime(dt);
-		
-		return new Coordinate(x, y, time);
+		if (feature.containsKey("geometry")) { //$NON-NLS-1$
+			JSONArray cs = (JSONArray) ((JSONObject) feature.get("geometry")).get("coordinates"); //$NON-NLS-1$ //$NON-NLS-2$
+			double x = ((Number) cs.get(0)).doubleValue();
+			double y = ((Number) cs.get(1)).doubleValue();
+			
+			LocalDateTime dt = getDateTime((JSONObject)feature.get(JSON_PROPERTIES));
+			Long time = SharedUtils.toLongTime(dt);
+			
+			return new Coordinate(x, y, time);
+		}
+		return null;
 	}
 	
 	/**
@@ -364,9 +369,11 @@ public abstract class IJsonFeatureProcessor {
 
 		Waypoint wp = new Waypoint();
 		wp.setConservationArea(ca);
-		wp.setDateTime(wpdatetime);
-		wp.setRawX(location.x);
-		wp.setRawY(location.y);
+		if (wpdatetime != null) wp.setDateTime(wpdatetime);
+		if (location != null) {
+			wp.setRawX(location.x);
+			wp.setRawY(location.y);
+		}
 
 		if (atts.containsKey("incidentId")) { //$NON-NLS-1$
 			wp.setId(atts.get("incidentId").toString()); //$NON-NLS-1$

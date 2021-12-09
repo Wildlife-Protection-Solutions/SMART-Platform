@@ -98,6 +98,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case OBSERVATION_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_23;
 		case WAYPOINT_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_24;
 		case OBSERVATION_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_25;
+		case CANNOT_UPDATE_DATE: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_26;
 		}
 		return ""; //$NON-NLS-1$
 	}

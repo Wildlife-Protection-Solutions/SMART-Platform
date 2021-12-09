@@ -11,6 +11,10 @@
             id="org.wcs.smart.patrol.test.json"
             name="Test JSON Processors">
       </command>
+      <command
+            id="org.wcs.smart.patrol.test.json.connect"
+            name="Test Connect JSON Processors">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -30,6 +34,11 @@
                   label="Generate Employees"
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.patrol.test.json.connect"
+                  label="Test Connect JSON Processors"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>
@@ -42,6 +51,10 @@
       <handler
             class="org.wcs.smart.patrol.json.TestJsonHandler$TestJSonHandlerWrapper"
             commandId="org.wcs.smart.patrol.test.json">
+      </handler>
+      <handler
+            class="org.wcs.smart.patrol.json.connecttest.ConnectTestJsonHandler$ConnectTestJsonHandlerWrapper"
+            commandId="org.wcs.smart.patrol.test.json.connect">
       </handler>
    </extension>
 

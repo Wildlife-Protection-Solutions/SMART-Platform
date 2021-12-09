@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.json;
 
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,7 +52,11 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
+import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -71,6 +76,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.TrackUtil;
 import org.wcs.smart.util.UuidUtils;
 
@@ -105,6 +111,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 	//Patrol related JSON data type
 	private static final String PATROL_DATATYPE = "patrol"; //$NON-NLS-1$
 	
+	//leg id; not added to the metadata as this is optional and generally not supplied by the user
+	private static final String JSON_LEGID_KEY = "legId"; //$NON-NLS-1$
+	
 	//Patrol related JSON feature types
 	private enum PatrolSmartFeatureType{
 		PATROL_NEW ("patrol/new"), //$NON-NLS-1$
@@ -112,7 +121,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		LEG_NEW("leg/new"), //$NON-NLS-1$
 		LEG_END("leg/end"), //$NON-NLS-1$
 		LEG("leg"), //$NON-NLS-1$
-		TRACKPOINT("trackpoint"); //$NON-NLS-1$
+		TRACKPOINT("trackpoint/new"); //$NON-NLS-1$
 		
 		private String key;
 		
@@ -150,12 +159,16 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		COMPLETE_MSG,
 		OBSERVATION_EXISTS,
 		WAYPOINT_NOT_FOUND,
-		OBSERVATION_NOT_FOUND;
+		OBSERVATION_NOT_FOUND,
+		CANNOT_UPDATE_DATE;
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, l);
 		}
 	}
+	
+	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
+			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 	
 	private Set<Patrol> modifiedFeatures = new HashSet<>();
 
@@ -229,6 +242,11 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
 		LocalDateTime date = super.getDateTime(props);
+
+		Waypoint wp = super.createWaypoint(feature, ca, session, l);
+		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
+		if (existingWp == null && date == null) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_DATETIME_KEY));
+		if (date == null) date = existingWp.getDateTime();
 		
 		UUID srcPatrolLegUuid = getSourcePatrolLegUuid(attributes, l);
 		PatrolLeg leg = findPatrolLegLink(srcPatrolLegUuid, ca, session, l);
@@ -272,18 +290,14 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		session.saveOrUpdate(leg.getPatrol());
 		session.flush();
 		
-		Waypoint wp = super.createWaypoint(feature, ca, session, l);
-		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-		if (wp.getId() == null) {
-			wp.setId(String.valueOf(toUpdate.getWaypoints().size() + 1));
-		}
-		
-		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
 		
 		HashMap<WaypointObservationGroup, UUID> groupLinks = new HashMap<>();
 		HashMap<WaypointObservation, UUID> observationLinks = new HashMap<>();		
 
 		if (existingWp == null) {
+			wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+			if (wp.getId() == null)  wp.setId(String.valueOf(toUpdate.getWaypoints().size() + 1));
+			
 			UUID src = wp.getUuid();
 			wp.setUuid(null);
 			//create a new waypoint & associated links
@@ -309,6 +323,8 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 				}
 			}
 
+			computeAttachmentLocation(wp, toUpdate.getPatrolLeg().getPatrol(), session);
+			
 			PatrolWaypoint pwp = new PatrolWaypoint();
 			pwp.setWaypoint(wp);
 			pwp.setPatrolLegDay(toUpdate);
@@ -327,10 +343,11 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 				session.save(dlink);
 			}
 			
-			
+			addTrackPoint(toUpdate, getPosition(feature));
 			
 		}else {
 			//merge observation groups with existing wp
+			computeAttachmentLocation(wp, toUpdate.getPatrolLeg().getPatrol(), session);
 			
 			for (WaypointObservation wo : wp.getAllObservations()) {
 				if (wo.getUuid() != null) {
@@ -396,7 +413,6 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			toUpdate.setStartTime(date.toLocalTime());
 		}
 		
-		addTrackPoint(toUpdate, getPosition(feature));
 		
 	}
 	
@@ -413,6 +429,15 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		Waypoint toUpdate = findIncidentLink(wp.getUuid(), ca, session, l);
 		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
 
+		LocalDateTime currentdt = toUpdate.getDateTime();
+		Double x = toUpdate.getRawX();
+		Double y = toUpdate.getRawY();
+		boolean updateTrackPoint = false;
+		
+		if (wp.getDateTime() != null && !wp.getDateTime().toLocalDate().equals(toUpdate.getDateTime().toLocalDate())){
+			throw new Exception(Messages.CANNOT_UPDATE_DATE.getMessage(l));
+		}
+		
 		//find patrol with associated waypoint
 		PatrolWaypoint pw = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp ", PatrolWaypoint.class) //$NON-NLS-1$
 				.setParameter("wp",toUpdate) //$NON-NLS-1$
@@ -420,16 +445,66 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (pw == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
 		modifiedFeatures.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
 		
+		if (wp.getDateTime() != null && !wp.getDateTime().equals(toUpdate.getDateTime())) {
+			updateTrackPoint = true;
+			toUpdate.setDateTime(wp.getDateTime());
+		}
+		if (wp.getRawX() != null && wp.getRawY() != null && 
+				(wp.getRawX() != toUpdate.getRawX() || wp.getRawY() != toUpdate.getRawY())){
+			updateTrackPoint = true;
+			toUpdate.setRawX(wp.getRawX());
+			toUpdate.setRawY(wp.getRawY());
+		}
+		
 		if (wp.getId() != null) toUpdate.setId(wp.getId());
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
-
+		
+		//attachments
+		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());
+		for (WaypointAttachment attachment: wp.getAttachments()) {
+			WaypointAttachment newattachment = new WaypointAttachment();
+			newattachment.setCopyFromLocation(attachment.getCopyFromLocation());
+			newattachment.setFilename(attachment.getFilename());
+			newattachment.setWaypoint(toUpdate);
+			toUpdate.getAttachments().add(newattachment);
+		}
+		
 		updateObserver(toUpdate, attributes, ca, session, l);
+		
+		if (updateTrackPoint) {
+			//lets try to find a track point that matches the old values and update it to the new values
+			Coordinate toFind = new Coordinate(x,y, SharedUtils.toLongTime(currentdt));
+			Coordinate updateTo = new Coordinate(toUpdate.getRawX(), toUpdate.getRawY(), SharedUtils.toLongTime(toUpdate.getDateTime()));
+			
+			for (Track t : pw.getPatrolLegDay().getTracks()) {
+				boolean isModified = false;
+				List<LineString> newLineStrings = new ArrayList<>();
+				for (LineString ls : t.getLineStrings()) {
+					List<Coordinate> items = new ArrayList<>();
+					for (Coordinate c : ls.getCoordinates()) {
+						if (c.getX() == toFind.getX() && c.getY() == toFind.getY() && c.getZ() == toFind.getZ()) {
+							isModified = true;
+							items.add(updateTo);
+						}else {
+							items.add(c);
+						}
+					}
+					if (isModified) {
+						newLineStrings.add(TrackUtil.convertToLineString(items));
+					}else {
+						newLineStrings.add(ls);
+					}
+				}
+				if (isModified) {
+					t.setLineStrings(newLineStrings);
+				}
+			}
+		}
 		
 		session.save(toUpdate);
 		session.flush();
-		
 	}
 	
 	private void processObservationUpdate(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
@@ -455,14 +530,25 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
 			toUpdate.setObserver(observation.getObserver());
 		}
-		//TODO: process attachments	
 		toUpdate.getAttributes().clear();
 		session.flush();
 			
-		toUpdate.setCategory(observation.getCategory());
-		for (WaypointObservationAttribute a : observation.getAttributes()) {
-			a.setObservation(toUpdate);
-			toUpdate.getAttributes().add(a);
+		if (attributes.containsKey("category")) { //$NON-NLS-1$
+			toUpdate.setCategory(observation.getCategory());
+			for (WaypointObservationAttribute a : observation.getAttributes()) {
+				a.setObservation(toUpdate);
+				toUpdate.getAttributes().add(a);
+			}
+		}
+		
+		//attachments
+		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());
+		for (ObservationAttachment attachment: observation.getAttachments()) {
+			ObservationAttachment newattachment = new ObservationAttachment();
+			newattachment.setCopyFromLocation(attachment.getCopyFromLocation());
+			newattachment.setFilename(attachment.getFilename());
+			newattachment.setObservation(toUpdate);
+			toUpdate.getAttachments().add(newattachment);
 		}
 		session.save(toUpdate);
 		session.flush();
@@ -602,7 +688,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			LocalDateTime date = super.getDateTime(props);
 			newPatrolLeg.setStartDate(date.toLocalDate());
 		}
-		
+		if (attributes.containsKey(JSON_LEGID_KEY)) {
+			newPatrolLeg.setId(attributes.get(JSON_LEGID_KEY).toString());
+		}
 		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey())) {
 			newPatrolLeg.setMandate(findPatrolMandate(ca, session,attributes, l));
 		}
@@ -763,10 +851,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
-		//TODO: patrol leg id
-//		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.ID.getKey())) {
-//			toUpdate.setId(updatedPatrolLeg.getId());
-//		}
+		if (attributes.containsKey(JSON_LEGID_KEY)) {
+			toUpdate.setId(updatedPatrolLeg.getId());
+		}
 		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey())) {
 			toUpdate.setMandate(updatedPatrolLeg.getMandate());
 		}
@@ -878,8 +965,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		newPatrol.setLegs(new ArrayList<>());
 		newPatrol.getLegs().add(newPatrolLeg);
 		newPatrolLeg.setPatrol(newPatrol);
-		//TODO: should this be specified in the JSON
-		newPatrolLeg.setId("1"); //$NON-NLS-1$
+		if (newPatrolLeg.getId() == null) newPatrolLeg.setId("1"); //$NON-NLS-1$
 		
 		createLegDays(newPatrolLeg, session);
 		newPatrolLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
@@ -1009,12 +1095,20 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		//configure date/time
 		LocalDateTime date = super.getDateTime(props);
+		if (date == null) {
+			throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), IJsonFeatureProcessor.JSON_DATETIME_KEY));
+		}
+		
+		Coordinate position = super.getPosition(feature);
+		if (position == null) {
+			throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), "geometry")); //$NON-NLS-1$
+		}
 		
 		UUID srcPatrolLegUuid = getSourcePatrolLegUuid(attributes, l);
 		PatrolLeg leg = findPatrolLegLink(srcPatrolLegUuid, ca, session, l);
 		if (leg == null) throw new Exception(MessageFormat.format(Messages.PATROLLEG_LINK_MISSING.getMessage(l), srcPatrolLegUuid.toString()));
 		modifiedFeatures.add(leg.getPatrol());
-		Coordinate position = super.getPosition(feature);
+		
 
 		//update leg dates
 		if (date.toLocalDate().isBefore(leg.getStartDate())) {
@@ -1421,6 +1515,25 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		link.setLastModified(LocalDateTime.now());
 		return waypoint;
 	}	
+	
+	private void computeAttachmentLocation(Waypoint wp, Patrol p, Session session) throws Exception {
+		for(WaypointAttachment wa : wp.getAttachments()) {
+			if (wa.getUuid() == null) {
+				wa.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+						.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p, session))
+						.resolve(wa.getFilename()));
+			}
+		}
+		for (WaypointObservation wo : wp.getAllObservations()) {
+			for(ObservationAttachment oa : wo.getAttachments()) {
+				if (oa.getUuid() == null) {
+					oa.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+							.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p, session))
+							.resolve(oa.getFilename()));
+				}
+			}
+		}
+	}
 	
 	
 }

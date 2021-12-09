@@ -164,6 +164,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			case OBSERVATION_EXISTS: return Messages.getString("PatrolLabelProvider.ObservationExists", l); //$NON-NLS-1$
 			case OBSERVATION_NOT_FOUND: return Messages.getString("PatrolLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
 			case WAYPOINT_NOT_FOUND: return Messages.getString("PatrolLabelProvider.WaypointNotFound", l); //$NON-NLS-1$
+			case CANNOT_UPDATE_DATE: return Messages.getString("PatrolLabelProvider.CannotUpdateDate", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

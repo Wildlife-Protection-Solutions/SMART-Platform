@@ -46,7 +46,9 @@ import org.wcs.smart.incident.IntegrateIncidentSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -162,6 +164,15 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		HashMap<UUID, WaypointObservation> observationlinks = new HashMap<>();
 
 		if (addTo == null) {
+			
+			if (wp.getDateTime() == null) {
+				throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), IJsonFeatureProcessor.JSON_DATETIME_KEY));
+			}
+			
+			if (wp.getRawX() == null || wp.getRawY() == null) {
+				throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), "geometry")); //$NON-NLS-1$
+			}
+			
 			UUID srcUuid = wp.getUuid();
 			wp.setUuid(null);
 			wp.getObservationGroups().forEach(g->{
@@ -335,8 +346,23 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
 		
+		if (wp.getRawX() != null) toUpdate.setRawX(wp.getRawX());
+		if (wp.getRawY() != null) toUpdate.setRawY(wp.getRawY());
+		
+		if (wp.getDateTime() != null) toUpdate.setDateTime(wp.getDateTime());
+		
 		//update observer
 		updateObserver(toUpdate, attributes, ca, session, l);
+		
+		//attachments
+		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());
+		for (WaypointAttachment attachment: wp.getAttachments()) {
+			WaypointAttachment newattachment = new WaypointAttachment();
+			newattachment.setCopyFromLocation(attachment.getCopyFromLocation());
+			newattachment.setFilename(attachment.getFilename());
+			newattachment.setWaypoint(toUpdate);
+			toUpdate.getAttachments().add(newattachment);
+		}
 		
 		session.save(toUpdate);
 		session.flush();
@@ -360,18 +386,29 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
 			toUpdate.setObserver(observation.getObserver());
 		}
-		//TODO: process attachments	
+
 		toUpdate.getAttributes().clear();
 		session.flush();
 			
-		toUpdate.setCategory(observation.getCategory());
-		for (WaypointObservationAttribute a : observation.getAttributes()) {
-			a.setObservation(toUpdate);
-			toUpdate.getAttributes().add(a);
+		if (attributes.containsKey("category")) { //$NON-NLS-1$
+			toUpdate.setCategory(observation.getCategory());
+			for (WaypointObservationAttribute a : observation.getAttributes()) {
+				a.setObservation(toUpdate);
+				toUpdate.getAttributes().add(a);
+			}
 		}
 		session.save(toUpdate);
 		session.flush();
 		
+		//attachments
+		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());
+		for (ObservationAttachment attachment: observation.getAttachments()) {
+			ObservationAttachment newattachment = new ObservationAttachment();
+			newattachment.setCopyFromLocation(attachment.getCopyFromLocation());
+			newattachment.setFilename(attachment.getFilename());
+			newattachment.setObservation(toUpdate);
+			toUpdate.getAttachments().add(newattachment);
+		}
 		logFeature(toUpdate.getWaypoint());
 	}
 }

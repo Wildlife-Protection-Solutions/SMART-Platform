@@ -171,6 +171,10 @@ public class Messages extends NLS {
 	public static String EmployeeDeleteAdvisor_DeleteError;
 	public static String EmployeeDeleteAdvisor_InvalidObject;
 	public static String ERDatabaseUpgrader_UpgradeTask;
+	public static String ErLabelProvider_cannotchangedate;
+
+	public static String ErLabelProvider_cannotchangesu;
+
 	public static String ErLabelProvider_DescriptionColumn;
 	public static String ErLabelProvider_EndDateColumn;
 

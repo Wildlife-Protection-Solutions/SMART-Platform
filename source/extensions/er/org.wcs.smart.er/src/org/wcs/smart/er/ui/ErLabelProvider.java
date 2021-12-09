@@ -196,6 +196,8 @@ public class ErLabelProvider implements IErLabelProvider{
 			case OBSERVATION_EXISTS: return Messages.ErLabelProvider_ObservationExists;
 			case WAYPOINT_NOT_FOUND: return Messages.ErLabelProvider_WaypointNotFound;
 			case OBSERVATION_NOT_FOUND: return Messages.ErLabelProvider_ObservationNotFound;
+			case CANNOT_UPDATE_DATE: return Messages.ErLabelProvider_cannotchangedate;
+			case CANNOT_UPDATE_SU: return Messages.ErLabelProvider_cannotchangesu;
 		}
 		return ""; //$NON-NLS-1$
 	}

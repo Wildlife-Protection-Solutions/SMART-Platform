@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.json;
 
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -60,10 +62,15 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
+import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.TrackUtil;
 import org.wcs.smart.util.UuidUtils;
 
@@ -106,7 +113,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		MISSION("mission"), //$NON-NLS-1$
 		MISSION_NEW("mission/new"), //$NON-NLS-1$
 		MISSION_END("mission/end"), //$NON-NLS-1$
-		TRACKPOINT("trackpoint"); //$NON-NLS-1$
+		TRACKPOINT("trackpoint/new"); //$NON-NLS-1$
 		
 		private String key;
 			
@@ -142,7 +149,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		COMPLETE_MSG,
 		OBSERVATION_EXISTS,
 		WAYPOINT_NOT_FOUND,
-		OBSERVATION_NOT_FOUND;
+		OBSERVATION_NOT_FOUND,
+		CANNOT_UPDATE_DATE,
+		CANNOT_UPDATE_SU;
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(IErLabelProvider.class).getLabel(this, l);
@@ -152,6 +161,10 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 	
 	private Set<Mission> modifiedFeatures = new HashSet<>();
 
+	
+	private static final IWaypointSource MISSON_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
+			.getSource(SurveyWaypointSource.KEY);
+	
 	/**
 	 * @return <code>true</code> if this processor can process the given feature
 	 * type.  
@@ -306,7 +319,6 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.TRACKPOINT.getKey())) {
 			processTrackPoint(feature, ca, session, l);
 		}else if (ftype.equalsIgnoreCase(SurveySmartFeatureType.MISSION.getKey())) {
-			//TODO: uypdateMission(feature, ca, session, l);
 			processMissionUpdate(feature, ca, session, l);
 		}else {
 			StringBuilder sb = new StringBuilder();
@@ -332,14 +344,19 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 		
+		Waypoint wp = super.createWaypoint(feature, ca, session, l);
+		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
+
 		LocalDateTime date = super.getDateTime(props);
+		if (existingWp == null && date == null) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_DATETIME_KEY));
+		if (date == null) date = existingWp.getDateTime();
 		
 		UUID srcMissionUuid = getSourceMissionUuid(attributes, l);
 		Mission mission = findMissionLink(srcMissionUuid, ca, session, l);
 		if (mission == null) throw new Exception(MessageFormat.format(Messages.MISSION_LINK_MISSING.getMessage(l), srcMissionUuid.toString()));
 		
 		modifiedFeatures.add(mission);
-		//update leg dates
+		
 		if (date.toLocalDate().isBefore(mission.getStartDate())) {
 			mission.setStartDate(date.toLocalDate());
 		}
@@ -360,17 +377,10 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		if (toUpdate == null) throw new Exception(Messages.MISSIONDAY_MISSING.getMessage(l));
 		if (toUpdate.getWaypoints() == null) toUpdate.setWaypoints(new ArrayList<>());
-		
 		if (toUpdate.getEndTime().equals(LocalTime.MAX) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
 			toUpdate.setEndTime(date.toLocalTime());
 		}
-		
-		Waypoint wp = super.createWaypoint(feature, ca, session, l);
-		wp.setSourceId(SurveyWaypointSource.KEY);
-		if (wp.getId() == null) {
-			wp.setId(String.valueOf(toUpdate.getWaypoints().size() + 1));
-		}
-		
+
 		SamplingUnit su = null;
 		if (attributes.containsKey(MissionAttributeMetadata.MissionWaypointMetadata.SAMPLING_UNIT.getKey())) {
 			String suid = attributes.get(MissionAttributeMetadata.MissionWaypointMetadata.SAMPLING_UNIT.getKey()).toString();
@@ -381,12 +391,13 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}
 		}
 		
-		
-		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
 		HashMap<WaypointObservationGroup, UUID> links = new HashMap<>();
 		HashMap<WaypointObservation, UUID> obslinks = new HashMap<>();
 
 		if (existingWp == null) {
+			wp.setSourceId(SurveyWaypointSource.KEY);
+			if (wp.getId() == null) wp.setId(String.valueOf(toUpdate.getWaypoints().size() + 1));
+						
 			UUID src = wp.getUuid();
 			wp.setUuid(null);
 
@@ -413,6 +424,8 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 					}
 				}
 			}
+			
+			computeAttachmentLocation(wp, toUpdate.getMission(), session);
 
 			SurveyWaypoint pwp = new SurveyWaypoint();
 			pwp.setWaypoint(wp);
@@ -438,8 +451,13 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dlink.setDataType(SurveyLinkDataType.INCIDENT.getKey());
 				session.save(dlink);
 			}
-			
+
+			//add track point
+			addTrackPoint(toUpdate, getPosition(feature), su, l);
 		}else {
+			
+			computeAttachmentLocation(wp, toUpdate.getMission(), session);
+			
 			//merge observation groups with existing wp
 			for (WaypointObservation wo : wp.getAllObservations()) {
 				if (wo.getUuid() != null) {
@@ -478,7 +496,6 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}
 			session.saveOrUpdate(existingWp);
 			for (WaypointObservationGroup g : existingWp.getObservationGroups()) session.saveOrUpdate(g);
-
 		}
 		
 		session.flush();
@@ -502,9 +519,6 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
 		}
-		
-		addTrackPoint(toUpdate, getPosition(feature), su, l);
-		
 	}
 	
 	private void processStartMission(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
@@ -901,12 +915,43 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		Waypoint toUpdate = findIncidentLink(wp.getUuid(), ca, session, l);
 		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
 
+		LocalDateTime currentdt = toUpdate.getDateTime();
+		Double x = toUpdate.getRawX();
+		Double y = toUpdate.getRawY();
+		boolean updateTrackPoint = false;
+		
+		if (wp.getDateTime() != null && !wp.getDateTime().toLocalDate().equals(toUpdate.getDateTime().toLocalDate())){
+			throw new Exception(Messages.CANNOT_UPDATE_DATE.getMessage(l));
+		}
+		
 		//find mission with associated waypoint
 		SurveyWaypoint sw = session.createQuery("FROM SurveyWaypoint WHERE id.waypoint = :wp ", SurveyWaypoint.class) //$NON-NLS-1$
 				.setParameter("wp",toUpdate) //$NON-NLS-1$
 				.uniqueResult();
 		if (sw == null) throw new Exception(MessageFormat.format(Messages.WAYPOINT_NOT_FOUND.getMessage(l), wp.getUuid().toString()));
+		
+		//check the sampling unit - cannot update the sampling unit
+		if (attributes.containsKey(MissionAttributeMetadata.MissionWaypointMetadata.SAMPLING_UNIT.getKey())) {
+			String suid = attributes.get(MissionAttributeMetadata.MissionWaypointMetadata.SAMPLING_UNIT.getKey()).toString();
+			UUID newSuUuid = null;
+			if (suid != null && !suid.trim().isEmpty()) newSuUuid = UuidUtils.stringToUuid(suid);
+			if ((sw.getSamplingUnit() == null && newSuUuid != null) ||
+				!sw.getSamplingUnit().getUuid().equals(newSuUuid)) 
+				throw new Exception(Messages.CANNOT_UPDATE_SU.getMessage(l));
+		}
+		
 		modifiedFeatures.add(sw.getMissionDay().getMission());
+		
+		if (wp.getDateTime() != null && !wp.getDateTime().equals(toUpdate.getDateTime())) {
+			updateTrackPoint = true;
+			toUpdate.setDateTime(wp.getDateTime());
+		}
+		if (wp.getRawX() != null && wp.getRawY() != null && 
+				(wp.getRawX() != toUpdate.getRawX() || wp.getRawY() != toUpdate.getRawY())){
+			updateTrackPoint = true;
+			toUpdate.setRawX(wp.getRawX());
+			toUpdate.setRawY(wp.getRawY());
+		}
 		
 		if (wp.getId() != null) toUpdate.setId(wp.getId());
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
@@ -915,6 +960,44 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 		updateObserver(toUpdate, attributes, ca, session, l);
 	
+		//attachments
+		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());
+		for (WaypointAttachment attachment: wp.getAttachments()) {
+			WaypointAttachment newattachment = new WaypointAttachment();
+			newattachment.setCopyFromLocation(attachment.getCopyFromLocation());
+			newattachment.setFilename(attachment.getFilename());
+			newattachment.setWaypoint(toUpdate);
+			toUpdate.getAttachments().add(newattachment);
+		}
+		
+		if (updateTrackPoint) {
+			//lets try to find a track point that matches the old values and update it to the new values
+			Coordinate toFind = new Coordinate(x,y, SharedUtils.toLongTime(currentdt));
+			Coordinate updateTo = new Coordinate(toUpdate.getRawX(), toUpdate.getRawY(), SharedUtils.toLongTime(toUpdate.getDateTime()));
+			
+			for (MissionTrack t : sw.getMissionDay().getTracks()) {
+				boolean isModified = false;
+				
+				if ( (t.getSamplingUnit() == null && sw.getSamplingUnit() == null) ||
+						(t.getSamplingUnit() != null && t.getSamplingUnit().equals(sw.getSamplingUnit()))) {
+					LineString ls = t.getLineString();
+					
+					List<Coordinate> items = new ArrayList<>();
+					for (Coordinate c : ls.getCoordinates()) {
+						if (c.getX() == toFind.getX() && c.getY() == toFind.getY() && c.getZ() == toFind.getZ()) {
+							isModified = true;
+							items.add(updateTo);
+						}else {
+							items.add(c);
+						}
+					}
+					if (isModified) {
+						t.setLineString( TrackUtil.convertToLineString(items));
+					}
+				}
+			}
+		}
+		
 		session.save(toUpdate);
 		session.flush();
 		
@@ -942,7 +1025,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
 			toUpdate.setObserver(observation.getObserver());
 		}
-		//TODO: process attachments	
+	
 		toUpdate.getAttributes().clear();
 		session.flush();
 			
@@ -950,6 +1033,16 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		for (WaypointObservationAttribute a : observation.getAttributes()) {
 			a.setObservation(toUpdate);
 			toUpdate.getAttributes().add(a);
+		}
+		
+		//attachments
+		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());
+		for (ObservationAttachment attachment: observation.getAttachments()) {
+			ObservationAttachment newattachment = new ObservationAttachment();
+			newattachment.setCopyFromLocation(attachment.getCopyFromLocation());
+			newattachment.setFilename(attachment.getFilename());
+			newattachment.setObservation(toUpdate);
+			toUpdate.getAttachments().add(newattachment);
 		}
 		session.save(toUpdate);
 		session.flush();
@@ -1207,5 +1300,25 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		session.save(toUpdate);
 		session.flush();
+	}
+	
+	
+	private void computeAttachmentLocation(Waypoint wp, Mission mission, Session session) throws Exception {
+		for(WaypointAttachment wa : wp.getAttachments()) {
+			if (wa.getUuid() == null) {
+				wa.computeFileLocation(Paths.get(wp.getConservationArea().getFileDataStoreLocation())
+						.resolve(MISSON_WP_SRC.getDatastoreFileLocation(mission, session))
+						.resolve(wa.getFilename()));
+			}
+		}
+		for (WaypointObservation wo : wp.getAllObservations()) {
+			for(ObservationAttachment oa : wo.getAttachments()) {
+				if (oa.getUuid() == null) {
+					oa.computeFileLocation(Paths.get(wp.getConservationArea().getFileDataStoreLocation())
+							.resolve(MISSON_WP_SRC.getDatastoreFileLocation(mission, session))
+							.resolve(oa.getFilename()));
+				}
+			}
+		}
 	}
 }
