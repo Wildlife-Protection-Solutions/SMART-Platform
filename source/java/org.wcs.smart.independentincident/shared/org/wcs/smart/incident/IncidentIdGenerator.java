@@ -107,7 +107,13 @@ public enum IncidentIdGenerator {
 		
 		//make this id unique by adding _x on the end
 		int cnt = 1;
-		String id = nextId;
+		String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
+		
+		String id = nextId + cntstr;
+		if (id.length() > Waypoint.ID_MAX_LENGTH) {
+			String part = cntstr;
+			id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
+		}
 		
 		while(true) {
 			Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca AND id = :id"); //$NON-NLS-1$
@@ -117,7 +123,7 @@ public enum IncidentIdGenerator {
 			Long number = (Long) q.uniqueResult();
 			if (number == 0) return id;
 			
-			String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
+			cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
 			
 			id = nextId + cntstr;
 			if (id.length() > Waypoint.ID_MAX_LENGTH) {
