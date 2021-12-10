@@ -479,14 +479,17 @@ public class CyberTrackerNoa {
 			}
 		}
 		
+		//see https://app.assembla.com/spaces/smart-cs/tickets/3312
+		boolean deleteItem = false;
 		if (thrown == null) {
-			try(OutputStream out = Files.newOutputStream(upfile, StandardOpenOption.CREATE)){ 
+			try(OutputStream out = Files.newOutputStream(upfile, StandardOpenOption.CREATE)){
 				IOUtils.copy(data, out);
 				item.setStatus(Status.QUEUED);
 			} catch (IOException ex) {
 				logger.log(Level.SEVERE, ex.getMessage(), ex);
 				item.setStatus(Status.ERROR);
 				item.setStatusMessage(Messages.getString("CtDataApi.WriteError", request.getLocale()) + ex.getMessage()); //$NON-NLS-1$
+				deleteItem = true;
 				thrown = ex;
 			}
 		}
@@ -495,7 +498,11 @@ public class CyberTrackerNoa {
 		s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			s.saveOrUpdate(item);
+			if (deleteItem) {
+				s.delete(item);
+			}else {
+				s.saveOrUpdate(item);
+			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			try{

@@ -47,6 +47,13 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.util.SharedUtils;
 
+/**
+ * replaced by data generator plugin
+ * 
+ * @author Emily
+ *
+ */
+@Deprecated
 public class PatrolDataGenerator {
 
 	public void generatePatrols(){

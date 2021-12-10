@@ -93,14 +93,27 @@ public class PatrolWaypointSource implements IWaypointSource {
 		}
 		String patrolDir ;
 		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
-			Query q = temp.createQuery("SELECT p.uuid from Patrol p join p.legs pl join pl.patrolLegDays pld join pld.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
-			q.setParameter("wp", wp); //$NON-NLS-1$
-			List<?> pws = q.getResultList();
-			if (pws.size() > 0){
-				UUID uuid = (UUID) pws.get(0);
-				patrolDir = UuidUtils.getDirectoryPath(uuid);
-			}else{
-				throw new Exception("Could not determine attachment location for patrol waypoint: " + wp.getUuid().toString()); //$NON-NLS-1$
+			
+			temp.beginTransaction();
+			try {
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT p.uuid "); //$NON-NLS-1$
+				sql.append(" FROM Patrol p JOIN p.legs pl "); //$NON-NLS-1$
+				sql.append(" JOIN pl.patrolLegDays pld "); //$NON-NLS-1$
+				sql.append(" JOIN pld.waypoints wp "); //$NON-NLS-1$
+				sql.append(" WHERE wp.id.waypoint = :wp "); //$NON-NLS-1$
+				
+				Query q = temp.createQuery(sql.toString());
+				q.setParameter("wp", wp); //$NON-NLS-1$
+				List<?> pws = q.getResultList();
+				if (pws.size() > 0){
+					UUID uuid = (UUID) pws.get(0);
+					patrolDir = UuidUtils.getDirectoryPath(uuid);
+				}else{
+					throw new Exception("Could not determine attachment location for patrol waypoint: " + wp.getUuid().toString()); //$NON-NLS-1$
+				}
+			}finally {
+				temp.getTransaction().commit();
 			}
 		}
 			

@@ -44,6 +44,10 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.getString("IncidentLabelProvider.createIncidentMsg",l); //$NON-NLS-1$
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.getString("IncidentLabelProvider.invalidSmartDataTypeJson",l); //$NON-NLS-1$
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_FEATURE_TYPE) return Messages.getString("IncidentLabelProvider.invalidSmartFeatureTypeJson",l); //$NON-NLS-1$
+		if (item == IncidentJsonFeatureProcessor.Messages.OBSERVATION_EXISTS) return Messages.getString("IncidentLabelProvider.ObservationExists", l); //$NON-NLS-1$
+		if (item == IncidentJsonFeatureProcessor.Messages.MISSING_PROPERTY) return Messages.getString("IncidentLabelProvider.MissionProperty", l); //$NON-NLS-1$
+		if (item == IncidentJsonFeatureProcessor.Messages.WAYPOINT_NOT_FOUND) return Messages.getString("IncidentLabelProvider.WaypointNotFound", l); //$NON-NLS-1$
+		if (item == IncidentJsonFeatureProcessor.Messages.OBSERVATION_NOT_FOUND) return Messages.getString("IncidentLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
 		
 		return null;
 	}

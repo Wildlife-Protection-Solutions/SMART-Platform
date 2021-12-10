@@ -46,6 +46,10 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.IncidentLabelProvider_jsonloaded;
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.IncidentLabelProvider_invaliddatatype;
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_FEATURE_TYPE) return Messages.IncidentLabelProvider_invalidfeaturetype;
+		if (item == IncidentJsonFeatureProcessor.Messages.OBSERVATION_EXISTS) return Messages.IncidentLabelProvider_ObservationExistsCannotUpdate;
+		if (item == IncidentJsonFeatureProcessor.Messages.MISSING_PROPERTY) return Messages.IncidentLabelProvider_JsonMissing;
+		if (item == IncidentJsonFeatureProcessor.Messages.WAYPOINT_NOT_FOUND) return Messages.IncidentLabelProvider_WpNotFound;
+		if (item == IncidentJsonFeatureProcessor.Messages.OBSERVATION_NOT_FOUND) return Messages.IncidentLabelProvider_ObservationNotFound;
 		
 		return null;
 	}

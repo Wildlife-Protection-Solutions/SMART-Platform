@@ -109,8 +109,9 @@ public class JsonFileProcessor {
 	public Collection<IJsonFeatureProcessor> getProcessors(){
 		return this.processors;
 	}
+	
 	/**
-	 * Processes the json represented by the given file.
+	 * Processes the JSON represented by the given file.
 	 * 
 	 * @param p
 	 * @param session
@@ -214,7 +215,6 @@ public class JsonFileProcessor {
 	protected void processFeature(String dataType, JSONObject feature, Session session) throws Exception{
 		IJsonFeatureProcessor p = findProcessor(dataType);
 		if (p == null)  throw new Exception(MessageFormat.format(Messages.PROCESSOR_NOTFOUND.getMessage(locale), dataType));
-		
 		p.processFeature(feature, ca, session, locale);
 	}
 	

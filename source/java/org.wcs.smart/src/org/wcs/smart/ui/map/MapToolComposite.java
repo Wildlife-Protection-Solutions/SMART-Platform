@@ -22,14 +22,18 @@
 package org.wcs.smart.ui.map;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -68,7 +72,7 @@ public class MapToolComposite {
 	public static final String UDIG_DISTANCE_ID = "org.locationtech.udig.tool.info.distancetool"; //$NON-NLS-1$
 	
 	public static final String[] DEFAULT_MAP_TOOLS = {
-		AddLayerTool.ID, 
+		AddLayerTool.ID,
 		SetBasemapTool.ID, 
 		SEPERATOR_TOOL_ID,
 		UDIG_ZOOM_EXTENT_ID,
@@ -87,6 +91,8 @@ public class MapToolComposite {
 	private String currentToolId = null;
 	private ToolBar toolBar;
 	
+	private Map<String, CustomAction> customActions;
+	
 	public MapToolComposite(){
 		
 	}
@@ -98,6 +104,13 @@ public class MapToolComposite {
 
 	public ToolBar getToolbar(){
 		return this.toolBar;
+	}
+	
+	
+	//style = swt.check -> on or off state; swt.push -> one click action
+	public void addCustomToolItem(String id, String tooltip, Image image, Listener onSelect, int style, Boolean defaultValue) {
+		if (customActions == null) customActions = new HashMap<String, MapToolComposite.CustomAction>();
+		customActions.put(id,  new CustomAction(id, tooltip, image, onSelect, style, defaultValue));
 	}
 	
 	public void createComposite(Composite parent){
@@ -125,11 +138,12 @@ public class MapToolComposite {
 				continue;
 			}
 			ToolProxy found = ((ToolManager)toolManager).findToolProxy(id);
-			if (found instanceof ModalTool){
+			if (found != null && found instanceof ModalTool){
 				int style = SWT.CHECK;
 				if (found.getType() != 1){	//modal tool proxy
 					 style = SWT.PUSH;
 				}
+				
 				final ToolItem item = new ToolItem (toolBar, style);
 				item.setImage (found.getImage());
     			item.setToolTipText(found.getToolTipText());
@@ -141,6 +155,14 @@ public class MapToolComposite {
 						select(item);
 					}
 				});
+    			
+    		}else if (found == null && customActions != null) {
+    			CustomAction action = customActions.get(id);
+    			final ToolItem item = new ToolItem (toolBar, action.style);
+				if (action.image != null) item.setImage(action.image);
+    			if (action.tooltip != null) item.setToolTipText(action.tooltip);
+    			item.addListener(SWT.Selection,  action.l);
+    			if (action.defaultValue != null) item.setSelection(action.defaultValue);    			
     		}
 		}
         toolBar.pack();
@@ -200,6 +222,23 @@ public class MapToolComposite {
 		}
 	}
 	
+	private class CustomAction{
+//		String id;
+		String tooltip;
+		Image image;
+		Listener l;
+		int style;
+		Boolean defaultValue;
+		public CustomAction(String id, String tooltip, Image image, Listener l, int style, Boolean defaultValue) {
+			this.style = style;
+//			this.id = id;
+			this.tooltip = tooltip;
+			this.image = image;
+			this.l = l;
+			this.defaultValue = defaultValue;
+		}
+		
+	}
 }
 
 

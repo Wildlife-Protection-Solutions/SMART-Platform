@@ -91,6 +91,11 @@ public class ErLabelProvider implements IErLabelProvider{
 		case DESIGN_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage18", l); //$NON-NLS-1$
 		case SURVEY_EXISTS: return Messages.getString("ErLabelProvider.ErLabelProvider.JsonProcessorMessage19", l); //$NON-NLS-1$
 		case SURVEY_LINK_EXISTS: return Messages.getString("ErLabelProvider.ErLabelProvider.JsonProcessorMessage20", l); //$NON-NLS-1$
+		case OBSERVATION_EXISTS: return Messages.getString("ErLabelProvider.ObservationExists", l); //$NON-NLS-1$
+		case OBSERVATION_NOT_FOUND: return Messages.getString("ErLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
+		case WAYPOINT_NOT_FOUND: return Messages.getString("ErLabelProvider.WaypointnotFound", l); //$NON-NLS-1$
+		case CANNOT_UPDATE_DATE: return Messages.getString("ErLabelProvider.CannotChangeDate", l); //$NON-NLS-1$
+		case CANNOT_UPDATE_SU: return Messages.getString("ErLabelProvider.CannotChangeSamplingUnit", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

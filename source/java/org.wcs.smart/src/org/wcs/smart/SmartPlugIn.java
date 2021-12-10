@@ -273,6 +273,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String ICON_IMG_ZOOMOUT = "org.wcs.smart.icon.zoom.out"; //$NON-NLS-1$
 	public static final String ICON_EXPAND = "org.wcs.smart.icon32.expand"; //$NON-NLS-1$
 	
+	public static final String ICON_AUTOZOOM = "org.wcs.smart.icon32.autozoom"; //$NON-NLS-1$
+	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.
@@ -541,6 +543,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ICON_IMG_ZOOMIN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_in.png")); //$NON-NLS-1$);
 	     reg.put(ICON_IMG_ZOOMOUT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_out.png")); //$NON-NLS-1$);
 	     reg.put(ICON_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/expand.png")); //$NON-NLS-1$);
+	     
+	     reg.put(ICON_AUTOZOOM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/auto_zoom.png")); //$NON-NLS-1$);
 	     
 	     
 	}

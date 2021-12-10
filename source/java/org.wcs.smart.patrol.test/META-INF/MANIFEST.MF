@@ -8,7 +8,8 @@ Require-Bundle: org.wcs.smart.patrol,
  org.wcs.smart.hibernate.libs,
  org.wcs.smart,
  org.eclipse.core.jobs,
- org.junit;bundle-version="4.12.0"
+ org.wcs.smart.independentincident,
+ org.wcs.smart.er
 Bundle-Activator: org.wcs.smart.patrol.test.Activator
 Automatic-Module-Name: org.wcs.smart.patrol.test
 Bundle-ClassPath: .

@@ -161,6 +161,10 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			case TEAM_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_21", l); //$NON-NLS-1$
 			case STATION_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_22", l); //$NON-NLS-1$
 			case CUSTOM_ATTRIBUTE_ERROR: return Messages.getString("PatrolLabelProvider.JSONPATROL_23", l); //$NON-NLS-1$
+			case OBSERVATION_EXISTS: return Messages.getString("PatrolLabelProvider.ObservationExists", l); //$NON-NLS-1$
+			case OBSERVATION_NOT_FOUND: return Messages.getString("PatrolLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
+			case WAYPOINT_NOT_FOUND: return Messages.getString("PatrolLabelProvider.WaypointNotFound", l); //$NON-NLS-1$
+			case CANNOT_UPDATE_DATE: return Messages.getString("PatrolLabelProvider.CannotUpdateDate", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

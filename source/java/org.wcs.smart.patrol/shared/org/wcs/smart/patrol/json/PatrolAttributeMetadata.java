@@ -78,7 +78,7 @@ public class PatrolAttributeMetadata {
 		EMPLOYEES("members", Attribute.AttributeType.MLIST), //$NON-NLS-1$
 		LEADER("leader", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		PILOT("pilot", Attribute.AttributeType.LIST), //$NON-NLS-1$
-		PATROLID("patrolId", Attribute.AttributeType.TEXT); //$NON-NLS-1$
+		PATROLID("patrolId", Attribute.AttributeType.TEXT);  //$NON-NLS-1$
 		
 		String key;
 		Attribute.AttributeType type;

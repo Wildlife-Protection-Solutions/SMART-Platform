@@ -262,6 +262,13 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		return false;
 	}
 	
+	protected MapToolComposite createMapToolsComposite() {
+		if (mapTools == null || mapTools.length == 0) {
+			return new MapToolComposite();
+		} else {
+			return new MapToolComposite(mapTools);
+		}
+	}
 	
 	/** Creates the map
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
@@ -301,12 +308,8 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 	      
 		ApplicationGIS.getToolManager().setCurrentEditor(SmartMapEditorPart.this);
-        if (mapTools == null || mapTools.length == 0){
-        	tools = new MapToolComposite();
-        }else{
-        	tools = new MapToolComposite(mapTools);
-        }
-		tools.createComposite(composite);
+        tools = createMapToolsComposite();
+        tools.createComposite(composite);
 		tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
 		
         Composite infoArea = new Composite(parent, SWT.NONE);
@@ -515,7 +518,8 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 
 		
         public void selectionChanged( IWorkbenchPart part, final ISelection selection ) {
-            if (part == SmartMapEditorPart.this.getParentEditor() || getSite().getPage().getActivePart() != part
+            if (part == SmartMapEditorPart.this.getParentEditor() || 
+            		(getSite().getPage() != null && getSite().getPage().getActivePart() != part)
                     || selection instanceof IBlockingSelection)
                 return;
             
