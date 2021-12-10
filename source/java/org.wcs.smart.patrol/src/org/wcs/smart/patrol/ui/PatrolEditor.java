@@ -60,9 +60,13 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.internal.PartService;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.part.WorkbenchPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.LayersView;
+import org.locationtech.udig.project.ui.internal.MapEditorPart;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.ca.Projection;
@@ -95,6 +99,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+import org.wcs.smart.ui.map.SmartMapEditorPart;
 
 /**
  * The patrol editor.
@@ -229,6 +234,15 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolDeleteListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
+		
+		
+		addPageChangedListener(e->{
+			Object x = getSelectedPage();
+			if (x instanceof SmartMapEditorPart) {
+				//required to make sure layers view gets updated correctly
+				LayersView.getViewPart().setCurrentMap(getMap());
+			}
+		});
 	}
 
 	public Projection[] getAvailableProjections(){

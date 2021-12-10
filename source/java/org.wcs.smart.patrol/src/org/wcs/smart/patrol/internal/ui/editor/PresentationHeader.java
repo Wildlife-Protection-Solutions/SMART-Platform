@@ -68,7 +68,7 @@ public class PresentationHeader extends Composite{
 	private Label dateLabel;
 	
 	private Label back, next;
-	private ToolItem tiPick, tiZoomToggle;
+	private ToolItem tiPick;
 	private Listener dateModified;
 	
 	/**
@@ -88,9 +88,6 @@ public class PresentationHeader extends Composite{
 		createComponent();
 	}
 
-	public boolean getAutoZoomOption() {
-		return this.tiZoomToggle.getSelection();
-	}
 	private void fireModified() {
 		dateModified.handleEvent(new Event());
 	}
@@ -135,11 +132,6 @@ public class PresentationHeader extends Composite{
 		next.addListener(SWT.MouseExit, e->getShell().setCursor(null));
 				
 		ToolBar tb = new ToolBar(this, SWT.FLAT);
-		
-		tiZoomToggle = new ToolItem(tb, SWT.CHECK);
-		tiZoomToggle.setToolTipText(Messages.PresentationHeader_autozoomtooltip);
-		tiZoomToggle.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ZOOM_IMAGE));
-		tiZoomToggle.setSelection(true);
 		
 		tiPick = new ToolItem(tb, SWT.PUSH);
 		tiPick.setToolTipText(Messages.PresentationHeader_pickpagetooltip);
