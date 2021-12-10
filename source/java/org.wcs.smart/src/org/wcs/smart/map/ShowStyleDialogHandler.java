@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.map.internal;
+package org.wcs.smart.map;
 
 import java.util.Iterator;
 
@@ -74,6 +74,11 @@ public class ShowStyleDialogHandler {
 			return;	
 		}
 
+		showDialog(activeShell, selectedLayer);
+	}
+
+	public void showDialog(Shell activeShell, Layer selectedLayer) {
+
 		String pageId = StyleManager.INSTANCE.findInitialStylePageId(selectedLayer);
 	    EditorPageManager manager = StyleEditorPageManager.createEditorPageManager(selectedLayer);
 
@@ -83,7 +88,7 @@ public class ShowStyleDialogHandler {
 		dialog.create();
 		dialog.open();
 	}
-
+	
 	public static class ShowStyleDialogHandlerWrapper extends
 			DIHandler<ShowStyleDialogHandler> {
 		public ShowStyleDialogHandlerWrapper() {
