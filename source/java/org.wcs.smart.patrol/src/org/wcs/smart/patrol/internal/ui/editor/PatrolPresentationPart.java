@@ -97,7 +97,6 @@ import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.internal.render.SelectionStyleContent;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
@@ -109,6 +108,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.ShowStyleDialogHandler;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
@@ -187,6 +187,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	private Projection viewProjection;
 	
 	private Layer waypointLayer = null;
+	private Layer trackLayer = null;
 	private Object currentSelection = null;
 	
 	private boolean autoZoom = true;
@@ -229,16 +230,18 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    						if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) {
 	    							IStyleBlackboard bb = StyleUtils.INSTANCE.getPatrolTrackStyle(parentEditor.getPatrol());
 	    							l.setStyleBlackboard((StyleBlackboard) bb);
+	    							trackLayer = l;
 	    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
 	    							waypointLayer = l;
-	    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
-	    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
+//	    							temp.getStyleBlackboard().put(SelectionStyleContent.ID, 
+//	    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
 	    						}
 	    					 }
 	    				}
 	    				
 	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).enableRendering();
 	    				getMap().getRenderManager().refresh(null);
+						
 	    			}
 					
 	    		};
@@ -384,22 +387,38 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 
 	@Override
 	protected MapToolComposite createMapToolsComposite() {
-		this.mapTools = new String[MapToolComposite.DEFAULT_MAP_TOOLS.length + 2];
+		this.mapTools = new String[MapToolComposite.DEFAULT_MAP_TOOLS.length + 4];
 		
 		for (int i = 0; i < MapToolComposite.DEFAULT_MAP_TOOLS.length; i ++) {
 			this.mapTools[i] = MapToolComposite.DEFAULT_MAP_TOOLS[i];
 		}
 		
-		int index = mapTools.length - 2;
-		String actionId = "org.wcs.smart.patrol.presentation.autozoomoption";
+		int index = mapTools.length - 4;
+		String autoZoomId = "org.wcs.smart.patrol.presentation.autozoomoption"; //$NON-NLS-1$
+		String waypointStyleId = "org.wcs.smart.patrol.presentation.waypointstyle"; //$NON-NLS-1$
+		String trackStyleId = "org.wcs.smart.patrol.presentation.trackstyle"; //$NON-NLS-1$
+		
 		this.mapTools[index] = MapToolComposite.SEPERATOR_TOOL_ID;
-		this.mapTools[index+1] = actionId;
+		this.mapTools[index+1] = autoZoomId;
+		this.mapTools[index+2] = waypointStyleId;
+		this.mapTools[index+3] = trackStyleId;
 		
 		MapToolComposite mapTools = super.createMapToolsComposite();
-		mapTools.addCustomToolItem(actionId, Messages.PresentationHeader_autozoomtooltip, 
+
+		mapTools.addCustomToolItem(autoZoomId, Messages.PresentationHeader_autozoomtooltip, 
 				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ICON_AUTOZOOM), l->{
 					autoZoom = (((ToolItem)l.widget).getSelection());
 					}, SWT.CHECK, Boolean.TRUE);
+		
+		mapTools.addCustomToolItem(waypointStyleId, Messages.PatrolPresentationPart_changewpstyletooltip, 
+				SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.STYLEWAYPOINT_ICON), l->{
+					(new ShowStyleDialogHandler()).showDialog(getSite().getShell(), waypointLayer);
+					}, SWT.PUSH, Boolean.TRUE);
+		
+		mapTools.addCustomToolItem(trackStyleId, Messages.PatrolPresentationPart_changetrackstyletooltip, 
+				SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.STYLETRACK_ICON), l->{
+					(new ShowStyleDialogHandler()).showDialog(getSite().getShell(), trackLayer);
+					}, SWT.PUSH, Boolean.TRUE);
 		
 		return mapTools;
 	}
@@ -532,7 +551,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				case SWT.PaintItem: {
 					PatrolLeg pl = (PatrolLeg)element;
 					GC gc = event.gc;
-					String text = MessageFormat.format("LEG ID: {0}            TYPE: {1}            MANDATE: {2}", pl.getId(), pl.getType().getName(), pl.getMandate().getName()); 
+					String text = MessageFormat.format(Messages.PatrolPresentationPart_PatrolLegHeader, pl.getId(), pl.getType().getName(), pl.getMandate().getName()); 
 					final Point extent = gc.stringExtent(text);
 
 					int width = 0;
@@ -893,9 +912,9 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			toolkit.createLabel(left, Messages.PatrolPresentationPart_TotalDays);
 
 			long days = ChronoUnit.DAYS.between(patrol.getStartDate(), patrol.getEndDate()) + 1;
-			String unit = "day";
-			if (days > 1) unit = "days";
-			String msg = MessageFormat.format("{0} {1}", days, unit );
+			String unit = Messages.PatrolPresentationPart_daylabel;
+			if (days > 1) unit = Messages.PatrolPresentationPart_dayslabel;
+			String msg = MessageFormat.format("{0} {1}", days, unit ); //$NON-NLS-1$
 			
 			if (patrol.getLegs().size() > 1) {
 				msg = MessageFormat.format(Messages.PatrolPresentationPart_DaysAndLegs, days, unit, patrol.getLegs().size());	
@@ -912,7 +931,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			
 			long mandatecnt = patrol.getLegs().stream().map(leg->leg.getMandate()).distinct().count();
 			if (mandatecnt > 1) {
-				toolkit.createLabel(left, "Mandates:");
+				toolkit.createLabel(left, Messages.PatrolPresentationPart_Mandates);
 			}else {
 				toolkit.createLabel(left, Messages.PatrolPresentationPart_Mandate);
 			}
@@ -1289,7 +1308,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				if (cnt > 1) {
 					return MessageFormat.format(Messages.PatrolPresentationPart_attachmentslabel, cnt);
 				}else if (cnt == 1) {
-					return MessageFormat.format("{0} file", cnt);
+					return MessageFormat.format(Messages.PatrolPresentationPart_singleattachmentslabel, cnt);
 				}
 				return ""; //$NON-NLS-1$
 			}

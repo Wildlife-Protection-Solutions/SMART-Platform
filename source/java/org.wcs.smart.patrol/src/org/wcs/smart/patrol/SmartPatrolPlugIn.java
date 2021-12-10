@@ -123,7 +123,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 * Image descriptor key for patrol folder icon
 	 */
 	public static final String PATROL_FOLDER_ICON = "org.wsc.smart.patrol.PATROL_FOLDER"; //$NON-NLS-1$
-
+	
+	public static final String STYLEWAYPOINT_ICON = "org.wsc.smart.patrol.style.waypoint"; //$NON-NLS-1$
+	public static final String STYLETRACK_ICON = "org.wsc.smart.patrol.style.track"; //$NON-NLS-1$
+	
 	/**
 	 * The constructor
 	 */
@@ -149,6 +152,9 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		reg.put(PATROL32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol@2x.png")); //$NON-NLS-1$
 
 		reg.put(PATROL_FOLDER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_folder.png")); //$NON-NLS-1$
+		
+		reg.put(STYLEWAYPOINT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style_waypoint.png")); //$NON-NLS-1$
+		reg.put(STYLETRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style_track.png")); //$NON-NLS-1$
 	}
 	
 	/*
