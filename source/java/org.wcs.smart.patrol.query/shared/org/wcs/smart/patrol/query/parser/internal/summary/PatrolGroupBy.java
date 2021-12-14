@@ -76,10 +76,7 @@ public class PatrolGroupBy implements IGroupBy {
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
 	 */
 	public String getKeyPart(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("patrol:"); //$NON-NLS-1$
-		sb.append(option.getKey());
-		return sb.toString();
+		return option.getKey();
 	}
 	
 	public PatrolQueryOption getOption(){
