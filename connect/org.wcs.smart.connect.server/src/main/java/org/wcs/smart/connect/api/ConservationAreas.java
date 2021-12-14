@@ -210,111 +210,74 @@ public class ConservationAreas extends HttpServlet{
 	 * @param caJsonFilter String - optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned.
 	 * 			be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D
 	 * 			originally it is caJsonFilter={"type":"Polygon","coordinates":[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/
-	 * @param includeSpatialBoundaries Boolean - true to get GeoJson data on CA boundaries, false to skip it as this can take a long time for lots of CAs and lots of boundaries.  
+	 * @param includeSpatialBoundaries Boolean - true to get GeoJson data on CA boundaries, 
+	 * false to skip it as this can take a long time for lots of CAs and lots of boundaries.
+	 * @param canQuery - Optional true to return only conservation areas the current user can access at least one
+	 * query for, false otherwise  
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
 	 */
 	@GET
     @Path("/")
 	@Operation(description="Lists all Conservation Areas")
-    public List<ConservationAreaProxy> getConservationAreas(@Parameter(description="optional - only return CAs that have the provided text in the organization field")  @QueryParam("organizationFilter") String organizationFilter,@Parameter(description="optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned. be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D   originally it is caJsonFilter={\'type\':\'Polygon\',\'coordinates\':[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/")  @QueryParam("caJsonFilter") String caJsonFilter,@Parameter(description="Boolean - true to get GeoJson data on CA boundaries, false to skip it as this can take a long time for lots of CAs and lots of boundaries.")  @QueryParam("includeSpatialBoundaries") Boolean includeSpatialBoundaries){
+    public List<ConservationAreaProxy> getConservationAreas(@Parameter(description="optional - only return CAs that have the provided text in the organization field")  @QueryParam("organizationFilter") String organizationFilter,@Parameter(description="optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned. be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D   originally it is caJsonFilter={\'type\':\'Polygon\',\'coordinates\':[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/")  @QueryParam("caJsonFilter") String caJsonFilter,
+    		@Parameter(description="Boolean - true to get GeoJson data on CA boundaries, false to skip it as this can take a long time for lots of CAs and lots of boundaries.")  @QueryParam("includeSpatialBoundaries") Boolean includeSpatialBoundaries){
+
 		if(includeSpatialBoundaries == null)includeSpatialBoundaries=true;//default to send boundary data, since we used to, I don't want to break existing API user's stuff.
+		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
 			List<ConservationAreaInfo> db = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
-				ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
-				ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
 				
 				//check to determine if ca is accessible by current user
 				try{
 					validateRead(ca.getUuid(), s);
-
-					if (smartca != null){
-						proxy.setDescriptionDesignation(smartca.getDescription(), smartca.getDesignation());
-						
-						//add the extra metadata we have now
-						proxy.setLocation(smartca.getCountry());
-						proxy.setPointOfContact(smartca.getPointOfContact());
-						proxy.setOrganization(smartca.getOrganization());
-						proxy.setOwner(smartca.getOwner());
-						
-						if(includeSpatialBoundaries){							
-							StringBuilder sb = new StringBuilder();
-							sb.append("select st_asgeojson(1,  st_force2d(st_collect(geom))) "); //$NON-NLS-1$
-							sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
-							sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
-							
-							NativeQuery<?> query = s.createNativeQuery(sb.toString());
-							query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-							query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
-							proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
-							
-							query.setParameter("type", AreaType.CA.name()); //$NON-NLS-1$
-							proxy.setCaBoundaryJson((String)query.uniqueResult() );
-							
-							query.setParameter("type", AreaType.BA.name()); //$NON-NLS-1$
-							proxy.setBufferedManagementAreaJson((String)query.uniqueResult() );
-							
-							query.setParameter("type", AreaType.MNGT.name()); //$NON-NLS-1$
-							proxy.setManagementSectorsJson((String)query.uniqueResult() );
-							
-							query.setParameter("type", AreaType.PATRL.name()); //$NON-NLS-1$
-							proxy.setPatrolSectorsJson((String)query.uniqueResult() );
-						}
-					}
-					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
-					if(ca.getVersion()== null){
-						proxy.setVersion(null);
-					}else{
-						proxy.setVersion(ca.getVersion());
-					}
-					
-					
-					//Check FILTERS
-					boolean passedBoundary = false;
-					if(caJsonFilter != null && !caJsonFilter.equals("")){ //$NON-NLS-1$
-						if(smartca == null){ //no-data CAs should not be returned when there is a geojson filter
-							passedBoundary = false;
-						}else{
-							//if the JSON passed in contains the CABoundry, return true;
-							StringBuilder sb = new StringBuilder();
-							sb.append("SELECT count(*) FROM  "); //$NON-NLS-1$
-							sb.append (" (SELECT st_geomfromgeojson(:json) as the_geom) as a, "); //$NON-NLS-1$
-							sb.append(" smart.area_geometries b WHERE b.ca_uuid = :ca AND b.area_type = :area and st_intersects(a.the_geom, b.geom)"); //$NON-NLS-1$
-							sb.append(" LIMIT 1"); //$NON-NLS-1$
-							
-							
-							NativeQuery<?> query = s.createNativeQuery(sb.toString());
-							query.setParameter("json", caJsonFilter); //$NON-NLS-1$
-							query.setParameter("ca", smartca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-							query.setParameter("area", AreaType.CA.name()); //$NON-NLS-1$
-							Boolean result = ((BigInteger)query.uniqueResult()).intValue() > 0;
-							
-							if(result != null && result == true){
-								passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
-							}else{
-								passedBoundary=false;
-							}
-						}
-					}else{
-						passedBoundary=true; //no filter provided or it is blank, assume they want everything
-					}
-					boolean passedOrg = false;
-					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase(Locale.ROOT).contains(organizationFilter.toUpperCase(Locale.ROOT))) ){ //$NON-NLS-1$
-						passedOrg = true;
-					}else{
-						passedOrg = false;
-					}
-					if(passedOrg && passedBoundary)conservationAreas.add(proxy);
-					
-				
-				}catch(SmartConnectException ex){
-					//not valid user; ignore
+				}catch (Exception ex) {
+					//not valid 
+					continue;
 				}
-
 				
+				ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());				
+				ConservationAreaProxy proxy = toProxy(ca, smartca, includeSpatialBoundaries, s);
+					
+				//Check FILTERS
+				boolean passedBoundary = false;
+				if(caJsonFilter != null && !caJsonFilter.equals("")){ //$NON-NLS-1$
+					if(smartca == null){ //no-data CAs should not be returned when there is a geojson filter
+						passedBoundary = false;
+					}else{
+						//if the JSON passed in contains the CABoundry, return true;
+						StringBuilder sb = new StringBuilder();
+						sb.append("SELECT count(*) FROM  "); //$NON-NLS-1$
+						sb.append (" (SELECT st_geomfromgeojson(:json) as the_geom) as a, "); //$NON-NLS-1$
+						sb.append(" smart.area_geometries b WHERE b.ca_uuid = :ca AND b.area_type = :area and st_intersects(a.the_geom, b.geom)"); //$NON-NLS-1$
+						sb.append(" LIMIT 1"); //$NON-NLS-1$
+						
+						
+						NativeQuery<?> query = s.createNativeQuery(sb.toString());
+						query.setParameter("json", caJsonFilter); //$NON-NLS-1$
+						query.setParameter("ca", smartca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+						query.setParameter("area", AreaType.CA.name()); //$NON-NLS-1$
+						Boolean result = ((BigInteger)query.uniqueResult()).intValue() > 0;
+						
+						if(result != null && result == true){
+							passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
+						}else{
+							passedBoundary=false;
+						}
+					}
+				}else{
+					passedBoundary=true; //no filter provided or it is blank, assume they want everything
+				}
+				boolean passedOrg = false;
+				if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase(Locale.ROOT).contains(organizationFilter.toUpperCase(Locale.ROOT))) ){ //$NON-NLS-1$
+					passedOrg = true;
+				}else{
+					passedOrg = false;
+				}
+				if(passedOrg && passedBoundary)conservationAreas.add(proxy);
 			}
 			
 			Collections.sort(conservationAreas, new Comparator<ConservationAreaProxy>() {
@@ -338,6 +301,53 @@ public class ConservationAreas extends HttpServlet{
 		}
 	}
 	
+	private ConservationAreaProxy toProxy(ConservationAreaInfo ca, ConservationArea smartca, 
+			boolean includeSpatialBoundaries, Session session) {
+		
+		ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
+		
+		if (smartca != null){
+			proxy.setDescriptionDesignation(smartca.getDescription(), smartca.getDesignation());
+				
+			//add the extra metadata we have now
+			proxy.setLocation(smartca.getCountry());
+			proxy.setPointOfContact(smartca.getPointOfContact());
+			proxy.setOrganization(smartca.getOrganization());
+			proxy.setOwner(smartca.getOwner());
+				
+			if(includeSpatialBoundaries){							
+				StringBuilder sb = new StringBuilder();
+				sb.append("select st_asgeojson(1,  st_force2d(st_collect(geom))) "); //$NON-NLS-1$
+				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
+				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
+				
+				NativeQuery<?> query = session.createNativeQuery(sb.toString());
+				query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+				query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
+				proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.CA.name()); //$NON-NLS-1$
+				proxy.setCaBoundaryJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.BA.name()); //$NON-NLS-1$
+				proxy.setBufferedManagementAreaJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.MNGT.name()); //$NON-NLS-1$
+				proxy.setManagementSectorsJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.PATRL.name()); //$NON-NLS-1$
+				proxy.setPatrolSectorsJson((String)query.uniqueResult() );
+			}
+		}
+		proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(session, ca.getUuid()));
+		if(ca.getVersion()== null){
+			proxy.setVersion(null);
+		}else{
+			proxy.setVersion(ca.getVersion());
+		}
+		return proxy;
+		
+	}
 	/**
 	 * <p>List all Conservation Areas that have SMART data</p>
 	 * <p>URL: ../server/api/conservationarea/withdataonly/<br>
@@ -354,38 +364,57 @@ public class ConservationAreas extends HttpServlet{
 	@GET
     @Path("/withdataonly/")
 	@Operation(description="List all Conservation Areas that have SMART data")
-    public List<ConservationAreaProxy> getConservationAreasWithData(@Parameter(description="Optional.  If provided it should be a comma delimited list of action strings that are applicable for the Conservation Area.  Only Conservation Areas that the user has the specific action permission for will be returned.  For example permission=updateca will only return ca's that the user has permission to update.")  @QueryParam("permission") String permissionFilter){
+    public List<ConservationAreaProxy> getConservationAreasWithData(@Parameter(description="Optional. If provided it should be a comma delimited list of action strings that are applicable for the Conservation Area. Only Conservation Areas that the user has the specific action permission for will be returned. For example permission=updateca will only return ca's that the user has permission to update. If not provided only ca's the user has permission to read from are returned.")  @QueryParam("permission") String permissionFilter){
 		
 		String[] permissions = null;
 		if (permissionFilter != null) {
 			permissions = permissionFilter.split(","); //$NON-NLS-1$
 		}
 		List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
-		List<ConservationAreaProxy> allConservationAreas = getConservationAreas(null,null,false);
+		
 		
 		
 		try(Session s = HibernateManager.getSession(context)){
 			s.beginTransaction();
 			try {
-				for (ConservationAreaProxy ca : allConservationAreas){
-					if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
-						
-						if (permissionFilter == null) {
-							conservationAreas.add(ca);
-							
-						}else {
-							boolean ok = false;
-							for (String actionKey : permissions) {
-								ISmartConnectAction action = ActionManager.INSTANCE.findAction(actionKey);
-								if (action != null && SecurityManager.INSTANCE.canAccess(s,  request.getUserPrincipal().getName(),actionKey, ca.getUuid())){  
-										ok = true;
-										break;
-								}
-							}
-							if (ok) conservationAreas.add(ca);
-						}
+				List<ConservationAreaInfo> db = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
+				
+				for (ConservationAreaInfo ca : db){
+				
+					if(!(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || 
+							ca.getStatus().equals(ConservationAreaInfo.Status.DATA))) {
+						continue;
 					}
+						
+					
+					//check to determine if ca is accessible by current user
+					if (permissionFilter == null || permissionFilter.isBlank()) {
+						
+						//if no permission filter use read only 
+						try{
+							validateRead(ca.getUuid(), s);
+						}catch (Exception ex) {
+							//not valid 
+							continue;
+						}
+					}else {
+						boolean ok = false;
+						for (String actionKey : permissions) {
+							ISmartConnectAction action = ActionManager.INSTANCE.findAction(actionKey);
+							if (action != null && SecurityManager.INSTANCE.canAccess(s,  request.getUserPrincipal().getName(),actionKey, ca.getUuid())){  
+								ok = true;
+								break;
+							}
+						}
+						if (!ok) continue;
+					}
+					
+					ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());				
+					ConservationAreaProxy proxy = toProxy(ca, smartca, false, s);
+					conservationAreas.add(proxy);
+				
 				}
+				
 			}finally {
 				s.getTransaction().rollback();
 			}

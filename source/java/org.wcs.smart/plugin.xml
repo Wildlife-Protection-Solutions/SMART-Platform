@@ -1130,7 +1130,7 @@
             commandId="org.wcs.smart.command.showperspective">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.ShowStyleDialogHandler$ShowStyleDialogHandlerWrapper"
+            class="org.wcs.smart.map.ShowStyleDialogHandler$ShowStyleDialogHandlerWrapper"
             commandId="org.wcs.smart.command.map.style">
          <enabledWhen>
             <with

@@ -695,6 +695,14 @@ public class Messages extends NLS {
 
 	public static String PatrolPresentationPart_categorycolumn;
 
+	public static String PatrolPresentationPart_changetrackstyletooltip;
+
+	public static String PatrolPresentationPart_changewpstyletooltip;
+
+	public static String PatrolPresentationPart_daylabel;
+
+	public static String PatrolPresentationPart_dayslabel;
+
 	public static String PatrolPresentationPart_Days;
 
 	public static String PatrolPresentationPart_DaysAndLegs;
@@ -711,11 +719,17 @@ public class Messages extends NLS {
 
 	public static String PatrolPresentationPart_Mandate;
 
+	public static String PatrolPresentationPart_Mandates;
+
 	public static String PatrolPresentationPart_Members;
 
 	public static String PatrolPresentationPart_Objective;
 
+	public static String PatrolPresentationPart_PatrolLegHeader;
+
 	public static String PatrolPresentationPart_refreshjobname;
+
+	public static String PatrolPresentationPart_singleattachmentslabel;
 
 	public static String PatrolPresentationPart_StartDate;
 

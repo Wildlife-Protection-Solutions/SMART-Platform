@@ -51,7 +51,7 @@ public class PlanPatrolQueryFilter implements IExtensionFilter {
 
 	@Override
 	public String asString() {
-		return "patrol:" + option.getKey() + " " + op.asSmartValue() + " " + value;  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+		return option.getKey() + " " + op.asSmartValue() + " " + value;  //$NON-NLS-1$  //$NON-NLS-2$
 	}
 
 	

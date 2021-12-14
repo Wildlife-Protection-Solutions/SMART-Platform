@@ -506,7 +506,7 @@ function generateUrl(root){
 function getCaList(){
 	var oReq = new XMLHttpRequest();
 		oReq.onload = populateCaList;
-		oReq.open("Get", CAURL + '/?includeSpatialBoundaries=false', true);
+		oReq.open("Get", CAURL + '/?includeSpatialBoundaries=false&permission=runreport', true);
 		oReq.send();
 }
 
@@ -898,6 +898,8 @@ function updateFolderTable(){
 		
 		if (clearreport && visible != null){
 			if (visible != null) selectFolder(visible.children[0]);
+		}else if (clearreport && visible == null){
+			selectedFolder = -2;
 		}
 	}
 	
@@ -910,6 +912,10 @@ function updateReportTable(){
 	var elementArray = null;
 	if (selectedFolder == -1){
 		elementArray = Array.from(reporttable.getElementsByClassName("reportrow"));
+	}else if (selectedFolder == -2){
+		//hide all
+		var items = Array.from(reporttable.getElementsByClassName("reportrow"));
+		items.forEach(function(element) {element.style.display="none"});
 	}else{
 		//hide all
 		Array.from(reporttable.getElementsByClassName("reportrow")).forEach(function(element){element.style.display="none"});

@@ -157,7 +157,13 @@ public enum PatrolIdGenerator {
 		if (!makeUnique) return nextId;
 		
 		int cnt = 1;
-		String id = nextId;
+		
+		String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
+		String id = nextId + cntstr;
+		if (id.length() > Patrol.MAX_ID_LENGTH) {
+			String part = cntstr;
+			id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
+		}
 		
 		while(true) {
 			Long number = (Long)s.createQuery("SELECT count(*) FROM Patrol WHERE id = :id AND conservationArea = :ca") //$NON-NLS-1$
@@ -166,7 +172,7 @@ public enum PatrolIdGenerator {
 					.uniqueResult();
 			if (number == 0) return id;
 			
-			String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
+			cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
 			id = nextId + cntstr;
 			if (id.length() > Patrol.MAX_ID_LENGTH) {
 				String part = cntstr;

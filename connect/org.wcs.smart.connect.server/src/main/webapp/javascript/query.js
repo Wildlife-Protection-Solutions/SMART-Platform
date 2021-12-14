@@ -437,7 +437,7 @@ function generateUrl(root){
 function getCaList(){
 	var oReq = new XMLHttpRequest();
 		oReq.onload = populateCaList;
-		oReq.open("Get", CAURL + '?includeSpatialBoundaries=false', true);
+		oReq.open("Get", CAURL + '?includeSpatialBoundaries=false&permission=runquery', true);
 		oReq.send();
 }
 
@@ -711,8 +711,11 @@ function updateFolderTable(){
 		});
 		
 		if (clearquery && visible != null){
-			if (visible != null) selectFolder(visible.children[0]);
+			selectFolder(visible.children[0]);
+		}else if (clearquery && visible == null){
+			selectedFolder = -2;
 		}
+		
 	}
 	
 }
@@ -722,10 +725,15 @@ function updateQueryTable(){
 	
 	var hide = document.getElementById('qhideexe').checked;
 	var querytable = document.getElementById('querytable');
-	var elementArray;
+	
+	var elementArray = null;
 	
 	if (selectedFolder == -1){
 		elementArray = Array.from(querytable.getElementsByClassName("queryrow"))
+	}else if (selectedFolder == -2){
+		//hide all
+		var items = Array.from(querytable.getElementsByClassName("queryrow"));
+		items.forEach(function(element) {element.style.display="none"});
 	}else{
 		//hide all
 		var items = Array.from(querytable.getElementsByClassName("queryrow"));
@@ -734,22 +742,23 @@ function updateQueryTable(){
 		elementArray = Array.from(querytable.querySelectorAll("[data-folderid='" + selectedFolder + "']"));
 	}
 	
-	var rowcnt = 1;
-	elementArray.forEach(function(element) {
-		if (!hide || element.getAttribute("data-canexe") == "true"){
-			if (isFoundInRow(element)){
-				element.style.display="";
-				element.classList.remove("smart-table-rowon");
-				element.classList.remove("smart-table-rowoff");
-				element.classList.add(rowcnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff")
-				rowcnt++;
+	if(elementArray != null){
+		var rowcnt = 1;
+		elementArray.forEach(function(element) {
+			if (!hide || element.getAttribute("data-canexe") == "true"){
+				if (isFoundInRow(element)){
+					element.style.display="";
+					element.classList.remove("smart-table-rowon");
+					element.classList.remove("smart-table-rowoff");
+					element.classList.add(rowcnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff")
+					rowcnt++;
+				}else{
+					element.style.display="none";
+				}
 			}else{
 				element.style.display="none";
 			}
-		}else{
-			element.style.display="none";
-		}
-	});
-	
-	
+		});
+	}
+		
 }
