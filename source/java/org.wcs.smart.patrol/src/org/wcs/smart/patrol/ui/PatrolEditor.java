@@ -425,19 +425,19 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			getSite().setSelectionProvider(selectionProvider);
 			
-			addPageChangedListener(new IPageChangedListener() {
-				
-				@Override
-				public void pageChanged(PageChangedEvent event) {
-					if (event.getSelectedPage() == presentationPage) {
-						//maximize editor
-						getActiveEditor().getSite().getPage().setPartState(
-								getActiveEditor().getSite().getPage().getActivePartReference(), 
-								IWorkbenchPage.STATE_MAXIMIZED);
-					}
-					
-				}
-			});
+//			addPageChangedListener(new IPageChangedListener() {
+//				
+//				@Override
+//				public void pageChanged(PageChangedEvent event) {
+//					if (event.getSelectedPage() == presentationPage) {
+//						//maximize editor
+//						getActiveEditor().getSite().getPage().setPartState(
+//								getActiveEditor().getSite().getPage().getActivePartReference(), 
+//								IWorkbenchPage.STATE_MAXIMIZED);
+//					}
+//					
+//				}
+//			});
 		} catch (final Throwable t) {
 			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override

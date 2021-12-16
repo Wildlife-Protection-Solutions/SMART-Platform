@@ -95,8 +95,11 @@ import org.locationtech.udig.project.IStyleBlackboard;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.impl.StyleBlackboardImpl;
+import org.locationtech.udig.project.internal.render.SelectionStyleContent;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
@@ -233,8 +236,9 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    							trackLayer = l;
 	    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
 	    							waypointLayer = l;
-//	    							temp.getStyleBlackboard().put(SelectionStyleContent.ID, 
-//	    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
+	    							waypointLayer.setStyleBlackboard(new WaypointLayerStyleBlackboard(waypointLayer.getStyleBlackboard()));
+	    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
+	    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
 	    						}
 	    					 }
 	    				}
@@ -1323,5 +1327,26 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			this.wo = wo;
 		}
 	}
+	
+	class WaypointLayerStyleBlackboard extends StyleBlackboardImpl {
+
+		public WaypointLayerStyleBlackboard(StyleBlackboard current) {
+			super();
+			for (StyleEntry i : current.getContent() ) {
+				super.put(i.getID(), i.getStyle());
+			}
+		}
+		
+		@Override
+		public Object lookup(Class<?> theClass) {
+			Object x = get(SelectionStyleContent.ID);
+			super.remove(SelectionStyleContent.ID);
+			Object value = super.lookup(theClass);
+			if (x != null) super.put(SelectionStyleContent.ID, x);
+			return value;
+		}
+		
+	}
+
 }
 
