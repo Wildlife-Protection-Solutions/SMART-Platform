@@ -13,6 +13,7 @@
 	<artifactId>org.wcs.smart.core.birt.map</artifactId>
 	<name>SMART Birt Map Components</name>
 	<packaging>bundle</packaging>
+	<version>7.4.1-SNAPSHOT</version>
 	
 	<dependencies>
 		<dependency>
