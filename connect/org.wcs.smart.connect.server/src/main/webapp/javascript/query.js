@@ -395,19 +395,19 @@ function generateRelativeUrl(root){
 	var format = document.getElementById('queryformat').value;
 	var dateField = document.getElementById('datefield').value;
 	
-	var url = root + uuid +"?format=" + format + "&date_filter=" + dateField
+	var url = root + uuid +"?format=" + encodeURIComponent(format) + "&date_filter=" + encodeURIComponent(dateField)
 	
 	if(document.getElementById('startdate').value != ""){
 		var startDate = new Date(document.getElementById('startdate').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
 		var startDateString = startDate.getFullYear() + "-" + (startDate.getMonth() + 1) + "-" + startDate.getDate() + " 00:00:00";
 		
-		url = url + "&start_date=" + startDateString; 
+		url = url + "&start_date=" + encodeURIComponent(startDateString); 
 	}
 	if(document.getElementById('enddate').value != ""){
 		var endDate = new Date(document.getElementById('enddate').value.substring(4)); //use end of the day, since it is the "to" date.
 		var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate() + " 23:59:59";
 	
-		url = url + "&end_date=" + endDateString; 
+		url = url + "&end_date=" + encodeURIComponent(endDateString); 
 	}
 	
 	if (document.getElementById('cafilter').style.display.toUpperCase() != "NONE"){
@@ -419,12 +419,12 @@ function generateRelativeUrl(root){
 			}
 		}
 		if (cafilter.length > 0){
-			url = url + "&cafilter=" + cafilter.substring(1);
+			url = url + "&cafilter=" + encodeURIComponent(cafilter.substring(1));
 		}
 	}
 	var type = document.getElementById("queryformat").value;
 	if (type == "shp" || type =="geojson"){
-		url = url + "&srid=" + document.getElementById('srid').value;
+		url = url + "&srid=" + encodeURIComponent(document.getElementById('srid').value);
 	}
 	return url;
 }
