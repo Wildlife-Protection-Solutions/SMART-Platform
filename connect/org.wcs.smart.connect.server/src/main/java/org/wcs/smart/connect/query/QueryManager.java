@@ -657,8 +657,8 @@ public enum QueryManager {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int getCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
-		org.hibernate.query.Query<?> q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
+	public int getActiveCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
+		org.hibernate.query.Query<?> q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE isActive = true AND conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		q.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setMaxResults(1);

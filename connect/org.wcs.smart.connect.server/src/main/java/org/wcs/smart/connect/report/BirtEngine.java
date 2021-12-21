@@ -43,6 +43,7 @@ import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.locationtech.udig.catalog.internal.wms.WmsPlugin;
+import org.locationtech.udig.catalog.wms.preferences.WmsPreferenceConstants;
 import org.locationtech.udig.render.wms.basic.WMSPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkListener;
@@ -179,6 +180,8 @@ public class BirtEngine {
 		new UiPluginWrapper();
 
 		new WmsPlugin(){
+			private UdigPreferenceStore localPreference;
+
 			@Override
 			public ImageDescriptor getGridObjectImage(){
 		    	return null;
@@ -187,6 +190,15 @@ public class BirtEngine {
 		    public ImageDescriptor getGridMissingImage(){
 		    	return null;
 		    }
+			
+			@Override
+		    public ScopedPreferenceStore getPreferenceStore() {
+				if (localPreference == null){
+					localPreference = new UdigPreferenceStore();	
+					localPreference.setValue( WmsPreferenceConstants.WMS_RESPONSE_TIMEOUT, WmsPreferenceConstants.DEFAULT_WMS_RESPONSE_TIMEOUT_IN_SECONDS);								
+				}
+				return localPreference;
+			}
 		};
 		
 		new WMSPlugin(){
@@ -205,6 +217,7 @@ public class BirtEngine {
 				return localPreference;
 			}
 		};
+		
 	}	
 	
 	
