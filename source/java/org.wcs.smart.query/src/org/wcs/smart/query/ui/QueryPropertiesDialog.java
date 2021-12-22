@@ -287,9 +287,18 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 					lblProp.setText(prop.getName()+": "); //$NON-NLS-1$
 					lblProp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 				
-					Label lblText = new Label(main, SWT.WRAP);
-					lblText.setText(prop.getValue(query));
-					lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					String value = prop.getValue(query);
+					if(value.contains("\n") || value.length() > 40) { //$NON-NLS-1$
+						Text txtValue = new Text(main, SWT.MULTI  | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+						txtValue.setEditable(false);
+						txtValue.setText(value);
+						txtValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+						((GridData)txtValue.getLayoutData()).heightHint = 60;
+					}else {
+						Label lblText = new Label(main, SWT.WRAP);
+						lblText.setText(prop.getValue(query));
+						lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					}
 				}else{
 					Composite c = prop.createComposite(main, query);
 					c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
