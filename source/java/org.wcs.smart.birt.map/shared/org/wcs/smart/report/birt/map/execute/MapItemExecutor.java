@@ -59,9 +59,11 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.styling.Style;
 import org.geotools.styling.visitor.RescaleStyleVisitor;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.mapgraphic.MapGraphic;
 import org.locationtech.udig.project.IMap;
@@ -73,6 +75,7 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.project.internal.impl.MapImpl;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.opengis.metadata.extent.Extent;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
@@ -534,7 +537,7 @@ public class MapItemExecutor implements IReportItemExecutor {
 			if (renderedMap.getMapLayers().isEmpty()) {
 				zoomToBounds = new ReferencedEnvelope(renderedMap.getViewportModel().getCRS());
 			} else {
-				zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
+				zoomToBounds = getMapBounds(renderedMap);
 			}
 		} else if (bounds.getOption() == BoundsOption.CUSTOM) {
 			zoomToBounds = bounds.getEnvelope();
@@ -556,7 +559,7 @@ public class MapItemExecutor implements IReportItemExecutor {
 				if (renderedMap.getMapLayers().isEmpty()) {
 					zoomToBounds = new ReferencedEnvelope(renderedMap.getViewportModel().getCRS());
 				} else {
-					zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
+					zoomToBounds = getMapBounds(renderedMap);
 				}
 			} else {
 				// expand slightly so full styling appears on map
@@ -565,7 +568,7 @@ public class MapItemExecutor implements IReportItemExecutor {
 		} else if (bounds.getOption() == BoundsOption.LAYER) {
 			// set above
 			if (zoomToBounds.isNull()) {
-				zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
+				zoomToBounds = getMapBounds(renderedMap);
 			}
 			// expand slightly so full styling appears on map
 			zoomToBounds.expandBy(zoomToBounds.maxExtent() * 0.05);
@@ -717,6 +720,28 @@ public class MapItemExecutor implements IReportItemExecutor {
 			g.drawString(bit, startx + 2, y);
 			y += fh;
 		}
+	}
+
+	private ReferencedEnvelope getMapBounds(IMap map) {
+		try {
+			//on connect this may throws and error because this tries to log the
+			//default bounds - so we catch and recompute the default bounds
+			return map.getBounds(new NullProgressMonitor());
+		}catch (Exception ex) {
+			return getDefaultBounds(map);
+		}
+	}
+
+	//copied from MapImpl but removed logging functions so it works with connect
+	private ReferencedEnvelope getDefaultBounds(IMap map) {
+		if (map.getViewportModel().getCRS().getDomainOfValidity() != null) {
+			Extent extent = map.getViewportModel().getCRS().getDomainOfValidity();
+			ReferencedEnvelope env = MapImpl.toReferencedEnvelope(extent, map.getViewportModel().getCRS());
+			if (env != null) {
+				return env;
+			}
+		}
+		return new ReferencedEnvelope(new Envelope(-180, 180, -90, 90), DefaultGeographicCRS.WGS84);
 	}
 
 }

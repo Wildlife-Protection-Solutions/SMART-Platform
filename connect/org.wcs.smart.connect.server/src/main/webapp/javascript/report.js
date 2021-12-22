@@ -463,7 +463,7 @@ function generateRelativeUrl(root){
 	var uuid = document.getElementById('reportuuid').value;
 	
 	//add the UUID
-	var url = root + uuid + "?format=" + document.getElementById('reportformat').value;
+	var url = root + uuid + "?format=" + encodeURIComponent(document.getElementById('reportformat').value);
 
 	//add the cafilter if applicable
 	if (document.getElementById('cafilter').style.display.toUpperCase() != "NONE"){
@@ -475,7 +475,7 @@ function generateRelativeUrl(root){
 			}
 		}
 		if (cafilter.length > 0){
-			url = url + "&cafilter=" + cafilter.substring(1);
+			url = url + "&cafilter=" + encodeURIComponent(cafilter.substring(1));
 		}
 	}
 
@@ -487,9 +487,9 @@ function generateRelativeUrl(root){
 			//parse out correct date format
 			var startDate = new Date(document.getElementById(name).value.substring(4));
 			var dateStr = startDate.getFullYear() + "-" + (startDate.getMonth()+1) + "-" + startDate.getDate() + " 00:00:00";
-			csString += name + "," +dateStr + ",";
+			csString += encodeURIComponent(name) + "," + encodeURIComponent(dateStr) + ",";
 		}else{
-			csString += name + "," + document.getElementById(name).value + ",";
+			csString += encodeURIComponent(name) + "," + encodeURIComponent(document.getElementById(name).value) + ",";
 		}
 	}
 	url = url + "&parameterList=" + csString;

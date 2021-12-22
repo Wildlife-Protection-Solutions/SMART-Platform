@@ -137,7 +137,7 @@ public class QueryColumnUtils {
 	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, ConservationAreaFilter caFilter) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
-		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
+		int ccnt = QueryManager.INSTANCE.getActiveCategoryDepth(session, caFilter);
 		for (int i = 0; i < ccnt; i ++){
 			keys.add(new CategoryQueryColumn(MessageFormat.format(Messages.getString("QueryColumnUtils.ObservationCategoryColumnName", l), i), i){ //$NON-NLS-1$
 				@Override

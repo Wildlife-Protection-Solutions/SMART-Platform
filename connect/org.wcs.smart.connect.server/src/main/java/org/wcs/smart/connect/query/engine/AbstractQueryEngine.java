@@ -799,7 +799,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			ConservationAreaFilter caFilter, String queryDataTable) throws SQLException {
 		
 		// get number of levels
-		categoryCount = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
+		categoryCount = QueryManager.INSTANCE.getActiveCategoryDepth(session, caFilter);
 		if (categoryCount < 0){
 			return;
 		}
