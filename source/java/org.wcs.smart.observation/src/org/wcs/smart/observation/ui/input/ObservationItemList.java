@@ -39,10 +39,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -51,10 +53,11 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -300,6 +303,7 @@ public class ObservationItemList {
 			return this.wo;
 		}
 		
+		@SuppressWarnings("restriction")
 		private void createComposite() {
 			//do this so initial highlighting is respected
 			//otherwise it is overwritten
@@ -363,16 +367,8 @@ public class ObservationItemList {
 					l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 	
-					
-					if (a.getAttribute().getType() == AttributeType.TEXT) {
-						l = new Label(attributes, SWT.WRAP);
-						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						((GridData)l.getLayoutData()).widthHint = 100;
-					}else {
-						l = new Label(attributes, SWT.NONE);
-						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					}
-	
+					l = new Label(attributes, SWT.WRAP);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setText(SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
 				}
 			}
@@ -381,9 +377,31 @@ public class ObservationItemList {
 			l.setText(Messages.ObservationItemList_Attachments);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
-			l = new Label(attributes, SWT.NONE);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			l.setText(MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
+			
+			if (wo.getAttachments().isEmpty()) {
+				l = new Label(attributes, SWT.NONE);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				l.setText(MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
+			}else {
+				Composite links = new Composite(attributes, SWT.NONE);
+				links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				links.setLayout(new RowLayout());
+				((RowLayout)links.getLayout()).wrap = true;
+				((RowLayout)links.getLayout()).marginTop = 0;
+				((RowLayout)links.getLayout()).marginLeft = 0;
+				((RowLayout)links.getLayout()).marginRight = 0;
+				((RowLayout)links.getLayout()).marginBottom = 0;
+				
+				for (ObservationAttachment attach : wo.getAttachments()) {
+					Link lnk = new Link(links, SWT.NONE);
+					lnk.setText("<a>" + attach.getFilename() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+					lnk.addListener(SWT.Selection, e->{
+						AttachmentUtil.openAttachment(attach);
+						e.doit = false;
+					});
+				}
+
+			}
 			
 			ToolBar btns = new ToolBar(right, SWT.VERTICAL);
 			btns.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
@@ -499,7 +517,9 @@ public class ObservationItemList {
 			while(!c.isEmpty()) {
 				Control i = c.remove(0);
 				i.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				i.addListener(SWT.MouseDown, this);
+				if (!(i instanceof Link)) {
+					i.addListener(SWT.MouseDown, this);
+				}
 				i.addListener(SWT.MouseEnter, this);
 				i.addListener(SWT.MouseExit, this);
 				if (i instanceof Composite) {

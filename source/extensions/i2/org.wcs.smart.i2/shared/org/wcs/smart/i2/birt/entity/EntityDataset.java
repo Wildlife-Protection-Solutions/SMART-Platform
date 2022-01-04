@@ -81,6 +81,8 @@ public class EntityDataset implements IQuery {
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
 		
+		if (type == null) throw new OdaException("Entity type not found: " + queryText); //$NON-NLS-1$
+		
 		if (connection.skipSecurityCheck()) {
 			return;
 		}
