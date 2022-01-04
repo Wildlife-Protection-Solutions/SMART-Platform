@@ -397,10 +397,17 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		for (ObservationAttachment a : toCopy.getAttachments()) {
 			if (!toKeep.getAttachments().contains(a)) {
 				toKeep.getAttachments().add(a);
+				Path temp = a.getCopyFromLocation() == null ? a.getAttachmentFile() : null;
 				a.setObservation(toKeep);
+				if (temp != null) a.computeFileLocation(temp);
 			}				
 		}
-		toKeep.getAttachments().forEach(e->e.setObservation(toKeep));
+		toKeep.getAttachments().forEach(e->{
+			Path temp = e.getCopyFromLocation() == null ? e.getAttachmentFile() : null;
+			e.setObservation(toKeep);
+			if (temp != null) e.computeFileLocation(temp);
+			
+		});
 		
 	}
 	/*
@@ -769,7 +776,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		for (ObservationAttachment a : currentAttachments){
 			try{
+				Path temp = a.getCopyFromLocation() == null ? a.getAttachmentFile() : null;
 				a.setObservation(wo);
+				if (temp != null) a.computeFileLocation(temp);
 				wo.getAttachments().add(a);
 			}catch (Exception ex){
 				ObservationPlugIn.displayLog(ex.getMessage(), ex);
