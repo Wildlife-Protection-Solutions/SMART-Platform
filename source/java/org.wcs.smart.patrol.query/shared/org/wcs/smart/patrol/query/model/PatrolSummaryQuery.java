@@ -57,7 +57,7 @@ public class PatrolSummaryQuery extends SummaryQuery {
 	 */
 	@Transient
 	protected SumQueryDefinition parseQuery() throws Exception {
-		
+		System.out.println(getQuery());
 		if (getQuery() == null || getQuery().length() == 0){
 			return null;
 		}
