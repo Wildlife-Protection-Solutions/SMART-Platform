@@ -82,6 +82,11 @@ public class PatrolGroupBy implements IGroupBy {
 	public PatrolQueryOption getOption(){
 		return this.option;
 	}
+	
+	public void setOption(PatrolQueryOption op) {
+		this.option = op;
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asString()
 	 */

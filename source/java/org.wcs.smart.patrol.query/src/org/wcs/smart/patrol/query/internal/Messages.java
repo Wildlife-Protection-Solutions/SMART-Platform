@@ -196,6 +196,8 @@ public class Messages extends NLS {
 	public static String PatrolStartDateField_PatrolStartDate;
 	public static String PatrolSummaryGroupByValuePanel_GroupByPanelTitle;
 	public static String PatrolSummaryGroupByValuePanel_ValueError;
+	public static String PatrolSummaryQueryDefinitionImporter_GroupByNotSupported;
+	public static String PatrolSummaryQueryType_GroupByNotSupported;
 	public static String PatrolSummaryQueryType_invalidGroupByOptions;
 	public static String PatrolSummaryQueryType_SummaryQueryTypeName;
 	public static String PatrolValueDropItem_ExcludeDaysWithoutDataOption;

@@ -33,11 +33,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
@@ -262,6 +264,26 @@ public class PatrolSummaryQueryType implements IQueryType {
 			groupBys.addAll(def.getColumnGroupByPart().getGroupBys());
 		}
 		
+		if (SmartDB.getCurrentConservationArea().getIsCcaa()) {
+			for (IGroupBy gp : groupBys) {
+				if (gp instanceof PatrolGroupBy) {
+					PatrolGroupBy pgb = (PatrolGroupBy) gp;
+					PatrolQueryOption po = pgb.getOption();
+					
+					boolean found = false;
+					for (PatrolQueryOption p : PatrolQueryOptions.SHARED_PATROL_GROUBY_OPTIONS) {
+						if (p == po) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) throw new Exception(MessageFormat.format(Messages.PatrolSummaryQueryType_GroupByNotSupported, po.getGuiName(Locale.getDefault()) + " ("+po.getKey() +")")); //$NON-NLS-1$ //$NON-NLS-2$
+					
+				}
+			}
+			
+			
+		}
 		for (IValueItem valueIt : def.getValuePart().getValueItems()){
 			if (valueIt instanceof CombinedValueItem) {
 				values.add(((CombinedValueItem) valueIt).getPart1());
