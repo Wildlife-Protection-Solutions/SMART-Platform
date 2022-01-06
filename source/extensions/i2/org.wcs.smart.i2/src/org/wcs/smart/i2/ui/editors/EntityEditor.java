@@ -1442,7 +1442,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		Button addRelationship = toolkit.createButton(relationshipButtonEditPanel, Messages.EntityEditor_NewRelationshipBtn, SWT.PUSH);
 		addRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addRelationship.setToolTipText(Messages.EntityEditor_deleteRelationshiptooltip);
+		addRelationship.setToolTipText(Messages.EntityEditor_newRelationshipTooltip);
 		addRelationship.addListener(SWT.Selection, e->{
 			EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity, context){
 				protected void doEvent(){

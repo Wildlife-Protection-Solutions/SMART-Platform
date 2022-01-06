@@ -254,6 +254,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_ModifiedTitle;
 	public static String EntityEditor_NewRecordLabel;
 	public static String EntityEditor_NewRelationshipBtn;
+	public static String EntityEditor_newRelationshipTooltip;
 	public static String EntityEditor_OpenAttachmentMnuItem;
 	public static String EntityEditor_OpenRecordMnuItem;
 	public static String EntityEditor_OpenSourceMenuLabel;
