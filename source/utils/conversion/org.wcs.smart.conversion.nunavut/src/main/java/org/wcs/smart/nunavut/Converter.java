@@ -39,6 +39,11 @@ public class Converter {
 	
 	public void convert() throws Exception {
 		
+		Path pOut = Paths.get(OUTPUT_FOLDER);
+		if (!Files.exists(pOut)) {
+			Files.createDirectories(pOut);
+		}
+		
 		NunavutDataSource source = new NunavutDataSource();
 		
 		List<String> pids = source.getPatrolsIds();
