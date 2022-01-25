@@ -1643,6 +1643,11 @@
             id="org.wcs.smart.preference.IdTokens"
             name="%PatternIdDefintionPage">
       </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.CaSizeReportPreferencePage"
+            id="org.wcs.smart.preference.casize"
+            name="Conservation Area Size Report">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">

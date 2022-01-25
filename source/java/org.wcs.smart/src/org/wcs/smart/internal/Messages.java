@@ -343,6 +343,13 @@ public class Messages extends NLS {
 	public static String CaPropertyPage_SaveWarning_Title;
 	public static String CaPropertyPage_SupportedLanguages_Label;
 	public static String CaPropertyPage_UniqueID_Label;
+	public static String CaSizeReport_CaFileSizeByFolder;
+	public static String CaSizeReport_CaFileSizeTotal;
+	public static String CaSizeReport_DatabaseSize;
+	public static String CaSizeReport_DbSizeInfo;
+	public static String CaSizeReport_ErrorLbl;
+	public static String CaSizeReport_MoreInfo;
+	public static String CaSizeReport_MoreInfoTitle;
 	public static String CategoryDialogPage_CreatePageTitle;
 	public static String CategoryDialogPage_DialogTitle;
 	public static String CategoryDialogPage_Edit_DialogTitle2;
