@@ -148,6 +148,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 	
 	@Override
 	public boolean canEditResults(){
+		if (SmartDB.isMultipleAnalysis()) return false;
 		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return false;
 		String queryType = ((QueryEditorInput)getEditorInput()).getType().getKey();
 		if (queryType.equals(PatrolObservationQuery.KEY) || queryType.equalsIgnoreCase(PatrolWaypointQuery.KEY)){
