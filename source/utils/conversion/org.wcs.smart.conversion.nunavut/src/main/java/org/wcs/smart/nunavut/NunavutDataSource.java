@@ -11,11 +11,11 @@ import java.util.List;
 
 public class NunavutDataSource {
 
-	private static final String HOST = "";
+	private static final String HOST = "54.196.200.248";
 	private static final int PORT = 3306;
-	private static final String DB_NAME = "nunavut";
-	private static final String USERNAME = "username";
-	private static final String PASSWORD = "password";
+	private static final String DB_NAME = "kitikmeot";
+	private static final String USERNAME = "devel";
+	private static final String PASSWORD = "asdfoiueSS!99kjlkqwe";
 	
 	private Connection connection;
 	
@@ -36,7 +36,7 @@ public class NunavutDataSource {
 
 	public List<String> getPatrolsIds() throws SQLException{
 		
-		String sql = "SELECT pid FROM patrols ";
+		String sql = "SELECT MOBILE_DATA_RECORD_TRIP_ID FROM mobile_data_record_trip";
 		List<String> patrolIds = new ArrayList<>();
 		
 		try(Statement s = connection.createStatement();
@@ -47,7 +47,8 @@ public class NunavutDataSource {
 				patrolIds.add(pid);
 			}
 		}
-		return Collections.emptyList();
+		return patrolIds;
+		//return Collections.emptyList();
 	}
 	
 	
