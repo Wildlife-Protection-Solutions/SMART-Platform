@@ -997,7 +997,7 @@
       </command>
       <command
             id="org.wcs.smart.command.help.online"
-            name="Online Support">
+            name="%command.onlinehelp.name">
       </command>
    </extension>
    <extension
@@ -1658,7 +1658,7 @@
       <page
             class="org.wcs.smart.ui.internal.preference.CaSizeReportPreferencePage"
             id="org.wcs.smart.preference.casize"
-            name="Conservation Area Size Report">
+            name="%preference.page.casize.name">
       </page>
    </extension>
    <extension
