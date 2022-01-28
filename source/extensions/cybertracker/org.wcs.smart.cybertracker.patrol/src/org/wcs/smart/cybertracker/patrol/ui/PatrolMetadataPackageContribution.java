@@ -353,7 +353,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		for (Object o : lstEmployees.getCheckedElements()) {
 			if (o instanceof EmployeeTeam) {
 				EmployeeTeam team = (EmployeeTeam)o;
-				for (EmployeeTeamMember e : team.getMembers()) items.add(e.getEmployee());
+				for (EmployeeTeamMember e : team.getActiveMembers()) items.add(e.getEmployee());
 			}else if (o instanceof Employee) {
 				items.add((Employee) o);
 			}
@@ -437,7 +437,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				ok = true;
 				break;
 			}else if (type instanceof EmployeeTeam) {
-				if (!((EmployeeTeam)type).getMembers().isEmpty()) {
+				if (!((EmployeeTeam)type).getActiveMembers().isEmpty()) {
 					ok = true;
 					break;
 				}
@@ -584,7 +584,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				eteams.addAll(QueryFactory.buildQuery(s, EmployeeTeam.class,
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()})  //$NON-NLS-1$
 						.list());
-				eteams.forEach(team->team.getMembers().forEach(e->e.getEmployee().getGivenName()));
+				eteams.forEach(team->team.getActiveMembers().forEach(e->e.getEmployee().getGivenName()));
 				types.addAll(QueryFactory.buildQuery(s, PatrolTransportType.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"isActive", true}) //$NON-NLS-1$

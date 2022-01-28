@@ -534,7 +534,7 @@ public class CtJsonExportUtils {
 				}
 				EmployeeTeam team = session.get(EmployeeTeam.class, item);
 				if (team != null) {
-					for (EmployeeTeamMember tm : team.getMembers()) {
+					for (EmployeeTeamMember tm : team.getActiveMembers()) {
 						allEmployees.add(tm.getEmployee());
 					}
 				}

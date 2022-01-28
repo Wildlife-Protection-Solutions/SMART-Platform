@@ -283,7 +283,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		for (Object o : lstEmployees.getCheckedElements()) {
 			if (o instanceof EmployeeTeam) {
 				EmployeeTeam team = (EmployeeTeam)o;
-				for (EmployeeTeamMember e : team.getMembers()) items.add(e.getEmployee());
+				for (EmployeeTeamMember e : team.getActiveMembers()) items.add(e.getEmployee());
 			}else if (o instanceof Employee) {
 				items.add((Employee) o);
 			}
@@ -364,7 +364,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				ok = true;
 				break;
 			}else if (type instanceof EmployeeTeam) {
-				if (!((EmployeeTeam)type).getMembers().isEmpty()) {
+				if (!((EmployeeTeam)type).getActiveMembers().isEmpty()) {
 					ok = true;
 					break;
 				}
@@ -452,7 +452,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				eteams.addAll(QueryFactory.buildQuery(s, EmployeeTeam.class,
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()})  //$NON-NLS-1$
 						.list());
-				eteams.forEach(team->team.getMembers().forEach(e->e.getEmployee().getGivenName()));
+				eteams.forEach(team->team.getActiveMembers().forEach(e->e.getEmployee().getGivenName()));
 			}
 			
 			eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
