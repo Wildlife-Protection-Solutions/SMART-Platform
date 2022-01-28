@@ -493,6 +493,53 @@ public class DataQueue {
 	}
 	
 	/**
+	 * <p>Gets a preview for the specific data queue item.</p>
+	 * <p>
+	 * URL: ../server/api/dataqueue/items/{uuid}/preview<br>
+	 * Call Type: GET
+	 * </p>
+	 * 
+	 * @param uuid	provided in the URL, the uuid of the item requested.
+	 * @return a string maximum of 10_000 characters for preview 
+	 */
+	@GET
+	@Path("/items/{uuid}/preview")
+	@Operation(description="Gets preview for a particular data queue item.")
+	public String getItemPreview(@Parameter(description="the uuid of the item requested") @PathParam("uuid") String uuid){
+		UUID itemUuid = parseUuid(uuid);
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			
+			ServerDataQueueItem item = (ServerDataQueueItem) s.get(ServerDataQueueItem.class, itemUuid);
+			if (item == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			validateRead(item.getConservationArea(), s);
+			
+			//read the first 10,000 characters from the files
+			java.nio.file.Path file = DataStoreManager.INSTANCE.getFile(item.getFile());
+			if (!Files.exists(file)){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.DqFileNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			}
+
+			try(InputStream reader = Files.newInputStream(file)){
+				byte[] data = new byte[10_000];
+				int length = reader.read(data);
+				return new String(data, 0, length);
+			}
+			
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Could not get data queue item: " +uuid, ex); //$NON-NLS-1$
+			if (ex instanceof SmartConnectException) throw (SmartConnectException)ex;
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("DataQueue.ItemNotFound", SmartUtils.getRequestLocale(request)), uuid), ex);	 //$NON-NLS-1$
+		}finally{
+			s.getTransaction().rollback();
+		}
+	}
+	
+	/**
 	 * <p>Updates the status of a data queue item</p>
 	 * <p>
 	 * URL: ../server/api/dataqueue/items/{uuid}/status/{status}<br>

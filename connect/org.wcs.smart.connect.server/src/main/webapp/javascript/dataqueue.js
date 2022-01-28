@@ -2,6 +2,10 @@ var DATAQUEUEURL = "../api/dataqueue";
 
 var oReq;
 
+var lastSorted = "name";
+var files = "";
+
+
 /* configure events on html elements */
 window.onload = function(){
 	menuCheckOnload();
@@ -134,14 +138,14 @@ function refreshFileList(){
 	var fileUrl = DATAQUEUEURL + "/detailedItems";
 	
  	var oReq = new XMLHttpRequest();
- 	oReq.onload = createFileTable;
+ 	oReq.onload = processFileApiResponse;
  	oReq.open("Get", fileUrl , true);
  	oReq.send();
  	
  	return false;
 }
 	
-function createFileTable(){
+function processFileApiResponse(){
 	
 	if (this.status != 200 && this.status != 201 ) {
 		var msg = i18n("dataqueue.error");
@@ -157,6 +161,12 @@ function createFileTable(){
 	
 	document.querySelector("#lastUpdateTime").innerHTML = formatDate(new Date());
 	
+	files = JSON.parse(this.responseText);
+	createFilterTable();
+}
+
+function createFilterTable(){
+	
 	//clear current table
 	var objects = document.querySelectorAll("div.filerow");
 	for (var i = 0; i < objects.length; i++){
@@ -166,8 +176,11 @@ function createFileTable(){
 	
 	var parent = document.getElementById("fileTable");
  	
+ 	var caMap = new Map();
+ 	var statusSet = new Set();
+ 	var typeSet = new Set();
+ 	
 	try{
-		var files = JSON.parse(this.responseText);
 
 	 	if(typeof files === "undefined" || files.length == 0){
 		 	var newRow = document.createElement("div");
@@ -187,6 +200,11 @@ function createFileTable(){
 		 		var lastModified = formatDate(files[i].lastModifiedDate);
 		 		var uploadedBy = files[i].uploadedBy; 
 
+				caMap.set(caUuid, ca);
+		 		statusSet.add(files[i].status);		 		
+				typeSet.add(files[i].type);
+		 		
+		 		
 		 		var row = tableCreateRow(parent,
 		 				[null, ca, name, type , status, lastModified, uploadedDate, uploadedBy, null], 
 		 				"filerow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
@@ -194,7 +212,10 @@ function createFileTable(){
 		 		row.dataset.uuid = uuid;
 		 		row.dataset.status = status;
 		 		row.dataset.type = type;
+		 		row.dataset.cauuid = caUuid;
 	
+		 		row.onclick = showFilePreview;
+
 		 		var checkbox = document.createElement("input");
 		 		checkbox.type="checkbox";
 		 		checkbox.name="dataqueueitem";
@@ -206,9 +227,7 @@ function createFileTable(){
 		 		
 		 		//TODO - should we check for permissions for update/delete, or assume any data queue permission = all data queue permission
 //		 		if(canupdate){
-	 			
-		 		
-		 			var updateicon = document.createElement("a");
+	 				var updateicon = document.createElement("a");
 			 		updateicon.className="update-icon marginleftright";
 			 		updateicon.title=i18n("dataqueue.edittooltip")
 			 		updateicon.onclick = updateFile;
@@ -233,7 +252,51 @@ function createFileTable(){
 			 	row.childNodes[row.childNodes.length - 1].appendChild(downloadicon);
 			 	
 		 	}
+		 	
+		 	//populate ca filter list
+		 	var cafilter = document.getElementById('cafilter');
+		 	//remove all
+		 	while (cafilter.firstChild) { cafilter.removeChild(cafilter.firstChild); }
+		 	//create all option
+		 	var op = document.createElement("option");
+		 	op.value = "all"
+		 	op.innerHTML = "All";
+		 	cafilter.appendChild(op);
+		 	for (const [cauuid, caname] of caMap){
+		 		op = document.createElement("option");
+		 		op.value = cauuid
+		 		op.innerHTML = caname;
+		 		cafilter.appendChild(op);
+		 	}
+		 	
+		 	var statusfilter = document.getElementById('statusfilter');
+		 	while(statusfilter.firstChild) {statusfilter.removeChild(statusfilter.firstChild);}
+		 	var op = document.createElement("option");
+		 	op.value = "all"
+		 	op.innerHTML = "All";
+		 	statusfilter.appendChild(op);
+		 	for (var stat of statusSet){
+		 		op = document.createElement("option");
+		 		op.value = stat
+		 		op.innerHTML = stat;
+		 		statusfilter.appendChild(op);
+		 	}
+		 	
+		 	var typefilter = document.getElementById('typefilter');
+		 	while(typefilter.firstChild) {typefilter.removeChild(typefilter.firstChild);}
+		 	var op = document.createElement("option");
+		 	op.value = "all"
+		 	op.innerHTML = "All";
+		 	typefilter.appendChild(op);
+		 	for (var stat of typeSet){
+		 		op = document.createElement("option");
+		 		op.value = stat
+		 		op.innerHTML = stat;
+		 		typefilter.appendChild(op);
+		 	}
+		 	
 	 	}
+	 	
 	}catch(err) {
  		var newRow = document.createElement("div");
  		newRow.style.backgroundColor = "#F00";
@@ -244,6 +307,79 @@ function createFileTable(){
  	   parent.appendChild(newRow);
 	}
 }
+
+function sortTable(sortColumn){
+	if(lastSorted == sortColumn){
+		sortColumn = "-" + sortColumn;
+		lastSorted = ""; //set it to nothing, so if clicked a 3rd time it sorts in ascending order again.
+	}else{
+		lastSorted = sortColumn; 
+	}
+ 	
+	files.sort(dynamicSort(sortColumn));
+ 	
+ 	createFilterTable();
+}
+
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if(property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    
+    return function (a,b) {
+        var result = (a[property].toUpperCase() < b[property].toUpperCase()) ? -1 : (a[property].toUpperCase() > b[property].toUpperCase()) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+
+function filterChanged(){
+
+	var ecafilter = document.getElementById('cafilter');
+	var cafilter = ecafilter.options[ecafilter.selectedIndex].value;
+		 	
+	var estatusfilter = document.getElementById('statusfilter');
+	var statusfilter = estatusfilter.options[estatusfilter.selectedIndex].value;
+		 	
+	var etypefilter = document.getElementById('typefilter');
+	var typefilter = etypefilter.options[etypefilter.selectedIndex].value;
+	
+	if (cafilter == "all") cafilter = null;
+	if (statusfilter == "all") statusfilter = null;
+	if (typefilter == "all") typefilter = null;
+	
+	var etable = document.getElementById('fileTable');
+	rows = etable.getElementsByTagName("div");
+	for (i = 0; i < rows.length; i++){
+		
+		var row = rows[i];
+		
+		var btypeok = true;
+		if (typefilter != null){
+		 	btypeok = row.dataset.type == null || (row.dataset.type != null && row.dataset.type == typefilter);
+		}
+		
+		var bstatusok = true;
+		if (statusfilter != null){
+			bstatusok = row.dataset.status == null || (row.dataset.status != null && row.dataset.status == statusfilter);
+		}
+		
+		var bcaok = true;
+		if (cafilter != null){
+			bcaok = row.dataset.cauuid == null || (cafilter != null && row.dataset.cauuid != null && row.dataset.cauuid == cafilter);
+		}
+		
+		if (btypeok && bstatusok && bcaok){
+			row.style.display = "";
+		}else{
+			row.style.display = "none";
+		}
+	
+	}
+	
+}
+
 
 function updateFile(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
@@ -283,6 +419,7 @@ function checkNone(){
 	}
 	return false;
 }
+
 function checkCompleted(){
 	
 	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]');
@@ -296,7 +433,9 @@ function checkCompleted(){
 function checkAll(){
 	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]');
 	for (var i = 0; i< checkedBoxes.length; i ++){
+		if (checkedBoxes[i].parentElement.parentElement.style.display != "none"){
 			checkedBoxes[i].checked = true;
+		}
 	}
 	return false;
 }
@@ -344,4 +483,31 @@ function getFilesize(){
     }
 
     return sizeinbytes;
+}
+
+
+/* updates the user info section with the current selected user */
+function showFilePreview(){
+	
+	if (this == null || this.dataset.uuid == null) return;
+	var itemuuid = this.dataset.uuid;
+	
+	var currentSelection = document.querySelector("#fileTable > .smart-table-selectedrow");
+	if (currentSelection != null){
+		currentSelection.className = currentSelection.className.replace(/(?:^|\s)smart-table-selectedrow(?!\S)/ , '' );
+	}
+	this.className = this.className + " smart-table-selectedrow";
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = showPreviewResults;
+ 	oReq.open("Get", DATAQUEUEURL + "/items/" + encodeURIComponent(itemuuid) + "/preview", true);
+ 	oReq.send();
+}
+
+function showPreviewResults(){
+	if (this.status != 200){
+		displayError(parseError(i18n("users.couldnotloaduser"), this.responseText));
+		return;
+	}
+	
+	document.getElementById("previewarea").value = this.responseText ;
 }

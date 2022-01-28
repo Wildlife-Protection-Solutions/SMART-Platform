@@ -19,35 +19,55 @@
 		<p class="infomessage"><fmt:message key="dataqueue.info"/></p>
 		<div><div id="message" class="msgsection"></div></div>
 		
-		<c:if test="${canupload}">
-			<div><button class="block button top-spacer" id="btnNewFile"><fmt:message key="dataqueue.newfilebutton"/></button></div>
-		</c:if>
-		<div class="top-spacer link_small" >
-			<fmt:message key="dataqueue.lastupdated"/><span id="lastUpdateTime"></span><a id="refreshnow" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>
+		<div style="padding-top: 10px; padding-bottom: 10px">
+			<fmt:message key="dataqueue.cafilter"/><select id="cafilter" class="formtext"  onchange="filterChanged()" style="max-width:24em"></select>
+			<fmt:message key="dataqueue.statusfilter"/><select id="statusfilter" class="formtext"  onchange="filterChanged()" style="max-width:12em"></select>
+			<fmt:message key="dataqueue.typefilter"/><select id="typefilter" class="formtext"  onchange="filterChanged()" style="max-width:12em"></select>
 		</div>
-		<div style="flex: 1 1 auto; height: 0;">
-  			<div style="height: 100%; overflow: auto; display: inline-block;">
+		
+
+		<div style="display: flex; flex: 1 1 auto; height: 0; border-top: 1px solid #BBBBBB; border-bottom: 1px solid #BBBBBB;">
+  			<div style="height: 100%; overflow: auto; flex-grow: 1">
 				<div id="fileTable" class="catable table-cell smart-table">
 				  	<div class="table-row smart-table-header">
 				  		<div class="table-cell smart-table-cell"></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.calabel"/></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.namelabel"/></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.typelabel"/></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.statuslabel"/></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.lastmodifiedlabel"/></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.uploadeddatelabel"/></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.uploadeduserlabel"/></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('caName')" ><fmt:message key="dataqueue.calabel"/></a></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')" ><fmt:message key="dataqueue.namelabel"/></a></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')" ><fmt:message key="dataqueue.typelabel"/></a></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('status')" ><fmt:message key="dataqueue.statuslabel"/></a></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('lastModifiedDate')" ><fmt:message key="dataqueue.lastmodifiedlabel"/></a></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedDate')" ><fmt:message key="dataqueue.uploadeddatelabel"/></a></div>
+						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedBy')" ><fmt:message key="dataqueue.uploadeduserlabel"/></a></div>
 						<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
 					</div>
 	  			</div> 
 	  		</div>
+	  		
+	  		<div style="flex-grow: 1; margin-left:20px" id="filepreview">
+		  		<div class="smart-table-header"><fmt:message key="dataqueue.preview"/></div>
+		  		<textarea style="width:90%; height: 90%" id="previewarea"></textarea>
+		  		<div><fmt:message key="dataqueue.previewmsg"/></div>
+	  		</div>
+	  		
 		</div>
-		<div><a class="link_small" id="selectNone" href="#"><fmt:message key="dataqueue.checknone"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#"><fmt:message key="dataqueue.checkcomplete"/></a> <a class="link_small" id="selectAll" href="#"><fmt:message key="dataqueue.checkall"/></a></div>
-		
-		<div class="top-spacer">
-		
-		<input type="button" class="button" value="<fmt:message key="dataqueue.deletebtn"/>" id="btnDeleteSelected"/>
+		<div class="top-spacer link_small" >
+			<fmt:message key="dataqueue.lastupdated"/>
+			<span id="lastUpdateTime"></span>
+			<a id="refreshnow" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>
+			<span style="padding-left: 10px; padding-right:10px">|</span>
+			<a id="selectNone" style="padding-right:5px" href="#"><fmt:message key="dataqueue.checknone"/></a>
+			<a id="selectCompleted" style="padding-right:5px" href="#"><fmt:message key="dataqueue.checkcomplete"/></a>
+			<a id="selectAll" href="#"><fmt:message key="dataqueue.checkall"/></a>
+			<span style="padding-left: 10px; padding-right:10px">|</span>
+			<!--<input type="button" style="margin-left: 10px; margin-right:10px"  class="button" value="<fmt:message key="dataqueue.deletebtn"/>" id="btnDeleteSelected"/>-->
+			<a id="btnDeleteSelected" style="padding-right:5px" href="#"><fmt:message key="dataqueue.deletebtn"/></a>
+			<c:if test="${canupload}">
+				<span style="padding-left: 10px; padding-right:10px">|</span>
+				<!-- <input style="margin-left: 10px; margin-right:10px" type = "button" class="button" id="btnNewFile" value="<fmt:message key="dataqueue.newfilebutton"/>"/>-->
+				<a id="btnNewFile" style="padding-right:5px" href="#"><fmt:message key="dataqueue.newfilebutton"/></a>
+			</c:if>	
 		</div>
+		
 	</div>
 <%@include file="footer.jsp" %>
 
