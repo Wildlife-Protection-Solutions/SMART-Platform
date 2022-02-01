@@ -244,6 +244,8 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 		btnDelete = new Button(btncomposite, SWT.NONE);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setToolTipText(Messages.CcaaUserPropertyPage_DeleteTooltip);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {

@@ -210,6 +210,9 @@ public class SmartStartUp {
 	 * @return true if successfully logged in, false otherwise
 	 */
 	public static boolean login(ConservationArea ca, String userName, String password ){
+		
+		List<Object> objectsToSave = new ArrayList<>();
+		
 		if (ca.getIsCcaa()){
 			// we are performing cross-ca analysis and need to do something
 			// different
@@ -265,8 +268,7 @@ public class SmartStartUp {
 								ccaaUser.setStartEmploymentDate(LocalDate.now());
 								ccaaUser.setId(ccaaUser.getSmartUserId());
 								ccaaUser.setConservationArea(ca);
-								session.save(ccaaUser);
-								session.flush();
+								objectsToSave.add(ccaaUser);
 							}
 							
 							//determine user levels by combining all permissions 
@@ -297,7 +299,7 @@ public class SmartStartUp {
 								lang.setCode(Locale.getDefault().getLanguage());
 								
 								ca.getLanguages().add(lang);
-								session.saveOrUpdate(lang);
+								objectsToSave.add(lang);
 							}
 							session.getTransaction().commit();
 						}catch (Exception ex){
@@ -316,9 +318,6 @@ public class SmartStartUp {
 					
 					//Record this Login in the login-log
 					recordLogin(ccaaUser, ca);
-					
-					try (Session s = HibernateManager.openSession()){
-					}
 				}
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
@@ -341,8 +340,6 @@ public class SmartStartUp {
 				
 				//Record this Login in the login-log
 				recordLogin(e, ca);				
-				//no longer necessary; done above by record login
-				//try(Session s = HibernateManager.openSession()){}
 
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError + ": " + ex.getMessage(), ex); //$NON-NLS-1$
@@ -391,6 +388,22 @@ public class SmartStartUp {
 			}
 		}
 		
+		//save objects here so that they get
+		//recorded in the change log if required
+		//otherwise ccaa users don't get recorded in the change log and
+		//never get shared to connect
+		if (!objectsToSave.isEmpty()) {
+			try(Session session = HibernateManager.openSession()){
+				
+				session.beginTransaction();
+				for (Object o : objectsToSave) session.save(o);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + Messages.SmartStartUp_LoginHandlerError, ca.getName(), "create objects", ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+				SmartPlugIn.displayLog(error, ex);
+				return false;
+			}
+		}
 		return true;
 	}
 	
