@@ -54,6 +54,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.util.factory.Hints;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Geometry;
@@ -64,6 +65,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.internal.ui.actions.ResetService;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.filter.Filter;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
@@ -386,7 +388,10 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					final AreaIdDialog[] idDialog = new AreaIdDialog[1];
 					try{
 						FileDataStore store = FileDataStoreFinder.getDataStore(url2);
-						collection = store.getFeatureSource().getFeatures();
+						//add force2d hint
+						org.geotools.data.Query q = new org.geotools.data.Query(store.getFeatureSource().getSchema().getTypeName(), Filter.INCLUDE);
+						q.getHints().put(Hints.FEATURE_2D, Boolean.TRUE);
+						collection = store.getFeatureSource().getFeatures(q);
 					}catch (final Exception ex){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
