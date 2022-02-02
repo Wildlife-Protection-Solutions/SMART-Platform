@@ -13,6 +13,7 @@
 	<groupId>org.wcs.smart.core</groupId>
 	<artifactId>org.wcs.smart.core.core</artifactId>
 	<name>SMART Core Module</name>
+	<version>7.5.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<build>

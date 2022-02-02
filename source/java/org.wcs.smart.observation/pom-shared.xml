@@ -15,14 +15,14 @@
 
 	<artifactId>org.wcs.smart.core.observation</artifactId>
 	<name>Observation Module</name>
-	<version>7.4.1-SNAPSHOT</version>
+	<version>7.5.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.wcs.smart.core</groupId>
 			<artifactId>org.wcs.smart.core.core</artifactId>
-			<version>${smart.version}</version>
+			<version>${smart750.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>

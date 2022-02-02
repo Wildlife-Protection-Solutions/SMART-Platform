@@ -13,7 +13,7 @@
 	<artifactId>org.wcs.smart.core.connect</artifactId>
 	<name>SMART Connect Module</name>
 	<packaging>bundle</packaging>
-	<version>7.4.1-SNAPSHOT</version>
+	<version>7.5.0-SNAPSHOT</version>
 	
 	<dependencies>
 		<dependency>

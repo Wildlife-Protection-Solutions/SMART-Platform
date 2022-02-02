@@ -10,7 +10,7 @@
 
 	<properties>
 		<smart.version>7.4.0-SNAPSHOT</smart.version>
-		<smart741.version>7.4.1-SNAPSHOT</smart741.version>
+		<smart750.version>7.5.0-SNAPSHOT</smart750.version>
 		<geotools.version>25.0</geotools.version>
 		<jts.version>1.16.1</jts.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>

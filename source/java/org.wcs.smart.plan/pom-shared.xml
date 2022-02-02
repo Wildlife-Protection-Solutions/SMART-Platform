@@ -13,7 +13,7 @@
 	<artifactId>org.wcs.smart.core.plan</artifactId>
 	<name>Plan Module</name>
 	<packaging>jar</packaging>
-	<version>7.4.1-SNAPSHOT</version>
+	<version>7.5.0-SNAPSHOT</version>
 	
 	<dependencies>
 		<dependency>
@@ -29,7 +29,7 @@
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.patrol.query</artifactId>
-    			<version>${smart741.version}</version>
+    			<version>${smart750.version}</version>
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>

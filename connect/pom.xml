@@ -17,7 +17,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<smart.version>7.4.0-SNAPSHOT</smart.version>
-		<smart741.version>7.4.1-SNAPSHOT</smart741.version>
+		<smart750.version>7.5.0-SNAPSHOT</smart750.version>
 		<birt.version>4.18.0-SNAPSHOT</birt.version>
 		<geotools.version>23.0</geotools.version>
 		<jts.version>1.16.1</jts.version>

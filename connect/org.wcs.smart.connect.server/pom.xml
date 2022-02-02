@@ -217,12 +217,12 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.core</artifactId>
-            <version>${smart.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.observation</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -252,7 +252,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.query</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -272,22 +272,22 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.patrol</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.patrol.query</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.plan</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.er</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -307,12 +307,12 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.incident</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.connect</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -362,7 +362,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.birt.map</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -407,7 +407,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.i2</artifactId>
-            <version>${smart741.version}</version>
+            <version>${smart750.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
