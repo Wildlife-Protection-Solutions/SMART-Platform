@@ -13,6 +13,6 @@
 	<name>SMART Connect Module</name>
 	<artifactId>org.wcs.smart.connect</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.4.1-SNAPSHOT</version>
+	<version>7.5.0-SNAPSHOT</version>
 	
 </project>

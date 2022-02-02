@@ -12,6 +12,6 @@
 	<name>SMART BIRT Mapping Module</name>
 	<artifactId>org.wcs.smart.birt.map</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.4.1-SNAPSHOT</version>
+	<version>7.5.0-SNAPSHOT</version>
 	
 </project>
