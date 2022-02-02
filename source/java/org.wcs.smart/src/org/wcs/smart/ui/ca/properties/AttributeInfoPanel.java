@@ -118,6 +118,7 @@ public class AttributeInfoPanel extends Composite {
 	private Text txtMinValue;
 	private Text txtMaxValue;
 	private Text txtRegex;
+	private Text txtDecimal;
 	
 	private Composite optionComposite;
 	private Composite booleanComposite;
@@ -134,6 +135,7 @@ public class AttributeInfoPanel extends Composite {
 	private ControlDecoration cdMaxValue;
 	private ControlDecoration cdAttList;
 	private ControlDecoration cdAttTree;
+	private ControlDecoration cdRegex;
 
 	private Language currentDisplayLang = null;
 	
@@ -335,9 +337,28 @@ public class AttributeInfoPanel extends Composite {
 			});
 		}
 		
+		
+		Label lbl = new Label(numericComposite, SWT.NONE);
+		lbl.setAlignment(SWT.RIGHT);
+		lbl.setText(Messages.AttributeInfoPanel_DecimalPlacesLbl);
+		lbl.setToolTipText(Messages.AttributeInfoPanel_DecimalPlacesTooltip);
+		
+		txtDecimal = new Text(numericComposite, SWT.BORDER);
+		txtDecimal.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		if (canEdit){
+			cdRegex = createDecoration(txtDecimal);		
+			txtDecimal.addListener(SWT.Modify, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validate();
+				}
+			});
+		}
+		
 		if (!canEdit){
 			txtMinValue.setEditable(false);
 			txtMaxValue.setEditable(false);
+			txtDecimal.setEditable(false);
 		}
 		
 		/*   Text Attribute Options */
@@ -848,6 +869,23 @@ public class AttributeInfoPanel extends Composite {
 			if (!miner){
 				cdMinValue.hide();
 			}
+			
+			String decimal = txtDecimal.getText().trim();
+			cdRegex.hide();
+			if (!decimal.isBlank()) {
+				try {
+					int dd = Integer.parseInt(decimal);
+					if (dd < 0 || dd > 30) {
+						cdRegex.show();
+						cdRegex.setDescriptionText(Messages.AttributeInfoPanel_InvalidDecimalPlaces);
+					}
+				}catch (Exception ex) {
+					cdRegex.show();
+					cdRegex.setDescriptionText(Messages.AttributeInfoPanel_InvalidDecimalPlaces);
+				}
+			}
+			
+			
 		}else if (type.equals(AttributeType.TEXT)){
 			//TODO: validate regex expression
 			cdMinValue.hide();
@@ -989,6 +1027,11 @@ public class AttributeInfoPanel extends Composite {
 				}
 				if (att.getMinValue() != null) {
 					txtMinValue.setText(String.valueOf(att.getMinValue()));
+				}
+				if (att.getRegex() != null) {
+					txtDecimal.setText(att.getRegex());
+				}else {
+					txtDecimal.setText(""); //$NON-NLS-1$
 				}
 			} else if (att.getType().equals(Attribute.AttributeType.TEXT)) {
 				textComposite.setVisible(true);
@@ -1155,6 +1198,9 @@ public class AttributeInfoPanel extends Composite {
 				}
 				if (txtMinValue.getText().length() > 0){
 					att.setMinValue(Double.valueOf(txtMinValue.getText()));
+				}
+				if (!txtDecimal.getText().isBlank()) {
+					att.setRegex(txtDecimal.getText());
 				}
 			}else if (att.getType().equals(Attribute.AttributeType.BOOLEAN)){
 				att.setAggregations(null);

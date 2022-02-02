@@ -207,13 +207,23 @@ public abstract class QueryColumn implements Cloneable{
 	public abstract Object getValue(IResultItem item) ;
 
 	/**
-	 * @param item
+	 * @param value
 	 * 
-	 * @return for a given query result item returns
-	 * the string representation of the object associated 
+	 * @return for a given query result value returns
+	 * the formatted string representation of the object associated 
 	 * with this column
 	 */
 	public String getValueAsString(Object value){
+		return getValueAsString(value, true);
+	}
+	/**
+	 * @param value 
+	 * @param formatted if the formatted version or raw version should be returned
+	 * @return for a given query result value returns
+	 * the string representation of the object associated 
+	 * with this column
+	 */
+	public String getValueAsString(Object value, boolean formatted){
 		if (value == null) return ""; //$NON-NLS-1$
 		if (type == ColumnType.BOOLEAN) {
 			if (value instanceof Double){
@@ -279,5 +289,11 @@ public abstract class QueryColumn implements Cloneable{
 	 */
 	public abstract QueryColumn clone();
 		
-	
+	/**
+	 * 
+	 * @return the format details for the column or null if none
+	 */
+	public String getFormatString() {
+		return null;
+	}
 }

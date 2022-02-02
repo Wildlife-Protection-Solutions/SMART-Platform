@@ -153,6 +153,8 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Aggregations_Label;
 	public static String AttributeInfoPanel_Aggregations_ToolTip;
 	public static String AttributeInfoPanel_ConvertToMultiList;
+	public static String AttributeInfoPanel_DecimalPlacesLbl;
+	public static String AttributeInfoPanel_DecimalPlacesTooltip;
 	public static String AttributeInfoPanel_Delete_DialogMessage;
 	public static String AttributeInfoPanel_Delete_DialogTitle;
 	public static String AttributeInfoPanel_DeleteErrorDialogTitle;
@@ -163,6 +165,7 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Error_OneListItemRequired;
 	public static String AttributeInfoPanel_Error_OneTreeNodeRequired;
 	public static String AttributeInfoPanel_IconLabel;
+	public static String AttributeInfoPanel_InvalidDecimalPlaces;
 	public static String AttributeInfoPanel_ListModificationError;
 	public static String AttributeInfoPanel_Max_Label;
 	public static String AttributeInfoPanel_Min_Label;

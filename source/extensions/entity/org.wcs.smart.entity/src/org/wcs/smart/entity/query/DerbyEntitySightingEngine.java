@@ -562,7 +562,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(FixedColumns.CA_NAME.dbColName + " varchar(256),"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$ 
 		sql.append(FixedColumns.WAYPOINT_SOURCE.dbColName + " varchar(16),"); //$NON-NLS-1$
-		sql.append(FixedColumns.WAYPOINT_ID.dbColName + " varchar(32),"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_ID.dbColName + " varchar(256),"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_X.dbColName + " double,"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_Y.dbColName + " double,"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_DIRECTION.dbColName + " real,"); //$NON-NLS-1$

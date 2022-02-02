@@ -170,7 +170,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 				for (EntityAttribute ea : entityType.getAttributes()){
 					for (EntityAttributeValue v : entity.getAttributes()){
 						if (v.getEntityAttribute().getKeyId().equals(ea.getKeyId())){
-							csvout[i + extra] = v.getValueAsString(Locale.getDefault());
+							csvout[i + extra] = v.getValueAsString(Locale.getDefault(), false);
 							break;
 						}
 					}

@@ -383,9 +383,7 @@ public class WaypointObservationAttribute extends UuidItem{
 			}
 			break;
 		case NUMERIC:
-			if (getNumberValue() != null){
-				text = String.valueOf(getNumberValue());	
-			}
+			text = Attribute.formatNumberAsString(getNumberValue(), getAttribute().getRegex());
 			break;
 		case BOOLEAN:
 			if (getNumberValue() != null){

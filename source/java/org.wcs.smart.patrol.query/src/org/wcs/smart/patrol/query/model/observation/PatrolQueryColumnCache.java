@@ -190,7 +190,7 @@ public class PatrolQueryColumnCache {
 					
 				for (Attribute att : atts) {
 					String name = att.getName();
-					QueryColumn toAdd = new AttributeQueryColumn(name, att.getKeyId(), att.getType());
+					QueryColumn toAdd = new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex());
 					toAdd.setEdit(true);
 					cols.add(toAdd);
 				}
