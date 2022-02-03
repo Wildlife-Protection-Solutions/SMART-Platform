@@ -1146,7 +1146,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			SummaryHeader header = new SummaryHeader(ObservationValueItemLabelProvider.INSTANCE.getName(item, session),
 					ObservationValueItemLabelProvider.INSTANCE.getFullName(item, session),
 					item.asString(), true);
-			
+			header.setUiFormatter(item.getFormatter(session,ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas())));
 			results.addValueHeader(header);
 		}
 		

@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import java.util.function.Function;
+
+import org.hibernate.Session;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 
 
@@ -54,4 +58,12 @@ public interface IValueItem {
 	 * @param visitor
 	 */
 	public void accept(IValueVisitor visitor);
+	
+	/**
+	 * Function to format value results
+	 * @return
+	 */
+	public default Function<Double,String> getFormatter(Session session, ConservationAreaFilter caFilter){
+		return null;
+	}
 }

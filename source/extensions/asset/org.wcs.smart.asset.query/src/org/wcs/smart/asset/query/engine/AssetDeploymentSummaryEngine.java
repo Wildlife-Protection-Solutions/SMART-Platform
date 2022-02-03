@@ -1088,6 +1088,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 					AssetValueItemLabelProvider.INSTANCE.getName(item, session),
 					AssetValueItemLabelProvider.INSTANCE.getFullName(item, session),
 					item.asString(), true) ;
+			header.setUiFormatter(item.getFormatter(session,ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas())));
 			if (item instanceof AssetValueItem && ((AssetValueItem)item).getAssetFormatOption() != null) {
 				header.setFormatter( ((AssetValueItem)item).getAssetFormatOption().getFormatter(Locale.getDefault()) );
 			}

@@ -150,7 +150,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 					 query = new QueryProxy(squery);
 					 query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 					 
-					getSite().getShell().getDisplay().asyncExec(new Runnable() {
+					 getSite().getShell().getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							initQuery();

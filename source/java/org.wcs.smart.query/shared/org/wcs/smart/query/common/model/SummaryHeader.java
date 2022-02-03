@@ -49,7 +49,17 @@ public class SummaryHeader {
 	private String identifier;  //hex encoded uuid, string or other key value
 	private boolean isValue = false;
 	
-	private Function<Double, String> formatter;	//formatter only applicable for value column headers
+	//formatter only applicable for value column
+	//converts double to string applies to
+	//all values all the time
+	private Function<Double, String> formatter;
+
+	//formatter only applicable for value column
+	//converts double to string but only in the UI
+	//(won't be used by BIRT or exports etc.)
+	private Function<Double, String> uiFormatter;
+	
+	
 	/**
 	 * Creates a new summary header with a null identifier 
 	 * @param name the gui name
@@ -85,7 +95,10 @@ public class SummaryHeader {
 	
 	/**
 	 * Sets the formatter to use for converting double values to string
-	 * results.  only applicable for value columns
+	 * results.  only applicable for value columns. This applies everywhere 
+	 * the value is displayed and results in the value being converted to
+	 * a String.
+	 * 
 	 * @param formatter
 	 */
 	public void setFormatter(Function<Double, String> formatter){
@@ -100,6 +113,22 @@ public class SummaryHeader {
 		return this.formatter;
 	}
 	
+	/**
+	 * Sets the formatter to use for converting double values to string
+	 * results for UI display. Only applicable to value columns.
+	 * @param formatter
+	 */
+	public void setUiFormatter(Function<Double, String> formatter){
+		this.uiFormatter = formatter;
+	}
+	/**
+	 * Gets the formatter to use for converting double values to string
+	 * results.  only applicable for value columns
+	 * 
+	 */
+	public Function<Double, String> getUiFormatter(){
+		return this.uiFormatter;
+	}
 	/**
 	 * @return the summary header name to display to the user
 	 */

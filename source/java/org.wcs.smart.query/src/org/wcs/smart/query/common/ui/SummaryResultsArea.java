@@ -55,8 +55,6 @@ public class SummaryResultsArea extends Composite{
 	private Hyperlink runQueryLink;
 	private FormToolkit toolkit;
 	
-	
-	
 	public SummaryResultsArea(Composite parentArea, ISummaryEditor parentEditor){
 		super(parentArea, SWT.NONE);
 		this.editor = parentEditor;
