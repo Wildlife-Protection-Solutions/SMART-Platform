@@ -73,6 +73,8 @@ public class CaSizeReportPreferencePage extends PreferencePage implements IWorkb
 		
 		txtReport = new StyledText(temp, SWT.MULTI| SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		txtReport.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txtReport.setEditable(false);
+		txtReport.setBackground(txtReport.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		((GridData)txtReport.getLayoutData()).widthHint = 200;
 		((GridData)txtReport.getLayoutData()).heightHint = 400;
 

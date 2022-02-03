@@ -134,7 +134,10 @@ public class CtJsonExportUtils {
 	 * JSON options property key; for list options
 	 */
 	public static final String JSON_OPTION_PROP_KEY = "options"; //$NON-NLS-1$
-	
+	/**
+	 * JSON options property key; for list options
+	 */
+	public static final String JSON_GROUP_PROP_KEY = "groups"; //$NON-NLS-1$
 	/**
 	 * JSON options key for representing the part list options
 	 */
@@ -524,6 +527,9 @@ public class CtJsonExportUtils {
 			boolean isFixed, Session session, ConservationArea ca) {
 		//find all employees - they are either directly linked or linked through a employee team
 		Set<Employee> allEmployees = new HashSet<>();
+		
+		Set<EmployeeTeam> selectedTeams = new HashSet<>();
+		
 		if (screenOption != null) {
 			for (MetadataFieldUuidValue uuid : screenOption.getUuidList()) {
 				UUID item = uuid.getUuidValue();
@@ -534,7 +540,8 @@ public class CtJsonExportUtils {
 				}
 				EmployeeTeam team = session.get(EmployeeTeam.class, item);
 				if (team != null) {
-					for (EmployeeTeamMember tm : team.getMembers()) {
+					selectedTeams.add(team);
+					for (EmployeeTeamMember tm : team.getActiveMembers()) {
 						allEmployees.add(tm.getEmployee());
 					}
 				}
@@ -573,6 +580,29 @@ public class CtJsonExportUtils {
 			optionOptions.add(ttype);
 		}
 		optionType.put(JSON_OPTION_PROP_KEY, optionOptions);
+		
+		//add groups
+		JSONArray groupOptions = new JSONArray();
+		for (EmployeeTeam team : selectedTeams) {
+			
+			JSONObject teamObject = new JSONObject();
+			
+			String defaultname = team.findName(team.getConservationArea().getDefaultLanguage());
+			teamObject.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultname);
+			for (Label l : team.getNames()) {
+				teamObject.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue()); 
+			}
+			//options
+			JSONArray emps = new JSONArray();
+			for (EmployeeTeamMember member: team.getMembers()) {
+				if (allEmployees.contains(member.getEmployee())) {
+					emps.add(UuidUtils.uuidToString(member.getEmployee().getUuid()));
+				}
+			}
+			teamObject.put(JSON_OPTION_PROP_KEY, emps);
+			groupOptions.add(teamObject);
+		}
+		optionType.put(JSON_GROUP_PROP_KEY, groupOptions);
 		
 		JSONObject teamTypeOp = new JSONObject();
 		teamTypeOp.put(JSON_EMPLOYEE_METADATA_KEY, optionType);

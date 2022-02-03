@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
@@ -41,6 +42,8 @@ public class AttributeQueryColumn extends QueryColumn {
 	protected String attributeKey = null;
 	protected AttributeType attributeType;
 	
+	protected String formatString;
+
 	/**
 	 * Creates a new attribute column.
 	 * 
@@ -48,8 +51,9 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @param key the attribute id key
 	 * @param type the type of the attribute column
 	 */
-	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
+	public AttributeQueryColumn(String name, String attributeId, AttributeType type, String formatString){
 		super(name, KEY_PREFIX + attributeId, null);
+		this.formatString = formatString;
 		this.attributeKey = attributeId;
 		this.attributeType = type;
 		ColumnType ctype = ColumnType.STRING;
@@ -63,12 +67,27 @@ public class AttributeQueryColumn extends QueryColumn {
 		super.setType(ctype);
 	}
 	
+	@Override
+	public String getFormatString() {
+		return this.formatString;
+	}
+	
 	public AttributeType getAttributeType(){
 		return this.attributeType;
 	}
 	
 	public String getAttributeId(){
 		return getKey().substring(KEY_PREFIX.length());
+	}
+
+	@Override
+	public String getValueAsString(Object value, boolean formatted){
+		if (value == null) return ""; //$NON-NLS-1$
+		
+		if (formatted && this.attributeType == Attribute.AttributeType.NUMERIC) {
+			return Attribute.formatNumberAsString(value, formatString);
+		}
+		return super.getValueAsString(value, formatted);
 	}
 	
 	@Override
@@ -90,7 +109,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 */
 	@Override
 	public QueryColumn clone() {
-		QueryColumn newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getAttributeType());
+		QueryColumn newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getAttributeType(), getFormatString());
 		newColumn.setEdit(canEdit());
 		return newColumn;
 	}

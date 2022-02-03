@@ -19,51 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.summary;
+package org.wcs.smart.ui;
 
-import java.util.function.Function;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.common.attachment.AttachmentUtil;
 
-import org.hibernate.Session;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.IValueVisitor;
+@SuppressWarnings("restriction")
+public class OnlineHelpHandler {
 
-
-/**
- * Interface that represents a value item
- * in a summary query.
- * 
- * @author egouge
- * @since 1.0.0
- */
-public interface IValueItem {
+	@Execute
+	public void execute(Shell activeShell) {
+		AttachmentUtil.launch("https://app.assembla.com/spaces/smart-cs/wiki/SMART_Software_Online_Help"); //$NON-NLS-1$
+	}
 	
-	public enum ValueType{
-		OBSERVATION("obs" ), //$NON-NLS-1$
-		WAYPOINT("wp"); //$NON-NLS-1$
-		
-		public String key;
-		
-		private ValueType(String key){
-			this.key = key;
+
+	// E3
+	public static class OnlineHelpHandlerWrapper extends DIHandler<OnlineHelpHandler> {
+		public OnlineHelpHandlerWrapper() {
+			super(OnlineHelpHandler.class);
 		}
-	}	
-	
-	/**
-	 * @return the string representation of the item
-	 */
-	public String asString();
-
-	/**
-	 * process the given visitor
-	 * @param visitor
-	 */
-	public void accept(IValueVisitor visitor);
-	
-	/**
-	 * Function to format value results
-	 * @return
-	 */
-	public default Function<Double,String> getFormatter(Session session, ConservationAreaFilter caFilter){
-		return null;
 	}
 }

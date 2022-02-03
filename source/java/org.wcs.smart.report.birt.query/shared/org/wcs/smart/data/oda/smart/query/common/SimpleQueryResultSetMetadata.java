@@ -39,6 +39,7 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Resultset Metadata object for 
@@ -199,6 +200,18 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getPrecision(int index) throws OdaException {
+		if (geometryColumns != null && index > queryColumns.length) return -1;
+		
+		QueryColumn qc = queryColumns[index-1];
+		if (qc.getType() == ColumnType.NUMBER ||
+				qc.getType() == ColumnType.LONG ||
+						qc.getType() == ColumnType.INTEGER) {
+			if (qc.getFormatString() != null) {
+				try {
+					return Integer.parseInt(qc.getFormatString());
+				}catch (Exception ex) {}
+			}
+		}
 		return -1;
 	}
 

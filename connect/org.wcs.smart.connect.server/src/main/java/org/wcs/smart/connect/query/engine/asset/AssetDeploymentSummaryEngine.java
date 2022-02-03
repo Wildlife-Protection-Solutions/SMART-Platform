@@ -1044,7 +1044,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 					summary.getName(item),
 					summary.getFullName(item),
 					item.asString(), true);
-			
+			header.setUiFormatter(item.getFormatter(session,caFilter));
 			if (item instanceof AssetValueItem && ((AssetValueItem)item).getAssetFormatOption() != null) {
 				header.setFormatter(((AssetValueItem)item).getAssetFormatOption().getFormatter(l));
 			}

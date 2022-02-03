@@ -460,7 +460,11 @@ public class SummaryResultTable extends Composite {
 			if (columnIndex >= data.length) return ""; //$NON-NLS-1$
 			
 			int vindex = columnIndex % results.getValueHeaders().size();
+			
 			Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
+			if (formatter == null) {
+				formatter = results.getValueHeaders().get(vindex).getUiFormatter();
+			}
 			
 			Double value = data[columnIndex];
 			if (formatter != null) {

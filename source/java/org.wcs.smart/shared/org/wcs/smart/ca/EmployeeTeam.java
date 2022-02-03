@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -30,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Employee Team Object.  An employee team consists of a set of 
@@ -58,11 +60,24 @@ public class EmployeeTeam extends NamedItem {
 		this.ca = ca;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.team", orphanRemoval=true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.team", 
+			orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<EmployeeTeamMember> getMembers(){
 		return this.members;
 	}
+	
 	public void setMembers(List<EmployeeTeamMember> members) {
 		this.members = members;
+	}
+	
+	@Transient
+	public List<EmployeeTeamMember> getActiveMembers(){
+		List<EmployeeTeamMember> all = new ArrayList<>();
+		for (EmployeeTeamMember m : getMembers()) {
+			if (m.getEmployee().isActive()) {
+				all.add(m);
+			}
+		}
+		return all;
 	}
 }

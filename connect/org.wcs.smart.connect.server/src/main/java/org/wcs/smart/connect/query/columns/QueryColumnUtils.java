@@ -158,7 +158,7 @@ public class QueryColumnUtils {
 		
 		//attributes
 		//I want all attributes that are shared across all conservationAreas
-		String query = "SELECT keyId, type  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc"; //$NON-NLS-1$
+		String query = "SELECT keyId, type, max(regex)  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc"; //$NON-NLS-1$
 		org.hibernate.query.Query<?> attquery = session.createQuery(query);
 		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
@@ -190,12 +190,15 @@ public class QueryColumnUtils {
 		for (Object attributeRow : attributes) {
 			Object[] attribute = (Object[]) attributeRow;
 			String keyid = (String) attribute[0];
+			
+			String formatstring = null;
 			AttributeType atype = (AttributeType) attribute[1];
-
+			if (atype == AttributeType.NUMERIC) {
+				formatstring = (String)attribute[2];
+			}
 			String name = attribute2name.get(keyid);
 
-			attributeColumns.add(new AttributeQueryColumn(name, keyid, atype) {
-				
+			attributeColumns.add(new AttributeQueryColumn(name, keyid, atype, formatstring) {
 				@Override
 				public Object getValue(IResultItem item) {
 					if (item instanceof ObservationQueryResultItem){

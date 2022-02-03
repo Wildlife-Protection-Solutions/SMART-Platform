@@ -53,6 +53,7 @@ public class ConservationAreaFilter implements IFilter {
 	public static ConservationAreaFilter parseFilter(String caFilterAsString, Collection<ConservationArea> validCas) {
 		ConservationAreaFilter filter = new ConservationAreaFilter();
 		if (caFilterAsString == null || caFilterAsString.trim().length() == 0){
+			for (ConservationArea ca : validCas) filter.addConservationArea(ca.getUuid());
 			filter.setIncludeAll(true);
 		}else{
 			filter.setIncludeAll(false);		

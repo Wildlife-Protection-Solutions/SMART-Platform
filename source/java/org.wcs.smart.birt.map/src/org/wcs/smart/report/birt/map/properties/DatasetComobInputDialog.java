@@ -245,7 +245,7 @@ public class DatasetComobInputDialog extends Dialog {
 					if (lname == null) {
 						return ((LayerDefinition)element).getHandle().getName() + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 					}else {
-						return ((LayerDefinition)element).getHandle().getName() + " - " + lname + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+						return ((LayerDefinition)element).getHandle().getName() + " - " + lname + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 				return super.getText(element);

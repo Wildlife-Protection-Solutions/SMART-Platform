@@ -195,7 +195,7 @@ public class CsvExporter extends AbstractQueryExporter {
 
 				data = new String[cols.size()];
 				for (int i = 0; i < cols.size(); i++) {
-					data[i] = results.getValueAsString(resultItem, cols.get(i), session);
+					data[i] = results.getValueAsString(resultItem, cols.get(i), session, false);
 				}
 				ICsvDataExporter.removeLineFeeds(data);
 				writer.writeNext(data);

@@ -109,7 +109,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 				teams.add(Messages.EmployeeSelectComposite_AllEmployees);
 				try(Session session = HibernateManager.openSession()){
 					List<EmployeeTeam> items = QueryFactory.buildQuery(session, EmployeeTeam.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
-					items.forEach(i->i.getMembers().forEach(m->m.getEmployee().getGivenName()));
+					items.forEach(i->i.getActiveMembers().forEach(m->m.getEmployee().getGivenName()));
 					teams.addAll(items);
 				}
 				Display.getDefault().syncExec(()->{
@@ -131,7 +131,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 				
 				Object x = cmbTeams.getStructuredSelection().getFirstElement();
 				if (x instanceof EmployeeTeam) {
-					List<Employee> choices = ((EmployeeTeam)x).getMembers().stream().map(e->e.getEmployee()).collect(Collectors.toList());
+					List<Employee> choices = ((EmployeeTeam)x).getActiveMembers().stream().map(e->e.getEmployee()).collect(Collectors.toList());
 					EmployeeSelectComposite.this.setItemsData(choices, getSelectedItemsAsList());
 				}else {
 					//all members

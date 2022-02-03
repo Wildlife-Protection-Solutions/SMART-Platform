@@ -58,6 +58,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -432,8 +433,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		Throwable temp = ex;
 		while(temp != null) {
 			if (temp instanceof SQLException) {
-				if ("XJ001".equals(((SQLException)temp).getSQLState())) {
-					throw new SQLException("Not enough memory to run query. Try adding reducing date range or adding filters to reduce amount of data returned.");
+				if ("XJ001".equals(((SQLException)temp).getSQLState())) { //$NON-NLS-1$
+					throw new SQLException(Messages.AbstractQueryEngine_NotEnoughMemory);
 				}
 			}
 			temp = temp.getCause();

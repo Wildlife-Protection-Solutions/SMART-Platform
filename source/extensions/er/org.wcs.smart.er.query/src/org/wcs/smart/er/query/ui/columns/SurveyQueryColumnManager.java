@@ -268,7 +268,7 @@ public class SurveyQueryColumnManager {
 							
 						for (Attribute att : atts) {
 							String name = att.getName();
-							cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
+							cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex()));
 						}
 						dataModelColumns = cols.toArray(new QueryColumn[cols.size()]);
 						

@@ -157,7 +157,20 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	public abstract String getGeometryType();
 
 	public String getValueAsString(T item, QueryColumn qc, Session session){
-		return qc.getValueAsString(getValue(item, qc, session));
+		return getValueAsString(item, qc, session, true);
+	}
+	
+	/**
+	 * Gets the value for the query column from the item.
+	 * 
+	 * @param item
+	 * @param qc
+	 * @param session
+	 * @param formatted if true the formatted value is returned, if false the raw value is returned
+	 * @return
+	 */
+	public String getValueAsString(T item, QueryColumn qc, Session session, boolean formatted){
+		return qc.getValueAsString(getValue(item, qc, session), formatted);
 	}
 	
 	public Object getValue(T item, QueryColumn column, Session session){

@@ -1125,6 +1125,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 					summary.getName(item),
 					summary.getFullName(item),
 					item.asString(), true);
+			header.setUiFormatter(item.getFormatter(session,caFilter));
 			results.addValueHeader(header);
 		}
 		

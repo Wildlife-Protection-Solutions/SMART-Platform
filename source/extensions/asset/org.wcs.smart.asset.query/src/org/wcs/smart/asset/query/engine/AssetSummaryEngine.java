@@ -1226,6 +1226,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 				AssetValueItemLabelProvider.INSTANCE.getName(item, session),
 				AssetValueItemLabelProvider.INSTANCE.getFullName(item, session),
 				item.asString(), true);
+			header.setUiFormatter(item.getFormatter(session,ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas())));
 			results.addValueHeader(header);			
 		}
 		

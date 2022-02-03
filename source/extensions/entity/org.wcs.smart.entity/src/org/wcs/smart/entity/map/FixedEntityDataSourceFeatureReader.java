@@ -129,7 +129,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 				if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
 					data[i+3] = value.getNumberValue() < 0.5 ? 0 : 1;
 				}else{
-					data[i+3] = value.getValueAsString(Locale.getDefault());
+					data[i+3] = value.getValueAsString(Locale.getDefault(), false);
 				}
 			}
 		}

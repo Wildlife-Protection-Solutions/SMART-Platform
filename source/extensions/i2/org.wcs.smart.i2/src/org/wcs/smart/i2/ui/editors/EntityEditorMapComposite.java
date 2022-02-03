@@ -836,8 +836,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 					Query<Waypoint> query = s.createQuery(sb.toString(), Waypoint.class);
 					query.setParameter("li", entity.getDmAttributeListItem()); //$NON-NLS-1$
 					if (hasDate) {
-						query.setParameter("d1", dateFilter[0]); //$NON-NLS-1$
-						query.setParameter("d2", dateFilter[1]); //$NON-NLS-1$
+						query.setParameter("d1", dateFilter[0].atStartOfDay()); //$NON-NLS-1$
+						query.setParameter("d2", dateFilter[1].atTime(LocalTime.MAX)); //$NON-NLS-1$
 					}
 					for (Waypoint wp : query.list()) {
 						alllocations.add(wp);

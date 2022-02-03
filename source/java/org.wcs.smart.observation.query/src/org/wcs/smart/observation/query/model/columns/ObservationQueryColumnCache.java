@@ -148,7 +148,7 @@ public class ObservationQueryColumnCache {
 					
 				for (Attribute att : atts) {
 					String name = att.getName();
-					cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
+					cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex()));
 				}
 				
 				cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));

@@ -45,11 +45,7 @@ public class AttributeColumnLabelProvider extends QueryColumnLabelProvider {
 	public String getText(Object element) {
 		if (element instanceof ObservationQueryResultItem) {
 			Object value = column.getValue((ObservationQueryResultItem) element);
-			if (value == null) {
-				return ""; //$NON-NLS-1$
-			} else {
-				return value.toString();
-			}
+			return column.getValueAsString(value);
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}

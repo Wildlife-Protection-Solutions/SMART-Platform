@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import java.util.function.Function;
+
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 
 /**
@@ -224,7 +228,25 @@ public class AttributeValueItem implements IValueItem {
 	public void updateValues(String attributeKey, Attribute.AttributeType type) {
 		this.attributeKey = attributeKey;
 		this.attributeType = type;
+	}
 	
+	/**
+	 * Function to format value results for the UI
+	 * @return
+	 */
+	@Override
+	public Function<Double,String> getFormatter(Session session, ConservationAreaFilter caFilter){	
+		if ( attributeType == Attribute.AttributeType.NUMERIC ) {
+			String query = "SELECT max(regex) FROM Attribute WHERE conservationArea.uuid IN (:uuids) AND keyId = :key"; //$NON-NLS-1$
+			String pattern = session.createQuery(query, String.class)
+				.setParameter("uuids",caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+				.setParameter("key",attributeKey) //$NON-NLS-1$
+				.uniqueResult();
+			if (pattern != null) {
+				return (d) -> Attribute.formatNumberAsString((Object)d, pattern);
+			}
+		}
+		return null;
 	}
 	
 }

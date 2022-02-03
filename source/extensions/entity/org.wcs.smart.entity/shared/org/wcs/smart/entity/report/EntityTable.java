@@ -212,7 +212,7 @@ public class EntityTable extends SmartBirtTable {
 		if (eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.LIST ||
 				eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.TREE ||
 				eav.getEntityAttribute().getDmAttribute().getType() == AttributeType.BOOLEAN){
-			return eav.getValueAsString(connection.getCurrentLocale());
+			return eav.getValueAsString(connection.getCurrentLocale(), false);
 		}
 		return eav.getValue();
 	}

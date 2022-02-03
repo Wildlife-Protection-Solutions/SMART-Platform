@@ -1613,6 +1613,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					SurveyValueItemLabelProvider.INSTANCE.getName(item, session),
 					SurveyValueItemLabelProvider.INSTANCE.getFullName(item, session),
 					item.asString(), true);
+			header.setUiFormatter(item.getFormatter(session,ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas())));
 			results.addValueHeader(header);
 		}
 		

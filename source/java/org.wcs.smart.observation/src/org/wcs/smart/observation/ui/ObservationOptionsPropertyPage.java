@@ -501,6 +501,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 				for (SignatureType t : deleteTypes) {
 					SignatureTypeManager.INSTANCE.deleteType(t, s);
 				}
+				s.flush();
 				
 				types.forEach(t->SignatureTypeManager.INSTANCE.saveType(t, s));
 				

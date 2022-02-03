@@ -39,6 +39,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
@@ -181,9 +182,12 @@ public class EntityAttributeValue {
 	 * 
 	 * @return the string representation of the 
 	 * entity attribute value
+	 * 
+	 * @param l the local to get the value for
+	 * @param formatted if it should be the raw value as a string or the value with formatting applied 
 	 */
 	@Transient
-	public String getValueAsString(Locale l){
+	public String getValueAsString(Locale l, boolean formatted){
 		String text = ""; //$NON-NLS-1$
 		switch (getEntityAttribute().getDmAttribute().getType()){
 		case TEXT:
@@ -194,9 +198,7 @@ public class EntityAttributeValue {
 				text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
 			}
 		case NUMERIC:
-			if (getNumberValue() != null){
-				text = String.valueOf(getNumberValue());	
-			}
+			text = Attribute.formatNumberAsString(getNumberValue(), getEntityAttribute().getDmAttribute().getRegex());
 			break;
 		case BOOLEAN:
 			if (getNumberValue() != null){

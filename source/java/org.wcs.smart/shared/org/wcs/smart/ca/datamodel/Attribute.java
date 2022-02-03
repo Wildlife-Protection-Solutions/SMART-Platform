@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.sql.Date;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -434,6 +435,12 @@ public class Attribute extends DmObject{
 		}
 	}
 	
+	/**
+	 * Determine if string value is a date or not
+	 * @param date
+	 * @return
+	 */
+	@Transient
 	public static boolean isValidDateString(String date){
 		try{
 			Date.valueOf(date);
@@ -441,5 +448,34 @@ public class Attribute extends DmObject{
 		}catch (Exception ex){
 			return false;
 		}
+	}
+	
+	/**
+	 * Formats a number value to the number of decimal places
+	 * @param value
+	 * @param decimalPlaces
+	 * @return
+	 */
+	@Transient
+	public static String formatNumberAsString(Object value, String decimalPlaces) {
+		if (value == null) return ""; //$NON-NLS-1$
+		if (!(value instanceof Number)) return ""; //$NON-NLS-1$
+		
+		String text = String.valueOf(value);
+			
+		if (decimalPlaces != null && !decimalPlaces.isBlank()) {
+			try {
+					
+				int decimal = Integer.parseInt(decimalPlaces);
+				String format = "0"; //$NON-NLS-1$
+				if (decimal > 0) {
+					format += "." + "0".repeat(decimal); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				 text = (new DecimalFormat(format)).format((Number)value);
+			}catch (Exception ex) {
+				//eat me
+			}
+		}
+		return text;
 	}
 }

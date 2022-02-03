@@ -22,25 +22,45 @@
 package org.wcs.smart.report.internal.ui.designer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.IRelatedFileChangeResolve;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.views.ElementAdapterManager;
+import org.eclipse.birt.report.model.adapter.oda.model.DataSetParameters;
+import org.eclipse.birt.report.model.adapter.oda.model.DesignValues;
+import org.eclipse.birt.report.model.adapter.oda.model.util.SerializerImpl;
+import org.eclipse.birt.report.model.api.CellHandle;
+import org.eclipse.birt.report.model.api.DataItemHandle;
 import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ModuleHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.PropertyHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.birt.report.model.api.RowHandle;
+import org.eclipse.birt.report.model.api.SlotHandle;
+import org.eclipse.birt.report.model.api.TableHandle;
 import org.eclipse.birt.report.model.api.activity.NotificationEvent;
 import org.eclipse.birt.report.model.api.command.ContentEvent;
 import org.eclipse.birt.report.model.api.command.NameEvent;
 import org.eclipse.birt.report.model.api.core.Listener;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
+import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
+import org.eclipse.birt.report.model.api.elements.structures.NumberFormatValue;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
 import org.eclipse.birt.report.model.elements.OdaDataSet;
+import org.eclipse.birt.report.model.elements.TableItem;
+import org.eclipse.birt.report.model.elements.interfaces.IDataItemModel;
+import org.eclipse.birt.report.model.elements.interfaces.IDataSetModel;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.datatools.connectivity.oda.design.ColumnDefinition;
+import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
+import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
+import org.eclipse.datatools.connectivity.oda.design.ResultSets;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -74,6 +94,96 @@ import org.wcs.smart.report.ui.SmartReportEditorInput;
  */
 public class ReportEditorManager implements IReportEditorManager,IReportListener{ 
 
+	//listener that listens for
+	//table add events and tries to automatically apply
+	//a numeric formatting pattern for smart datasets
+	//whose metadata supplies a precision values
+	private Listener formatListener = new Listener() {
+		@SuppressWarnings({ "restriction", "unchecked" })
+		@Override
+		public void elementChanged(DesignElementHandle focus,
+				NotificationEvent ev) {
+		
+			if (ev instanceof ContentEvent) {
+				ContentEvent ce = (ContentEvent)ev;
+				
+				if (ce.getAction() == ContentEvent.ADD && 
+						ce.getContent() instanceof TableItem) {
+					
+					try {
+						org.eclipse.birt.report.model.core.Module root = ev.getTarget().getRoot();
+						TableItem ti = (TableItem) ce.getContent();
+						OdaDataSet dataset = (OdaDataSet) ti.getDataSetElement(root);
+						OdaDataSetHandle handle = (OdaDataSetHandle) dataset.getHandle(root);
+	
+						if (!handle.getExtensionID().startsWith("org.wcs.smart")) return; //$NON-NLS-1$
+						
+						//find percision mappings from the designer values metadata					
+						HashMap<String, Integer> precisionMap = new HashMap<>();
+						HashMap<String, String> nameToKey = new HashMap<>();
+						
+						OdaDataSetHandle datasethandle = (OdaDataSetHandle)dataset.getHandle(ev.getTarget().getRoot());
+
+						//reads the designer values which are stored as xml 
+						String dvaluessml = datasethandle.getDesignerValues();
+						DesignValues values = SerializerImpl.instance().read(dvaluessml);
+						
+						ResultSets imp = values.getResultSets();
+						for (ResultSetDefinition d : imp.getResultSetDefinitions()) {
+							ResultSetColumns cc = d.getResultSetColumns();
+							for (ColumnDefinition cd : cc.getResultColumnDefinitions()) {
+								if (cd.getAttributes().getPrecision() != -1) {
+									precisionMap.put(cd.getAttributes().getName(), cd.getAttributes().getPrecision());
+								}
+							}	
+						}
+					
+						//dataset column hints
+						ArrayList<ColumnHint> hints = (ArrayList<ColumnHint>) dataset.getProperty(ev.getTarget().getRoot(), IDataSetModel.COLUMN_HINTS_PROP);
+						for (ColumnHint h : hints) {
+							String key = h.getStringProperty(ev.getTarget().getRoot(), ColumnHint.COLUMN_NAME_MEMBER);
+							String name = h.getStringProperty(ev.getTarget().getRoot(), ColumnHint.ALIAS_MEMBER);
+							nameToKey.put(name, key);
+						}
+					
+					
+						SlotHandle sl = ((TableHandle)ti.getHandle(root)).getDetail();
+						RowHandle rh = (RowHandle) sl.get(0);
+					
+						for (int i = 0; i < ti.getColumnCount(ev.getTarget().getRoot()); i ++) {
+							CellHandle cell = (CellHandle)rh.getCells().get(i);
+							DataItemHandle di = (DataItemHandle) cell.getSlot(0).get(0);
+						
+							String columnName = di.getElement().getProperty(ev.getTarget().getRoot(), IDataItemModel.RESULT_SET_COLUMN_PROP).toString();
+						
+							Integer p = null;
+							if (precisionMap.containsKey(columnName)) {
+								p = precisionMap.get(columnName);
+							}else if (nameToKey.containsKey(columnName) && precisionMap.containsKey(nameToKey.get(columnName))) {
+								p = precisionMap.get(nameToKey.get(columnName));
+							}
+						
+							if ( p != null) {
+								NumberFormatValue vv = new NumberFormatValue();
+							
+								String pattern = "0"; //$NON-NLS-1$
+								if (p > 0) {
+									pattern += "." + "0".repeat(p); //$NON-NLS-1$ //$NON-NLS-2$
+								}
+								
+								vv.setPattern(pattern);
+								vv.setCategory(DesignChoiceConstants.NUMBER_FORMAT_TYPE_CUSTOM);
+								cell.getSlot(0).get(0).setProperty(DesignChoiceConstants.CHOICE_NUMBER_FORMAT_TYPE, vv);
+							}
+						}
+					}catch (Exception ex) {
+						
+					}
+				}
+			}
+		}
+	};
+	
 	// This listener is a hack to name the
 	// smart query datasources with the query name
 	// I couldn't figure out how to do this any other way.
@@ -166,6 +276,9 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 			if (!editor.getModel().equals(initialModel)){
 				initialModel.removeListener(nameChangeListener);
 				editor.getModel().addListener(nameChangeListener);
+				
+				initialModel.removeListener(formatListener);
+				editor.getModel().addListener(formatListener);
 			}
 			editor.refreshMarkers(editor.getEditorInput());
 		} catch (CoreException e) {
@@ -310,6 +423,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 	@Override
 	public void dispose() {
 		editor.getModel().removeListener(nameChangeListener);
+		editor.getModel().removeListener(formatListener);
 		
 		ReportEventManager.getInstance().removeReportListener(this);
 		editor = null;
@@ -317,7 +431,8 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 
 	@Override
 	public void addPages() {
-		editor.getModel().addListener(nameChangeListener);		
+		editor.getModel().addListener(nameChangeListener);
+		editor.getModel().addListener(formatListener);
 		if (editor.getEditorInput() instanceof SmartReportEditorInput){
 			SmartReportEditorInput in = getEditorInputLocal();
 			//if we are editing a SMART report update the name; otherwise leave it alone 

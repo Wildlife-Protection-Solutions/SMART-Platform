@@ -186,7 +186,7 @@ public class EntityInfoPanelComposite extends Composite{
 		for(EntityAttributeValue v : entity.getAttributes()){
 			Text txt = attributeToUi.get(v.getEntityAttribute().getKeyId());
 			if (txt != null){
-				txt.setText(v.getValueAsString(Locale.getDefault()));
+				txt.setText(v.getValueAsString(Locale.getDefault(), true));
 			}
 		}
 	}

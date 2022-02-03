@@ -108,6 +108,9 @@ public class HtmlStreamingSummaryQueryExporter extends HtmlStreamingExporter {
 						
 						int vindex = k % results.getValueHeaders().size();
 						Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
+						if (formatter == null) {
+							formatter = results.getValueHeaders().get(vindex).getUiFormatter();
+						}
 						String value = "";
 						if (formatter == null) {
 							value = String.valueOf(results.getData()[i][k]);

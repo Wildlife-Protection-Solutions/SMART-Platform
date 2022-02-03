@@ -305,7 +305,7 @@ public class EntityListTable extends Composite {
 								Entity e = (Entity) element;
 								EntityAttributeValue value = e.findAttribute(ea.getKeyId());
 								if (value != null) {
-									return value.getValueAsString(Locale.getDefault());
+									return value.getValueAsString(Locale.getDefault(), true);
 								}
 								return ""; //$NON-NLS-1$
 							}
@@ -339,7 +339,7 @@ public class EntityListTable extends Composite {
 							comp = (o1, o2)->{
 								EntityAttributeValue v1 = o1.findAttribute(ea.getKeyId());
 								EntityAttributeValue v2 = o2.findAttribute(ea.getKeyId());
-								if (v1 != null && v2 != null) return v1.getValueAsString(Locale.getDefault()).compareTo(v2.getValueAsString(Locale.getDefault()));
+								if (v1 != null && v2 != null) return v1.getValueAsString(Locale.getDefault(), true).compareTo(v2.getValueAsString(Locale.getDefault(), true));
 								if (v1 != null) return 1;
 								return -1;
 							};

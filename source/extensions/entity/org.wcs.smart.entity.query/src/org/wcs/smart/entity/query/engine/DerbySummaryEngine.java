@@ -1220,6 +1220,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					ValueItemLabelProvider.INSTANCE.getName(item, session),
 					ValueItemLabelProvider.INSTANCE.getFullName(item, session),
 					item.asString(), true);
+			header.setUiFormatter(item.getFormatter(session,ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas())));
 			results.addValueHeader(header);
 		}
 		
