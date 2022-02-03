@@ -942,7 +942,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				activeTime += pld.getFieldHoursWorked();
 			}
 		}
-		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics, String.valueOf(distance), PatrolEditor.formatTimeRange(totalTime), PatrolEditor.formatTimeRange(activeTime));
+		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics, PatrolEditor.formatDistance(distance), PatrolEditor.formatTimeRange(totalTime), PatrolEditor.formatTimeRange(activeTime));
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -1076,7 +1076,7 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.DISTANCE){
 				if (legDay.getTrack() != null){
-					return String.valueOf( legDay.getTrack().getDistance() );
+					return PatrolEditor.formatDistance( legDay.getTrack().getDistance() );
 				}else{
 					return "0"; //$NON-NLS-1$
 				}
