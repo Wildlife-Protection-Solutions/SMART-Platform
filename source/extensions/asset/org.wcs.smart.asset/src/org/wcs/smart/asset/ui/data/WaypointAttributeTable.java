@@ -26,6 +26,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -102,23 +105,25 @@ public class WaypointAttributeTable {
 		
 		rows = new ArrayList<>();
 		if (waypoint.getObservationGroups() != null && !waypoint.getObservationGroups().isEmpty()) {
-			for (WaypointObservationGroup g : waypoint.getObservationGroups()) {
-				Composite groupcomp = new Composite(parent, SWT.NONE);
-				groupcomp.setLayout(new GridLayout());
-				((GridLayout)groupcomp.getLayout()).marginWidth = 0;
-				((GridLayout)groupcomp.getLayout()).marginHeight = 0;
-				groupcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				groupcomp.setBackground(groupcomp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				
-				if (waypoint.getObservationGroups().size() > 1) SmartUiUtils.createHeaderLabel(groupcomp, Messages.WaypointAttributeTable_ObsGroupHeader);
-				for (WaypointObservation obs : g.getObservations()) {
-					RowItem item = new RowItem(obs);
-					item.createControl(groupcomp);
-					rows.add(item);
+			try(Session session = HibernateManager.openSession()){
+				Waypoint temp = session.get(Waypoint.class, this.waypoint.getUuid());
+				for (WaypointObservationGroup g : temp.getObservationGroups()) {
+					Composite groupcomp = new Composite(parent, SWT.NONE);
+					groupcomp.setLayout(new GridLayout());
+					((GridLayout)groupcomp.getLayout()).marginWidth = 0;
+					((GridLayout)groupcomp.getLayout()).marginHeight = 0;
+					groupcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					groupcomp.setBackground(groupcomp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+					
+					if (temp.getObservationGroups().size() > 1) SmartUiUtils.createHeaderLabel(groupcomp, Messages.WaypointAttributeTable_ObsGroupHeader);
+					for (WaypointObservation obs : g.getObservations()) {
+						RowItem item = new RowItem(obs);
+						item.createControl(groupcomp);
+						rows.add(item);
+					}
+					groupcomp.getChildren()[groupcomp.getChildren().length-1].dispose();
 				}
-				groupcomp.getChildren()[groupcomp.getChildren().length-1].dispose();
 			}
-			
 		}else if (page.isEdit()){
 			Composite placeholder = toolkit.createComposite(parent, SWT.NONE);
 			placeholder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -232,7 +237,6 @@ public class WaypointAttributeTable {
 //						if (g.getObservations().isEmpty()) session.delete(g);
 //					}
 					
-					
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
@@ -263,19 +267,21 @@ public class WaypointAttributeTable {
 	
 	private void deleteObservation(Collection<WaypointObservation> wos) {
 		if (!page.isEdit()) return;
+		Set<UUID> toDelete = wos.stream().map(e->e.getUuid()).collect(Collectors.toSet());
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(waypoint);
+				waypoint = session.get(Waypoint.class, waypoint.getUuid());
 				List<WaypointObservationGroup> empty = new ArrayList<>();
 				for (WaypointObservationGroup g : waypoint.getObservationGroups()) {
-					for (WaypointObservation todelete : wos) {
-						if (g.getObservations().contains(todelete)) {
-							g.getObservations().remove(todelete);
-							session.delete(todelete);
+					List<WaypointObservation> remove = new ArrayList<>();
+					for (WaypointObservation wo : g.getObservations()) {
+						if (toDelete.contains(wo.getUuid())) {
+							remove.add(wo);
 						}
 					}
-					
+					g.getObservations().removeAll(remove);
+					remove.forEach(r->session.delete(r));
 					if (g.getObservations().isEmpty()) empty.add(g);
 				}
 				waypoint.getObservationGroups().removeAll(empty);

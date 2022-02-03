@@ -218,10 +218,11 @@ public abstract class AssetDataPanel {
 		return main;
 	}
 	
-	void resizeScroll() {
+	void resizeScroll() {		
 		int width = scroll.getBounds().width;
 		if (rows != null) rows.forEach(a->a.resize(width, displaySettings.getIconSize()));
 		scroll.setMinSize(scroll.getChildren()[0].computeSize(scroll.getBounds().width - scroll.getVerticalBar().getSize().x, SWT.DEFAULT));
+		scroll.getParent().layout(true,true);
 	}
 	
 	private void createHeaderMenu(Control control) {
@@ -302,7 +303,7 @@ public abstract class AssetDataPanel {
 		
 		createPageControl(details, true, true);
 		
-		scroll = new ScrolledComposite(details, SWT.V_SCROLL );
+		scroll = new ScrolledComposite(details, SWT.V_SCROLL | SWT.BORDER);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(scroll);
 		scroll.setExpandHorizontal(true);
@@ -360,7 +361,14 @@ public abstract class AssetDataPanel {
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 			session.beginTransaction();
 			try {
+				Waypoint existingwp = session.get(Waypoint.class, aw.getWaypoint().getUuid());
+				List<AssetWaypoint> current = new ArrayList<>();
+				for (AssetWaypoint oldlink : aw.getAssetLinks()) {
+					current.add(session.get(AssetWaypoint.class, oldlink.getUuid()));
+				}
+				aw = new AssetWaypointMapping(existingwp, current);
 				//clone waypoint
+				
 				Waypoint cloneWp = aw.getWaypoint().clone(session);
 				cloneWp.setAttachments(new ArrayList<>());
 				cloneWp.setDateTime(dtWaypoint.getDateTime());
@@ -368,7 +376,12 @@ public abstract class AssetDataPanel {
 				
 				//clone attachments and associate deployments
 				Map<AssetDeployment, AssetWaypoint> newDeployments = new HashMap<>(); 
+				List<WaypointAttachment> attachmentsToDelete = new ArrayList<>();
+				
 				for (WaypointAttachment sp : attachments) {
+					sp = session.get(WaypointAttachment.class, sp.getUuid());
+					attachmentsToDelete.add(sp);
+					
 					WaypointAttachment att = new WaypointAttachment();
 					// copy file to temp location so it won't be deleted out from under us
 					Path tmpLocation = Files.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -400,15 +413,18 @@ public abstract class AssetDataPanel {
 								newlink.getAttachments().add(newattachlink);
 								
 								oldlink.getAttachments().remove(attachlink);
+								session.delete(attachlink);
 								break;
 							}
 						}
 					}
 					
 				}
-				aw.getAssetLinks().forEach(a->session.saveOrUpdate(a));
-				aw.getWaypoint().getAttachments().removeAll(attachments);
-				for(WaypointAttachment wa : attachments) session.delete(wa);
+				session.flush();
+//				aw.getAssetLinks().forEach(a->session.saveOrUpdate(a));
+				
+				aw.getWaypoint().getAttachments().removeAll(attachmentsToDelete);
+				for(WaypointAttachment wa : attachmentsToDelete) session.delete(wa);
 				
 				session.save(cloneWp);
 				if (newDeployments.isEmpty()) {
@@ -763,6 +779,12 @@ public abstract class AssetDataPanel {
 		//modify the waypoint datetime and/or ID
 		if (!isEdit) return;
 		if (toedit == null) return;
+		
+		//reload data to ensure we have all the data
+		try(Session session = HibernateManager.openSession()){
+			Waypoint temp = session.get(Waypoint.class, toedit.getWaypoint().getUuid());
+			toedit = new AssetWaypointMapping(temp, toedit.getAssetLinks());
+		}
 		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), toedit);
 		if (dialog.open() == EditWaypointDialog.OK) {
 			try(Session s = HibernateManager.openSession()){
@@ -1137,34 +1159,35 @@ public abstract class AssetDataPanel {
 		boolean fireEvents = false;
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
-			try {
-				session.saveOrUpdate(waypoint.getWaypoint());
-								
+			try {							
 				List<AssetWaypoint> assetLinksToRemove = new ArrayList<AssetWaypoint>();
-				for (ISmartAttachment attachment : toRemove) {
+				
+				List<AssetWaypointAttachment> attachments = new ArrayList<>();
+				
 					//remove asset waypoint attachment link
 					
-					for (AssetWaypoint aw : waypoint.getAssetLinks()) {
-						List<AssetWaypointAttachment> attachments = new ArrayList<>();
+				for (AssetWaypoint aw : waypoint.getAssetLinks()) {
+					attachments.clear();
+					aw = session.get(AssetWaypoint.class, aw.getUuid());
+					
+					for (ISmartAttachment attachment : toRemove) {
 						for (AssetWaypointAttachment a : aw.getAttachments()){
 							if (a.getWaypointAttachment().equals(attachment)) {
 								attachments.add(a);
 							}
 						}
-						attachments.forEach(a->{
-							session.delete(a);
-							a.getAssetWaypoint().getAttachments().remove(a);							
-						});
-						
-						//if no more attachment links we should remove the asset waypoint
-						if (aw.getAttachments().isEmpty()) {
-							assetLinksToRemove.add(aw);
-						}
-
 					}
-					waypoint.getWaypoint().getAttachments().remove(attachment);
-					session.delete(attachment);
+					
+					attachments.forEach(a->{
+						session.delete(a);
+						a.getAssetWaypoint().getAttachments().remove(a);							
+					});
+					//if no more attachment links we should remove the asset waypoint
+					if (aw.getAttachments().isEmpty()) {
+						assetLinksToRemove.add(aw);
+					}
 				}
+				
 				session.flush();
 				
 				//if associated deployment has no more waypoints we should remove that as well
@@ -1777,7 +1800,6 @@ public abstract class AssetDataPanel {
 								populateHeaderLabel();
 								tt.refresh();
 								AssetDataPanel.this.resizeScroll();
-								
 							}
 							
 						});					
