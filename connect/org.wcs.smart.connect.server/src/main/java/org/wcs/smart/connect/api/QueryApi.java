@@ -352,7 +352,9 @@ public class QueryApi extends HttpServlet{
 			if (SecurityManager.INSTANCE.canAccess(session, name, QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 				//access is OK since they have access to All Queries in this CA.
 			}else{
-				return new QueryResult(createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request)))); //$NON-NLS-1$
+				if (!query.getConservationArea().getIsCcaa() || !SecurityManager.INSTANCE.canAccessAtLeastOneResouce(session, name, CaAdminAccountAction.KEY)){
+					return new QueryResult(createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request)))); //$NON-NLS-1$
+				}
 			}
 		}
 									
@@ -518,7 +520,9 @@ public class QueryApi extends HttpServlet{
 			if (SecurityManager.INSTANCE.canAccess(s, name, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 				//access is OK since they have access to All Queries in this CA.
 			}else{
-				return new QueryResult(createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request)))); //$NON-NLS-1$
+				if (!query.getConservationArea().getIsCcaa() || !SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, name, CaAdminAccountAction.KEY)){
+					return new QueryResult(createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request)))); //$NON-NLS-1$
+				}
 			}
 		}
 									
@@ -854,6 +858,15 @@ public class QueryApi extends HttpServlet{
 			allActions.addAll(QueryFactory.buildQuery(s, SmartRoleAction.class, "role", r.getRole()).list()); //$NON-NLS-1$
 		}
 		
+		//https://app.assembla.com/spaces/smart-cs/tickets/3339
+		boolean atleastonecaadmin = false;
+		for (AbstractSmartAction a : allActions) {
+			if (a.getAction().equalsIgnoreCase(CaAdminAccountAction.KEY)) {
+				atleastonecaadmin=true;
+				break;
+			}
+		}
+		
 		for (QueryProxy q : all) {
 			boolean canAdd = false;
 			
@@ -874,6 +887,11 @@ public class QueryApi extends HttpServlet{
 					break;
 				}
 			}
+			
+			if (atleastonecaadmin && q.getIsCcaa()) {
+				canAdd = true;
+			}
+			
 			if (canAdd) allowed.add(q);
 		}
 		return allowed;
@@ -901,6 +919,15 @@ public class QueryApi extends HttpServlet{
 			allActions.addAll(QueryFactory.buildQuery(s, SmartRoleAction.class, "role", r.getRole()).list()); //$NON-NLS-1$
 		}
 		
+		//https://app.assembla.com/spaces/smart-cs/tickets/3339
+		boolean atleastonecaadmin = false;
+		for (AbstractSmartAction a : allActions) {
+			if (a.getAction().equalsIgnoreCase(CaAdminAccountAction.KEY)) {
+				atleastonecaadmin=true;
+				break;
+			}
+		}
+		
 		for (QueryProxy q : queries){
 			boolean canAdd = false;
 			
@@ -915,6 +942,9 @@ public class QueryApi extends HttpServlet{
 					canAdd = true;
 					break;
 				}
+			}
+			if (atleastonecaadmin && q.getIsCcaa()) {
+				canAdd = true;
 			}
 			if (canAdd) allowed.add(q);
 			

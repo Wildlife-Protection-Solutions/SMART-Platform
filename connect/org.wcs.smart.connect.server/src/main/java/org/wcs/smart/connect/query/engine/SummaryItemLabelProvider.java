@@ -1015,6 +1015,12 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(PatrolAttributeGroupBy item){
 		List<ListItem> results = new ArrayList<ListItem>();
 		
+		Set<String> keys = null;
+		if (item.getItems() != null) {
+			keys = new HashSet<>();
+			for (String i : item.getItems()) keys.add(i);
+		}
+		
 		List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
 		if (caUuids.size() == 1) {
 
@@ -1025,11 +1031,7 @@ public class SummaryItemLabelProvider {
 			
 			if (pa == null || pa.getType() != AttributeType.LIST) return results;
 			
-			Set<String> keys = null;
-			if (item.getItems() != null) {
-				keys = new HashSet<>();
-				for (String i : item.getItems()) keys.add(i);
-			}
+
 			
 			for (PatrolAttributeListItem li : pa.getAttributeList()) {
 				if (keys == null || keys.contains(li.getKeyId())) {
@@ -1039,7 +1041,7 @@ public class SummaryItemLabelProvider {
 		}else {
 			//merge together items
 			
-			List<PatrolAttribute> pas = s.createQuery("FROM patrolAttribute WHERE conservationArea.uuid in (:cas) and keyId = :keyid", PatrolAttribute.class) //$NON-NLS-1$
+			List<PatrolAttribute> pas = s.createQuery("FROM PatrolAttribute WHERE conservationArea.uuid in (:cas) and keyId = :keyid", PatrolAttribute.class) //$NON-NLS-1$
 					.setParameterList("cas", caUuids) //$NON-NLS-1$
 					.setParameter("keyid", item.getAttributeKey()) //$NON-NLS-1$
 					.list();
@@ -1050,7 +1052,7 @@ public class SummaryItemLabelProvider {
 			HashMap<String, ListItem> items = new HashMap<>();
 			for (PatrolAttribute pa : pas) {
 				for (PatrolAttributeListItem li : pa.getAttributeList()) {
-					if (!items.containsKey(li.getKeyId())) {
+					if ( (keys == null || keys.contains(li.getKeyId())) &&  !items.containsKey(li.getKeyId())) {
 						ListItem litem = new ListItem(null, li.getKeyId(), li.getName());
 						items.put(li.getKeyId(), litem);
 					}

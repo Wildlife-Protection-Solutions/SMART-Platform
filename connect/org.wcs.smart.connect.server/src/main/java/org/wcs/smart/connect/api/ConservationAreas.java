@@ -87,7 +87,10 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.ActionManager;
 import org.wcs.smart.connect.security.CaAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
+import org.wcs.smart.connect.security.QueryAction;
+import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -364,14 +367,15 @@ public class ConservationAreas extends HttpServlet{
 	@GET
     @Path("/withdataonly/")
 	@Operation(description="List all Conservation Areas that have SMART data")
-    public List<ConservationAreaProxy> getConservationAreasWithData(@Parameter(description="Optional. If provided it should be a comma delimited list of action strings that are applicable for the Conservation Area. Only Conservation Areas that the user has the specific action permission for will be returned. For example permission=updateca will only return ca's that the user has permission to update. If not provided only ca's the user has permission to read from are returned.")  @QueryParam("permission") String permissionFilter){
+    public List<ConservationAreaProxy> getConservationAreasWithData(
+    		@Parameter(description="Optional. If provided it should be a comma delimited list of action strings that are applicable for the Conservation Area. Only Conservation Areas that the user has the specific action permission for will be returned. For example permission=updateca will only return ca's that the user has permission to update. If not provided only ca's the user has permission to read from are returned.")  
+    		@QueryParam("permission") String permissionFilter){
 		
 		String[] permissions = null;
 		if (permissionFilter != null) {
 			permissions = permissionFilter.split(","); //$NON-NLS-1$
 		}
 		List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
-		
 		
 		
 		try(Session s = HibernateManager.getSession(context)){
@@ -404,6 +408,17 @@ public class ConservationAreas extends HttpServlet{
 							if (action != null && SecurityManager.INSTANCE.canAccess(s,  request.getUserPrincipal().getName(),actionKey, ca.getUuid())){  
 								ok = true;
 								break;
+							}
+						}
+						
+						//ccaa are accessable for running queries and reports if user has one ca admin account
+						if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)) {
+							for (String actionKey : permissions) {
+								ISmartConnectAction action = ActionManager.INSTANCE.findAction(actionKey);
+								if (action != null && (actionKey.equals(QueryAction.RUNQUERY_KEY) || actionKey.equals(ReportAction.RUNREPORT_KEY))
+										&& SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY)) {
+									ok = true;
+								}
 							}
 						}
 						if (!ok) continue;

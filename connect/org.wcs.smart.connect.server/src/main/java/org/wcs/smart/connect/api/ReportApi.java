@@ -97,6 +97,7 @@ import org.wcs.smart.connect.report.ReportFormat;
 import org.wcs.smart.connect.report.ReportProxy;
 import org.wcs.smart.connect.report.query.ServerSmartConnection;
 import org.wcs.smart.connect.security.CaAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -194,7 +195,14 @@ public class ReportApi extends HttpServlet{
 					if (SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())){
 						//access is OK since they have access to All Queries in this CA.
 					}else{
-						return createErrorResponse(Status.UNAUTHORIZED, Messages.getString("ReportApi.InvalidAccess", request.getLocale()));  //$NON-NLS-1$
+						//if report is ccaa then user nees one ca admin
+						boolean isok = false;
+						if (report.getConservationArea().getIsCcaa()) {
+							if(SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, name, CaAdminAccountAction.KEY)) {
+								isok = true;
+							}
+						}
+						if (!isok) return createErrorResponse(Status.UNAUTHORIZED, Messages.getString("ReportApi.InvalidAccess", request.getLocale()));  //$NON-NLS-1$
 					}
 				}
 				
@@ -369,6 +377,12 @@ public class ReportApi extends HttpServlet{
 			
 			Set<UUID> caUuids = allowed.stream().map(e->e.getCaUuid()).collect(Collectors.toSet());
 			
+			
+			boolean atleastonecaadmin = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+			if (atleastonecaadmin) {
+				caUuids.add(ConservationArea.MULTIPLE_CA);
+			}
+			
 			// CAs are the root folders
 			for(UUID caUuid : caUuids) {
 				ConservationArea ca = s.get(ConservationArea.class, caUuid);
@@ -455,17 +469,19 @@ public class ReportApi extends HttpServlet{
 			 return allowed;
 		}
 		
+		boolean atleastonecaadmin = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+		
 		//Get all Queries and check each one for specific permission to this user.
 		List<ReportProxy> all = getReports(s, request.getLocale(), false);
 		for (ReportProxy q : all){
 			//Do they have access to all reports from this CA? if yes then add it.
 			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getCaUuid())){
 				allowed.add(q);
-			}else{
+			}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getUuid())){
 				//Do they have specific permission to this report? if yes then add it.
-				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getUuid())){
-					allowed.add(q);
-				}
+				allowed.add(q);
+			}else if (atleastonecaadmin && q.getIsCcaa()) {
+				allowed.add(q);
 			}
 		}
 		return allowed;
@@ -480,7 +496,7 @@ public class ReportApi extends HttpServlet{
 		}
 		
 		HashMap<ReportProxy, String> query2names = new HashMap<>();
-		
+
 		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code, r.folder.uuid " //$NON-NLS-1$
 				+ " FROM Report as r JOIN Label as l on l.id.element = r.uuid JOIN l.id.language as z " //$NON-NLS-1$
 				+ " WHERE l.id.element = r.uuid and (z.default = true or z.code in (:langs)) "; //$NON-NLS-1$
