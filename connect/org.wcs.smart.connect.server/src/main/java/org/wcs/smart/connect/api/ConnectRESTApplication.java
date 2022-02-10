@@ -74,6 +74,7 @@ public class ConnectRESTApplication extends Application {
 		resources.add(DataQueue.class);
 		resources.add(DesktopUser.class);
 		resources.add(QueryApi.class);
+		resources.add(CustomQueryApi.class);
 		resources.add(QueryTypeApi.class);
 		resources.add(QuicklinkApi.class);
 		resources.add(ReportApi.class);

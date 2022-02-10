@@ -195,6 +195,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 	};
 	
+	public static String formatDistance(Float distance){
+		if (distance == null || distance == 0) return "0"; //$NON-NLS-1$
+		return (new DecimalFormat("0.0")).format(distance); //$NON-NLS-1$
+	}
 	/**
 	 * Converts a double that represents a time range into
 	 * and hours and minutes string.  For example: 20.5 is 

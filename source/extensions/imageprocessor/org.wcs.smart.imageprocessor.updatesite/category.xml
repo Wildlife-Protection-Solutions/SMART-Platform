@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.imageprocessor.feature_7.0.2.qualifier.jar" id="org.wcs.smart.imageprocessor.feature" version="7.0.2.qualifier"/>
+   <feature id="org.wcs.smart.imageprocessor.feature"/>
 </site>
