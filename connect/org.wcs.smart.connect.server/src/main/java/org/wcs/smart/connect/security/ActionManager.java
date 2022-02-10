@@ -49,6 +49,7 @@ public enum ActionManager {
 		actions.add(new DataQueueAction());
 		actions.add(new ReportAction());
 		actions.add(new CyberTrackerAction());
+		actions.add(new CustomQueryAccountAction());
 		
 		caActions = new ArrayList<ISmartConnectAction>();
 		caActions.add(new CaAction());
