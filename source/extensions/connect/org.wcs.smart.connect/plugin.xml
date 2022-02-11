@@ -286,7 +286,7 @@
                <command
                      commandId="org.wcs.smart.observation.import.json"
                      icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
-                     label="Import JSON Data..."
+                     label="%command.label.importjson"
                      style="push">
                </command>
             </menu>
