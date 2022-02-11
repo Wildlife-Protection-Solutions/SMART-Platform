@@ -59,7 +59,9 @@ import org.apache.derby.iapi.services.io.FileUtil;
  */
 public class Packagei18nNew {
 
-	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\svn\\source\\";
+	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Version7.X\\svn\\source\\";
+
+//	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\svn\\source\\";
 //	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\udig\\udig-platform\\plugins";
 	
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
@@ -68,7 +70,7 @@ public class Packagei18nNew {
 //	public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
 //	public static final String[] LANGUAGES =  new String[] {"es","pt"};
 //	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
-	public static final String[] LANGUAGES = {"hi", "kar"};
+	public static final String[] LANGUAGES = {"vi"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
