@@ -617,6 +617,9 @@
 		<profile>
 			<id>languagepacks</id>
 			<modules>
+							
+				<module>org.wcs.smart.updatesite</module>
+				
 				<module>../translations/org.wcs.smart.birt.map.nl</module>
 				<module>../translations/org.wcs.smart.dataentry.nl</module>
 				<module>../translations/org.wcs.smart.feature.nl</module>
