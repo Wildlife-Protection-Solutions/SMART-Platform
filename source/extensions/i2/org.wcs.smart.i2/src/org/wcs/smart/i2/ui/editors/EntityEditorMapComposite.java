@@ -500,11 +500,15 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		
 		
 		//records details tooltip
-		new AbstractEntityEditorShellListener<IntelEntityLocation, RecordDetailsShell>(locationTable, 4) {			
+		new AbstractEntityEditorShellListener<Object, RecordDetailsShell>(locationTable, 4) {			
 			@Override
-			protected RecordDetailsShell getShellDialog(IntelEntityLocation currentSelection) {
-				if (!IntelSecurityManager.INSTANCE.canViewRecords(currentSelection.getLocation().getRecord().getProfile())) return null;
-				return new RecordDetailsShell(locationTable.getControl().getShell(),currentSelection.getLocation().getRecord());
+			protected RecordDetailsShell getShellDialog(Object currentSelectionObject) {
+				if (currentSelectionObject instanceof IntelEntityLocation ) {
+					IntelEntityLocation currentSelection = (IntelEntityLocation)currentSelectionObject;
+					if (!IntelSecurityManager.INSTANCE.canViewRecords(currentSelection.getLocation().getRecord().getProfile())) return null;
+					return new RecordDetailsShell(locationTable.getControl().getShell(),currentSelection.getLocation().getRecord());
+				}
+				return null;
 			}
 		};
 

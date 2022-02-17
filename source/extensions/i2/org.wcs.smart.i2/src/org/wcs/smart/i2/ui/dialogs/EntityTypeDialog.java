@@ -94,9 +94,11 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.IconComposite;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -250,6 +252,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 					
 					sub.beginTask(Messages.EntityTypeDialog_SaveTypeTask, 2);
 					boolean filterDiff = false;
+					boolean idAttributeModified = false;
+					
 					try(Session s = HibernateManager.openSession()){
 						
 						if (!isNew && !newProfiles.isEmpty()) {
@@ -272,10 +276,18 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								}
 							}
 						}
+						if (!isNew) {
+							IntelAttribute id = s.createQuery("SELECT et.idAttribute FROM IntelEntityType et WHERE et.uuid = :uuid", IntelAttribute.class) //$NON-NLS-1$
+									.setParameter("uuid",  type.getUuid()) //$NON-NLS-1$
+									.uniqueResult();
+							idAttributeModified = !id.equals(type.getIdAttribute());
+						}
 						
 						s.beginTransaction();
 						try {
+							
 							if (type.getDmAttribute() != null && type.getDmAttribute().getUuid() == null) {
+								//create new data model attribute and configure list items
 								s.saveOrUpdate(type.getDmAttribute());
 								s.saveOrUpdate(type);
 								type.getDmAttribute().setAttributeList(new ArrayList<>());
@@ -296,8 +308,39 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 										s.flush();
 									}
 								}
-							}else if (type.getDmAttribute() != null && filterDiff) {
+							}else if (type.getDmAttribute() != null && idAttributeModified) {
+								s.saveOrUpdate(type);
 								
+								//if the ID attribute was updated so we want to update list values for all entities
+								ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
+										.setParameter("type",  type).scroll(); //$NON-NLS-1$
+									
+								s.saveOrUpdate(type.getDmAttribute());
+								List<AttributeListItem> keys = new ArrayList<>(type.getDmAttribute().getAttributeList());
+									
+								while(scroll.next()) {
+									IntelEntity ie = (IntelEntity)scroll.get(0);
+									if (ie.getDmAttributeListItem() != null) {
+										String newid = ie.getIdAttributeAsText();
+										
+										keys.remove(ie.getDmAttributeListItem());
+										String newKey = NamedKeyItem.generateKey(newid, keys);
+										keys.add(ie.getDmAttributeListItem());
+										
+										ie.getDmAttributeListItem().setKeyId(newKey);
+										for (org.wcs.smart.ca.Label l : ie.getDmAttributeListItem().getNames()) {
+											l.setValue(newid);
+										}
+									}
+									
+									if (filterDiff) {
+										ie.updateActiveValue();
+									}
+								}
+								s.flush();
+								
+							}else if (type.getDmAttribute() != null && filterDiff) {
+								//filter updated so we need to update the active state of all entities
 								s.saveOrUpdate(type);
 								
 								//recompute active state for all entities
