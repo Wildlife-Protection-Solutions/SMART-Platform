@@ -143,8 +143,31 @@ public class Converter {
 		member.setIsPilot(false);
 		
 		HashMap<String, String>names = source.getPatrolLeader(patrolId);
-		member.setFamilyName(names.get("last_name"));
-		member.setGivenName(names.get("first_name"));
+		
+		
+		//special cases for user names. want this maps a couple of misspellings and test users
+		if(names.get("last_name").equals("TaloTest")) {
+			member.setFamilyName(names.get("admin"));
+			member.setGivenName(names.get("admin"));
+		}else if(names.get("last_name").equals("Ukuqtunnuaq")  && names.get("first_name").equals("Johnny")) {
+			member.setFamilyName(names.get("Uquktunnuaq"));
+			member.setGivenName(names.get("Johnny"));
+		}else if(names.get("last_name").equals("Sanertanut")  && names.get("first_name").equals("Bobby")) {
+			member.setFamilyName(names.get("Sanertanaut"));
+			member.setGivenName(names.get("Bobby"));
+		}else if(names.get("last_name").equals("Idlout")  && names.get("first_name").equals("John Brian")) {
+			member.setFamilyName(names.get("Idlout"));
+			member.setGivenName(names.get("John Bryan"));
+		}else if(names.get("last_name").equals("Anguttitauruq Sr")  && names.get("first_name").equals("Andrew ")) {
+			member.setFamilyName(names.get("Anguttitauruq"));
+			member.setGivenName(names.get("Andrew"));
+		}else if(names.get("last_name").equals("Anguttitauruq Sr")  && names.get("first_name").equals("Andrew")) {
+			member.setFamilyName(names.get("Anguttitauruq"));
+			member.setGivenName(names.get("Andrew"));
+		}else {
+			member.setFamilyName(names.get("last_name"));
+			member.setGivenName(names.get("first_name"));
+		}
 		leg1.getMembers().add(member);
 		
 		//for each leg day
