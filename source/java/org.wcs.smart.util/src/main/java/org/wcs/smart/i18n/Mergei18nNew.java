@@ -63,8 +63,8 @@ public class Mergei18nNew {
    		ROOT + "svn\\source\\extensions\\r\\translations",
     };
 	
-    public static final String[] LANGUAGES =  new String[] {"vi"};
-//    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
+    //public static final String[] LANGUAGES =  new String[] {"vi"};
+    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "in","ka","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
 
 //    public static final String[] LANGUAGES =  new String[] {"hi", "kar"};
@@ -174,8 +174,8 @@ public class Mergei18nNew {
             if (!target.containsKey(e.getKey())){
                 System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
-                target.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+//                target.put(e.getKey(), "**NEW**" + e.getValue());
+//                changes = true;
             }
         }
 

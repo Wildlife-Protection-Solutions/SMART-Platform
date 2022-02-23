@@ -1,8 +1,15 @@
 package org.wcs.smart.i18n;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,27 +18,35 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 
 public class Sumaryi18n {
 
 	public enum Language {
-		ENGLISH("en", "English"),
+		
+		ARABIC("ar", "Arabic"),
 		SPANISH("es", "Spanish"),
 		FRENCH("fr", "French"),
-		RUSSIAN("ru", "Russian"),
-		THAI("th", "Thai"),
-		CHINESE("zh", "Chinese"),
-		VIETNAMESE("vi", "Vietnamese"),
-		MALAY("ms", "Malay"),
-		LAOS("lo", "Laos"),
 		HINDI("hi", "Hindi"),
 		INDONESIAN("in", "Indonesian"), // should be id
-		KHMER("km", "Khmer"),
 		Georgian("ka", "Georgian"),
 		KAREN("kar", "Karen"),
-		MONGOLIAN("mn", "Mongolian");
+		KHMER("km", "Khmer"),
+		LAOS("lo", "Laos"),
+		MONGOLIAN("mn", "Mongolian"),
+		MALAY("ms", "Malay"),
+		PORTUGUESE("pt", "Portuguese"),
+		RUSSIAN("ru", "Russian"),
+		SWAHILI("sw", "Swahili"),
+		THAI("th", "Thai"),
+		UKAINIAN("uk", "Ukrainian"),
+		VIETNAMESE("vi", "Vietnamese"),
+		CHINESE("zh", "Chinese"),
+		
+		ENGLISH("en", "English");
+		
 
 		String code;
 		String name;
@@ -42,36 +57,41 @@ public class Sumaryi18n {
 		}
 	}
 
+	private static final String ROOT = "C:\\data\\SMART\\Source\\Version7.X\\";
+
+	
 	public static final String[] IN_DIRS = {
-			"C:\\data\\SMART\\Source\\trunk\\source\\java",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
-//			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+			ROOT + "svn\\source\\java",
+			ROOT + "svn\\source\\extensions\\asset",
+			ROOT + "svn\\source\\extensions\\connect",
+			ROOT + "svn\\source\\extensions\\cybertracker",
+			ROOT + "svn\\source\\extensions\\entity",
+			ROOT + "svn\\source\\extensions\\er",
+			ROOT + "svn\\source\\extensions\\event",
+			ROOT + "svn\\source\\extensions\\i2",
+			ROOT + "svn\\source\\extensions\\paws",
+			ROOT + "svn\\source\\extensions\\qa",
+			ROOT + "svn\\source\\extensions\\r",
 		};
 
 	public static final String[] TRANS_DIRS = {
-			"C:\\data\\SMART\\Source\\trunk\\source\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
-//			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations", 
+			ROOT + "svn\\source\\translations",
+			ROOT + "svn\\source\\extensions\\asset\\translations",
+			ROOT + "svn\\source\\extensions\\connect\\translations",
+			ROOT + "svn\\source\\extensions\\cybertracker\\translations",
+			ROOT + "svn\\source\\extensions\\entity\\translations",
+			ROOT + "svn\\source\\extensions\\er\\translations",
+			ROOT + "svn\\source\\extensions\\event\\translations",
+			ROOT + "svn\\source\\extensions\\i2\\translations",
+			ROOT + "svn\\source\\extensions\\paws\\translations",
+			ROOT + "svn\\source\\extensions\\qa\\translations",
+			ROOT + "svn\\source\\extensions\\r\\translations", 
 		};
 
 	public static final String LINE_SEP = "\n";
 
-	private HashMap<Language, Integer> totalCount = new HashMap<Sumaryi18n.Language, Integer>();
-	private HashMap<File, HashMap<Language, Integer>> fileCount = new HashMap<File, HashMap<Language, Integer>>();
+	private HashMap<Language, Integer> totalCount = new HashMap<>();
+	private HashMap<Path, HashMap<Language, Integer>> fileCount = new HashMap<>();
 
 	/**
 	 * find all plugin.properties, messages.properties or bundle.properties
@@ -81,44 +101,47 @@ public class Sumaryi18n {
 	 * @return
 	 * @throws Exception
 	 */
-	public File[] findFiles(String coreDir, String transDir) throws Exception {
-		File src = new File(coreDir);
-		IOFileFilter filter = new IOFileFilter() {
+	public Path[] findFiles(String coreDir, String transDir) throws Exception {
+		Path src = Paths.get(coreDir);
+		
+		List<Path> filesToVisit = new ArrayList<>();
+		
+		Files.walkFileTree(src, new FileVisitor<Path>() {
 
 			@Override
-			public boolean accept(File dir, String name) {
-				return accept(new File(dir, name));
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				if (dir.getFileName().toString().equals("bin") || dir.getFileName().toString().equals("target")) {
+					return FileVisitResult.SKIP_SUBTREE;
+				}
+				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
-			public boolean accept(File file) {
-				/* exclude bin dir */
-				if (checkBin(file)) {
-					return false;
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				
+				if  (file.getFileName().toString().equals("plugin.properties")
+						|| file.getFileName().toString().equals("messages.properties") 
+						|| file.getFileName().toString().equals("bundle.properties")) {
+					filesToVisit.add(file);
 				}
-
-				return (file.getName().equals("plugin.properties")
-						|| file.getName().equals("messages.properties") || file
-						.getName().equals("bundle.properties"));
-
+				
+				return FileVisitResult.CONTINUE;
 			}
 
-			private boolean checkBin(File f) {
-				if (f == null) {
-					return false;
-				}
-				if (f.getName().equals("bin") || f.getName().equals("target")) {
-					return true;
-				}
-				return checkBin(f.getParentFile());
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				throw new IOException(exc);
 			}
-		};
 
-		Collection<File> files = FileUtils.listFiles(src, filter,
-				DirectoryFileFilter.DIRECTORY);
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		
 		int i = 1;
-		for (File f : files) {
-			int x = countFile(f);
+		for (Path file : filesToVisit) {
+			int x = countFile(file);
 			Integer cnt = totalCount.get(Language.ENGLISH);
 			if (cnt == null) {
 				cnt = x;
@@ -127,136 +150,98 @@ public class Sumaryi18n {
 			}
 			totalCount.put(Language.ENGLISH, cnt);
 
-			HashMap<Language, Integer> lCount = fileCount.get(f);
+			HashMap<Language, Integer> lCount = fileCount.get(file);
 			if (lCount == null) {
 				lCount = new HashMap<Sumaryi18n.Language, Integer>();
-				fileCount.put(f, lCount);
+				fileCount.put(file, lCount);
 			}
 			lCount.put(Language.ENGLISH, x);
 
 			// System.out.println("Processing: " +f.getAbsolutePath() + "  " +
 			// (i++) + "/" + files.size() );
-			processFile(f, transDir);
+			processFile(file, Paths.get(transDir));
 		}
 
-		return files.toArray(new File[files.size()]);
+		return filesToVisit.toArray(new Path[filesToVisit.size()]);
 	}
 
 	/*
 	 * Processes a base file, looking for matching i18n files and merging
 	 * matched files.
 	 */
-	private void processFile(File f, String stransDir) throws Exception {
-		File transDir = new File(stransDir);
-		int index = f.getCanonicalPath().indexOf("org.wcs.smart");
-		String pluginName = f.getCanonicalPath().substring(index);
-		index = pluginName.indexOf(File.separator);
-		pluginName = pluginName.substring(0, index);
-		String pathName = f.getCanonicalPath().substring(
-				f.getCanonicalPath().indexOf(pluginName) + pluginName.length());
-		File transFile = new File(pathName);
-
-		HashMap<Language, Integer> lCount = fileCount.get(f);
+	private void processFile(Path file, Path transDir) throws Exception {
+		
+		Path temp = file.getParent();
+//		String pluginName = null;
+		List<String> dirs = new ArrayList<>();
+		
+		Path searchDir = transDir;
+		while(temp != null) {
+			
+			if (temp.getFileName().toString().startsWith("org.wcs.smart")) {
+				searchDir = searchDir.resolve(temp.getFileName() + ".nl");
+				for(String s : dirs) {
+					searchDir = searchDir.resolve(s);
+				}
+//				pluginName = temp.getFileName().toString();
+				break;
+			}
+			dirs.add(0, temp.getFileName().toString());
+			temp = temp.getParent();
+			
+		}
+		if (searchDir == null) throw new Exception("Could not determine plugin name for: " + file.toString());
+		
+		HashMap<Language, Integer> lCount = fileCount.get(file);
 		if (lCount == null) {
 			lCount = new HashMap<Sumaryi18n.Language, Integer>();
-			fileCount.put(f, lCount);
+			fileCount.put(file, lCount);
 		}
 
+		String base = FilenameUtils.getBaseName(file.getFileName().toString());
+		String ext = FilenameUtils.getExtension(file.getFileName().toString());
+		
 		for (Language l : Language.values()) {
-			if (l == Language.ENGLISH)
-				continue;
-			List<File> filesList = new ArrayList<File>();
+			if (l == Language.ENGLISH) continue;
 
-			final String matchDir = pluginName + ".nl_" + l.code; /*
-																 * ADD _XX if
-																 * you want to
-																 * search for a
-																 * specific
-																 * language
-																 */
-			for (File flangDir : transDir.listFiles()) {
-				if (!flangDir.isDirectory()) {
-					continue;
-				}
-				File[] transToMerge = flangDir.listFiles(new FilenameFilter() {
-
-					@Override
-					public boolean accept(File arg0, String name) {
-//						if (matchDir.endsWith("ka")) {
-//							System.out.println("test");
-//						}
-						return name.equalsIgnoreCase(matchDir);
-					}
-				});
-				for (File tmp : transToMerge) {
-					filesList.add(tmp);
-				}
-				if (flangDir.getName().equals(matchDir)){
-					filesList.add(flangDir);
-				}
-
-			}
-			if (filesList.size() > 1) {
-				System.err.println("ERROR: " + filesList.size());
+			String fileToFind = base + "_" + l.code + "." + ext;
+			Path found = searchDir.resolve(fileToFind);
+			
+			if (!Files.exists(found)) {
+//				throw new Exception("Could not find file: " + found.toString());
+				return;
 			}
 
-			for (File ft : filesList) {
-				String langCode = ft.getName().substring(
-						ft.getName().indexOf('_') + 1);
-				int index2 = transFile.getName().lastIndexOf('.');
-				final String prefix = transFile.getName().substring(0, index2);
-				final String postfix = transFile.getName()
-						.substring(index2 + 1);
-
-				File toMerge = new File(ft.getCanonicalPath()
-						+ transFile.getParent() + File.separator + prefix + "_"
-						+ langCode + "." + postfix);
-
-				// System.out.println(f.toString());
-				// System.out.println(toMerge.toString());
-
-				if (!f.exists() || !toMerge.exists()) {
-					System.err
-							.println("Error either source or target file does not exists. "
-									+ f.toString()
-									+ "  |  "
-									+ toMerge.toString());
-				} else {
-					int x = countFile(toMerge);
-					Integer cnt = totalCount.get(l);
-					if (cnt == null) {
-						cnt = x;
-					} else {
-						cnt += x;
-					}
-					totalCount.put(l, cnt);
-
-					Integer cnt2 = lCount.get(l);
-					if (cnt2 == null) {
-						cnt2 = x;
-					} else {
-						System.err
-								.println("Should not get here; each file should only have one match");
-						cnt2 += x;
-					}
-					lCount.put(l, cnt2);
-
-				}
+			int x = countFile(found);
+			Integer cnt = totalCount.get(l);
+			if (cnt == null) {
+				cnt = x;
+			} else {
+				cnt += x;
 			}
+			totalCount.put(l, cnt);
+
+			Integer cnt2 = lCount.get(l);
+			if (cnt2 == null) {
+				cnt2 = x;
+			} else {
+				System.err.println("Should not get here; each file should only have one match");
+				cnt2 += x;
+			}
+			lCount.put(l, cnt2);
 		}
+		
 	}
 
 	/*
 	 * Processes a file and its matched i18n files
 	 */
-	private int countFile(File sourceFile) throws Exception {
+	private int countFile(Path sourceFile) throws Exception {
 		Properties prop = new Properties();
-		FileReader fr = new FileReader(sourceFile);
-		prop.load(fr);
-		fr.close();
-
+		try(InputStream is = Files.newInputStream(sourceFile)){
+			prop.load(is);
+		}
 		return prop.values().size();
-
 	}
 
 	public static void main(String args[]) {
@@ -285,7 +270,7 @@ public class Sumaryi18n {
 		System.out.print("All");
 		System.out.println();
 
-		for (Entry<File, HashMap<Language, Integer>> values : util.fileCount.entrySet()) {
+		for (Entry<Path, HashMap<Language, Integer>> values : util.fileCount.entrySet()) {
 
 			double encnt2 = values.getValue().get(Language.ENGLISH);
 
