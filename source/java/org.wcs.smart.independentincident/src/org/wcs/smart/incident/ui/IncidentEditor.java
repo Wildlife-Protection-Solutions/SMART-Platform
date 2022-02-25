@@ -151,7 +151,6 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		((IncidentEditorInput)getEditorInput()).setId(incident.getId());
 		((IncidentEditorInput)getEditorInput()).setDateTime(incident.getDateTime());
 		setPartName(((IncidentEditorInput)getEditorInput()).getName());
-		
 		summaryEditor.initData(incident);
 		mapPage.updatePointsLayer();
 		
@@ -220,6 +219,8 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	@Override
 	protected void createPages() {
 		super.setPartName(getIncident().getId());
+		setTitleImage(((IncidentEditorInput)getEditorInput()).getImage());
+
 		showBusy(true);
 		try {
 			
