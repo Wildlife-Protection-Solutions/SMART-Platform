@@ -31,10 +31,10 @@ public class NunavutDataSource {
 
 	private static final String HOST = "54.196.200.248";
 	private static final int PORT = 3306;
-	private static final String DB_NAME = "kivalliq";
+	private static final String DB_NAME = "kitikmeot";
 	private static final String USERNAME = "devel";
 	private static final String PASSWORD = "aertiueSS!99kjpoiwe";
-	public static final String FILE_LOCATION = "D:\\Myfiles\\SMART\\Nunavut_data_conversion\\Orig_Attachments\\kivalliq\\AllInOneFolder\\";
+	public static final String FILE_LOCATION = "D:\\Myfiles\\SMART\\Nunavut_data_conversion\\Orig_Attachments\\kitikmeot\\AllInOneFolder\\";
 	public static final String MAPPING_FILE = "D:\\Myfiles\\SMART\\Nunavut_data_conversion\\ListItemMapping\\items.csv";
 
 	HashMap<String, String> itemMap = new HashMap<String, String>();

@@ -36,7 +36,8 @@ import org.wcs.smart.patrol.xml.model.v13.WaypointType;
 
 public class Converter {
 
-	public static final String OUTPUT_FOLDER = "D:\\Myfiles\\SMART\\Nunavut_data_conversion\\OutputKiva";
+	public static final String OUTPUT_FOLDER = "D:\\Myfiles\\SMART\\Nunavut_data_conversion\\Output";
+	public static final String prefix = "kit"; 
 	
 	public void convert() throws Exception {
 		
@@ -52,10 +53,10 @@ public class Converter {
 		int completed = 0;
 		for (String p : pids) {
 			//Devel code only, much faster testing to just do a few patrols
-//			if(count < 3368 ) {
-//				count++;
-//				continue;
-//			}
+			if(count < 3948 ) {
+				count++;
+				continue;
+			}
 			
 			
 			System.out.println("Processing patrol: " + p);
@@ -65,7 +66,7 @@ public class Converter {
 			
 			//Devel code only, much faster testing to just do a few patrols
 			//break;
-//			if(count > 3387 ) {
+//			if(count > 3650 ) {
 //				break;
 //			}
 		}
@@ -87,13 +88,13 @@ public class Converter {
 		
 		PatrolType ptype = new PatrolType();
 		if(Double.parseDouble(patrolId) < 10) {
-			ptype.setId("00000" + patrolId);
+			ptype.setId(prefix + "00000" + patrolId);
 		}else if(Double.parseDouble(patrolId) < 100) {
-			ptype.setId("0000" + patrolId);
+			ptype.setId(prefix + "0000" + patrolId);
 		}else if(Double.parseDouble(patrolId) < 1000) {
-			ptype.setId("000" + patrolId);
+			ptype.setId(prefix + "000" + patrolId);
 		}else {
-			ptype.setId("00" + patrolId);
+			ptype.setId(prefix + "00" + patrolId);
 		}
 		ptype.setComment("");
 		
@@ -144,29 +145,34 @@ public class Converter {
 		
 		HashMap<String, String>names = source.getPatrolLeader(patrolId);
 		
-		
 		//special cases for user names. want this maps a couple of misspellings and test users
-		if(names.get("last_name").equals("TaloTest")) {
-			member.setFamilyName(names.get("admin"));
-			member.setGivenName(names.get("admin"));
-		}else if(names.get("last_name").equals("Ukuqtunnuaq")  && names.get("first_name").equals("Johnny")) {
-			member.setFamilyName(names.get("Uquktunnuaq"));
-			member.setGivenName(names.get("Johnny"));
-		}else if(names.get("last_name").equals("Sanertanut")  && names.get("first_name").equals("Bobby")) {
-			member.setFamilyName(names.get("Sanertanaut"));
-			member.setGivenName(names.get("Bobby"));
-		}else if(names.get("last_name").equals("Idlout")  && names.get("first_name").equals("John Brian")) {
-			member.setFamilyName(names.get("Idlout"));
-			member.setGivenName(names.get("John Bryan"));
-		}else if(names.get("last_name").equals("Anguttitauruq Sr")  && names.get("first_name").equals("Andrew ")) {
-			member.setFamilyName(names.get("Anguttitauruq"));
-			member.setGivenName(names.get("Andrew"));
-		}else if(names.get("last_name").equals("Anguttitauruq Sr")  && names.get("first_name").equals("Andrew")) {
-			member.setFamilyName(names.get("Anguttitauruq"));
-			member.setGivenName(names.get("Andrew"));
+		if(names != null && names.get("last_name") != null) {
+			if(names.get("last_name").equals("TaloTest")) {
+				member.setFamilyName("admin");
+				member.setGivenName("admin");
+			}else if(names.get("last_name").equals("Ukuqtunnuaq")  && names.get("first_name").equals("Johnny")) {
+				member.setFamilyName("Uquktunnuaq");
+				member.setGivenName("Johnny");
+			}else if(names.get("last_name").equals("Sanertanut")  && names.get("first_name").equals("Bobby")) {
+				member.setFamilyName("Sanertanaut");
+				member.setGivenName("Bobby");
+			}else if(names.get("last_name").equals("Idlout")  && names.get("first_name").equals("John Brian")) {
+				member.setFamilyName("Idlout");
+				member.setGivenName("John Bryan");
+			}else if(names.get("last_name").equals("Anguttitauruq Sr")  && names.get("first_name").equals("Andrew ")) {
+				member.setFamilyName("Anguttitauruq");
+				member.setGivenName("Andrew");
+			}else if(names.get("last_name").equals("Anguttitauruq Sr")  && names.get("first_name").equals("Andrew")) {
+				member.setFamilyName("Anguttitauruq");
+				member.setGivenName("Andrew");
+			}else {
+				member.setFamilyName(names.get("last_name"));
+				member.setGivenName(names.get("first_name"));
+			}
 		}else {
-			member.setFamilyName(names.get("last_name"));
-			member.setGivenName(names.get("first_name"));
+			//use default if there is no name in the database
+			member.setFamilyName("Data");
+			member.setGivenName("TrailMark");
 		}
 		leg1.getMembers().add(member);
 		
