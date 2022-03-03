@@ -50,7 +50,7 @@ public class IntegrateIncidentProvider implements IIncidentProvider {
 
 	@Override
 	public Image getImage() {
-		return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON);
+		return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INTEGRATE_ICON);
 	}
 
 

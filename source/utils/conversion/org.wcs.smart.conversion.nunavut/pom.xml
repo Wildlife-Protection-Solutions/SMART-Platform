@@ -39,7 +39,16 @@
 			<artifactId>jts-core</artifactId>
 			<version>1.17.1</version>
 		</dependency>
-
+		<dependency>
+		      <groupId>com.opencsv</groupId>
+		      <artifactId>opencsv</artifactId>
+		      <version>5.3</version>
+		  </dependency>
+		<dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>26.1</version>
+        </dependency>
 	</dependencies>
 
 </project>

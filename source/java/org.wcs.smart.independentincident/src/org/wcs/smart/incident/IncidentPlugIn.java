@@ -41,6 +41,7 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.wcs.smart.independentincident"; //$NON-NLS-1$
 
 	public static final String INCIDENT_ICON = "org.wcs.smart.incident.ICON"; //$NON-NLS-1$
+	public static final String INTEGRATE_ICON = "org.wcs.smart.incident.integrate.ICON"; //$NON-NLS-1$
 	public static final String INCIDENT32_ICON = "org.wcs.smart.incident.ICON32"; //$NON-NLS-1$
 
 	// The shared instance
@@ -84,6 +85,7 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
 		reg.put(INCIDENT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/incident.png")); //$NON-NLS-1$
+		reg.put(INTEGRATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/integrate_incident.png")); //$NON-NLS-1$
 		reg.put(INCIDENT32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/incident@2x.png")); //$NON-NLS-1$
 	}
 	

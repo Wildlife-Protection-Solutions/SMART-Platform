@@ -72,6 +72,10 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_CustomSettings;
 
+	public static String CtPatrolPackageConfigurator_CustomTimerTooltip1;
+
+	public static String CtPatrolPackageConfigurator_CustomTimerTooltip2;
+
 	public static String CtPatrolPackageConfigurator_DateProperty;
 
 	public static String CtPatrolPackageConfigurator_DefaultName;

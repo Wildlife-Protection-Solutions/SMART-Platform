@@ -292,7 +292,12 @@ public enum PatrolPackageExporter {
 				Messages.PatrolPackageExporter_TransportTypePageLabel,
 				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				PatrolMetadataField.TRANSPORT.isRequired(), 
-				false, session, ctpackage.getConservationArea());
+				false, session, ctpackage.getConservationArea(),
+				(item, json)->{
+					json.put("max_speed", ((PatrolTransportType)item).getPatrolType().getDefaultMaxSpeed()); //$NON-NLS-1$
+				}
+				
+				);
 		JSONObject joo = (JSONObject) transportScreen.get(PatrolMetadataField.TRANSPORT.getJsonKey());
 		JSONArray it = (JSONArray) joo.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
 		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes);
