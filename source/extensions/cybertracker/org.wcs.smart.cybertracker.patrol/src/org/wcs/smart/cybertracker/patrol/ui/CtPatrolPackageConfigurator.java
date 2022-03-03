@@ -264,6 +264,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		lblTt.setText(Messages.CtPatrolPackageConfigurator_CustomSettings);
 		lblTt.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		((GridData)lblTt.getLayoutData()).verticalIndent = 2;
+		lblTt.setToolTipText(Messages.CtPatrolPackageConfigurator_CustomTimerTooltip1 + "\n" + Messages.CtPatrolPackageConfigurator_CustomTimerTooltip2); //$NON-NLS-1$
 		
 		Composite ctt = new Composite(g, SWT.NONE);
 		ctt.setLayout(new GridLayout(1, false));

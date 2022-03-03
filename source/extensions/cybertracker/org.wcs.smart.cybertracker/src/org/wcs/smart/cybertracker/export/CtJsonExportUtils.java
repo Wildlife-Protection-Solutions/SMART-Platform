@@ -42,6 +42,7 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
@@ -715,6 +716,17 @@ public class CtJsonExportUtils {
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
 			String defaultLabel, HashMap<String,String> translations, 
 			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+		
+		return  convertKeyOptions(screenOption, clazz, screenKey, 
+				defaultLabel, translations, isRequired, isFixed, session, ca, (i,j)->{});
+	}
+	
+	public static JSONObject convertKeyOptions(MetadataFieldValue screenOption, 
+			Class<? extends NamedKeyItem> clazz, String screenKey, 
+			String defaultLabel, HashMap<String,String> translations, 
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca, 
+			BiConsumer<NamedKeyItem, JSONObject> customValuesAdded) {
+		
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 //		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
@@ -750,9 +762,9 @@ public class CtJsonExportUtils {
 			ttype.put(JSON_PROP_KEY, t.getKeyId()); 
 			ttype.put(JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ca.getDefaultLanguage()));
 			for (Label l : t.getNames()) {
-				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
-				
+				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());	
 			}
+			customValuesAdded.accept(t, ttype);
 			optionOptions.add(ttype);
 		}
 		optionType.put(JSON_OPTION_PROP_KEY, optionOptions);
