@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.patrol.ui;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +47,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
@@ -55,10 +57,12 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.patrol.PatrolProfilePlugIn;
 import org.wcs.smart.i2.patrol.internal.Messages;
 import org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
@@ -87,77 +91,81 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
-		
-		Composite tableComp = new Composite(part, SWT.NONE);
-		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	
-		TableColumnLayout tlayout = new TableColumnLayout();
-		tableComp.setLayout(tlayout);
-		tblViewer = new TableViewer(tableComp, SWT.BORDER);
-		tblViewer.setContentProvider(ArrayContentProvider.getInstance());
-		
-		TableViewerColumn col = new TableViewerColumn(tblViewer, SWT.NONE);
-		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
-		col.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				if (element instanceof PatrolMotivatedRecord) {
-					return ((PatrolMotivatedRecord) element).getId().getIntelRecord().getTitle();
+		if (!IntelSecurityManager.INSTANCE.canViewRecordAny()) {
+			Label l = new Label(part, SWT.NONE);
+			l.setText(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+		}else {
+			Composite tableComp = new Composite(part, SWT.NONE);
+			tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			TableColumnLayout tlayout = new TableColumnLayout();
+			tableComp.setLayout(tlayout);
+			tblViewer = new TableViewer(tableComp, SWT.BORDER);
+			tblViewer.setContentProvider(ArrayContentProvider.getInstance());
+			
+			TableViewerColumn col = new TableViewerColumn(tblViewer, SWT.NONE);
+			tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
+			col.setLabelProvider(new ColumnLabelProvider() {
+				public String getText(Object element) {
+					if (element instanceof PatrolMotivatedRecord) {
+						return ((PatrolMotivatedRecord) element).getId().getIntelRecord().getTitle();
+					}
+					return super.getText(element);
 				}
-				return super.getText(element);
-			}
-			
-			public Image getImage(Object element) {
-				if (element instanceof PatrolMotivatedRecord) {
-					return Resources.INSTANCE.getImage(((PatrolMotivatedRecord) element).getId().getIntelRecord().getRecordSource());
+				
+				public Image getImage(Object element) {
+					if (element instanceof PatrolMotivatedRecord) {
+						return Resources.INSTANCE.getImage(((PatrolMotivatedRecord) element).getId().getIntelRecord().getRecordSource());
+					}
+					return super.getImage(element);
 				}
-				return super.getImage(element);
-			}
-		});
-		tblViewer.addDoubleClickListener(evt->{
-			Object item = tblViewer.getStructuredSelection().getFirstElement();
-			if (!(item instanceof PatrolMotivatedRecord)) return;
-			PatrolMotivatedRecord record = (PatrolMotivatedRecord)item;
+			});
+			tblViewer.addDoubleClickListener(evt->{
+				Object item = tblViewer.getStructuredSelection().getFirstElement();
+				if (!(item instanceof PatrolMotivatedRecord)) return;
+				PatrolMotivatedRecord record = (PatrolMotivatedRecord)item;
+				
+				(new ShowPerspectiveHandler()).execute(IntelDataAssessmentPerspective.ID, ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActive(MWindow.class));
+				(new OpenRecordHandler()).openRecord(record.getId().getIntelRecord(), false);
+			});
 			
-			(new ShowPerspectiveHandler()).execute(IntelDataAssessmentPerspective.ID, ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActive(MWindow.class));
-			(new OpenRecordHandler()).openRecord(record.getId().getIntelRecord(), false);
-		});
-		
-		Menu mnu = new Menu(tblViewer.getControl());
-		
-		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
-		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		miAdd.addListener(SWT.Selection,e->addLink());
-		
-		MenuItem miRemove = new MenuItem(mnu, SWT.PUSH);
-		miRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		miRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		miRemove.addListener(SWT.Selection,e->removeLink());
-		
-		mnu.addMenuListener(new MenuListener() {			
-			@Override
-			public void menuShown(MenuEvent e) {
-				boolean hasItem = (tblViewer.getStructuredSelection().getFirstElement() instanceof PatrolMotivatedRecord);
-				miRemove.setEnabled(hasItem);
-			}
+			Menu mnu = new Menu(tblViewer.getControl());
 			
-			@Override
-			public void menuHidden(MenuEvent e) {
-			}
-		});
-		
-		
-		ToolBar tbar = new ToolBar(part, SWT.FLAT | SWT.VERTICAL);
-		tbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		
-		ToolItem tiAdd = new ToolItem(tbar, SWT.PUSH);
-		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.addListener(SWT.Selection,e->addLink());
-		ToolItem tiRemove = new ToolItem(tbar, SWT.PUSH);
-		tiRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiRemove.addListener(SWT.Selection,e->removeLink());
-		
-		tblViewer.getControl().setMenu(mnu);
+			MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+			miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miAdd.addListener(SWT.Selection,e->addLink());
+			
+			MenuItem miRemove = new MenuItem(mnu, SWT.PUSH);
+			miRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			miRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			miRemove.addListener(SWT.Selection,e->removeLink());
+			
+			mnu.addMenuListener(new MenuListener() {			
+				@Override
+				public void menuShown(MenuEvent e) {
+					boolean hasItem = (tblViewer.getStructuredSelection().getFirstElement() instanceof PatrolMotivatedRecord);
+					miRemove.setEnabled(hasItem);
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {
+				}
+			});
+			
+			
+			ToolBar tbar = new ToolBar(part, SWT.FLAT | SWT.VERTICAL);
+			tbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			
+			ToolItem tiAdd = new ToolItem(tbar, SWT.PUSH);
+			tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			tiAdd.addListener(SWT.Selection,e->addLink());
+			ToolItem tiRemove = new ToolItem(tbar, SWT.PUSH);
+			tiRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			tiRemove.addListener(SWT.Selection,e->removeLink());
+			
+			tblViewer.getControl().setMenu(mnu);
+		}
 		
 		return part;
 	}
@@ -229,6 +237,7 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 
 	
 	private void refresh() {
+		if (tblViewer == null) return;
 		tblViewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		updateValues.schedule();	
 	}
@@ -236,16 +245,23 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<PatrolMotivatedRecord> records ;
+			List<Object> records = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				String query = "FROM PatrolMotivatedRecord WHERE id.patrol = :patrol"; //$NON-NLS-1$
-				records = session.createQuery(query, PatrolMotivatedRecord.class)
+				List<PatrolMotivatedRecord> items = session.createQuery(query, PatrolMotivatedRecord.class)
 						.setParameter("patrol",  patrol) //$NON-NLS-1$
 						.list();
-				records.forEach(r->{
+				items.forEach(r->{
 					r.getId().getIntelRecord().getTitle();
-					r.getId().getIntelRecord().getRecordSource().getName();
+					if (r.getId().getIntelRecord().getRecordSource() != null) r.getId().getIntelRecord().getRecordSource().getName();
 				});
+				for (int i = 0; i < items.size(); i ++) {
+					if (IntelSecurityManager.INSTANCE.canViewRecords( ((PatrolMotivatedRecord)items.get(i)).getId().getIntelRecord().getProfile() )){
+						records.add(items.get(i));
+					}else {
+						records.add(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+					}
+				}
 				
 			}
 			Display.getDefault().asyncExec(()->{

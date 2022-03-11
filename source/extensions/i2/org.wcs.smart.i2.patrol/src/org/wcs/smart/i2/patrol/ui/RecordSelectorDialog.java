@@ -24,6 +24,7 @@ package org.wcs.smart.i2.patrol.ui;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,8 +51,11 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.patrol.internal.Messages;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -165,21 +169,35 @@ public class RecordSelectorDialog extends SmartStyledTitleDialog {
 			List<IntelRecord> records;
 			
 			try(Session session = HibernateManager.openSession()){
-				StringBuilder sb = new StringBuilder();
-				sb.append(" FROM "); //$NON-NLS-1$
-				sb.append(" IntelRecord "); //$NON-NLS-1$
-				sb.append(" WHERE conservationArea = :ca AND "); //$NON-NLS-1$
-				sb.append(" primaryDate >= :start and primaryDate <= :end"); //$NON-NLS-1$
-			
-				records = session.createQuery(sb.toString(), IntelRecord.class)
-					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-					.setParameter("start",  startDate.atStartOfDay()) //$NON-NLS-1$
-					.setParameter("end",  endDate.atTime(LocalTime.MAX)) //$NON-NLS-1$
-					.list();
-				records.forEach(r->{
-					r.getRecordSource().getName();
-					r.getTitle();
-				});
+				
+				List<IntelProfile> profiles = ProfilesManager.INSTANCE.getProfiles(session, true);
+				List<IntelProfile> viewable = new ArrayList<>();
+				for (IntelProfile p : profiles) {
+					if (IntelSecurityManager.INSTANCE.canViewRecords(p)) viewable.add(p);
+					
+				}
+				
+				if (viewable.isEmpty()) {
+					records = Collections.emptyList();
+				}else {
+					StringBuilder sb = new StringBuilder();
+					sb.append(" FROM "); //$NON-NLS-1$
+					sb.append(" IntelRecord "); //$NON-NLS-1$
+					sb.append(" WHERE conservationArea = :ca AND "); //$NON-NLS-1$
+					sb.append(" primaryDate >= :start and primaryDate <= :end"); //$NON-NLS-1$
+					sb.append(" AND profile IN (:profiles)"); //$NON-NLS-1$
+					
+					records = session.createQuery(sb.toString(), IntelRecord.class)
+						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+						.setParameter("start",  startDate.atStartOfDay()) //$NON-NLS-1$
+						.setParameter("end",  endDate.atTime(LocalTime.MAX)) //$NON-NLS-1$
+						.setParameterList("profiles", viewable) //$NON-NLS-1$
+						.list();
+					records.forEach(r->{
+						if (r.getRecordSource() != null) r.getRecordSource().getName();
+						r.getTitle();
+					});
+				}
 			}
 			
 			Display.getDefault().asyncExec(()->{
