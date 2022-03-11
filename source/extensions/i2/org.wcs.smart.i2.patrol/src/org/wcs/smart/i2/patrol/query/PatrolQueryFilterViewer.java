@@ -4,9 +4,11 @@ import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.patrol.PatrolProfilePlugIn;
 import org.wcs.smart.i2.patrol.internal.Messages;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
@@ -92,6 +94,7 @@ public class PatrolQueryFilterViewer implements IExtensionFilterViewer {
 	private ListItem findRecord(Session session, String uuid) throws Exception{
 		IntelRecord r = session.get(IntelRecord.class, UuidUtils.stringToUuid(uuid));
 		if (r == null) throw new Exception(Messages.PatrolQueryFilterViewer_RecordNotFoundError);
+		if (!IntelSecurityManager.INSTANCE.canViewRecords(r.getProfile())) return new ListItem(r.getUuid(), IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES); 
 		return new ListItem(r.getUuid(), r.getTitle());
 	}
 }

@@ -26,10 +26,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.patrol.internal.Messages;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
@@ -59,13 +61,21 @@ public class PatrolProfileRecordPatrolData implements IPatrolOptionData {
 	public List<ListItem> getAllValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		
-		List<IntelRecord> records = QueryFactory.buildQuery(session, 
-				IntelRecord.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()})  //$NON-NLS-1$
-				.list();
-		
-		for (IntelRecord i : records) {
-			items.add(new ListItem(i.getUuid(), i.getTitle()));
+		List<IntelProfile> profiles = ProfilesManager.INSTANCE.getProfiles(session, true);
+		List<IntelProfile> viewable = new ArrayList<>();
+		for (IntelProfile p : profiles) {
+			if (IntelSecurityManager.INSTANCE.canViewRecords(p)) viewable.add(p);
+			
+		}
+		if (!viewable.isEmpty()) {
+			List<IntelRecord> records = session.createQuery("FROM IntelRecord WHERE conservationArea = :ca and profile in (:profiles)",IntelRecord.class) //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.setParameter("profiles", viewable) //$NON-NLS-1$
+					.list();
+			
+			for (IntelRecord i : records) {
+				items.add(new ListItem(i.getUuid(), i.getTitle()));
+			}
 		}
 		Collections.sort(items);
 		items.add(0,ANY_ITEM);
