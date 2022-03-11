@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>7.4.0-SNAPSHOT</version>
+		<version>7.5.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 
@@ -15,14 +15,13 @@
 
 	<artifactId>org.wcs.smart.core.observation</artifactId>
 	<name>Observation Module</name>
-	<version>7.5.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.wcs.smart.core</groupId>
 			<artifactId>org.wcs.smart.core.core</artifactId>
-			<version>${smart750.version}</version>
+			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>

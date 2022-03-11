@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.patrol.contribution">
+      <uieditor
+            class="org.wcs.smart.i2.patrol.ui.PatrolEditorContribution">
+      </uieditor>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+      <class
+            ca_property=".id.patrol.conservationArea"
+            class="org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord"
+            supportsCcaa="false">
+      </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.patrol.query.contribution">
+      <FilterItem
+            filter="org.wcs.smart.i2.patrol.query.IntelRecordPatrolQueryFilter"
+            viewer="org.wcs.smart.i2.patrol.query.PatrolQueryFilterViewer">
+      </FilterItem>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.i2.patrol.plugin.OnInstallAction"
+            name="org.wcs.smart.i2.patrol.onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="1.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.i2.patrol.plugin.OnUninstallAction"
+            name="org.wcs.smart.i2.patrol.onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="1.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            requires="org.wcs.smart.i2"
+            upgrader="org.wcs.smart.i2.patrol.plugin.DatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.i2.patrol.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+  
+
+</plugin>

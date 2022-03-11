@@ -327,8 +327,10 @@ public class IntelligenceLabelProviderImpl implements
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
 		if (item == ValuePart.ValueOption.NUMBER_RECORDS) return Messages.IntelligenceLabelProviderImpl_NumberOfRecordsValue;
-		 if (item instanceof SystemAttributeFilter.SystemAttribute) return getName((SystemAttributeFilter.SystemAttribute)item);
+		if (item instanceof SystemAttributeFilter.SystemAttribute) return getName((SystemAttributeFilter.SystemAttribute)item);
 		 
+		if (item.equals("MOTIVATEDBY")) return Messages.IntelligenceLabelProviderImpl_MotiviatedByQueryOption; //$NON-NLS-1$
+		
 		return ""; //$NON-NLS-1$
 	}
 	

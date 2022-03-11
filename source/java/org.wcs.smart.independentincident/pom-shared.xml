@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>7.4.0-SNAPSHOT</version>
+		<version>7.5.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
@@ -13,7 +13,6 @@
 	<groupId>org.wcs.smart.core</groupId>
 	<artifactId>org.wcs.smart.core.incident</artifactId>
 	<name>Independent Incident Module</name>
-	<version>7.5.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<dependencies>
@@ -25,7 +24,7 @@
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.observation</artifactId>
-    			<version>${smart750.version}</version>
+    			<version>${smart.version}</version>
 		</dependency>
 	</dependencies>
 </project>

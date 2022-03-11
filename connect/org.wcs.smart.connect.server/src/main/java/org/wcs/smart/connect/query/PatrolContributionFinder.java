@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.i2.patrol.query.IntelRecordPatrolQueryFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
 import org.wcs.smart.patrol.query.ext.IPatrolContributionFinder;
@@ -41,6 +42,7 @@ public class PatrolContributionFinder implements IPatrolContributionFinder{
 		ArrayList<IExtensionFilter> items = new ArrayList<IExtensionFilter>();
 //		items.add(new IntelligencePatrolQueryFilter());
 		items.add(new PlanPatrolQueryFilter());
+		items.add(new IntelRecordPatrolQueryFilter());		
 		return items;
 	}
 	

@@ -183,6 +183,7 @@ import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -428,7 +429,7 @@ public enum SmartTable {
 	I2_PROFILE_CONFIG(IntelProfile.class, null),
 	I2_PROFILE_RECORD_SOURCE(IntelProfileRecordSource.class, ".id.profile.conservationArea"),
 	I2_PROFILE_ENTITY_TYPE(IntelProfileEntityType.class, ".id.profile.conservationArea"),
-	
+	I2_PATROL_RECORD_LINK(PatrolMotivatedRecord.class, ".id.patrol.conservationArea"),
 	QA_ERROR(QaError.class, null),
 	QA_ROUTINE(QaRoutine.class, null),
 	QA_ROUTINE_PARAMETER(QaRoutineParameter.class, ".qaRoutine.conservationArea"),

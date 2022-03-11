@@ -61,6 +61,36 @@ public class Intel6Database extends Smart6Database {
 		return getConservationAreas(sql);
 	}
 
+	public Map<UUID, List<UUID>> getMotivatedByLinks(ConservationArea ca) throws SQLException{
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT a.patrol_uuid, a.intelligence_uuid "); //$NON-NLS-1$
+		sb.append("FROM smart.patrol_intelligence a join smart.intelligence b  "); //$NON-NLS-1$
+		sb.append(" on a.intelligence_uuid = b.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE b.ca_uuid = ? "); //$NON-NLS-1$
+		
+		Map<UUID, List<UUID>> intelToPatrol = new HashMap<>();
+		
+		try(PreparedStatement s = connection.prepareStatement(sb.toString())){
+			s.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
+		
+			try(ResultSet rs = s.executeQuery()){
+				while(rs.next()) {
+					UUID patrolUuid = UuidUtils.byteToUUID(rs.getBytes(1));
+					UUID intelUuid = UuidUtils.byteToUUID(rs.getBytes(2));
+					
+					List<UUID> patrols = intelToPatrol.get(intelUuid);
+					if (patrols == null) {
+						patrols = new ArrayList<>();
+						intelToPatrol.put(intelUuid, patrols);
+					}
+					patrols.add(patrolUuid);
+				}
+			}
+		}
+		return intelToPatrol;
+	}
+	
 	public Collection<IntelligenceItem> getIntelItems(ConservationArea ca) throws SQLException{
 		Map<UUID, IntelligenceItem> sources = new HashMap<>();
 		
