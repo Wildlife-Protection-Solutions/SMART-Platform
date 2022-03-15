@@ -93,10 +93,13 @@ public class Messages extends NLS {
 	public static String SmartCollectPackageConfigurator_DeviceSettingsLabel;
 	public static String SmartCollectPackageConfigurator_EditSettingsTooltip;
 	public static String SmartCollectPackageConfigurator_InvalidType;
+	public static String SmartCollectPackageConfigurator_MakePrivate;
 	public static String SmartCollectPackageConfigurator_NameRequired;
 	public static String SmartCollectPackageConfigurator_NoPackage;
 	public static String SmartCollectPackageConfigurator_PackageDetails;
+	public static String SmartCollectPackageConfigurator_PackageMessage;
 	public static String SmartCollectPackageConfigurator_PackageNameLabel;
+	public static String SmartCollectPackageConfigurator_PackageUrlSection;
 	public static String SmartCollectPackageConfigurator_PasswordError;
 	public static String SmartCollectPackageConfigurator_PasswordLbl;
 	public static String SmartCollectPackageConfigurator_PasswordTooltip;

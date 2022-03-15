@@ -22,8 +22,10 @@
 package org.wcs.smart.cybertracker.model;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +36,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.util.UuidUtils;
 
@@ -110,4 +113,41 @@ public interface ICtPackage {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Transient
+	public static String generateSmartMobileAppLink(URL url, UUID ctPackageUuid, boolean requiresPassword) {
+		
+		StringBuilder serverUrl = new StringBuilder();
+		serverUrl.append(url.getProtocol());
+		serverUrl.append("://"); //$NON-NLS-1$
+		serverUrl.append(url.getHost());
+		if (url.getPort() != -1) {
+			serverUrl.append(":"); //$NON-NLS-1$
+			serverUrl.append(url.getPort());
+		}
+		serverUrl.append(url.getPath());
+		
+		JSONObject json = new JSONObject();
+		json.put("connector", "SMART"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (ctPackageUuid != null) {
+			json.put("packageUuid", ctPackageUuid.toString()); //$NON-NLS-1$
+		}
+		json.put("server", serverUrl.toString()); //$NON-NLS-1$
+		json.put("launch", Boolean.TRUE); //$NON-NLS-1$
+		json.put("requires_authentication", requiresPassword); //$NON-NLS-1$
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("https://cybertrackerwiki.org/applink-smart?"); //$NON-NLS-1$
+		sb.append(new String(Base64.getEncoder().encode(json.toString().getBytes())));
+		return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @return true if supports connect url, false otherwise
+	 */
+	@Transient
+	public default boolean supportsConnectUrl() {
+		return true;
+	}
 }

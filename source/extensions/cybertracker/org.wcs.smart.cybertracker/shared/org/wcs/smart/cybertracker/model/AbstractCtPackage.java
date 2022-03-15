@@ -211,4 +211,6 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	public void clearBasemap() {
 		setBasemapDef(null);
 	}
+	
+
 }

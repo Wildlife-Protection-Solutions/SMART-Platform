@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -43,14 +45,23 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.connect.ConnectHibernateManager;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
+import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Ui Controller for adding connect alerts/upload details to package
@@ -76,6 +87,9 @@ public class ConnectDataUiController implements IPackageUiContribution{
 
 	private boolean fireEvents = true;
 	private boolean canDisableUpload = true;
+	
+	private Text txtUrl;
+	private Button btnPublic;
 	
 	public ConnectDataUiController() {
 		this(true);
@@ -123,7 +137,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		Label msg = new Label(core, SWT.WRAP);
 		msg.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		msg.setText(Messages.ConnectDataUiController_dataUploadMsg);
-		((GridData)msg.getLayoutData()).widthHint = 140;
+		((GridData)msg.getLayoutData()).widthHint = 600;
 		
 		btnUploadData = new Button(core, SWT.CHECK);
 		btnUploadData.setSelection(true);
@@ -163,7 +177,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		((GridLayout)posComp.getLayout()).marginWidth = 0;
 		((GridLayout)posComp.getLayout()).marginHeight = 0;
 		
-		SmartUiUtils.createHeaderLabel(upDataComp, Messages.ConnectDataUiController_PositionLabel);
+		SmartUiUtils.createHeaderLabel(posComp, Messages.ConnectDataUiController_PositionLabel);
 		
 		core = new Composite(posComp, SWT.FLAT);
 		core.setLayout(new GridLayout(5, false));
@@ -172,7 +186,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		msg = new Label(core, SWT.WRAP);
 		msg.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
 		msg.setText(Messages.ConnectDataUiController_PositiongMessage);
-		((GridData)msg.getLayoutData()).widthHint = 140;
+		((GridData)msg.getLayoutData()).widthHint = 600;
 		
 		btnPositionUpdates = new Button(core, SWT.CHECK);
 		btnPositionUpdates.setSelection(false);
@@ -224,6 +238,71 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			refreshAlertTypes(true);
 		});
 		
+		if (ctpackage.supportsConnectUrl()) {
+		
+			Composite urlComp = new Composite(main, SWT.FLAT);
+			urlComp.setLayout(new GridLayout());
+			urlComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)urlComp.getLayout()).marginWidth = 0;
+			((GridLayout)urlComp.getLayout()).marginHeight = 0;
+			
+			SmartUiUtils.createHeaderLabel(urlComp, Messages.ConnectDataUiController_PackageUrlHeader);
+			
+			core = new Composite(urlComp, SWT.FLAT);
+			core.setLayout(new GridLayout(1, false));
+			core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Label l = new Label(core, SWT.WRAP);
+			l.setText(Messages.ConnectDataUiController_LinkInfo);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 600;
+			
+			Composite temp = new Composite(core, SWT.NONE);
+			temp.setLayout(new GridLayout(2, false));
+			((GridLayout)temp.getLayout()).marginWidth = 0;
+			((GridLayout)temp.getLayout()).marginHeight = 0;
+			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			txtUrl = new Text(temp, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER);
+			txtUrl.setEditable(false);
+			txtUrl.setEnabled(true);
+			txtUrl.setText(""); //$NON-NLS-1$
+			txtUrl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtUrl.getLayoutData()).heightHint = 50;
+			((GridData)txtUrl.getLayoutData()).widthHint = 600;
+			
+			ToolBar privateTb = new ToolBar(temp, SWT.FLAT);
+			privateTb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			
+			ToolItem btnCopy = new ToolItem(privateTb, SWT.PUSH);
+			btnCopy.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.COPY_ICON));
+			btnCopy.setToolTipText(Messages.ConnectDataUiController_copytooltip);
+			btnCopy.addListener(SWT.Selection,e->{
+				txtUrl.setRedraw(false);
+				txtUrl.selectAll();
+				txtUrl.copy();
+				txtUrl.clearSelection();
+				txtUrl.setRedraw(true);
+				
+			});
+			
+			l = new Label(core, SWT.WRAP);
+			l.setText(Messages.ConnectDataUiController_SecurityMessage);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 600;
+	
+			btnPublic = new Button(core, SWT.CHECK);
+			btnPublic.setText(Messages.ConnectDataUiController_MakePublic);
+			btnPublic.addListener(SWT.Selection, e->{
+				if (btnPublic.getSelection()) {
+					MessageDialog.openWarning(btnPublic.getShell(), Messages.ConnectDataUiController_WarningTitle, Messages.ConnectDataUiController_WarningMsg);
+				}
+				validate();
+			});
+			
+			updateUrl();
+		}
+				
 		
 		if (ctpackage instanceof AbstractCtPackage) {
 			try {
@@ -246,6 +325,16 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				}else {
 					btnPositionUpdates.setSelection(false);
 				}
+				
+				if (btnPublic != null) {
+					data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
+					if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
+						btnPublic.setSelection(false);
+					}else {
+						btnPublic.setSelection(true);
+					}
+				}
+				
 				btnUploadData.notifyListeners(SWT.Selection, new Event());
 				btnPositionUpdates.notifyListeners(SWT.Selection, new Event());
 			}finally {
@@ -357,6 +446,16 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			data.setUuidValue(null);
 		}
 		
+		if (btnPublic != null) {
+			data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
+			if (btnPublic.getSelection()) {
+				data.setBooleanValue(false);
+			}else {
+				data.setBooleanValue(true);
+			}
+			updateUrl();
+		}
+		
 	}
 	
 	private MetadataFieldValue findCreateMetadataField(String key, AbstractCtPackage ctpackage) {
@@ -375,4 +474,34 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		return v;
 	}
 
+	private void updateUrl() {
+		if (ctpackage.getUuid() == null) {
+			txtUrl.setText(Messages.ConnectDataUiController_PackageMustBeSaved);	
+		}else {
+			ConnectServer cs;
+			try(Session s = HibernateManager.openSession()){
+				cs = ConnectHibernateManager.getConnectServer(s);
+			}
+			if (cs == null) {
+				txtUrl.setText(Messages.ConnectDataUiController_NoConnectServer);
+			}else {
+				String surl = cs.getServerUrl();
+				surl += "/noa/cybertracker/packages/" + UuidUtils.uuidToString(ctpackage.getUuid()); //$NON-NLS-1$
+
+				try {
+					MetadataFieldValue privatemd = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
+					boolean isprivate = true;
+					if (privatemd.getBooleanValue() != null) isprivate = privatemd.getBooleanValue();
+					
+					URL url = new URL(surl);
+					String link = ICtPackage.generateSmartMobileAppLink(url, ctpackage.getUuid(), isprivate);
+					txtUrl.setText(link);
+				}catch (Exception ex) {
+					ConnectPlugIn.log(ex.getMessage(), ex);
+					txtUrl.setText(Messages.ConnectDataUiController_PackageConfigError +ex.getMessage());
+				}
+			}
+		}
+	}
 }
+ 

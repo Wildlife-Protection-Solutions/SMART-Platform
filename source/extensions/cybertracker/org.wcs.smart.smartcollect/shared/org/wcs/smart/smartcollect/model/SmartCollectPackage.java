@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.smartcollect.model;
 
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,7 +30,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.json.simple.JSONObject;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -114,34 +110,14 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 		}
 		return copy;
 	}
-	
-	
-	@SuppressWarnings("unchecked")
-	@Transient
-	public static String generateSmartMobileAppLink(URL url, UUID ctPackageUuid) {
-		
-		StringBuilder serverUrl = new StringBuilder();
-		serverUrl.append(url.getProtocol());
-		serverUrl.append("://"); //$NON-NLS-1$
-		serverUrl.append(url.getHost());
-		if (url.getPort() != -1) {
-			serverUrl.append(":"); //$NON-NLS-1$
-			serverUrl.append(url.getPort());
-		}
-		serverUrl.append(url.getPath());
-		
-		JSONObject json = new JSONObject();
-		json.put("connector", "SMART"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (ctPackageUuid != null) {
-			json.put("packageUuid", ctPackageUuid.toString()); //$NON-NLS-1$
-		}
-		json.put("server", serverUrl.toString()); //$NON-NLS-1$
-		json.put("launch", Boolean.TRUE); //$NON-NLS-1$
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("https://cybertrackerwiki.org/applink-smart?"); //$NON-NLS-1$
-		sb.append(new String(Base64.getEncoder().encode(json.toString().getBytes())));
-		return sb.toString();
+
+	/**
+	 * collect urls are different
+	 */
+	@Override
+	public boolean supportsConnectUrl() {
+		return false;
 	}
+
 	
 }

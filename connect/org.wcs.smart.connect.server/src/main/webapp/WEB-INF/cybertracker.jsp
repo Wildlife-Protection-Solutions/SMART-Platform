@@ -37,8 +37,10 @@
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.name"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.ca"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.type"/></div>
+			  <div class="table-cell smart-table-cell">Public/Private</div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.upload"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revisiondate"/></div>
+			  <div class="table-cell smart-table-cell">Link</div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revision"/></div>
 			  <div class="table-cell smart-table-cell"></div>
 			  <div class="table-cell smart-table-cell"></div>
@@ -46,7 +48,7 @@
 	    </div>
 	    <a id="refreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
 	  </div>	
-	  
+
 	  <!-- Navigation Layer Table -->
 	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
 	  
@@ -61,20 +63,6 @@
 		  </div>
 	    </div>
 	    <a id="navrefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
-	  </div>
-	  
-	  <!-- Private Packages Table -->
-	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.privatepackages"/></p>
-	  
-	  <div class="top-spacer" >
-	    <div id="privatepackagetable" class="table-cell smart-table">
-	  	  <div class="table-row smart-table-header">
-			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatepackagesname"/></div>
-			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatepackagesca"/></div>
-			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatepackageslink"/></div>
-		  </div>
-	    </div>
-	    <a id="privatepackagerefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
 	  </div>
 	  
 	  <!--  API Key Table -->

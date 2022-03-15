@@ -34,6 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -57,6 +58,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.api.ConnectAlert;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
@@ -74,6 +76,7 @@ import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.GeoJsonAlert;
+import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.util.UuidUtils;
@@ -113,7 +116,7 @@ public class CyberTrackerNoa {
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 	@Context private HttpHeaders headers;
-	
+		
 	private URL getRootUrl() throws MalformedURLException{
 		URL url = new URL(request.getRequestURL().toString());
 		String sp = context.getContextPath();
@@ -129,6 +132,18 @@ public class CyberTrackerNoa {
 	 * 
 	 */
 	private UUID validateToken() {
+		String token = parseToken();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try {
+			return validateToken(s, token);
+		}finally {
+			s.getTransaction().rollback();
+		}
+	}
+	
+	private String parseToken() {
 		String token = null;
 		if (request.getParameterMap() != null && request.getParameterMap().containsKey(ConnectNoaRESTApplication.APIKEY_QUERY_PARAM)) {
 			token = request.getParameterMap().get(ConnectNoaRESTApplication.APIKEY_QUERY_PARAM)[0];
@@ -137,24 +152,46 @@ public class CyberTrackerNoa {
 			token = request.getHeader(ConnectNoaRESTApplication.APIKEY_HEADER_PARAM);
 		}
 		if (token == null || token.isEmpty()) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-
-		Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
-		try {
-			
-			CyberTrackerApiKey key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, 
-					new Object[] {"apiKey", token}).uniqueResult(); //$NON-NLS-1$
-			
-			if (key == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			if (key.getApiKey() == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			if (!key.getApiKey().equals(token)) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			
-			return key.getConservationArea().getUuid();
-		}finally {
-			s.getTransaction().rollback();
-		}
+		return token;
 	}
 	
+	private UUID validateToken(Session s, String token) {
+		
+		CyberTrackerApiKey key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, 
+				new Object[] {"apiKey", token}).uniqueResult(); //$NON-NLS-1$
+			
+		if (key == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+		if (key.getApiKey() == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+		if (!key.getApiKey().equals(token)) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			
+		return key.getConservationArea().getUuid();
+	}
+	
+	private boolean validateBasicAuthorization(Session session) {
+		String auth = request.getHeader("Authorization"); //$NON-NLS-1$
+		if (auth == null || auth.trim().isBlank()) return false;
+		
+		auth = auth.trim();
+		String[] bits = auth.split("\\s+"); //$NON-NLS-1$
+					
+		if (!bits[0].equalsIgnoreCase("BASIC")) return false; //$NON-NLS-1$
+		
+		String info = new String(Base64.getDecoder().decode(bits[1]));
+		int colon = info.indexOf(':');
+		if (colon < 0) return false;
+		
+		String user = info.substring(0,colon);
+		String pass = info.substring(colon+1);
+		
+		SmartUser cuser = session.createQuery("FROM SmartUser where username = :user", SmartUser.class) //$NON-NLS-1$
+				.setParameter("user", user) //$NON-NLS-1$
+				.uniqueResult();
+		
+		if (cuser == null) return false;
+		if ((new BcryptCredentialHandler()).matches(pass, cuser.getPassword())) return true;
+			
+		return false;
+	}
 	
 	/**
 	 * Gets the package details include the current revision
@@ -254,8 +291,6 @@ public class CyberTrackerNoa {
 	@ApiResponse(responseCode = "404", description = "Requested package not found")
 	public Response getCtPackage(@PathParam("uuid") String packageUuidstr){
 		
-		UUID tokenCaUuid = validateToken();
-		
 		UUID packageUuid = null;
 		try{
 			packageUuid = UUID.fromString(packageUuidstr);
@@ -266,11 +301,31 @@ public class CyberTrackerNoa {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			
+			//For package links - packages are private by default and require either api key or
+			//username/password.  However some packages can be public and require no authorization to access
+			boolean hasBasicAuth = false;
+			if (validateBasicAuthorization(s)) {
+				hasBasicAuth = true;
+			}
+			
 			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
-			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN); 
-			if (ctpackage.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND);
+			
+			if (ctpackage == null || 
+					ctpackage.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) {
+				if (hasBasicAuth) throw new SmartConnectException(Response.Status.NOT_FOUND);
+				throw new SmartConnectException(Response.Status.FORBIDDEN);
+			}
+			
+			if (!ctpackage.getIsPrivate()) {
+				//public package doesn't require authentication to access
+			} else {
+				if (!hasBasicAuth) {
+					UUID tokenCaUuid = validateToken(s, parseToken());
+					if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN);
+				}
+			}
 			file = DataStoreManager.INSTANCE.getRootDirectory()
 					.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {

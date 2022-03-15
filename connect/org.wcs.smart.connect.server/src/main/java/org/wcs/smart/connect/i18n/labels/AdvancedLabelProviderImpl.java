@@ -289,7 +289,7 @@ public class AdvancedLabelProviderImpl implements
 			}
 		}
 		
-		if (item.equals("MOTIVATEDBY")) return "Motivated By Profile Record";
+		if (item.equals("MOTIVATEDBY")) return Messages.getString("AdvancedLabelProviderImpl.MotivatedByProfileRecord", l); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return ""; //$NON-NLS-1$
 	}

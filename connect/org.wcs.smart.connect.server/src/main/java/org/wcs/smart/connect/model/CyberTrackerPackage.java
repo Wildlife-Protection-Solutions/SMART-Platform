@@ -39,7 +39,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
-import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.cybertracker.model.ICtPackage;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -162,13 +162,8 @@ public class CyberTrackerPackage extends UuidItem{
 	
 	@Transient
 	public CyberTrackerPackageProxy asProxy(URL rootUrl) {	
-		CyberTrackerPackageProxy proxy = null;		
-		if (getIsPrivate()) {
-			proxy = new CyberTrackerPrivatePackageProxy();
-			((CyberTrackerPrivatePackageProxy)proxy).setAppLink(SmartCollectPackage.generateSmartMobileAppLink(rootUrl, getCtPackageUuid()));
-		}else {
-			proxy = new CyberTrackerPackageProxy();
-		}
+		CyberTrackerPackageProxy proxy = new CyberTrackerPackageProxy();
+		proxy.setAppLink(ICtPackage.generateSmartMobileAppLink(rootUrl, getCtPackageUuid()));
 		proxy.setCaLabel(getConservationArea().getLabel());
 		proxy.setCaUuid(getConservationArea().getUuid());
 		proxy.setUuid( getCtPackageUuid() );

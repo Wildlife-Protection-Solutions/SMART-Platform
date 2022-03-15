@@ -92,6 +92,7 @@ import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Package configurator for SMARTCollect package
@@ -164,13 +165,13 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		scroll.setContent(main);
 		mainTab.setControl(scroll);
 		
-		Composite g = new Composite(main, SWT.NONE);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite core = new Composite(main, SWT.NONE);
+		core.setLayout(new GridLayout());
+		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		SmartUiUtils.createHeaderLabel(g, Messages.SmartCollectPackageConfigurator_ConfigurationSection);
+		SmartUiUtils.createHeaderLabel(core, Messages.SmartCollectPackageConfigurator_ConfigurationSection);
 		
-		g = new Composite(g, SWT.NONE);
+		Composite g = new Composite(core, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -270,17 +271,16 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 	
-		Label lblPrivate = new Label(g, SWT.NONE);
-		lblPrivate.setText(Messages.SmartCollectPackageConfigurator_PrivatePkgLabel);
-		lblPrivate.setToolTipText(Messages.SmartCollectPackageConfigurator_PrivatePkgTooltip);
+		SmartUiUtils.createHeaderLabel(core, Messages.SmartCollectPackageConfigurator_PackageUrlSection);
+
+		g = new Composite(core, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnPrivate = new Button(g, SWT.CHECK);
-		btnPrivate.addListener(SWT.Selection, e->{
-			if (!isInit) validate();
-			updateUrl();
-		});
-	
-		new Label(g, SWT.NONE);
+		lblWarn = new Label(g, SWT.WRAP);
+		lblWarn.setText(Messages.SmartCollectPackageConfigurator_urltooltip);
+		lblWarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblWarn.getLayoutData()).widthHint = 600;
 		
 		Composite urlpart = new Composite(g, SWT.NONE);
 		urlpart.setLayout(new GridLayout(2, false));
@@ -290,10 +290,10 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		
 		txtUrl = new Text(urlpart, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER);
 		txtUrl.setEditable(false);
-		txtUrl.setEnabled(false);
 		txtUrl.setText(""); //$NON-NLS-1$
 		txtUrl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtUrl.getLayoutData()).heightHint = 50;
+		((GridData)txtUrl.getLayoutData()).widthHint = 600;
 		
 		privateTb = new ToolBar(urlpart, SWT.FLAT);
 		privateTb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -310,12 +310,17 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			
 		});
 		
-		new Label(g, SWT.NONE);
+		Label l = new Label(g, SWT.WRAP);
+		l.setText(Messages.SmartCollectPackageConfigurator_PackageMessage);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 600;
 		
-		lblWarn = new Label(g, SWT.WRAP);
-		lblWarn.setText(Messages.SmartCollectPackageConfigurator_urltooltip);
-		lblWarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)lblWarn.getLayoutData()).widthHint = 50;
+		btnPrivate = new Button(g, SWT.CHECK);
+		btnPrivate.setText(Messages.SmartCollectPackageConfigurator_MakePrivate);
+		btnPrivate.addListener(SWT.Selection, e->{
+			if (!isInit) validate();
+		});
+		
 
 		Composite ct = new Composite(g, SWT.NONE);
 		ct.setLayout(new GridLayout(3, false));
@@ -354,12 +359,12 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	}
 	
 	private void updateUrl() {
-		lblWarn.setEnabled(btnPrivate.getSelection());
-		txtUrl.setEnabled(btnPrivate.getSelection());
-		privateTb.setEnabled(btnPrivate.getSelection());
-		if (!txtUrl.getEnabled()) {
-			txtUrl.setText(""); //$NON-NLS-1$
-		}else {
+//		lblWarn.setEnabled(btnPrivate.getSelection());
+//		txtUrl.setEnabled(btnPrivate.getSelection());
+//		privateTb.setEnabled(btnPrivate.getSelection());
+//		if (!txtUrl.getEnabled()) {
+//			txtUrl.setText(""); //$NON-NLS-1$
+//		}else {
 			if (ctpackage.getUuid() == null) {
 				txtUrl.setText(Messages.SmartCollectPackageConfigurator_saverequired);	
 			}else {
@@ -371,10 +376,12 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					txtUrl.setText(Messages.SmartCollectPackageConfigurator_connectnotconfigured);
 				}else {
 					String surl = cs.getServerUrl();
-				
+					surl += "/noa/smartcollect/packages/" + UuidUtils.uuidToString(ctpackage.getUuid()); //$NON-NLS-1$
+					
 					try {
 						URL url = new URL(surl);
-						String link = SmartCollectPackage.generateSmartMobileAppLink(url, ctpackage.getUuid());
+						
+						String link = ICtPackage.generateSmartMobileAppLink(url, ctpackage.getUuid(), false);
 						txtUrl.setText(link);
 					}catch (Exception ex) {
 						SmartCollectPlugIn.log(ex.getMessage(), ex);
@@ -382,7 +389,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					}
 				}
 			}
-		}
+//		}
 	}
 	
 	private CyberTrackerPropertiesProfile getAssciatedProfile(Object src) {
