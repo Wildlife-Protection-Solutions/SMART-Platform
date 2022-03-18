@@ -113,6 +113,7 @@ import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -638,6 +639,11 @@ public class MissionDayComposite {
 					if (wp.getWaypoint().getAttachments() != null) {
 						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
 							if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+						}
+					}
+					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+						for (ObservationAttachment a : wo.getAttachments()) {
+							if (a.getSignatureType() != null) a.getSignatureType().getName();
 						}
 					}
 				}

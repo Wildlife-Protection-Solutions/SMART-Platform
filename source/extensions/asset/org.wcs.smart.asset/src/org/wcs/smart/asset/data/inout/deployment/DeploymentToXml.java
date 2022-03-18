@@ -263,6 +263,9 @@ public class DeploymentToXml {
 					for (ObservationAttachment oa : wo.getAttachments()) {
 						XmlAttachmentType atype = new XmlAttachmentType();
 						atype.setFilename(oa.getFilename());
+						if (oa.getSignatureType() != null) {
+							atype.setSignatureTypeKey(oa.getSignatureType().getKeyId());
+						}
 						xmlw.getAttachments().add(atype);
 					}
 					xmlg.getObservations().add(xmlwo);

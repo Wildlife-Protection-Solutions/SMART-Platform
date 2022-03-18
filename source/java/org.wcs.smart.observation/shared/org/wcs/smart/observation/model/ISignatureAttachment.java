@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2022 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,36 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.ui;
+package org.wcs.smart.observation.model;
 
-import java.text.MessageFormat;
-
-import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
-import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.observation.model.ISignatureAttachment;
+import org.wcs.smart.ca.SignatureType;
 
 /**
- * Label provider for observation attachments; adds signature
- * details if applicable to labels for waypoint attachments
+ * Interface for attachments that can have a signature type
  * 
  * @author Emily
+ * @since 7.5
  *
  */
-public class ObservationAttachmentLabelProvider extends SmartAttachmentLabelProvider {
+public interface ISignatureAttachment {
+
+	/**
+	 * 
+	 * @return signature type
+	 */
+	public SignatureType getSignatureType();
 	
-	public String getText(Object element) {
-		if (element instanceof ISmartAttachment){
-			StringBuilder sb = new StringBuilder();
-			sb.append(super.getText(element));
-			if (element instanceof ISignatureAttachment) {
-				ISignatureAttachment wa = (ISignatureAttachment)element;
-				if (wa.getSignatureType() != null) {
-					sb.append(MessageFormat.format(Messages.ObservationAttachmentLabelProvider_SignatureTypeLabel, wa.getSignatureType().getName()));
-				}
-			}
-			return sb.toString();
-		}
-		return super.getText(element);
-	}
+	/**
+	 * Sets the signature type
+	 * @param stype
+	 */
+	public void setSignatureType(SignatureType stype);
 }

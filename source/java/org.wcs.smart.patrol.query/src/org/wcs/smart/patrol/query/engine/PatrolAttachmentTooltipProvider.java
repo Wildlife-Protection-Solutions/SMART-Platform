@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.ISignatureAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -72,11 +73,13 @@ public class PatrolAttachmentTooltipProvider extends Job {
 		PatrolWaypoint pw = null;
 		Waypoint wp = null;
 		WaypointObservation o = null;
+		ISignatureAttachment attachment = null;
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			
 			ObservationAttachment oba = s.get(ObservationAttachment.class, data.getAttachment().getUuid());
 			if (oba != null) {
+				attachment = oba;
 				o = oba.getObservation();
 				pw = QueryFactory.buildQuery(s,  PatrolWaypoint.class, "id.waypoint", o.getWaypoint()).uniqueResult(); //$NON-NLS-1$
 				pw.getPatrolLegDay().getPatrolLeg().getPatrol().getId();
@@ -90,6 +93,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 				o.getCategory().getFullCategoryName();
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
+				attachment = obw;
 				wp = obw.getWaypoint();
 				pw = QueryFactory.buildQuery(s,  PatrolWaypoint.class, "id.waypoint", obw.getWaypoint()).uniqueResult(); //$NON-NLS-1$
 				pw.getPatrolLegDay().getPatrolLeg().getPatrol().getId();
@@ -104,12 +108,14 @@ public class PatrolAttachmentTooltipProvider extends Job {
 				}
 				
 			}
+			if (attachment != null && attachment.getSignatureType() != null) attachment.getSignatureType().getName();
 			s.getTransaction().rollback();
 		}
 		
 		PatrolWaypoint fpw = pw;
 		WaypointObservation fo = o;
-		
+		ISignatureAttachment fattachment = attachment;
+
 		Display.getDefault().syncExec(()->{
 			if (details == null || details.isDisposed()) return;
 			ScrolledComposite scroll = new ScrolledComposite(details, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -151,7 +157,20 @@ public class PatrolAttachmentTooltipProvider extends Job {
 			l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(fpw.getWaypoint().getDateTime()));
 			l.setBackground(details.getBackground());
 			
+			if (fattachment != null && 
+				fattachment.getSignatureType() != null) {
+				
+				l = new Label(main, SWT.NONE);
+				l.setText(Messages.PatrolAttachmentTooltipProvider_SignatureType);
+				l.setBackground(details.getBackground());
+				
+				l = new Label(main, SWT.NONE);
+				l.setText(fattachment.getSignatureType().getName());
+				l.setBackground(details.getBackground());
+			}
+			
 			if (fo != null) {
+				
 				l = new Label(main, SWT.NONE);
 				l.setText(Messages.PatrolAttachmentTooltipProvider_ObservationLbl);
 				l.setBackground(details.getBackground());

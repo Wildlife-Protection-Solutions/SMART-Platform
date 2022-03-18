@@ -22,7 +22,7 @@
 package org.wcs.smart.data.oda.smart.query.common;
 
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.ISignatureAttachment;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -70,10 +70,10 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 	public Object getValue(IResultItem item) {
 		if (item instanceof IAttachmentResultItem) {
 			ISmartAttachment att = ((IAttachmentResultItem) item).getAttachment();
-			if (att instanceof WaypointAttachment) {
-				if (((WaypointAttachment) att).getSignatureType() != null) {
-					if (type == Type.KEY) return ((WaypointAttachment) att).getSignatureType().getKeyId();
-					if (type == Type.NAME) return ((WaypointAttachment) att).getSignatureType().getName();
+			if (att instanceof ISignatureAttachment) {
+				if (((ISignatureAttachment) att).getSignatureType() != null) {
+					if (type == Type.KEY) return ((ISignatureAttachment) att).getSignatureType().getKeyId();
+					if (type == Type.NAME) return ((ISignatureAttachment) att).getSignatureType().getName();
 				}
 			}
 		}

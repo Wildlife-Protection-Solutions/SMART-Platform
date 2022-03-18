@@ -26,12 +26,15 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.attachment.AttachmentComposite;
 import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
@@ -59,12 +62,15 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 	private Waypoint waypoint;
 	private AttachmentComposite<WaypointAttachment> attachmentComposite;
 	
+	private Link moveLink;
+	private boolean isMoved = false;
+	
 	/**
 	 * @param parentShell
 	 */
 	public AttachmentDialog(Shell parentShell, Waypoint wp) {
 		super(parentShell);
-		waypoint = wp;
+		this.waypoint = wp;
 	}
 	
 	@Override
@@ -74,7 +80,6 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
-	
 	
 	@Override
 	public Control createDialogArea(Composite parent){
@@ -110,6 +115,7 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 			@Override
 			public void attachmentsChanged() {
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				moveLink.setEnabled(false);
 			}
 		});
 		if (waypoint.getAttachments() != null){
@@ -130,12 +136,33 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 		l.setText(Messages.AttachmentDialog_ObservationAttachmentLbl);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		
+		moveLink = new Link(c,SWT.NONE);
+		moveLink.setText("<a>" + Messages.AttachmentDialog_moveattachments + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
+		moveLink.setToolTipText(Messages.AttachmentDialog_moveattachmentstooltip);
+		moveLink.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		moveLink.addListener(SWT.Selection, e->{
+			if (getButton(IDialogConstants.OK_ID).isEnabled()) {
+				//shouldn't happen -must save changes before you can edit 
+				return;
+			}
+			
+			cancelPressed();
+			if (getShell() != null) return;
+			MoveAttachmentDialog d = new MoveAttachmentDialog(Display.getDefault().getActiveShell(), waypoint);
+			if (d.open() == Window.OK) isMoved = true;
+		});
+		
+		
 		setMessage(Messages.AttachmentDialog_DialogMessage);
 		getShell().setText(Messages.AttachmentDialog_DialogTitle);
 		setTitle(Messages.AttachmentDialog_DialogTitle);
 		return composite; 
 	}
 
+	public boolean hasMoved() {
+		return this.isMoved;
+	}
 	/**
 	 * @return all attachments selected by the user
 	 */

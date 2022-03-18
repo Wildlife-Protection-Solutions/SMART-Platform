@@ -19,6 +19,13 @@ RETURN ROW; END$$;
 
 CREATE TRIGGER trg_patrol_record_motivation AFTER INSERT OR DELETE OR UPDATE ON smart.i_patrol_record_motivation FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_record_motivation();
 
+insert into connect.connect_plugin_version(plugin_id, version) values ('org.wcs.smart.i2.patrol', '1.0');
 
+insert into connect.ca_plugin_version(ca_uuid, plugin_id, version) 
+select ca_uuid, 'org.wcs.smart.i2.patrol', '1.0'
+from connect.ca_plugin_version where plugin_id = 'org.wcs.smart.i2';
+
+alter table smart.OBSERVATION_ATTACHMENT add column signature_type_uuid uuid;
+alter table smart.observation_attachment ADD CONSTRAINT observation_attachment_sig_fk foreign key (signature_type_uuid)  references smart.signature_type(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
 
 update connect.connect_version set version = '7.5.0', last_updated = now();

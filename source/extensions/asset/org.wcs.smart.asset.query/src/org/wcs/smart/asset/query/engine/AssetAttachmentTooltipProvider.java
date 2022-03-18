@@ -46,6 +46,7 @@ import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.ISignatureAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -79,11 +80,15 @@ public class AssetAttachmentTooltipProvider extends Job {
 		
 		WaypointObservation o = null;
 		Waypoint wp = null;
+		ISignatureAttachment attachment;
+		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			
 			ObservationAttachment oba = s.get(ObservationAttachment.class, data.getAttachment().getUuid());
+			
 			if (oba != null) {
+				attachment=oba;
 				o = oba.getObservation();
 				wp = o.getWaypoint();
 				if (o.getAttributes() != null) {
@@ -95,6 +100,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 				o.getCategory().getFullCategoryName();
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
+				attachment = obw;
 				wp = obw.getWaypoint();
 				for (WaypointObservation wo : wp.getAllObservations()) {
 					if (wo.getAttributes() != null) {
@@ -113,13 +119,15 @@ public class AssetAttachmentTooltipProvider extends Job {
 				stations.add(as.getAssetDeployment().getStationLocation().getStation().getId());
 				locations.add(as.getAssetDeployment().getStationLocation().getId());
 			}
-			
+			if (attachment != null && attachment.getSignatureType() != null) attachment.getSignatureType().getName();
+
 			s.getTransaction().rollback();
 		}
 		
 		WaypointObservation fo = o;
 		Waypoint fwp = wp;
-		
+		ISignatureAttachment fattachment = attachment;
+
 		Display.getDefault().syncExec(()->{
 			if (details == null || details.isDisposed()) return;
 			ScrolledComposite scroll = new ScrolledComposite(details, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -178,7 +186,18 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l = new Label(main, SWT.NONE);
 			l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(fwp.getDateTime()));
 			l.setBackground(details.getBackground());
-			
+
+			if (fattachment != null && 
+				fattachment.getSignatureType() != null) {
+						
+				l = new Label(main, SWT.NONE);
+				l.setText(Messages.AssetAttachmentTooltipProvider_SignatureType);
+				l.setBackground(details.getBackground());
+					
+				l = new Label(main, SWT.NONE);
+				l.setText(fattachment.getSignatureType().getName());
+				l.setBackground(details.getBackground());
+			}
 			if (fo != null) {
 				l = new Label(main, SWT.NONE);
 				l.setText(Messages.AssetAttachmentTooltipProvider_ObservationLabel);

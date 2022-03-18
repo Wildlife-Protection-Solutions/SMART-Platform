@@ -69,6 +69,7 @@ import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ISignatureAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -114,9 +115,9 @@ public class WaypointInfoView {
 	};
 	
 	private Composite compThumbnails;
-	private Composite compSignatures;
+//	private Composite compSignatures;
 	private List<ThumbnailComposite> obsThumbs = null;
-	private Composite innerSignatures;
+//	private Composite innerSignatures;
 	private List<Label> categoryLabels = new ArrayList<>();
 	private List<Label> attributeLabels = new ArrayList<>();
 	private List<Label> attributeValuesLabels = new ArrayList<>();
@@ -157,12 +158,14 @@ public class WaypointInfoView {
 										woa.getAttributeValueAsString(Locale.getDefault());
 									}
 									for (ObservationAttachment att: wo.getAttachments()){
+										if (att.getSignatureType() != null) att.getSignatureType().getName();
 										try{
 											att.computeFileLocation(s);
 										}catch (Exception ex){
 											ObservationPlugIn.log(ex.getMessage(), ex);
 										}
 									}
+									
 								}
 							}
 						}
@@ -201,7 +204,7 @@ public class WaypointInfoView {
 
 					for (Control c : infoSection.getBody().getChildren()) {
 						c.dispose();
-						innerSignatures = null;
+//						innerSignatures = null;
 					}
 					if (obsThumbs != null){
 						for (ThumbnailComposite c : obsThumbs ){
@@ -271,8 +274,16 @@ public class WaypointInfoView {
 								}
 								if (showImages) {
 									//Waypoint Composite
-									List<ISmartAttachment> files = new ArrayList<>();
-									for (ObservationAttachment att : wo.getAttachments()) files.add(att);
+									List<ObservationAttachment> files = new ArrayList<>();
+									List<ObservationAttachment> signatures = new ArrayList<>();
+									for (ObservationAttachment att : wo.getAttachments()) {
+										if (att.getSignatureType() == null) {
+											files.add(att);
+										}else {
+											signatures.add(att);
+										}
+									}
+									files.addAll(signatures);
 									if (!files.isEmpty()) {
 										ThumbnailComposite tc = new ThumbnailComposite(attributeComp);
 										tc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -300,12 +311,12 @@ public class WaypointInfoView {
 						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
 					}
 
-					compSignatures = toolkit.createComposite(infoSection.getBody(), SWT.NONE);
-					compSignatures.setLayout(new GridLayout());
-					((GridLayout)compSignatures.getLayout()).marginWidth = 0;
-					((GridLayout)compSignatures.getLayout()).marginHeight = 0;
-					compSignatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					
+//					compSignatures = toolkit.createComposite(infoSection.getBody(), SWT.NONE);
+//					compSignatures.setLayout(new GridLayout());
+//					((GridLayout)compSignatures.getLayout()).marginWidth = 0;
+//					((GridLayout)compSignatures.getLayout()).marginHeight = 0;
+//					compSignatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//					
 					createHiddenLabels();
 					
 					infoSection.getBody().pack();
@@ -353,27 +364,27 @@ public class WaypointInfoView {
 							c.createThumbs();
 						}
 						for (Control c : compThumbnails.getChildren()) c.dispose();
-						for (Control c : compSignatures.getChildren()) c.dispose();
-						innerSignatures = null;
+//						for (Control c : compSignatures.getChildren()) c.dispose();
+//						innerSignatures = null;
 						
 						for (Thumbnail nail : thumbnails){
 							Composite parent = toolkit.createComposite(compThumbnails);
 							nail.createThumbnail(parent);
 						}
 						
-						if (!signatures.isEmpty()) {
-							
-							Label l = toolkit.createLabel(compSignatures, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-							l = toolkit.createLabel(compSignatures, Messages.WaypointInfoView_SignaturesSection);
-							l.setFont(boldFont);
-							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-							
-							innerSignatures = toolkit.createComposite(compSignatures);
-							innerSignatures.setLayout(new GridLayout());
-							innerSignatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//						if (!signatures.isEmpty()) {
+//							
+//							Label l = toolkit.createLabel(compSignatures, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+//							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//							l = toolkit.createLabel(compSignatures, Messages.WaypointInfoView_SignaturesSection);
+//							l.setFont(boldFont);
+//							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//							
+//							innerSignatures = toolkit.createComposite(compSignatures);
+//							innerSignatures.setLayout(new GridLayout());
+//							innerSignatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 							for (Thumbnail nail : signatures){
-								Composite parent = toolkit.createComposite(innerSignatures);
+								Composite parent = toolkit.createComposite(compThumbnails);
 								parent.setLayout(new GridLayout());
 								((GridLayout)parent.getLayout()).marginWidth = 0;
 								((GridLayout)parent.getLayout()).marginHeight = 0;
@@ -382,10 +393,10 @@ public class WaypointInfoView {
 								Composite p = toolkit.createComposite(parent);
 								nail.createThumbnail(p);
 								
-								l = toolkit.createLabel(parent, ((WaypointAttachment)nail.getAttachment()).getSignatureType().getName() );
+								Label l = toolkit.createLabel(parent, ((WaypointAttachment)nail.getAttachment()).getSignatureType().getName() );
 								l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 							}
-						}
+//						}
 						
 						
 						
@@ -562,14 +573,14 @@ public class WaypointInfoView {
 					int width = infoSection.getParent().getSize().x - infoSection.getVerticalBar().getSize().x-5;
 					int cols = (int)Math.floor(width / 105.0);
 					compThumbnails.setLayout(new GridLayout(cols, false));
-					if (innerSignatures != null) innerSignatures.setLayout(new GridLayout(cols, false));
+//					if (innerSignatures != null) innerSignatures.setLayout(new GridLayout(cols, false));
 					for (ThumbnailComposite c : obsThumbs){
 						c.updateLayout(cols);
 						((GridData)c.getLayoutData()).widthHint = mainWidth;
 						c.layout(true);
 					}
 					compThumbnails.layout(true);
-					if (innerSignatures != null) innerSignatures.layout(true);
+//					if (innerSignatures != null) innerSignatures.layout(true);
 				}
 				infoSection.reflow(true);
 			}
@@ -682,7 +693,7 @@ public class WaypointInfoView {
 	 * A composite for thumbnails
 	 */
 	private class ThumbnailComposite extends Composite{
-		private List<ISmartAttachment> fileNames;
+		private List<? extends ISmartAttachment> fileNames;
 		private List<Thumbnail> thumbs;
 		public ThumbnailComposite(Composite parent){
 			super(parent, SWT.NONE);
@@ -696,7 +707,7 @@ public class WaypointInfoView {
 			gl.marginWidth = gl.marginHeight = 0;
 			setLayout(gl);
 		}
-		public void setFiles(List<ISmartAttachment> fileNames){
+		public void setFiles(List<? extends ISmartAttachment> fileNames){
 			this.fileNames = fileNames;
 		}
 		
@@ -711,8 +722,26 @@ public class WaypointInfoView {
 		public void createThumbs(){
 			if (thumbs == null) return;
 			for (Thumbnail t : thumbs){
-				Composite parent = toolkit.createComposite(this);
-				t.createThumbnail(parent);
+				if (t.getAttachment() instanceof ISignatureAttachment && ((ISignatureAttachment)t.getAttachment()).getSignatureType() != null) {
+					Composite parent = toolkit.createComposite(this);
+					parent.setLayout(new GridLayout());
+					((GridLayout)parent.getLayout()).marginWidth = 0;
+					((GridLayout)parent.getLayout()).marginHeight = 0;
+					((GridLayout)parent.getLayout()).verticalSpacing = 0;
+					
+					Composite p = toolkit.createComposite(parent);
+					t.createThumbnail(p);
+					p.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+					Label l = toolkit.createLabel(parent, ((ISignatureAttachment)t.getAttachment()).getSignatureType().getName() );
+					l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+				}else {
+					Composite parent = toolkit.createComposite(this);
+					t.createThumbnail(parent);
+				}
+				
+				
+				
+				
 			}
 		}
 	}

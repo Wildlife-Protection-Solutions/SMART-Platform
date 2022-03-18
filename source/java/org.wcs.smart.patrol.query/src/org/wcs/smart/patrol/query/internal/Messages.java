@@ -86,6 +86,7 @@ public class Messages extends NLS {
 	public static String PatrolAttachmentTooltipProvider_ObservationLbl;
 	public static String PatrolAttachmentTooltipProvider_ObsGroupHeader;
 	public static String PatrolAttachmentTooltipProvider_PatrolIdLbl;
+	public static String PatrolAttachmentTooltipProvider_SignatureType;
 	public static String PatrolAttachmentTooltipProvider_WpDateLbl;
 	public static String PatrolAttachmentTooltipProvider_WpIdLbl;
 	public static String PatrolAttachmentTooltipProvider_WpObsLbl;

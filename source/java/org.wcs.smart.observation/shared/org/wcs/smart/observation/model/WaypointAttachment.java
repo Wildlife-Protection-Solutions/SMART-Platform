@@ -46,7 +46,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 @Entity
 @Table(name="smart.wp_attachments")
-public class WaypointAttachment extends ISmartAttachment {
+public class WaypointAttachment extends ISmartAttachment implements ISignatureAttachment {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -77,28 +77,6 @@ public class WaypointAttachment extends ISmartAttachment {
 	}
 
 	
-//	@Transient
-//	private String datastoreFolderPath = null;
-//	/**
-//	 * Sets directory location where the attachment should be stored.  This
-//	 * does not have to be set.  If not set then getDatastoreFolderPath will
-//	 * lookup the path from the waypoint and source.  
-//	 * <p>This function is provided to deal with issues when saving waypoints.  In
-//	 * some cases the waypoints are saved before the encompassing object (ex. patrol waypoint)
-//	 * so the datastore folder path cannot be computed using standard process.  It
-//	 * can be set manually here to allow objects to be saved.</p>
-//	 * 
-//	 * @param path this is the path not including the CAUUID 
-//	 */
-//	public void setDatastoreFolderExtension(String path, ConservationArea ca){
-//		StringBuilder sb = new StringBuilder();
-//		sb.append(ca);
-//		sb.append(File.separator);
-//		sb.append(path);
-//		
-//		this.datastoreFolderPath = sb.toString();
-//	}
-	
 	/**
 	 * @return the full path to where the file should be stored in the 
 	 * database.
@@ -106,9 +84,6 @@ public class WaypointAttachment extends ISmartAttachment {
 	@Transient
 	@Override
 	public String getDatastoreFolderPath(Session session) throws Exception{
-//		if (datastoreFolderPath != null){
-//			return datastoreFolderPath;
-//		}
 		if (getWaypoint() != null ){
 			if (getWaypoint().getSourceId() == null){
 				throw new Exception("No attachment information found for waypoint attachment " + UuidUtils.uuidToString(getUuid())); //$NON-NLS-1$

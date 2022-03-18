@@ -226,6 +226,9 @@ public class PatrolToXmlConverter {
 		for (ObservationAttachment attach : observation.getAttachments()){
 			AttachmentType xmlattach = new AttachmentType();
 			xmlattach.setFilename(attach.getFilename());
+			if (attach.getSignatureType() != null) {
+				xmlattach.setSignatureTypeKey(attach.getSignatureType().getKeyId());
+			}
 			xml.getAttachments().add(xmlattach);
 		}
 		
