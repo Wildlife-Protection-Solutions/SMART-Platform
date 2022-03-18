@@ -177,6 +177,7 @@ public class LinkDmAttributeDialog  extends NameKeyDialog<Attribute>{
 				if (ab.getAttribute().getType() == AttributeType.LIST) {
 					IntelAttribute ia  = session.get(IntelAttribute.class, ab.getAttribute().getUuid());
 					ia.getAttributeList().forEach(e->e.getName());
+					ab.setAttribute(ia);
 					attributes.add(ia);
 				}else if (ab.getAttribute().getType() != AttributeType.POSITION &&
 						ab.getAttribute().getType() != AttributeType.EMPLOYEE) {
