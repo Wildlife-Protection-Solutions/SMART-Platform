@@ -339,9 +339,20 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 				}
 			}
 			if (!dAttribute.equals(existingAttribute)) {
+				Attribute fdAttribute = dAttribute;
 				itemMappings.forEach(z->{
+					
 					z.dmList= null;
 					z.dmNode = null;
+					
+					for (AttributeListItem li : fdAttribute.getAttributeList()) {
+						if (li.getKeyId().equalsIgnoreCase(z.iItem.getKeyId())) {
+							z.dmList = li;
+							break;
+						}
+						
+					}
+					
 							
 				});
 				tblList.refresh();	
