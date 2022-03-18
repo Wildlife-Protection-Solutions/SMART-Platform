@@ -243,7 +243,12 @@ public enum ProfilesManager {
 					"delete from IntelEntityRecord ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
-	
+			
+			q = session.createQuery(
+					"delete from IntelEntityRecord ii where ii.id.record in (FROM IntelRecord WHERE profile = :profile) "); //$NON-NLS-1$
+			q.setParameter("profile", profile); //$NON-NLS-1$
+			q.executeUpdate();
+			
 			// delete all locations
 			q = session.createQuery(
 					"delete from IntelEntityLocation ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
