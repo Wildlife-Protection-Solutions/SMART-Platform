@@ -134,7 +134,7 @@ public interface ICtPackage {
 		}
 		json.put("server", serverUrl.toString()); //$NON-NLS-1$
 		json.put("launch", Boolean.TRUE); //$NON-NLS-1$
-		json.put("requires_authentication", requiresPassword); //$NON-NLS-1$
+		json.put("auth", requiresPassword); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("https://cybertrackerwiki.org/applink-smart?"); //$NON-NLS-1$
@@ -143,11 +143,13 @@ public interface ICtPackage {
 	}
 	
 	/**
+	 * True of false if the package requires a configuration 
+	 * page for the Connect URL
 	 * 
-	 * @return true if supports connect url, false otherwise
+	 * @return true if supports connect URL, false otherwise
 	 */
 	@Transient
-	public default boolean supportsConnectUrl() {
+	public default boolean showConnectUrlConfiguration() {
 		return true;
 	}
 }

@@ -238,7 +238,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			refreshAlertTypes(true);
 		});
 		
-		if (ctpackage.supportsConnectUrl()) {
+		if (ctpackage.showConnectUrlConfiguration()) {
 		
 			Composite urlComp = new Composite(main, SWT.FLAT);
 			urlComp.setLayout(new GridLayout());

@@ -115,7 +115,7 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 	 * collect urls are different
 	 */
 	@Override
-	public boolean supportsConnectUrl() {
+	public boolean showConnectUrlConfiguration() {
 		return false;
 	}
 
