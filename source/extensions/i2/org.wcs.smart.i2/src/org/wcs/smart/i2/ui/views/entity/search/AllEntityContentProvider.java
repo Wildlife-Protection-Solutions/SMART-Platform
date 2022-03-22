@@ -106,15 +106,6 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
 			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
 			
-			if (profiles.isEmpty()) {
-				EntityTableData data = new EntityTableData();
-				data.attributes = Collections.emptyList();
-				data.tableName = ""; //$NON-NLS-1$
-				data.totalCount = 0;
-				data.currentCount = 0;
-				return data;
-			}
-			
 			this.data = null;
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
@@ -155,40 +146,42 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					
 					//now we need to populate this table
 					//entity uuid for this ca
-					sb = new StringBuilder();
-					sb.append(" INSERT INTO "); //$NON-NLS-1$
-					sb.append( DB_NAME_NAME );
-					sb.append(" (entity_uuid, entity_type_uuid, profile_uuid, i_primary_id, filter)"); //$NON-NLS-1$
-					sb.append(" SELECT e.uuid, t.uuid, e.profile_uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
-					sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
-					session.createNativeQuery(sb.toString())
-						.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
-						.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
-						.executeUpdate();
-					sb = new StringBuilder();
-					sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-					session.createNativeQuery(sb.toString()).executeUpdate();
-					
-					//entity type names
-					sb = new StringBuilder();
-					sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME); //$NON-NLS-1$
-					List<?> entityTypes = session.createNativeQuery(sb.toString()).list();
-					for (Object x : entityTypes) {
-						UUID entityTypeUuid = UuidUtils.byteToUUID( (byte[]) x );
-						IntelEntityType type = session.get(IntelEntityType.class, entityTypeUuid);
-					
+					if (!profiles.isEmpty()) {
 						sb = new StringBuilder();
-						sb.append(" UPDATE "); //$NON-NLS-1$
-						sb.append(DB_NAME_NAME);
-						sb.append(" SET "); //$NON-NLS-1$
-						sb.append(COL_ENTITY_TYPE_NAME);
-						sb.append(" = :name WHERE entity_type_uuid = :uuid"); //$NON-NLS-1$
-						
+						sb.append(" INSERT INTO "); //$NON-NLS-1$
+						sb.append( DB_NAME_NAME );
+						sb.append(" (entity_uuid, entity_type_uuid, profile_uuid, i_primary_id, filter)"); //$NON-NLS-1$
+						sb.append(" SELECT e.uuid, t.uuid, e.profile_uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
+						sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
 						session.createNativeQuery(sb.toString())
-							.setParameter("name", type.getName()) //$NON-NLS-1$
-							.setParameter("uuid", entityTypeUuid) //$NON-NLS-1$
+							.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+							.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
 							.executeUpdate();
+						sb = new StringBuilder();
+						sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+						session.createNativeQuery(sb.toString()).executeUpdate();
 						
+						//entity type names
+						sb = new StringBuilder();
+						sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME); //$NON-NLS-1$
+						List<?> entityTypes = session.createNativeQuery(sb.toString()).list();
+						for (Object x : entityTypes) {
+							UUID entityTypeUuid = UuidUtils.byteToUUID( (byte[]) x );
+							IntelEntityType type = session.get(IntelEntityType.class, entityTypeUuid);
+						
+							sb = new StringBuilder();
+							sb.append(" UPDATE "); //$NON-NLS-1$
+							sb.append(DB_NAME_NAME);
+							sb.append(" SET "); //$NON-NLS-1$
+							sb.append(COL_ENTITY_TYPE_NAME);
+							sb.append(" = :name WHERE entity_type_uuid = :uuid"); //$NON-NLS-1$
+							
+							session.createNativeQuery(sb.toString())
+								.setParameter("name", type.getName()) //$NON-NLS-1$
+								.setParameter("uuid", entityTypeUuid) //$NON-NLS-1$
+								.executeUpdate();
+							
+						}
 					}
 					
 					Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult(); //$NON-NLS-1$
@@ -573,6 +566,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			data.currentCount = 0;
 			viewer.setItemCount(0);
 		}
+		
 		
 		if (filterString == null || filterString.isEmpty()) {
 			filterRefreshJob.cancel();
