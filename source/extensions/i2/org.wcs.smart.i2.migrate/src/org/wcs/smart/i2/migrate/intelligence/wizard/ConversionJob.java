@@ -119,17 +119,17 @@ public class ConversionJob implements IRunnableWithProgress {
 							IntelRecord r = convertItem(item, mapping, session);
 							
 							List<UUID> patrols = intelToPatrol.get(item.getUuid());
-							for (UUID patrol : patrols) {
-								Patrol p = session.get(Patrol.class, patrol);
-								if (p != null) {
-									PatrolMotivatedRecord mr = new PatrolMotivatedRecord();
-									mr.getId().setIntelRecord(r);
-									mr.getId().setPatrol(p);
-									session.save(mr);
+							if (patrols != null) {
+								for (UUID patrol : patrols) {
+									Patrol p = session.get(Patrol.class, patrol);
+									if (p != null) {
+										PatrolMotivatedRecord mr = new PatrolMotivatedRecord();
+										mr.getId().setIntelRecord(r);
+										mr.getId().setPatrol(p);
+										session.save(mr);
+									}		
 								}
-								
 							}
-							
 							
 							added ++;
 							if (ca.equals(SmartDB.getCurrentConservationArea())) {
