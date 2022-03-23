@@ -275,9 +275,16 @@ public class XmlToProfile {
 			profile.getRecordSources().clear();
 			session.save(profile);
 			
-			
 			types.forEach(ipe->ipe.getEntityType().getAttributes().forEach(att->session.saveOrUpdate(att.getAttribute())));
+			
 			types.forEach(ipe->session.saveOrUpdate(ipe.getEntityType()));
+			
+			types.forEach(ipe->ipe.getEntityType().getAttributes().forEach(att->{
+				if (att.getAttributeGroup() != null) session.saveOrUpdate(att.getAttributeGroup());
+				
+			}));
+			
+			session.flush();
 			
 			profile.getEntityTypes().addAll(types);
 			
