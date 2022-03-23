@@ -201,6 +201,17 @@ public class PatrolLegDayInputComposite {
 							e.printStackTrace();
 						}	
 					});
+					
+					pld.getWaypoints().forEach(pw->{
+						pw.getWaypoint().getAttachments().forEach(wa->{
+							if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+						});
+						pw.getWaypoint().getAllObservations().forEach(wo->{
+							wo.getAttachments().forEach(wa->{
+								if (wa.getSignatureType() != null) wa.getSignatureType().getName();	
+							});
+						});
+					});
 					setData(pld);
 					
 				}
