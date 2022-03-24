@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -155,8 +156,10 @@ public class RecordSelectorDialog extends SmartStyledTitleDialog {
 		DateFilter dFilter = dComp.getDateFilter();
 		startDate = dFilter.getStartDate();
 		endDate = dFilter.getEndDate();
-		if (startDate == null) startDate = dComp.getCustomStartDate();
-		if (endDate == null) endDate = dComp.getCustomEndDate();
+		if (dFilter == DateFilter.CUSTOM) {
+			startDate = dComp.getCustomStartDate();
+			endDate = dComp.getCustomEndDate();
+		}
 		
 		loadRecords.schedule();
 	}
@@ -184,15 +187,19 @@ public class RecordSelectorDialog extends SmartStyledTitleDialog {
 					sb.append(" FROM "); //$NON-NLS-1$
 					sb.append(" IntelRecord "); //$NON-NLS-1$
 					sb.append(" WHERE conservationArea = :ca AND "); //$NON-NLS-1$
-					sb.append(" primaryDate >= :start and primaryDate <= :end"); //$NON-NLS-1$
-					sb.append(" AND profile IN (:profiles)"); //$NON-NLS-1$
+					sb.append(" profile IN (:profiles)"); //$NON-NLS-1$
+					if (startDate != null && endDate != null) {
+						sb.append(" AND primaryDate >= :start and primaryDate <= :end"); //$NON-NLS-1$
+					}
 					
-					records = session.createQuery(sb.toString(), IntelRecord.class)
+					Query<IntelRecord> query= session.createQuery(sb.toString(), IntelRecord.class)
 						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-						.setParameter("start",  startDate.atStartOfDay()) //$NON-NLS-1$
-						.setParameter("end",  endDate.atTime(LocalTime.MAX)) //$NON-NLS-1$
-						.setParameterList("profiles", viewable) //$NON-NLS-1$
-						.list();
+						.setParameterList("profiles", viewable); //$NON-NLS-1$
+					if (startDate != null && endDate != null) {
+						query.setParameter("start",  startDate.atStartOfDay()); //$NON-NLS-1$
+						query.setParameter("end",  endDate.atTime(LocalTime.MAX)); //$NON-NLS-1$
+					}
+					records = query.list();
 					records.forEach(r->{
 						if (r.getRecordSource() != null) r.getRecordSource().getName();
 						r.getTitle();
