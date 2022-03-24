@@ -206,11 +206,12 @@ public class ConversionJob implements IRunnableWithProgress {
 			value.setRecord(record);
 			record.getAttributes().add(value);
 		}
-		if (mapping.getFromDateMapping() != null && item.getRecievedDate() != null) {
+		if (mapping.getFromDateMapping() != null && item.getFromDate() != null) {
+			//cannot map to the same attribute
 			if (!mapping.getToDateMapping().equals(mapping.getFromDateMapping())) {
 				IntelRecordAttributeValue value = new IntelRecordAttributeValue();
 				value.setAttribute(mapping.getFromDateMapping());
-				value.setDateValue(item.getToDate());
+				value.setDateValue(item.getFromDate());
 				value.setRecord(record);
 				record.getAttributes().add(value);
 			}
