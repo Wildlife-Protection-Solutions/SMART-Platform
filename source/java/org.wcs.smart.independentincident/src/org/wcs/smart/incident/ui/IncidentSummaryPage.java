@@ -255,6 +255,11 @@ public class IncidentSummaryPage extends EditorPart {
 			}
 		
 			//include all attachments 
+			try {
+				ObservationHibernateManager.computeAttachmentLocations(incident, session);
+			} catch (Exception ex) {
+				IncidentPlugIn.log(ex.getMessage(), ex);
+			}
 			List<ISmartAttachment> allAtts = new ArrayList<ISmartAttachment>();
 			allAtts.addAll(incident.getAttachments());
 			
