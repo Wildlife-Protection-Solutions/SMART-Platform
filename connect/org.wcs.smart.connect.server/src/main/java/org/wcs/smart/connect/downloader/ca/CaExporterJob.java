@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -169,7 +170,9 @@ public class CaExporterJob implements Runnable {
 			(new PostgresqlExporters()).exportAll(engine);
 			
 			//zip
-			ZipUtil.createZip(Files.list(tempDir).collect(Collectors.toList()), destFile);
+			try(Stream<Path> stream = Files.list(tempDir)){
+				ZipUtil.createZip(stream.collect(Collectors.toList()), destFile);
+			}
 		}finally{
 			FileUtils.deleteDirectory(tempDir.toFile());
 		}

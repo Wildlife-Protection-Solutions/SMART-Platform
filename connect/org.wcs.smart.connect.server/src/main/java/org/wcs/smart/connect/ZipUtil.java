@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -129,17 +130,25 @@ public class ZipUtil {
             	IOUtils.copy(in, zOut);
             }
             zOut.closeArchiveEntry();
-        }else if (Files.isDirectory(path) && Files.list(path).count() == 0){
-        	//empty directory
-    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + File.separator); 
-            zOut.putArchiveEntry(zipEntry);
-            zOut.closeArchiveEntry();
         } else {
-        	List<Path> kids = Files.list(path).collect(Collectors.toList());
-            for (Path child : kids) {
-				if (!addFileToZip(zOut, child, entryName + File.separator)) {
-					return false;
-				}
+        	
+        	List<Path> kids = null;
+        	
+        	try(Stream<Path> items = Files.list(path)){
+        		kids = items.collect(Collectors.toList());
+        	}
+        	
+        	if (Files.isDirectory(path) && kids.size() == 0){
+        		//empty directory
+        		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + File.separator); 
+        		zOut.putArchiveEntry(zipEntry);
+        		zOut.closeArchiveEntry();
+        	} else {
+        		for (Path child : kids) {
+        			if (!addFileToZip(zOut, child, entryName + File.separator)) {
+        				return false;
+        			}
+        		}
             }
 
         }
