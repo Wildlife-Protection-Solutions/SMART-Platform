@@ -90,7 +90,7 @@ public enum ChangeLogManager {
 	
 	public void watchFilestore(SessionFactory sf)  throws IOException {
 		fileWatcher = new FileStoreWatcher(sf);
-		
+
 		/*
 		 * We may want to add code here to ignore changes to informant
 		 * files; however that is only necessaary if we are going to be editing informant
