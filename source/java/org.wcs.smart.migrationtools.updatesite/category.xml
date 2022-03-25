@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.wcs.smart.wcomm.feature">
-      <category name="migrationtools"/>
-   </feature>
    <feature id="org.wcs.smart.i2.migrate.feature">
       <category name="migrationtools"/>
    </feature>

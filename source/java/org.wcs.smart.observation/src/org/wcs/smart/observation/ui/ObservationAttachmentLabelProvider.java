@@ -26,7 +26,7 @@ import java.text.MessageFormat;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.ISignatureAttachment;
 
 /**
  * Label provider for observation attachments; adds signature
@@ -41,8 +41,8 @@ public class ObservationAttachmentLabelProvider extends SmartAttachmentLabelProv
 		if (element instanceof ISmartAttachment){
 			StringBuilder sb = new StringBuilder();
 			sb.append(super.getText(element));
-			if (element instanceof WaypointAttachment) {
-				WaypointAttachment wa = (WaypointAttachment)element;
+			if (element instanceof ISignatureAttachment) {
+				ISignatureAttachment wa = (ISignatureAttachment)element;
 				if (wa.getSignatureType() != null) {
 					sb.append(MessageFormat.format(Messages.ObservationAttachmentLabelProvider_SignatureTypeLabel, wa.getSignatureType().getName()));
 				}

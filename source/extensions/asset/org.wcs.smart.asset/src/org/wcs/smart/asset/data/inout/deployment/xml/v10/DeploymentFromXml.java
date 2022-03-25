@@ -314,6 +314,12 @@ public class DeploymentFromXml {
 							attachment.setObservation(wo);
 							attachment.setFilename(filename);
 							attachment.setCopyFromLocation(fname);
+							SignatureType stype = SignatureTypeManager.INSTANCE.findType(xmlattachment.getSignatureTypeKey(), ca, session);
+							if (stype != null) {
+								attachment.setSignatureType(stype);
+							}else {
+								warnings.add(MessageFormat.format(Messages.DeploymentFromXml_SignatureTypeNotFound,xmlattachment.getSignatureTypeKey()));
+							}
 							wo.getAttachments().add(attachment);
 						}
 						

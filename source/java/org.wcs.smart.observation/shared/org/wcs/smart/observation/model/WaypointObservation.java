@@ -168,6 +168,7 @@ public class WaypointObservation extends UuidItem {
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());
 					att.setObservation(clone);
+					att.setSignatureType(sp.getSignatureType());
 					clone.getAttachments().add(att);
 				} catch (Exception ex) {
 					throw new RuntimeException("Error cloning waypoint.  Waypoint attachments could not be cloned.", ex); //$NON-NLS-1$

@@ -300,6 +300,7 @@ public abstract class IJsonFeatureProcessor {
 				oa.setFilename(a.getFilename());
 				oa.setCopyFromLocation(a.getCopyFromLocation());
 				oa.setObservation(wo);
+				oa.setSignatureType(a.getSignatureType());
 				wo.getAttachments().add(oa);
 			});
 		}

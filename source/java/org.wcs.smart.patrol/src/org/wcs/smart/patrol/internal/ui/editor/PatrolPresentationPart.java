@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -1321,10 +1322,18 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		
 	}
 	
-	class FirstWaypointObservation{
+	class FirstWaypointObservation implements IAdaptable{
 		WaypointObservation wo;
+		
 		public FirstWaypointObservation(WaypointObservation wo) {
 			this.wo = wo;
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T getAdapter(Class<T> adapter) {
+			if (adapter.equals(Waypoint.class)) return (T) wo.getWaypoint();
+			return null;
 		}
 	}
 	

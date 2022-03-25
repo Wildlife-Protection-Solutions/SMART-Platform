@@ -23,10 +23,16 @@ package org.wcs.smart.incident.ui.newwizard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentComposite;
 import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
@@ -34,6 +40,8 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.ui.MoveAttachmentDialog;
 import org.wcs.smart.observation.ui.ObservationAttachmentLabelProvider;
 
 /**
@@ -47,6 +55,19 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 	
 	private AttachmentComposite<WaypointAttachment> attachmentComp;
 	
+	private boolean isEditing = false;
+	private Supplier<Boolean> beforeEdit;
+	private Waypoint wp;
+	
+	public IncidentAttachmentComposite(boolean isEditing) {
+		this(isEditing, null);
+	}
+	
+	public IncidentAttachmentComposite(boolean isEditing, Supplier<Boolean> beforeEdit) {
+		this.isEditing = isEditing;
+		this.beforeEdit = beforeEdit;
+	}
+	
 	@Override
 	public String validate() {
 		return null;
@@ -54,7 +75,10 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 
 	@Override
 	public Composite createComposite(Composite parent) {
-		attachmentComp = new AttachmentComposite<WaypointAttachment>(parent, SWT.NONE) {
+		Composite part = new Composite(parent, SWT.NONE);
+		part.setLayout(new GridLayout());
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		attachmentComp = new AttachmentComposite<WaypointAttachment>(part, SWT.NONE) {
 			@Override
 			protected WaypointAttachment createNewAttachement() {
 				return new WaypointAttachment();
@@ -81,7 +105,23 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 				
 			}
 		});
-		return attachmentComp;
+		if (isEditing) {
+			Label l = new Label(part, SWT.NONE);
+			l.setText(Messages.IncidentAttachmentComposite_observationattachmentsmessage);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Link hl = new Link(part,SWT.NONE);
+			hl.setText("<a>" + Messages.IncidentAttachmentComposite_moveLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			hl.setToolTipText(Messages.IncidentAttachmentComposite_moveTooltip);
+			hl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+			hl.addListener(SWT.Selection, e->{
+				if (beforeEdit != null && !beforeEdit.get()) return;
+				MoveAttachmentDialog d = new MoveAttachmentDialog(Display.getDefault().getActiveShell(), wp);
+				d.open();
+			});
+		}
+		
+		return part;
 	}
 
 	@Override
@@ -90,19 +130,37 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 			incident.setAttachments(new ArrayList<WaypointAttachment>());
 		}
 		List<WaypointAttachment> atts = attachmentComp.getAttchments();
-		incident.getAttachments().clear();
+		
+		List<WaypointAttachment> toDelete = new ArrayList<>();
+		for (WaypointAttachment existing : incident.getAttachments()) {
+			if (!atts.contains(existing)) toDelete.add(existing);
+		}
+		incident.getAttachments().removeAll(toDelete);
 		
 		for (WaypointAttachment a : atts){
-			incident.getAttachments().add((WaypointAttachment)a);
-			a.setWaypoint(incident);
+			if (!incident.getAttachments().contains(a)) {
+				incident.getAttachments().add((WaypointAttachment)a);
+				a.setWaypoint(incident);
+			}
 		}
+		
 				
 	}
 
 	@Override
 	public void initFields(Waypoint incident, Session session) {
+		this.wp = incident;
 		if (incident.getAttachments() != null){
 			attachmentComp.initAttachments(incident.getAttachments());
+		}
+		
+		if (isEditing) {
+			List<ISmartAttachment> obs = new ArrayList<ISmartAttachment>();
+			
+			for (WaypointObservation o : incident.getAllObservations()) {
+				if (o.getAttachments() != null) obs.addAll(o.getAttachments());
+			}
+			attachmentComp.initOtherAttachments(obs);
 		}
 	}
 

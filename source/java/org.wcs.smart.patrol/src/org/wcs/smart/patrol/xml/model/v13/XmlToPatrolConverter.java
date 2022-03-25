@@ -542,6 +542,15 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 						warnings.add(MessageFormat.format(
 								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
+						if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isEmpty()) {
+							SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+							if (stype != null) {
+								att.setSignatureType(stype);
+							}else {
+								warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_SignatureTypeKeyNotFound, attachment.getSignatureTypeKey()));
+							}
+						}
+						
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);

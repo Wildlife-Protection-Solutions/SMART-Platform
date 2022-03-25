@@ -424,6 +424,7 @@
 				<module>org.wcs.smart.updatesite</module>
 				
 				<module>../extensions/i2/org.wcs.smart.i2</module>
+				<module>../extensions/i2/org.wcs.smart.i2.patrol</module>
 				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
 				<module>../extensions/i2/org.wcs.smart.i2.core.feature</module>
 				 
@@ -555,6 +556,7 @@
 				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2.feature</module>  
 				
 				<module>../extensions/i2/org.wcs.smart.i2</module>
+				<module>../extensions/i2/org.wcs.smart.i2.patrol</module>
 				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
 				<module>../extensions/i2/org.wcs.smart.i2.core.feature</module>
 				
@@ -690,6 +692,7 @@
 				
 				<module>../extensions/i2/translations/org.wcs.smart.i2.feature.nl</module>
 				<module>../extensions/i2/translations/org.wcs.smart.i2.nl</module>
+				<module>../extensions/i2/translations/org.wcs.smart.i2.patrol.nl</module>
 				<module>../extensions/i2/translations/org.wcs.smart.connect.dataqueue.i2.nl</module>
 				<module>../extensions/i2/translations/org.wcs.smart.connect.dataqueue.i2.feature.nl</module>
 				

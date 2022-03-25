@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,6 +58,7 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -98,6 +100,9 @@ public class ConversionJob implements IRunnableWithProgress {
 					SubMonitor catask = task.split(1);
 					
 					Collection<IntelligenceItem> items = smart6.getIntelItems(ca);
+					
+					Map<UUID, List<UUID>> intelToPatrol = smart6.getMotivatedByLinks(ca);
+					
 					catask.beginTask(ca.getNameLabel(), items.size());
 					
 					for(IntelligenceItem item : items) {
@@ -112,6 +117,20 @@ public class ConversionJob implements IRunnableWithProgress {
 						}
 						if (mapping != null) {
 							IntelRecord r = convertItem(item, mapping, session);
+							
+							List<UUID> patrols = intelToPatrol.get(item.getUuid());
+							if (patrols != null) {
+								for (UUID patrol : patrols) {
+									Patrol p = session.get(Patrol.class, patrol);
+									if (p != null) {
+										PatrolMotivatedRecord mr = new PatrolMotivatedRecord();
+										mr.getId().setIntelRecord(r);
+										mr.getId().setPatrol(p);
+										session.save(mr);
+									}		
+								}
+							}
+							
 							added ++;
 							if (ca.equals(SmartDB.getCurrentConservationArea())) {
 								thisCaNewRecords.add(r);

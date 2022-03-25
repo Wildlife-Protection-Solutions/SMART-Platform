@@ -1170,24 +1170,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 		wsetItem.setToolTipText(Messages.EntityEditor_addtowstooltip);
-		wsetItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(Collections.singleton(getEntity()), context);
-			}
-		});
+		wsetItem.addListener(SWT.Selection, e->WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(Collections.singleton(getEntity()), context));
 		wsetItem.setEnabled(IntelSecurityManager.INSTANCE.canEditWorkingSet() && WorkingSetManager.INSTANCE.isSet());
-		
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
 		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		editItem.setToolTipText(Messages.EntityEditor_editingtooltip);
-		editItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setEditMode(!getEditMode());
-			}
-		});
+		editItem.addListener(SWT.Selection, e->setEditMode(!getEditMode()));
+		
 		
 		SectionTabHeader tabList = new SectionTabHeader(new String[]{
 				Messages.EntityEditor_AttributeTitle, 
@@ -2188,7 +2178,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						});
 					}
-					e.addResizeListener(evt->attributelist.reflow(true));
+					e.addResizeListener(evt->{
+						Point p = part.computeSize(attributelist.getSize().x-20, SWT.DEFAULT);
+						p.y = p.y + 20;
+						attributelist.setMinSize(p);
+					});
 					fieldEditors.add(e);
 					
 				}else{
@@ -2208,7 +2202,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 						tmp.setText(text);
 						tmp.setEditable(false);
 						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						tmp.addListener(SWT.Resize, evt->attributelist.reflow(true));
+						((GridData)tmp.getLayoutData()).widthHint = 200;
+						tmp.addListener(SWT.Resize, evt->{
+							Point p = part.computeSize(attributelist.getSize().x-20, SWT.DEFAULT);
+							p.y = p.y + 20;
+							attributelist.setMinSize(p);
+						});
 					}else {
 						Text tmp = toolkit.createText(part, text, SWT.BORDER);
 						tmp.setEditable(false);

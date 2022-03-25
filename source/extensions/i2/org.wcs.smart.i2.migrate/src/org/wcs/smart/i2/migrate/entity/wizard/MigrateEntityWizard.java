@@ -131,7 +131,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
      */
 	public void addPages() {
     	
-    	setWindowTitle(Messages.MigrateIntelligenceWizard_Title);
+    	setWindowTitle("Migrate SMART6 Entity Data");
     	
     	page1 = new Smart6WizardPage();
     	page2 = new CaListWizardPage();

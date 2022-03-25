@@ -183,6 +183,7 @@ public class Messages extends NLS {
 	public static String SurveyAttachmentTooltipProvider_MissionLbl;
 	public static String SurveyAttachmentTooltipProvider_ObservationLbl;
 	public static String SurveyAttachmentTooltipProvider_ObsGroupSection;
+	public static String SurveyAttachmentTooltipProvider_SignatureType;
 	public static String SurveyAttachmentTooltipProvider_SurveyLbl;
 	public static String SurveyAttachmentTooltipProvider_WpDateLbl;
 	public static String SurveyAttachmentTooltipProvider_WpIdLbl;

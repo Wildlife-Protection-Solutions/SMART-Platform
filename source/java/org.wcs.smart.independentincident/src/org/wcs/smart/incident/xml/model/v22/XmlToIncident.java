@@ -224,6 +224,16 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 						warnings.add(MessageFormat.format(
 								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
+
+						if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isEmpty()) {
+							SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+							if (stype == null) {
+								warnings.add(MessageFormat.format(Messages.XmlToIncident_SignatureTypeNotFound,attachment.getSignatureTypeKey()));
+							}else {
+								att.setSignatureType(stype);
+							}
+						}
+						
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);

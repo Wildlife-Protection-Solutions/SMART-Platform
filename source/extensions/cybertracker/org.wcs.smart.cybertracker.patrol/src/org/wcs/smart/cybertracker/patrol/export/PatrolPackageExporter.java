@@ -72,6 +72,7 @@ import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -294,10 +295,18 @@ public enum PatrolPackageExporter {
 				PatrolMetadataField.TRANSPORT.isRequired(), 
 				false, session, ctpackage.getConservationArea(),
 				(item, json)->{
-					json.put("max_speed", ((PatrolTransportType)item).getPatrolType().getDefaultMaxSpeed()); //$NON-NLS-1$
+					PatrolType ptype = session.createQuery("FROM PatrolType WHERE id.type = :type and id.conservationArea = :ca", PatrolType.class) //$NON-NLS-1$
+							.setParameter("type",  ((PatrolTransportType)item).getPatrolType()) //$NON-NLS-1$
+							.setParameter("ca", ((PatrolTransportType)item).getConservationArea()) //$NON-NLS-1$
+							.uniqueResult();
+					
+					int max = ((PatrolTransportType)item).getPatrolType().getDefaultMaxSpeed();
+					if (ptype != null) {
+						max = ptype.getMaxSpeed();
+					}
+					json.put("max_speed", max); //$NON-NLS-1$
 				}
-				
-				);
+			);
 		JSONObject joo = (JSONObject) transportScreen.get(PatrolMetadataField.TRANSPORT.getJsonKey());
 		JSONArray it = (JSONArray) joo.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
 		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes);

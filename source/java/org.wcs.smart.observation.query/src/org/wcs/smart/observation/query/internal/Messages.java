@@ -84,6 +84,7 @@ public class Messages extends NLS {
 	public static String SummaryQuery_DefaultQueryName;
 	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
 	public static String WaypointAttachmentTooltipProvider_ObsLbl;
+	public static String WaypointAttachmentTooltipProvider_SignatureType;
 	public static String WaypointAttachmentTooltipProvider_SourceLbl;
 	public static String WaypointAttachmentTooltipProvider_WpDateLbl;
 	public static String WaypointAttachmentTooltipProvider_WpIdlbl;

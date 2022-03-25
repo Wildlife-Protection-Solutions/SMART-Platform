@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2022 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,25 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.model;
+package org.wcs.smart.i2.patrol.plugin;
 
-import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.patrol.PatrolProfilePlugIn;
+import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
 
 /**
- * Private packages in app link
+ * Action that is called when plug-in is installed
  * 
  * @author Emily
- *
  */
-public class CyberTrackerPrivatePackageProxy extends CyberTrackerPackageProxy {
+public class OnInstallAction extends InstallProvisioningAction {
 
-	private String appLink;
-	
-	public void setAppLink(String link) {
-		this.appLink = link;
+	@Override
+	public IStatus executeInternal(Map<String, Object> parameters) {
+		Job job = new AddPluginJob();
+		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		job.schedule();
+		try{
+			job.join();
+		}catch(InterruptedException ex){
+			PatrolProfilePlugIn.log(ex.getLocalizedMessage(), ex);
+		}
+		return Status.OK_STATUS;
 	}
-	
-	public String getAppLink() {
-		return this.appLink;
+
+	@Override
+	protected String getPluginId() {
+		return PatrolProfilePlugIn.PLUGIN_ID;
 	}
+
 }

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>7.4.0-SNAPSHOT</version>
+		<version>7.5.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
@@ -21,9 +21,9 @@
     		<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.wcs.smart.core</groupId>
-    		<artifactId>org.wcs.smart.core.observation</artifactId>
-    		<version>${smart.version}</version>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.observation</artifactId>
+    			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.locationtech.udig</groupId>

@@ -42,6 +42,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.ISignatureAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -71,11 +72,13 @@ public class SurveyAttachmentTooltipProvider extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		SurveyWaypoint wp = null;
 		WaypointObservation o = null;
+		ISignatureAttachment attachment = null;
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			
 			ObservationAttachment oba = s.get(ObservationAttachment.class, data.getAttachment().getUuid());
 			if (oba != null) {
+				attachment = oba;
 				o = oba.getObservation();
 				wp = QueryFactory.buildQuery(s, SurveyWaypoint.class,"id.waypoint", o.getWaypoint()).uniqueResult(); //$NON-NLS-1$
 				if (o.getAttributes() != null) {
@@ -87,6 +90,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 				o.getCategory().getFullCategoryName();
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
+				attachment = obw;
 				wp = QueryFactory.buildQuery(s, SurveyWaypoint.class,"id.waypoint", obw.getWaypoint()).uniqueResult(); //$NON-NLS-1$
 				for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
 					if (wo.getAttributes() != null) {
@@ -107,11 +111,14 @@ public class SurveyAttachmentTooltipProvider extends Job {
 				wp.getMissionDay().getMission().getSurvey().getId();
 				wp.getMissionDay().getMission().getSurvey().getSurveyDesign().getName();
 			}
+			if (attachment != null && attachment.getSignatureType() != null) attachment.getSignatureType().getName();
+
 			s.getTransaction().rollback();
 		}
 		
 		WaypointObservation fo = o;
 		SurveyWaypoint fwp = wp;
+		ISignatureAttachment fattachment = attachment;
 		
 		Display.getDefault().syncExec(()->{
 			if (details == null || details.isDisposed()) return;
@@ -163,6 +170,18 @@ public class SurveyAttachmentTooltipProvider extends Job {
 			l = new Label(main, SWT.NONE);
 			l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(fwp.getWaypoint().getDateTime()));
 			l.setBackground(details.getBackground());
+			
+			if (fattachment != null && 
+				fattachment.getSignatureType() != null) {
+						
+				l = new Label(main, SWT.NONE);
+				l.setText(Messages.SurveyAttachmentTooltipProvider_SignatureType);
+				l.setBackground(details.getBackground());
+					
+				l = new Label(main, SWT.NONE);
+				l.setText(fattachment.getSignatureType().getName());
+				l.setBackground(details.getBackground());
+			}
 			
 			if (fo != null) {
 				l = new Label(main, SWT.NONE);

@@ -57,7 +57,7 @@ the patrol group by node in summary queries.
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IExtensionFilter"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.ext.IExtensionFilter"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -67,7 +67,7 @@ the patrol group by node in summary queries.
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.ext.IExtensionFilterViewer"/>
                </appinfo>
             </annotation>
          </attribute>

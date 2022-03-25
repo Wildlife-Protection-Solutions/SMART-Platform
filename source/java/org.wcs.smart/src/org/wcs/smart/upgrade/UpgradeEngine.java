@@ -329,20 +329,49 @@ public class UpgradeEngine {
 
 	/**
 	 * @return list of {@link IDatabaseUpgrader} extension points
+	 * @throws Exception 
 	 */
-	private List<IDatabaseUpgrader> getExtensions() {
+	private List<IDatabaseUpgrader> getExtensions() throws Exception {
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
+		List<String> names = new ArrayList<>();
+		
+		List<Object[]> toprocess = new ArrayList<>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
-		try {
+		try {			
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("dbUpgrader")){ //$NON-NLS-1$
-					items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
+					String requires = e.getAttribute("requires"); //$NON-NLS-1$
+					String name = e.getContributor().getName();
+					IDatabaseUpgrader up = (IDatabaseUpgrader)e.createExecutableExtension("upgrader"); //$NON-NLS-1$
+					if (requires == null) {
+						items.add(up); 
+						names.add(name);
+					}else {
+						toprocess.add(new Object[] {requires, name, up});
+					}
 				}
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}
+
+		int cnt = 0;
+		while(!toprocess.isEmpty()) {
+			if (cnt > toprocess.size()) {
+				throw new Exception("Circular dependency associated with database upgraders."); //$NON-NLS-1$
+			}
+			Object[] item = toprocess.remove(0);
+			if (names.contains(item[0])) {
+				items.add((IDatabaseUpgrader)item[2]);
+				names.add((String)item[1]);
+				cnt = 0;
+			}else {
+				toprocess.add(item);
+				cnt++;
+			}
+		}
+		
 		return items;
 	}
 

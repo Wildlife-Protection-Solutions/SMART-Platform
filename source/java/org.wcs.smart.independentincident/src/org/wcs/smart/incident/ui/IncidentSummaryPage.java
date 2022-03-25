@@ -193,10 +193,10 @@ public class IncidentSummaryPage extends EditorPart {
 	 *  
 	 * @param incident
 	 */
-	public void initData(Waypoint incident){
+	public void initData(){
 		
 		try(Session session = HibernateManager.openSession()){
-			session.saveOrUpdate(editor.getIncident());
+			Waypoint incident = session.get(Waypoint.class, editor.getIncident().getUuid());
 			if (incident.getComment() == null){
 				txtComments.setText(""); //$NON-NLS-1$
 			}else{
@@ -527,6 +527,7 @@ public class IncidentSummaryPage extends EditorPart {
 			}
 		});
 		createEdit(right, canEdit, IncidentAttachmentComposite.ID);
+		
 		toolkit.createLabel(right, ""); //$NON-NLS-1$
 		l = toolkit.createLabel(right, "**" + Messages.IncidentSummaryPage_ObservationAttachmentsLabel); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
@@ -586,7 +587,7 @@ public class IncidentSummaryPage extends EditorPart {
 			lblLastModified.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
 		}
 		
-		initData(editor.getIncident());
+		initData();
 	}
 	
 	
@@ -653,7 +654,7 @@ public class IncidentSummaryPage extends EditorPart {
 					EditIncidentDialog d = new EditIncidentDialog(getSite().getShell(), panelId, editor.getIncident());
 					d.open();
 					ApplicationGIS.getToolManager().setCurrentEditor(editor);
-					initData(editor.getIncident());
+					initData();
 				}
 			});
 		}else{

@@ -10,6 +10,10 @@ public class Messages extends NLS {
 	public static String AttachmentDialog_DialogMessage;
 	public static String AttachmentDialog_DialogTitle;
 
+	public static String AttachmentDialog_moveattachments;
+
+	public static String AttachmentDialog_moveattachmentstooltip;
+
 	public static String AttachmentDialog_ObservationAttachmentLbl;
 	public static String AttributeDMAdvisor_Error_AttributeNotDeletable;
 	public static String AttributeDMAdvisor_Error_InvalidObjectType;
@@ -169,6 +173,28 @@ public class Messages extends NLS {
 	public static String GPSDataImport_Progress_ParsingWaypoints;
 	public static String GPSDataImport_Progress_ReadingData;
 	
+	public static String MoveAttachmentDialog_AttachmentColumn;
+
+	public static String MoveAttachmentDialog_AttributesColumn;
+
+	public static String MoveAttachmentDialog_CategoryColumn;
+
+	public static String MoveAttachmentDialog_DetailsColumn;
+
+	public static String MoveAttachmentDialog_Message;
+
+	public static String MoveAttachmentDialog_MoveError;
+
+	public static String MoveAttachmentDialog_MoveLbl;
+
+	public static String MoveAttachmentDialog_ObservationColumn;
+
+	public static String MoveAttachmentDialog_ObsSelectionMessage;
+
+	public static String MoveAttachmentDialog_Title;
+
+	public static String MoveAttachmentDialog_WaypointLabel;
+
 	public static String ObservationAttachmentLabelProvider_SignatureTypeLabel;
 
 	public static String ObservationCellEditor_LoadDataModel_JobName;

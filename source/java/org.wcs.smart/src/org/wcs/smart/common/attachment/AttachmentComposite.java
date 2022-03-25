@@ -98,11 +98,11 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		
 		Composite wrapper = new Composite(this, SWT.NONE);
 		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		((GridData)wrapper.getLayoutData()).heightHint = 100;
+		((GridData)wrapper.getLayoutData()).widthHint = 200;
+		
 		tblAttachments = new TableViewer(wrapper, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		tblAttachments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)tblAttachments.getTable().getLayoutData()).heightHint = 100;
-		((GridData)tblAttachments.getTable().getLayoutData()).widthHint = 200;
 		tblAttachments.setContentProvider(ArrayContentProvider.getInstance());
 		tblAttachments.setLabelProvider(new SmartAttachmentLabelProvider(){
 			public String getText(Object element) {

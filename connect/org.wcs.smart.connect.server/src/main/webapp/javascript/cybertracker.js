@@ -7,14 +7,12 @@ window.onload = function(){
 	menuCheckOnload();
 	
 	refreshPackageList();
-	refreshPrivatePackageList();
 	refreshApiKeyTable();
 	refreshNavigationList();
 	getCollectUsers();
 	
 	document.querySelector("#refreshnow").onclick=function(){refreshPackageList(); return false;};
 	document.querySelector("#navrefreshnow").onclick=function(){refreshNavigationList(); return false;};
-	document.querySelector("#privatepackagerefreshnow").onclick=function(){refreshPrivatePackageList(); return false;};
 }
 
 function confirmResetApi(){
@@ -161,65 +159,6 @@ function refreshPackageList(){
  	oReq.send();
 }
 
-function refreshPrivatePackageList(){
-	
-	//clear current table
-	var objects = document.querySelectorAll("div.pprow");
-	for (var i = 0; i < objects.length; i++){
-		var ele = objects[i];
-		ele.parentElement.removeChild(ele);
-	}
-
-	var parent = document.querySelector("#privatepackagetable");
-	var row = document.createElement("div");
-	row.className="pprow";
-	row.innerHTML=i18n("cybertracker.loadingpackagesmsg");
-	parent.appendChild(row);
-		
- 	var oReq = new XMLHttpRequest();
- 	oReq.onload = createPrivatePackageTable;
- 	oReq.open("Get", CTURL + "/packages?private=true", true);
- 	oReq.send();
-}
-
-
-function createPrivatePackageTable(){
-	if (this.status != 200) {
-		var msg = i18n("cybertracker.loadingpackageserror");
-		if (this.status == 401){
-			msg += i18n("cybertracker.unauthorized");
-		}
-		try {
-			msg += JSON.parse(this.responseText).error
-		} catch (err) {
-		}
-		displayError(msg);
-		return;
-	}
-	//clear current table
-	var objects = document.querySelectorAll("div.pprow");
-	for (var i = 0; i < objects.length; i++){
-		var ele = objects[i];
-		ele.parentElement.removeChild(ele);
-	}
-	
-	var parent = document.querySelector("#privatepackagetable");
- 	var packages = JSON.parse(this.responseText);
- 	
- 	for (var i = 0; i < packages.length; i ++){
- 		
-		var link = packages[i].appLink;
-		
-		var linkhtml = "<p style=\"width:700px; overflow-wrap: break-word;\">" + link + "</p>";
-		
- 		tableCreateRow(parent, 
- 				[packages[i].name, packages[i].caLabel, linkhtml], 
- 				"pprow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
- 		
- 		//row.dataset.packageuuid = packages[i].uuid;
- 	}
-}
-
 function createPackageTable(){
 	if (this.status != 200) {
 		var msg = i18n("cybertracker.loadingpackageserror");
@@ -257,8 +196,14 @@ function createPackageTable(){
  		
  		var upDate = new Date( Date.parse(packages[i].uploadedDate) );
  		
+ 		var linkhtml = "<p style=\"width:300px; overflow-wrap: break-word;\">" + packages[i].appLink + "</p>";
+ 		
  		var row = tableCreateRow(parent, 
- 				[packages[i].name, packages[i].caLabel, packages[i].type, upDate.toLocaleString(), rDate.toLocaleString(), packages[i].version, null, null], 
+ 				[packages[i].name, packages[i].caLabel, packages[i].type,
+ 				 packages[i].isPrivate ? "PRIVATE" : "PUBLIC",
+ 				upDate.toLocaleString(), rDate.toLocaleString(),
+ 				linkhtml, 
+ 				packages[i].version, null, null], 
  				"ctrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.packageuuid = packages[i].uuid;
@@ -270,7 +215,7 @@ function createPackageTable(){
 	 	downloadca.dataset.uuid = packages[i].uuid;
 	 	downloadca.onclick = downloadPackage;
 	 	downloadca.href="";
-	 	row.childNodes[4].appendChild(downloadca);
+	 	row.childNodes[8].appendChild(downloadca);
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
@@ -278,7 +223,7 @@ function createPackageTable(){
  		deleteicon.dataset.uuid = packages[i].uuid;
  		deleteicon.onclick = deletePackageValidate;
  		deleteicon.href="";
- 		row.childNodes[5].appendChild(deleteicon);
+ 		row.childNodes[9].appendChild(deleteicon);
  	}
 }
 

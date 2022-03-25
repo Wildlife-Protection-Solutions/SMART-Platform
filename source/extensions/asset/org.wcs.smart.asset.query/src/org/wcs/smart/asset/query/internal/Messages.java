@@ -48,6 +48,7 @@ public class Messages extends NLS {
 	public static String AssetAttachmentTooltipProvider_ObservationLabel;
 	public static String AssetAttachmentTooltipProvider_ObservationsLabel;
 	public static String AssetAttachmentTooltipProvider_ObsGroupLabel;
+	public static String AssetAttachmentTooltipProvider_SignatureType;
 	public static String AssetAttachmentTooltipProvider_StationLabel;
 	public static String AssetAttachmentTooltipProvider_WpIDLabel;
 	public static String AssetAttributeValueItem_AttributeNotFound;

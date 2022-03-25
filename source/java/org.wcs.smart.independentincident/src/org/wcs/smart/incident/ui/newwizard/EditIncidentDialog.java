@@ -74,7 +74,11 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 		}else if (panelId == LocationComposite.ID){
 			panel = new LocationComposite();
 		}else if (panelId == IncidentAttachmentComposite.ID){
-			panel = new IncidentAttachmentComposite();
+			panel = new IncidentAttachmentComposite(true, ()->{
+				cancelPressed();
+				if (getShell() != null) return false;
+				return true;
+			});
 		}else if (panelId == DistanceDirectionComposite.ID){
 			panel = new DistanceDirectionComposite();
 		}
@@ -100,7 +104,7 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 			setMessage(panel.getDescription());
 			
 			try(Session s = openSession()){
-				panel.initFields(incident, s);	
+				panel.initFields(s.get(Waypoint.class, incident.getUuid()), s);	
 			}
 			
 			setChangesMade(false);
@@ -124,8 +128,8 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 			try(Session session = openSession()){
 				session.beginTransaction();
 				try{
-					panel.updateIncident(incident);
-					session.saveOrUpdate(incident);
+					Waypoint wp = session.get(Waypoint.class, incident.getUuid());
+					panel.updateIncident(wp);
 					session.getTransaction().commit();
 				}catch (Exception ex){
 					session.getTransaction().rollback();

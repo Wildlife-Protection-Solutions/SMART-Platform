@@ -61,6 +61,13 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="requires" type="string">
+            <annotation>
+               <documentation>
+                  The id of the plugin that is required to be installed/upgraded before this plugin can be installed/updated.  Optional.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

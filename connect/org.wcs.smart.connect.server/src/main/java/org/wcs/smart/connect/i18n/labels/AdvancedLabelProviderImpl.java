@@ -288,6 +288,9 @@ public class AdvancedLabelProviderImpl implements
 			case RECORD_STATUS: return Messages.getString("AdvancedLabelProviderImpl.SysAttRecordStatus", l); //$NON-NLS-1$
 			}
 		}
+		
+		if (item.equals("MOTIVATEDBY")) return Messages.getString("AdvancedLabelProviderImpl.MotivatedByProfileRecord", l); //$NON-NLS-1$ //$NON-NLS-2$
+
 		return ""; //$NON-NLS-1$
 	}
 

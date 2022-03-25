@@ -392,6 +392,14 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 						warnings.add(MessageFormat.format(
 								Messages.XMLtoMissionConverter_1, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
+						if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isBlank()) {
+							SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+							if (stype != null) {
+								att.setSignatureType(stype);
+							}else {
+								warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_SignatureTypeNotFound, attachment.getSignatureTypeKey()));
+							}
+						}
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);

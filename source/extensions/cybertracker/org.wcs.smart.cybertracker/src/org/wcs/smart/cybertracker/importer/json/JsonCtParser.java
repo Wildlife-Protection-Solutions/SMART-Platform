@@ -453,14 +453,33 @@ public class JsonCtParser {
 					waypointAttachments.add(info);
 				}
 			}else if (key.startsWith(ScreensUtil.RESULT_SIGNATURE)) {
-				String keyId = key.replaceFirst(ScreensUtil.RESULT_SIGNATURE, ""); //$NON-NLS-1$
+				//"SMART_Signature_<typekey>:<obsnum>"
+				//"SMART_Signature_signaturetypea:0"
+				
+				//associate signature with observations
+				int obsnum = 0;
+				String keypart = key;
+				if (key.contains(String.valueOf(CyberTrackerConfExporter.KEY_SEP))) {
+					String[] bits = key.split(String.valueOf(CyberTrackerConfExporter.KEY_SEP));
+					obsnum = Integer.parseInt(bits[1]);
+					keypart = bits[0];
+				}
+				String keyId = keypart.replaceFirst(ScreensUtil.RESULT_SIGNATURE, ""); //$NON-NLS-1$
 				SignatureType stype = SignatureTypeManager.INSTANCE.findType(keyId, ca, session);
+				
+				AttachmentInfo ainfo = null;
 				if (stype == null) {
 					warnings.add(MessageFormat.format(Messages.JsonCtParser_SignatureTypeNotFoundWarning, keyId));
-					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue()), imagecounter++));
+					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue()), imagecounter++);
 				}else {
-					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), imagecounter++, stype));
+					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), imagecounter++, stype);
 				}
+				List<AttachmentInfo> data = observationAttachments.get(obsnum);
+				if (data == null){
+					data = new ArrayList<AttachmentInfo>();
+					observationAttachments.put(obsnum, data);
+				}
+				data.add(ainfo);
 			}
 			
 			//default values
@@ -546,6 +565,7 @@ public class JsonCtParser {
 						ObservationAttachment oa = new ObservationAttachment();
 						oa.setCopyFromLocation(wa.getCopyFromLocation());
 						oa.setFilename(wa.getFilename());
+						oa.setSignatureType(wa.getSignatureType());
 						oa.setObservation(wp);
 						wp.getAttachments().add(oa);
 					}
@@ -577,6 +597,7 @@ public class JsonCtParser {
 							oa.setCopyFromLocation(wa.getCopyFromLocation());
 							oa.setFilename(wa.getFilename());
 							oa.setObservation(wp);
+							oa.setSignatureType(wa.getSignatureType());
 							wp.getAttachments().add(oa);
 						}
 					}

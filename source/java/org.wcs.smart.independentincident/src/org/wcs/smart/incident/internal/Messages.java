@@ -71,7 +71,10 @@ public class Messages extends NLS {
 	public static String ImportTemplateHandler_ImportError;
 	public static String ImportTemplateHandler_ImportTitle;
 	public static String IncidentAttachmentComposite_Description;
+	public static String IncidentAttachmentComposite_moveLabel;
+	public static String IncidentAttachmentComposite_moveTooltip;
 	public static String IncidentAttachmentComposite_Name;
+	public static String IncidentAttachmentComposite_observationattachmentsmessage;
 	public static String IncidentAttachmentDatasetResultSetMetadata_attachmentuuidcolumnname;
 	public static String IncidentAttachmentDatasetResultSetMetadata_datacolumnname;
 	public static String IncidentAttachmentDatasetResultSetMetadata_filenamecolumnname;

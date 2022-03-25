@@ -52,7 +52,9 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -169,6 +171,11 @@ public class PatrolDayEditor extends EditorPart {
 								if (wp.getWaypoint().getAttachments() != null) {
 									for(WaypointAttachment wa : wp.getWaypoint().getAttachments()) {
 										if (wa.getSignatureType() != null)wa.getSignatureType().getName();
+									}
+								}
+								for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+									for (ObservationAttachment a : wo.getAttachments()) {
+										if (a.getSignatureType() != null) a.getSignatureType().getName();
 									}
 								}
 							}

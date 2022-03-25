@@ -89,6 +89,9 @@ public class IncidentToXml {
 				for (ObservationAttachment attach : ob.getAttachments()){
 					AttachmentType xmlattach = new AttachmentType();
 					xmlattach.setFilename(attach.getFilename());
+					if (attach.getSignatureType() != null) {
+						xmlattach.setSignatureTypeKey(attach.getSignatureType().getKeyId());
+					}
 					wot.getAttachments().add(xmlattach);
 				}
 				

@@ -84,6 +84,7 @@ import org.wcs.smart.filter.CategoryFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.NotFilter;
 import org.wcs.smart.filter.Operator;
+import org.wcs.smart.i2.patrol.query.IntelRecordPatrolQueryFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -619,6 +620,19 @@ public enum PsqlFilterToSqlGenerator {
 				planSqlPart = sb.toString();
 			}
 			String sql = "EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid "+planSqlPart+")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return sql;
+		}
+		if (filter instanceof IntelRecordPatrolQueryFilter) {
+			IntelRecordPatrolQueryFilter qfilter = (IntelRecordPatrolQueryFilter)filter;
+			
+			String prefix = engine.tablePrefix(qfilter.getPatrolQueryOption().getPatrolAttributeClass());
+			String v = SharedUtils.stripQuotes((String)qfilter.getValue());
+			String intelPart = ""; //$NON-NLS-1$
+			if (!qfilter.isAnyRecord()){
+				String param = engine.addParameterValue(UuidUtils.stringToUuid(v));
+				intelPart = !qfilter.isAnyRecord() ? " AND p2i.i_record_uuid = " + param  : "";  //$NON-NLS-1$//$NON-NLS-2$ 
+			}
+			String sql = "EXISTS (SELECT * FROM smart.i_patrol_record_motivation p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return sql;
 		}
 		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	 //$NON-NLS-1$

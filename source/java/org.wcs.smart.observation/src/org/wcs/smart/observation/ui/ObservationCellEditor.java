@@ -379,6 +379,8 @@ public class ObservationCellEditor extends DialogCellEditor {
 	 */
 	@Override
 	protected void updateContents(Object value) {
+		super.updateContents(value);
+		if (value != null && !(value instanceof Waypoint)) return;
 		String text = Messages.ObservationCellEditor_NoObservations_Label;
 		if (value != null && value instanceof Waypoint
 				&& ((Waypoint) value).getObservationGroups() != null
@@ -453,7 +455,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 		wizard.setWizardDialog(dialog);
 		try{
 			if (dialog.open() == Window.CANCEL) {
-				return null;
+				return Boolean.FALSE;
 			}
 			this.wp.getObservationGroups().clear();
 			this.wp.getObservationGroups().addAll(wizard.getWaypoint().getObservationGroups());

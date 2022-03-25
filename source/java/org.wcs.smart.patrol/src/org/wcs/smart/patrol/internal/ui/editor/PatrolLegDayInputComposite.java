@@ -1003,10 +1003,7 @@ public class PatrolLegDayInputComposite {
 			}
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
-			if (value != null){
-				needSave = true;
-			}
-			//updated in cell editor
+			if (value instanceof Waypoint) needSave = true;
 		}
 		if (needSave){
 			IJobChangeListener listener = new IJobChangeListener() {

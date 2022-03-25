@@ -33,6 +33,7 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.UuidUtils;
 
@@ -45,11 +46,12 @@ import org.wcs.smart.util.UuidUtils;
  */
 @Entity
 @Table(name="smart.observation_attachment")
-public class ObservationAttachment extends ISmartAttachment {
+public class ObservationAttachment extends ISmartAttachment implements ISignatureAttachment{
 
 	private static final long serialVersionUID = 1L;
 	
 	private WaypointObservation observation;
+	private SignatureType signatureType; 
 
     
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -63,37 +65,18 @@ public class ObservationAttachment extends ISmartAttachment {
 		super.attachmentFile = null;
 	}
 
-	
-	@Transient
-	private String datastoreFolderPath = null;
-	/**
-	 * Sets directory location where the attachment should be stored.  This
-	 * does not have to be set.  If not set then getDatastoreFolderPath will
-	 * lookup the path from the waypoint and source.  
-	 * <p>This function is provided to deal with issues when saving waypoints.  In
-	 * some cases the waypoints are saved before the encompassing object
-	 * (ex. patrol waypoint)
-	 * so the datastore folder path cannot be computed using standard process.  It
-	 * can be set manually here to allow objects to be saved.</p>
-	 * 
-	 * @param path this is the path not including the CAUUID 
-	 * @param conservation area 
-	 */
-	public void setDatastoreFolderExtension(String path, ConservationArea ca){
-		StringBuilder sb = new StringBuilder();
-		sb.append(ca.getFileDataStoreLocation());
-		sb.append(File.separator);
-		sb.append(path);
-		
-		this.datastoreFolderPath = sb.toString();
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="signature_type_uuid", referencedColumnName="uuid")
+	public SignatureType getSignatureType(){
+		return this.signatureType;
+	}
+	public void setSignatureType(SignatureType stype){
+		this.signatureType = stype;
 	}
 	
 	@Transient
 	@Override
 	public String getDatastoreFolderPath(Session session) throws Exception {
-		if (datastoreFolderPath != null){
-			return datastoreFolderPath;
-		}
 		if (observation != null && observation.getWaypoint() != null){
 			if (observation.getWaypoint().getSourceId() == null){
 				throw new Exception("No attachment information found for observation attachment " + UuidUtils.uuidToString(getUuid())); //$NON-NLS-1$

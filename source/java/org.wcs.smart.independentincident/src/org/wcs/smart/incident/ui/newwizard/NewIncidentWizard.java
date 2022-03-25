@@ -158,7 +158,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
     		super.addPage(new IncidentWizardPage(this, new DistanceDirectionComposite()));
     	}
     	super.addPage(new IncidentWizardPage(this, new CommentComposite()));
-    	super.addPage(new IncidentWizardPage(this, new IncidentAttachmentComposite()));
+    	super.addPage(new IncidentWizardPage(this, new IncidentAttachmentComposite(false)));
     	
     }
     

@@ -48,6 +48,8 @@ public class CyberTrackerPackageProxy {
 	
 	private String revision;
 	private String name;
+
+	private String appLink;
 	
 	private boolean isPrivate;
 	
@@ -113,7 +115,22 @@ public class CyberTrackerPackageProxy {
 		return this.isPrivate;
 	}
 	
+	/**
+	 * For SMART Collect packages by default packages are not private (false).
+	 * For SMART Connect packages by default packages are private
+	 * 
+	 * @param isPrivate
+	 */
 	public void setIsPrivate(boolean isPrivate) {
 		this.isPrivate = isPrivate;
+	}
+	
+	
+	public void setAppLink(String link) {
+		this.appLink = link;
+	}
+	
+	public String getAppLink() {
+		return this.appLink;
 	}
 }

@@ -35,7 +35,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -75,7 +78,40 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		
 		if (attd.open() == Window.CANCEL){
 			setValue(null);
-			return null;
+			if (!attd.hasMoved()) return Boolean.FALSE;
+			
+			//attachments may have been moved so we should reload them here
+			//for waypoint and all observations
+			try(Session session = HibernateManager.openSession()){
+				Waypoint db = session.get(Waypoint.class, wp.getUuid());
+				
+				wp.setAttachments(db.getAttachments());
+				for (WaypointAttachment wa : wp.getAttachments()) {
+					try {
+						wa.computeFileLocation(session);
+					}catch (Exception ex) {}
+					if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+				}
+				for (WaypointObservation wo : wp.getAllObservations()) {
+					for (WaypointObservation dbwo : db.getAllObservations()) {
+						if (wo.equals(dbwo)) {
+							wo.setAttachments(dbwo.getAttachments());
+							for (ObservationAttachment wa : wo.getAttachments()) {
+								try {
+									wa.computeFileLocation(session);
+								}catch (Exception ex) {}
+								if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+							}
+						}
+					}
+				}
+				
+				for (WaypointObservation wo : wp.getAllObservations()) {
+					wo.getAttachments().size();
+				}
+				
+			}
+			return Boolean.FALSE;
 		}
 		
 		//Update the attachments
@@ -115,7 +151,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 	@Override
 	 protected void updateContents(Object value) {
 		super.updateContents(value);
-		if (value == null){
+		if (value == null || !(value instanceof Waypoint)){
 			return;
 		}
 		int wpCnt = 0;
