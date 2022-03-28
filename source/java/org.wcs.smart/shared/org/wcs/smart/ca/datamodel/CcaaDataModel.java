@@ -129,22 +129,26 @@ public abstract class CcaaDataModel {
 		if (a.getIcon() != null) return a.getIcon().getKeyId();
 		
 		String hql = "SELECT distinct icon.keyId FROM AttributeListItem WHERE keyId = :key AND attribute.conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<String> q = session.createQuery(hql, String.class);
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", cas);//$NON-NLS-1$
 		
-		return (String)q.uniqueResult();
+		List<String> items = q.list();
+		if (items.isEmpty()) return null;
+		return items.get(0);
 	}
 
 	private String findIconKey (AttributeTreeNode a, Session session){
 		if (a.getIcon() != null) return a.getIcon().getKeyId();
 		
 		String hql = "SELECT distinct icon.keyId FROM AttributeTreeNode WHERE keyId = :key AND attribute.conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<String> q = session.createQuery(hql, String.class);
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", cas);//$NON-NLS-1$
 		
-		return (String)q.uniqueResult();
+		List<String> items = q.list();
+		if (items.isEmpty()) return null;
+		return items.get(0);
 	}
 	/**
 	 * Returns only items shared across all conservation areas.
