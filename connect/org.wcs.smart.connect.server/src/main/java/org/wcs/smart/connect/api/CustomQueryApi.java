@@ -101,7 +101,7 @@ public class CustomQueryApi extends HttpServlet{
 	 * </p>
 	*/
 	@GET
-    @Path("/patroldetails")
+    @Path("/patrol")
 	@Operation(description="Runs query patrol and returns the results as json")
 	public Response runPatrolQuery(
 			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
@@ -156,12 +156,12 @@ public class CustomQueryApi extends HttpServlet{
 	/**
 	 * <p>Queries patrols for waypoints and returns the results as json.</p>
 	 * <p>
-	 * URL: ../server/api/query/custom/patrol<br>
+	 * URL: ../server/api/query/custom/waypoint/patrol<br>
 	 * Call Type: GET
 	 * </p>
 	*/
 	@GET
-    @Path("/patrol")
+    @Path("/waypoint/patrol")
 	@Operation(description="Runs query patrol and returns the results as json")
 	public Response runPatrolQuery(
 			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
@@ -297,12 +297,12 @@ public class CustomQueryApi extends HttpServlet{
 	/**
 	 * <p>Queries independent incidents and returns results as json</p>
 	 * <p>
-	 * URL: ../server/api/query/custom/incident<br>
+	 * URL: ../server/api/query/custom/waypoint/incident<br>
 	 * Call Type: GET
 	 * </p>
 	*/
 	@GET
-    @Path("/incident")
+    @Path("/waypoint/incident")
 	@Operation(description="Runs a custom incident query and returns the results as json")
 	public Response runIndependentIncidentQuery(
 			@Parameter(description="smart incident uuid") @QueryParam("incident_uuid") String incidentuuid,
