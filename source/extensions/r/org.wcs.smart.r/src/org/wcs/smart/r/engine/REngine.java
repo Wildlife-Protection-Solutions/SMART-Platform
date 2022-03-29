@@ -24,7 +24,7 @@ package org.wcs.smart.r.engine;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -52,6 +52,7 @@ import org.wcs.smart.r.RScriptManager;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.RPreferencePage;
+import org.wcs.smart.r.ui.editor.script.IRScriptOutputStream;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -66,7 +67,7 @@ public class REngine {
 	private List<QueryConfiguration> queryConfigs;
 	private String rParameters;
 	
-	private OutputStream outStream;
+	private IRScriptOutputStream outStream;
 	private RScript script;
 	
 	/**
@@ -77,7 +78,7 @@ public class REngine {
 	 * @param rParameters
 	 * @param outStream
 	 */
-	public REngine(RScript script, List<QueryConfiguration> queryConfigs, String rParameters, OutputStream outStream) {
+	public REngine(RScript script, List<QueryConfiguration> queryConfigs, String rParameters, IRScriptOutputStream outStream) {
 		this.queryConfigs = queryConfigs;
 		this.rParameters = rParameters;
 		this.outStream = outStream;
@@ -86,8 +87,7 @@ public class REngine {
 	
 	private void writeString(String string) throws IOException {
 		if (outStream == null) return;
-		outStream.write(string.getBytes());
-		outStream.write("\n".getBytes()); //$NON-NLS-1$
+		outStream.write(string);
 	}
 	
 	public void execute()  {
@@ -104,8 +104,10 @@ public class REngine {
 	private Job executeJob = new Job(Messages.REngine_JobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			
 			List<Path> queryFiles = new ArrayList<>();
 			try {
+				
 				for (QueryConfiguration query : queryConfigs) {
 					writeString(MessageFormat.format(Messages.REngine_QueryName, query.getQuery().getName()));
 					writeString(MessageFormat.format(Messages.REngine_DateFilter, query.getDateFilter().asString()));
@@ -146,9 +148,9 @@ public class REngine {
 				}
 				
 				List<String> params = new ArrayList<>();
-				
-				params.add(RPreferencePage.getRSystemProperty());
+				params.add(RPreferencePage.getRSystemProperty());		
 				params.add(RScriptManager.INSTANCE.getScriptPath(script).toRealPath().toString());
+				
 				if (rParameters != null && !rParameters.strip().isBlank()) {
 					String[] parts = rParameters.strip().split("\\s+"); //$NON-NLS-1$
 					for(String b : parts) if (!b.strip().isBlank()) params.add(b);
@@ -163,7 +165,7 @@ public class REngine {
 				writeString("---------------------------------------- " + Messages.REngine_ScriptOutput + "----------------------------------------"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				//run command
-				runCommand(params, outStream);
+				runCommand(params);
 				
 			}catch (Exception ex) {
 				try {
@@ -173,24 +175,19 @@ public class REngine {
 				}
 				RPlugIn.log(ex.getMessage(), ex);
 			}finally {
-				try {
-					outStream.close();
-				} catch (IOException e) {
-					RPlugIn.log(e.getMessage(), e);
-				}
+				outStream.close();
 			}
-			
-
 			return Status.OK_STATUS;
 		}
 		
 	};
 	
-	private void runCommand(List<String> parameters, OutputStream outStream) {
+	private void runCommand(List<String> parameters) {
 		try {  
 	        Process p = (new ProcessBuilder(parameters)).start();
-	        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+	        
+	        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+	        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8));
 
 	        String s = null;
 	        while ((s = stdInput.readLine()) != null) {

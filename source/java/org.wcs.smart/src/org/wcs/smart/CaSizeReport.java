@@ -32,6 +32,7 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -90,8 +91,8 @@ public class CaSizeReport {
 		Path fileStore = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation());
 		
 		long[] total = new long[] {0};
-		try {
-			Files.list(fileStore).forEach(file->{
+		try (Stream<Path> stream = Files.list(fileStore)){
+			stream.forEach(file->{
 				if (Files.isDirectory(file)) {
 					
 					String name = file.getFileName().toString();

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
@@ -208,7 +209,10 @@ public class ShpExporter extends AbstractQueryExporter{
 				tx.commit();
 			}
 			
-			ZipUtil.createZip(Files.list(outDirectory).collect(Collectors.toList()), zipFile);
+			try(Stream<Path> stream = Files.list(outDirectory)){
+				ZipUtil.createZip(stream.collect(Collectors.toList()), zipFile);	
+			}
+			
 			try {
 				FileUtils.deleteDirectory(outDirectory.toAbsolutePath().normalize().toFile());
 			}catch(IOException ex) {

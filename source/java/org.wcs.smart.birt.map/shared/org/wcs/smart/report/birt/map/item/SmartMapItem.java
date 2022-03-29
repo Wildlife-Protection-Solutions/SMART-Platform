@@ -38,6 +38,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.report.birt.map.BoundsSetting;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * A Smart map report item.
@@ -220,15 +221,19 @@ public class SmartMapItem extends ReportItem {
 		
 		if (op == BoundsSetting.BoundsOption.CUSTOM) {
 		
+			CoordinateReferenceSystem crs = null;
 			String srs = handle.getStringProperty(SMART_BOUNDS_SRID_PROP);
 			if (srs == null){
-				return null;
-			}
-			CoordinateReferenceSystem crs = null;
-			try{
-				crs = CRS.parseWKT(handle.getStringProperty(SMART_BOUNDS_SRID_PROP));
-			}catch (Exception ex){
-				throw new IllegalStateException("Could not parse coordinate reference system.", ex); //$NON-NLS-1$
+				//no srs specified
+				//asssume SMART CRS which might be wrong but should prevent null pointer
+				crs = GeometryUtils.SMART_CRS;
+			} else {
+			
+				try{
+					crs = CRS.parseWKT(handle.getStringProperty(SMART_BOUNDS_SRID_PROP));
+				}catch (Exception ex){
+					throw new IllegalStateException("Could not parse coordinate reference system.", ex); //$NON-NLS-1$
+				}
 			}
 			
 			double x1 = handle.getFloatProperty(SMART_BOUNDS_XMIN_PROP);

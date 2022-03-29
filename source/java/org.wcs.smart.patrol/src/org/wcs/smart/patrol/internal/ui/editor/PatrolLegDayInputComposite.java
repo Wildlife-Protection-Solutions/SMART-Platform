@@ -201,6 +201,17 @@ public class PatrolLegDayInputComposite {
 							e.printStackTrace();
 						}	
 					});
+					
+					pld.getWaypoints().forEach(pw->{
+						pw.getWaypoint().getAttachments().forEach(wa->{
+							if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+						});
+						pw.getWaypoint().getAllObservations().forEach(wo->{
+							wo.getAttachments().forEach(wa->{
+								if (wa.getSignatureType() != null) wa.getSignatureType().getName();	
+							});
+						});
+					});
 					setData(pld);
 					
 				}
@@ -1197,13 +1208,16 @@ public class PatrolLegDayInputComposite {
 				public void aboutToRun(IJobChangeEvent event) { }
 				@Override
 				public void done(IJobChangeEvent event) {
-					Display.getDefault().asyncExec(()->observationTable.refresh());
+					Display.getDefault().asyncExec(()->{
+						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+						observationTable.refresh();
+					});
 				}
 
 			};
 			
 			editor.getPatrolEditor().save(Collections.singleton(wp), listener);
-			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+			
 		}
 	}
 	

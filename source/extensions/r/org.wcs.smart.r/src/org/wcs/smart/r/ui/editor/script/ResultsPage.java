@@ -21,10 +21,6 @@
  */
 package org.wcs.smart.r.ui.editor.script;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -135,34 +131,30 @@ public class ResultsPage extends EditorPart {
 		
 	}
 	
-	public OutputStream createPage2OutputStream() {
-
-		return new OutputStream() {
-			StringWriter sb = new StringWriter();	
+	public IRScriptOutputStream createPage2OutputStream() {
+		IRScriptOutputStream test = new IRScriptOutputStream() {
 			private Job j = new Job("refreshJob") { //$NON-NLS-1$
-
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Display.getDefault().syncExec(()->txtOutput.setText(sb.toString()));
 					return Status.OK_STATUS;
 				}
-				
+								
 			};
 			@Override
-			public void close() throws IOException {
+			public void close() {
 				final String lastString = sb.toString();
 				Display.getDefault().asyncExec(()->txtOutput.setText(lastString));
-				super.close();
 				j.cancel();
 				j = null;
 			}
 			
 			@Override
-			public void write(int b) throws IOException {
-				sb.append((char)b);
+			public void write(String string) {
+				super.write(string);
 				j.schedule(500);
 			}
 		};
-
+		return test;
 	}
 }

@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.custom;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -58,6 +59,34 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class CustomPatrolQueryEngine extends CustomQueryEngine {
+	
+	public List<Patrol> getPatrolsByPatrolUuid(Session session, String patrolUuid, Set<UUID> conservationAreas) {
+		UUID puuid = UuidUtils.stringToUuid(patrolUuid);
+		return getPatrolsByPatrolUuid(session, puuid, conservationAreas);
+	}
+
+	public List<Patrol> getPatrolsByPatrolUuid(Session session, UUID patrolUuid, Set<UUID> conservationAreas) {
+		Patrol p = session.get(Patrol.class, patrolUuid);
+		if (p == null || !conservationAreas.contains(p.getConservationArea().getUuid()))
+			throw new SmartConnectException(Status.NOT_FOUND,
+					MessageFormat.format("No patrol with uuid {0}", patrolUuid)); //$NON-NLS-1$
+		return Collections.singletonList(p);
+	}
+	
+	public List<Patrol> getPatrolsByClientUuid(Session session, String clientPatrolUuid, Set<UUID> conservationAreas) {
+
+		UUID clientuuid = UuidUtils.stringToUuid(clientPatrolUuid);
+		DataLink link = session
+				.createQuery("FROM DataLink WHERE providerId = :clientUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+				.setParameter("clientUuid", clientuuid)  //$NON-NLS-1$
+				.setParameter("dataType", PatrolLinkDataType.PATROL.getKey()) //$NON-NLS-1$
+				.uniqueResult();
+		if (link == null)
+			throw new SmartConnectException(Status.NOT_FOUND,
+					MessageFormat.format("No patrol found with link to client id {0}", clientPatrolUuid)); //$NON-NLS-1$
+
+		return getPatrolsByPatrolUuid(session, link.getSmartId(), conservationAreas);
+	}
 	
 	public List<PatrolWaypoint> getWaypointsByPatrolUuid(Session session, String patrolUuid, Set<UUID> conservationAreas) {
 		UUID puuid = UuidUtils.stringToUuid(patrolUuid);
@@ -423,6 +452,14 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		}
 		patrolleg.put("members",members); //$NON-NLS-1$
 				
+		//patrol leg day start time
+		JSONObject patrolLegDay = new JSONObject();
+		patrolLegDay.put("date", pw.getPatrolLegDay().getDate()); //$NON-NLS-1$
+		patrolLegDay.put("start_time", pw.getPatrolLegDay().getStartTime()); //$NON-NLS-1$
+		patrolLegDay.put("end_time", pw.getPatrolLegDay().getEndTime()); //$NON-NLS-1$
+		
+		patrolleg.put("patrol_leg_day",patrolLegDay); //$NON-NLS-1$
+		
 		props.put("patrol_leg", patrolleg); //$NON-NLS-1$
 		
 		JSONObject jwp = convertWaypoint(pw.getWaypoint(), session);	
@@ -438,6 +475,170 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		props.put(WAYPOINT_FIELD,jwp);
 		
 		return feature;
+		
+	}
+	
+	public JSONArray convertPatrolsToJSON(List<Patrol> patrols, Session session, Locale l) {
+		JSONArray ptrs = new JSONArray();
+		for (Patrol p : patrols) {
+			ptrs.put(convertToJSON(p, session, l));
+		}
+		return ptrs;
+	}
+	public JSONObject convertToJSON(Patrol ptr, Session session, Locale l) {
+		
+		JSONObject patrol = new JSONObject();
+		patrol.put(UUID_FIELD, UuidUtils.uuidToString(ptr.getUuid()));
+		patrol.put(ID_FIELD, ptr.getId());
+		patrol.put("comment", ptr.getComment()); //$NON-NLS-1$
+		patrol.put("armed", ptr.isArmed()); //$NON-NLS-1$
+		patrol.put("start_date", ptr.getStartDate()); //$NON-NLS-1$
+		patrol.put("end_date", ptr.getEndDate()); //$NON-NLS-1$
+		patrol.put("objective", ptr.getObjective()); //$NON-NLS-1$
+		
+		//find a client uuid
+		DataLink link = session
+				.createQuery("FROM DataLink WHERE smartId = :smartUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+				.setParameter("smartUuid", ptr.getUuid()) //$NON-NLS-1$
+				.setParameter("dataType", PatrolLinkDataType.PATROL.getKey()) //$NON-NLS-1$
+				.uniqueResult();
+		if (link != null) {
+			patrol.put(CLIENT_UUID_FIELD, UuidUtils.uuidToString(link.getProviderId()));
+		}
+			
+		if (ptr.getStation() != null) {
+			JSONObject station = new JSONObject();
+			Station ps = ptr.getStation();
+			station.put(UUID_FIELD, UuidUtils.uuidToString(ps.getUuid()));
+			for (Label ll : ps.getNames()) {
+				station.put(NAME_FIELD + "_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+			}
+			patrol.put("station", station); //$NON-NLS-1$
+		}
+		
+		if (ptr.getTeam() != null) {
+			JSONObject team = new JSONObject();
+			Team pt = ptr.getTeam();
+			team.put(UUID_FIELD, UuidUtils.uuidToString(pt.getUuid()));
+			for (Label ll : pt.getNames()) {
+				team.put(NAME_FIELD + "_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+			}
+			patrol.put("team", team); //$NON-NLS-1$
+		}
+		
+		JSONObject ca = new JSONObject();
+		ca.put(UUID_FIELD, UuidUtils.uuidToString(ptr.getConservationArea().getUuid()));
+		ca.put(ID_FIELD, ptr.getConservationArea().getId());
+		ca.put(NAME_FIELD, ptr.getConservationArea().getName());
+		patrol.put("conservation_area", ca); //$NON-NLS-1$
+		
+		
+		JSONArray customAttribute = new JSONArray();
+		patrol.put("attributes", customAttribute); //$NON-NLS-1$
+		for (PatrolAttributeValue custom : ptr.getCustomAttributes() ) {
+			JSONObject value = new JSONObject();
+			value.put("attribute_key", custom.getPatrolAttribute().getKeyId()); //$NON-NLS-1$
+			for (Label ll : custom.getPatrolAttribute().getNames()) {
+				value.put("attribute_name_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+			}
+			switch(custom.getPatrolAttribute().getType()) {
+			case BOOLEAN: value.put(VALUE_FIELD, custom.getNumberValue() >= 0.5);
+				break;
+			case DATE: value.put(VALUE_FIELD,custom.getDateValue());
+				break;
+			case LIST:
+				value.put(VALUE_FIELD, custom.getAttributeListItem().getKeyId());
+				for (Label ll : custom.getAttributeListItem().getNames()) {
+					value.put(LABEL_FIELD + "_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+				}
+				break;
+			case MLIST:
+				//not supported
+				break;
+			case NUMERIC: value.put(VALUE_FIELD, custom.getNumberValue());
+				break;
+			case TEXT:value.put(VALUE_FIELD, custom.getStringValue());
+				break;
+			case TREE:
+				//not supported
+				break;
+			default:
+				break;
+			
+			}
+		}
+		
+		JSONArray legs = new JSONArray();
+		for (PatrolLeg leg : ptr.getLegs()) {
+			JSONObject patrolleg = new JSONObject();
+			patrolleg.put(UUID_FIELD, UuidUtils.uuidToString(leg.getUuid()));
+			patrolleg.put(ID_FIELD, leg.getId());
+			patrolleg.put("start_date", leg.getStartDate()); //$NON-NLS-1$
+			patrolleg.put("end_date", leg.getEndDate()); //$NON-NLS-1$
+			legs.put(patrolleg);
+			
+			//find a client uuid
+			link = session
+					.createQuery("FROM DataLink WHERE smartId = :smartUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+					.setParameter("smartUuid", leg.getUuid()) //$NON-NLS-1$
+					.setParameter("dataType", PatrolLinkDataType.LEG.getKey()) //$NON-NLS-1$
+					.uniqueResult();
+			if (link != null) {
+				patrolleg.put(CLIENT_UUID_FIELD, UuidUtils.uuidToString(link.getProviderId()));
+			}
+			
+			
+			
+			if (leg.getMandate() != null) {
+				JSONObject mandate = new JSONObject();
+				PatrolMandate pm = leg.getMandate();
+				mandate.put(UUID_FIELD, UuidUtils.uuidToString(pm.getUuid()));
+				mandate.put(KEY_FIELD,leg.getMandate().getKeyId());
+				for (Label ll : pm.getNames()) {
+					mandate.put(NAME_FIELD + "_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+				}
+				patrolleg.put("mandate", mandate); //$NON-NLS-1$
+			}
+			
+			JSONObject type = new JSONObject();
+			PatrolTransportType tt = leg.getType();
+			type.put(UUID_FIELD, UuidUtils.uuidToString(tt.getUuid()));
+			type.put(KEY_FIELD, tt.getKeyId());
+			for (Label ll : tt.getNames()) {
+				type.put("name_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+			}
+			patrolleg.put("type", type); //$NON-NLS-1$
+			
+			
+			JSONArray members = new JSONArray();
+			for (PatrolLegMember m : leg.getMembers()) {
+				JSONObject member = new JSONObject();
+				member.put(UUID_FIELD, UuidUtils.uuidToString(m.getMember().getUuid()));
+				member.put(ID_FIELD, m.getMember().getId());
+				//TODO: locale
+				member.put(NAME_FIELD, SmartLabelProvider.getFullName(m.getMember(), l));
+				member.put("is_leader", m.getIsLeader()); //$NON-NLS-1$
+				member.put("is_pilot", m.getIsPilot()); //$NON-NLS-1$
+				members.put(member);
+			}
+			patrolleg.put("members",members); //$NON-NLS-1$
+					
+			JSONArray legdays = new JSONArray();
+			
+			for (PatrolLegDay day : leg.getPatrolLegDays()) {
+				//patrol leg day start time
+				JSONObject patrolLegDay = new JSONObject();
+				patrolLegDay.put("date", day.getDate()); //$NON-NLS-1$
+				patrolLegDay.put("start_time", day.getStartTime()); //$NON-NLS-1$
+				patrolLegDay.put("end_time", day.getEndTime()); //$NON-NLS-1$
+				legdays.put(patrolLegDay);
+			}
+			patrolleg.put("patrol_leg_days",legdays); //$NON-NLS-1$
+			
+		}
+		patrol.put("patrol_legs", legs); //$NON-NLS-1$
+		
+		return patrol;
 		
 	}
 }

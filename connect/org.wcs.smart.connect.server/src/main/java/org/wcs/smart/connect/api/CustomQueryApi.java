@@ -55,6 +55,7 @@ import org.wcs.smart.connect.security.CustomQueryAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,6 +92,7 @@ public class CustomQueryApi extends HttpServlet{
 	@Context private ServletContext context; 
 	@Context private HttpServletRequest request;
 	
+	
 	/**
 	 * <p>Queries patrols for waypoints and returns the results as json.</p>
 	 * <p>
@@ -100,6 +102,66 @@ public class CustomQueryApi extends HttpServlet{
 	*/
 	@GET
     @Path("/patrol")
+	@Operation(description="Runs query patrol and returns the results as json")
+	public Response runPatrolQuery(
+			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
+			@Parameter(description="query by client patrol uuid") @QueryParam("client_patrol_uuid") String clientpatroluuid) {
+	
+		//only one filter is allowed
+		int cnt = 0;
+		String[] params = new String[] {smartpatroluuid, clientpatroluuid};
+		for (String x : params) {
+			if (x != null && !x.trim().isEmpty()) cnt++;
+		}
+		if (cnt != 1) throw FILTER_REQURIED;
+			
+		CustomPatrolQueryEngine engine = new CustomPatrolQueryEngine();
+
+		List<Patrol> patrols = null;
+		try(Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale())){
+			try {
+				s.beginTransaction();
+					
+				Set<UUID> conservationAreas = findConservationAreas(s);
+				if (!conservationAreas.isEmpty()) {
+					
+					if (smartpatroluuid != null) {
+						patrols = engine.getPatrolsByPatrolUuid(s, smartpatroluuid, conservationAreas);
+					}else if (clientpatroluuid != null) {
+						patrols = engine.getPatrolsByClientUuid(s, clientpatroluuid, conservationAreas);
+					}
+					
+					if (patrols == null || patrols.isEmpty() ) {
+						//empty list
+						return Response
+								.status(Status.OK)
+								.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+								.entity(((new JSONArray()).toString()))
+								.build();
+					}
+				}
+				return Response
+						.status(Status.OK)
+						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+						.entity(engine.convertPatrolsToJSON(patrols, s, request.getLocale()).toString())
+						.build();
+			}finally {
+				s.getTransaction().commit();
+			}
+		}catch(RuntimeException ex) {
+			logger.log(Level.SEVERE,ex.getMessage(), ex);
+			throw ex;
+		}
+	}
+	/**
+	 * <p>Queries patrols for waypoints and returns the results as json.</p>
+	 * <p>
+	 * URL: ../server/api/query/custom/waypoint/patrol<br>
+	 * Call Type: GET
+	 * </p>
+	*/
+	@GET
+    @Path("/waypoint/patrol")
 	@Operation(description="Runs query patrol and returns the results as json")
 	public Response runPatrolQuery(
 			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
@@ -176,7 +238,7 @@ public class CustomQueryApi extends HttpServlet{
 					}
 				}
 				
-				if (wps == null || wps.isEmpty()) {
+				if (wps == null || wps.isEmpty() ) {
 					//empty list
 					return Response
 							.status(Status.OK)
@@ -235,12 +297,12 @@ public class CustomQueryApi extends HttpServlet{
 	/**
 	 * <p>Queries independent incidents and returns results as json</p>
 	 * <p>
-	 * URL: ../server/api/query/custom/incident<br>
+	 * URL: ../server/api/query/custom/waypoint/incident<br>
 	 * Call Type: GET
 	 * </p>
 	*/
 	@GET
-    @Path("/incident")
+    @Path("/waypoint/incident")
 	@Operation(description="Runs a custom incident query and returns the results as json")
 	public Response runIndependentIncidentQuery(
 			@Parameter(description="smart incident uuid") @QueryParam("incident_uuid") String incidentuuid,

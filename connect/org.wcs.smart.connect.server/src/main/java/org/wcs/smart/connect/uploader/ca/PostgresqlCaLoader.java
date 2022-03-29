@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -121,13 +122,15 @@ public class PostgresqlCaLoader {
 		
 		Path filestore = dir.resolve("filestore"); //$NON-NLS-1$
 		
-		List<Path> paths = Files.list(filestore).collect(Collectors.toList());
-		for (Path f : paths) {
-			if (Files.isDirectory(f)) {
-				Path to = toDir.resolve(f.getFileName().toString());
-				FileUtils.copyDirectory(f.toAbsolutePath().normalize().toFile(), to.toAbsolutePath().normalize().toFile());
-			}else {
-				Files.copy(f, toDir.resolve(f.getFileName().toString()));
+		try(Stream<Path> stream = Files.list(filestore)){
+			List<Path> files = stream.collect(Collectors.toList());
+			for (Path f : files) {
+				if (Files.isDirectory(f)) {
+					Path to = toDir.resolve(f.getFileName().toString());
+					FileUtils.copyDirectory(f.toAbsolutePath().normalize().toFile(), to.toAbsolutePath().normalize().toFile());
+				}else {
+					Files.copy(f, toDir.resolve(f.getFileName().toString()));
+				}
 			}
 		}
 	}
@@ -275,10 +278,12 @@ public class PostgresqlCaLoader {
 		Path dataFileDir = dir.resolve( DATABASE_DIR);
 		//list all .def file
 		
-		List<Path> files = Files.list(dataFileDir)
+		List<Path> files = null;
+		try(Stream<Path> stream = Files.list(dataFileDir)){
+			files = stream
 				.filter(e->e.getFileName().toString().endsWith(".def")) //$NON-NLS-1$
 				.collect(Collectors.toList());
-		
+		}		
 		
 		//read info in files
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();

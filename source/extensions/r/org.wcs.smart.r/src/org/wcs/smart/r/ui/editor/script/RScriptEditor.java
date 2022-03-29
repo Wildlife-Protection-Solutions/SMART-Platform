@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.r.ui.editor.script;
 
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -212,7 +211,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 		setActiveEditor(page2);
 	}
 	
-	OutputStream createPage2OutputStream() {
+	IRScriptOutputStream createPage2OutputStream() {
 		return page2.createPage2OutputStream();
 	}
 	

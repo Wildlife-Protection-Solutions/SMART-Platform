@@ -99,10 +99,27 @@ public class FileStoreWatcher implements Runnable {
     /**
      * Register the given directory with the WatchService
      */
-    private void registerDirectory(Path dir) throws IOException {
-    	if (ignorePaths.contains(dir)) return;
+    private boolean registerDirectory(Path dir) throws IOException {
+    	if (ignorePaths.contains(dir)) {
+    		return false;
+    	}
+    	
+    	//find ca_uuid in path; if we cannot find it then don't register this path
+    	Path relativePath = FileSystems.getDefault()
+    			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
+    			.relativize(dir);
+    	try{
+    		UuidUtils.stringToUuid(relativePath.getName(0).toString());
+    	}catch (Exception ex){
+    		//not in a ca directory so we do not replicate 
+    		//System.out.println("FileStoreWatcher: Process Event: Error cannot determine CA from '" + relativePath.getName(0).toString() + "', directory not being watched"); //$NON-NLS-1$ //$NON-NLS-2$
+    		logger.log(Level.INFO, "FileStoreWatcher: Process Event: Error cannot determine CA from '" + dir.toString() + "', directory not being watched");
+    		return true; //we do want to check sub-directories
+    	}
+    	//logger.log(Level.SEVERE, "Watching directory: " + dir.toString());
         WatchKey key = dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
         keys.put(key, dir);
+        return true;
     }
     
     public void ignoreCa(ConservationAreaInfo ca) {
@@ -122,8 +139,8 @@ public class FileStoreWatcher implements Runnable {
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            	registerDirectory(dir);
-                return FileVisitResult.CONTINUE;
+            	if (registerDirectory(dir)) return FileVisitResult.CONTINUE;
+            	return FileVisitResult.SKIP_SUBTREE;
             }
         });
     }

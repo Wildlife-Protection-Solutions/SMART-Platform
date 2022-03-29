@@ -255,6 +255,11 @@ public enum ProfilesManager {
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
+			q = session.createQuery(
+					"delete from IntelEntityLocation ii where ii.id.location in (FROM IntelLocation a WHERE a.record.profile = :profile) "); //$NON-NLS-1$
+			q.setParameter("profile", profile); //$NON-NLS-1$
+			q.executeUpdate();
+			
 			// delete all links to working sets
 			q = session.createQuery(
 					"delete from IntelWorkingSetEntity ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
