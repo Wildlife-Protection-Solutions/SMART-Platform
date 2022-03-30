@@ -710,6 +710,7 @@ public class Messages extends NLS {
 	public static String EditProjectionDialog_Error_ParsingWKT;
 	public static String EditProjectionDialog_Name_Label;
 	public static String EditProjectionDialog_WKT_Label;
+	public static String EmailLogHandler_emailclienterror;
 	public static String EmailLogHandler_EmailRequired;
 	public static String EmailLogHandler_Error;
 	public static String EmailLogHandler_ErrorMsg;

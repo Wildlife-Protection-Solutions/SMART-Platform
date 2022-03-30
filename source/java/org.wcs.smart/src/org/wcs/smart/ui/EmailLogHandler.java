@@ -74,7 +74,7 @@ public class EmailLogHandler {
 		sb.append(logfile.toString());
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(SharedUtils.LINE_SEPARATOR);
-		sb.append("SMART Version: " + System.getProperty("org.wcs.smart.version.simple")); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("SMART Version: " + System.getProperty("org.wcs.smart.version")); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append("Locale:" + Locale.getDefault().getDisplayName()); //$NON-NLS-1$
 		sb.append(SharedUtils.LINE_SEPARATOR);
@@ -138,8 +138,20 @@ public class EmailLogHandler {
 		try {
 			//TODO: test this on linux and mac
 			if (Desktop.isDesktopSupported()) {
-				String mailto = "mailto:?subject=" + enc("SMART Error Log") + "&body=" + enc(sb.toString());	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				Desktop.getDesktop().mail(new URI(mailto));
+				String part = null;
+				if (sb.length() > 20000) {
+					part = sb.substring(0, 20000);
+				}else {
+					part = sb.toString();
+				}
+				try {
+					String mailto = "mailto:?subject=" + enc("SMART Error Log") + "&body=" + enc(part);	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					Desktop.getDesktop().mail(new URI(mailto));
+				}catch (Exception ex) {
+					SmartPlugIn.log(ex.getMessage(), ex);
+					MessageDialog.openError(activeShell, Messages.EmailLogHandler_ErrorTitle, 
+							MessageFormat.format(Messages.EmailLogHandler_emailclienterror, logfile.toString()) );
+				}
 			} else if (System.getProperty("os.name").toLowerCase().contains("mac")) { //$NON-NLS-1$ //$NON-NLS-2$
 				//use the mac email program
 				
