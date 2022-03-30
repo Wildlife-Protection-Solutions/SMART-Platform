@@ -28,4 +28,6 @@ from connect.ca_plugin_version where plugin_id = 'org.wcs.smart.i2';
 alter table smart.OBSERVATION_ATTACHMENT add column signature_type_uuid uuid;
 alter table smart.observation_attachment ADD CONSTRAINT observation_attachment_sig_fk foreign key (signature_type_uuid)  references smart.signature_type(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
 
+update smart.i18n_label set value = 'Hyaena Brown' WHERE  value = 'Hyaena rown' and element_uuid in (select uuid from smart.icon where keyid = 'hyaena_rown';
+
 update connect.connect_version set version = '7.5.0', last_updated = now();
