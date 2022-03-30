@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.r.feature"
       label="SMART R Module"
-      version="7.4.0.qualifier"
+      version="7.5.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.r"
       license-feature="org.wcs.smart.license.feature"
