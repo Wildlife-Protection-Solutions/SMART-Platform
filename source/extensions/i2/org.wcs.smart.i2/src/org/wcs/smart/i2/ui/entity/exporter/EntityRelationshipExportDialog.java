@@ -193,7 +193,7 @@ public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 	private String getDefaultDirectory(){
 		String dir = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_DIR_KEY);
 		if (dir == null || dir.isEmpty()){
-			dir = System.getProperty("user.dir"); //$NON-NLS-1$
+			dir = System.getProperty("user.home"); //$NON-NLS-1$
 		}
 		return dir;
 	}

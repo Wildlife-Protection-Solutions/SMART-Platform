@@ -50,7 +50,6 @@ import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.user.UserLevelManager;
-import org.wcs.smart.util.SmartUtils;
 /**
  * Preference page for configuring auto-backups
  * 
@@ -291,9 +290,6 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		txtBackupDir = new Text(backup, SWT.BORDER | SWT.SINGLE);
 		Path temp = Paths.get(System.getProperty("user.dir")); //$NON-NLS-1$
 		Path b = temp.getParent().resolve("SMART_Backups"); //$NON-NLS-1$
-		if(!Files.exists(b)){
-			SmartUtils.createDirectory(b);
-		}
 		
 		txtBackupDir.setText(b.toAbsolutePath().normalize().toString());
 		
@@ -328,7 +324,7 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		cdFullTimer = createDecoration(fullDays);
 		cdPartTimer = createDecoration(partDays);
 		cdDeleteTimer = createDecoration(deleteDays);
-		cdLoc = createDecoration(txtBackupDir);
+		cdLoc = createDecorationWarning(txtBackupDir);
 
 		setMessage(Messages.AutoBackupDialog_Title);
 		
@@ -339,13 +335,21 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 	}
 
 	protected ControlDecoration createDecoration(Control control){
+		return createDecoration(control, FieldDecorationRegistry.DEC_ERROR);
+	}
+	
+	protected ControlDecoration createDecorationWarning(Control control){
+		return createDecoration(control, FieldDecorationRegistry.DEC_WARNING);
+	}
+
+	private ControlDecoration createDecoration(Control control, String image){
 		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
 		cd.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+				.getFieldDecoration(image).getImage());
 		cd.setShowHover(true);
 		return cd;
 	}
-
+	
 	/**
 	 * Validate the input fields
 	 * 
@@ -353,7 +357,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 	 */
 	private boolean validate() {
 		boolean isComplete = true;
-		String error = null;
+		String error = null;	
+	
 		if ( ! isInteger(fullDays.getText()) || Integer.parseInt(fullDays.getText()) < -1){
 			cdFullTimer.show();
 			error = Messages.AutoBackupDialog_Error_InvalidNumberDays;
@@ -382,12 +387,14 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		Path f = Paths.get(txtBackupDir.getText());
 		if (!Files.exists(f)){
 			cdLoc.show();
-			error = Messages.AutoBackupDialog_Error_InvalidDirectory;
 			cdLoc.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidDirectory);
-			isComplete = false;
+//			setMessage(Messages.AutoBackupDialog_Error_InvalidDirectory);
+//			error = Messages.AutoBackupDialog_Error_InvalidDirectory;
+//			isComplete = false;
 		}else{
 			cdLoc.hide();
 		}
+		
 		setErrorMessage(error);
 		setValid(isComplete);
 		return isComplete;
