@@ -295,7 +295,6 @@ public class RecordMappingPage extends WizardPage {
 		
 		scomp = new ScrolledComposite(temp, SWT.V_SCROLL | SWT.H_SCROLL);
 		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		scomp.setExpandHorizontal(true);
 		
 		main = new Composite(scomp, SWT.NONE);
 		scomp.setContent(main);
