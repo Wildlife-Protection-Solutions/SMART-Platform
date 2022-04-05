@@ -966,7 +966,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			Set<PatrolMandate> mandates = new HashSet<>();
 
 			mandates.add(legs.get(0).getMandate());
-			toolkit.createLabel(left, legs.get(0).getMandate().getName());
+			toolkit.createLabel(left, legs.get(0).getMandate() == null ? "" : legs.get(0).getMandate().getName());
 			
 			for (int i = 1; i < legs.size(); i ++) {
 				if (mandates.contains(legs.get(i).getMandate())) continue;
@@ -1025,7 +1025,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			Set<Employee> leaders = new HashSet<>();
 			for (PatrolLeg pl : patrol.getLegs()) {
 				pl.getMembers().forEach(pm -> members.add(pm.getMember()));
-				leaders.add(pl.getLeader().getMember());
+				if (pl.getLeader() != null) leaders.add(pl.getLeader().getMember());
 			}
 			members.removeAll(leaders);
 			
@@ -1115,7 +1115,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 					for (PatrolLeg leg : patrol.getLegs()) {
 						//order leg days by time of first waypoint
 						leg.getType().getName();
-						leg.getMandate().getName();
+						if (leg.getMandate() != null) leg.getMandate().getName();
 						for (PatrolLegDay legday : leg.getPatrolLegDays()) {				
 							List<PatrolLegDay> temp = legsbyday.get(legday.getDate());
 							if (temp == null) {
