@@ -744,13 +744,17 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			toUpdate.getTracks().add(track);
 		}
 
+		boolean exists = false;
 		List<Coordinate> items = new ArrayList<>();
 		if (track.getLineString() != null) {
 			for (Coordinate c : track.getLineString().getCoordinates()) {
 				items.add(c);
+				if (c.x == position.x && c.y == position.y && c.z == position.z) {
+					exists = true;
+				}
 			}
 		}
-		items.add(position);		
+		if (!exists) items.add(position);		
 		if (items.size() == 1) items.add(position);
 		
 		track.setLineString(TrackUtil.convertToLineString(items));
