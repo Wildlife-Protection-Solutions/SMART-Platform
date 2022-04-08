@@ -22,16 +22,13 @@
 package org.wcs.smart.connect.api;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -61,6 +58,7 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
@@ -70,10 +68,13 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.hibernate.AttachmentInterceptor;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.CaAction;
@@ -83,8 +84,9 @@ import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
+import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter.IconOption;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel;
 import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -145,14 +147,14 @@ public class DataModelApi extends HttpServlet{
 						
 				SimpleDataModel caDataModel = new SimpleDataModel(ca, roots, attributes);
 				
-				DataModelToXmlConverter converter = new DataModelToXmlConverter();
-				org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = converter.convert(caDataModel);
+				DataModelToXmlConverter converter = new DataModelToXmlConverter(IconOption.NONE);
+				DataModel xml = converter.convert(caDataModel);
 				
 				StreamingOutput stream = new StreamingOutput() {
 					@Override
 					public void write(OutputStream output) throws IOException {
 						try {
-							XmlSmartDataModelManager.writeDataModel(xml, output);
+							DataModelToXmlConverter.writeDataModel(xml, output);
 						} catch (JAXBException e) {
 							throw new IOException(e);
 						}
@@ -213,81 +215,126 @@ public class DataModelApi extends HttpServlet{
 		}
 
 		//read data model as utf-8 file
-		InputStream inputStream = dataModelFilesParts.get(0).getBody(InputStream.class,null);
-		byte [] bytes = IOUtils.toByteArray(inputStream);
-		String dmXml = new String(bytes, StandardCharsets.UTF_8);
-		
-		String conservationAreas = conservationAreaParts.get(0).getBodyAsString();
-		String[] cabits = conservationAreas.split(","); //$NON-NLS-1$
-		
-		
-		SimpleDataModel sdm = null;
-
 		List<String> allWarnings = new ArrayList<>();
 		
-		try(Session session = HibernateManager.getSession(context)){
-			session.beginTransaction();
-			try {
-				for (String strUuid : cabits) {
-					UUID caUuid = UuidUtils.stringToUuid(strUuid);
-				
-					ConservationArea ca = session.get(ConservationArea.class, caUuid);
-					if (ca == null) {
-						throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataModelApi_CaIdError", SmartUtils.getRequestLocale(request)), ca)); //$NON-NLS-1$
-					}
-
-					List<Icon> cmIcons = QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
-					try(InputStream stream = new ByteArrayInputStream(dmXml.getBytes(StandardCharsets.UTF_8.name()))){
-						DataModelXmlToSimpleDataModelConverter cc = new DataModelXmlToSimpleDataModelConverter();
-						sdm = cc.convert(stream, cmIcons, Locale.getDefault());
-					}catch (Exception ex) {
-						logger.log(Level.SEVERE, ex.getMessage(), ex);
-						throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataModelApi_ReadError", SmartUtils.getRequestLocale(request)), ex.getMessage()), ex) ; //$NON-NLS-1$
-					}
-					
-					CriteriaBuilder cb = session.getCriteriaBuilder();
-					CriteriaQuery<Category> c = cb.createQuery(Category.class);
-					Root<Category> root = c.from(Category.class);
-					c.where(cb.and(
-							cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
-							cb.isNull(root.get("parent")) //$NON-NLS-1$
-							));
-					c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
-					List<Category> rootCategories = session.createQuery(c).getResultList();
-								
-					List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
-							new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
-					
-					SimpleDataModel targetDm = new SimpleDataModel(ca, rootCategories, attribute);
-					
-					
-					DataModelMergeAndUpdater merger = new DataModelMergeAndUpdater(targetDm, sdm, SmartUtils.getRequestLocale(request));
-					List<String> warnings = merger.merge(new NullProgressMonitor());
-					allWarnings.addAll(warnings);
-					
-					//add any new objects that are not saved via relationships
-					for (Attribute a : targetDm.getAttributes()){
-						if (a.getUuid() == null){
-							session.save(a);
-						}
-					}
-					for (Category cat : targetDm.getCategories()){
-						if (cat.getUuid() == null){
-							session.save(cat);
-						}
-					}
-					session.flush();
-				}
-				session.getTransaction().commit();
-			}catch (Exception ex) {
-				logger.log(Level.SEVERE, ex.getMessage(), ex);
-				if (session.getTransaction().isActive()) session.getTransaction().rollback();
-				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("DataModelApi_MergeError", SmartUtils.getRequestLocale(request)) +ex.getMessage(), ex); //$NON-NLS-1$
+		java.nio.file.Path workingDirectory = Files.createTempDirectory("smartdm"); //$NON-NLS-1$
+		try {
+			//write input stream to local file
+			String extension = ".xml"; //$NON-NLS-1$
+			if (dataModelFilesParts.get(0).getMediaType().toString().contains("zip")) { //$NON-NLS-1$
+				extension = ".zip"; //$NON-NLS-1$
 			}
+			java.nio.file.Path dmfile = workingDirectory.resolve("dmfile" + extension); //$NON-NLS-1$
+			try(InputStream inputStream = dataModelFilesParts.get(0).getBody(InputStream.class,null)){
+				Files.copy(inputStream, dmfile);	
+			}
+			
+			String conservationAreas = conservationAreaParts.get(0).getBodyAsString();
+			String[] cabits = conservationAreas.split(","); //$NON-NLS-1$
+			
+			
+			SimpleDataModel sdm = null;
+			
+			try(Session session = HibernateManager.getSession(context, request.getLocale(), new AttachmentInterceptor())){
+				session.beginTransaction();
+				try {
+					for (String strUuid : cabits) {
+						UUID caUuid = UuidUtils.stringToUuid(strUuid);
+					
+						ConservationArea ca = session.get(ConservationArea.class, caUuid);
+						if (ca == null) {
+							throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataModelApi_CaIdError", SmartUtils.getRequestLocale(request)), ca)); //$NON-NLS-1$
+						}
+	
+						List<Icon> cmIcons = QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+						List<IconSet> cmSets = QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+						
+						java.nio.file.Path localTemp = workingDirectory.resolve(ca.getUuid().toString());
+						XmlDataModelImporter importer = new XmlDataModelImporter(cmIcons, cmSets,  request.getLocale(), localTemp);
+						importer.processFile(dmfile);
+						sdm = importer.getImportedDataModel();
+										
+						CriteriaBuilder cb = session.getCriteriaBuilder();
+						CriteriaQuery<Category> c = cb.createQuery(Category.class);
+						Root<Category> root = c.from(Category.class);
+						c.where(cb.and(
+								cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
+								cb.isNull(root.get("parent")) //$NON-NLS-1$
+								));
+						c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
+						List<Category> rootCategories = session.createQuery(c).getResultList();
+									
+						List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
+								new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
+						
+						//we need to load and cache all attribute details here otherwise
+						//auto flush flushes data when loading which causes hibernate errors
+						rootCategories.forEach(rc->rc.accept(cat->{
+							cat.getNames().size();
+							return true;
+						}));
+						attribute.forEach(ra->{
+							ra.getNames().size();
+							if (ra.getAttributeList() != null) ra.getAttributeList().forEach(li->li.getNames().size());
+							if (ra.getTree() != null) {
+								ra.getTree().forEach(node->
+									node.accept(v->{
+										v.getNames().size();
+										return true;
+									})
+								);
+							}
+						});
+						
+						SimpleDataModel targetDm = new SimpleDataModel(ca, rootCategories, attribute);
+						
+						DataModelMergeAndUpdater merger = new DataModelMergeAndUpdater(targetDm, sdm, SmartUtils.getRequestLocale(request));
+						List<String> warnings = merger.merge(new NullProgressMonitor());
+						allWarnings.addAll(warnings);
+						
+						//add any new objects that are not saved via relationships
+						for (Attribute a : targetDm.getAttributes()){
+							updateAndSaveIcon(a, a.getConservationArea(), session);
+							if (a.getAttributeList() != null) a.getAttributeList().forEach(li->updateAndSaveIcon(li, a.getConservationArea(), session));
+							if (a.getTree() != null)a.getTree().forEach(node->node.accept(v->{
+								updateAndSaveIcon(v, a.getConservationArea(), session);
+								return true;
+							}));
+							if (a.getUuid() == null){
+								session.save(a);
+							}
+						}
+						for (Category cat : targetDm.getCategories()){
+							cat.accept(cd->{
+								updateAndSaveIcon(cd, cd.getConservationArea(), session);
+								return true;
+							});
+							if (cat.getUuid() == null){
+								session.save(cat);
+							}
+						}
+					}
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+					throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("DataModelApi_MergeError", SmartUtils.getRequestLocale(request)) +ex.getMessage(), ex); //$NON-NLS-1$
+				}
+			}
+		}finally{
+			if (Files.exists(workingDirectory)) FileUtils.deleteDirectory(workingDirectory.toFile());
 		}
 		return allWarnings;
 	}
 	
+	private void updateAndSaveIcon(DmObject object, ConservationArea ca, Session session) {
+		if (object.getIcon() == null) return;
+		object.getIcon().setConservationArea(ca);
+		if (object.getIcon().getUuid() == null) {
+			session.save(object.getIcon());
+		}
+		
+	}
 	
 	
 	@GET
