@@ -29,9 +29,10 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -40,24 +41,22 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartApp;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
-import org.wcs.smart.ui.internal.ca.properties.ImportAttributeDialog.ParentTreeNodeType;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
 
 /**
  * Processor for importing attribute information from an xml file.
- * <p>This class attemps to find an xml file that matches the key of
+ * <p>This class attempts to find an xml file that matches the key of
  * the provided attribute and displays a dialog to users where they can select
  * items to import.
  * </p><p>Currently only works for 
@@ -70,9 +69,11 @@ import org.wcs.smart.ui.internal.ca.properties.ImportAttributeDialog.ParentTreeN
  */
 public class ImportAttributeProcessor {
 
-	private DataModel xmlDataModel = null;
+//	private DataModel xmlDataModel = null;
 	private Attribute attribute;
-	private AttributeType matchedAttribute;
+//	private AttributeType matchedAttribute;
+	private Attribute matchedAttribute;
+	
 	private List<AttributeTreeNode> workingRoots = null;
 	private String defaultLangCode = null;
 	private String currentKey = null;
@@ -122,9 +123,9 @@ public class ImportAttributeProcessor {
 			return;
 		}
 		
-		List<TreeNodeType> roots = dialog.getSelectedNodes();
+		List<AttributeTreeNode> roots = dialog.getSelectedNodes();
 		List<AttributeTreeNode> newNodes = new ArrayList<AttributeTreeNode>();
-		for (TreeNodeType root : roots){
+		for (AttributeTreeNode root : roots){
 			newNodes.add(convertNodeCascade(root, null));
 		}
 		
@@ -163,20 +164,18 @@ public class ImportAttributeProcessor {
 			return false;
 		}
 		
-		defaultLangCode = DataModelXmlToSmartConverter.checkLanguage(xmlDataModel.getLanguages().getLanguages().stream().map(m->m.getCode()).collect(Collectors.toSet()), attribute.getConservationArea());
 		if (defaultLangCode == null){
 			return false;
 		}
 		return true;
 	}
 	
-
 	/**
 	 * 
 	 * @return the data model xml attribute that
 	 * matches the current smart attribute
 	 */
-	public AttributeType getMatchedAttribute(){
+	public Attribute getMatchedAttribute(){
 		return this.matchedAttribute;
 	}
 	
@@ -247,7 +246,7 @@ public class ImportAttributeProcessor {
 	/*
 	 * Converts a xml tree node to a smart tree node.
 	 */
-	private  AttributeTreeNode convertNode(TreeNodeType toClone,
+	private  AttributeTreeNode convertNode(AttributeTreeNode toClone,
 			AttributeTreeNode parent) {
 		
 		HashMap<String, Language>langLookup = new HashMap<String, Language>();
@@ -257,21 +256,21 @@ public class ImportAttributeProcessor {
 		
 		AttributeTreeNode cloned = new AttributeTreeNode();
 		cloned.setAttribute(attribute);
-		cloned.setKeyId(toClone.getKey());
-		for (NameType nt : toClone.getNames()){
+		cloned.setKeyId(toClone.getKeyId());
+		for (Label nt : toClone.getNames()){
 			String value = nt.getValue();
-			Language l = langLookup.get(nt.getLanguageCode());
+			Language l = langLookup.get(nt.getLanguage().getCode());
 			if (l != null){
 				cloned.updateName(l, value);
 			}
-			if (nt.getLanguageCode().equals(defaultLangCode)){
+			if (nt.getLanguage().getCode().equals(defaultLangCode)){
 				cloned.updateName(attribute.getConservationArea().getDefaultLanguage(), value);
 			}
 		}
 		
 		cloned.setActiveChildren(new ArrayList<AttributeTreeNode>());
 		cloned.setChildren(new ArrayList<AttributeTreeNode>());
-		cloned.setIsActive(toClone.isIsactive());
+		cloned.setIsActive(toClone.getIsActive());
 		cloned.setParent(parent);
 		
 		return cloned;
@@ -280,32 +279,22 @@ public class ImportAttributeProcessor {
 	/*
 	 * Converts and xml tree node and it's children to a smart tree node.
 	 */
-	private AttributeTreeNode convertNodeCascade(TreeNodeType toClone, AttributeTreeNode parent){
+	private AttributeTreeNode convertNodeCascade(AttributeTreeNode toClone, AttributeTreeNode parent){
 		AttributeTreeNode cloned = convertNode(toClone, parent);
 	
-		try(Session session = HibernateManager.openSession()){
-			int i = 1;
-			for (TreeNodeType child : toClone.getChildrens()){
-				AttributeTreeNode clonedchild = convertNodeCascade((ParentTreeNodeType)child, cloned);
-				clonedchild.setNodeOrder(i++);
-				clonedchild.setParent(cloned);
-				
-				cloned.getChildren().add(clonedchild);
-				if (clonedchild.getIsActive()){
-					cloned.getActiveChildren().add(clonedchild);
-				}
-		
-				if (child.getIconkey() != null && !child.getIconkey().isEmpty()) {
-					Icon icon = QueryFactory.buildQuery(session, Icon.class, 
-							new Object[] {"conservationArea", attribute.getConservationArea()}, //$NON-NLS-1$
-							new Object[] {"keyId", child.getIconkey()}).uniqueResult(); //$NON-NLS-1$
-					if (icon != null) {
-						clonedchild.setIcon(icon);
-						icon.getFiles().forEach(ie->ie.computeFileLocation(session));
-					}
-				}
+		int i = 1;
+		for (AttributeTreeNode child : toClone.getChildren()){
+			AttributeTreeNode clonedchild = convertNodeCascade(child, cloned);
+			clonedchild.setNodeOrder(i++);
+			clonedchild.setParent(cloned);
+			
+			cloned.getChildren().add(clonedchild);
+			if (clonedchild.getIsActive()){
+				cloned.getActiveChildren().add(clonedchild);
 			}
+			clonedchild.setIcon(child.getIcon());
 		}
+		
 		return cloned;
 	}
 
@@ -336,10 +325,7 @@ public class ImportAttributeProcessor {
 	 * @throws Exception
 	 */
 	public void readDataModel(Path f) throws Exception{
-		try(InputStream is = Files.newInputStream(f)){	
-			importAttributeDataModel(is);
-		}
-		
+		importAttributeDataModel(f, null);
 	}
 	
 	
@@ -349,29 +335,72 @@ public class ImportAttributeProcessor {
 			//no file found
 			return ;
 		}
-		importAttributeDataModel(in);
+		importAttributeDataModel(null, in);
 	}
 	
 	/*
 	 * read the xml file from an input stream.  Closes the input
 	 * stream when finished reading.
 	 */
-	private void importAttributeDataModel(InputStream in) throws Exception{
-		xmlDataModel = null;
+	private void importAttributeDataModel(Path file, InputStream in) throws Exception{
 		matchedAttribute = null;
 		defaultLangCode = null;
 		
-		xmlDataModel = XmlSmartDataModelManager.readDataModel(in, Locale.getDefault());
-		
-		if (xmlDataModel == null){
-			throw new Exception("Data model is null."); //$NON-NLS-1$
+		List<Icon> icons;
+		List<IconSet> sets;
+		try(Session session = HibernateManager.openSession()){
+			icons = QueryFactory.buildQuery(session, Icon.class, 
+				new Object[] {"conservationArea", attribute.getConservationArea()}) //$NON-NLS-1$
+					.list();
+			icons.forEach(i->i.getFiles().forEach(ic->ic.computeFileLocation(session)));
+			sets = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", attribute.getConservationArea()}) //$NON-NLS-1$
+					.list();
 		}
-		for (AttributeType type : xmlDataModel.getAttributes().getAttributes()){
-			if (type.getKey().equals(currentKey)){
-				matchedAttribute = type;
+		
+		XmlDataModelImporter importer = new XmlDataModelImporter(icons, sets, Locale.getDefault(), null);
+		if (file != null) {
+			importer.processFile(file);
+		}else if (in != null) {
+			importer.processInputStream(in);
+		}else {
+			throw new Exception("No file to import"); //$NON-NLS-1$
+		}
+		
+		if (importer.getImportedDataModel() == null) throw new Exception("Data model is null."); //$NON-NLS-1$
+		
+		for (Attribute a : importer.getImportedDataModel().getAttributes()) {
+			if (a.getKeyId().equalsIgnoreCase(currentKey)) {
+				matchedAttribute = a;
 				break;
 			}
-		}	
+		}
+
+		SimpleDataModel dm = importer.getImportedDataModel();
+		Set<String> lcodes = new HashSet<>();
+		//collect all language codes used in data model
+		dm.getCategories().forEach(category->{
+			category.accept(e->{
+				e.getNames().forEach(l->lcodes.add(l.getLanguage().getCode()));
+				return true;
+			});
+		});
+		dm.getAttributes().forEach(a->{
+			a.getNames().forEach(l->lcodes.add(l.getLanguage().getCode()));
+			if (a.getAttributeList() != null) {
+				a.getAttributeList().forEach(li -> li.getNames().forEach(l->lcodes.add(l.getLanguage().getCode())));
+			}
+			if (a.getTree() != null) {
+				for (AttributeTreeNode node : a.getTree()) {
+					 node.accept(e->{
+						e.getNames().forEach(l->lcodes.add(l.getLanguage().getCode()));
+						return true;
+					});
+				}
+			}
+		});
+		
+		defaultLangCode = DataModelXmlToSmartConverter.checkLanguage(lcodes, attribute.getConservationArea());
 	}
 	
 	

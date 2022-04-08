@@ -870,6 +870,16 @@ public class Messages extends NLS {
 	public static String ExportCaHandler_ExportCancelledMessage;
 	public static String ExportCaHandler_ExportComplete_DialogMessage;
 	public static String ExportCaHandler_ExportComplete_DialogTitle;
+	public static String ExportDataModelPage1_ExcludeIconsInfo;
+	public static String ExportDataModelPage1_IncludeIcons;
+	public static String ExportDataModelPage1_IncludeIconsInfo;
+	public static String ExportDataModelPage1_Message;
+	public static String ExportDataModelPage1_Title;
+	public static String ExportDataModelPage2_FileLabel;
+	public static String ExportDataModelPage2_Message;
+	public static String ExportDataModelPage2_Title;
+	public static String ExportDataModelWizard_DmExported;
+	public static String ExportDataModelWizard_ExportDm;
 	public static String ExportMapToImageWizard_ChooseFilenameMessage;
 	public static String ExportMapToImageWizard_Error;
 	public static String ExportMapToImageWizard_Error2;
@@ -1339,6 +1349,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_CaTableName;
 	public static String SmartLabelProvider_ContainsOperator;
 	public static String SmartLabelProvider_countrycolumnname;
+	public static String SmartLabelProvider_DataModelXmlNotFound;
 	public static String SmartLabelProvider_DateAttributeType;
 	public static String SmartLabelProvider_DescriptionColumnName;
 	public static String SmartLabelProvider_DesignationColumnName;
@@ -1347,6 +1358,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_EqualsOperator;
 	public static String SmartLabelProvider_ExactOperator;
 	public static String SmartLabelProvider_GeometryLabel;
+	public static String SmartLabelProvider_InvalidXmlFile;
 	public static String SmartLabelProvider_KeyName;
 	public static String SmartLabelProvider_ListAttributeType;
 	public static String SmartLabelProvider_MergeDmAttNotFound;

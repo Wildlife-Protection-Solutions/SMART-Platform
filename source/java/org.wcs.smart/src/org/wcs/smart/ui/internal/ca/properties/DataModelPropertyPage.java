@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,6 +46,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -85,9 +85,9 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.DataModelTranslationExporter;
 import org.wcs.smart.ca.datamodel.DataModelTranslationImporter;
-import org.wcs.smart.ca.datamodel.ICategoryVisitor;
 import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.control.WarningDialog;
@@ -95,10 +95,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.ca.datamodel.DataModelMergeDialog;
+import org.wcs.smart.ui.ca.datamodel.ExportDataModelWizard;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
@@ -607,14 +607,35 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							//get icons and create target dm with these icons
 							List<Icon> icons = QueryFactory.buildQuery(session, Icon.class,
 									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+							List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class,
+									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 							DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-							DataModel targetDm = converter.convert(f, ca, icons, false);
+							
+							//TODO: figure out when to delete this temp dir
+							Path workingDirectory = Files.createTempDirectory("smartdb");
+							DataModel targetDm = converter.convert(f, ca, icons, sets, false, workingDirectory);
 							
 							DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, SmartDB.getCurrentLanguage());					
 							warnings.addAll(updater.merge(progress.split(1)));
 							
 							//add any new objects that are not saved via relationships
 							for (Attribute a : sourceDm.getAttributes()){
+								
+								if (a.getIcon() != null && a.getIcon().getUuid() == null) session.save(a.getIcon());
+								if (a.getAttributeList() != null) {
+									a.getAttributeList().forEach(e->{
+										if (e.getIcon() != null && e.getIcon().getUuid() == null) session.save(e.getIcon());
+									});
+								}
+								if (a.getTree() != null) {
+									a.getTree().forEach(node->{
+										node.accept(n->{
+											if (n.getIcon() != null && n.getIcon().getUuid() == null) session.save(n.getIcon());
+											return true;
+										});
+									});
+								}
+								
 								if (a.getUuid() == null){
 									session.save(a);
 									if (a.getIcon() != null) a.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
@@ -639,18 +660,12 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								}
 							}
 							for (Category c : sourceDm.getCategories()){
-								if (c.getUuid() == null){
-									session.save(c);
-								}
-								
-								c.accept(new ICategoryVisitor() {
-									
-									@Override
-									public boolean visit(Category category) {
-										if (category.getIcon() != null) category.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
-										return true;
-									}
+								c.accept(category->{
+									if (category.getIcon() != null && category.getIcon().getUuid() == null) session.save(category.getIcon());
+									if (category.getIcon() != null) category.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+									return true;
 								});
+								if (c.getUuid() == null) session.save(c);
 							}
 						}
 						session.flush();
@@ -699,61 +714,65 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * Exports the current model as defined (not necessary saved) to an xml file.
 	 */
 	private void exportXml(){
-		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
-		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
-		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
 		
-		String file = fd.open();
-		if (file == null){
-			//nothing selected
-			return;
-		}
-		final Path f = Paths.get(file);
-		if (Files.exists(f)){
-			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_OverwriteFile_DialogTitle, 
-					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getFileName()}))){
-				return;
-			}
-		}
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try{
-			pmd.run(true, false, new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					try{
-						monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
-						DataModel dm = ((DataModel) viewer.getInput());
-						
-						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
-						DataModelSmartToXmlConverter converter = new DataModelSmartToXmlConverter(monitor);
-						org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = converter.convert(dm);
-						monitor.worked(1);
-						
-						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
-						try(OutputStream fout = Files.newOutputStream(f)){
-							XmlSmartDataModelManager.writeDataModel(xml,fout);
-						}
-						monitor.done();
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
-							}});
-						
-					}catch (final Exception ex){
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
-							}});
-					}
-				}
-			});
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
-		}
+		WizardDialog dialog = new SmartWizardDialog(getShell(), new ExportDataModelWizard(((DataModel) viewer.getInput())));
+		dialog.open();
+		
+//		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
+//		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
+//		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
+//		
+//		String file = fd.open();
+//		if (file == null){
+//			//nothing selected
+//			return;
+//		}
+//		final Path f = Paths.get(file);
+//		if (Files.exists(f)){
+//			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_OverwriteFile_DialogTitle, 
+//					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getFileName()}))){
+//				return;
+//			}
+//		}
+//		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+//		try{
+//			pmd.run(true, false, new IRunnableWithProgress() {
+//
+//				@Override
+//				public void run(IProgressMonitor monitor)
+//						throws InvocationTargetException, InterruptedException {
+//					try{
+//						monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
+//						DataModel dm = ((DataModel) viewer.getInput());
+//						
+//						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
+//						DataModelSmartToXmlConverter converter = new DataModelSmartToXmlConverter(monitor);
+//						org.wcs.smart.internal.ca.datamodel.xml.generate.v10.DataModel xml = converter.convert(dm);
+//						monitor.worked(1);
+//						
+//						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
+//						try(OutputStream fout = Files.newOutputStream(f)){
+//							XmlSmartDataModelManager.writeDataModel(xml,fout);
+//						}
+//						monitor.done();
+//						Display.getDefault().syncExec(new Runnable(){
+//							@Override
+//							public void run() {
+//								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
+//							}});
+//						
+//					}catch (final Exception ex){
+//						Display.getDefault().syncExec(new Runnable(){
+//							@Override
+//							public void run() {
+//								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
+//							}});
+//					}
+//				}
+//			});
+//		} catch (Exception ex) {
+//			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
+//		}
 	}
 	
 	/**
@@ -1005,7 +1024,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		if (ret == Window.CANCEL){
 			return;
 		}
-		
+		if (newCat.getIcon() != null && newCat.getIcon().getUuid() == null) session.save(newCat.getIcon());
 		if (o instanceof DataModelContentProvider.RootNode){
 			DataModel dm = (DataModel)viewer.getInput();
 			newCat.setParent(null);
@@ -1161,6 +1180,24 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				newAttributes.add( dm.addNewAttribute(att, parent) );
 				//added a new attribute
 				DataModelManager.INSTANCE.fireAddListener(session, att);
+				
+				//process any potentially  new custom attributes
+				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.save(att.getIcon());
+				if (att.getAttributeList() != null) {
+					att.getAttributeList().forEach(a->{
+						if (a.getIcon() != null && a.getIcon().getUuid() == null) session.save(a.getIcon());
+					});
+				}
+				if (att.getTree() != null) {
+					att.getTree().forEach(node->{
+						if (node.getIcon() != null && node.getIcon() == null) session.save(node.getIcon());
+						node.accept(kid->{
+							if (kid.getIcon() != null && kid.getIcon() == null) session.save(kid.getIcon());
+							return true;
+						});
+					});				}
+				
+				
 				session.saveOrUpdate(att);
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(ex.getMessage(), ex);

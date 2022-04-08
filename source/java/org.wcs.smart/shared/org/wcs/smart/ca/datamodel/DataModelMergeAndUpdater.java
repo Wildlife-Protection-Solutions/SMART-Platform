@@ -32,10 +32,12 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * Merges a source data model with a target data model updating
@@ -149,10 +151,60 @@ public class DataModelMergeAndUpdater {
 		}
 		resortCategories(sourceDm.getCategories());
 		monitor.done();
+		
+		//update icon Conservation area links
+		sourceDm.getCategories().forEach(c->{
+			c.accept(e->{updateIconCa(e, e.getConservationArea()); return true;});
+		});
+		sourceDm.getAttributes().forEach(a->{
+			updateIconCa(a, a.getConservationArea());
+			if (a.getAttributeList() != null) a.getAttributeList().forEach(item->updateIconCa(item, a.getConservationArea()));
+			if (a.getTree() != null) {
+				a.getTree().forEach(node->{
+					node.accept(e->{updateIconCa(e, a.getConservationArea()); return true;});
+				});
+			}
+		});
+		
 		return warnings;
 	}
 	
-	
+	private void updateIconCa(DmObject object, ConservationArea ca) {
+		Icon icon = object.getIcon();
+		
+		if (icon == null) return;
+		icon.setConservationArea(ca);
+		
+		//update labels - ensure language references ca language
+		List<Label> toRemove = new ArrayList<>();
+		for (Label l : icon.getNames()) {
+			if (ca.equals(l.getLanguage().getCa())) continue;
+			
+			Language updateto = null;
+			for (Language lang : ca.getLanguages() ) {
+				if (lang.getCode().equalsIgnoreCase(l.getLanguage().getCode())) {
+					updateto = lang;
+					break;
+				}
+			}
+			if (updateto == null) {
+				toRemove.add(l);
+			}else {
+				l.setLanguage(updateto);
+			}
+		}
+		if (!toRemove.isEmpty()) icon.getNames().removeAll(toRemove);
+		//make sure there is a name for the default language
+		if (icon.findNameNull(ca.getDefaultLanguage()) == null) {
+			if (icon.getNames().isEmpty()) {
+				icon.updateName(ca.getDefaultLanguage(), "icon"); //$NON-NLS-1$
+			}else {
+				icon.updateName(ca.getDefaultLanguage(), icon.getNames().iterator().next().getValue());
+			}
+			
+		}
+		
+	}
 	private void mergeCategory(Category source, Category target) throws Exception{
 		if (!source.getKeyId().equals(target.getKeyId())) return;
 		if (!source.getHkey().equals(target.getHkey())) return;

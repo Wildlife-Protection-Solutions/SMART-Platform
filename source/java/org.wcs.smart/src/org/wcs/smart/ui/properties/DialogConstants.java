@@ -55,4 +55,9 @@ public class DialogConstants {
 	public static final String LOADING_TEXT = Messages.DialogConstants_LoadingText;
 	
 	public static final String ERROR_STRING = Messages.DialogConstants_ErrorText;
+	
+	public static final String ALL_FILES = "All Files (*.*)";
+	public static final String XML_FILES = "XML Files (*.xml)";
+	public static final String ZIP_FILES = "Zip Files (*.zip)";
+	public static final String ZIP_XML_FILES = "XML or Zip Files (*.xml, *.zip)";
 }

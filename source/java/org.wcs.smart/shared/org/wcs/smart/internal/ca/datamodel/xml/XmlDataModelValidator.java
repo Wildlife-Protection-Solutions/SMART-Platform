@@ -24,21 +24,21 @@ package org.wcs.smart.internal.ca.datamodel.xml;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
+
 
 /**
  * Validates an xml data model.  Validations includes: ensuring
@@ -55,10 +55,12 @@ public class XmlDataModelValidator {
 		INVALID_NAME
 	}
 	
-	private DataModel dm;
+	private SimpleDataModel dm;
 	private Locale locale;
 	
-	public XmlDataModelValidator(DataModel dm, Locale locale){
+	private ParseException exception;
+	
+	public XmlDataModelValidator(SimpleDataModel dm, Locale locale){
 		this.dm = dm;
 		this.locale = locale;
 	}
@@ -70,111 +72,73 @@ public class XmlDataModelValidator {
 	 */
 	public void validate() throws ParseException {
 		// we need to do some validation here on keys and names
+		exception = null;
 		if (dm.getAttributes() != null){
-			List<DmObjectWrapper> attributes = new ArrayList<DmObjectWrapper>();
-			for (AttributeType attribute : dm.getAttributes().getAttributes()) {
-				DmObjectWrapper wrap = new DmObjectWrapper();
-				wrap.setKeyId(attribute.getKey());
-				attributes.add(wrap);
-			}
-			for (AttributeType attribute : dm.getAttributes().getAttributes()) {
-				validate(attribute.getKey(), attribute.getNames(), attributes);
+
+			for (Attribute attribute : dm.getAttributes()) {
+				validate(attribute, dm.getAttributes());
 			
-				if (Attribute.decodeAttributeType(attribute.getType()).isList()){
-					List<DmObjectWrapper> list = new ArrayList<DmObjectWrapper>();
-					for (ListNode li : attribute.getValues()){
-						DmObjectWrapper wrap = new DmObjectWrapper();
-						wrap.setKeyId(li.getKey());
-						list.add(wrap);
+				if (attribute.getType() == AttributeType.LIST) {
+					for (AttributeListItem li : attribute.getAttributeList()) {
+						validate(li, attribute.getAttributeList());
 					}
-				
-					for (ListNode li : attribute.getValues()){
-						validate(li.getKey(), li.getNames(), list);
-					}	
 				}
 			
-				if (Attribute.decodeAttributeType(attribute.getType()) == Attribute.AttributeType.TREE){
-					List<DmObjectWrapper> roots = new ArrayList<DmObjectWrapper>();
-					for (TreeNodeType tn : attribute.getTrees()){
-						DmObjectWrapper wrap = new DmObjectWrapper();
-						wrap.setKeyId(tn.getKey());
-						roots.add(wrap);
-					}
-					for (TreeNodeType tn : attribute.getTrees()){
-						validate(tn, roots);
+				if (attribute.getType() == AttributeType.TREE) {
+					for (AttributeTreeNode node : attribute.getTree()) {
+						node.accept(n->{
+							try {
+								validate(n, n.getParent() == null? attribute.getTree() : n.getParent().getChildren());
+							}catch (ParseException ex) {
+								exception = ex;
+								return false;
+							}
+							return true;
+						});
+						if (exception != null) throw exception;
 					}
 				}
 			}
 		}
 		
 		if (dm.getCategories() != null){
-			List<DmObjectWrapper> roots = new ArrayList<DmObjectWrapper>();
-			for (CategoryType cat : dm.getCategories().getCategories()){
-				DmObjectWrapper wrap = new DmObjectWrapper();
-				wrap.setKeyId(cat.getKey());
-				roots.add(wrap);
+			
+			for (Category cat : dm.getCategories()){
+				cat.accept(c->{
+					try {
+						validate(c, c.getParent() == null ? dm.getCategories() : c.getParent().getChildren());
+					}catch (ParseException ex) {
+						exception = ex;
+						return false;
+					}
+					return true;
+				});
+				if (exception != null) throw exception;
 			}
-		
-			for (CategoryType cat : dm.getCategories().getCategories()){
-				validate(cat, roots);
-			}
-		}
-	}
-	
-	private void validate(TreeNodeType toValidate, List<DmObjectWrapper> siblings ) throws ParseException{
-		validate(toValidate.getKey(), toValidate.getNames(), siblings);
-		
-		List<DmObjectWrapper> kids = new ArrayList<DmObjectWrapper>();
-		for(TreeNodeType kid : toValidate.getChildrens()){
-			DmObjectWrapper wrap = new DmObjectWrapper();
-			wrap.setKeyId(kid.getKey());
-			kids.add(wrap);
-		}
-		
-		for(TreeNodeType kid : toValidate.getChildrens()){
-			validate(kid, kids);
-		}
-	}
-	
-	private  void validate(CategoryType toValidate, List<DmObjectWrapper> siblings ) throws ParseException{
-		validate(toValidate.getKey(), toValidate.getNames(), siblings);
-		
-		List<DmObjectWrapper> kids = new ArrayList<DmObjectWrapper>();
-		for(CategoryType kid : toValidate.getCategories()){
-			DmObjectWrapper wrap = new DmObjectWrapper();
-			wrap.setKeyId(kid.getKey());
-			kids.add(wrap);
-		}
-		
-		for(CategoryType kid : toValidate.getCategories()){
-			validate(kid, kids);
 		}
 	}
 	
 	private String getLabel(I18NMessages message) {
 		return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(message, locale);
-		
 	}
 	
-	private void validate(String key, List<NameType> names, List<DmObjectWrapper> siblings) throws ParseException{
+	private void validate(DmObject item, Collection<? extends DmObject> siblings) throws ParseException{
 
-		List<DmObjectWrapper> kids = new ArrayList<DmObjectWrapper>();
-		kids.addAll(siblings);
-		for (DmObjectWrapper wrap : kids){
-			if (wrap.getKeyId().equals(key)){
+		List<DmObject> kids = new ArrayList<DmObject>(siblings);
+		for (DmObject wrap : kids){
+			if (wrap.getKeyId().equals(item.getKeyId())){
 				kids.remove(wrap);
 				break;
 			}
 		}
-		String error = SimpleDataModel.validateKey(key, kids, locale);
+		String error = SimpleDataModel.validateKey(item.getKeyId(), kids, locale);
 		if (error != null) {
-			throw new ParseException(MessageFormat.format(getLabel(I18NMessages.INVALID_KEY), new Object[] {key, error }), 0);
+			throw new ParseException(MessageFormat.format(getLabel(I18NMessages.INVALID_KEY), 
+					new Object[] {item.getKeyId(), error }), 0);
 		}
 	
-		for (NameType nt : names) {
-			Language l = new Language();
-			l.setCode(nt.getLanguageCode());
-			error = SimpleDataModel.validateName(nt.getValue(), l, locale);
+		for (Label nt : item.getNames()) {
+			error = SimpleDataModel.validateName(nt.getValue(), nt.getLanguage(), locale);
 			if (error != null) {
 				throw new ParseException(MessageFormat.format(getLabel(I18NMessages.INVALID_NAME), new Object[] {nt.getValue(), error }), 0);
 			}
@@ -182,12 +146,6 @@ public class XmlDataModelValidator {
 		}
 	}
 	
-	class DmObjectWrapper extends DmObject{
-		private static final long serialVersionUID = 1L;
-		public DmObjectWrapper(){
-			super();
-		}
-	}
 }
 
 

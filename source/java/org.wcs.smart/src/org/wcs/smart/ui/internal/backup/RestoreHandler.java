@@ -55,8 +55,7 @@ public class RestoreHandler {
 				try {
 					return Files.size(f);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					SmartPlugIn.log(e.getMessage(),e);
 				}
 				return 0;
 			}).sum();

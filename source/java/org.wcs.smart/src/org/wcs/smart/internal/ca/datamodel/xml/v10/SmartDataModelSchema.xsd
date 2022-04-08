@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/datamodel" 
+xmlns:smrt="http://www.smartconservationsoftware.org/xml/1.0/datamodel" 
+xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0"
+xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" jaxb:extensionBindingPrefixes="xjc"
+elementFormDefault="qualified">
+	<annotation>
+    	<appinfo>
+      		<jaxb:globalBindings>
+        		<xjc:simple />        		
+      		</jaxb:globalBindings>
+    	</appinfo>
+  	</annotation>
+  	
+    <element name="DataModel" type="smrt:DataModel"></element>
+    
+    <complexType name="DataModel">
+    	<sequence>
+    		<element name="languages" type="smrt:LanguageListType"
+    			maxOccurs="1" minOccurs="1">
+    		</element>
+    		<element name="attributes" type="smrt:AttributeListType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="categories" type="smrt:CategoryTypeList"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="LanguageType">
+    	<attribute name="code" type="string"></attribute>
+    </complexType>
+
+
+    <complexType name="AttributeType">
+    	<sequence>
+    		<element name="aggregations" type="smrt:AggregationType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="qa_minmax" type="smrt:MinMaxType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="qa_regex" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="names" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="values" type="smrt:ListNode"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="tree" type="smrt:TreeNodeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="isrequired" type="boolean"></attribute>
+    	<attribute name="type">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="NUMBERIC"></enumeration>
+    				<enumeration value="TEXT"></enumeration>
+    				<enumeration value="BOOLEAN"></enumeration>
+    				<enumeration value="LIST"></enumeration>
+    				<enumeration value="TREE"></enumeration>
+    				<enumeration value="DATE"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="isactive" type="boolean"></attribute>
+    	<attribute name="iconkey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="MinMaxType">
+    	<sequence>
+    		<element name="MinValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="MaxValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="AggregationType">
+    	<attribute name="aggregation" type="string"></attribute>
+    </complexType>
+
+    <complexType name="CategoryType">
+    	<sequence>
+    		<element name="names" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="attribute" type="smrt:CategoryAttributeLink"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="category" type="smrt:CategoryType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="ismultiple" type="boolean"></attribute>
+    	<attribute name="isactive" type="boolean"></attribute>
+    	<attribute name="iconkey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="NameType">
+    	<attribute name="language_code" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+    <complexType name="TreeNodeType">
+    	<sequence>
+    		<element name="names" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="children" type="smrt:TreeNodeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="isactive" type="boolean"></attribute>
+    	<attribute name="iconkey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="ListNode">
+    	<sequence>
+    		<element name="names" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="isactive" type="boolean"></attribute>
+    	<attribute name="iconkey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="AttributeListType">
+    	<sequence>
+    		<element name="attribute" type="smrt:AttributeType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="LanguageListType">
+    	<sequence>
+    		<element name="language" type="smrt:LanguageType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="CategoryTypeList">
+    	<sequence>
+    		<element name="category" type="smrt:CategoryType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="CategoryAttributeLink">
+    	<attribute name="isactive" type="boolean"></attribute>
+    	<attribute name="attributekey" type="string"></attribute>
+    </complexType>
+</schema>

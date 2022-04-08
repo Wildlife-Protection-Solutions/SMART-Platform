@@ -92,11 +92,12 @@ public class DataModelMergeDialog extends SmartStyledTitleDialog{
 	}
 	
 	protected String[] getFileFilterExtensions() {
-		return new String[] {"*.xml", "*.*"};  //$NON-NLS-1$//$NON-NLS-2$
+		return new String[] {"*.xml;*.zip","*.xml", "*.zip", "*.*"};  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 	
 	protected String[] getFileFilterNames() {
-		return new String[] {Messages.DataModelMergeDialog_xmlfilelbl, Messages.DataModelMergeDialog_allfileslbl};
+		return new String[] {DialogConstants.ZIP_XML_FILES, DialogConstants.XML_FILES,
+				DialogConstants.ZIP_FILES, DialogConstants.ALL_FILES};
 	}
 	
 	protected void createFileWarning(Composite composite) {
