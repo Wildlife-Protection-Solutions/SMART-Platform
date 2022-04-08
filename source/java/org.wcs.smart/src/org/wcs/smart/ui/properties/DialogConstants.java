@@ -56,8 +56,9 @@ public class DialogConstants {
 	
 	public static final String ERROR_STRING = Messages.DialogConstants_ErrorText;
 	
-	public static final String ALL_FILES = "All Files (*.*)";
-	public static final String XML_FILES = "XML Files (*.xml)";
-	public static final String ZIP_FILES = "Zip Files (*.zip)";
-	public static final String ZIP_XML_FILES = "XML or Zip Files (*.xml, *.zip)";
+	public static final String CSV_FILES = Messages.DialogConstants_csvfiles;
+	public static final String ALL_FILES = Messages.DialogConstants_allfiles;
+	public static final String XML_FILES = Messages.DialogConstants_xmlfiles;
+	public static final String ZIP_FILES = Messages.DialogConstants_zipfiles;
+	public static final String ZIP_XML_FILES = Messages.DialogConstants_xmorzipfiles;
 }
