@@ -27,13 +27,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
@@ -57,20 +57,29 @@ public class DataModelTranslationImporter {
 	public static final String ATTRIBUTE_KEY = "attribute"; //$NON-NLS-1$
 	public static final String CATEGORY_KEY = "category"; //$NON-NLS-1$
 	public static final String SMART_KEY_COLUMN = "smart_key"; //$NON-NLS-1$
+	public static final String ICON_KEY_COLUMN = "icon_key"; //$NON-NLS-1$
 	
 	private List<String> warnings;
 	
 	private DataModel datamodel;
 	private Path file;
 	
+	private Integer keyColumn = -1;
+	private Integer iconColumn = -1;
+	private HashMap<Language, Integer> langcolumns;
+	
+	private Collection<Icon> icons;
+	
 	/**
 	 * Create new importer from given file and data model
+	 * 
 	 * @param file
 	 * @param datamodel
 	 */
-	public DataModelTranslationImporter(Path file, DataModel datamodel) {
+	public DataModelTranslationImporter(Path file, DataModel datamodel, Collection<Icon> icons) {
 		this.file = file;
 		this.datamodel = datamodel;
+		this.icons = icons;
 	}
 
 	/**
@@ -94,13 +103,18 @@ public class DataModelTranslationImporter {
 			
 			String[] header = reader.readNext();
 					
-			Integer keyColumn = -1;
-			HashMap<Language, Integer> langcolumns = new HashMap<>();
+			keyColumn = -1;
+			iconColumn = -1;
+			langcolumns = new HashMap<>();
 					
 			for (int i = 0; i < header.length; i ++) { 
 				String code = header[i];
 				if (code.equals(SMART_KEY_COLUMN)) {
 					keyColumn = i;
+					continue;
+				}
+				if (code.equals(ICON_KEY_COLUMN)) {
+					iconColumn = i;
 					continue;
 				}
 				Language found = null;
@@ -135,21 +149,20 @@ public class DataModelTranslationImporter {
 				String key = header[keyColumn];
 						
 				if (key.startsWith(CATEGORY_KEY + SEP_VALUE)) {
-					processCategory(key, header, langcolumns, categories);
+					processCategory(key, header, categories);
 				}else if (key.startsWith(ATTRIBUTE_KEY + SEP_VALUE)) {
-					processAttribute(key, header, langcolumns,attributes);
+					processAttribute(key, header, attributes);
 				}else if (key.startsWith(ATTRIBUTELIST_KEY + SEP_VALUE)) {
-					processAttributeListItem(key, header, langcolumns, attributes);
+					processAttributeListItem(key, header, attributes);
 				}else if (key.startsWith(ATTRIBUTENODE_KEY + SEP_VALUE)) {
-					processAttributeTreeNode(key, header, langcolumns, attributes);
+					processAttributeTreeNode(key, header, attributes);
 				}
 			}
 		}			
 		
 	}
 	
-	private void processAttribute(String key, String[] row, Map<Language, Integer> columns,
-			List<Attribute> attributes) {
+	private void processAttribute(String key, String[] row, List<Attribute> attributes) {
 		String akey = key.split(SEP_VALUE)[1];
 
 		Attribute toUpdate = null;
@@ -162,12 +175,11 @@ public class DataModelTranslationImporter {
 		if (toUpdate == null) {
 			warnings.add(MessageFormat.format(Messages.DataModelTranslationImporter_AttributeNotFound, akey, datamodel.getConservationArea().getNameLabel()));
 		} else {
-			processItem(toUpdate, row, columns);
+			processItem(toUpdate, row);
 		}
 	}
 
-	private void processAttributeListItem(String key, String[] row, Map<Language, Integer> columns,
-			List<Attribute> attributes) {
+	private void processAttributeListItem(String key, String[] row, List<Attribute> attributes) {
 		String[] bits = key.split(SEP_VALUE);
 
 		String akey = bits[1];
@@ -194,14 +206,13 @@ public class DataModelTranslationImporter {
 				warnings.add(MessageFormat.format(Messages.DataModelTranslationImporter_AttributeListItemNotFound, lkey, toUpdate.getName(), datamodel.getConservationArea().getNameLabel()));
 
 			} else {
-				processItem(itemToUpdate, row, columns);
+				processItem(itemToUpdate, row);
 			}
 		}
 	}
 		
 	
-	private void processAttributeTreeNode(String key, String[] row, Map<Language, Integer> columns,
-			List<Attribute> attributes) {
+	private void processAttributeTreeNode(String key, String[] row, List<Attribute> attributes) {
 		String[] bits = key.split(SEP_VALUE);
 
 		String akey = bits[1];
@@ -233,12 +244,12 @@ public class DataModelTranslationImporter {
 			if (nodeToUpdate == null) {
 				warnings.add(MessageFormat.format(Messages.DataModelTranslationImporter_TreeNodeNotFound, nodekey, toUpdate.getName(), datamodel.getConservationArea().getNameLabel()));
 			} else {
-				processItem(nodeToUpdate, row, columns);
+				processItem(nodeToUpdate, row);
 			}
 		}
 	}
 	
-	private void processCategory(String key, String[] row, Map<Language, Integer> columns, List<Category> categories) {
+	private void processCategory(String key, String[] row, List<Category> categories) {
 		String hkey = key.split(SEP_VALUE)[1];
 		
 		Category toUpdate = null;
@@ -251,15 +262,39 @@ public class DataModelTranslationImporter {
 		if (toUpdate == null) {
 			warnings.add(MessageFormat.format(Messages.DataModelTranslationImporter_CategoryNotFound, hkey, datamodel.getConservationArea().getNameLabel()));
 		}else {
-			processItem(toUpdate, row, columns);
+			processItem(toUpdate, row);
 		}
 	}
 	
-	private void processItem(NamedKeyItem item, String[] row, Map<Language, Integer> columns) {
+	private void processItem(DmObject item, String[] row) {
 		
-		for (Entry<Language, Integer> value : columns.entrySet()) {
+		//update icon
+		if (iconColumn >= 0) {
+			String iconKey = row[iconColumn];
+			if (!iconKey.isBlank()) {
+				String current = item.getIcon() == null ? "" : item.getIcon().getKeyId(); //$NON-NLS-1$
+				if (!current.equalsIgnoreCase(iconKey)) {
+					Icon found = null;
+					for (Icon i : icons) {
+						if (i.getKeyId().equalsIgnoreCase(iconKey)) {
+							found = i;
+							break;
+						}
+					}
+					if (found == null) {
+						warnings.add(MessageFormat.format(Messages.DataModelTranslationImporter_IconKeyNotFound, iconKey, item.getName()));
+					}else {
+						item.setIcon(found);
+					}
+				}
+			}
+		}
+		
+		//update translations
+		for (Entry<Language, Integer> value : langcolumns.entrySet()) {
 			String newValue = row[value.getValue()];
-			if(newValue != null && !newValue.isBlank() ) {
+			if(newValue != null && !newValue.isBlank() && !newValue.equals(item.findName(value.getKey()))) {
+				
 				item.updateName(value.getKey(), newValue);
 				
 				if (datamodel.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {

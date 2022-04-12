@@ -51,7 +51,7 @@ import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
- * Wizard to create a new patrol.
+ * Wizard to create a data model expor.
  * 
  * @author Emily
  * @since 1.0.0

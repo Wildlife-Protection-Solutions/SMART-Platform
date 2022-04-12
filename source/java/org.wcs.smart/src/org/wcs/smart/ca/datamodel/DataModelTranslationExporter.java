@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Stack;
 
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -68,10 +67,11 @@ public class DataModelTranslationExporter {
 				lang.add(l);
 			}
 			
-			String[] values = new String[lang.size() +1];
+			String[] values = new String[lang.size() + 2];
 			values[0] = DataModelTranslationImporter.SMART_KEY_COLUMN;
+			values[1] = DataModelTranslationImporter.ICON_KEY_COLUMN;
 			for (int i = 0; i < lang.size(); i ++) {
-				values[i+1] = lang.get(i).getCode();
+				values[i+2] = lang.get(i).getCode();
 			}
 			
 			writer.writeNext(values);
@@ -146,11 +146,12 @@ public class DataModelTranslationExporter {
 	}
 	
 	
-	private void writeValues(String key, NamedKeyItem item, List<Language> langs, CSVWriter writer) {
-		String[] values = new String[langs.size() + 1];
+	private void writeValues(String key, DmObject item, List<Language> langs, CSVWriter writer) {
+		String[] values = new String[langs.size() + 2];
 		
 		values[0] = key;
-		int i  = 1;
+		values[1] = item.getIcon() == null ? "" : item.getIcon().getKeyId(); //$NON-NLS-1$
+		int i  = 2;
 		for (Language l : langs) {
 			values[i++] = item.findNameNull(l);
 		}

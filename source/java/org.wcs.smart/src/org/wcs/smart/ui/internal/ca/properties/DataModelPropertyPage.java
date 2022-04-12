@@ -109,6 +109,7 @@ import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Property page for modifying data model
@@ -144,6 +145,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	
 	protected Session session;
 	
+	private List<Path> deleteOnClose;
+	
 	/**
 	 * Creates new data model property page
 	 */
@@ -153,6 +156,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		for (Aggregation agg : DataModel.getAggregations()){
 			getSession().update(agg);
 		}
+		deleteOnClose = new ArrayList<>();
 	}
 	
 	@Override
@@ -267,6 +271,17 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
+		
+		parent.addListener(SWT.Dispose, e->{
+			for (Path p : deleteOnClose) {
+				try {
+					SmartUtils.deleteDirectory(p);
+				}catch (Exception ex) {
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		});
+		
 		parent.setLayout(new GridLayout(1, false));		
 	
 		Composite thisparent = new Composite(parent, SWT.NONE);
@@ -611,8 +626,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 							DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
 							
-							//TODO: figure out when to delete this temp dir
-							Path workingDirectory = Files.createTempDirectory("smartdb");
+							Path workingDirectory = Files.createTempDirectory("smartdb"); //$NON-NLS-1$
+							deleteOnClose.add(workingDirectory);
 							DataModel targetDm = converter.convert(f, ca, icons, sets, false, workingDirectory);
 							
 							DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, SmartDB.getCurrentLanguage());					
@@ -718,61 +733,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		WizardDialog dialog = new SmartWizardDialog(getShell(), new ExportDataModelWizard(((DataModel) viewer.getInput())));
 		dialog.open();
 		
-//		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
-//		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
-//		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
-//		
-//		String file = fd.open();
-//		if (file == null){
-//			//nothing selected
-//			return;
-//		}
-//		final Path f = Paths.get(file);
-//		if (Files.exists(f)){
-//			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_OverwriteFile_DialogTitle, 
-//					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getFileName()}))){
-//				return;
-//			}
-//		}
-//		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-//		try{
-//			pmd.run(true, false, new IRunnableWithProgress() {
-//
-//				@Override
-//				public void run(IProgressMonitor monitor)
-//						throws InvocationTargetException, InterruptedException {
-//					try{
-//						monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
-//						DataModel dm = ((DataModel) viewer.getInput());
-//						
-//						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
-//						DataModelSmartToXmlConverter converter = new DataModelSmartToXmlConverter(monitor);
-//						org.wcs.smart.internal.ca.datamodel.xml.generate.v10.DataModel xml = converter.convert(dm);
-//						monitor.worked(1);
-//						
-//						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
-//						try(OutputStream fout = Files.newOutputStream(f)){
-//							XmlSmartDataModelManager.writeDataModel(xml,fout);
-//						}
-//						monitor.done();
-//						Display.getDefault().syncExec(new Runnable(){
-//							@Override
-//							public void run() {
-//								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
-//							}});
-//						
-//					}catch (final Exception ex){
-//						Display.getDefault().syncExec(new Runnable(){
-//							@Override
-//							public void run() {
-//								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
-//							}});
-//					}
-//				}
-//			});
-//		} catch (Exception ex) {
-//			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
-//		}
 	}
 	
 	/**
@@ -1370,12 +1330,16 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						monitor.subTask(ca.getName());
 						DataModel sourceDm = null;
 						
+						
 						if (ca.equals(SmartDB.getCurrentConservationArea())) {
-							sourceDm = ((DataModel) viewer.getInput());
+							sourceDm = ((DataModel) viewer.getInput());							
 						}else {
 							sourceDm = HibernateManager.loadDataModel(ca, session);
 						}
-						DataModelTranslationImporter importer = new DataModelTranslationImporter(p, sourceDm);
+						
+						List<Icon> icons = QueryFactory.buildQuery(session, Icon.class, 
+								new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+						DataModelTranslationImporter importer = new DataModelTranslationImporter(p, sourceDm, icons);
 						try {
 							importer.importTranslations();
 							warnings.addAll(importer.getWarnings());

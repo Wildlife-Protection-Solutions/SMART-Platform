@@ -632,6 +632,7 @@ public class Messages extends NLS {
 	public static String DataModelTranslationImporter_AttributeListItemNotFound;
 	public static String DataModelTranslationImporter_AttributeNotFound;
 	public static String DataModelTranslationImporter_CategoryNotFound;
+	public static String DataModelTranslationImporter_IconKeyNotFound;
 	public static String DataModelTranslationImporter_KeyColumnNotFound;
 	public static String DataModelTranslationImporter_KeyColumnNotFoundInFile;
 	public static String DataModelTranslationImporter_LanguageNotFound;
@@ -993,6 +994,9 @@ public class Messages extends NLS {
 	public static String IconComposite_CouldNotReadFile;
 	public static String IconComposite_ImagesLbl;
 	public static String IconComposite_SelectFile;
+	public static String IconExporter_SubTaskA;
+	public static String IconExporter_SubTaskB;
+	public static String IconExporter_TaskName;
 	public static String IconImporter_DefaultName;
 	public static String IconImporter_IconFileNotFound;
 	public static String IconImporter_IconFileNotSpecified;
@@ -1040,6 +1044,11 @@ public class Messages extends NLS {
 	public static String IconSelectionDialog_SystemGenerated;
 	public static String IconsetPropertyPage_Closedialog;
 	public static String IconsetPropertyPage_CloseMessage;
+	public static String IconsetPropertyPage_CSVFile;
+	public static String IconsetPropertyPage_ExportComplete;
+	public static String IconsetPropertyPage_ExportFormat;
+	public static String IconsetPropertyPage_ExportIconTitle;
+	public static String IconsetPropertyPage_FileExists;
 	public static String IconsetPropertyPage_IconImportError;
 	public static String IconsetPropertyPage_IconImportWarn;
 	public static String IconsetPropertyPage_IconsImportedMsg;
@@ -1050,6 +1059,7 @@ public class Messages extends NLS {
 	public static String IconsetPropertyPage_SaveError;
 	public static String IconsetPropertyPage_SaveRequired;
 	public static String IconsetPropertyPage_Title;
+	public static String IconsetPropertyPage_ZilFile;
 	public static String IdGeneratorManager_DayToken;
 	public static String IdGeneratorManager_HourToken;
 	public static String IdGeneratorManager_LeaderFamilyToken;
