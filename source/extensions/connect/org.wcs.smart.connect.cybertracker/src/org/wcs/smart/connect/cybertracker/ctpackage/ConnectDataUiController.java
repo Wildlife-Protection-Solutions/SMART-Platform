@@ -76,6 +76,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private Runnable onInitilized;
 
 	private Button btnUploadData;
+	private Button btnUploadPeriod;
 	private Label lblUp1, lblUp2;
 	private Text txtDataPeriod;
 	private Button btnPositionUpdates;
@@ -131,43 +132,69 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		SmartUiUtils.createHeaderLabel(upDataComp, Messages.ConnectDataUiController_DataUploadsLabel);
 		
 		Composite core = new Composite(upDataComp, SWT.FLAT);
-		core.setLayout(new GridLayout(4, false));
+		core.setLayout(new GridLayout());
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label msg = new Label(core, SWT.WRAP);
-		msg.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+		msg.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 		msg.setText(Messages.ConnectDataUiController_dataUploadMsg);
 		((GridData)msg.getLayoutData()).widthHint = 600;
 		
-		btnUploadData = new Button(core, SWT.CHECK);
-		btnUploadData.setSelection(true);
-		btnUploadData.setEnabled(canDisableUpload);
-		btnUploadData.addListener(SWT.Selection, e->{
-			txtDataPeriod.setEnabled(btnUploadData.getSelection());
-			lblUp1.setEnabled(btnUploadData.getSelection());
-			lblUp2.setEnabled(btnUploadData.getSelection());
+		if (canDisableUpload) {
+			
+			btnUploadData = new Button(core, SWT.CHECK);
+			btnUploadData.setSelection(false);
+			btnUploadData.setText(Messages.ConnectDataUiController_UploadOp);
+			
+			btnUploadData.addListener(SWT.Selection, e->{
+				boolean ok = btnUploadData.getSelection();
+				btnUploadPeriod.setEnabled(ok);
+				lblUp1.setEnabled(ok);
+				lblUp2.setEnabled(ok);
+				txtDataPeriod.setEnabled(ok);
+				validate();
+			});
+		}
+		
+		Composite part = new Composite(core, SWT.NONE);
+		part.setLayout(new GridLayout(4, false));
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if (canDisableUpload) ((GridData)part.getLayoutData()).horizontalIndent = 20;
+		((GridLayout)part.getLayout()).marginWidth = 0;
+		((GridLayout)part.getLayout()).marginHeight = 0;
+		
+		btnUploadPeriod = new Button(part, SWT.CHECK);
+		btnUploadPeriod.setSelection(true);
+		btnUploadPeriod.setEnabled(canDisableUpload);
+		btnUploadPeriod.addListener(SWT.Selection, e->{
+		txtDataPeriod.setEnabled(btnUploadPeriod.getSelection());
+			//lblUp1.setEnabled(btnUploadData.getSelection());
+			//lblUp2.setEnabled(btnUploadData.getSelection());
 			validate();
 		});
+		btnUploadPeriod.setToolTipText(Messages.ConnectDataUiController_AutoUploadTooltip);
 		
-		lblUp1 = new Label(core, SWT.NONE);
-		lblUp1.setText(Messages.ConnectDataUiController_Upload1);
+		lblUp1 = new Label(part, SWT.NONE);
+		lblUp1.setText(Messages.ConnectDataUiController_Upload1a);
+		lblUp1.setToolTipText(btnUploadPeriod.getToolTipText());
 		if (canDisableUpload) {
 			lblUp1.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseUp(MouseEvent e) {
-					btnUploadData.setSelection(!btnUploadData.getSelection());
-					btnUploadData.notifyListeners(SWT.Selection, new Event());
+					btnUploadPeriod.setSelection(!btnUploadPeriod.getSelection());
+					btnUploadPeriod.notifyListeners(SWT.Selection, new Event());
 				}
 			});
 		}
 		
-		txtDataPeriod = new Text(core, SWT.BORDER);
+		txtDataPeriod = new Text(part, SWT.BORDER);
 		txtDataPeriod.setText("20"); //$NON-NLS-1$
 		txtDataPeriod.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		txtDataPeriod.setEnabled(true);
 		((GridData)txtDataPeriod.getLayoutData()).widthHint = 30;
 		txtDataPeriod.addListener(SWT.Modify, e->validate());
 		
-		lblUp2 = new Label(core, SWT.NONE);
+		lblUp2 = new Label(part, SWT.NONE);
 		lblUp2.setText(Messages.ConnectDataUiController_Upload2);
 		lblUp2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
@@ -191,15 +218,15 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		btnPositionUpdates = new Button(core, SWT.CHECK);
 		btnPositionUpdates.setSelection(false);
 		btnPositionUpdates.addListener(SWT.Selection, e->{
-			lblPos1.setEnabled(btnPositionUpdates.getSelection());
-			lblPos2.setEnabled(btnPositionUpdates.getSelection());
+//			lblPos1.setEnabled(btnPositionUpdates.getSelection());
+//			lblPos2.setEnabled(btnPositionUpdates.getSelection());
 			txtPositionPeriod.setEnabled(btnPositionUpdates.getSelection());
 			cmbPositionType.getControl().setEnabled(btnPositionUpdates.getSelection());
 			validate();
 		});
 		lblPos1 = new Label(core, SWT.NONE);
 		lblPos1.setText(Messages.ConnectDataUiController_Position1);
-		lblPos1.setEnabled(false);
+//		lblPos1.setEnabled(false);
 		lblPos1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -217,7 +244,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		lblPos2 = new Label(core, SWT.NONE);
 		lblPos2.setText(Messages.ConnectDataUiController_Position2);
-		lblPos2.setEnabled(false);
+//		lblPos2.setEnabled(false);
 		
 		cmbPositionType = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbPositionType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -309,15 +336,23 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				fireEvents = false;
 				MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
-					btnUploadData.setSelection(true);
-					txtDataPeriod.setText(data.getStringValue());
+					btnUploadPeriod.setSelection(true);
+					if (data.getStringValue() != null) txtDataPeriod.setText(data.getStringValue());
 				}else {
 					if (canDisableUpload) {
-						btnUploadData.setSelection(false);
+						btnUploadPeriod.setSelection(false);
 					}else {
-						btnUploadData.setSelection(true);	
+						btnUploadPeriod.setSelection(true);	
 					}
 				}
+				
+				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
+				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
+					if (btnUploadData != null) btnUploadData.setSelection(true);
+				}else {
+					if (btnUploadData != null) btnUploadData.setSelection(false);
+				}
+				
 				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
 					btnPositionUpdates.setSelection(true);
@@ -334,8 +369,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 						btnPublic.setSelection(true);
 					}
 				}
-				
-				btnUploadData.notifyListeners(SWT.Selection, new Event());
+				if (btnUploadData != null) btnUploadData.notifyListeners(SWT.Selection,new Event());
+				btnUploadPeriod.notifyListeners(SWT.Selection, new Event());
 				btnPositionUpdates.notifyListeners(SWT.Selection, new Event());
 			}finally {
 				fireEvents = true;
@@ -390,7 +425,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	
 	@Override
 	public String isValid() {
-		if (btnUploadData.getSelection()) {
+		
+		if (btnUploadPeriod.getSelection()) {
 			String min = txtDataPeriod.getText();
 			
 			try {
@@ -427,12 +463,21 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
 		
 		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage);
-		if (btnUploadData.getSelection()) {
+		if (btnUploadPeriod.getSelection()) {
 			data.setBooleanValue(true);
 			data.setStringValue(txtDataPeriod.getText());
 		}else {
 			data.setBooleanValue(false);
 			data.setStringValue(null);
+		}
+		
+		if (btnUploadData != null) {
+			data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
+			if (btnUploadData.getSelection()) {
+				data.setBooleanValue(true);
+			}else {
+				data.setBooleanValue(false);
+			}
 		}
 		
 		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
@@ -471,6 +516,22 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		v.setConservationArea(ctpackage.getConservationArea());
 		v.setCtPackage(ctpackage);
 		ctpackage.getMetadataValues().add(v);
+		
+		
+		//if there is no use_connect metadata field then base the value of this field on the 
+		//data_upload metadata field to support backwards compatibility
+		if (key.equalsIgnoreCase(CtConnectPackageMetadata.Properties.USE_CONNECT.name()) ) {
+			for (MetadataFieldValue t : ctpackage.getMetadataValues()) {
+				if (t.getMetadataKey().equals( CtConnectPackageMetadata.Properties.DATA_UPLOAD.name() )) {
+					v.setBooleanValue(t.getBooleanValue());
+					break;
+				}
+			}
+		}
+		
+		if (key.equalsIgnoreCase(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
+			v.setBooleanValue(true);
+		}
 		return v;
 	}
 

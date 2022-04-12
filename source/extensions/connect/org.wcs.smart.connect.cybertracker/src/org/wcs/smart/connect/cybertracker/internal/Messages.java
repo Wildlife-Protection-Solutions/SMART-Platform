@@ -100,6 +100,7 @@ public class Messages extends NLS {
 	public static String ConnectCtTemplateCloner_TaskName;
 	public static String ConnectDataContribution_ConnectRequired;
 	public static String ConnectDataUiController_AertTypeRequired;
+	public static String ConnectDataUiController_AutoUploadTooltip;
 	public static String ConnectDataUiController_copytooltip;
 	public static String ConnectDataUiController_dataUploadMsg;
 	public static String ConnectDataUiController_DataUploadsLabel;
@@ -119,8 +120,9 @@ public class Messages extends NLS {
 	public static String ConnectDataUiController_RefreshTypes;
 	public static String ConnectDataUiController_SecurityMessage;
 	public static String ConnectDataUiController_TabName;
-	public static String ConnectDataUiController_Upload1;
+	public static String ConnectDataUiController_Upload1a;
 	public static String ConnectDataUiController_Upload2;
+	public static String ConnectDataUiController_UploadOp;
 	public static String ConnectDataUiController_WarningMsg;
 	public static String ConnectDataUiController_WarningTitle;
 	public static String ConnectUrlContribution_AutoUpdateMsg;
