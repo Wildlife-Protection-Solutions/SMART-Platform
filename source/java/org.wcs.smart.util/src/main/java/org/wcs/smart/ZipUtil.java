@@ -51,16 +51,10 @@ public class ZipUtil {
 	public static boolean createZip(
 			File[] directories, 
 			File outputZipFile) throws IOException{
-		
-		FileOutputStream fOut = null;
-        BufferedOutputStream bOut = null;
-        ZipArchiveOutputStream tOut = null;
- 
-        
-        try {
-            fOut = new FileOutputStream(outputZipFile);
-            bOut = new BufferedOutputStream(fOut);
-            tOut = new ZipArchiveOutputStream(bOut);
+        try 
+            (FileOutputStream fOut = new FileOutputStream(outputZipFile);
+        		BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+        		ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut)){
            
             
             for (int i = 0; i < directories.length; i ++){
@@ -73,18 +67,6 @@ public class ZipUtil {
             	}else{
             		addFileToZip(tOut,directories[i].getAbsoluteFile(), ""); //$NON-NLS-1$
             	}
-            }
-            
-        } finally {
-        	if (tOut != null){
-        		tOut.finish();
-        		tOut.close();
-        	}
-            if (bOut != null){
-            	bOut.close();
-            }
-            if (fOut != null){
-            	fOut.close();
             }
         }
         return true;
@@ -111,9 +93,9 @@ public class ZipUtil {
         if (path.isFile()) {
             ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
             zOut.putArchiveEntry(zipEntry);
-            FileInputStream in = new FileInputStream(path);
-            IOUtils.copy(in, zOut);
-            in.close();
+            try(FileInputStream in = new FileInputStream(path)){
+            	IOUtils.copy(in, zOut);
+            }
             zOut.closeArchiveEntry();
             
         } else {
@@ -125,7 +107,7 @@ public class ZipUtil {
                     }
                 }
             }else{
-            	throw new IllegalStateException("Zip error");
+            	throw new IllegalStateException("Zip error"); //$NON-NLS-1$
             }
         }
         return true;
