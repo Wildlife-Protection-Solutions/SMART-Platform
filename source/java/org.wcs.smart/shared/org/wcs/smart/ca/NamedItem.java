@@ -167,7 +167,9 @@ public class NamedItem extends UuidItem {
 			if (newName == null) {
 				getNames().remove(found);
 			}else {
-				found.setValue(newName);
+				//only update if they are different; this will
+				//ensure we don't have extra things to sync that aren't really required
+				if (!found.getValue().equals(newName)) found.setValue(newName);
 			}		
 			return;
 		}

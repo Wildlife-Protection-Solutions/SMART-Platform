@@ -289,7 +289,7 @@ public class DataModelApi extends HttpServlet{
 						SimpleDataModel targetDm = new SimpleDataModel(ca, rootCategories, attribute);
 						
 						DataModelMergeAndUpdater merger = new DataModelMergeAndUpdater(targetDm, sdm, SmartUtils.getRequestLocale(request));
-						List<String> warnings = merger.merge(new NullProgressMonitor());
+						List<String> warnings = merger.merge(session, new NullProgressMonitor());
 						allWarnings.addAll(warnings);
 						
 						//add any new objects that are not saved via relationships

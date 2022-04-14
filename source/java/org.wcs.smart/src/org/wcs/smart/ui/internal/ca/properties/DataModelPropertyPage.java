@@ -631,7 +631,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							DataModel targetDm = converter.convert(f, ca, icons, sets, false, workingDirectory);
 							
 							DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, SmartDB.getCurrentLanguage());					
-							warnings.addAll(updater.merge(progress.split(1)));
+							warnings.addAll(updater.merge(session, progress.split(1)));
 							
 							//add any new objects that are not saved via relationships
 							for (Attribute a : sourceDm.getAttributes()){
