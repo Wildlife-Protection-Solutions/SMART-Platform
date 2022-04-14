@@ -69,7 +69,6 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.TranslateNameComposite;
 
 /**
  * Info composite containing some common logic and building blocks for {@link CmRootNode},  {@link CmNode},  {@link CmAttribute}
@@ -303,20 +302,14 @@ public abstract class AbstractInfoComposite extends Composite {
 		final CmNode node = new CmNode();
 		node.setModel(getModel());
 		node.setCategory(category);
-		node.setName(category.getName());
-		for (org.wcs.smart.ca.Label label : category.getNames()) { // we need a copy, not the same instance of set
-			node.updateName(label.getLanguage(), label.getValue());
-		}
+
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		category.getAllAttribute(attrList, true);
 		for (Attribute a : attrList) {
 			CmAttribute cma = new CmAttribute();
 			cma.setNode(node);
 			cma.setAttribute(a);
-			cma.setName(a.getName());
-			for (org.wcs.smart.ca.Label label : a.getNames()) { // we need a copy, not the same instance of set
-				cma.updateName(label.getLanguage(), label.getValue());
-			}
+
 			cma.setOrder(node.getCmAttributes().size());
 			cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 			node.getCmAttributes().add(cma);
@@ -478,37 +471,16 @@ public abstract class AbstractInfoComposite extends Composite {
 	 * @author elitvin
 	 * @since 2.0.0
 	 */
-	protected class TranslatableNameComposite extends TranslateNameComposite implements ISourceObjectChangedListener {
+	protected class TranslatableNameComposite extends CmTranslateNameComposite {
 
-		private boolean internalChange = false; //indicate if text was changed by user or by calling setter
-		
 		public TranslatableNameComposite(Composite parent) {
 			super(parent, null);
 		}
-		
+
 		@Override
 		protected void handleChanged() {
 			fireModelChanged();
 		}
 		
-		@Override
-		protected boolean isInnerChange() {
-			return internalChange;
-		}
-		
-		@Override
-		public void sourceObjectChanged(Object newObject, Language language) {
-			setCurrentLanguage(language);
-			if (newObject instanceof NamedItem) {
-				internalChange = true;
-				NamedItem ni = (NamedItem) newObject;
-				updateText(ni);
-				setItem(ni);
-				internalChange = false;
-			} else if (newObject instanceof CmRootNode) {
-				CmRootNode root = (CmRootNode) newObject;
-				sourceObjectChanged(root.model, language);
-			}
-		}
 	}
 }

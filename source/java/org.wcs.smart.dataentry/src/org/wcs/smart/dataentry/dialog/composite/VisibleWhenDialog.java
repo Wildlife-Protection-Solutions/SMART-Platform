@@ -74,12 +74,12 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BooleanOpDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem.BracketType;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.IDropItemFactory;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for configuring visible when expression for configurable model

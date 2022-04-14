@@ -1,4 +1,5 @@
 
+-- new org.wcs.smart.i2.patrol plugin
 CREATE TABLE smart.i_patrol_record_motivation(
   patrol_uuid uuid NOT NULL, 
   i_record_uuid uuid NOT NULL, 
@@ -19,15 +20,48 @@ RETURN ROW; END$$;
 
 CREATE TRIGGER trg_patrol_record_motivation AFTER INSERT OR DELETE OR UPDATE ON smart.i_patrol_record_motivation FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_record_motivation();
 
-insert into connect.connect_plugin_version(plugin_id, version) values ('org.wcs.smart.i2.patrol', '1.0');
+INSERT INTO connect.connect_plugin_version(plugin_id, version) 
+VALUES('org.wcs.smart.i2.patrol', '1.0');
 
-insert into connect.ca_plugin_version(ca_uuid, plugin_id, version) 
-select ca_uuid, 'org.wcs.smart.i2.patrol', '1.0'
-from connect.ca_plugin_version where plugin_id = 'org.wcs.smart.i2';
+INSERT INTO connect.ca_plugin_version(ca_uuid, plugin_id, version) 
+SELECT ca_uuid, 'org.wcs.smart.i2.patrol', '1.0'
+FROM connect.ca_plugin_version 
+WHERE plugin_id = 'org.wcs.smart.i2';
 
+--remove labels from configurable models that match data model 
+DELETE FROM smart.i18n_label 
+WHERE (element_uuid, language_uuid) IN 
+(
+SELECT va.element_uuid, va.language_uuid
+FROM smart.cm_node a, smart.i18n_label va, smart.i18n_label ca 
+WHERE a.category_uuid is not null AND 
+ca.element_uuid = a.category_uuid AND 
+va.element_uuid = a.uuid AND 
+va.language_uuid = ca.language_uuid AND 
+va.value = ca.value 
+);
+
+DELETE FROM smart.i18n_label 
+WHERE (element_uuid, language_uuid) IN 
+(
+SELECT va.element_uuid, va.language_uuid
+FROM smart.cm_attribute a, smart.i18n_label va, smart.i18n_label ca 
+WHERE a.attribute_uuid is not null AND 
+ca.element_uuid = a.attribute_uuid AND 
+va.element_uuid = a.uuid AND 
+va.language_uuid = ca.language_uuid AND 
+va.value = ca.value 
+);
+
+-- signatures added to observation attachment tables
 alter table smart.OBSERVATION_ATTACHMENT add column signature_type_uuid uuid;
 alter table smart.observation_attachment ADD CONSTRAINT observation_attachment_sig_fk foreign key (signature_type_uuid)  references smart.signature_type(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
 
+-- typo
 update smart.i18n_label set value = 'Hyaena Brown' WHERE  value = 'Hyaena rown' and element_uuid in (select uuid from smart.icon where keyid = 'hyaena_rown');
 
+
+--update versions
+update connect.connect_plugin_version set version = '7.5.0' where plugin_id = 'org.wcs.smart';
+update connect.ca_plugin_version set version = '7.5.0' where plugin_id = 'org.wcs.smart';
 update connect.connect_version set version = '7.5.0', last_updated = now();

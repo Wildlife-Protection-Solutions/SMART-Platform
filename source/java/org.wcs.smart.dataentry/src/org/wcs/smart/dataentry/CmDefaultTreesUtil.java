@@ -38,7 +38,6 @@ import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Util class for configurable model default trees manipulations
@@ -79,8 +78,6 @@ public class CmDefaultTreesUtil {
 	
 	public static CmAttributeConfig buildDefaultTreeConfig(ConfigurableModel model, Attribute a) {
 		CmAttributeConfig cfg = CmAttributeConfig.createConfig(model, a, true);
-		cfg.setName(a.getName());
-		cfg.updateName(SmartDB.getCurrentLanguage(), a.getName());
 		List<CmAttributeTreeNode> tree = buildDefaultTree(cfg, a, null, null, null);
 		cfg.setTree(tree);
 		return cfg;

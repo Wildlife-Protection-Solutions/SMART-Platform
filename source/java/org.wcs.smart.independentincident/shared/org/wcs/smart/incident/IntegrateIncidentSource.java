@@ -101,8 +101,5 @@ public class IntegrateIncidentSource implements IWaypointSource {
 		sb.append(") "); //$NON-NLS-1$
 		return sb.toString();
 	}
-	
-	//TODO:
-//	public Class<? extends IJsonFeatureProcessor> getJsonFeatureProcessor() { return IncidentJsonFeatureProcessor.class; }
 
 }

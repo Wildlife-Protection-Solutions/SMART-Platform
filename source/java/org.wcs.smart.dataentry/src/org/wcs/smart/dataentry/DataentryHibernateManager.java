@@ -116,6 +116,8 @@ public class DataentryHibernateManager extends HibernateManager {
 		if (nodes == null)
 			return;
 		for (CmNode cmNode : nodes) {
+			cmNode.getNames().size();
+			if (cmNode.getCategory() != null) cmNode.getCategory().getNames().size();
 			cmNode.getCmAttributes().size();
 			fetchNodesData(cmNode.getChildren());
 		}

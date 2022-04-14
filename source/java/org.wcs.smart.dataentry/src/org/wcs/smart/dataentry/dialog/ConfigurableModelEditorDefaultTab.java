@@ -548,9 +548,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			((MenuItem)btn.getData(MENU_ITEM_KEY)).setEnabled(btn.isEnabled());
 		}
 	}
-
+	
 	@Override
 	public void performSave(Session s) {
+		s.flush();
 		s.saveOrUpdate(dialog.getModel());
 		addedConfigs.forEach(e->s.saveOrUpdate(e));
 		dialog.getModel().getDefaultConfigs().values().forEach(e->s.saveOrUpdate(e));

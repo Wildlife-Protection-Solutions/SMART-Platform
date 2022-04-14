@@ -154,14 +154,26 @@ public class NamedItem extends UuidItem {
 		if (getNames() == null){
 			names = new HashSet<Label>();
 		}
+		Label found = null;
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if (type.getLanguage().equals(lang)){
-				type.setValue(newName);
-				return;
+				found = type;
+				break;
 			}
 		}
+		
+		if (found != null) {
+			if (newName == null) {
+				getNames().remove(found);
+			}else {
+				found.setValue(newName);
+			}		
+			return;
+		}
+		
 		//create a new label
+		if (newName == null) return;
 		getNames().add(createLabel(lang, newName));		
 	}
 	
