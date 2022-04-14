@@ -328,7 +328,8 @@ public class TranslateConfigurableModelItemDialog extends SmartStyledTitleDialog
 			}
 		});
 		
-		if (item instanceof CmNode && (((CmNode)item).getCategory() != null)) {
+		if ( (item instanceof CmNode && (((CmNode)item).getCategory() != null)) || 
+			(item instanceof CmAttribute && (((CmAttribute)item).getAttribute() != null)) ) { 
 			colName.getColumn().setWidth(200);
 			TableViewerColumn dmName = new TableViewerColumn(nameTable, SWT.NONE);
 			dmName.getColumn().setWidth(200);

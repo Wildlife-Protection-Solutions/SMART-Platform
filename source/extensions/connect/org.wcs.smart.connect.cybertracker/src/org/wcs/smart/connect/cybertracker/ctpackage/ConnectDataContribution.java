@@ -75,7 +75,6 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 				useconnect = mv;
 			}else if (mv.getMetadataKey().equalsIgnoreCase(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
 				dataupload = mv;
-				break;
 			}
 		}
 		if (useconnect == null) {
@@ -96,12 +95,7 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		
 		boolean requiresConnect = false;
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
-			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
-				if (mv.getBooleanValue()) {
-					requiresConnect=true;
-					break;
-				}
-			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
+			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
 				if (mv.getBooleanValue()) {
 					requiresConnect = true;
 					break;

@@ -334,7 +334,15 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		if (ctpackage instanceof AbstractCtPackage) {
 			try {
 				fireEvents = false;
-				MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+				
+				MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
+				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
+					if (btnUploadData != null) btnUploadData.setSelection(true);
+				}else {
+					if (btnUploadData != null) btnUploadData.setSelection(false);
+				}
+				
+				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
 					btnUploadPeriod.setSelection(true);
 					if (data.getStringValue() != null) txtDataPeriod.setText(data.getStringValue());
@@ -344,13 +352,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					}else {
 						btnUploadPeriod.setSelection(true);	
 					}
-				}
-				
-				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
-				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
-					if (btnUploadData != null) btnUploadData.setSelection(true);
-				}else {
-					if (btnUploadData != null) btnUploadData.setSelection(false);
 				}
 				
 				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
@@ -471,14 +472,14 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			data.setStringValue(null);
 		}
 		
+		boolean useconnect = true;
 		if (btnUploadData != null) {
-			data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
-			if (btnUploadData.getSelection()) {
-				data.setBooleanValue(true);
-			}else {
-				data.setBooleanValue(false);
+			if (!btnUploadData.getSelection()) {
+				useconnect = false;
 			}
 		}
+		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
+		data.setBooleanValue(useconnect);
 		
 		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
 		if (btnPositionUpdates.getSelection()) {

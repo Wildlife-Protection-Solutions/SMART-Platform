@@ -307,6 +307,7 @@ public class EditListDialog extends SmartStyledTitleDialog{
 							Label l = iterator.next();
 							if (l.getLanguage().equals(lang)){
 								iterator.remove();
+								session.flush();
 							}
 						}
 					}
