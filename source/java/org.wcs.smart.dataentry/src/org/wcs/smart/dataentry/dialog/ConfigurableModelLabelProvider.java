@@ -57,20 +57,31 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 	
 	@Override
 	public String getText(Object element) {
+		if (element instanceof CmNode) {
+			CmNode node = (CmNode)element;
+			if (currentLanguage == null) {
+				return node.findDisplayName(SmartDB.getCurrentLanguage(), SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+			return node.findDisplayName(currentLanguage, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		}
+		if (element instanceof CmAttribute) {
+			if (currentLanguage == null) return ((CmAttribute)element).getName();
+			return ((CmAttribute)element).findDisplayName(currentLanguage, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		}
 		if (element instanceof NamedItem) {
 			NamedItem i = (NamedItem)element;
 			if (currentLanguage == null){
 				return i.getName();
 			}
 			String l = i.findNameNull(currentLanguage);
-			if (l == null){
-				l = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-			}
+			if (l != null) return l;
 			
+			return i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+						
 //			if (element instanceof CmAttribute) {
 //				l = l + "(" + ((CmAttribute)element).getOrder() + ")";
 //			}
-			return l;
+//			return l;
 		}
 		if (element instanceof CmRootNode) {
 			return getText(((CmRootNode)element).model);

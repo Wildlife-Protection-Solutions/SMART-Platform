@@ -75,6 +75,36 @@ public class DataModelMergeDialog extends SmartStyledTitleDialog{
 		super(parentShell);
 	}
 	
+	protected String getDialogMessage() {
+		return Messages.DataModelMergeDialog_Message;
+	}
+	
+	protected String getDialogTitle() {
+		return Messages.DataModelMergeDialog_Title;
+	}
+	
+	protected String getShellTitle() {
+		return Messages.DataModelMergeDialog_ShellTitle;
+	}
+	
+	protected String getFileMessage() {
+		return Messages.DataModelMergeDialog_SelectFileMsg;
+	}
+	
+	protected String[] getFileFilterExtensions() {
+		return new String[] {"*.xml;*.zip","*.xml", "*.zip", "*.*"};  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+	
+	protected String[] getFileFilterNames() {
+		return new String[] {DialogConstants.ZIP_XML_FILES, DialogConstants.XML_FILES,
+				DialogConstants.ZIP_FILES, DialogConstants.ALL_FILES};
+	}
+	
+	protected void createFileWarning(Composite composite) {
+		
+	}
+	
+	
 	public void okPressed() {
 		file = txtFile.getText();
 		
@@ -101,15 +131,16 @@ public class DataModelMergeDialog extends SmartStyledTitleDialog{
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)main.getLayout()).marginWidth = 10;
+		((GridLayout)main.getLayout()).marginHeight = 10;
+
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText(Messages.DataModelMergeDialog_SelectFileMsg);
+		l.setText(getFileMessage());
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Composite fileSelector = new Composite(main, SWT.NONE);
 		fileSelector.setLayout(new GridLayout(2, false));
-		((GridLayout)fileSelector.getLayout()).marginWidth = 0;
-		((GridLayout)fileSelector.getLayout()).marginHeight = 0;
 		fileSelector.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)fileSelector.getLayoutData()).horizontalIndent = 10;
 		
@@ -123,13 +154,15 @@ public class DataModelMergeDialog extends SmartStyledTitleDialog{
 		btnBrowse.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(getShell());
 			fd.setText(txtFile.getText());
-			fd.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-			fd.setFilterNames(new String[] {Messages.DataModelMergeDialog_xmlfilelbl, Messages.DataModelMergeDialog_allfileslbl});
+			fd.setFilterExtensions(getFileFilterExtensions());
+			fd.setFilterNames(getFileFilterNames());
 			String newFile = fd.open();
 			if (newFile != null) {
 				txtFile.setText(newFile);
 			}
 		});
+		
+		createFileWarning(main);
 				
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.DataModelMergeDialog_CaMsg);
@@ -166,9 +199,9 @@ public class DataModelMergeDialog extends SmartStyledTitleDialog{
 		});
 		lstCas.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		
-		setTitle(Messages.DataModelMergeDialog_Title);
-		setMessage(Messages.DataModelMergeDialog_Message);
-		getShell().setText(Messages.DataModelMergeDialog_ShellTitle);
+		setTitle(getDialogTitle());
+		setMessage(getDialogMessage());
+		getShell().setText(getShellTitle());
 		
 		loadCas.setSystem(true);
 		loadCas.schedule();

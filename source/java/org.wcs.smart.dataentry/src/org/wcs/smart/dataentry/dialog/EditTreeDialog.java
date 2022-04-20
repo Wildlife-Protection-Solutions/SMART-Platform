@@ -536,6 +536,7 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 							}
 						}
 					}
+					session.flush();
 				}else if(dmNode == null || !dmNode.findName(lang).equals(newValue)){
 					cmNode.updateName(((Language)element), (String)value);
 				}

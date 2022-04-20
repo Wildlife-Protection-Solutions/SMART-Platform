@@ -71,7 +71,6 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  */
 public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
-	private Session session;
 	private CmNode node;
 
 	private Label lblCategory;
@@ -86,11 +85,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private List<CmAttributeConfig> deletedConfigs;
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup, List<CmAttributeConfig> deletedConfigs) {
-		super(parent, model);
+		super(parent, model, session);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
-		this.session = session;
 		this.deletedConfigs = deletedConfigs;
 		this.isGroup = isGroup;
 		

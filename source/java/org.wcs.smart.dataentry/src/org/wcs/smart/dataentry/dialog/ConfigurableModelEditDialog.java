@@ -89,6 +89,7 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 		super(Display.getDefault().getActiveShell());
 		
 		session = HibernateManager.openSession(new AssociatedImageInterceptor());
+		session.beginTransaction();
 		if (cm.getUuid() != null){
 			this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
 		}else{
@@ -173,7 +174,10 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 				return false;
 			}
 		}
-		if (getSession() != null && getSession().isOpen()) getSession().close();
+		if (getSession() != null && getSession().isOpen()) {
+			if (getSession().getTransaction().isActive()) getSession().getTransaction().rollback();
+			getSession().close();
+		}
 		return super.close();  
 	}
 	
@@ -346,7 +350,7 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 						InterruptedException {
 					monitor.beginTask(Messages.ConfigurableModelEditDialog_SaveCmProgress, IProgressMonitor.UNKNOWN);
 					try{
-						session.beginTransaction();
+//						session.beginTransaction();
 						for (IConfigurableModelEditorTabContent tab : tabs) {
 							tab.performSave(session);
 							session.flush();
@@ -362,6 +366,7 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 					}
 				}
 			});
+			session.beginTransaction();
 		}catch(Exception ex){
 			SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
 			return false;

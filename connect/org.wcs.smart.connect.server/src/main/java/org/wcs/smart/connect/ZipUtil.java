@@ -29,14 +29,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 
@@ -155,48 +153,4 @@ public class ZipUtil {
         return true;
     }
     
-    
-    /**
-     * @param file  the zip file
-     * @param destinationLocation the destination for unzipped file
-     * @return
-     * @throws Exception  
-     */
-    public static void unzipFolder(Path file,
-    		Path destinationLocation)
-			throws Exception {
-    	
-    	
-    	String[] outputZipRootFolder = new String[] { "null" }; //$NON-NLS-1$
-    	
-		try (ZipFile archiveFile = new ZipFile(file.toAbsolutePath().normalize().toFile())){
-			Enumeration<ZipArchiveEntry> entries = archiveFile.getEntries();
-			while (entries.hasMoreElements()) {
-				ZipArchiveEntry zipEntry = entries.nextElement();
-				String name = zipEntry.getName();
-				name = name.replace('\\', '/');
-				int i = name.indexOf('/');
-				if (i > 0) {
-					outputZipRootFolder[0] = name.substring(0, i);
-				}
-				// name = name.substring(i + 1);
-
-				Path destinationFile = destinationLocation.resolve(name);
-				Path parent = destinationFile.getParent();
-				if (name.endsWith("/")) { //$NON-NLS-1$
-					parent = destinationFile;
-				}
-				Files.createDirectories(parent);
-
-				if (!Files.isDirectory(destinationFile)) {
-					try (InputStream is = archiveFile.getInputStream(zipEntry)){
-						Files.copy(is, destinationFile);
-					}
-				}
-			}
-		} catch (IOException e) {
-			throw new Exception("Unzip failed: " + e.getLocalizedMessage(), e); //$NON-NLS-1$
-		} 
-
-	}
 }

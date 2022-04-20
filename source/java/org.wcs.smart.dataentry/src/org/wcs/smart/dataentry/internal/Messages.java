@@ -84,6 +84,8 @@ public class Messages extends NLS {
 	public static String CmTemplateCloner_CopyConfigModelName;
 	public static String CmTemplateCloner_CopyProgress;
 	public static String CmTemplateCloner_TreeNodeNotFoundError;
+	public static String CmTranslateNameComposite_InvalidName;
+	public static String CmTranslateNameComposite_TranslateButton;
 	public static String CmTreeLabelProvider_Root;
 	public static String CmXmlToSmartImporter_DefaultConfigName;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
@@ -270,6 +272,14 @@ public class Messages extends NLS {
 	public static String TextAttributeInfoComposite_NumPadTooltip;
 	public static String TextAttributeInfoComposite_QRCodeOp;
 	public static String TextAttributeInfoComposite_QRCodeTooltip;
+	public static String TranslateConfigurableModelItemDialog_ConfiguredNameColumn;
+	public static String TranslateConfigurableModelItemDialog_DataModelNameColumn;
+	public static String TranslateConfigurableModelItemDialog_InvalidLabel;
+	public static String TranslateConfigurableModelItemDialog_LanguageColumn;
+	public static String TranslateConfigurableModelItemDialog_Message;
+	public static String TranslateConfigurableModelItemDialog_SaveMessage;
+	public static String TranslateConfigurableModelItemDialog_SaveTitle;
+	public static String TranslateConfigurableModelItemDialog_Title;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Message;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Title;
 	public static String TreeAttributeInfoComposite_deafultValueTooltip;

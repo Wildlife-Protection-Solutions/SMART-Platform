@@ -221,10 +221,11 @@ public class ConfigurableModelFactory {
 			node.setModel(model);
 			node.setParent(parent);
 			node.setCategory(c);
-			node.setName(c.getName());
-			for (Label l : c.getNames()){
-				node.updateName(l.getLanguage(), l.getValue());
-			}
+			c.getNames().size();
+//			node.setName(c.getName());
+//			for (Label l : c.getNames()){
+//				node.updateName(l.getLanguage(), l.getValue());
+//			}
 			
 			List<Attribute> attrList = new ArrayList<Attribute>();
 			c.getAllAttribute(attrList, true);
@@ -232,10 +233,11 @@ public class ConfigurableModelFactory {
 				CmAttribute cma = new CmAttribute();
 				cma.setNode(node);
 				cma.setAttribute(a);
-				cma.setName(a.getName());
-				for (Label label : a.getNames()) { //we need a copy, not the same instance of set
-					cma.updateName(label.getLanguage(), label.getValue());
-				}
+				a.getNames().size();
+//				cma.setName(a.getName());
+//				for (Label label : a.getNames()) { //we need a copy, not the same instance of set
+//					cma.updateName(label.getLanguage(), label.getValue());
+//				}
 				cma.setOrder(node.getCmAttributes().size());
 				cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 				node.getCmAttributes().add(cma);

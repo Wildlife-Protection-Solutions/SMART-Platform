@@ -34,7 +34,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
  * Represents a attribute associated
- * with an etity type.
+ * with an entity type.
  * 
  * @author Emily
  *

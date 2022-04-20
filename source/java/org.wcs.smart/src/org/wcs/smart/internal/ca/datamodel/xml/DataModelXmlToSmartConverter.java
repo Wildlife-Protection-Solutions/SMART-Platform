@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.internal.ca.datamodel.xml;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -43,14 +41,15 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
 
@@ -70,23 +69,30 @@ public class DataModelXmlToSmartConverter {
 	private ConservationArea targetCa = null;
 	
 	/**
-	 * Converts an xml data model file into a SMART
-	 * datamodel file.
+	 * Converts an xml data model file represented by the input stream 
+	 * into a SMART datamodel file. The XML input stream must be the latest
+	 * version of the data model xml.
 	 * 
-	 * @param file The xml data model
-	 * @param icons set of icons to map xml items to can be null 
-	 * @return SMART db datamodel
-	 * 
-	 * @throws JAXBException
-	 * @throws ParseException
-	 * @throws IOException 
+	 * @param is input stream representing xm
+	 * @param targetCa target conservation area
+	 * @param icons existing icons in the conservation area
+	 * @param sets existing icon sets in the conservation area
+	 * @param syncLanguages see comment below
 	 */
-	public DataModel convert(Path file, ConservationArea targetCa, Collection<Icon> icons, boolean synchronizeLang) throws JAXBException, ParseException, IOException {
-		try(InputStream is = Files.newInputStream(file)){
-			return convert(is, targetCa, icons, synchronizeLang);
-		}
+	public DataModel convert(InputStream is, ConservationArea targetCa, 
+			Collection<Icon> icons,
+			Collection<IconSet> sets,
+			boolean syncLanguages, Path workingDirectory) throws Exception {
+		this.targetCa = targetCa;
+		useAsDefault = null;	
+
+		//this converts without a conservation area
+		XmlDataModelImporter cmimporter = new XmlDataModelImporter(icons, sets, Locale.getDefault(), workingDirectory);
+		cmimporter.processInputStream(is);
+		SimpleDataModel sdm = cmimporter.getImportedDataModel();
+		
+		return processDataModelInternal(targetCa, syncLanguages, sdm);
 	}
-	
 	
 	/**
 	 * Converts xml data model into smart database data model
@@ -121,14 +127,23 @@ public class DataModelXmlToSmartConverter {
 	 * @throws JAXBException
 	 * @throws ParseException
 	 */
-	public DataModel convert(InputStream is, ConservationArea targetCa, Collection<Icon> icons, boolean syncLanguages) throws JAXBException, ParseException {
+	public DataModel convert(Path file, ConservationArea targetCa, 
+			Collection<Icon> icons,
+			Collection<IconSet> sets,
+			boolean syncLanguages,
+			Path workingDirectory) throws Exception {
 		this.targetCa = targetCa;
 		useAsDefault = null;	
 
 		//this converts without a conservation area
-		DataModelXmlToSimpleDataModelConverter cc = new DataModelXmlToSimpleDataModelConverter();
-		SimpleDataModel sdm = cc.convert(is, icons, Locale.getDefault());
-		
+		XmlDataModelImporter cmimporter = new XmlDataModelImporter(icons, sets, Locale.getDefault(), workingDirectory);
+		cmimporter.processFile(file);
+		SimpleDataModel sdm = cmimporter.getImportedDataModel();
+		return processDataModelInternal(targetCa, syncLanguages, sdm);
+	}
+
+	private DataModel processDataModelInternal(ConservationArea targetCa, boolean syncLanguages, SimpleDataModel sdm)
+			throws ParseException {
 		//get aggregations
 		aggs = DataModel.getAggregations();
 
@@ -167,25 +182,15 @@ public class DataModelXmlToSmartConverter {
 			}
 			
 			if (a.getTree() != null) {
-				List<AttributeTreeNode> nodes = new ArrayList<>();
-				nodes.addAll(a.getTree());
-				while(!nodes.isEmpty()) {
-					AttributeTreeNode node = nodes.remove(0);
-					updateNames(node);
-					if (node.getChildren() != null) nodes.addAll(node.getChildren());
-				}
+				DataModel.processAttributeTree(a, node->updateNames(node));
 			}
 		}
 		
 		//update labels for categories
-		List<Category> toProcess = new ArrayList<Category>();
-		toProcess.addAll(dm.getCategories());
-		while(!toProcess.isEmpty()) {
-			Category c = toProcess.remove(0);
-			if (c.getChildren() != null) toProcess.addAll(c.getChildren());
+		DataModel.processCategories(dm, c->{
 			c.setConservationArea(targetCa);
 			updateNames(c);
-		}
+		});
 		
 		return dm;
 	}
@@ -199,22 +204,11 @@ public class DataModelXmlToSmartConverter {
 			}
 			
 			if (a.getTree() != null) {
-				List<AttributeTreeNode> nodes = new ArrayList<>();
-				nodes.addAll(a.getTree());
-				while(!nodes.isEmpty()) {
-					AttributeTreeNode node = nodes.remove(0);
-					node.getNames().forEach(l->languageCodes.add(l.getLanguage().getCode()));
-					if (node.getChildren() != null) nodes.addAll(node.getChildren());
-				}
+				DataModel.processAttributeTree(a, 
+						node->node.getNames().forEach(l->languageCodes.add(l.getLanguage().getCode())));
 			}
 		}
-		
-		List<Category> toProcess = new ArrayList<Category>();
-		while(!toProcess.isEmpty()) {
-			Category c = toProcess.remove(0);
-			if (c.getChildren() != null) toProcess.addAll(c.getChildren());
-			c.getNames().forEach(l->languageCodes.add(l.getLanguage().getCode()));
-		}
+		DataModel.processCategories(sdm, c->c.getNames().forEach(l->languageCodes.add(l.getLanguage().getCode())));
 		return languageCodes;
 		
 	}
@@ -292,14 +286,21 @@ public class DataModelXmlToSmartConverter {
 	 * updates the names associated with a data model object
 	 */
 	private void updateNames(DmObject dmobject){
+		updateNamedKeyItem(dmobject);
+		if (dmobject.getIcon() != null && dmobject.getIcon().getUuid() == null) {
+			updateNamedKeyItem(dmobject.getIcon());
+		}
+	}
+	
+	private void updateNamedKeyItem(NamedKeyItem nameditem){
 		List<Label> newLabels = new ArrayList<Label>();
 		String labelValue = null;
-		for (Label label : dmobject.getNames()) {
+		for (Label label : nameditem.getNames()) {
 			Language lang = langLookup.get(label.getLanguage().getCode());
 			labelValue = label.getValue();
 			if (lang != null) {
 				Label l = new Label();
-				l.setElement(dmobject);
+				l.setElement(nameditem);
 				l.setLanguage(lang);
 				l.setValue(label.getValue());
 				newLabels.add(l);
@@ -307,24 +308,24 @@ public class DataModelXmlToSmartConverter {
 			
 			if (useAsDefault != null && useAsDefault.equals(label.getLanguage().getCode())){
 				Label l = new Label();
-				l.setElement(dmobject);
+				l.setElement(nameditem);
 				l.setLanguage(targetCa.getDefaultLanguage());
 				l.setValue(label.getValue());
 				
 			}
 		}
-		dmobject.getNames().clear();
+		nameditem.getNames().clear();
 		for (Label l : newLabels) {
-			dmobject.updateName(l.getLanguage(), l.getValue());
+			nameditem.updateName(l.getLanguage(), l.getValue());
 		}
 		
-		if (dmobject.findNameNull(targetCa.getDefaultLanguage()) == null){
+		if (nameditem.findNameNull(targetCa.getDefaultLanguage()) == null){
 			if (labelValue != null){
 				//no default name provided; lets use any of the names
-				dmobject.updateName(targetCa.getDefaultLanguage(), labelValue);
+				nameditem.updateName(targetCa.getDefaultLanguage(), labelValue);
 			}else{
-				dmobject.updateName(targetCa.getDefaultLanguage(), dmobject.getKeyId());
+				nameditem.updateName(targetCa.getDefaultLanguage(), nameditem.getKeyId());
 			}			
-		}		
+		}
 	}
 }

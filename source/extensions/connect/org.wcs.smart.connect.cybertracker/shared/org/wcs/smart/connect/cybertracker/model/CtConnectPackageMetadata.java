@@ -30,7 +30,8 @@ package org.wcs.smart.connect.cybertracker.model;
 public class CtConnectPackageMetadata {
 
 	public enum Properties{
-		DATA_UPLOAD,
+		USE_CONNECT,
+		DATA_UPLOAD,  //->represents the auto upload every x minutes
 		POSITION_UPLOAD,
 		CONNECT_ALERT
 	};

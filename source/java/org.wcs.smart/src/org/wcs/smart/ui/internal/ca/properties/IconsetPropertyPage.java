@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -34,6 +38,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ILazyContentProvider;
@@ -57,6 +63,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -65,11 +72,15 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
+import org.wcs.smart.ca.in.IconExporter;
+import org.wcs.smart.ca.in.IconImporter;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.NameKeyDialog;
+import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -230,6 +241,16 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		ToolBar tb = new ToolBar(panel,  SWT.HORIZONTAL);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
+		ToolItem exportIcon = new ToolItem(tb, SWT.PUSH);
+		exportIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		exportIcon.addListener(SWT.Selection, e->exportIcons());
+		exportIcon.setToolTipText(Messages.IconsetPropertyPage_ExportIconTitle);
+		
+		ToolItem importIcon = new ToolItem(tb, SWT.PUSH);
+		importIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		importIcon.addListener(SWT.Selection, e->importIcons());
+		importIcon.setToolTipText(Messages.IconsetPropertyPage_ImportCustomICons);
+		
 		ToolItem addIcon = new ToolItem(tb, SWT.PUSH);
 		addIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addIcon.addListener(SWT.Selection, e->addIcon());
@@ -383,10 +404,136 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		session.saveOrUpdate(icon);
 		setDirty(true);
 		icons.add(icon);
+		sortIcons();
 		tblIcons.setItemCount(icons.size());
 		tblIcons.refresh();
 		selectIconSet(true);
 	}
+	
+	
+	private void exportIcons() {
+		if (isDirty) {
+			MessageDialog.openWarning(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_SaveRequired);
+			return;
+		}
+		
+		MessageDialog dialog = new MessageDialog(getShell(), Messages.IconsetPropertyPage_ExportIconTitle, null,
+				Messages.IconsetPropertyPage_ExportFormat,
+				MessageDialog.WARNING,
+				0, Messages.IconsetPropertyPage_CSVFile, Messages.IconsetPropertyPage_ZilFile, IDialogConstants.CANCEL_LABEL);
+		int r = dialog.open();
+		if (r == 2) return;
+		
+		boolean iscsv = r == 0;
+		
+		
+		FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
+		if (iscsv) {
+			fd.setFilterExtensions(new String[] {"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[] {DialogConstants.CSV_FILES, DialogConstants.ALL_FILES});
+			fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_icons.csv"); //$NON-NLS-1$
+		}else {
+			fd.setFilterExtensions(new String[] {"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[] {DialogConstants.ZIP_FILES, DialogConstants.ALL_FILES});
+			fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_icons.zip"); //$NON-NLS-1$
+		}
+		String file = fd.open();
+		if (file == null) return;
+		
+		Path exportfile = Paths.get(file);
+		if (Files.exists(exportfile)) {
+			if (!MessageDialog.openQuestion(getShell(), Messages.IconsetPropertyPage_ExportIconTitle, MessageFormat.format(Messages.IconsetPropertyPage_FileExists, exportfile.toString()))) {
+				return;
+			}
+		}
+		
+		ProgressMonitorDialog pdialog = new ProgressMonitorDialog(getShell());
+		try {
+			pdialog.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+
+					try {
+						IconExporter exporter = new IconExporter();
+						if (iscsv) {
+							exporter.exportIconKeys(SmartDB.getCurrentConservationArea(), exportfile, session, monitor);
+						}else {
+							exporter.exportIconFiles(SmartDB.getCurrentConservationArea(), exportfile, session, monitor);
+						}
+						Display.getDefault().syncExec(()->{
+							MessageDialog.openInformation(getShell(), Messages.IconsetPropertyPage_ExportIconTitle, 
+									MessageFormat.format(Messages.IconsetPropertyPage_ExportComplete, exportfile.toString()));	
+						});
+					}catch (Exception ex) {
+						throw new InvocationTargetException(ex);
+					}
+				}
+			});
+		}catch (Exception ex) {
+			SmartPlugIn.displayLog(ex.getMessage(), ex);
+		}
+	}
+	
+	private void importIcons() {
+		if (isDirty) {
+			MessageDialog.openWarning(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_SaveRequired);
+			return;
+		}
+		
+		BiFunction<Path,Path,Boolean> processor = (iconFile, iconDirectory)->{
+			//TODO: - do in progress monitor??
+			try {
+				IconImporter importer = new IconImporter();
+				ConservationArea ca = session.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+				importer.importIcons(ca, sets, iconFile, iconDirectory);
+				
+				if (importer.getIcons().isEmpty()) {
+					MessageDialog.openWarning(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_NoIconsFound);
+					return false;
+				}
+				List<String> errors = importer.validate(icons);
+				if (!errors.isEmpty()) {
+					WarningDialog edialog = new WarningDialog(getShell(), 
+							Messages.IconsetPropertyPage_ImportIconsTitle, 
+							Messages.IconsetPropertyPage_IconImportError,errors );
+					edialog.open();
+					return false;
+				}
+				if (!importer.getWarnings().isEmpty()) {
+					WarningDialog wdialog = new WarningDialog(getShell(), 
+							Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_IconImportWarn,
+							importer.getWarnings(), 
+							new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
+					if (wdialog.open() == 1) {
+						//no 
+						return false;
+					}
+				}
+				
+				importer.getIcons().forEach(i->session.save(i));
+				setDirty(true);
+				icons.addAll(importer.getIcons());
+				sortIcons();
+				tblIcons.setItemCount(icons.size());
+				tblIcons.refresh();
+				selectIconSet(true);
+				
+				MessageDialog.openInformation(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, MessageFormat.format(Messages.IconsetPropertyPage_IconsImportedMsg, importer.getIcons().size()));
+				return true;
+				
+			}catch (Exception ex) {
+				SmartPlugIn.displayLog(ex.getMessage(), ex);
+				return false;
+			}
+		};
+		
+		ImportIconDialog dialog = new ImportIconDialog(getShell(), session, processor);
+		if (dialog.open() != Window.OK) return;
+		
+	}
+	
+	
 	
 	private void deleteIcons() {
 		if (tblIcons == null || tblIcons.getControl().isDisposed()) return;
@@ -604,7 +751,9 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		createIconTable(sets, icons);
 	}
 	
-	
+	private void sortIcons() {
+		icons.sort((a,b)->java.text.Collator.getInstance().compare(a.getName(), b.getName()));
+	}
 	private Job loadJob = new Job(Messages.IconPreferencePage_LoadJobName) {
 
 		@Override
@@ -617,7 +766,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			
 			icons.forEach(icn->icn.getFiles().forEach(iconfile->iconfile.computeFileLocation(session)));
 						
-			icons.sort((a,b)->java.text.Collator.getInstance().compare(a.getName(), b.getName()));
+			sortIcons();
 			
 			Display.getDefault().asyncExec(()->{
 				lstIconsets.setInput(sets);

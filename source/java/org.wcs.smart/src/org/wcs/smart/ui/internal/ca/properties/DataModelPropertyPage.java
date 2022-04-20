@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.OutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +30,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -45,6 +46,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -59,6 +61,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -80,9 +83,11 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
-import org.wcs.smart.ca.datamodel.ICategoryVisitor;
+import org.wcs.smart.ca.datamodel.DataModelTranslationExporter;
+import org.wcs.smart.ca.datamodel.DataModelTranslationImporter;
 import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.control.WarningDialog;
@@ -90,10 +95,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.ca.datamodel.DataModelMergeDialog;
+import org.wcs.smart.ui.ca.datamodel.ExportDataModelWizard;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
@@ -104,6 +109,7 @@ import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Property page for modifying data model
@@ -139,6 +145,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	
 	protected Session session;
 	
+	private List<Path> deleteOnClose;
+	
 	/**
 	 * Creates new data model property page
 	 */
@@ -148,6 +156,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		for (Aggregation agg : DataModel.getAggregations()){
 			getSession().update(agg);
 		}
+		deleteOnClose = new ArrayList<>();
 	}
 	
 	@Override
@@ -262,6 +271,17 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
+		
+		parent.addListener(SWT.Dispose, e->{
+			for (Path p : deleteOnClose) {
+				try {
+					SmartUtils.deleteDirectory(p);
+				}catch (Exception ex) {
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		});
+		
 		parent.setLayout(new GridLayout(1, false));		
 	
 		Composite thisparent = new Composite(parent, SWT.NONE);
@@ -447,13 +467,18 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		setButtonLayoutData(btnModifyElement);		
 		
 		Composite bottomComp = new Composite(thisparent, SWT.NONE);
-		GridLayout gl = new GridLayout(2, false);
+		GridLayout gl = new GridLayout();
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		bottomComp.setLayout(gl);
 		
+		Composite row1 = new Composite(bottomComp, SWT.NONE);
+		row1.setLayout(new GridLayout(4, false));
+		((GridLayout)row1.getLayout()).marginWidth = 0;
+		((GridLayout)row1.getLayout()).marginHeight = 0;
+		
 		//merge
-		Button mergeButton = new Button(bottomComp, SWT.PUSH);
+		Button mergeButton = new Button(row1, SWT.PUSH);
 		mergeButton.setText(Messages.DataModelPropertyPage_MergeButton);
 		mergeButton.setToolTipText(Messages.DataModelPropertyPage_MergeTooltip);
 		mergeButton.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
@@ -466,8 +491,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		
+		
 		//export 
-		Button exportButton = new Button(bottomComp, SWT.PUSH);
+		Button exportButton = new Button(row1, SWT.PUSH);
 		exportButton.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 		exportButton.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		exportButton.setText(Messages.DataModelPropertyPage_ExportXml_Button);
@@ -478,7 +504,22 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				exportXml();
 			}
 		});
+
+		//merge
+		Button exportTranslationsButton = new Button(row1, SWT.PUSH);
+		exportTranslationsButton.setText(Messages.DataModelPropertyPage_ExportTranslationsButton);
+		exportTranslationsButton.setToolTipText(Messages.DataModelPropertyPage_ExportTranslationsTooltip);
+		exportTranslationsButton.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		exportTranslationsButton.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		exportTranslationsButton.addListener(SWT.Selection,e->exportTranslations());
 			
+		Button importTranslationsButton = new Button(row1, SWT.PUSH);
+		importTranslationsButton.setText(Messages.DataModelPropertyPage_ImportTranslationsButton);
+		importTranslationsButton.setToolTipText(Messages.DataModelPropertyPage_ImportTranslationsTooltip);
+		importTranslationsButton.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		importTranslationsButton.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		importTranslationsButton.addListener(SWT.Selection, e->importTranslations());		
+		
 		viewer.refresh();
 		setTitle(Messages.DataModelPropertyPage_PageTitle);
 		setMessage(Messages.DataModelPropertyPage_Dialog_Message);
@@ -565,9 +606,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModelPropertyPage_TaskName, 2);
 					try{
-						
-						
-						
 						List<String> warnings = new ArrayList<>();
 						progress.setWorkRemaining(conservationAreas.size());
 						
@@ -584,14 +622,35 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							//get icons and create target dm with these icons
 							List<Icon> icons = QueryFactory.buildQuery(session, Icon.class,
 									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+							List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class,
+									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 							DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-							DataModel targetDm = converter.convert(f, ca, icons, false);
+							
+							Path workingDirectory = Files.createTempDirectory("smartdb"); //$NON-NLS-1$
+							deleteOnClose.add(workingDirectory);
+							DataModel targetDm = converter.convert(f, ca, icons, sets, false, workingDirectory);
 							
 							DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, SmartDB.getCurrentLanguage());					
-							warnings.addAll(updater.merge(progress.split(1)));
+							warnings.addAll(updater.merge(session, progress.split(1)));
 							
 							//add any new objects that are not saved via relationships
 							for (Attribute a : sourceDm.getAttributes()){
+								
+								if (a.getIcon() != null && a.getIcon().getUuid() == null) session.save(a.getIcon());
+								if (a.getAttributeList() != null) {
+									a.getAttributeList().forEach(e->{
+										if (e.getIcon() != null && e.getIcon().getUuid() == null) session.save(e.getIcon());
+									});
+								}
+								if (a.getTree() != null) {
+									a.getTree().forEach(node->{
+										node.accept(n->{
+											if (n.getIcon() != null && n.getIcon().getUuid() == null) session.save(n.getIcon());
+											return true;
+										});
+									});
+								}
+								
 								if (a.getUuid() == null){
 									session.save(a);
 									if (a.getIcon() != null) a.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
@@ -616,18 +675,12 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								}
 							}
 							for (Category c : sourceDm.getCategories()){
-								if (c.getUuid() == null){
-									session.save(c);
-								}
-								
-								c.accept(new ICategoryVisitor() {
-									
-									@Override
-									public boolean visit(Category category) {
-										if (category.getIcon() != null) category.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
-										return true;
-									}
+								c.accept(category->{
+									if (category.getIcon() != null && category.getIcon().getUuid() == null) session.save(category.getIcon());
+									if (category.getIcon() != null) category.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+									return true;
 								});
+								if (c.getUuid() == null) session.save(c);
 							}
 						}
 						session.flush();
@@ -676,61 +729,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * Exports the current model as defined (not necessary saved) to an xml file.
 	 */
 	private void exportXml(){
-		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
-		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
-		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
 		
-		String file = fd.open();
-		if (file == null){
-			//nothing selected
-			return;
-		}
-		final Path f = Paths.get(file);
-		if (Files.exists(f)){
-			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_OverwriteFile_DialogTitle, 
-					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getFileName()}))){
-				return;
-			}
-		}
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try{
-			pmd.run(true, false, new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					try{
-						monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
-						DataModel dm = ((DataModel) viewer.getInput());
-						
-						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
-						DataModelSmartToXmlConverter converter = new DataModelSmartToXmlConverter(monitor);
-						org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = converter.convert(dm);
-						monitor.worked(1);
-						
-						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
-						try(OutputStream fout = Files.newOutputStream(f)){
-							XmlSmartDataModelManager.writeDataModel(xml,fout);
-						}
-						monitor.done();
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
-							}});
-						
-					}catch (final Exception ex){
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
-							}});
-					}
-				}
-			});
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
-		}
+		WizardDialog dialog = new SmartWizardDialog(getShell(), new ExportDataModelWizard(((DataModel) viewer.getInput())));
+		dialog.open();
+		
 	}
 	
 	/**
@@ -982,7 +984,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		if (ret == Window.CANCEL){
 			return;
 		}
-		
+		if (newCat.getIcon() != null && newCat.getIcon().getUuid() == null) session.save(newCat.getIcon());
 		if (o instanceof DataModelContentProvider.RootNode){
 			DataModel dm = (DataModel)viewer.getInput();
 			newCat.setParent(null);
@@ -1138,6 +1140,24 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				newAttributes.add( dm.addNewAttribute(att, parent) );
 				//added a new attribute
 				DataModelManager.INSTANCE.fireAddListener(session, att);
+				
+				//process any potentially  new custom attributes
+				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.save(att.getIcon());
+				if (att.getAttributeList() != null) {
+					att.getAttributeList().forEach(a->{
+						if (a.getIcon() != null && a.getIcon().getUuid() == null) session.save(a.getIcon());
+					});
+				}
+				if (att.getTree() != null) {
+					att.getTree().forEach(node->{
+						if (node.getIcon() != null && node.getIcon() == null) session.save(node.getIcon());
+						node.accept(kid->{
+							if (kid.getIcon() != null && kid.getIcon() == null) session.save(kid.getIcon());
+							return true;
+						});
+					});				}
+				
+				
 				session.saveOrUpdate(att);
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(ex.getMessage(), ex);
@@ -1225,5 +1245,189 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			btnDeleteElement.setEnabled(false);			
 		}
 		infoInnerPanel.layout();
+	}
+	
+	private void importTranslations() {
+		if (changesMade) {
+			MessageDialog.openInformation(getShell(), Messages.DataModelPropertyPage_SaveRequiredTitle,
+					Messages.DataModelPropertyPage_SaveRequiredMsg);
+			return;
+		}
+			
+		DataModelMergeDialog mergeDialog = new DataModelMergeDialog(getShell()) {
+			@Override 
+			protected String getDialogMessage() {
+				return Messages.DataModelPropertyPage_TranslationsImportDialogMessage;
+			}
+			@Override 
+			protected String getDialogTitle() {
+				return Messages.DataModelPropertyPage_TranslationsImportDialogTitle;
+			}
+			@Override 
+			protected String getShellTitle() {
+				return getDialogTitle();
+			}
+			@Override 
+			protected String getFileMessage() {
+				return Messages.DataModelPropertyPage_TranslationsImportDialogSelectFile;
+			}
+			@Override 
+			protected String[] getFileFilterExtensions() {
+				return new String[] {"*.csv", "*.*"};  //$NON-NLS-1$//$NON-NLS-2$
+			}
+			@Override 
+			protected String[] getFileFilterNames() {
+				return new String[] {Messages.DataModelPropertyPage_Csvfile, Messages.DataModelMergeDialog_allfileslbl};
+			}
+			@Override 
+			protected void createFileWarning(Composite parent) {
+				Composite part = new Composite(parent, SWT.NONE);
+				part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				part.setLayout(new GridLayout(2, false));
+				((GridData)part.getLayoutData()).horizontalIndent = 10;
+				
+				Label lblWarn = new Label(part, SWT.NONE);
+				lblWarn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+				
+				Label lblMsg = new Label(part, SWT.WRAP);
+				lblMsg.setText(Messages.DataModelPropertyPage_TranslationsImportDialogutfrequired);
+				lblMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)lblMsg.getLayoutData()).widthHint = 200;
+			}
+		};
+			
+		int code = mergeDialog.open();
+		if (code == Window.CANCEL) return;
+
+		final Path p = Paths.get(mergeDialog.getFile());
+		if (!Files.exists(p)) {
+			MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, 
+					MessageFormat.format(Messages.DataModelPropertyPage_FileNotFound, p.toString()));
+			return;
+		}
+		
+		try{
+			DataModelTranslationImporter.validateFile(p);
+		}catch (Exception ex) {
+			MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, ex.getMessage());
+			return;
+		}
+		
+		final List<ConservationArea> conservationAreas = mergeDialog.getSelectedConservationAreas();
+
+		try {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			
+			dialog.run(true, false,new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.DataModelPropertyPage_ImportTranslationsProgress1, conservationAreas.size()+1);
+					List<String> warnings = new ArrayList<>();
+					
+					List<String> casupdated = new ArrayList<>();
+					for (ConservationArea ca : conservationAreas) {
+						monitor.subTask(ca.getName());
+						DataModel sourceDm = null;
+						
+						
+						if (ca.equals(SmartDB.getCurrentConservationArea())) {
+							sourceDm = ((DataModel) viewer.getInput());							
+						}else {
+							sourceDm = HibernateManager.loadDataModel(ca, session);
+						}
+						
+						List<Icon> icons = QueryFactory.buildQuery(session, Icon.class, 
+								new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+						DataModelTranslationImporter importer = new DataModelTranslationImporter(p, sourceDm, icons);
+						try {
+							importer.importTranslations();
+							warnings.addAll(importer.getWarnings());
+							casupdated.add(ca.getId());
+						}catch (Exception ex) {
+							SmartPlugIn.displayLog(MessageFormat.format(Messages.DataModelPropertyPage_ImportTranslationsCAError, ca.getNameLabel(), ex.getMessage()),ex);
+						}
+						monitor.worked(1);
+					}
+					
+					monitor.subTask(Messages.DataModelPropertyPage_ImportTranslationsProgress2);
+					
+					session.flush();
+					monitor.worked(1);
+					Display.getDefault().syncExec(()->{
+						String title = Messages.DataModelPropertyPage_ImportTranslationsDialogTitle;
+						if (casupdated.isEmpty()) {
+							MessageDialog.openInformation(getShell(), title, Messages.DataModelPropertyPage_ImportTranslationsNotCasUpdates);
+						} else {
+							setChangesMade(true);
+							
+							StringJoiner joiner = new StringJoiner(", "); //$NON-NLS-1$
+							for (String id : casupdated) joiner.add(id);
+							
+							String msg = MessageFormat.format(Messages.DataModelPropertyPage_ImportTranslationsCaUpdatedMessage, joiner.toString());
+							
+							if (warnings.isEmpty()) {
+								MessageDialog.openInformation(getShell(), title, msg);
+							}else {
+								WarningDialog wd = new WarningDialog(getShell(), title, msg, warnings);
+								wd.open();
+							}
+						}
+					});
+				}
+			});			
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(MessageFormat.format(Messages.DataModelPropertyPage_ImportTranslationsError, ex.getMessage()), ex);
+			closeAndReopen();
+		}
+	}
+	
+	private void exportTranslations() {
+		
+		FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
+		fd.setFilterExtensions(new String[] {"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.DataModelPropertyPage_Csvfile, Messages.DataModelMergeDialog_allfileslbl});
+				
+		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + ".datamodel.translations.csv"); //$NON-NLS-1$
+				
+		String str = fd.open();
+		if (str == null) return;
+				
+		Path p = Paths.get(str);
+		if (!Files.exists(p.getParent())) {
+			try {
+				Files.createDirectories(p.getParent());
+			} catch (IOException ex) {
+				SmartPlugIn.displayLog(ex.getMessage(), ex);
+			}
+		}
+		if (Files.exists(p)) {
+			boolean ok = MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_FileExists,
+					MessageFormat.format(Messages.DataModelPropertyPage_FileExistsOverwrite, p.toString()));
+			if (!ok) return;
+		}
+		
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+		try {
+			dialog.run(true, false,new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.DataModelPropertyPage_ExportTranslationsProgress, IProgressMonitor.UNKNOWN);;
+					DataModelTranslationExporter exporter = new DataModelTranslationExporter();
+					DataModel dm = ((DataModel) viewer.getInput());
+					try {
+						exporter.export(p, dm);
+					} catch (IOException ex) {
+						throw new InvocationTargetException(ex);
+					}
+					Display.getDefault().syncExec(()->{
+						MessageDialog.openInformation(getShell(), Messages.DataModelPropertyPage_ExportTranslationsTitle, 
+								MessageFormat.format(Messages.DataModelPropertyPage_ExportTranslationsMsg, p.getFileName()));
+					});
+				}
+			});
+		}catch (Exception ex) {
+			SmartPlugIn.displayLog(MessageFormat.format(Messages.DataModelPropertyPage_ExportingTranslationsError,  ex.getMessage()), ex);
+		}	
 	}
 }

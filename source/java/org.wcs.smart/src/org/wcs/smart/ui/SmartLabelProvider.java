@@ -42,7 +42,8 @@ import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.IXmlToDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelValidator;
 import org.wcs.smart.util.SmartUtils;
 
@@ -133,8 +134,8 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_CAT_TASKNAME)) return Messages.SmartLabelProvider_MergeDmProcessingCats;
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_TASKNAME)) return Messages.SmartLabelProvider_MergeDmProcessingDms;
 		
-		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_NOT_FOUND_ERROR)) return Messages.SmartLabelProvider_AttributeNotFound;
-		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.SmartLabelProvider_AttributeTypeNotFound;
+		if (value.equals(IXmlToDataModelConverter.I18NMessages.ATTRIBUTE_NOT_FOUND_ERROR)) return Messages.SmartLabelProvider_AttributeNotFound;
+		if (value.equals(IXmlToDataModelConverter.I18NMessages.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.SmartLabelProvider_AttributeTypeNotFound;
 		
 		if (value.equals(SimpleDataModel.I18nMessages.KEY_INVALID_CHARS)) return Messages.DataModel_Error_Key_InvalidCharacters;
 		if (value.equals(SimpleDataModel.I18nMessages.KEY_KEYWORD)) return Messages.DataModel_KeywordKeyError;
@@ -146,7 +147,10 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.XmlDataModelValidator_InvalidKey;
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.XmlDataModelValidator_InvalidName;
-				
+		
+		if (value.equals(XmlDataModelImporter.I18NMessages.NO_DM_XML_FOUND)) return Messages.SmartLabelProvider_DataModelXmlNotFound;
+		if (value.equals(XmlDataModelImporter.I18NMessages.INVALID_XML)) return Messages.SmartLabelProvider_InvalidXmlFile;
+		
 		if (value.equals(DataModelMerger.ProgressMessages.LOADING)) return Messages.DataModelMerger_SubTask1;
 		if (value.equals(DataModelMerger.ProgressMessages.TASKNAME)) return Messages.DataModelMerger_TaskName;
 		if (value.equals(DataModelMerger.ProgressMessages.MERGINGATTRIBUTES)) return Messages.DataModelMerger_SubTask2;

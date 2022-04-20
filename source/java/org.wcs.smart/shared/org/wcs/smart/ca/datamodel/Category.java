@@ -508,6 +508,7 @@ RETURNS NULL ON NULL INPUT;
 	@Transient
 	public void accept(ICategoryVisitor visitor) {
 		if (!visitor.visit(this)) return;
+		if (getChildren() == null) return;
 		for (Category kid : getChildren()){
 			kid.accept(visitor);
 		}

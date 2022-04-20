@@ -31,6 +31,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+
 /**
  * Deals with removing disabled elements
  * from the configured models, once when the user
@@ -88,7 +89,6 @@ public class DataModelListener implements IDataModelListener {
 						//part of root
 						session.delete(delete);
 						//TODO: re-order root nodes
-						
 					}
 				}
 				

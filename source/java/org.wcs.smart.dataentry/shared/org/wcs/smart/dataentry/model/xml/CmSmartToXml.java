@@ -310,7 +310,12 @@ public class CmSmartToXml {
 	private void processCmNode(CmNode node, List<NodeType> xmlNodes, IProgressMonitor monitor) throws IOException  {
 
 		NodeType nt = new NodeType();
-		setNames(nt.getName(), node.getNames());
+		
+		if (node.getCategory() != null) {
+			setNames(nt.getName(), node.getNames(), node.getCategory().getNames());
+		} else {
+			setNames(nt.getName(), node.getNames());
+		}
 		if (node.getCategory() != null) {
 			nt.setCategoryKey(node.getCategory().getKeyId());
 			nt.setCategoryHkey(node.getCategory().getHkey());
@@ -345,7 +350,7 @@ public class CmSmartToXml {
 		if (node.getCmAttributes() != null){
 			for (CmAttribute ca : node.getCmAttributes()) {
 				AttributeType at = new AttributeType();
-				setNames(at.getName(), ca.getNames());
+				setNames(at.getName(), ca.getNames(), ca.getAttribute().getNames());
 				at.setAttributeKey(ca.getAttribute().getKeyId());
 				at.setDmUuid(toString(ca.getAttribute().getUuid()));
 				at.setRequired(ca.getAttribute().getIsRequired());

@@ -41,6 +41,7 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.connect.uploader.ca.CaProcessorUtils;
+import org.wcs.smart.util.ZipUtilCommon;
 
 
 /**
@@ -74,7 +75,7 @@ public class PostgresqlSyncProcessor {
 		Path tempDir = ZipUtil.createTemporaryDirectory();		
 		try{
 			//unzip file
-			ZipUtil.unzipFolder(zipFile, tempDir);
+			ZipUtilCommon.unzipFolder(zipFile, tempDir);
 
 			Path metadataFile = null;
 			Path changeLogFile = null;

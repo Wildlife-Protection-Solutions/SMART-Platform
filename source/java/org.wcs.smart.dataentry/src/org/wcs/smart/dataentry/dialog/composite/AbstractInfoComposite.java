@@ -69,7 +69,6 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.TranslateNameComposite;
 
 /**
  * Info composite containing some common logic and building blocks for {@link CmRootNode},  {@link CmNode},  {@link CmAttribute}
@@ -85,10 +84,12 @@ public abstract class AbstractInfoComposite extends Composite {
 	private List<ISourceObjectChangedListener> sourceListeners = new ArrayList<ISourceObjectChangedListener>();
 
 	protected boolean fireChanged = true;
+	protected Session session;
 	
-	public AbstractInfoComposite(Composite parent, ConfigurableModel model) {
+	public AbstractInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, SWT.NONE);
 		this.model = model;
+		this.session = session;
 	}
 
 	public abstract Object getSourceObject();
@@ -252,34 +253,31 @@ public abstract class AbstractInfoComposite extends Composite {
 							InterruptedException {
 						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
 					
-						
-						try(Session s = HibernateManager.openSession()){
-							for (Category c : dialog.getCategories()){
-								Category c2 = c;
-								monitor.subTask(c.getName());
-								s.saveOrUpdate(c);
-								while(c2 != null){
-									c2.getNames().size();
-									loadFiles(c2.getIcon(), s);
+						for (Category c : dialog.getCategories()){
+							monitor.subTask(c.getName());
+
+							Category start = c;
+							while(c != null){
+								c.getNames().size();
+								loadFiles(c.getIcon(), session);
 									
-									for (CategoryAttribute ca : c2.getAttributes(true)){
-										ca.getAttribute().getNames().size();
-										loadFiles(ca.getAttribute().getIcon(), s);
+								for (CategoryAttribute ca : c.getAttributes(true)){
+									ca.getAttribute().getNames().size();
+									loadFiles(ca.getAttribute().getIcon(), session);
 										
-										if (ca.getAttribute().getAggregations()!= null) ca.getAttribute().getAggregations().size();
-										if (ca.getAttribute().getActiveListItems() != null){
-											for (AttributeListItem li : ca.getAttribute().getActiveListItems()){
-												li.getNames().size();
-												loadFiles(li.getIcon(), s);
-											}
+									if (ca.getAttribute().getAggregations()!= null) ca.getAttribute().getAggregations().size();
+									if (ca.getAttribute().getActiveListItems() != null){
+										for (AttributeListItem li : ca.getAttribute().getActiveListItems()){
+											li.getNames().size();
+											loadFiles(li.getIcon(), session);
 										}
-										visitTreeNodes(ca.getAttribute().getActiveTreeNodes(),s);
 									}
-									c2 = c2.getParent();
+									visitTreeNodes(ca.getAttribute().getActiveTreeNodes(),session);
 								}
-								addCategory(c);
-								monitor.worked(1);
+								c = c.getParent();
 							}
+							addCategory(start);
+							monitor.worked(1);
 						}
 						monitor.done();
 						
@@ -303,20 +301,14 @@ public abstract class AbstractInfoComposite extends Composite {
 		final CmNode node = new CmNode();
 		node.setModel(getModel());
 		node.setCategory(category);
-		node.setName(category.getName());
-		for (org.wcs.smart.ca.Label label : category.getNames()) { // we need a copy, not the same instance of set
-			node.updateName(label.getLanguage(), label.getValue());
-		}
+
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		category.getAllAttribute(attrList, true);
 		for (Attribute a : attrList) {
 			CmAttribute cma = new CmAttribute();
 			cma.setNode(node);
 			cma.setAttribute(a);
-			cma.setName(a.getName());
-			for (org.wcs.smart.ca.Label label : a.getNames()) { // we need a copy, not the same instance of set
-				cma.updateName(label.getLanguage(), label.getValue());
-			}
+
 			cma.setOrder(node.getCmAttributes().size());
 			cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 			node.getCmAttributes().add(cma);
@@ -368,28 +360,25 @@ public abstract class AbstractInfoComposite extends Composite {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.AbstractInfoComposite_DmLoadingTaskName, 3);
-					try(Session s = HibernateManager.openSession()){
-						DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
-						progress.worked(1);
+					
+					DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					progress.worked(1);
 						
-						//load categories into memory; no-lazy loading here.
-						//attributes are only loaded when needed (when added to the cm)
-						SubMonitor sub = progress.split(1);
-						sub.setWorkRemaining(dataModel.getActiveCategories().size());
-						sub.subTask(Messages.AbstractInfoComposite_CategoriesSubTask);
-						for (Category cat: dataModel.getActiveCategories()){
-							sub.subTask(cat.getName());
-							visitCategory(cat);
-							cat.getNames().size();
-							sub.worked(1);
-						}
-						
-						
-						cachedDataModel = dataModel;
-						progress.worked(1);
-					}finally{
-						monitor.done();
+					//load categories into memory; no-lazy loading here.
+					//attributes are only loaded when needed (when added to the cm)
+					SubMonitor sub = progress.split(1);
+					sub.setWorkRemaining(dataModel.getActiveCategories().size());
+					sub.subTask(Messages.AbstractInfoComposite_CategoriesSubTask);
+					for (Category cat: dataModel.getActiveCategories()){
+						sub.subTask(cat.getName());
+						visitCategory(cat);
+						cat.getNames().size();
+						sub.worked(1);
 					}
+						
+					cachedDataModel = dataModel;
+					progress.worked(1);
+					monitor.done();
 				}
 				
 				private void visitCategory(Category cat){
@@ -478,37 +467,16 @@ public abstract class AbstractInfoComposite extends Composite {
 	 * @author elitvin
 	 * @since 2.0.0
 	 */
-	protected class TranslatableNameComposite extends TranslateNameComposite implements ISourceObjectChangedListener {
+	protected class TranslatableNameComposite extends CmTranslateNameComposite {
 
-		private boolean internalChange = false; //indicate if text was changed by user or by calling setter
-		
 		public TranslatableNameComposite(Composite parent) {
 			super(parent, null);
 		}
-		
+
 		@Override
 		protected void handleChanged() {
 			fireModelChanged();
 		}
 		
-		@Override
-		protected boolean isInnerChange() {
-			return internalChange;
-		}
-		
-		@Override
-		public void sourceObjectChanged(Object newObject, Language language) {
-			setCurrentLanguage(language);
-			if (newObject instanceof NamedItem) {
-				internalChange = true;
-				NamedItem ni = (NamedItem) newObject;
-				updateText(ni);
-				setItem(ni);
-				internalChange = false;
-			} else if (newObject instanceof CmRootNode) {
-				CmRootNode root = (CmRootNode) newObject;
-				sourceObjectChanged(root.model, language);
-			}
-		}
 	}
 }

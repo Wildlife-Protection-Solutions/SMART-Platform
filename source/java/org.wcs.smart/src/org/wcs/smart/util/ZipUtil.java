@@ -217,38 +217,7 @@ public class ZipUtil {
     public static void unzipFolder(Path file,
 			Path destinationLocation)
 			throws Exception {
-    	
-    	String[] outputZipRootFolder = new String[] { "null" }; //$NON-NLS-1$
-    	
-		try(ZipFile archiveFile = new ZipFile(file.normalize().toAbsolutePath().toFile())) {
-			Enumeration<? extends ZipEntry> entries = archiveFile.entries();
-			while (entries.hasMoreElements()) {
-				ZipEntry zipEntry = entries.nextElement();
-				String name = zipEntry.getName();
-				name = name.replace('\\', '/');
-				int i = name.indexOf('/');
-				if (i > 0) {
-					outputZipRootFolder[0] = name.substring(0, i);
-				}
-				// name = name.substring(i + 1);
-
-				Path destinationFile = destinationLocation.resolve(name);
-				Path parent = destinationFile.getParent();
-				
-				if (name.endsWith("/")) { //$NON-NLS-1$
-					parent = destinationFile;
-				} 
-				SmartUtils.createDirectory(parent);
-
-				if (!Files.isDirectory(destinationFile)) {
-					try (InputStream in = archiveFile.getInputStream(zipEntry)) {
-						Files.copy(in, destinationFile);
-					}
-				}
-			}
-		} catch (IOException e) {
-			throw new Exception(Messages.ZipUtil_Error_UnzipFailed + e.getLocalizedMessage(), e);
-		}
+    	ZipUtilCommon.unzipFolder(file, destinationLocation);
 
 	}
     

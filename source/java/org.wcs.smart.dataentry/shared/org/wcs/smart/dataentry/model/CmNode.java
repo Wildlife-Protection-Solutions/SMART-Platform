@@ -42,6 +42,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Type;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Category;
@@ -60,11 +62,14 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private static final long serialVersionUID = 1L;
 	
 	private ConfigurableModel model; 
+	
 	private Category category; 
+	private List<CmAttribute> cmAttributes;
+	
 	private CmNode parent;
 	private int nodeOrder;
 	private List<CmNode> children;
-	private List<CmAttribute> cmAttributes;
+	
 	private boolean photoAllowed = false;
 	private boolean photoRequired = true;
 	private boolean collectMultipleObservations = false;
@@ -295,5 +300,42 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 			sb.append(getExtension());
 		}
 		return sb.toString();
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @return the names associated with the list element in the
+	 * language the platform is running in.
+	 */
+	@Override
+	@Type(type="org.wcs.smart.ca.LabelUserType")
+	@Column(name="uuid", insertable=false, updatable=false)
+	public String getName() {
+		String n = super.getName();
+		if (n == null || n.length() == 0){
+			if (getCategory() == null) return null;
+			return getCategory().getName();
+		}
+		return n;
+	}
+	
+	@Transient
+	public String findDisplayName(Language language, Language defaultl) {
+		//search for custom translations
+		String l = super.findNameNull(language);
+		if (l != null) return l;
+		
+		if (getCategory() != null) l = getCategory().findNameNull(language);
+		if (l != null) return l;
+		
+		l = super.findNameNull(defaultl);
+		if (l != null) return l;
+		
+		if (getCategory() != null) return getCategory().findName(defaultl);
+		
+		return "";	
+		
 	}
 }

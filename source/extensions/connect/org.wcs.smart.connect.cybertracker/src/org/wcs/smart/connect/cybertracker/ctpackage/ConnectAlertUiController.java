@@ -602,9 +602,14 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 					nodes.addAll(currentModel.getNodes());
 					while(!nodes.isEmpty()) {
 						CmNode n = nodes.removeFirst();
-						if (n.getCategory() != null) n.getCategory().getFullCategoryName();
+						n.getNames().size();
+						if (n.getCategory() != null) {
+							n.getCategory().getNames().size();
+							n.getCategory().getFullCategoryName();
+						}
 						if (n.getCmAttributes() != null) {
 							for (CmAttribute a : n.getCmAttributes()) {
+								a.getNames().size();
 								a.getAttribute().getName();
 								if (a.getCurrentList() != null) {
 									for (CmAttributeListItem li : a.getCurrentList()) {

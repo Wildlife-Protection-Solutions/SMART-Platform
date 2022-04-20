@@ -58,6 +58,7 @@ import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.util.ZipUtilCommon;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -100,7 +101,7 @@ public class PostgresqlCaLoader {
 	public void importData(Path zipFile, ConservationAreaInfo ca) throws Exception {
 		Path tempDir = ZipUtil.createTemporaryDirectory();
 		try{
-			ZipUtil.unzipFolder(zipFile, tempDir);
+			ZipUtilCommon.unzipFolder(zipFile, tempDir);
 			processDatabaseFiles(tempDir);
 			inportPlugInVersionFile(tempDir, ca);
 			validatePluginVersions(ca);

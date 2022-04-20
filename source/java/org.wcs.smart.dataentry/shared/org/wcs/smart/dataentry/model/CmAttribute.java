@@ -41,6 +41,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Type;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -408,5 +410,39 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 			getCmAttributeOptions().put(CmAttributeOption.ID_INPUTGROUP, op);
 		}
 		getCmAttributeOptions().get(CmAttributeOption.ID_INPUTGROUP).setBooleanValue(isgrouped);
+	}
+	
+	
+	/**
+	 * 
+	 * @return the names associated with the list element in the
+	 * language the platform is running in.
+	 */
+	@Override
+	@Type(type="org.wcs.smart.ca.LabelUserType")
+	@Column(name="uuid", insertable=false, updatable=false)
+	public String getName() {
+		String n = super.getName();
+		if (n == null || n.length() == 0){
+			if (getAttribute() == null) return null;
+			return getAttribute().getName();
+		}
+		return n;
+	}
+	
+	public String findDisplayName(Language language, Language defaultl) {
+		//search for custom translations
+		String l = super.findNameNull(language);
+		if (l != null) return l;
+		
+		if (getAttribute() != null) l = getAttribute().findNameNull(language);
+		if (l != null) return l;
+		
+		l = super.findNameNull(defaultl);
+		if (l != null) return l;
+		
+		if (getAttribute() != null) return getAttribute().findName(defaultl);
+		
+		return "";	
 	}
 }
