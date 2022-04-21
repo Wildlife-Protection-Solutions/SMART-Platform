@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
@@ -229,6 +230,26 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		return main;
 	}
 	
+	private Image getImage(Icon icon, IconSet s) {
+		
+		IconFile ff = icon.getIconFile(s);
+		if (ff == null) return null;
+		try {
+			Path f = null;
+			if (ff.getCopyFromLocation() != null) {
+				f = ff.getCopyFromLocation();
+			}else {
+				f = ff.getAttachmentFile();
+			}
+			Image img = SmartUtils.getImage(f,SIZE);
+//			if (img != null) images.add(img);
+			return img;
+		}catch (Throwable t) {
+			
+		}
+		return null;
+	
+	}
 	private void createIconTable(List<IconSet> sets, List<Icon> icons) {
 		for (Control c : iconComp.getChildren()) c.dispose();
 		
@@ -285,18 +306,42 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			}
 		});
 		
-		
+		tblIcons.getTable().addListener(SWT.MeasureItem, e->{
+			if (e.index >= 2) {
+				e.width = 50;
+				e.height = 50;
+			}
+		});
+		tblIcons.getTable().addListener(SWT.PaintItem, e->{
+			int col = e.index;
+			if (col >= 2) {
+				int w = 0;
+				for (int i = 0; i < col; i ++) {
+					w+=tblIcons.getTable().getColumn(i).getWidth();	
+				}
+				IconSet s = sets.get(col-2);
+				Icon icon = (Icon)((TableItem)e.item).getData();
+				Image img = getImage(icon, s);
+				if (img != null) {
+					e.gc.drawImage(img, w, e.y);
+					img.dispose();
+				}
+			}
+		});
 		tblIcons.getTable().setHeaderVisible(true);
 		tblIcons.getTable().setLinesVisible(false);
+		
+		ColumnLabelProvider emptyLabelProvider = new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return ""; //$NON-NLS-1$
+			}
+		};
 		
 		TableViewerColumn emptycolumn = new TableViewerColumn(tblIcons, SWT.NONE);
 		emptycolumn.getColumn().setText(""); //$NON-NLS-1$
 		emptycolumn.getColumn().setWidth(0);
-		emptycolumn.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				return null;
-			}
-		});
+		emptycolumn.setLabelProvider(emptyLabelProvider);
 		
 		
 		TableViewerColumn colName = new TableViewerColumn(tblIcons, SWT.NONE);
@@ -315,42 +360,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		for (IconSet s : sets) {
 			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.NONE);
 			colIcon.getColumn().setText(s.getName());
-			colIcon.setLabelProvider(new ColumnLabelProvider() {
-				private List<Image> images = new ArrayList<>();
-				
-				@Override
-				public String getText(Object element) {
-					return null;
-				}
-				
-				@Override
-				public void dispose() {
-					super.dispose();
-					images.forEach(e->e.dispose());
-				}
-				
-				@Override
-				public Image getImage(Object element) {
-					if (element instanceof Icon) {
-						IconFile ff = ((Icon)element).getIconFile(s);
-						if (ff == null) return null;
-						try {
-							Path f = null;
-							if (ff.getCopyFromLocation() != null) {
-								f = ff.getCopyFromLocation();
-							}else {
-								f = ff.getAttachmentFile();
-							}
-							Image img = SmartUtils.getImage(f,SIZE);
-							if (img != null) images.add(img);
-							return img;
-						}catch (Throwable t) {
-							
-						}
-					}
-					return null;
-				}
-			});
+			colIcon.setLabelProvider(emptyLabelProvider);
 			colIcon.getColumn().pack();
 			if (colIcon.getColumn().getWidth() < SIZE) { colIcon.getColumn().setWidth(SIZE); }
 		}
@@ -801,11 +811,9 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			
 			Display.getDefault().asyncExec(()->{
 				lstIconsets.setInput(sets);
+				createIconTable(sets, icons);
 				if (!sets.isEmpty()) {
 					lstIconsets.setSelection(new StructuredSelection(sets.get(0)));
-				}
-				if (!icons.isEmpty()) {
-					createIconTable(sets, icons);
 				}
 				main.layout(true, true);
 			});
