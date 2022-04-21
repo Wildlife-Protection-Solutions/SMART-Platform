@@ -1045,6 +1045,7 @@ public class Messages extends NLS {
 	public static String IconsetPropertyPage_Closedialog;
 	public static String IconsetPropertyPage_CloseMessage;
 	public static String IconsetPropertyPage_CSVFile;
+	public static String IconsetPropertyPage_deleteicontask;
 	public static String IconsetPropertyPage_ExportComplete;
 	public static String IconsetPropertyPage_ExportFormat;
 	public static String IconsetPropertyPage_ExportIconTitle;

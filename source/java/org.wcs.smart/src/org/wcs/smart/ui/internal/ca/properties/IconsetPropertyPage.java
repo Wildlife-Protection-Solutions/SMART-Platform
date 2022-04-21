@@ -312,7 +312,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			}
 		});
 		
-		
 		for (IconSet s : sets) {
 			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.NONE);
 			colIcon.getColumn().setText(s.getName());
@@ -329,6 +328,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 					super.dispose();
 					images.forEach(e->e.dispose());
 				}
+				
 				@Override
 				public Image getImage(Object element) {
 					if (element instanceof Icon) {
@@ -379,6 +379,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		iconComp.layout(true);
 	}
+	
 	
 	private void editIcon() {
 		Object x = tblIcons.getStructuredSelection().getFirstElement();
@@ -486,20 +487,13 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			try {
 				IconImporter importer = new IconImporter();
 				ConservationArea ca = session.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-				importer.importIcons(ca, sets, iconFile, iconDirectory);
+				importer.importIcons(ca, sets, icons, iconFile, iconDirectory);
 				
 				if (importer.getIcons().isEmpty()) {
 					MessageDialog.openWarning(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_NoIconsFound);
 					return false;
 				}
-				List<String> errors = importer.validate(icons);
-				if (!errors.isEmpty()) {
-					WarningDialog edialog = new WarningDialog(getShell(), 
-							Messages.IconsetPropertyPage_ImportIconsTitle, 
-							Messages.IconsetPropertyPage_IconImportError,errors );
-					edialog.open();
-					return false;
-				}
+				
 				if (!importer.getWarnings().isEmpty()) {
 					WarningDialog wdialog = new WarningDialog(getShell(), 
 							Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_IconImportWarn,
@@ -511,15 +505,19 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 					}
 				}
 				
-				importer.getIcons().forEach(i->session.save(i));
+				importer.getIcons().forEach(i->session.saveOrUpdate(i));
+				session.flush();
 				setDirty(true);
-				icons.addAll(importer.getIcons());
+				//add any new icons
+				for (Icon c : importer.getIcons()) {
+					if (!icons.contains(c)) icons.add(c);
+				}				
 				sortIcons();
 				tblIcons.setItemCount(icons.size());
 				tblIcons.refresh();
 				selectIconSet(true);
 				
-				MessageDialog.openInformation(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, MessageFormat.format(Messages.IconsetPropertyPage_IconsImportedMsg, importer.getIcons().size()));
+				MessageDialog.openInformation(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_IconsImportedMsg);
 				return true;
 				
 			}catch (Exception ex) {
@@ -546,16 +544,49 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		if (toDelete.isEmpty()) return;
 		
 		if (!MessageDialog.openConfirm(getShell(), Messages.IconPreferencePage_DeleteTitle,  MessageFormat.format(Messages.IconPreferencePage_DeleteMsg, toDelete.size()))) return;
-		
-		toDelete.forEach(e->{
-			session.delete(e);	
-		});
-		session.flush();
-		setDirty(true);
-		icons.removeAll(toDelete);
-		tblIcons.setItemCount(icons.size());
-		tblIcons.refresh();
-		selectIconSet(true);
+		tblIcons.getTable().setRedraw(false);
+		try {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			try {
+				dialog.run(true, false, new IRunnableWithProgress() {
+					
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						monitor.beginTask(Messages.IconsetPropertyPage_deleteicontask, toDelete.size()+1);
+						toDelete.forEach(e->{
+							
+							//there seems to be a bug in apache derby
+							//that causes all values passed to the trigger to be null
+							//as a result we get ca_uuid cannot be null error
+							//this only appears to be a problem for Attribute icons
+							//so we specifically delete them here.
+							//re: #3401
+							session.createQuery("UPDATE Attribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
+								.setParameter("icon", e) //$NON-NLS-1$
+								.executeUpdate();
+							session.delete(e);
+							session.flush();
+							monitor.worked(1);
+						});
+						
+						icons.removeAll(toDelete);
+						monitor.done();
+						
+					}
+				});
+			}catch (Exception ex) {
+				SmartPlugIn.log(ex.getMessage(), ex);
+			}
+			
+			setDirty(true);
+			
+			tblIcons.setItemCount(icons.size());
+			tblIcons.refresh();
+			tblIcons.setSelection(null);
+			selectIconSet(true);
+		}finally {
+			tblIcons.getTable().setRedraw(true);
+		}
 	}
 	
 	private Composite createSetTab(Composite parent) {

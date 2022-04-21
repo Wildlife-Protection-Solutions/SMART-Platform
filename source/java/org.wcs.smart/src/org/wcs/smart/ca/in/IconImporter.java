@@ -30,11 +30,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.icon.Icon;
@@ -74,7 +73,8 @@ public class IconImporter {
 		return this.icons;
 	}
 	
-	public void importIcons(ConservationArea ca, Collection<IconSet> iconSets, Path iconFile, Path iconDirectory) throws Exception {
+	public void importIcons(ConservationArea ca, Collection<IconSet> iconSets, 
+			List<Icon> currentIcons, Path iconFile, Path iconDirectory) throws Exception {
 		
 		try(FileReader freader = new FileReader(iconFile.toString(), StandardCharsets.UTF_8);
 			CSVReader reader = new CSVReader(freader)){
@@ -142,10 +142,21 @@ public class IconImporter {
 				
 				String key = headers[keyColumn];
 				
-				Icon icon = new Icon();
-				icon.setConservationArea(ca);
-				icon.setKeyId(key);
-				icon.setFiles( new ArrayList<>() );
+				Icon icon = null;
+				for (Icon current : currentIcons) {
+					if (current.getKeyId().equalsIgnoreCase(key)) {
+						icon = current;
+						break;
+					}
+				}
+				
+				if (icon == null) {
+					icon = new Icon();
+					icon.setConservationArea(ca);
+					icon.setKeyId(key);
+					icon.setFiles( new ArrayList<>() );
+				}
+				//update names
 				for (Entry<Language, Integer> names : nameColumns.entrySet()) {
 					String value = headers[names.getValue()];
 					if (!value.isBlank()) icon.updateName(names.getKey(),value);
@@ -157,6 +168,8 @@ public class IconImporter {
 						icon.updateName(ca.getDefaultLanguage(), icon.getNames().iterator().next().getValue());
 				}
 				icon.setName(icon.findName(SmartDB.getCurrentLanguage()));
+				
+				//update/add files
 				for (Entry<IconSet, Integer> names : setColumns.entrySet()) {
 					String filename = headers[names.getValue()];
 					Path setFile = iconDirectory.resolve(filename);
@@ -166,35 +179,51 @@ public class IconImporter {
 						continue;
 					}
 					
-					IconFile file = new IconFile();
-					file.setIcon(icon);
-					file.setCopyFromLocation(setFile);
-					file.setFilename(setFile.getFileName().toString());
-					file.setIconSet(names.getKey());
+					IconFile file = icon.getIconFile(names.getKey());
 					
-					icon.getFiles().add(file);
+					if (file != null) {
+						Path p1 = file.getAttachmentFile();
+						Path p2 = setFile;
+						
+						//TODO: update when using java12+
+						//Files::mismatch
+						boolean areFilesSame = false;
+						try(FileReader r1 = new FileReader(p1.toFile());
+								FileReader r2 = new FileReader(p2.toFile());){
+							areFilesSame = IOUtils.contentEquals(r1, r2);
+						}catch (Exception ex) {
+							System.out.println(p1.toString());
+							System.out.println(p2.toString());
+							
+							throw ex;
+						}
+						if (!areFilesSame) {
+							//this is a different icon file so we want to
+							//delete this file 
+							//and create a new one
+							icon.getFiles().remove(file);
+							file = null;
+						}else {
+							//exact same file so lets do nothing
+						}
+					}
+					
+					if (file == null) {
+						file = new IconFile();
+						file.setIcon(icon);
+						file.setIconSet(names.getKey());
+						file.setCopyFromLocation(setFile);
+						file.setFilename(setFile.getFileName().toString());
+						icon.getFiles().add(file);
+					}
+					
 				}
 				
 				icons.add(icon);
 			}
 		}
 	}
-	
-	public List<String> validate(Collection<Icon> existingIcons) {
-		//ensure 
-		Set<String> keys = new HashSet<>();
-		existingIcons.forEach(e->keys.add(e.getKeyId()));
-		
-		List<String> errors = new ArrayList<>();
-		
-		for (Icon newIcon : icons) {
-			if (keys.contains(newIcon.getKeyId())) {
-				errors.add(MessageFormat.format(Messages.IconImporter_KeyExists, newIcon.getKeyId()));
-			}
-		}
-		
-		return errors;
-	}
+
 	
 	public static void writeSampleFile(ConservationArea ca, List<IconSet> sets, Path outputFile) throws Exception{
 		
