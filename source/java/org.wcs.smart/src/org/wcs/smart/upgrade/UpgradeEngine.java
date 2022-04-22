@@ -331,7 +331,7 @@ public class UpgradeEngine {
 	 * @return list of {@link IDatabaseUpgrader} extension points
 	 * @throws Exception 
 	 */
-	private List<IDatabaseUpgrader> getExtensions() throws Exception {
+	public static List<IDatabaseUpgrader> getExtensions() throws Exception {
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
 		List<String> names = new ArrayList<>();
