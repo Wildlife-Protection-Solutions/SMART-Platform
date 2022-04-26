@@ -155,22 +155,26 @@ public class AttachmentViewDialog {
 		
 		
 		if (exifTransform != null){
-			float[] bounds = new float[]{0,0,rawImage.getBounds().width, rawImage.getBounds().height};
-			exifTransform.transform(bounds);
-			
-			int newWidth = (int)Math.abs(bounds[2] - bounds[0]);
-			int newHeight = (int)Math.abs(bounds[3] - bounds[1]);
-			
-	        Image newImage = new Image(Display.getDefault(), newWidth, newHeight);
-			GC gc3 = new GC(newImage);
 			try {
-				gc3.setTransform(exifTransform);
-				gc3.drawImage(rawImage, 0,0);
+				float[] bounds = new float[]{0,0,rawImage.getBounds().width, rawImage.getBounds().height};
+				exifTransform.transform(bounds);
+				
+				int newWidth = (int)Math.abs(bounds[2] - bounds[0]);
+				int newHeight = (int)Math.abs(bounds[3] - bounds[1]);
+				
+		        Image newImage = new Image(Display.getDefault(), newWidth, newHeight);
+				GC gc3 = new GC(newImage);
+				try {
+					gc3.setTransform(exifTransform);
+					gc3.drawImage(rawImage, 0,0);
+				}finally {
+					gc3.dispose();
+					rawImage.dispose();
+				}
+				rawImage = newImage;
 			}finally {
-				gc3.dispose();
-				rawImage.dispose();
+				exifTransform.dispose();
 			}
-			rawImage = newImage;
 		}
 		
 		draw.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

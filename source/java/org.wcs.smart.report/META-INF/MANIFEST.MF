@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Smart Reporting PlugIn
 Bundle-SymbolicName: org.wcs.smart.report;singleton:=true
-Bundle-Version: 7.5.0.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Require-Bundle: org.wcs.smart;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.query;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.birt;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+Require-Bundle: org.wcs.smart;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.birt;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.eclipse.birt.report.designer.ui.lib.explorer;visibility:=reexport,
  org.eclipse.birt.report.engine;visibility:=reexport,
  org.eclipse.birt.report.designer.core;visibility:=reexport,

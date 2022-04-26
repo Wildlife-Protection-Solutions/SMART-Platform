@@ -35,9 +35,9 @@ import java.util.logging.Logger;
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 
-import com.adobe.xmp.XMPIterator;
-import com.adobe.xmp.XMPMeta;
-import com.adobe.xmp.properties.XMPPropertyInfo;
+import com.adobe.internal.xmp.XMPIterator;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.properties.XMPPropertyInfo;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.lang.GeoLocation;

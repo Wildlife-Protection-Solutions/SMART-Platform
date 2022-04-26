@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.internal.workbench.swt.AbstractPartRenderer;
 import org.eclipse.e4.ui.internal.workbench.swt.CSSRenderingUtils;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
@@ -15,6 +16,7 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.SideValue;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
+import org.eclipse.e4.ui.services.IStylingEngine;
 import org.eclipse.e4.ui.widgets.ImageBasedFrame;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -43,14 +45,77 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 	@Inject
 	EModelService modelService;
 
+//	@Override
+//	public Object createWidget(final MUIElement element, Object parent) {
+//		if (!(element instanceof MToolBar) || !(parent instanceof Composite)) {
+//			return null;
+//		}
+//
+//		final MToolBar toolbarModel = (MToolBar) element;
+//		ToolBar newTB = createToolbar(toolbarModel, (Composite) parent);
+//		bindWidget(element, newTB);
+//		processContribution(toolbarModel, toolbarModel.getElementId());
+//
+//		Control renderedCtrl = newTB;
+//		MUIElement parentElement = element.getParent();
+//		if (parentElement instanceof MTrimBar) {
+//			//for SMART none of the toolbars are draggable
+////			if (!element.getTags().contains(IPresentationEngine.NO_MOVE)) {
+////				element.getTags().add(IPresentationEngine.DRAGGABLE);
+////			}
+//			
+//			setCSSInfo(element, newTB);
+//
+//			boolean vertical = false;
+//			MTrimBar bar = (MTrimBar) parentElement;
+//			vertical = bar.getSide() == SideValue.LEFT || bar.getSide() == SideValue.RIGHT;
+//			IEclipseContext parentContext = getContextForParent(element);
+//			CSSRenderingUtils cssUtils = parentContext.get(CSSRenderingUtils.class);
+//			if (cssUtils != null) {
+//				MUIElement modelElement = (MUIElement) newTB.getData(AbstractPartRenderer.OWNING_ME);
+//				boolean draggable = ((modelElement != null) && (modelElement.getTags().contains(IPresentationEngine.DRAGGABLE)));
+//				if (!draggable) {
+//					//had to add this otherwise the toolbar visiblity property does not get set
+//					//properly and additional spacers get added to toolbar
+//					//on non-windows this seems to cause a lot of errors and is not necessary
+//					renderedCtrl = new ImageBasedFrame(newTB.getParent(), newTB, vertical, false);
+//					//some sort of image is required for mac/linux
+//					Image handleImage = new Image(newTB.getDisplay(), 1, 1);
+//					
+//					((ImageBasedFrame)renderedCtrl).setImages(null, null, handleImage);
+//				}else {
+//					renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
+//				}
+//			}
+//		}
+//
+//		return renderedCtrl;
+//	}
+	
 	@Override
 	public Object createWidget(final MUIElement element, Object parent) {
 		if (!(element instanceof MToolBar) || !(parent instanceof Composite)) {
 			return null;
 		}
 
+		Composite toolbarComposite = (Composite) parent;
+		// Composite which contains toolbar needs to have a separate class to allow the
+		// CSS engine to target it
+		IStylingEngine engine = getContextForParent(element).get(IStylingEngine.class);
+		if (engine != null) {
+			String cssClass = WidgetElement.getCSSClass(toolbarComposite);
+			if (cssClass != null && !cssClass.isEmpty()) {
+				if (!cssClass.contains("ToolbarComposite")) {//$NON-NLS-1$
+					cssClass = cssClass + " ToolbarComposite"; //$NON-NLS-1$
+				}
+			} else {
+				cssClass = "ToolbarComposite"; //$NON-NLS-1$
+			}
+			engine.setClassname(toolbarComposite, cssClass);
+		}
+
 		final MToolBar toolbarModel = (MToolBar) element;
-		ToolBar newTB = createToolbar(toolbarModel, (Composite) parent);
+		ToolBar newTB = createToolbar(toolbarModel, toolbarComposite);
 		bindWidget(element, newTB);
 		processContribution(toolbarModel, toolbarModel.getElementId());
 
@@ -58,46 +123,38 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 		MUIElement parentElement = element.getParent();
 		if (parentElement instanceof MTrimBar) {
 			//for SMART none of the toolbars are draggable
-//			if (!element.getTags().contains(IPresentationEngine.NO_MOVE)) {
-//				element.getTags().add(IPresentationEngine.DRAGGABLE);
-//			}
-			
+			if (!element.getTags().contains(IPresentationEngine.NO_MOVE)) {
+				element.getTags().add(IPresentationEngine.DRAGGABLE);
+			}
+
 			setCSSInfo(element, newTB);
+
 
 			boolean vertical = false;
 			MTrimBar bar = (MTrimBar) parentElement;
 			vertical = bar.getSide() == SideValue.LEFT || bar.getSide() == SideValue.RIGHT;
 			IEclipseContext parentContext = getContextForParent(element);
+
 			CSSRenderingUtils cssUtils = parentContext.get(CSSRenderingUtils.class);
 			if (cssUtils != null) {
 				MUIElement modelElement = (MUIElement) newTB.getData(AbstractPartRenderer.OWNING_ME);
 				boolean draggable = ((modelElement != null) && (modelElement.getTags().contains(IPresentationEngine.DRAGGABLE)));
-				if (!draggable) {
-					//had to add this otherwise the toolbar visiblity property does not get set
-					//properly and additional spacers get added to toolbar
-					//on non-windows this seems to cause a lot of errors and is not necessary
-					renderedCtrl = new ImageBasedFrame(newTB.getParent(), newTB, vertical, false);
-					//some sort of image is required for mac/linux
-					Image handleImage = new Image(newTB.getDisplay(), 1, 1);
-					((ImageBasedFrame)renderedCtrl).setImages(null, null, handleImage);
-				}else {
-					renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
-				}
+				renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
 			}
 		}
 
 		return renderedCtrl;
 	}
 
-	private Image initDragHandleResource() {
-		Bundle bundle = org.eclipse.e4.ui.internal.workbench.swt.WorkbenchSWTActivator.getDefault().getBundle();
-		IPath path = new Path("$ws$/images/dragHandle.png");
-		URL url = FileLocator.find(bundle, path, null);
-		ImageDescriptor desc = ImageDescriptor.createFromURL(url);
-		if (desc != null)
-			JFaceResources.getImageRegistry().put( "org.eclipse.e4.ui.workbench.swt.DRAG_HANDLE", desc);
-		return JFaceResources.getImage( "org.eclipse.e4.ui.workbench.swt.DRAG_HANDLE");
-	}
+//	private Image initDragHandleResource() {
+//		Bundle bundle = org.eclipse.e4.ui.internal.workbench.swt.WorkbenchSWTActivator.getDefault().getBundle();
+//		IPath path = new Path("$ws$/images/dragHandle.png");
+//		URL url = FileLocator.find(bundle, path, null);
+//		ImageDescriptor desc = ImageDescriptor.createFromURL(url);
+//		if (desc != null)
+//			JFaceResources.getImageRegistry().put( "org.eclipse.e4.ui.workbench.swt.DRAG_HANDLE", desc);
+//		return JFaceResources.getImage( "org.eclipse.e4.ui.workbench.swt.DRAG_HANDLE");
+//	}
 	
 	private ToolBar createToolbar(final MUIElement element, Composite parent) {
 		int orientation = getOrientation(element);

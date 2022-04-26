@@ -953,6 +953,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		lblMainImage.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1));
+		lblMainImage.addListener(SWT.Dispose, e->{
+			if (lblMainImage != null && !lblMainImage.isDisposed()) lblMainImage.dispose();
+		});
 		((GridData)lblMainImage.getLayoutData()).widthHint = THUMB_SIZE;
 		((GridData)lblMainImage.getLayoutData()).heightHint = THUMB_SIZE;
 
@@ -2043,6 +2046,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 			if (Files.exists(fileName)){
 				Thumbnail thum = new Thumbnail(entity.getPrimaryAttachment(), THUMB_SIZE);
+				if (imgMain != null) imgMain.dispose();
 				imgMain = thum.getImage();
 				lblMainImage.redraw();
 			}

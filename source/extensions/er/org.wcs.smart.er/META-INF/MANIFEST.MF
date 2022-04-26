@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecological Records Plug-in
 Bundle-SymbolicName: org.wcs.smart.er;singleton:=true
-Bundle-Version: 7.4.0.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-Activator: org.wcs.smart.er.EcologicalRecordsPlugIn
 Require-Bundle: org.eclipse.ui,
- org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.eclipse.ui.forms,
  org.eclipse.jface.databinding,
  org.eclipse.core.databinding.observable,

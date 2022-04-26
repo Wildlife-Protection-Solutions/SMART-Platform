@@ -5,7 +5,7 @@
       version="7.4.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.4.0.qualifier">
+      license-feature-version="8.0.0.qualifier">
 
    <description>
       Language pack for core SMART features.  This includes the BIRT and Eclipse language packs.
@@ -58,11 +58,11 @@
    <requires>
       <import plugin="org.wcs.smart.hibernate.libs"/>
       <import plugin="org.wcs.smart.udig.customization"/>
-      <import feature="org.wcs.smart.feature" version="7.0.5.qualifier"/>
+      <import feature="org.wcs.smart.feature" version="8.0.0" match="compatible"/>
       <import feature="org.eclipse.help" version="2.3.400.v20201202-1800"/>
       <import feature="org.eclipse.rcp" version="4.18.0.v20201202-1800"/>
       <import feature="org.eclipse.equinox.p2.extras.feature" version="1.4.1000.v20201106-1246"/>
-      <import feature="org.wcs.smart.p2.feature" version="7.0.4.qualifier"/>
+      <import feature="org.wcs.smart.p2.feature" version="8.0.0" match="compatible"/>
    </requires>
 
    <plugin

@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.cybertracker.survey.feature"
       label="SMART Mobile Ecological Records Module"
-      version="7.4.0.qualifier"
+      version="8.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.4.0.qualifier">
+      license-feature-version="8.0.0.qualifier">
 
    <description>
       Adds support for mobile data collection of surveys using Cybertracker enabled
@@ -23,8 +23,8 @@ on Cybertracker.
          optional="true"/>
 
    <requires>
-      <import feature="org.wcs.smart.er.feature" version="7.0.0.qualifier"/>
-      <import feature="org.wcs.smart.cybertracker.feature" version="7.0.0.qualifier"/>
+      <import feature="org.wcs.smart.er.feature" version="8.0.0" match="compatible"/>
+      <import feature="org.wcs.smart.cybertracker.feature" version="8.0.0" match="compatible"/>
    </requires>
 
 </feature>

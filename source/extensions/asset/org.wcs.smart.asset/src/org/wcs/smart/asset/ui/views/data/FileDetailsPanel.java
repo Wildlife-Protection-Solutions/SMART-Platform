@@ -610,17 +610,21 @@ public class FileDetailsPanel {
 					// transform based on exif orientation data
 					Transform imageTransform = SmartUtils.getExifImageTransform(proxy.getFile(), img.getBounds().width, img.getBounds().height);
 					if (imageTransform != null) {
-						//TODO: performance
-						Image image3 = new Image(Display.getDefault(), img.getBounds().height, img.getBounds().width);
-						GC gc3 = new GC(image3);
 						try {
-							gc3.setTransform(imageTransform);
-							gc3.drawImage(img, 0, 0);
-						}finally {
-							img.dispose();
-							gc3.dispose();
+							//TODO: performance
+							Image image3 = new Image(Display.getDefault(), img.getBounds().height, img.getBounds().width);
+							GC gc3 = new GC(image3);
+							try {
+								gc3.setTransform(imageTransform);
+								gc3.drawImage(img, 0, 0);
+							}finally {
+								img.dispose();
+								gc3.dispose();
+							}
+							img = image3;
+						} finally {
+							imageTransform.dispose();
 						}
-						img = image3;
 					}
 				}catch (Exception ex) {
 					ex.printStackTrace();

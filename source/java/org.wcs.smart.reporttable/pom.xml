@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
     		<artifactId>smart-tycho</artifactId>
-		<version>7.4.0-SNAPSHOT</version>
+		<version>8.0.0-SNAPSHOT</version>
 	</parent>
 	
 	<name>SMART BIRT Tables Module</name>
 	<artifactId>org.wcs.smart.reporttable</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.4.0-SNAPSHOT</version>
+	<version>8.0.0-SNAPSHOT</version>
 	
 </project>

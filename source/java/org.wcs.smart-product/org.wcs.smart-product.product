@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="7.4.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="8.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.wcs.smart/images/nl/en/about.png"/>
@@ -14,7 +14,7 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xmx2048M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -Dosgi.framework.extensions=org.eclipse.equinox.transforms.hook,org.eclipse.fx.osgi
+      <vmArgs>-Xmx2048M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -Dosgi.framework.extensions=org.eclipse.equinox.transforms.hook,org.eclipse.fx.osgi -Dorg.eclipse.swt.graphics.Resource.reportNonDisposed=false
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true
       </vmArgsMac>

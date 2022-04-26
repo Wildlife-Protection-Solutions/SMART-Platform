@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Collect PlugIn
 Bundle-SymbolicName: org.wcs.smart.smartcollect;singleton:=true
-Bundle-Version: 7.4.0.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-Activator: org.wcs.smart.smartcollect.SmartCollectPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.independentincident;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.independentincident;bundle-version="[8.0.0,9.0.0)",
  org.locationtech.udig.style.sld;bundle-version="3.0.0",
- org.wcs.smart.cybertracker;bundle-version="[7.0.0,8.0.0)",
- org.wcs.smart.connect.cybertracker;bundle-version="[7.0.0,8.0.0)",
- org.wcs.smart.connect;bundle-version="7.0.0"
+ org.wcs.smart.cybertracker;bundle-version="[8.0.0,9.0.0)",
+ org.wcs.smart.connect.cybertracker;bundle-version="[8.0.0,9.0.0)",
+ org.wcs.smart.connect;bundle-version="[8.0.0,9.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.wcs.smart.smartcollect
 Bundle-ActivationPolicy: lazy

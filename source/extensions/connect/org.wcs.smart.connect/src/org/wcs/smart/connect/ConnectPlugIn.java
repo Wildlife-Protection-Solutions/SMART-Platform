@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect;
 
-import javax.ws.rs.ext.RuntimeDelegate;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

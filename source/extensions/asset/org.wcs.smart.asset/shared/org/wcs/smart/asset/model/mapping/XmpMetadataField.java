@@ -27,8 +27,8 @@ import java.util.logging.Logger;
 
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 
-import com.adobe.xmp.XMPIterator;
-import com.adobe.xmp.properties.XMPPropertyInfo;
+import com.adobe.internal.xmp.XMPIterator;
+import com.adobe.internal.xmp.properties.XMPPropertyInfo;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.xmp.XmpDirectory;
 

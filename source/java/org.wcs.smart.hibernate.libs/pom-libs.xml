@@ -6,20 +6,20 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>7.2.0-SNAPSHOT</version>
+		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom-libs.xml</relativePath>
 	</parent>
 	
 	<name>SMART Hibernate Libraries Module</name>
 	<artifactId>org.wcs.smart.libs</artifactId>
   	<packaging>pom</packaging>
-	<version>7.2.0-SNAPSHOT</version>
+	<version>8.0.0-SNAPSHOT</version>
 		
 	<properties>
-		<hibernate.version>5.4.3.Final</hibernate.version>
-		<ehcache.version>3.8.1</ehcache.version>
-		<derby.version>10.15.1.3</derby.version>
-		<c3p0.version>0.9.5.4</c3p0.version>
+		<hibernate.version>5.6.7.Final</hibernate.version>
+		<ehcache.version>3.10.0</ehcache.version>
+		<derby.version>10.15.2.0</derby.version>
+		<c3p0.version>0.9.5.5</c3p0.version>
 	</properties>
     
 	<dependencies>

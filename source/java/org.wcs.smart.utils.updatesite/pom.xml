@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.4.0-SNAPSHOT</version>
+		<version>8.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.wcs.smart.utils.updatesite</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<version>7.4.0-SNAPSHOT</version>
+	<version>8.0.0-SNAPSHOT</version>
 
 
 </project>

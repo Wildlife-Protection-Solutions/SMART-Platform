@@ -969,23 +969,31 @@ public class SmartUtils {
 		try {
 			//check fo exif metadata for transform
 			Transform imageTransform = SmartUtils.getExifImageTransform(file, sizeW, sizeH);
-		 	if (imageTransform != null) {
-				Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
-				GC gc3 = new GC(image3);
-				try {
-					gc3.setTransform(imageTransform);
-					gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
-				}finally {
-					gc3.dispose();
-					rawImage.dispose();
-				}
-				return image3;
-			}
+		 	
+		 		try {
+		 			if (imageTransform != null) {
+						Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
+						GC gc3 = new GC(image3);
+						try {
+							gc3.setTransform(imageTransform);
+							gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
+						}finally {
+							gc3.dispose();
+							rawImage.dispose();
+						}
+						return image3;
+		 			}
+		 		}finally {
+		 			if (imageTransform != null) imageTransform.dispose();
+		 		}
+			
 		}catch (Exception ex) {
 			
 		}
 		
-		if (size == null) return rawImage;
+		if (size == null) {
+			return rawImage;
+		}
 				
 		// resize image
 		Image image2 = new Image(Display.getDefault(), sizeW, sizeH);
@@ -996,8 +1004,8 @@ public class SmartUtils {
 			gc.dispose();
 			rawImage.dispose();
 		}
-		return image2;
 		
+		return image2;
 	}
 	
 	
@@ -1051,16 +1059,21 @@ public class SmartUtils {
 			
 		}
 		if (imageTransform != null) {
-			Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
-			GC gc3 = new GC(image3);
 			try {
-				gc3.setTransform(imageTransform);
+				Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
+				GC gc3 = new GC(image3);
+				try {
+					gc3.setTransform(imageTransform);
 					gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
+					imageTransform.dispose();
+				}finally {
+					gc3.dispose();
+					rawImage.dispose();
+				}
+				return image3;
 			}finally {
-				gc3.dispose();
-				rawImage.dispose();
+				imageTransform.dispose();
 			}
-			return image3;
 		}
 		
 		if (size == null) return rawImage;

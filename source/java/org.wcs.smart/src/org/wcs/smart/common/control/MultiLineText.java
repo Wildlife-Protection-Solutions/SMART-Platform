@@ -24,6 +24,7 @@ package org.wcs.smart.common.control;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -59,7 +60,13 @@ public class MultiLineText extends Composite implements Listener{
 			  e.gc.drawImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RESIZE_IMAGE), 0, 0);        
 		  }
 		}); 
-		int imagewidth = SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.RESIZE_IMAGE).createImage().getBounds().width;
+		int imagewidth = 1;
+		Image temp = SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.RESIZE_IMAGE).createImage();
+		try {
+			imagewidth = temp.getBounds().width;
+		}finally{
+			temp.dispose();
+		}
 		move.setBounds(super.getBounds().width - imagewidth - offset, super.getBounds().height - imagewidth - offset, imagewidth, imagewidth);
 		
 		move.addListener(SWT.MouseMove, this);
@@ -98,9 +105,10 @@ public class MultiLineText extends Composite implements Listener{
 		r.height = minSize + offset + 2;
 		lastHeight = minSize + offset;
 		
+		final int fimagewidth = imagewidth;
 		addListener(SWT.Resize, e->{
 			text.setBounds(0, 0, super.getBounds().width - offset, lastHeight);// super.getBounds().height - offset);
-			move.setBounds(super.getBounds().width - imagewidth - offset, super.getBounds().height - imagewidth - offset, imagewidth, imagewidth);
+			move.setBounds(super.getBounds().width - fimagewidth - offset, super.getBounds().height - fimagewidth - offset, fimagewidth, fimagewidth);
 		});
 		
 		super.setBounds(r);

@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Asset Query
 Bundle-SymbolicName: org.wcs.smart.asset.query;singleton:=true
-Bundle-Version: 7.4.0.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-Activator: org.wcs.smart.asset.query.AssetQueryPlugIn
 Require-Bundle: org.eclipse.ui.forms,
- org.wcs.smart.asset;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.query;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.observation.query;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.asset;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.observation.query;bundle-version="[8.0.0,9.0.0)",
  org.locationtech.udig.catalog.rasterings;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11

@@ -32,7 +32,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;

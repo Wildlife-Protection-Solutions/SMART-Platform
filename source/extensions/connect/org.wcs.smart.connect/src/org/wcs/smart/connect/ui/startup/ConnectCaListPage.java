@@ -24,7 +24,7 @@ package org.wcs.smart.connect.ui.startup;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotAuthorizedException;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;

@@ -25,7 +25,7 @@ import java.net.MalformedURLException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;

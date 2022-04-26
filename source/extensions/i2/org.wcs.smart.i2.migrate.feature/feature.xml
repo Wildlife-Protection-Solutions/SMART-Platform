@@ -6,7 +6,7 @@
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.4.0.qualifier">
+      license-feature-version="8.0.0.qualifier">
 
    <description>
       A plugin for migrating SMART6 intelligence and entity data into the SMART profiles system.

@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.diagram;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
@@ -64,6 +66,9 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IFi
 	
 	private RelationshipGraphContentProvider graphContentProvider;
 	private RelationshipDiagramStyle style;
+	
+	private Map<RelationshipDiagramNodeStyleOptions, Font> fonts = new HashMap<>();
+	private Map<IntelEntity, Image> images = new HashMap<>();
 	
 	public RelationshipGraphLabelProvider(RelationshipGraphContentProvider graphContentProvider) {
 		this.graphContentProvider = graphContentProvider; 
@@ -128,9 +133,13 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IFi
 	public Image getImage(Object element) {
 		if (element instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) element;
+			if (images.containsKey(e)) return images.get(e);
+			
 			int size = style != null ? getNodeOptions(element).getImageSize().getSize() : ImageSizeOption.DEFAULT_IMAGE_SIZE_OPTION.getSize();
 			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment(), size);
-			return thum.getImage();
+			Image i = thum.getImage();
+			images.put(e, i);
+			return i;
 		}
 		return super.getImage(element);
 	}
@@ -151,11 +160,19 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IFi
 //		return null;
 //	}
 
+	
+	
 	@Override
 	public Font getFont(Object element) {
 		if (style != null) {
-			FontData fd = getNodeOptions(element).getFontData();
-			return fd != null ? new Font(Display.getCurrent(), fd) : null;
+			RelationshipDiagramNodeStyleOptions ops = getNodeOptions(element);
+			if (fonts.containsKey(ops)) return fonts.get(ops);
+		
+			FontData fd = ops.getFontData();
+			if (fd == null) return null;
+			Font f = new Font(Display.getCurrent(), fd);
+			fonts.put(ops, f);
+			return f;
 		}
 		return null;
 	}
@@ -276,6 +293,17 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IFi
 			return figure;
 		}
 		return null;
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		
+		fonts.values().forEach(f->f.dispose());
+		fonts.clear();
+		
+		images.values().forEach(e->e.dispose());
+		images.clear();
 	}
 
 }

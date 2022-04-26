@@ -2,11 +2,11 @@
 <feature
       id="org.wcs.smart.r.feature"
       label="SMART R Module"
-      version="7.4.0.qualifier"
+      version="8.0.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.r"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.4.0.qualifier">
+      license-feature-version="8.0.0.qualifier">
 
    <description>
       Provides a link to executing R Scripts.
