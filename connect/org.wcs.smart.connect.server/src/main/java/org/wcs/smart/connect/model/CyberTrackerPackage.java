@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -36,11 +37,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.api.noa.CyberTrackerNoa;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -162,14 +165,18 @@ public class CyberTrackerPackage extends UuidItem{
 	}
 	
 	@Transient
-	public CyberTrackerPackageProxy asProxy(URL rootUrl) {	
+	public CyberTrackerPackageProxy asProxy(URL rootUrl) throws MalformedURLException {	
 		
 		boolean requirespassword = getIsPrivate();
 		if (getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) {
 			requirespassword = false;
 		}
+		
+		String path = rootUrl.getPath() + "/noa/" + CyberTrackerNoa.PATH + "/packages/" + UuidUtils.uuidToString(getCtPackageUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		URL url = new URL(rootUrl.getProtocol(), rootUrl.getHost(), rootUrl.getPort(), path);
+		
 		CyberTrackerPackageProxy proxy = new CyberTrackerPackageProxy();
-		proxy.setAppLink(ICtPackage.generateSmartMobileAppLink(rootUrl, getCtPackageUuid(), requirespassword));
+		proxy.setAppLink(ICtPackage.generateSmartMobileAppLink(url, getCtPackageUuid(), requirespassword));
 		proxy.setCaLabel(getConservationArea().getLabel());
 		proxy.setCaUuid(getConservationArea().getUuid());
 		proxy.setUuid( getCtPackageUuid() );

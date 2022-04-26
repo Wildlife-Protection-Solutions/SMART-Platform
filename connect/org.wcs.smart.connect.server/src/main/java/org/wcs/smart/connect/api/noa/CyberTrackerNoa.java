@@ -211,7 +211,7 @@ public class CyberTrackerNoa {
 		
 		UUID packageUuid = null;
 		try{
-			packageUuid = UUID.fromString(packageUuidstr);
+			packageUuid = UuidUtils.stringToUuid(packageUuidstr);
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.InvalidPackageError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -407,7 +407,7 @@ public class CyberTrackerNoa {
 		
 		UUID navigationUuid = null;
 		try{
-			navigationUuid = UUID.fromString(uuid);
+			navigationUuid = UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.NavLayerNotFound", request.getLocale())); //$NON-NLS-1$
 		}
