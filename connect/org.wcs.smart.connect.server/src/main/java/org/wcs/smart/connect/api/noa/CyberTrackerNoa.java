@@ -293,7 +293,7 @@ public class CyberTrackerNoa {
 		
 		UUID packageUuid = null;
 		try{
-			packageUuid = UUID.fromString(packageUuidstr);
+			packageUuid = UuidUtils.stringToUuid(packageUuidstr);
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.InvalidPackageError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}

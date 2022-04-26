@@ -364,7 +364,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				
 				if (btnPublic != null) {
 					data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
-					if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
+					if ((data == null || data.getBooleanValue() == null) || data.getBooleanValue()) {
 						btnPublic.setSelection(false);
 					}else {
 						btnPublic.setSelection(true);
