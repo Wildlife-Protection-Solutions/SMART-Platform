@@ -61,7 +61,7 @@ import org.wcs.smart.upgrade.v600.Upgrader601To610;
 import org.wcs.smart.upgrade.v600.Upgrader610To620;
 import org.wcs.smart.upgrade.v600.Upgrader620To630;
 import org.wcs.smart.upgrade.v700.Upgrader630To700;
-import org.wcs.smart.upgrade.v700.Upgrader700To741;
+import org.wcs.smart.upgrade.v700.Upgrader700To750;
 
 
 /**
@@ -96,7 +96,7 @@ public class UpgradeEngine {
 		V620("6.1.0", "6.2.0", Upgrader610To620.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V630("6.2.0", "6.3.0", Upgrader620To630.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V700("6.3.0", "7.0.0", Upgrader630To700.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V741("7.0.0", "7.4.1", Upgrader700To741.class); //$NON-NLS-1$ //$NON-NLS-2$
+		V750("7.0.0", "7.5.0", Upgrader700To750.class); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		public String fromVersion;
 		public String toVersion;
@@ -331,7 +331,7 @@ public class UpgradeEngine {
 	 * @return list of {@link IDatabaseUpgrader} extension points
 	 * @throws Exception 
 	 */
-	private List<IDatabaseUpgrader> getExtensions() throws Exception {
+	public static List<IDatabaseUpgrader> getExtensions() throws Exception {
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
 		List<String> names = new ArrayList<>();

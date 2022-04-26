@@ -32,7 +32,8 @@ import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.filter.Operator;
-import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.IXmlToDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelValidator;
 
 /**
@@ -109,8 +110,12 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_TASKNAME)) return Messages.getString("SmartLabelProvider.MergeDmProgress", l); //$NON-NLS-1$
 		
 				
-		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_NOT_FOUND_ERROR)) return Messages.getString("SmartLabelProvider.DmXmlAttributeNotFound", l); //$NON-NLS-1$
-		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.getString("SmartLabelProvider.DmXmlAttributeTypeNotSupported", l); //$NON-NLS-1$
+		if (value.equals(IXmlToDataModelConverter.I18NMessages.ATTRIBUTE_NOT_FOUND_ERROR)) return Messages.getString("SmartLabelProvider.DmXmlAttributeNotFound", l); //$NON-NLS-1$
+		if (value.equals(IXmlToDataModelConverter.I18NMessages.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.getString("SmartLabelProvider.DmXmlAttributeTypeNotSupported", l); //$NON-NLS-1$
+		
+		if (value.equals(XmlDataModelImporter.I18NMessages.NO_DM_XML_FOUND)) return Messages.getString("SmartLabelProvider.DataModelXmlNotFound", l); //$NON-NLS-1$
+		if (value.equals(XmlDataModelImporter.I18NMessages.INVALID_XML)) return Messages.getString("SmartLabelProvider.InvalidFile", l); //$NON-NLS-1$
+		
 		
 		if (value.equals(SimpleDataModel.I18nMessages.KEY_INVALID_CHARS)) return Messages.getString("SmartLabelProvider.DmValidateInvalidChars", l); //$NON-NLS-1$
 		if (value.equals(SimpleDataModel.I18nMessages.KEY_KEYWORD)) return Messages.getString("SmartLabelProvider.DmValidateCannotContainKeyword", l); //$NON-NLS-1$

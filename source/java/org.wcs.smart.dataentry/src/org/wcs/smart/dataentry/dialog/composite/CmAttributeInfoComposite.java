@@ -69,7 +69,6 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 
-	private Session session;
 	private CmAttribute attribute;
 
 	private Label lblAttribute;
@@ -78,8 +77,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	private ImageSelectionControl imageSelection;
 	
 	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
-		super(parent, model);
-		this.session = session;
+		super(parent, model, session);
 		createControls();
 	}
 	

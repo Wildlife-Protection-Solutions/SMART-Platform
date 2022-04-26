@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DataModel xmlns="http://www.smartconservationsoftware.org/xml/1.0/datamodel">
+<DataModel xmlns="http://www.smartconservationsoftware.org/xml/1.1/datamodel">
     <languages>
         <language code="ka"/>
         <language code="en"/>

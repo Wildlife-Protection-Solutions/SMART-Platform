@@ -16,12 +16,16 @@
     <name>SMART Connect Server</name>
     <packaging>war</packaging>
     
-    
+    <properties>
+		<timestamp>${maven.build.timestamp}</timestamp>
+   		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+    </properties>
     <build>
     	<finalName>server</finalName>
     	<resources>
     		<resource>
     			<directory>src/main/resources</directory>
+    			<filtering>true</filtering>
     		</resource>
     		<resource>
     			<directory>src/main/java</directory>

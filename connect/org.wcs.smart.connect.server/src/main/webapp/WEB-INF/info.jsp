@@ -17,8 +17,10 @@
 		
 		<div style="flex: 1 1 auto; overflow:auto">
 			<div>
+				<br>
+				<p>Build Version: ${buildversion}</p>
 				<p>Connect Version: ${connectVersion}</p>
-				<p>Last Updated:  ${connectUpdated}</p>
+				<p>Last Updated (db):  ${connectUpdated}</p>
 			</div>
 	
 			<div class="catable table-cell smart-table info-tables-float">

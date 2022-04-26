@@ -24,8 +24,10 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -48,10 +50,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
@@ -67,8 +69,8 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	private LabelProvider nodeTypeLabelProvider = new LabelProvider(){
 		@Override
 		public String getText(Object element) {
-			if (element instanceof TreeNodeType){
-				return findName((TreeNodeType)element);
+			if (element instanceof AttributeTreeNode){
+				return findName((AttributeTreeNode)element);
 			}
 			return super.getText(element);
 		}
@@ -77,9 +79,10 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	private TreeViewer tv1; //source nodes
 	private TreeViewer tv2;	//to import 
 	
-	private ParentTreeNodeType[] rootNodes;
+	private AttributeTreeNode[] rootNodes;
 	private ImportAttributeProcessor processor;
 
+	private Set<AttributeTreeNode> inTree;
 	
 	/**
 	 * Creates a new attribute dialog
@@ -89,6 +92,7 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	public ImportAttributeDialog(Shell parentShell, ImportAttributeProcessor processor) {
 		super(parentShell);
 		this.processor = processor;
+		inTree = new HashSet<>();
 		initAttributeType();
 	}
 	
@@ -96,10 +100,10 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	 * 
 	 * @return list of nodes selected by user
 	 */
-	public List<TreeNodeType> getSelectedNodes(){
-		List<TreeNodeType> nodes = new ArrayList<TreeNodeType>();
-		for (ParentTreeNodeType p : rootNodes){
-			if (p.isInTree()){
+	public List<AttributeTreeNode> getSelectedNodes(){
+		List<AttributeTreeNode> nodes = new ArrayList<AttributeTreeNode>();
+		for (AttributeTreeNode p : rootNodes){
+			if (inTree.contains(p)){
 				nodes.add(p);
 				filterChildren(p);
 			}
@@ -110,10 +114,10 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	/*
 	 * removes all children that are not selected
 	 */
-	private void filterChildren(TreeNodeType t){
-		for (Iterator<TreeNodeType> iterator = t.getChildrens().iterator(); iterator.hasNext();) {
-			TreeNodeType kid = iterator.next();
-			if (!((ParentTreeNodeType)kid).isInTree()){
+	private void filterChildren(AttributeTreeNode t){
+		for (Iterator<AttributeTreeNode> iterator = t.getChildren().iterator(); iterator.hasNext();) {
+			AttributeTreeNode kid = iterator.next();
+			if (!inTree.contains(kid)){
 				iterator.remove();
 			}else{
 				filterChildren(kid);
@@ -127,19 +131,19 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	 * language.  If not found, it uses the default code selected by the user.  If
 	 * it can't find that then it returns the key.
 	 */
-	private String findName(TreeNodeType node){
+	private String findName(AttributeTreeNode node){
 		String defaultLabel = null;
-		for (NameType type : node.getNames()){
-			if (type.getLanguageCode().equals(SmartDB.getCurrentLanguage().getCode())){
+		for (Label type : node.getNames()){
+			if (type.getLanguage().getCode().equals(SmartDB.getCurrentLanguage().getCode())){
 				return type.getValue();
-			}else if (type.getLanguageCode().equals(this.processor.getDefaultLangCode())){
+			}else if (type.getLanguage().getCode().equals(this.processor.getDefaultLangCode())){
 				defaultLabel = type.getValue();
 			}
 		}
 		if (defaultLabel != null){
 			return defaultLabel;
 		}
-		return node.getKey();
+		return node.getKeyId();
 	}
 	
 	@Override
@@ -240,11 +244,8 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	 */
 	private void initAttributeType(){
 		//create root nodes
-		List<ParentTreeNodeType> roots = new ArrayList<ParentTreeNodeType>();
-		for (TreeNodeType tn : processor.getMatchedAttribute().getTrees()){
-			roots.add(new ParentTreeNodeType(tn));
-		}
-		rootNodes = roots.toArray(new ParentTreeNodeType[roots.size()]);
+		List<AttributeTreeNode> roots = new ArrayList<>(processor.getMatchedAttribute().getTree());
+		rootNodes = roots.toArray(new AttributeTreeNode[roots.size()]);
 	}
 	
 	/*
@@ -253,8 +254,8 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	 */
 	private void changeSelected(){
 		//validate
-		for (ParentTreeNodeType n : rootNodes){
-			if (n.isInTree()){
+		for (AttributeTreeNode n : rootNodes){
+			if (inTree.contains(n)){
 				boolean cont = MessageDialog.openQuestion(getShell(), Messages.ImportAttributeDialog_ConfirmDialogText, Messages.ImportAttributeDialog_ClearWarning);
 				if (!cont){
 					return;
@@ -293,9 +294,9 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 		IStructuredSelection selection = (IStructuredSelection)tv1.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
-			if (item instanceof ParentTreeNodeType ){
-				setInTreeCascadeToKids( (ParentTreeNodeType)item, true);
-				setInTreeCascadeUp( (ParentTreeNodeType)item);
+			if (item instanceof AttributeTreeNode ){
+				setInTreeCascadeToKids( (AttributeTreeNode)item, true);
+				setInTreeCascadeUp( (AttributeTreeNode)item);
 				tv2.refresh();
 				tv2.expandToLevel(item, TreeViewer.ALL_LEVELS);
 			}
@@ -309,8 +310,8 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 		IStructuredSelection selection = (IStructuredSelection)tv2.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
-			if (item instanceof ParentTreeNodeType ){
-				setInTreeCascadeToKids( (ParentTreeNodeType)item, false);
+			if (item instanceof AttributeTreeNode ){
+				setInTreeCascadeToKids( (AttributeTreeNode)item, false);
 			}			
 			
 		}
@@ -318,16 +319,21 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 		
 	}
 	
-	private void setInTreeCascadeUp(ParentTreeNodeType node){
+	private void setInTreeCascadeUp(AttributeTreeNode node){
 		if (node == null) return;
-		node.setIsInTree(true);
+		inTree.add(node);
 		setInTreeCascadeUp(node.getParent());
 	}
 	
-	private void setInTreeCascadeToKids(ParentTreeNodeType node, boolean isInTree){
-		node.setIsInTree(isInTree);
-		for (TreeNodeType kid : node.getChildrens()){
-			setInTreeCascadeToKids((ParentTreeNodeType)kid, isInTree);
+	private void setInTreeCascadeToKids(AttributeTreeNode node, boolean isInTree){
+		if (isInTree) {
+			inTree.add(node);
+		}else {
+			inTree.remove(node);
+		}
+		
+		for (AttributeTreeNode kid : node.getChildren()){
+			setInTreeCascadeToKids(kid, isInTree);
 		}
 	}
 	
@@ -343,7 +349,7 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 	 */
 	private class TreeContentProvider implements ITreeContentProvider{
 
-		private ParentTreeNodeType[] rootNodes;
+		private AttributeTreeNode[] rootNodes;
 		private boolean inTreeFlag = false;
 		
 		public TreeContentProvider(boolean inTreeFlag){
@@ -357,7 +363,7 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			this.rootNodes = (ParentTreeNodeType[])newInput;
+			this.rootNodes = (AttributeTreeNode[])newInput;
 		}
 
 		@Override
@@ -365,29 +371,27 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 			if (!inTreeFlag){
 				return rootNodes;
 			}
-			ArrayList<ParentTreeNodeType> roots = new ArrayList<ParentTreeNodeType>();
-			for (ParentTreeNodeType tn : rootNodes){
-				if (tn.isInTree()){
-					roots.add(tn);
-				}
+			ArrayList<AttributeTreeNode> roots = new ArrayList<AttributeTreeNode>();
+			for (AttributeTreeNode tn : rootNodes){
+				if (inTree.contains(tn)) roots.add(tn);
+				
 			}
-			return roots.toArray(new ParentTreeNodeType[roots.size()]);
+			return roots.toArray(new AttributeTreeNode[roots.size()]);
 			
 		}
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof ParentTreeNodeType){
+			if (parentElement instanceof AttributeTreeNode){
+				AttributeTreeNode parent = (AttributeTreeNode) parentElement;
 				if (!inTreeFlag){
-					return ((ParentTreeNodeType) parentElement).getChildrens().toArray();
+					return parent.getChildren().toArray();
 				}else{
-					ArrayList<ParentTreeNodeType> roots = new ArrayList<ParentTreeNodeType>();
-					for (TreeNodeType tn : ((ParentTreeNodeType)parentElement).getChildrens()){
-						if (((ParentTreeNodeType)tn).isInTree()){
-							roots.add((ParentTreeNodeType)tn);
-						}
+					ArrayList<AttributeTreeNode> roots = new ArrayList<AttributeTreeNode>();
+					for (AttributeTreeNode tn : parent.getChildren()){
+						if (inTree.contains(tn)) roots.add(tn);
 					}
-					return roots.toArray(new ParentTreeNodeType[roots.size()]);		
+					return roots.toArray(new AttributeTreeNode[roots.size()]);		
 				}
 			}
 			return null;
@@ -395,22 +399,21 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 
 		@Override
 		public Object getParent(Object element) {
-			if (element instanceof ParentTreeNodeType){
-				return ((ParentTreeNodeType) element).getParent();
+			if (element instanceof AttributeTreeNode){
+				return ((AttributeTreeNode) element).getParent();
 			}
 			return null;
 		}
 
 		@Override
 		public boolean hasChildren(Object element) {
-			if (element instanceof ParentTreeNodeType){
+			if (element instanceof AttributeTreeNode){
+				AttributeTreeNode item = (AttributeTreeNode) element;
 				if (!inTreeFlag){
-					return ((ParentTreeNodeType) element).getChildrens().size() > 0;
+					return !item.getChildren().isEmpty();
 				}else{
-					for (TreeNodeType tn : ((ParentTreeNodeType)element).getChildrens()){
-						if (((ParentTreeNodeType)tn).isInTree()){
-							return true;
-						}
+					for (AttributeTreeNode tn : item.getChildren()){
+						if (inTree.contains(tn)) return true;
 					}
 					return false;
 				}
@@ -420,47 +423,47 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 		
 	}
 	
-	/**
-	 * wrapper around a tree node that keeps a reference
-	 * to the parent object.
-	 * @author Emily
-	 *
-	 */
-	class ParentTreeNodeType extends TreeNodeType{
-		
-		private ParentTreeNodeType parent = null;
-		private boolean isInTree = false;
-		
-		public ParentTreeNodeType(){
-		}
-		
-		public ParentTreeNodeType(TreeNodeType type){
-			this.isactive = type.isIsactive();
-			this.key = type.getKey();
-			this.names = type.getNames();
-			this.iconkey = type.getIconkey();
-			for (TreeNodeType child : type.getChildrens()){
-				ParentTreeNodeType t = new ParentTreeNodeType(child);
-				if (this.childrens == null){
-					this.childrens = new ArrayList<TreeNodeType>();
-				}
-				this.childrens.add(t);
-				t.parent = this;
-			}
-		
-		}
-		public ParentTreeNodeType getParent(){
-			return this.parent;
-		}
-		public void setParent(ParentTreeNodeType parent){
-			this.parent = parent;
-		}
-		
-		public boolean isInTree(){
-			return this.isInTree;
-		}
-		public void setIsInTree(boolean inTree){
-			this.isInTree = inTree;
-		}
-	}
+//	/**
+//	 * wrapper around a tree node that keeps a reference
+//	 * to the parent object.
+//	 * @author Emily
+//	 *
+//	 */
+//	class ParentTreeNodeType extends TreeNodeType{
+//		
+//		private ParentTreeNodeType parent = null;
+//		private boolean isInTree = false;
+//		
+//		public ParentTreeNodeType(){
+//		}
+//		
+//		public ParentTreeNodeType(TreeNodeType type){
+//			this.isactive = type.isIsactive();
+//			this.key = type.getKey();
+//			this.names = type.getNames();
+//			this.iconkey = type.getIconkey();
+//			for (TreeNodeType child : type.getChildrens()){
+//				ParentTreeNodeType t = new ParentTreeNodeType(child);
+//				if (this.childrens == null){
+//					this.childrens = new ArrayList<TreeNodeType>();
+//				}
+//				this.childrens.add(t);
+//				t.parent = this;
+//			}
+//		
+//		}
+//		public ParentTreeNodeType getParent(){
+//			return this.parent;
+//		}
+//		public void setParent(ParentTreeNodeType parent){
+//			this.parent = parent;
+//		}
+//		
+//		public boolean isInTree(){
+//			return this.isInTree;
+//		}
+//		public void setIsInTree(boolean inTree){
+//			this.isInTree = inTree;
+//		}
+//	}
 }

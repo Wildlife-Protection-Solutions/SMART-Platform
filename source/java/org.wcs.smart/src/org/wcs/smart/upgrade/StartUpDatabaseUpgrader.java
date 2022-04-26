@@ -22,6 +22,7 @@
 package org.wcs.smart.upgrade;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.wcs.smart.SmartPlugIn;
@@ -77,6 +78,14 @@ public class StartUpDatabaseUpgrader   {
 					IDatabaseUpgrader upgrader = UpgradeFromVersion.values()[i].upgradeEngine.getDeclaredConstructor().newInstance();
 					upgrader.upgrade(new NullProgressMonitor());
 				}
+				
+				//upgrade extensions 
+				List<IDatabaseUpgrader> extensions = UpgradeEngine.getExtensions();
+				for (IDatabaseUpgrader upgrader : extensions) {
+					//execute install/upgrade
+					upgrader.upgrade(new NullProgressMonitor());
+				}
+
 			}finally {
 				ChangeLogInstaller.INSTANCE.setEnabled(isChangeLogInstalled);
 			}

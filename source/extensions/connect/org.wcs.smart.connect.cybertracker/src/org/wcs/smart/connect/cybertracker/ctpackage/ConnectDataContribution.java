@@ -64,11 +64,40 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		if (!(ctpackage instanceof AbstractCtPackage)) return null;
 		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
 
+		
+		//for backward compatibility
+		//if we have data_upload metadata field but not the use_connect then set the use_connect
+		//field to the value of the data_upload
+		MetadataFieldValue useconnect = null;
+		MetadataFieldValue dataupload = null;
+		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
+			if (mv.getMetadataKey().equalsIgnoreCase(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
+				useconnect = mv;
+			}else if (mv.getMetadataKey().equalsIgnoreCase(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
+				dataupload = mv;
+			}
+		}
+		if (useconnect == null) {
+			MetadataFieldValue mv = new MetadataFieldValue();
+			mv.setConservationArea(apackage.getConservationArea());
+			mv.setCtPackage(apackage);
+			mv.setMetadataKey(CtConnectPackageMetadata.Properties.USE_CONNECT.name());
+			mv.setVisible(false);
+			apackage.getMetadataValues().add(mv);
+			
+			if (dataupload == null || !dataupload.getBooleanValue()) {
+				mv.setBooleanValue(false);
+			}else {
+				mv.setBooleanValue(true);
+			}
+		}
+		
+		
 		boolean requiresConnect = false;
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
-			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
+			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
 				if (mv.getBooleanValue()) {
-					requiresConnect=true;
+					requiresConnect = true;
 					break;
 				}
 			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
@@ -93,15 +122,19 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 				
 		PackageContribution cc = new PackageContribution();
 		
+		JSONObject dataserver = new JSONObject();
+		dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
+		dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);		
+		
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
-			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
+			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
 				if (mv.getBooleanValue()) {
-					JSONObject dataserver = new JSONObject();
-					dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
-					dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
-					dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
-					
 					cc.addProfileMetadata(SmartMobilePackageFields.DATA_SERVER_JSONKEY, dataserver);
+				}
+				
+			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
+				if (mv.getBooleanValue()) {
+					dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
 				}
 			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {

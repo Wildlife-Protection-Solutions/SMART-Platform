@@ -247,6 +247,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	@Transient
 	public void accept(ITreeNodeVisitor visitor) {
 		if (!visitor.visit(this)) return;
+		if (getChildren() == null) return;
 		for (AttributeTreeNode kid : getChildren()) {
 			kid.accept(visitor);
 		}

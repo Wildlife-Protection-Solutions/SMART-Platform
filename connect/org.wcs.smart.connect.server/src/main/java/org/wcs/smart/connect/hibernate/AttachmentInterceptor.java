@@ -32,7 +32,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -43,7 +42,6 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.i18n.Messages;
 
 /**
@@ -95,10 +93,13 @@ public class AttachmentInterceptor extends EmptyInterceptor {
 				}
 				//if there are no more files then we delete the directory too
 				try {
+					
+					long cnt = 0;
 					try(Stream<Path> stream = Files.list(f.getParent())){
-						if (stream.count() == 0) {
-							FileUtils.deleteDirectory(f.getParent().toAbsolutePath().normalize().toFile());
-						}
+						cnt = stream.count();
+					}
+					if (cnt == 0) {
+						FileUtils.deleteDirectory(f.getParent().toAbsolutePath().normalize().toFile());
 					}
 					
 				}catch (Exception ex) {

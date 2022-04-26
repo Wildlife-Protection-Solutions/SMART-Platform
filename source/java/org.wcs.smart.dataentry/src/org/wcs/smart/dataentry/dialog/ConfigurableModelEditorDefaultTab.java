@@ -374,12 +374,13 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			public void modelChanged() {
 				dialog.notifyChangesMade();
 				modelTreeViewer.refresh();
+				dialog.getSession().flush();
 			}
 		};
 
 		//NOTE: session is already opened and should not be closed until dialog is closed
 		
-		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model);
+		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
 		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), true, deletedConfigs);
@@ -548,9 +549,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			((MenuItem)btn.getData(MENU_ITEM_KEY)).setEnabled(btn.isEnabled());
 		}
 	}
-
+	
 	@Override
 	public void performSave(Session s) {
+		s.flush();
 		s.saveOrUpdate(dialog.getModel());
 		addedConfigs.forEach(e->s.saveOrUpdate(e));
 		dialog.getModel().getDefaultConfigs().values().forEach(e->s.saveOrUpdate(e));

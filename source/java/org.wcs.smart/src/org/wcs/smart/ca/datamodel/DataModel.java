@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -54,11 +55,11 @@ import org.wcs.smart.internal.Messages;
 
 /**
  * Extension of a simple data model to support Desktop specific features.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-public class DataModel extends SimpleDataModel{
-	
+public class DataModel extends SimpleDataModel {
 		
 	private static List<Aggregation> aggregations; //set of valid aggregations
 	
@@ -407,6 +408,19 @@ public class DataModel extends SimpleDataModel{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
 		try {
 			for (Attribute att : attributes) {
+				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.save(att.getIcon());
+				if (att.getAttributeList() != null) att.getAttributeList().forEach(e->{
+					if (e.getIcon() != null && e.getIcon().getUuid() == null) session.save(e.getIcon());
+				});
+				
+				if (att.getTree() != null) {
+					processAttributeTree(att, (node)->{
+						if (node.getIcon() != null && node.getIcon().getUuid() == null) {
+							node.getIcon().setConservationArea(node.getAttribute().getConservationArea());
+							session.save(node.getIcon());
+						}
+					});
+				}
 				progress.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.save(att);
 				session.flush();
@@ -414,6 +428,15 @@ public class DataModel extends SimpleDataModel{
 				progress.worked(1);
 			}
 
+			processCategories(this, (node)->{
+				if (node.getIcon() != null && node.getIcon().getUuid() == null) {
+					node.getIcon().setConservationArea(node.getConservationArea());
+					session.saveOrUpdate(node.getIcon());
+					session.flush();
+				}
+			});
+			session.flush();
+			
 			for (Category c : categories) {
 				progress.subTask(Messages.DataModel_Progress_SaveCategory + c.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.save(c);
@@ -504,5 +527,31 @@ public class DataModel extends SimpleDataModel{
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
 		}
 		return null;
+	}
+	
+	public static void processCategories(DataModel dm, Consumer<Category> consumer) {
+		processCategories(dm.getCategories(), consumer);
+	}
+	
+	public static void processCategories(SimpleDataModel dm, Consumer<Category> consumer) {
+		processCategories(dm.getCategories(), consumer);
+	}
+	
+	public static void processCategories(List<Category> rootCategories, Consumer<Category> consumer) {
+		for (Category c : rootCategories) {
+			c.accept(e->{
+				consumer.accept(e);
+				return true;
+			});
+		}
+	}
+	
+	public static void processAttributeTree(Attribute attribute, Consumer<AttributeTreeNode> consumer) {
+		for (AttributeTreeNode node : attribute.getTree()) {
+			node.accept(e->{
+				consumer.accept(e);
+				return true;
+			});
+		}
 	}
 }

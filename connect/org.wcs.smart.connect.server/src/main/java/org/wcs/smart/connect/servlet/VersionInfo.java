@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.connect.servlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import javax.naming.NamingException;
@@ -57,6 +60,17 @@ public class VersionInfo extends HttpServlet{
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		StringBuilder buildVersion = new StringBuilder();
+		try(InputStream is = getClass().getResourceAsStream("/version.txt"); //$NON-NLS-1$
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is))){
+			String line = null;
+		
+			while((line = reader.readLine()) != null) {
+				buildVersion.append( line);
+				buildVersion.append("; "); //$NON-NLS-1$
+			}
+		}
 		
 		List<CaPluginVersion> versions = null;
 		List<ConservationAreaInfo> areas = null;
@@ -94,6 +108,7 @@ public class VersionInfo extends HttpServlet{
 		request.setAttribute("connectUpdated", connectUpdated); //$NON-NLS-1$
 		request.setAttribute("areas", areas); //$NON-NLS-1$
 		request.setAttribute("plugins", plugins); //$NON-NLS-1$
+		request.setAttribute("buildversion", buildVersion); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/info.jsp").forward(request, response); //$NON-NLS-1$
 		

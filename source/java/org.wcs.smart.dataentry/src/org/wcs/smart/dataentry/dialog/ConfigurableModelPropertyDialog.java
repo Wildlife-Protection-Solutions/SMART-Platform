@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -73,6 +74,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
@@ -310,6 +312,15 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							deleteq.setParameter("model", currentCm); //$NON-NLS-1$
 							deleteq.executeUpdate();
 
+							//need to load names here otherwise we end up with a null pointer exception
+							ArrayDeque<CmNode> nodes = new ArrayDeque<>(currentCm.getNodes());
+							while(!nodes.isEmpty()) {
+								CmNode node = nodes.remove();
+								node.getNames().size();
+								node.getCmAttributes().forEach(a->a.getNames().size());
+								nodes.addAll(node.getChildren());
+							}
+							
 							session.delete(currentCm);
 							session.getTransaction().commit();
 							//deleting filestore

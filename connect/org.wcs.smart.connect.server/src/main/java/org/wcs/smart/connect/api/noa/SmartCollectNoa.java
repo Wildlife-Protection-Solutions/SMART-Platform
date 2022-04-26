@@ -62,6 +62,7 @@ import org.wcs.smart.connect.model.SmartCollectConnectUser;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
+import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -138,7 +139,7 @@ public class SmartCollectNoa {
 		
 		UUID packageUuid = null;
 		try{
-			packageUuid = UUID.fromString(packageUuidstr);
+			packageUuid = UuidUtils.stringToUuid(packageUuidstr);
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.InvalidIdentifier", request.getLocale()));  //$NON-NLS-1$
 		}
@@ -201,7 +202,7 @@ public class SmartCollectNoa {
 		
 		UUID packageUuid = null;
 		try{
-			packageUuid = UUID.fromString(packageUuidstr);
+			packageUuid = UuidUtils.stringToUuid(packageUuidstr);
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.InvalidPackageError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}

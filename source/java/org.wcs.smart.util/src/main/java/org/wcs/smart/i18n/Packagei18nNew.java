@@ -68,7 +68,7 @@ public class Packagei18nNew {
 //	public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
 //	public static final String[] LANGUAGES =  new String[] {"es","pt"};
 //	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
-	public static final String[] LANGUAGES = {"hi", "kar"};
+	public static final String[] LANGUAGES = {"my"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);

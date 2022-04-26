@@ -89,7 +89,7 @@
 				<is_open_after_saved>true</is_open_after_saved>
 			</export_html_setting>
 			<export_image_setting>
-				<output_file_path>C:\data\SMART\Docs\6.2.tech\events.png</output_file_path>
+				<output_file_path>C:\temp\SMART7.5\ER\events.png</output_file_path>
 				<category_dir_path></category_dir_path>
 				<with_category_image>true</with_category_image>
 				<is_open_after_saved>true</is_open_after_saved>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2018-03-15 10:05:14</creation_date>
-			<updated_date>2018-12-05 09:48:43</updated_date>
+			<updated_date>2022-04-20 14:38:45</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -454,7 +454,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>5</word_id>
+					<word_id>4</word_id>
 					<id>2</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -618,7 +618,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>4</word_id>
+					<word_id>5</word_id>
 					<id>6</id>
 					<description></description>
 					<unique_key_name></unique_key_name>

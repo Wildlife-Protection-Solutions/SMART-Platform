@@ -208,7 +208,7 @@ public class ConversionJob implements IRunnableWithProgress {
 		}
 		if (mapping.getFromDateMapping() != null && item.getFromDate() != null) {
 			//cannot map to the same attribute
-			if (!mapping.getToDateMapping().equals(mapping.getFromDateMapping())) {
+			if (!mapping.getFromDateMapping().equals(mapping.getToDateMapping())) {
 				IntelRecordAttributeValue value = new IntelRecordAttributeValue();
 				value.setAttribute(mapping.getFromDateMapping());
 				value.setDateValue(item.getFromDate());

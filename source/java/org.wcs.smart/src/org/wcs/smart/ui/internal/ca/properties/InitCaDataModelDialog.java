@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,9 +60,13 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -68,6 +75,8 @@ import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -91,6 +100,8 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 	private Session session = null;
 	private Button btnClone;
 
+	private Path workingDirectory = null;
+	
 	/**
 	 * @param parentShell
 	 */
@@ -98,6 +109,8 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 		super(parent);
 		this.ca = SmartDB.getCurrentConservationArea();
 		this.session = session;
+		
+		
 	}
 
 	private Session getSession() {
@@ -119,6 +132,16 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 
 	@Override
 	public Control createDialogArea(Composite parent) {
+		
+		//ensure working directory is dispoed of properly when dialog is closed
+		parent.addListener(SWT.Dispose, e->{
+			try {
+				if (workingDirectory != null) SmartUtils.deleteDirectory(workingDirectory);
+			} catch (IOException ex) {
+				SmartPlugIn.log(ex.getMessage(), ex);
+			}
+		});
+		
 		parent = (Composite) super.createDialogArea(parent);
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
@@ -159,11 +182,18 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 
 	private List<Icon> getIcons(){
 		List<Icon> icons = new ArrayList<>();
-		try(Session s = HibernateManager.openSession()){
-			icons.addAll(QueryFactory.buildQuery(s, Icon.class,
-					new Object[] {"conservationArea", ca}).list()); //$NON-NLS-1$
-		}
+		icons.addAll(QueryFactory.buildQuery(session, Icon.class,
+				new Object[] {"conservationArea", ca}).list()); //$NON-NLS-1$
+		
 		return icons;
+	}
+	
+	private List<IconSet> getIconSets(){
+		List<IconSet> sets = new ArrayList<>();
+		sets.addAll(QueryFactory.buildQuery(session, IconSet.class,
+				new Object[] {"conservationArea", ca}).list()); //$NON-NLS-1$
+		
+		return sets;
 	}
 	
 	private void createImportXml(Composite comp,
@@ -181,8 +211,10 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 		imp.setLayout(layout);
 
 		btnImport = new Button(imp, SWT.PUSH);
+		btnImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		btnImport.setBackground(imp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnImport.setEnabled(false);
-		btnImport.setText(Messages.InitCaDataModelDialog_ImportXML_Button);
+		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if(caViewer != null){
@@ -190,8 +222,9 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 				}
 				
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-				fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-				fd.setFilterNames(new String[]{Messages.InitCaDataModelDialog_XmlFileFilter_Name, Messages.InitCaDataModelDialog_AllFiles_FilterName});
+				fd.setFilterExtensions(new String[]{"*.xml;*.zip", "*.xml", "*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				fd.setFilterNames(new String[]{DialogConstants.ZIP_XML_FILES,
+						DialogConstants.XML_FILES, DialogConstants.ZIP_FILES, DialogConstants.ALL_FILES});
 				
 				String file = fd.open();
 				if (file != null) {
@@ -205,10 +238,15 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 							public void run(IProgressMonitor monitor)
 									throws InvocationTargetException,
 									InterruptedException {
+								
 								try {
-									
+									if (workingDirectory != null) {
+										SmartUtils.deleteDirectory(workingDirectory);
+									}
+									workingDirectory = Files.createTempDirectory("smartdm"); //$NON-NLS-1$
+
 									DataModelXmlToSmartConverter converter =  new DataModelXmlToSmartConverter();
-									dm = converter.convert(f, ca, getIcons(), true);
+									dm = converter.convert(f, ca, getIcons(), getIconSets(), true, workingDirectory);
 								} catch (Exception ex) {
 									SmartPlugIn
 											.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotReadXml + "\n\n" + ex.getMessage(), //$NON-NLS-1$
@@ -307,7 +345,7 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 						try {
 							try {
 								DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-								dm = converter.convert(is, ca, getIcons(), true);
+								dm = converter.convert(is, ca, getIcons(), getIconSets(), true, workingDirectory);
 							} finally {
 								is.close();
 							}
@@ -366,7 +404,80 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 							}
 						}
 						
-						dm = dmToClone.clone(ca, code, getIcons(), progress.split(1));
+						
+						//find all the new icons 
+						List<Icon> caIcons = getIcons();
+						
+						List<Icon> dmIcons = new ArrayList<>();
+						dmToClone.getCategories().forEach(c->{
+							c.accept(e->{
+								if (e.getIcon() != null) dmIcons.add(e.getIcon());
+								return true;
+							});
+						});
+						dmToClone.getAttributes().forEach(a->{
+							if (a.getIcon() != null) dmIcons.add(a.getIcon());
+							if (a.getAttributeList() != null) {
+								for (AttributeListItem item : a.getAttributeList()) {
+									if (item.getIcon() != null) dmIcons.add(item.getIcon());
+								}
+							}
+							if (a.getTree() != null) {
+								for (AttributeTreeNode node : a.getTree()) {
+									node.accept(e->{
+										if (e.getIcon() != null) dmIcons.add(e.getIcon());
+										return true;
+									});		
+								}
+							}
+							
+						});
+						//now for every icon in the dm look for the icon in the ca
+						HashMap<String,Icon> caIconMap = new HashMap<>();
+						caIcons.forEach(e->caIconMap.put(e.getKeyId(), e));
+						List<IconSet> sets = getIconSets();
+						for (Icon dmIcon : dmIcons) {
+							if (!caIconMap.containsKey(dmIcon.getKeyId())) {
+								//We want to create a icon for this and add it to our icon list
+								Icon newIcon = new Icon();
+								newIcon.setConservationArea(ca);
+								newIcon.setKeyId(dmIcon.getKeyId());
+								newIcon.setFiles(new ArrayList<>());
+
+								//names and icon sets
+								newIcon.updateName(ca.getDefaultLanguage(), dmIcon.getDefaultName());
+								for (org.wcs.smart.ca.Label l : dmIcon.getNames()) {
+									for (Language ll : ca.getLanguages()) {
+										if (l.getLanguage().getCode().equalsIgnoreCase(ll.getCode())) {
+											newIcon.updateName(ll, l.getValue());
+										}
+									}
+								}
+								
+								for (IconSet is : sets) {
+									IconFile tocopy = null;
+									for (IconFile iconf : dmIcon.getFiles()) {
+										if (iconf.getIconSet().getKeyId().equalsIgnoreCase(is.getKeyId())) {
+											tocopy = iconf;
+											break;
+										}
+									}
+									if (tocopy == null) continue;
+									
+									IconFile newFile = new IconFile();
+									newFile.setIcon(newIcon);
+									newFile.setIconSet(is);
+									tocopy.computeFileLocation(getSession());
+									newFile.setCopyFromLocation(tocopy.getAttachmentFile());
+									newFile.setFilename(tocopy.getFilename());
+									newIcon.getFiles().add(newFile);
+								}
+								caIcons.add(newIcon);
+							}
+						}
+						
+						
+						dm = dmToClone.clone(ca, code, caIcons, progress.split(1));
 						
 					}else if (isBlank){
 						progress = SubMonitor.convert(monitor);

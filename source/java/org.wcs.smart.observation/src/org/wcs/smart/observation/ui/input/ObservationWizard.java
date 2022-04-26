@@ -195,10 +195,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				while(!allNodes.isEmpty()) {
 					CmNode nn = allNodes.remove(0);
 					if (nn.getCategory() != null) {
-						nn.getCategory().getName();
+						nn.getCategory().getNames().size();
 						nn.getCategory().getFullCategoryName();
 					}
-					nn.getName();
+					nn.getNames().size();
 					if (nn.getChildren() != null) allNodes.addAll(nn.getChildren());
 				}
 			}

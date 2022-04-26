@@ -51,7 +51,7 @@ public class SmartMobilePackageFields {
 	public static final String DATA_SERVER_JSONKEY = "DATA_SERVER"; //$NON-NLS-1$
 	
 	public static final String FREQUENCY_MIN_JSONKEY = "FREQUENCY_MIN"; //$NON-NLS-1$
-
+	
 	//json keys for status/package urls
 	public static final String JSON_STATUS_KEY = "status_url"; //$NON-NLS-1$
 	

@@ -5,16 +5,16 @@ import java.nio.file.Paths;
 import java.util.Locale;
 
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v10.AttributeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v10.CategoryType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v10.ListNode;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v10.NameType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v10.TreeNodeType;
 
 public class IntegrateDmTranslations {
 	private static void doSomething() throws Exception{
-		org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel defaultDm = XmlSmartDataModelManager.readDataModel(Files.newInputStream(Paths.get("C:\\data\\SMART\\Source\\trunk\\source\\java\\org.wcs.smart\\properties\\datamodel.xml")), Locale.getDefault());
-		org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel mergeDm = XmlSmartDataModelManager.readDataModel(Files.newInputStream(Paths.get("C:\\temp\\ka\\smart.ka.xml")), Locale.getDefault());
+		org.wcs.smart.internal.ca.datamodel.xml.generate.v10.DataModel defaultDm = XmlSmartDataModelManager.readDataModel(Files.newInputStream(Paths.get("C:\\data\\SMART\\Source\\trunk\\source\\java\\org.wcs.smart\\properties\\datamodel.xml")), Locale.getDefault());
+		org.wcs.smart.internal.ca.datamodel.xml.generate.v10.DataModel mergeDm = XmlSmartDataModelManager.readDataModel(Files.newInputStream(Paths.get("C:\\temp\\ka\\smart.ka.xml")), Locale.getDefault());
 		
 		
 		for (AttributeType da : defaultDm.getAttributes().getAttributes()){
