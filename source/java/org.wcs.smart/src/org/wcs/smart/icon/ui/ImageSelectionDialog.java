@@ -87,7 +87,6 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 
 	private static final String NAMEKEY = "KEY"; //$NON-NLS-1$
 	private static final String WIDGET_KEY = "WIDGET"; //$NON-NLS-1$
-	private static final String IMAGE_KEY = "IMAGE"; //$NON-NLS-1$
 	private static final String PATH_KEY = "PATH"; //$NON-NLS-1$
 	private static final String MOUSEIN_KEY = "MOUSEIN"; //$NON-NLS-1$
 	private static final String SELECTED_KEY = "SELECTED"; //$NON-NLS-1$
@@ -404,18 +403,18 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 				}
 				icon.addListener(SWT.Paint, e->{
 					Widget w = e.widget;
-					Object img = w.getData(IMAGE_KEY);
-					if (img == null) {
-						URL url = (URL) w.getData(PATH_KEY);
-						if (url != null) {
-							img = SmartUtils.getImage(url, THUMB_SIZE - 4);
-							w.setData(IMAGE_KEY, img);
+
+					URL url = (URL) w.getData(PATH_KEY);
+					if (url != null) {
+						Image img = SmartUtils.getImage(url, THUMB_SIZE - 4);
+						try {
+							e.gc.drawImage((Image)img, 2, 2);
+						}finally {
+							img.dispose();
 						}
 					}
-					if (img != null) {
-						e.gc.drawImage((Image)img, 2, 2);
-					}
 				});
+				
 				outer.setData(SELECTED_KEY,  false);
 				outer.setData(MOUSEIN_KEY,  false);
 				outer.addListener(SWT.Paint, itemListener);
