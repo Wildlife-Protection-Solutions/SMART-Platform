@@ -106,7 +106,7 @@
 		    <unit id="org.eclipse.e4.tools.spies.feature.feature.group" version="0.18.0.v20200923-1237"/>
 	    </location>
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/babel-R0.15.1-mars.zip!/"/>
+		    <repository location="jar:file:/C:/data/SMART/Source/Version7.X/svn/source/java/org.wcs.smart.target/babel-R0.15.1-mars.zip!/"/>
 		    <unit id="org.eclipse.babel.nls_birt_ar.feature.group" version="4.5.0.v20171231064042"/>
 		    <unit id="org.eclipse.babel.nls_birt_es.feature.group" version="4.5.0.v20171231064042"/>
 		    <unit id="org.eclipse.babel.nls_birt_fr.feature.group" version="4.5.0.v20171231064042"/>
@@ -182,7 +182,7 @@
 		    <type>jar</type>
 	    </location>
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/birt-source-4.18.0-20210618.zip!/"/>
+		    <repository location="jar:file:/C:/data/SMART/Source/Version7.X/svn/source/java/org.wcs.smart.target/birt-source-4.18.0-20210618.zip!/"/>
 		    <unit id="org.eclipse.birt.feature.group" version="4.18.0.v202106181740"/>
 		    <unit id="org.eclipse.birt.rcp.feature.group" version="4.18.0.v202106181740"/>
 	    </location>
