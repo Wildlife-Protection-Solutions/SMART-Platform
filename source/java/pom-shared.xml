@@ -9,7 +9,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<smart.version>${project.version}</smart.version>
+		<smart.version>7.5.0</smart.version>
 		<geotools.version>25.0</geotools.version>
 		<jts.version>1.16.1</jts.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>
