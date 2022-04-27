@@ -176,7 +176,7 @@ public class CyberTrackerPackage extends UuidItem{
 		URL url = new URL(rootUrl.getProtocol(), rootUrl.getHost(), rootUrl.getPort(), path);
 		
 		CyberTrackerPackageProxy proxy = new CyberTrackerPackageProxy();
-		proxy.setAppLink(ICtPackage.generateSmartMobileAppLink(url, getCtPackageUuid(), requirespassword));
+		proxy.setAppLink(ICtPackage.generateSmartMobileAppLink(url, requirespassword));
 		proxy.setCaLabel(getConservationArea().getLabel());
 		proxy.setCaUuid(getConservationArea().getUuid());
 		proxy.setUuid( getCtPackageUuid() );

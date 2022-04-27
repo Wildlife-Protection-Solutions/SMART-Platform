@@ -556,7 +556,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					if (privatemd.getBooleanValue() != null) isprivate = privatemd.getBooleanValue();
 					
 					URL url = new URL(surl);
-					String link = ICtPackage.generateSmartMobileAppLink(url, ctpackage.getUuid(), isprivate);
+					String link = ICtPackage.generateSmartMobileAppLink(url, isprivate);
 					txtUrl.setText(link);
 				}catch (Exception ex) {
 					ConnectPlugIn.log(ex.getMessage(), ex);

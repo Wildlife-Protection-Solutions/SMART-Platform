@@ -381,7 +381,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					try {
 						URL url = new URL(surl);
 						
-						String link = ICtPackage.generateSmartMobileAppLink(url, ctpackage.getUuid(), false);
+						String link = ICtPackage.generateSmartMobileAppLink(url, false);
 						txtUrl.setText(link);
 					}catch (Exception ex) {
 						SmartCollectPlugIn.log(ex.getMessage(), ex);
