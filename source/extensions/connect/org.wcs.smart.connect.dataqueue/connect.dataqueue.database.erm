@@ -89,7 +89,7 @@
 				<is_open_after_saved>true</is_open_after_saved>
 			</export_html_setting>
 			<export_image_setting>
-				<output_file_path>C:\data\SMART\Docs\6.2.tech\connect_dataqueue.png</output_file_path>
+				<output_file_path>C:\temp\SMART7.5\ER\connect_dataqueue.png</output_file_path>
 				<category_dir_path></category_dir_path>
 				<with_category_image>true</with_category_image>
 				<is_open_after_saved>true</is_open_after_saved>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2011-12-09 11:11:09</creation_date>
-			<updated_date>2018-12-05 10:43:53</updated_date>
+			<updated_date>2022-04-27 12:23:56</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -849,8 +849,8 @@
 					<referenced_complex_unique_key>null</referenced_complex_unique_key>
 				</relation>
 			</connections>
-			<physical_name>data_queue_processiong_op</physical_name>
-			<logical_name>data_queue_processiong_op</logical_name>
+			<physical_name>data_queue_option</physical_name>
+			<logical_name>data_queue_option</logical_name>
 			<description></description>
 			<constraint></constraint>
 			<primary_key_name></primary_key_name>

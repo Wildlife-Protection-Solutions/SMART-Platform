@@ -89,7 +89,7 @@
 				<is_open_after_saved>true</is_open_after_saved>
 			</export_html_setting>
 			<export_image_setting>
-				<output_file_path>C:\temp\SMART7.5\ER\profile.png</output_file_path>
+				<output_file_path>C:\temp\SMART7.5\ER\org.wcs.smart.i2.patrol.png</output_file_path>
 				<category_dir_path></category_dir_path>
 				<with_category_image>true</with_category_image>
 				<is_open_after_saved>true</is_open_after_saved>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2016-08-10 16:27:12</creation_date>
-			<updated_date>2022-04-20 14:37:11</updated_date>
+			<updated_date>2022-04-27 14:49:49</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
