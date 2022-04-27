@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Profiles Triggers PlugIn
 Bundle-SymbolicName: org.wcs.smart.event.i2;singleton:=true
-Bundle-Version: 7.5.0.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-Activator: org.wcs.smart.event.i2.Activator
 Bundle-Vendor: org.wcs.smart
 Export-Package: org.wcs.smart.event.i2

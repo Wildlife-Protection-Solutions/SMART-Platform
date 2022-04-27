@@ -113,9 +113,15 @@ public interface ICtPackage {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param url the url to access the package on connect
+	 * @param requiresPassword if a password on connect is required to access password
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	@Transient
-	public static String generateSmartMobileAppLink(URL url, UUID ctPackageUuid, boolean requiresPassword) {
+	public static String generateSmartMobileAppLink(URL url, boolean requiresPassword) {
 		
 		StringBuilder serverUrl = new StringBuilder();
 		serverUrl.append(url.getProtocol());
@@ -129,9 +135,6 @@ public interface ICtPackage {
 		
 		JSONObject json = new JSONObject();
 		json.put("connector", "SMART"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (ctPackageUuid != null) {
-			json.put("packageUuid", ctPackageUuid.toString()); //$NON-NLS-1$
-		}
 		json.put("server", serverUrl.toString()); //$NON-NLS-1$
 		json.put("launch", Boolean.TRUE); //$NON-NLS-1$
 		json.put("auth", requiresPassword); //$NON-NLS-1$
