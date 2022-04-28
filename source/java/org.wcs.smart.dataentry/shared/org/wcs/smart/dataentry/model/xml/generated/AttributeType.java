@@ -54,6 +54,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="isCustomImage" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="minValue" type="{http://www.w3.org/2001/XMLSchema}double" />
  *       &lt;attribute name="maxValue" type="{http://www.w3.org/2001/XMLSchema}double" />
+ *       &lt;attribute name="regex" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -96,7 +97,8 @@ public class AttributeType {
     protected Double minValue;
     @XmlAttribute(name = "maxValue")
     protected Double maxValue;
-
+    @XmlAttribute(name = "regex")
+    protected String regex;
     /**
      * Gets the value of the name property.
      * 
@@ -453,4 +455,27 @@ public class AttributeType {
         this.maxValue = value;
     }
 
+    /**
+     * Gets the value of the regex property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getRegex() {
+        return regex;
+    }
+
+    /**
+     * Sets the value of the regex property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setRegex(String value) {
+        this.regex = value;
+    }
 }
