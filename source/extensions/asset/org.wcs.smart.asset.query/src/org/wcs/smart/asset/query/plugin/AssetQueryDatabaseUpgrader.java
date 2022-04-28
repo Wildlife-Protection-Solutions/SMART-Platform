@@ -78,6 +78,9 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		//nothing to do
 		if (currentVersion.equals(AssetQueryPlugIn.DB_VERSION_1)) {
 			upgradeV1toV2(session);
+			upgradeV2toV3(session);
+		}else if (currentVersion.equals(AssetQueryPlugIn.DB_VERSION_2)) {
+			upgradeV2toV3(session);
 		}
 	}
 	
@@ -95,4 +98,15 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	}
 	
+	private static void upgradeV2toV3(Session session) {
+		String[] sql = new String[]{
+				"ALTER TABLE SMART.ASSET_WAYPOINT_QUERY DROP COLUMN SURVEYDESIGN_KEY", //$NON-NLS-1$
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(AssetQueryPlugIn.PLUGIN_ID, AssetQueryPlugIn.DB_VERSION_3, session);
+
+	}
 }
