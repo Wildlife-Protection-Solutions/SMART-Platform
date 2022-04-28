@@ -55,6 +55,7 @@ import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
@@ -96,7 +97,10 @@ public class CtJsonExportUtils {
 	/**
 	 * The SMART JSON format version
 	 */
-	public static final String SMART_JSON_VERSION = "7.0"; //$NON-NLS-1$
+	public static final String SMART_JSON_VERSION = 
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMajor() + "." + //$NON-NLS-1$
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMinor() + "." + //$NON-NLS-1$
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMicro();
 	
 	/**
 	 * Distance Direction option for profile file
