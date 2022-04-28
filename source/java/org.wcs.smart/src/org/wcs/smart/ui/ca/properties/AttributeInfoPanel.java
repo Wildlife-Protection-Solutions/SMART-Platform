@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -135,6 +136,7 @@ public class AttributeInfoPanel extends Composite {
 	private ControlDecoration cdMaxValue;
 	private ControlDecoration cdAttList;
 	private ControlDecoration cdAttTree;
+	private ControlDecoration cdDecimal;
 	private ControlDecoration cdRegex;
 
 	private Language currentDisplayLang = null;
@@ -346,7 +348,7 @@ public class AttributeInfoPanel extends Composite {
 		txtDecimal = new Text(numericComposite, SWT.BORDER);
 		txtDecimal.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (canEdit){
-			cdRegex = createDecoration(txtDecimal);		
+			cdDecimal = createDecoration(txtDecimal);		
 			txtDecimal.addListener(SWT.Modify, new Listener() {
 				@Override
 				public void handleEvent(Event event) {
@@ -373,6 +375,14 @@ public class AttributeInfoPanel extends Composite {
 		txtRegex.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (!canEdit){
 			txtRegex.setEditable(false);
+		}else {
+			cdRegex = createDecoration(txtRegex);		
+			txtRegex.addListener(SWT.Modify, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validate();
+				}
+			});
 		}
 		
 		
@@ -871,23 +881,36 @@ public class AttributeInfoPanel extends Composite {
 			}
 			
 			String decimal = txtDecimal.getText().trim();
-			cdRegex.hide();
+			cdDecimal.hide();
 			if (!decimal.isBlank()) {
 				try {
 					int dd = Integer.parseInt(decimal);
 					if (dd < 0 || dd > 30) {
-						cdRegex.show();
-						cdRegex.setDescriptionText(Messages.AttributeInfoPanel_InvalidDecimalPlaces);
+						cdDecimal.show();
+						cdDecimal.setDescriptionText(Messages.AttributeInfoPanel_InvalidDecimalPlaces);
+						error = true;
 					}
 				}catch (Exception ex) {
-					cdRegex.show();
-					cdRegex.setDescriptionText(Messages.AttributeInfoPanel_InvalidDecimalPlaces);
+					cdDecimal.show();
+					cdDecimal.setDescriptionText(Messages.AttributeInfoPanel_InvalidDecimalPlaces);
+					error = true;
 				}
 			}
 			
 			
 		}else if (type.equals(AttributeType.TEXT)){
-			//TODO: validate regex expression
+			
+			String text = txtRegex.getText();
+			try {
+				Pattern.compile(text);
+				cdRegex.hide();
+				cdRegex.setDescriptionText(""); //$NON-NLS-1$
+			}catch (Exception ex) {
+				cdRegex.show();
+				cdRegex.setDescriptionText(Messages.AttributeInfoPanel_InvalidRegex);
+				error = true;
+			}
+			
 			cdMinValue.hide();
 			cdMaxValue.hide();
 			if (cdAttTree != null){
@@ -904,7 +927,7 @@ public class AttributeInfoPanel extends Composite {
 			if (this.attributeList.size() == 0){
 				cdAttList.setDescriptionText(Messages.AttributeInfoPanel_Error_OneListItemRequired);
 				cdAttList.show();
-				error = false;
+				error = true;
 			}else{
 				cdAttList.hide();
 			}
@@ -916,7 +939,7 @@ public class AttributeInfoPanel extends Composite {
 				if (this.attTree.getRootNodes() == null || this.attTree.getRootNodes().size() == 0){
 					cdAttTree.setDescriptionText(Messages.AttributeInfoPanel_Error_OneTreeNodeRequired);
 					cdAttTree.show();
-					error = false;
+					error = true;
 				}else{
 					cdAttTree.hide();
 				}

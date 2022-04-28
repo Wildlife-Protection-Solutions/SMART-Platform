@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.Collection;
 
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.internal.Messages;
 
@@ -116,11 +117,19 @@ public class AttributeValidator {
 			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
 		}
 		if ((String)value != null && attribute.getRegex() != null && attribute.getRegex().length() > 0){
-			if (!((String)value).matches(attribute.getRegex())){
+			try {
+				if (!((String)value).matches(attribute.getRegex())){
+					return MessageFormat.format(Messages.AttributeValidator_RegexMatchFailed, new Object[]{
+					((String)value),
+					attribute.getName(),
+					attribute.getRegex()});
+				}
+			}catch (Exception ex) {
+				SmartPlugIn.log(ex.getMessage(), ex);
 				return MessageFormat.format(Messages.AttributeValidator_RegexMatchFailed, new Object[]{
-				((String)value),
-				attribute.getName(),
-				attribute.getRegex()});
+						((String)value),
+						attribute.getName(),
+						attribute.getRegex()});
 			}
 		}
 		
