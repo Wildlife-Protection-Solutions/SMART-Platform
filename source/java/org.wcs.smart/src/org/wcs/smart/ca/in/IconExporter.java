@@ -120,21 +120,23 @@ public class IconExporter {
 				
 				for (int i = 0; i < sets.size(); i ++) {
 					IconFile iconFile = icon.getIconFile(sets.get(i));
+					String zipitem = ""; //$NON-NLS-1$
+					if (iconFile != null) {
 					
-					iconFiles.add(iconFile.getAttachmentFile());
-					
-					String fname = iconFile.getAttachmentFile().getFileName().toString();
-					String ext = FilenameUtils.getExtension(fname);
-					fname = icon.getKeyId() + "." + ext; //$NON-NLS-1$
-					String zipitem = sets.get(i).getKeyId() + "/" + fname; //$NON-NLS-1$
-					if (toFile.contains(zipitem)) {
-						//find a unique name
-						fname = UuidUtils.uuidToString(iconFile.getUuid()) + "_" + icon.getKeyId() + "." + ext; //$NON-NLS-1$ //$NON-NLS-2$
-						zipitem = sets.get(i).getKeyId() + "/" + fname; //$NON-NLS-1$
+						iconFiles.add(iconFile.getAttachmentFile());
 						
+						String fname = iconFile.getAttachmentFile().getFileName().toString();
+						String ext = FilenameUtils.getExtension(fname);
+						fname = icon.getKeyId() + "." + ext; //$NON-NLS-1$
+						zipitem = sets.get(i).getKeyId() + "/" + fname; //$NON-NLS-1$
+						if (toFile.contains(zipitem)) {
+							//find a unique name
+							fname = UuidUtils.uuidToString(iconFile.getUuid()) + "_" + icon.getKeyId() + "." + ext; //$NON-NLS-1$ //$NON-NLS-2$
+							zipitem = sets.get(i).getKeyId() + "/" + fname; //$NON-NLS-1$
+							
+						}
+						toFile.add(zipitem);
 					}
-					toFile.add(zipitem);
-					
 					fields[i + languages.size() + 1] = zipitem;
 				}
 				
