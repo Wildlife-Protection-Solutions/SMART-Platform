@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
@@ -862,15 +861,6 @@ public class CtJsonExportUtils {
 					temp.setHelpFormat(imageFormat);
 					temp.setHelpText(helpText);
 					temp.setHelpImageLocation(HelpImageLocation.valueOf(imageLocation));
-
-					String html = temp.getHelpTextAsHtml(false);
-					if (html == null || html.isEmpty())
-						continue;
-
-					Path p = targetDir.resolve(Paths.get("cm_help_" + UuidUtils.uuidToString(temp.getUuid()) + ".html")); //$NON-NLS-1$ //$NON-NLS-2$
-					Files.writeString(p, html);
-					filesToAdd.add(p);
-					
 					
 					Path imgFile = null;
 					if (temp.getHelpFormat() != null) {
@@ -887,13 +877,12 @@ public class CtJsonExportUtils {
 							Files.copy(imgFile, target);
 							filesToAdd.add(target);
 						}
+						
+						AttributeOptionType op = new AttributeOptionType();
+						op.setId("HELP_IMAGE_FILE"); //$NON-NLS-1$
+						op.setStringValue(imgFile.getFileName().toString());
+						at.getOption().add(op);
 					}
-
-					AttributeOptionType op = new AttributeOptionType();
-					op.setId("HELP_HTML_FILE"); //$NON-NLS-1$
-					op.setStringValue(p.getFileName().toString());
-					at.getOption().add(op);
-
 				}
 			}
 		}

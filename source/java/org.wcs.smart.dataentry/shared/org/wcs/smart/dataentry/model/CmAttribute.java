@@ -179,7 +179,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 			if (p != null) sb.append("<br><img src='" + p.toString() + "'/>"); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			// before
-			if (p != null) sb.append("<br><img src='" + p.toString() + "'/>"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (p != null) sb.append("<img src='" + p.toString() + "'/><br>"); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(getHelpText());
 		}
 		sb.append("</body></html>"); //$NON-NLS-1$
@@ -443,6 +443,6 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		
 		if (getAttribute() != null) return getAttribute().findName(defaultl);
 		
-		return "";	
+		return "";	 //$NON-NLS-1$
 	}
 }
