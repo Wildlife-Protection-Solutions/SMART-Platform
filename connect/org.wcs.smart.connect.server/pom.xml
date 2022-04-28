@@ -271,7 +271,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.dataentry</artifactId>
-            <version>${smart.version}</version>
+            <version>${smart.version751}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>

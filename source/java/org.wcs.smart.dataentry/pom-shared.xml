@@ -13,6 +13,7 @@
 	<artifactId>org.wcs.smart.core.dataentry</artifactId>
 	<name>DataEntry Module</name>
 	<packaging>bundle</packaging>
+	<version>7.5.1</version>
 	
 	<dependencies>
 		<dependency>
