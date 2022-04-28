@@ -166,6 +166,7 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Error_OneTreeNodeRequired;
 	public static String AttributeInfoPanel_IconLabel;
 	public static String AttributeInfoPanel_InvalidDecimalPlaces;
+	public static String AttributeInfoPanel_InvalidRegex;
 	public static String AttributeInfoPanel_ListModificationError;
 	public static String AttributeInfoPanel_Max_Label;
 	public static String AttributeInfoPanel_Min_Label;

@@ -157,6 +157,7 @@ elementFormDefault="qualified">
     	<attribute name="isCustomImage" type="boolean"></attribute>
     	<attribute name="minValue" type="double"></attribute>
     	<attribute name="maxValue" type="double"></attribute>
+    	<attribute name="regex" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">

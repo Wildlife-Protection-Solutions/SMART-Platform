@@ -46,6 +46,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SignatureType;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -363,6 +364,10 @@ public class CmSmartToXml {
 				}
 				if (ca.getAttribute().getMaxValue() != null) {
 					at.setMaxValue(ca.getAttribute().getMaxValue());
+				}
+				if (ca.getAttribute().getType() == Attribute.AttributeType.TEXT &&
+						ca.getAttribute().getRegex() != null && !ca.getAttribute().getRegex().isBlank()) {
+					at.setRegex(ca.getAttribute().getRegex());
 				}
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();

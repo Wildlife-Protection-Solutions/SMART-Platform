@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
@@ -55,6 +54,7 @@ import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
@@ -96,7 +96,10 @@ public class CtJsonExportUtils {
 	/**
 	 * The SMART JSON format version
 	 */
-	public static final String SMART_JSON_VERSION = "7.0"; //$NON-NLS-1$
+	public static final String SMART_JSON_VERSION = 
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMajor() + "." + //$NON-NLS-1$
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMinor() + "." + //$NON-NLS-1$
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMicro();
 	
 	/**
 	 * Distance Direction option for profile file
@@ -858,15 +861,6 @@ public class CtJsonExportUtils {
 					temp.setHelpFormat(imageFormat);
 					temp.setHelpText(helpText);
 					temp.setHelpImageLocation(HelpImageLocation.valueOf(imageLocation));
-
-					String html = temp.getHelpTextAsHtml(false);
-					if (html == null || html.isEmpty())
-						continue;
-
-					Path p = targetDir.resolve(Paths.get("cm_help_" + UuidUtils.uuidToString(temp.getUuid()) + ".html")); //$NON-NLS-1$ //$NON-NLS-2$
-					Files.writeString(p, html);
-					filesToAdd.add(p);
-					
 					
 					Path imgFile = null;
 					if (temp.getHelpFormat() != null) {
@@ -883,13 +877,12 @@ public class CtJsonExportUtils {
 							Files.copy(imgFile, target);
 							filesToAdd.add(target);
 						}
+						
+						AttributeOptionType op = new AttributeOptionType();
+						op.setId("HELP_IMAGE_FILE"); //$NON-NLS-1$
+						op.setStringValue(imgFile.getFileName().toString());
+						at.getOption().add(op);
 					}
-
-					AttributeOptionType op = new AttributeOptionType();
-					op.setId("HELP_HTML_FILE"); //$NON-NLS-1$
-					op.setStringValue(p.getFileName().toString());
-					at.getOption().add(op);
-
 				}
 			}
 		}
