@@ -1,34 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
 		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart.core</groupId>
 	<artifactId>org.wcs.smart.core.birt.map</artifactId>
 	<name>SMART Birt Map Components</name>
 	<packaging>bundle</packaging>
-	
+
 	<dependencies>
 		<dependency>
-    			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.core</artifactId>
-    			<version>${smart.version}</version>
+			<groupId>org.wcs.smart.core</groupId>
+			<artifactId>org.wcs.smart.core.core</artifactId>
+			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.birt</artifactId>
-    			<version>${smart.version}</version>
+			<groupId>org.wcs.smart.core</groupId>
+			<artifactId>org.wcs.smart.core.birt</artifactId>
+			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.query</artifactId>
-    			<version>${smart.version}</version>
+			<groupId>org.wcs.smart.core</groupId>
+			<artifactId>org.wcs.smart.core.query</artifactId>
+			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
@@ -46,40 +49,34 @@
 			<version>${udig.version}</version>
 		</dependency>
 		<dependency>
-	    		<groupId>joda-time</groupId>
-	    		<artifactId>joda-time</artifactId>
-	    		<version>2.9.3</version>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>${mozilla.javascript.version}</version>
 		</dependency>
-		
-		
+
 		<dependency>
-  			<groupId>org.mozilla</groupId>
-  			<artifactId>rhino</artifactId>
-  			<version>1.7.13</version>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.ui.workbench</artifactId>
+			<version>${org.eclipse.ui.workbench.version}</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.swt</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jna</groupId>
+					<artifactId>com.sun.jna</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jna</groupId>
+					<artifactId>com.sun.jna.platform</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-			<dependency>
-    		<groupId>org.eclipse.platform</groupId>
-    		<artifactId>org.eclipse.ui.workbench</artifactId>
-    		<version>3.122.0</version>
-    		<scope>provided</scope>
-    		<exclusions>
-    			<exclusion>
-          			<groupId>org.eclipse.platform</groupId>
-          			<artifactId>org.eclipse.swt</artifactId>
-        		</exclusion>
-        		<exclusion>
-          			<groupId>com.sun.jna</groupId>
-          			<artifactId>com.sun.jna</artifactId>
-        		</exclusion>
-        		<exclusion>
-          			<groupId>com.sun.jna</groupId>
-          			<artifactId>com.sun.jna.platform</artifactId>
-        		</exclusion>
-        		<exclusion>
-        			<groupId>javax.annotation</groupId>
-        			<artifactId>javax.annotation-api</artifactId>
-        		</exclusion>
-      		</exclusions> 
-	</dependency>
-	</dependencies>	
+	</dependencies>
 </project>

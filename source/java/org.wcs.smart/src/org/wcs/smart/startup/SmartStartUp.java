@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -39,12 +41,17 @@ import javax.persistence.criteria.Root;
 
 import org.apache.derby.shared.common.error.StandardException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.osgi.framework.Bundle;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.SmartPlugIn;
@@ -55,10 +62,12 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
+import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
  * This class contains some of the basic functions required
@@ -76,7 +85,9 @@ public class SmartStartUp {
 	 * @return <code>true</code> if successful, <code>false</code> if error
 	 * occurs and application should exit.
 	 */
-	public static void initDb() throws Exception{
+	public static void initDb(IProgressMonitor monitor) throws Exception{
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartStartUp_StartingDb, 3);
+		
 		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		
 		//check that the database exists
@@ -86,7 +97,7 @@ public class SmartStartUp {
 		
 		//check version
 		try{
-			SmartPlugIn.versionCheck();
+			versionCheck(sub.split(2, SubMonitor.SUPPRESS_NONE));
 		}catch (Exception ex){
 			if (checkAlreadyRunning(ex)){
 				throw new IllegalStateException(Messages.SmartStartUp_MultiConnectError);
@@ -96,6 +107,8 @@ public class SmartStartUp {
 		}
 		
 		//run any other start scripts
+		SubMonitor sub1 = sub.split(1);
+		sub1.setTaskName(Messages.SmartStartUp_RunningStartupScripts);
 		List<IDatabaseStartupRunner> runners = new ArrayList<IDatabaseStartupRunner>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDatabaseStartupRunner.EXTENSION_ID);
 		for (IConfigurationElement e : config) {	
@@ -109,10 +122,61 @@ public class SmartStartUp {
 				runner.run(s);
 			}
 		}
-
-
 	}
 	
+	
+	/**
+	 * Checks the current database version against the expected version.  If an exception
+	 * is thrown, the calling function should terminate the application.
+	 *  
+	 * @return
+	 * @throws exception if the version are incorrect
+	 */
+	public static void versionCheck(IProgressMonitor monitor) throws Exception{
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartStartUp_ValidationDbVersions, 4);
+		
+		String isok = UpgradeEngine.validateVersions();
+		if (isok == null) return;
+		
+		//attempt an upgrade and try again
+		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		try {
+			(new UpgradeEngine()).upgradeSystem(sub.split(3, SubMonitor.SUPPRESS_NONE));
+		}catch (Exception ex) {
+			throw ex;
+		}finally {
+			HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
+		}
+		isok = UpgradeEngine.validateVersions();
+		if (isok == null) return;
+		
+		//LOG debugging information
+		StringBuilder sb = new StringBuilder();
+		sb.append("SMART Database could not be upgraded to match required versions"); //$NON-NLS-1$
+		try(Session session = HibernateManager.openSession()){
+			Map<String,String> version = UpgradeEngine.getVersions(session);
+			sb.append("Current Database Versions:"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			for (Entry<String,String> items : version.entrySet()) {
+				sb.append(items.getKey() + ": " + items.getValue()); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
+			}
+		}
+		
+		sb.append("PlugIn Versions:"); //$NON-NLS-1$
+		sb.append("\n"); //$NON-NLS-1$
+		for (Bundle b : SmartPlugIn.getDefault().getBundle().getBundleContext().getBundles()) {
+			if (b.getSymbolicName().startsWith("org.wcs.smart")) { //$NON-NLS-1$
+				sb.append(b.getSymbolicName() + ": " + b.getVersion().toString()); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
+			}
+		}
+		SmartPlugIn.log(sb.toString(), null);
+		
+
+		throw new Exception(isok);
+		
+	}
 	
 	/**
 	 * Gets a list of conservation areas from the database.  
@@ -441,6 +505,50 @@ public class SmartStartUp {
 		wd.create();
 		wd.open();
 		return wizard.isCompletedOk();
+		
+	}
+	
+	
+	public static void initializeDatabase(IProgressMonitor monitor){
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartStartUp_StartingDb, 5);
+		
+		boolean exit = false;
+		try{
+			monitor.worked(2);
+			SmartStartUp.initDb(sub.split(4, SubMonitor.SUPPRESS_NONE));
+		}catch (final Exception ex){	
+			Display.getDefault().syncExec(()->{
+				MessageDialog
+				.openInformation(
+					Display.getCurrent().getActiveShell(),
+					Messages.SmartStartUp_ErrorDialogTitle,
+					MessageFormat.format(Messages.SmartStartUp_CouldNotStartUp, Platform.getLogFileLocation().toOSString()));
+			});
+			SmartPlugIn.log(ex.getMessage(), ex);		
+			exit = true;
+		}
+		if (!exit){
+			try{
+				sub.split(1);
+				SmartStartUp.connectToDb();	
+			}catch (final Exception ex){
+				SmartPlugIn.displayLog(ex.getMessage(), ex);		
+				exit= true;
+			}
+		}
+		
+		if (exit){
+			System.exit(1);
+		}
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				IJobManager manager = Job.getJobManager();
+				if (manager.currentRule() == SmartPlugIn.PLUGIN_START_MUTEX){
+					manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);
+				}
+			}});
 		
 	}
 }

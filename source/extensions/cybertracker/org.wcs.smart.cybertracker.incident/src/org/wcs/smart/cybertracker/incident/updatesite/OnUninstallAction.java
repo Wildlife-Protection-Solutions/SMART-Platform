@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.cybertracker.incident.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.incident.CtIncidentPlugIn;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -34,14 +37,40 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
  */
 public class OnUninstallAction extends UninstallProvisioningAction {
 
+	private static String[] TABLES = new String[]{
+			"ct_incident_package", //$NON-NLS-1$
+		};
+		
+	
 	@Override
 	protected void performRemove() {
-		Job job = new RemoveCtIncidentJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			SmartPlugIn.log(ex.getLocalizedMessage(), ex);
+		try(Session session = HibernateManager.openSession()){
+			
+			session.beginTransaction();
+			try {
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE smart."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				
+				//clear version
+				HibernateManager.setPlugInVersion(CtIncidentPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog("Error uninstalling CT Incident PlugIn " + e.getMessage(), e); //$NON-NLS-1$
+					}
+				});
+				return;
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
 		}
 	}
 

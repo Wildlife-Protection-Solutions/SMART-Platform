@@ -153,6 +153,7 @@
 	    </location>
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/birt/update-site/4.9.0/"/>
+		    <unit id="org.eclipse.birt.doc.feature.group" version="4.9.0.v202203150031"/>
 		    <unit id="org.eclipse.birt.chart.cshelp.feature.group" version="4.9.0.v202203150031"/>
 		    <unit id="org.eclipse.birt.chart.feature.group" version="4.9.0.v202203150031"/>
 		    <unit id="org.eclipse.birt.chart.osgi.runtime.sdk.feature.group" version="4.9.0.v202203150031"/>
@@ -160,56 +161,6 @@
 		    <unit id="org.eclipse.birt.feature.group" version="4.9.0.v202203150031"/>
 		    <unit id="org.eclipse.birt.nl.feature.group" version="4.9.0.v202203150031"/>
 		    <unit id="org.eclipse.birt.osgi.runtime.sdk.feature.group" version="4.9.0.v202203150031"/>
-	    </location>
-	    <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-		    <dependencies>
-			    <dependency>
-				    <groupId>com.itextpdf</groupId>
-				    <artifactId>kernel</artifactId>
-				    <version>7.1.14</version>
-				    <type>jar</type>
-			    </dependency>
-		    </dependencies>
-	    </location>
-	    <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-		    <dependencies>
-			    <dependency>
-				    <groupId>com.itextpdf</groupId>
-				    <artifactId>font-asian</artifactId>
-				    <version>7.1.14</version>
-				    <type>jar</type>
-			    </dependency>
-		    </dependencies>
-	    </location>
-	    <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-		    <dependencies>
-			    <dependency>
-				    <groupId>com.itextpdf</groupId>
-				    <artifactId>io</artifactId>
-				    <version>7.1.14</version>
-				    <type>jar</type>
-			    </dependency>
-		    </dependencies>
-	    </location>
-	    <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-		    <dependencies>
-			    <dependency>
-				    <groupId>com.itextpdf</groupId>
-				    <artifactId>layout</artifactId>
-				    <version>7.1.14</version>
-				    <type>jar</type>
-			    </dependency>
-		    </dependencies>
-	    </location>
-	    <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-		    <dependencies>
-			    <dependency>
-				    <groupId>com.itextpdf</groupId>
-				    <artifactId>hyph</artifactId>
-				    <version>7.1.14</version>
-				    <type>jar</type>
-			    </dependency>
-		    </dependencies>
-	    </location>
+	    </location>	    
     </locations>
 </target>

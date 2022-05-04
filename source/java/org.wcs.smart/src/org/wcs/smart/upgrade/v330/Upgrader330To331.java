@@ -31,7 +31,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 
 /**
  * Upgrades from database version 330 to 331
@@ -39,7 +39,7 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  * @author elitvin
  * @since 3.3.0
  */
-public class Upgrader330To331 implements IDatabaseUpgrader {
+public class Upgrader330To331 extends AbstractInteralDatabaseUpgrader {
 
 	public void upgrade(final IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader330To331_UpgradeMsg);
@@ -86,5 +86,5 @@ public class Upgrader330To331 implements IDatabaseUpgrader {
 		
 		c.commit();
 	}
-	
+
 }

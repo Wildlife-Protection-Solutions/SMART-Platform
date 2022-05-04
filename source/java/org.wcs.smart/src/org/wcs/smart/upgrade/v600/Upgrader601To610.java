@@ -30,7 +30,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
@@ -39,7 +39,7 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @author Emily
  *
  */
-public class Upgrader601To610 implements IDatabaseUpgrader { 
+public class Upgrader601To610 extends AbstractInteralDatabaseUpgrader { 
 	private Exception thrownException = null;
 
 	@Override
@@ -78,8 +78,6 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.waypoint ADD COLUMN last_modified_by char(16) for bit data", //$NON-NLS-1$
 				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO ANALYST", //$NON-NLS-1$
 				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO MANAGER", //$NON-NLS-1$
-				
-				"GRANT ALL PRIVILEGES ON smart.qa_routine_parameter TO admin,manager,data_entry", //$NON-NLS-1$
 				
 				//for support of svg/png images in configurable model
 				"ALTER TABLE smart.cm_node add column imagetype varchar(32)",  //$NON-NLS-1$

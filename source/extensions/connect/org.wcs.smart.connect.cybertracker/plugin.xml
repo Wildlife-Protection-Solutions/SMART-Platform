@@ -23,15 +23,6 @@
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
-            class="org.wcs.smart.connect.cybertracker.updatesite.OnInstallAction"
-            name="onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
             class="org.wcs.smart.connect.cybertracker.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
@@ -47,7 +38,7 @@
    <extension
          point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
-            upgrader="org.wcs.smart.connect.cybertracker.upgrade.ConnectCtDatabaseUpgrader">
+            upgrader="org.wcs.smart.connect.cybertracker.updatesite.ConnectCtDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension

@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.event.plugin;
 
-import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -33,17 +36,57 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemoveEventJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			EventPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-	@Override
 	protected String getPluginId() {
 		return EventPlugIn.PLUGIN_ID;
 	}
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				uninstall(session);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					EventPlugIn.log(ex.getMessage(), ex);	
+				}
+				EventPlugIn.displayLog(Messages.RemoveEventJob_UninstallError + e.getMessage(), e);
+				return;
+			}
+		}	
+	}
+	
+	private void uninstall(Session session){
+		
+		String[] TABLES = new String[]{
+				"e_event_action", //$NON-NLS-1$
+				"e_action_parameter_value", //$NON-NLS-1$
+				"e_action", //$NON-NLS-1$
+				"e_event_filter" //$NON-NLS-1$
+		};
+		
+		String[] LABELTABLES = new String[]{
+		};
+		
+		//drop tables
+		for (String table : LABELTABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+			
+		for (String table : TABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+			}
+		}		
+
+		//remove from plugin table
+		HibernateManager.setPlugInVersion(EventPlugIn.PLUGIN_ID, null, session);
+
+	}
+
 }

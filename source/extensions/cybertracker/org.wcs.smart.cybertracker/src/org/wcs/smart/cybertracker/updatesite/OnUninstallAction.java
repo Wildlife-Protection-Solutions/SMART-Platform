@@ -21,9 +21,18 @@
  */
 package org.wcs.smart.cybertracker.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Action that is called when CyberTracker plug-in is uninstalled
@@ -34,19 +43,53 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemoveCyberTrackerJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			CyberTrackerPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-
-	@Override
 	protected String getPluginId() {
 		return CyberTrackerPlugIn.PLUGIN_ID;
 	}
+	
+	@Override
+	protected void performRemove() {
+		String[] tables = new String[] { "CM_CT_PROPERTIES_PROFILE", //$NON-NLS-1$
+				"CT_PROPERTIES_OPTION", //$NON-NLS-1$
+				"CT_PROPERTIES_PROFILE_OPTION", //$NON-NLS-1$
+				"CT_PROPERTIES_PROFILE", //$NON-NLS-1$
+				"CT_INCIDENT_LINK", //$NON-NLS-1$
+				"CT_METADATA_VALUE_UUID", //$NON-NLS-1$
+				"CT_METADATA_VALUE", //$NON-NLS-1$
+				"CT_NAVIGATION_LAYER" //$NON-NLS-1$
+		};
+
+		try (final Session session = HibernateManager.openSession()) {
+
+			final List<ConservationArea> caList = HibernateManager.getConservationAreas(session);
+			session.beginTransaction();
+			try {
+				// delete labels
+				if (DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_PROFILE")) { //$NON-NLS-1$
+					session.createNativeQuery(
+							"delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.CT_PROPERTIES_PROFILE)") //$NON-NLS-1$
+							.executeUpdate();
+				}
+				// delete tables
+				for (String table : tables) {
+					if (DerbyHibernateExtensions.tableExists(session, table)) {
+						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				// clean filestore
+				for (ConservationArea ca : caList) {
+					SmartUtils.deleteDirectory(ICyberTrackerConstants.getDowloadFolder(ca));
+				}
+				HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+
+			} catch (Exception e) {
+				SmartPlugIn.displayLog(Messages.RemoveCyberTrackerTablesJob_Error, e);
+				return;
+			}
+		}
+	}
+
+
 
 }

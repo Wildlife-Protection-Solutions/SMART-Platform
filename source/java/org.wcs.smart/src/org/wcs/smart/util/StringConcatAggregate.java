@@ -42,7 +42,7 @@ public class StringConcatAggregate implements Aggregator<String, String, StringC
 	@Override
 	public void accumulate(String b) {
 		sb.append(b);
-		sb.append(", ");
+		sb.append(", "); //$NON-NLS-1$
 	}
 
 

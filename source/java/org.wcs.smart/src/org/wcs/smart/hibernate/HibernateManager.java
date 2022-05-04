@@ -205,16 +205,16 @@ public class HibernateManager extends SmartHibernateManager{
 			@Override
 			public void execute(Connection connection) throws SQLException {
 				List<TableInfo> all = getTableInformation();
-				monitor.beginTask("", all.size()); //$NON-NLS-1$
+				SubMonitor sub = SubMonitor.convert(monitor, "", all.size()); //$NON-NLS-1$
 
 				for (TableInfo ti : getTableInformation()) {
 					try {
-						monitor.split(1);
-						monitor.subTask(MessageFormat.format(Messages.HibernateManager_TaskName, ti.getTableName()));
+						sub.subTask(MessageFormat.format(Messages.HibernateManager_TaskName, ti.getTableName()));
 						String[] bits = ti.getTableName().split("\\."); //$NON-NLS-1$
 						String q = "CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE('" + bits[0].toUpperCase() + "', '" + bits[1].toUpperCase() + "', 1)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						connection.createStatement().execute(q);
 						connection.commit();
+						sub.worked(1);
 					}catch (Exception ex) {
 						SmartPlugIn.log(ex.getMessage(),ex);
 					}

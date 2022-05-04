@@ -71,6 +71,7 @@ public enum ChangeLogInstaller {
 	 * 
 	 * @param session current session in active trasaction
 	 * @param pluginId plugin id to install 
+	 * @param monitor progress monitor
 	 * 
 	 * @throws Exception
 	 */
@@ -100,32 +101,12 @@ public enum ChangeLogInstaller {
 	}
 	
 	/**
-	 * Install change log tracking for all plugins.<br><br>
-	 * This checks the database to ensure the plugin tables have been created.  If the plugin
-	 * id does not have a entry in the db_versions table the change log tracking will not
-	 * be installed for that plugin.
+	 * Install change log tracking for all plugins.
+	 * 
 	 * @param session
 	 * @throws Exception
 	 */
 	public void installChangeLogTracking(Session session) throws Exception{
-		//if installing multiple plugins at once the system
-		//will register all the extension points and then run the install
-		//code.  So if installing the plan and connect plugins the plan plugin
-		//extension points are registered then the connect install code is run
-		//which tries to create the triggers on the plan tables (from the registered 
-		//extension) but the plan tables do not exist yet.
-		//The current workaround for this issue is to check to ensure the plugin
-		//is registered in the database first.
-		//
-		//this doesn't work because we may be installing all but still have an old
-		//version of the plugin
-		//Consider the case when a user asks for an update to CT plugin and
-		//install the connect plugin at the same time.  If the connect plugin is installed first
-		//after it is installed we try to install change tracking for
-		//all plugins; however the ct plugin has not yet been updated to
-		//this may fail if the ct plugin installs some new tables
-		//we cannot just ignore exceptions because this will cause the transaction
-		//to fail.
 		if (!enabled) return;
 		SmartPlugIn.log("Installing ALL change logging. ", null); //$NON-NLS-1$
 		for (ChangeTrackerWrapper tracker : getTrackers(null)){

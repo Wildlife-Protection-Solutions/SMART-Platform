@@ -37,7 +37,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.UuidUtils;
 
@@ -47,7 +47,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 3.0.0
  */
-public class Upgrader200To300 implements IDatabaseUpgrader {
+public class Upgrader200To300 extends AbstractInteralDatabaseUpgrader {
 	
 	private Exception throwEx = null;
 	

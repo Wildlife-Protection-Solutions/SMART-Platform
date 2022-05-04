@@ -4,15 +4,6 @@
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
-            class="org.wcs.smart.er.updatesite.OnInstallAction"
-            name="onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
             class="org.wcs.smart.er.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
@@ -22,7 +13,7 @@
    <extension
          point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
-            upgrader="org.wcs.smart.er.upgrade.ERDatabaseUpgrader">
+            upgrader="org.wcs.smart.er.updatesite.ERDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension

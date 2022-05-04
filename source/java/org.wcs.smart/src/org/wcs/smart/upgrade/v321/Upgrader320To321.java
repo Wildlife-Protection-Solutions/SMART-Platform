@@ -29,7 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 
 /**
  * Upgrades from database version 320 to 321.
@@ -37,7 +37,7 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  * @author elitvin
  * @since 3.2.0
  */
-public class Upgrader320To321 implements IDatabaseUpgrader {
+public class Upgrader320To321 extends AbstractInteralDatabaseUpgrader {
 	
 	private Exception throwEx = null;
 	

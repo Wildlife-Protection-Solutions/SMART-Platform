@@ -21,9 +21,20 @@
  */
 package org.wcs.smart.paws.plugin;
 
-import org.eclipse.core.runtime.jobs.Job;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
+import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Action that is called when PAWS plug-in is uninstalled
@@ -33,17 +44,73 @@ import org.wcs.smart.paws.PawsPlugIn;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemovePawsJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			PawsPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-	@Override
 	protected String getPluginId() {
 		return PawsPlugIn.PLUGIN_ID;
 	}
+	
+	@Override
+	protected void performRemove() {
+		List<ConservationArea> cas = null;
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				cas = HibernateManager.getConservationAreas(session);
+				uninstall(session);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					PawsPlugIn.log(ex.getMessage(), ex);	
+				}
+				PawsPlugIn.displayLog(Messages.RemovePawsJob_Error + e.getMessage(), e);
+				return;
+			}
+		}	
+
+		//remove filestore data  
+		if (cas != null){
+			//delete intelligence data from the filestore 
+			for (ConservationArea ca : cas){
+				try {
+					Path folder = Paths.get(ca.getFileDataStoreLocation()).resolve(PawsFileManager.PAWS_DIR);
+					SmartUtils.deleteDirectory(folder);
+				} catch (IOException ex) {
+					PawsPlugIn.log("Error removing PAWS folder for Conservation Area datastore: " + ca.getId(), ex); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+	
+	private void uninstall(Session session){
+		//to drop and the label tables (objects that extend NamedItem or NamedKeyItem)
+		String[] TABLES = new String[]{	
+			"paws_parameter", //$NON-NLS-1$
+			"paws_query_class", //$NON-NLS-1$
+			"paws_simple_class", //$NON-NLS-1$
+			"paws_run", //$NON-NLS-1$
+			"paws_service", //$NON-NLS-1$
+			"paws_configuration", //$NON-NLS-1$
+		};
+		
+		String[] LABELTABLES = new String[]{
+		};
+		
+		//drop labels
+		for (String table : LABELTABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		//drop the tables
+		for (String table : TABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+			}
+		}		
+
+		//remove from plugin table
+		HibernateManager.setPlugInVersion(PawsPlugIn.PLUGIN_ID, null, session);
+	}
+
 }

@@ -124,15 +124,6 @@
             class="org.wcs.smart.asset.query.exportimport.AssetShapeQueryExporter">
       </Exporter>
    </extension>
-    <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.asset.query.plugin.OnInstallAction"
-            name="onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
-   </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action

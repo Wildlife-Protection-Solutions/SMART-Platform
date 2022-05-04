@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.cybertracker.patrol.json.updatesite;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.cybertracker.patrol.PatrolCyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -40,6 +44,22 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
+	public String getPluginId() {
+		return PatrolCyberTrackerPlugIn.PLUGIN_ID;
+	}
+
+	@Override
+	public String getPluginName() {
+		return getName(PatrolCyberTrackerPlugIn.getDefault().getBundle());
+	}
+	
+	@Override
+	public boolean isUpdateToDate(Map<String, String> currentVersions) {
+		if (!currentVersions.containsKey(PatrolCyberTrackerPlugIn.PLUGIN_ID)) return false;
+		return currentVersions.get(PatrolCyberTrackerPlugIn.PLUGIN_ID).equals(PatrolCyberTrackerPlugIn.DB_VERSION);
+	}
+	
+	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.DataQueueCtPatrolDatabaseUpgrader_UpgradeTask);
 		try(Session session = HibernateManager.openSession()){
@@ -47,15 +67,7 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 			session.beginTransaction();
 			try {
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
-				if (versions == null)
-					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-				String currentPluginVersion = versions.get(PatrolCyberTrackerPlugIn.PLUGIN_ID);
-	
-				if (currentPluginVersion == null) {
-					(new AddCtPatrolJob()).installPlugin(session);
-				} else {
-					upgrade(currentPluginVersion, session);
-				}
+				upgrade(versions.get(PatrolCyberTrackerPlugIn.PLUGIN_ID), session);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -70,13 +82,16 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param currentVersion
 	 * @param session in active transaction
 	 */
-	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.equals(PatrolCyberTrackerPlugIn.DB_VERSION_1)) {
+	private void upgrade(String currentVersion, Session session){
+		if (currentVersion == null) {
+			createTables(session);
+			update10to20(session);
+		}else if (currentVersion.equals(PatrolCyberTrackerPlugIn.DB_VERSION_1)) {
 			update10to20(session);
 		}
 	}
 	
-	private static void update10to20(Session session) {
+	private void update10to20(Session session) {
 		String[] sql = new String[] {
 				"create table smart.ct_patrol_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
 
@@ -103,4 +118,31 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, PatrolCyberTrackerPlugIn.DB_VERSION_2, session);
 	}
 
+
+	
+	private void createTables(Session session){
+		if (DerbyHibernateExtensions.tableExists(session, "ct_patrol_link")){ //$NON-NLS-1$
+			return;
+		}
+		
+		final String[] sql = new String[]{
+			"CREATE TABLE smart.ct_patrol_link ( CT_UUID CHAR(16) for bit data NOT NULL, PATROL_LEG_UUID CHAR(16) for bit data  NOT NULL, ct_device_id varchar(36) not null, last_observation_cnt integer, group_start_time timestamp, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
+			
+			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO ANALYST", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO MANAGER", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.ct_patrol_link ADD CONSTRAINT patrol_key_uuid_fk FOREIGN KEY (patrol_leg_uuid) REFERENCES smart.patrol_leg ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
+		};
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				for (int i = 0; i < sql.length; i ++){
+					c.createStatement().execute(sql[i]);
+				}				
+			}
+		});
+		HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, PatrolCyberTrackerPlugIn.DB_VERSION_1, session);
+	}
 }

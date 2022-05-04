@@ -45,7 +45,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -56,7 +56,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class Upgrader500To600 implements IDatabaseUpgrader { 
+public class Upgrader500To600 extends AbstractInteralDatabaseUpgrader { 
 	private Exception thrownException = null;
 
 	@Override
@@ -122,7 +122,7 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		c.createStatement().execute("ALTER TABLE smart.agency ADD CONSTRAINT keyunq UNIQUE (keyid, ca_uuid)"); //$NON-NLS-1$
 		
 		//create qa plugin tables
-		QaPlugInInstaller.createTables(session, c);
+		//QaPlugInInstaller.createTables(session, c);
 		
 		//ecnrypt files
 		encryptFilestoreData(c);

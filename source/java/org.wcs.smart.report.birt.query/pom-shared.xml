@@ -43,7 +43,7 @@
 		<dependency>
     			<groupId>org.eclipse.datatools.plugins</groupId>
   				<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
-    			<version>3.6.101-SNAPSHOT</version>
+    			<version>${org.eclipse.datatools.connectivity.oda.version}</version>
 		</dependency>
 		
 	</dependencies> 	

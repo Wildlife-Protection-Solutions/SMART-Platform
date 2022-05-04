@@ -1809,6 +1809,12 @@
             class="org.wcs.smart.udig.style.SmartGenerateIconSymbolizer">
       </pointsymbolizer>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.upgrade.CoreDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
 

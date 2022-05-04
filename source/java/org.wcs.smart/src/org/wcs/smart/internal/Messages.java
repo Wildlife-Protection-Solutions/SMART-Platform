@@ -402,6 +402,7 @@ public class Messages extends NLS {
 	public static String CcaaUserPropertyPage_verifyDelete1;
 	public static String CcaaUserPropertyPage_verifyDelete2;
 	public static String CcaaUserPropertyPage_verifyDelete3;
+	public static String ChangeLogInstaller_ProgressTaskName;
 	public static String ChangeUserPasswordDialog_ChangeUser_DialogMessage;
 	public static String ChangeUserPasswordDialog_ChangeUser_DialogTitle;
 	public static String ChangeUserPasswordDialog_Dialog_Message;
@@ -447,6 +448,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaTemplateCloner_Progress_CopyProjection;
 	public static String ConservationAreaTemplateCloner_Progress_CopyStation;
 	public static String ConservationAreaTemplateCloner_Progress_CopyStyles;
+	public static String CoreDatabaseUpgrader_TaskName;
 	public static String CreateCaWizard_Error_CreateCaError;
 	public static String CreateCaWizard_ErrorCopyInfo;
 	public static String CreateCaWizard_ErrorCreateFromTemplate;
@@ -1447,6 +1449,7 @@ public class Messages extends NLS {
 	public static String SmartStartUp_AnalysisLoginSepeartor;
 	public static String SmartStartUp_CannotLogin;
 	public static String SmartStartUp_ConnectError;
+	public static String SmartStartUp_CouldNotStartUp;
 	public static String SmartStartUp_Error_LoginError;
 	public static String SmartStartUp_Error_LoginFail;
 	public static String SmartStartUp_Error_NoSmartDb;
@@ -1455,7 +1458,10 @@ public class Messages extends NLS {
 	public static String SmartStartUp_LoginHandlerError;
 	public static String SmartStartUp_MultiConnectError;
 	public static String SmartStartUp_NoCaAccess;
+	public static String SmartStartUp_RunningStartupScripts;
 	public static String SmartStartUp_SingleCaAccess;
+	public static String SmartStartUp_StartingDb;
+	public static String SmartStartUp_ValidationDbVersions;
 	public static String SmartStyleEditorDialog_ApplyButton;
 	public static String SmartStyleEditorDialog_CustomConfigLabel;
 	public static String SmartStyleEditorDialog_CustomStyleLabel;
@@ -1586,10 +1592,13 @@ public class Messages extends NLS {
 	public static String TranslateSimpleListItemDialog_Error_LabelRequired;
 	public static String TranslateSimpleListItemDialog_LanguageLabel;
 	public static String TranslateSimpleListItemDialog_NameLabel;
+	public static String UpgradeEngine_ChangeLogTaskName;
+	public static String UpgradeEngine_CompressingTaskName;
 	public static String UpgradeEngine_Confirm_Message;
 	public static String UpgradeEngine_Confirm_Title;
 	public static String UpgradeEngine_Error_Message1;
 	public static String UpgradeEngine_IncompatibleVersion;
+	public static String UpgradeEngine_LoadingTaskName;
 	public static String UpgradeEngine_Plugin_Missing;
 	public static String UpgradeEngine_Plugin_UpgradeMessage;
 	public static String UpgradeEngine_Plugin_WrongVersion;
@@ -1600,6 +1609,8 @@ public class Messages extends NLS {
 	public static String UpgradeEngine_subprogress5;
 	public static String UpgradeEngine_subprogress6;
 	public static String UpgradeEngine_UpgradeTask;
+	public static String UpgradeEngine_UpgradingTaskName;
+	public static String UpgradeEngine_VersionError;
 	public static String Upgrader112To200_Error;
 	public static String Upgrader112To200_SubTask_Name;
 	public static String Upgrader200To300_Error;

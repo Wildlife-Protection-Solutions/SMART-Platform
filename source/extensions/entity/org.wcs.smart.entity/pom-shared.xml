@@ -40,14 +40,30 @@
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.birt.map</artifactId>
     			<version>${smart.version}</version>
-		</dependency>	
+		</dependency>		
 		<dependency>
-    		<groupId>org.eclipse.scout.sdk.deps</groupId>
-    		<artifactId>org.eclipse.ui.workbench</artifactId>
-    		<version>3.108.0.v20160602-1232</version>
+    		<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.ui.workbench</artifactId>
+    		<version>${org.eclipse.ui.workbench.version}</version>
     		<scope>provided</scope>
+    		<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.swt</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jna</groupId>
+					<artifactId>com.sun.jna</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jna</groupId>
+					<artifactId>com.sun.jna.platform</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
-
 	</dependencies>
 </project>

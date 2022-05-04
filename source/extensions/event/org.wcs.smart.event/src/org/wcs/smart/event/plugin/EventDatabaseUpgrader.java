@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.event.plugin;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -39,21 +42,30 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
+	public String getPluginId() {
+		return EventPlugIn.PLUGIN_ID;
+	}
+
+	@Override
+	public String getPluginName() {
+		return getName(EventPlugIn.getDefault().getBundle());
+	}
+	
+	
+	@Override
+	public boolean isUpdateToDate(Map<String, String> currentVersions) {
+		if (!currentVersions.containsKey(EventPlugIn.PLUGIN_ID)) return false;
+		return currentVersions.get(EventPlugIn.PLUGIN_ID).equals(EventPlugIn.DB_VERSION);
+	}
+	
+	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.EventDatabaseUpgrader_TaskName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
-				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happen //$NON-NLS-1$
-				String currentPluginVersion = versions.get(EventPlugIn.PLUGIN_ID);
-				
-				if (currentPluginVersion == null) {
-					monitor.subTask(Messages.EventDatabaseUpgrader_SubTaskName);
-					(new AddEventJob()).installPlugin(session);
-				}else{
-					upgrade(currentPluginVersion, session);
-				}
+				upgrade(versions.get(EventPlugIn.PLUGIN_ID), session);
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				session.getTransaction().rollback();
@@ -62,19 +74,23 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		monitor.done();
 	}
+
 	
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
 	 * @param currentVersion
 	 * @param session is active transaction
 	 */
-	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.equalsIgnoreCase(EventPlugIn.DB_VERSION_1)) {
+	private void upgrade(String currentVersion, Session session){
+		if (currentVersion == null) {
+			createTables(session);
+			upgradev1tov2(session);
+		}else if (currentVersion.equalsIgnoreCase(EventPlugIn.DB_VERSION_1)) {
 			upgradev1tov2(session);
 		}
 	}
 	
-	private static void upgradev1tov2(Session session) {
+	private void upgradev1tov2(Session session) {
 		//create profile parameters for intel events
 		StringBuilder sb = new StringBuilder();
 		sb.append("insert into smart.e_action_parameter_value(action_uuid, parameter_key, parameter_value)"); //$NON-NLS-1$
@@ -86,4 +102,48 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(EventPlugIn.PLUGIN_ID, EventPlugIn.DB_VERSION_2, session);
 	}
 		
+	
+	private void createTables(Session session){
+		String[] sql = new String[]{
+			"CREATE TABLE smart.e_event_filter(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, id varchar(128) not null, filter_string varchar(32000) not null, PRIMARY KEY(uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.e_event_filter ADD CONSTRAINT eeventfilter_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_filter TO ANALYST",  //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_filter TO DATA_ENTRY",  //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_event_filter TO MANAGER", //$NON-NLS-1$
+
+			"CREATE TABLE smart.e_action( uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, id varchar(128) not null, type_key varchar(128) not null, PRIMARY KEY (uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.e_action ADD CONSTRAINT eaction_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action TO ANALYST", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_action TO MANAGER", //$NON-NLS-1$
+
+
+			"CREATE TABLE smart.e_action_parameter_value( action_uuid char(16) for bit data not null, parameter_key varchar(128)  not null, parameter_value varchar(4096) not null, PRIMARY KEY (action_uuid, parameter_key) )", //$NON-NLS-1$
+			"ALTER TABLE smart.e_action_parameter_value ADD CONSTRAINT eactionparametervalue_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action_parameter_value TO ANALYST", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action_parameter_value TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_action_parameter_value TO MANAGER", //$NON-NLS-1$
+
+
+			"CREATE TABLE smart.e_event_action(uuid char(16) for bit data not null, filter_uuid char(16) for bit data not null, action_uuid char(16) for bit data not null, is_enabled boolean not null default true, PRIMARY KEY (uuid) )", //$NON-NLS-1$
+			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_filteruuid_fk FOREIGN KEY (filter_uuid) REFERENCES smart.e_event_filter(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_action TO ANALYST", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_action TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_event_action TO MANAGER", //$NON-NLS-1$
+
+		};
+		
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection connection) throws SQLException {
+				for (String s : sql){
+					EventPlugIn.log(s, null);
+					connection.createStatement().executeUpdate(s);
+				}
+			}
+			
+		});
+		HibernateManager.setPlugInVersion(EventPlugIn.PLUGIN_ID, EventPlugIn.DB_VERSION_1, session);
+	}
 }

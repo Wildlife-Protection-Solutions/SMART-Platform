@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.smartcollect.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.smartcollect.SmartCollectPlugIn;
+import org.wcs.smart.smartcollect.internal.Messages;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 
 /**
  * Action that is called when plug-in is uninstalled
@@ -34,20 +39,52 @@ import org.wcs.smart.smartcollect.SmartCollectPlugIn;
  */
 public class OnUninstallAction extends UninstallProvisioningAction {
 
-	@Override
-	protected void performRemove() {
-		Job job = new RemoveSmartCollectJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			SmartPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-
+	private static String[] TABLES = new String[]{
+			"smartcollect_package", //$NON-NLS-1$
+			"smartcollect_waypoint", //$NON-NLS-1$
+		};
+		
 	@Override
 	protected String getPluginId() {
 		return SmartCollectPlugIn.PLUGIN_ID;
 	}
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			
+			session.beginTransaction();
+			try {
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE smart."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+					
+					//delete all waypoints with source of smartcollect
+					session.createQuery("DELETE FROM Waypoint WHERE source = :source") //$NON-NLS-1$
+						.setParameter("source", SmartCollectWaypointSource.KEY).executeUpdate(); //$NON-NLS-1$
+				}
+				
+				//clear version
+				HibernateManager.setPlugInVersion(SmartCollectPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.RemoveSmartCollectJob_UninstallError + e.getMessage(), e);
+					}
+				});
+				return ;
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
+		}
+	}
+
+	
 
 }

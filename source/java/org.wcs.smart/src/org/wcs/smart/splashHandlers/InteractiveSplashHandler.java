@@ -30,7 +30,9 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -64,6 +66,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -112,6 +115,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private ComboViewer cmvConservationArea  = null;
 	private Label progressLabel  = null;
 	private Link lblAdvanced = null;
+	private ProgressBar pbar;
 	
 	private Cursor appStartCursor;
 	
@@ -324,10 +328,14 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		fCompositeLogin = new Composite(getSplash(), SWT.BORDER);
 		
+		
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
 		fCompositeLogin.setLayout(layout);		
 		((GridLayout)fCompositeLogin.getLayout()).marginHeight = 0;
 		((GridLayout)fCompositeLogin.getLayout()).marginWidth= 0;
+		
+		pbar = new ProgressBar(fCompositeLogin, SWT.HORIZONTAL);
+		pbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, F_COLUMN_COUNT, 1));
 		
 		Composite right = new Composite(fCompositeLogin, SWT.NONE);
 		right.setLayout(new GridLayout(2, false));
@@ -506,117 +514,152 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * Initializes the start-up screen data.  This includes
 	 * loading the conservation areas.
 	 */
-	private void startup(){
+	private void startup() {
 		try {
-			progressLabel.setText(Messages.InteractiveSplashHandler_intiDbProcess);
+			IProgressMonitor pmonitor = getBundleProgressMonitor();
+			SubMonitor sub = SubMonitor.convert(pmonitor, Messages.InteractiveSplashHandler_intiDbProcess, 10);
+
 			Job job = new Job(Messages.InteractiveSplashHandler_Progress_LoadingCa) {
-				
+
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					DisplayAccess.accessDisplayDuringStartup();
-					try{
-					
-						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							
-							//setup cursor
-							appStartCursor = new Cursor(InteractiveSplashHandler.this.parent.getDisplay(), 
-									SWT.CURSOR_APPSTARTING);
-							
-							InteractiveSplashHandler.this.parent.getShell().setCursor(appStartCursor);
-							
-							//disable controls while we reload conservation area
-							enableControls(false);
-							progressLabel.setText(Messages.InteractiveSplashHandler_intiDbProcess);
-						}
-					});
-					
-					SmartPlugIn.initializeDatabase();
-					
-					
-					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
-						}
-					});
-					
-					final List<Object> cas = new ArrayList<Object>();
-					try{
-						cas.addAll(SmartStartUp.getConservationAreas(true));
-					}catch (final Exception ex){
-						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
-							public void run(){
-								SmartPlugIn.displayLogExit(ex.getMessage(), ex);
+					try {
+
+						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								// setup cursor
+								appStartCursor = new Cursor(InteractiveSplashHandler.this.parent.getDisplay(),
+										SWT.CURSOR_APPSTARTING);
+								InteractiveSplashHandler.this.parent.getShell().setCursor(appStartCursor);
+								// disable controls while we reload conservation area
+								enableControls(false);
 							}
 						});
-					}
-					
-					String cauuid = ConfigurationScope.INSTANCE.getNode(CA_PREF_NODE).get(LAST_CA_KEY, null);
-					UUID caUuid = null;
-					if (cauuid != null) {
+
+						SmartStartUp.initializeDatabase(sub.split(9, SubMonitor.SUPPRESS_NONE));
+						SubMonitor cam = sub.split(1, SubMonitor.SUPPRESS_NONE);
+						cam.beginTask(Messages.InteractiveSplashHandler_Progress_LoadingCa, 2);
+						final List<Object> cas = new ArrayList<Object>();
 						try {
-							caUuid = UuidUtils.stringToUuid(cauuid);
-						}catch (Exception ex) {
-							
-						}
-					}
-					
-					final UUID thisUuid = caUuid;
-					
-					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							if (cas != null && cas.size() > 0){
-								cmvConservationArea.setInput(cas);
-								cmvConservationArea.getCombo().select(0);
-								if (thisUuid != null) {
-									for (Object ca : cas) {
-										if (ca instanceof ConservationArea && ((ConservationArea)ca).getUuid().equals(thisUuid)) {
-											cmvConservationArea.setSelection(new StructuredSelection(ca));
-											break;
-										}
-									}
+							cas.addAll(SmartStartUp.getConservationAreas(true));
+						} catch (final Exception ex) {
+							InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable() {
+								public void run() {
+									SmartPlugIn.displayLogExit(ex.getMessage(), ex);
 								}
-								enableControls(true);
-								progressLabel.setText(""); //$NON-NLS-1$
-								
-								validateUi();
-							} else {
-								// no conservation areas
-								enableControls(false);
-								(new StartUpDialog(parent)).open();
-								startup();
+							});
+						}
+
+						String cauuid = ConfigurationScope.INSTANCE.getNode(CA_PREF_NODE).get(LAST_CA_KEY, null);
+						UUID caUuid = null;
+						if (cauuid != null) {
+							try {
+								caUuid = UuidUtils.stringToUuid(cauuid);
+							} catch (Exception ex) {
+
 							}
-							
-						}});
-					}finally{
-						//revert cursor
-						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
-							public void run(){
+						}
+
+						final UUID thisUuid = caUuid;
+						cam.done();
+
+						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								if (cas != null && cas.size() > 0) {
+									cmvConservationArea.setInput(cas);
+									cmvConservationArea.getCombo().select(0);
+									if (thisUuid != null) {
+										ConservationArea temp = new ConservationArea();
+										temp.setUuid(thisUuid);
+										cmvConservationArea.setSelection(new StructuredSelection(temp));
+									}
+									enableControls(true);
+									progressLabel.setText(""); //$NON-NLS-1$
+
+									validateUi();
+								} else {
+									// no conservation areas
+									enableControls(false);
+									(new StartUpDialog(parent)).open();
+									startup();
+								}
+
+							}
+						});
+					} finally {
+						// revert cursor
+						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable() {
+							public void run() {
 								InteractiveSplashHandler.this.parent.getShell().setCursor(null);
-								if (appStartCursor != null){
+								if (appStartCursor != null) {
 									appStartCursor.dispose();
 								}
 							}
 						});
-						
+
 					}
+					pmonitor.done();
 					return Status.OK_STATUS;
 				}
 			};
-			
-			//this job won't be run until after the plugin starts anywyas
-			//so we don't need this rule
+
+			// this job won't be run until after the plugin starts anywyas
+			// so we don't need this rule
 //			job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 			job.schedule(50);
-		
+
 		} catch (Exception ex) {
 			SmartPlugIn.displayLogExit(Messages.InteractiveSplashHandler_Error_Initialization, ex);
 		}
 	}
 	
-	 
+
+	@Override
+	public IProgressMonitor getBundleProgressMonitor() {
+		return new NullProgressMonitor() {
+			@Override
+			public void beginTask(String name, final int totalWork) {
+				getSplash().getDisplay().syncExec(()->{
+					pbar.setVisible(true);
+					pbar.setMinimum(0);
+					pbar.setMaximum(totalWork);
+					pbar.setSelection(0);
+					progressLabel.setText(name);
+				});
+			}
+			
+			@Override
+			public void subTask(String name) {
+				getSplash().getDisplay().syncExec(() ->{
+					progressLabel.setText(name);
+				});
+			}
+			
+			@Override
+			public void setTaskName(String name) {
+				getSplash().getDisplay().syncExec(() ->{
+					progressLabel.setText(name);
+				});
+			}
+			
+			
+			@Override
+			public void worked(int work) {
+				getSplash().getDisplay().syncExec(() ->{
+					pbar.setSelection(pbar.getSelection() + work);
+				});
+			}
+			
+			@Override
+			public void done() {
+				getSplash().getDisplay().syncExec(() ->{
+					pbar.setVisible(false);
+				});
+			}
+		};
+	}
 	
 }

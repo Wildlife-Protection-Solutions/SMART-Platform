@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.er.query.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.hibernate.Session;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -35,17 +37,53 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemoveERQueryJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			EcologicalRecordsPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-	@Override
 	protected String getPluginId() {
 		return ERQueryPlugIn.PLUGIN_ID;
 	}
+	
+	private String[] LABELTABLES = new String[]{
+			"SURVEY_OBSERVATION_QUERY", //$NON-NLS-1$
+			"SURVEY_GRIDDED_QUERY", //$NON-NLS-1$
+			"SURVEY_SUMMARY_QUERY", //$NON-NLS-1$
+			"SURVEY_MISSION_QUERY", //$NON-NLS-1$
+			"SURVEY_MISSION_TRACK_QUERY", //$NON-NLS-1$
+			"SURVEY_WAYPOINT_QUERY" //$NON-NLS-1$
+
+	};
+	
+	@Override
+	protected void performRemove() {
+		//drop tables
+		try (final Session session = HibernateManager.openSession()) {
+			session.beginTransaction();
+			try {
+				for (String table : LABELTABLES) {
+					if (DerbyHibernateExtensions.tableExists(session, table)) {
+						session.createNativeQuery(
+								"delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")") //$NON-NLS-1$ //$NON-NLS-2$
+								.executeUpdate();
+					}
+				}
+
+				for (String table : LABELTABLES) {
+					if (DerbyHibernateExtensions.tableExists(session, table)) {
+						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+
+				HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+
+			} catch (Exception e) {
+				try {
+					session.getTransaction().rollback();
+				} catch (Exception ex) {
+					ERQueryPlugIn.log(ex.getMessage(), ex);
+				}
+				ERQueryPlugIn.displayLog(Messages.RemoveERQueryJob_UninstallError, e);
+				return ;
+			}
+		}
+	}
+
 }

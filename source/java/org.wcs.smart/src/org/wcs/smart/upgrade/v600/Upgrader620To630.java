@@ -33,7 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -41,7 +41,7 @@ import org.wcs.smart.util.UuidUtils;
 /**
  * Upgrade from 620 to 630 - adds new species icons to datasets
  */
-public class Upgrader620To630 implements IDatabaseUpgrader { 
+public class Upgrader620To630 extends AbstractInteralDatabaseUpgrader { 
 	private Exception thrownException = null;
 
 	@Override

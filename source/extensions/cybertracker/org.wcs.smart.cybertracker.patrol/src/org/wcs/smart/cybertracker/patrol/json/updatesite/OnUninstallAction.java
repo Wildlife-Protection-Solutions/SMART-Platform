@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.cybertracker.patrol.json.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.patrol.PatrolCyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -34,20 +38,49 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
  */
 public class OnUninstallAction extends UninstallProvisioningAction {
 
-	@Override
-	protected void performRemove() {
-		Job job = new RemoveCtPatrolJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			SmartPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-
+	private static String[] TABLES = new String[]{
+			"ct_patrol_wplink", //$NON-NLS-1$
+			"ct_patrol_link", //$NON-NLS-1$
+			"ct_patrol_package" //$NON-NLS-1$
+		};
+	
 	@Override
 	protected String getPluginId() {
 		return PatrolCyberTrackerPlugIn.PLUGIN_ID;
 	}
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			
+			session.beginTransaction();
+			try {
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				
+				//clear version
+				HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.DataQueueCtPatrolJob_ErrorMsg, e);
+					}
+				});
+				return;
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
+		}
+	}
+
+	
 
 }

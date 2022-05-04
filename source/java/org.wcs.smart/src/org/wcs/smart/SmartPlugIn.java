@@ -23,19 +23,16 @@ package org.wcs.smart;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
@@ -43,16 +40,12 @@ import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.startup.SmartStartUp;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSmartServiceLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.upgrade.StartUpDatabaseUpgrader;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -352,84 +345,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		cleanUp.schedule();
 	}
 
-	public static void initializeDatabase(){
-		boolean exit = false;
-		try{
-			SmartStartUp.initDb();
-		}catch (final Exception ex){	
-			SmartPlugIn.displayLog(ex.getMessage(), ex);		
-			exit = true;
-		}
-		if (!exit){
-			try{
-				SmartStartUp.connectToDb();	
-			}catch (final Exception ex){
-				SmartPlugIn.displayLog(ex.getMessage(), ex);		
-				exit= true;
-			}
-		}
-		
-		if (exit){
-			System.exit(1);
-		}
-		Display.getDefault().syncExec(new Runnable(){
-
-			@Override
-			public void run() {
-				IJobManager manager = Job.getJobManager();
-				if (manager.currentRule() == SmartPlugIn.PLUGIN_START_MUTEX){
-					manager.endRule(SmartPlugIn.PLUGIN_START_MUTEX);
-				}
-			}});
-		
-	}
 	
-	/**
-	 * Checks the current database version against the expected version.  If an exception
-	 * is thrown, the calling function should terminate the application.
-	 *  
-	 * @return
-	 * @throws exception if the version are incorrect
-	 */
-	public static void versionCheck() throws Exception{
-		boolean isokay = false;
-		String currentVersion = Messages.SmartPlugIn_UnknownVersion;
-		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
-		
-		try(Session s = HibernateManager.openSession()){
-			currentVersion = HibernateManager.getPlugInVersion(SmartPlugIn.PLUGIN_ID, s);
-		}catch (Exception ex){
-			//we cannot determine db version so we don't let the user login
-			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
-		}
-		if (currentVersion.equals(smartDbVersion) ){
-			isokay = true;
-		}else {
-			//attempt an upgrade and try again
-			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-			try {
-				(new StartUpDatabaseUpgrader()).doUpgrade(currentVersion);
-			}catch (Exception ex) {
-				HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());	
-				throw ex;
-			}
-			currentVersion = null;
-			try(Session s = HibernateManager.openSession()){
-				currentVersion = HibernateManager.getPlugInVersion(SmartPlugIn.PLUGIN_ID, s);
-			}catch (Exception ex){
-				//we cannot determine db version so we don't let the user login
-				throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
-			}
-			if (currentVersion.equals(smartDbVersion) ){
-				isokay = true;
-			}
-		}
-		
-		
-		if (!isokay){
-			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{currentVersion, smartDbVersion}));
-		}
-	}
+	
+	
 	
 	/*
 	 * (non-Javadoc)

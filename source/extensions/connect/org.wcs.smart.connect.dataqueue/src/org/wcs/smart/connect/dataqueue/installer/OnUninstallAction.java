@@ -21,9 +21,21 @@
  */
 package org.wcs.smart.connect.dataqueue.installer;
 
-import org.eclipse.core.runtime.jobs.Job;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Action that is called when Entity plug-in is uninstalled
@@ -34,19 +46,71 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemoveConnectDataQueueJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			ConnectDataQueuePlugin.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-
-	@Override
 	protected String getPluginId() {
 		return ConnectDataQueuePlugin.PLUGIN_ID;
 	}
+	
+	private static String[] TABLES = new String[]{
+			"connect_data_queue", //$NON-NLS-1$
+			"connect_data_queue_option", //$NON-NLS-1$
+		};
+		
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+		
+			try {
+				
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				
+				//we need to remove any data into the data queue associated
+				//with this plugin (for each ca the /connect/dataqueue folder
+				Path filestore = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
+				try(DirectoryStream<Path> dirs = Files.newDirectoryStream(filestore)){
+					for (Path p : dirs){
+						Path dataqueue = p.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
+						if (Files.exists(dataqueue) && Files.isDirectory(dataqueue)){
+							try{
+								SmartUtils.deleteDirectory(dataqueue);
+							}catch (Exception ex){
+								ConnectDataQueuePlugin.log("Could not remove data queue folder from filestore when uninstalled Connect DataQueue Plugin", ex); //$NON-NLS-1$
+							}
+						}
+					}
+				}catch (Exception ex){
+					ConnectDataQueuePlugin.log("Could not remove data queue folders from filestore when uninstalled Connect DataQueue Plugin", ex); //$NON-NLS-1$
+				}
+				
+				
+				
+				//clear version
+				HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.RemoveConnectDataQueueJob_UninstallError, e);
+					}
+				});
+				return; 
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
+		}
+	}
 
+
+
+	
+	
 }

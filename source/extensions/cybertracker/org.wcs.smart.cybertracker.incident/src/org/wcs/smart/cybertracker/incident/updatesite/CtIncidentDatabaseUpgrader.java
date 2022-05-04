@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.cybertracker.incident.updatesite;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.cybertracker.incident.CtIncidentPlugIn;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -38,6 +41,23 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class CtIncidentDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
+	public String getPluginId() {
+		return CtIncidentPlugIn.PLUGIN_ID;
+	}
+
+	@Override
+	public String getPluginName() {
+		return getName(CtIncidentPlugIn.getDefault().getBundle());
+	}
+	
+
+	@Override
+	public boolean isUpdateToDate(Map<String, String> currentVersions) {
+		if (!currentVersions.containsKey(CtIncidentPlugIn.PLUGIN_ID)) return false;
+		return currentVersions.get(CtIncidentPlugIn.PLUGIN_ID).equals(CtIncidentPlugIn.DB_VERSION);
+	}
+	
+	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CtIncidentDatabaseUpgrader_Progress);
 		try(Session session = HibernateManager.openSession()){
@@ -45,15 +65,7 @@ public class CtIncidentDatabaseUpgrader implements IDatabaseUpgrader {
 			session.beginTransaction();
 			try {
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
-				if (versions == null)
-					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-				String currentPluginVersion = versions.get(CtIncidentPlugIn.PLUGIN_ID);
-	
-				if (currentPluginVersion == null) {
-					(new AddCtIncidentJob()).installPlugin(session);
-				} else {
-					upgrade(currentPluginVersion, session);
-				}
+				upgrade(versions.get(CtIncidentPlugIn.PLUGIN_ID), session);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -68,10 +80,38 @@ public class CtIncidentDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param currentVersion
 	 * @param session in active transaction
 	 */
-	public static final void upgrade(String currentVersion, Session session){
-		
+	private void upgrade(String currentVersion, Session session){
+		if (currentVersion == null) {
+			createTables(session);
+		}
 	}
 	
 	
+	private void createTables(Session session){
+		
+		final String[] sql = new String[]{
+
+				"CREATE TABLE smart.ct_incident_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null,cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
+
+				"ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				"GRANT ALL PRIVILEGES ON smart.ct_incident_package to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_incident_package to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_incident_package to analyst", //$NON-NLS-1$
+		};
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				for (int i = 0; i < sql.length; i ++){
+					c.createStatement().execute(sql[i]);
+				}				
+			}
+		});
+		
+		HibernateManager.setPlugInVersion(CtIncidentPlugIn.PLUGIN_ID, CtIncidentPlugIn.DB_VERSION_1, session);
+	}
 
 }

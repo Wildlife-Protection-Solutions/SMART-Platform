@@ -872,6 +872,34 @@
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.plan.ui.perspective.PlanListView$PlanListViewWrapper"
+            icon="images/icons/obj16/plan.png"
+            id="org.wcs.smart.plan.PlanListView"
+            name="%planlistview.view.name"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.plan.ui.editor.PlanEditor"
+            default="false"
+            icon="images/icons/obj16/plan.png"
+            id="org.wcs.smart.plan.ui.editor.PlanEditor"
+            name="%planlistview.editor.name">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.plan.internal.preference.PlanConfigurationPreferencePage"
+            id="org.wcs.smart.preference.PlanConfiguration"
+            name="%planconfig.preferencepage.name">
+      </page>
+   </extension>
 
    <extension
          point="org.wcs.smart.patrol.wizardpage">
@@ -945,54 +973,11 @@
       </perspective>
    </extension>
    <extension
-         point="org.eclipse.ui.views">
-      <view
-            class="org.wcs.smart.plan.ui.perspective.PlanListView$PlanListViewWrapper"
-            icon="images/icons/obj16/plan.png"
-            id="org.wcs.smart.plan.PlanListView"
-            name="%planlistview.view.name"
-            restorable="true">
-      </view>
-   </extension>
-   <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            class="org.wcs.smart.plan.ui.editor.PlanEditor"
-            default="false"
-            icon="images/icons/obj16/plan.png"
-            id="org.wcs.smart.plan.ui.editor.PlanEditor"
-            name="%planlistview.editor.name">
-      </editor>
-   </extension>
-   <extension
          point="org.wcs.smart.patrol.xml">
       <contribution
             class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution"
             uiclass="org.wcs.smart.plan.xml.patrol.IncludeDefOp">
       </contribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            class="org.wcs.smart.plan.internal.preference.PlanConfigurationPreferencePage"
-            id="org.wcs.smart.preference.PlanConfiguration"
-            name="%planconfig.preferencepage.name">
-      </page>
-   </extension>
-   <extension
-         point="org.wcs.smart.caDeleteAdvisor">
-      <DeleteAdvisor
-            advisor="org.wcs.smart.plan.advisors.StationDeleteAdvisor"
-            class="org.wcs.smart.ca.Station">
-      </DeleteAdvisor>
-      <DeleteAdvisor
-            advisor="org.wcs.smart.plan.advisors.TeamDeleteAdvisor"
-            class="org.wcs.smart.patrol.model.Team">
-      </DeleteAdvisor>
-      <DeleteAdvisor
-            advisor="org.wcs.smart.plan.advisors.EmployeePlanDeleteAdvisor"
-            class="org.wcs.smart.ca.Employee">
-      </DeleteAdvisor>
    </extension>
    <extension
          point="org.wcs.smart.birt.reportEditorManager">
@@ -1164,6 +1149,21 @@
       </StyleProvider>
    </extension>
    <extension
+         point="org.wcs.smart.caDeleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.plan.advisors.StationDeleteAdvisor"
+            class="org.wcs.smart.ca.Station">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.plan.advisors.TeamDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.Team">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.plan.advisors.EmployeePlanDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
+   </extension>
+   <extension
          point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.plan.PlanTemplateCloner"
@@ -1185,13 +1185,23 @@
       </GroupByItem>
    </extension>
    <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.plan.updatesite.OnInstallAction"
-            name="onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
+         point="org.eclipse.help.toc">
+      <toc
+            file="toc.xml"
+            primary="false">
+      </toc>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.plan.updatesite.PlanDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.plan.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
@@ -1207,25 +1217,6 @@
       <FilestoreDirectory
             directory="plans">
       </FilestoreDirectory>
-   </extension>
-   <extension
-         point="org.eclipse.help.toc">
-      <toc
-            file="toc.xml"
-            primary="false">
-      </toc>
-   </extension>
-   <extension
-         point="org.wcs.smart.dbUpgrade">
-      <dbUpgrader
-            upgrader="org.wcs.smart.plan.upgrade.PlanDatabaseUpgrader">
-      </dbUpgrader>
-   </extension>
-   <extension
-         point="org.wcs.smart.changeLogInstaller">
-      <ChangeLogTracker
-            clazz="org.wcs.smart.plan.updatesite.ChangeTrackerInstaller">
-      </ChangeLogTracker>
    </extension>
 
 </plugin>

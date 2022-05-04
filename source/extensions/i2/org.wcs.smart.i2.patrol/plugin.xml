@@ -25,15 +25,6 @@
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
-            class="org.wcs.smart.i2.patrol.plugin.OnInstallAction"
-            name="org.wcs.smart.i2.patrol.onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
-      </action>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
             class="org.wcs.smart.i2.patrol.plugin.OnUninstallAction"
             name="org.wcs.smart.i2.patrol.onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"

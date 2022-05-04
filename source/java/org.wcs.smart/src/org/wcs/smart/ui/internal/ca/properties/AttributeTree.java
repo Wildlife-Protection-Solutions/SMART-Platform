@@ -282,7 +282,8 @@ public class AttributeTree {
 				}
 				
 			};
-			FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION, patternFilter, true);
+			FilteredTree fTree = new FilteredTree(comp,
+					SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION, patternFilter, true, false);
 			viewer = fTree.getViewer();
 		}else{
 			viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);

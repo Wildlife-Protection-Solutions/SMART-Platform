@@ -30,7 +30,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
@@ -39,7 +39,7 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @author elitvin
  * @since 4.1.0
  */
-public class Upgrader401To410 implements IDatabaseUpgrader {
+public class Upgrader401To410 extends AbstractInteralDatabaseUpgrader {
 
 	private Exception thrownException = null;
 	

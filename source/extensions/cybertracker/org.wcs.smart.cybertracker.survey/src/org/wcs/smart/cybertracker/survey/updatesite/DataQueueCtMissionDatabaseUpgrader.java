@@ -21,14 +21,18 @@
  */
 package org.wcs.smart.cybertracker.survey.updatesite;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.cybertracker.survey.SurveyCyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
-import org.wcs.smart.er.upgrade.ERDatabaseUpgrader;
+import org.wcs.smart.er.updatesite.ERDatabaseUpgrader;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -42,6 +46,16 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
+	public String getPluginId() {
+		return SurveyCyberTrackerPlugIn.PLUGIN_ID;
+	}
+
+	@Override
+	public String getPluginName() {
+		return getName(SurveyCyberTrackerPlugIn.getDefault().getBundle());
+	}
+	
+	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask, 2);
 		progress.subTask( Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask);
@@ -53,16 +67,7 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 			session.beginTransaction();
 			try{
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
-				
-				if (versions == null)
-					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-				String currentPluginVersion = versions.get(SurveyCyberTrackerPlugIn.PLUGIN_ID);
-	
-				if (currentPluginVersion == null) {
-					(new AddDataQueueCtMissionJob()).installPlugin(session);
-				} else {
-					upgrade(currentPluginVersion, session);
-				}
+				upgrade(versions.get(SurveyCyberTrackerPlugIn.PLUGIN_ID), session);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -72,18 +77,27 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 		progress.worked(1);
 	}
 	
+	@Override
+	public boolean isUpdateToDate(Map<String, String> currentVersions) {
+		if (!currentVersions.containsKey(SurveyCyberTrackerPlugIn.PLUGIN_ID)) return false;
+		return currentVersions.get(SurveyCyberTrackerPlugIn.PLUGIN_ID).equals(SurveyCyberTrackerPlugIn.DB_VERSION);
+	}
+	
 	/**
 	 * 
 	 * @param currentVersion
 	 * @param session in active transaction
 	 */
-	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.contentEquals(SurveyCyberTrackerPlugIn.DB_VERSION_1)) {
+	private void upgrade(String currentVersion, Session session){
+		if (currentVersion == null) {
+			createTables(session);
+			upgradeV1ToV2(session);
+		}else if (currentVersion.contentEquals(SurveyCyberTrackerPlugIn.DB_VERSION_1)) {
 			upgradeV1ToV2(session);
 		}
 	}
 	
-	private static final void upgradeV1ToV2(Session session) {
+	private void upgradeV1ToV2(Session session) {
 		String[] sql = new String[] {
 				"create table smart.ct_survey_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, sd_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
@@ -108,4 +122,29 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(SurveyCyberTrackerPlugIn.PLUGIN_ID, SurveyCyberTrackerPlugIn.DB_VERSION_2, session);
 	}
 
+	private void createTables(Session session){
+		if (DerbyHibernateExtensions.tableExists(session, "ct_mission_link")){ //$NON-NLS-1$
+			return;
+		}
+		final String[] sql = new String[]{
+			"CREATE TABLE smart.ct_mission_link ( CT_UUID CHAR(16) for bit data NOT NULL, MISSION_UUID CHAR(16) for bit data  NOT NULL, ct_device_id varchar(36) not null, last_observation_cnt integer, group_start_time timestamp, su_uuid char(16) for bit data, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
+			
+			"GRANT ALL PRIVILEGES ON smart.ct_mission_link TO ANALYST", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.ct_mission_link TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.ct_mission_link TO MANAGER", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.ct_mission_link ADD CONSTRAINT mission_uuid_fk FOREIGN KEY (mission_uuid) REFERENCES smart.mission ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.ct_mission_link ADD CONSTRAINT su_uuid_fk FOREIGN KEY (su_uuid) REFERENCES smart.sampling_unit ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
+		};
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				for (int i = 0; i < sql.length; i ++){
+					c.createStatement().execute(sql[i]);
+				}				
+			}
+		});
+		HibernateManager.setPlugInVersion(SurveyCyberTrackerPlugIn.PLUGIN_ID, SurveyCyberTrackerPlugIn.DB_VERSION_1, session);
+	}
 }

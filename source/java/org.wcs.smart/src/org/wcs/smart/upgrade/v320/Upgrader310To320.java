@@ -45,7 +45,7 @@ import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 
 /**
  * Upgrades from database version 310 to 320.
@@ -53,7 +53,7 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  * @author Emily
  *
  */
-public class Upgrader310To320 implements IDatabaseUpgrader {
+public class Upgrader310To320 extends AbstractInteralDatabaseUpgrader {
 	
 	private String dbUrl = null;
 	private Exception throwEx = null;

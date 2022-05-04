@@ -282,15 +282,6 @@
             propertyProvider="org.wcs.smart.entity.query.ui.ColumnQueryPropertyProvider">
       </queryproperty>
    </extension>
-<extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.entity.query.updatesite.OnInstallAction"
-            name="onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
-   </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
@@ -303,7 +294,7 @@
    <extension
          point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
-            upgrader="org.wcs.smart.entity.query.upgrade.EntityQueryDatabaseUpgrader">
+            upgrader="org.wcs.smart.entity.query.updatesite.EntityQueryDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension

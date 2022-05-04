@@ -46,7 +46,7 @@ import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.UuidUtils;
 
@@ -57,7 +57,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 3.2.0
  */
-public class Upgrader331To400 implements IDatabaseUpgrader {
+public class Upgrader331To400 extends AbstractInteralDatabaseUpgrader {
 	
 	private String dbUrl = null;
 	private Exception thrownException = null;

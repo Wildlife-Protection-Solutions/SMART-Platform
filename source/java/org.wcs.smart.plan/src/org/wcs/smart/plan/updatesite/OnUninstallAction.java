@@ -21,9 +21,19 @@
  */
 package org.wcs.smart.plan.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Action that is called when Plan plug-in is uninstalled
@@ -33,18 +43,60 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
  */
 public class OnUninstallAction extends UninstallProvisioningAction {
 
-	@Override
-	protected void performRemove() {
-		Job job = new RemovePlanJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			SmartPlanPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
+	private static final String[] TABLES = new String[]{
+			"patrol_plan",  //$NON-NLS-1$
+			"plan_target_point",  //$NON-NLS-1$
+			"plan_target",  //$NON-NLS-1$
+			"plan"}; //$NON-NLS-1$
+	
+	
 	@Override
 	protected String getPluginId() {
 		return SmartPlanPlugIn.PLUGIN_ID;
 	}
+	
+	@Override
+	protected void performRemove() {
+		List<ConservationArea> cas = null;
+		
+		try(final Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				cas = HibernateManager.getConservationAreas(session);
+				if (DerbyHibernateExtensions.tableExists(session, "plan")){ //$NON-NLS-1$
+					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)").executeUpdate(); //$NON-NLS-1$
+				}
+				for (String table : TABLES){
+					if (DerbyHibernateExtensions.tableExists(session, table)){
+						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+					}
+				}		
+				HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+	
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					SmartPlanPlugIn.log(ex.getMessage(), ex);	
+				}
+				SmartPlanPlugIn.displayLog(Messages.RemovePlanJob_Error, e);
+//				return new Status(Status.ERROR,SmartPlanPlugIn.PLUGIN_ID,e.getMessage());
+				return;
+			}
+		} 
+		if (cas != null){
+			//delete filestores
+			for (ConservationArea ca : cas){
+				try {
+					Path folder = Paths.get(ca.getFileDataStoreLocation()).resolve(SmartPlanPlugIn.PLAN_DIR);
+					SmartUtils.deleteDirectory(folder);
+				} catch (IOException ex) {
+					SmartPlanPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}	
+	}
+
+	
 }

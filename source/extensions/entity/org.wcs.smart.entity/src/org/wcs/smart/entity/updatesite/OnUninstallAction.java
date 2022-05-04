@@ -21,8 +21,13 @@
  */
 package org.wcs.smart.entity.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -34,17 +39,58 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemoveEntityJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			EntityPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-	@Override
 	protected String getPluginId() {
 		return EntityPlugIn.PLUGIN_ID;
 	}
+	
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			try {
+				session.beginTransaction();
+				for (int i = 0; i < SQL.length; i ++){
+					if (SQL[i].equals("")) continue; //$NON-NLS-1$
+					
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery(SQL[i]).executeUpdate();
+					}
+				}
+				
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.RemoveEntityJob_Error, e);
+					}
+				});
+				return ; 
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
+		}
+		
+	}
+	
+	private static String[] SQL = new String[] {
+			"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_attribute)", //$NON-NLS-1$
+			"", //$NON-NLS-1$
+			"", //$NON-NLS-1$
+			"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.entity_type)", //$NON-NLS-1$
+	};
+
+	private static String[] TABLES = new String[] { "ENTITY_ATTRIBUTE_VALUE", //$NON-NLS-1$
+			"ENTITY", //$NON-NLS-1$
+			"ENTITY_ATTRIBUTE", //$NON-NLS-1$
+			"ENTITY_TYPE", //$NON-NLS-1$
+	};
 }

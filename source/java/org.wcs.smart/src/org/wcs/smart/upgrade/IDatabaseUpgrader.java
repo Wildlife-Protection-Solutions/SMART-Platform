@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.upgrade;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 
 /**
  * Interface that can be implemented to perform upgrade/install operations
@@ -33,10 +37,49 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public interface IDatabaseUpgrader {
 
 	/**
+	 * The plugin id for the change log manager, used for installing/uninstalling
+	 * approriate triggers
+	 * @return
+	 */
+	public String getPluginId();
+	
+	/**
+	 * The plugin name for the UI
+	 * @return
+	 */
+	public String getPluginName();
+	
+	/**
+	 * Returns true if the database is update to date; otherwise false
+	 * if upgrade is required
+	 *  
+	 * @param currentVersion a map from the plugin id to the current version in the database
+	 * @return
+	 */
+	public boolean isUpdateToDate(Map<String,String> currentVersions);
+	
+	/**
 	 * Installs or upgrades the plugin.
 	 * 
 	 * @param monitor
 	 */
 	public void upgrade(IProgressMonitor monitor) throws Exception;
 	
+	/**
+	 * Runs any post-processing scripts.  These are to be run
+	 * after the upgrade has occurred and the plugin and plugin version validation
+	 * has completed.
+	 * These should not in any way modify the plugin or plugin version table.
+	 * @param monitor
+	 */
+	public default void postProcess(IProgressMonitor monitor) throws Exception{}
+	
+	/**
+	 *  
+	 * @param bundle
+	 * @return The bundle-name header from the plugin bundle.
+	 */
+	public default String getName(Bundle bundle) {
+		return bundle.getHeaders().get(Constants.BUNDLE_NAME);
+	}
 }

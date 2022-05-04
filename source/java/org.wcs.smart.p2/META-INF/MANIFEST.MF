@@ -4,14 +4,12 @@ Bundle-Name: SMART P2 Configuration PlugIn
 Bundle-SymbolicName: org.wcs.smart.p2;singleton:=true
 Bundle-Version: 8.0.0.qualifier
 Bundle-Activator: org.wcs.smart.p2.Activator
-Require-Bundle: org.eclipse.equinox.p2.ui,
- org.eclipse.compare;resolution:=optional,
- org.wcs.smart;bundle-version="[8.0.0,9.0.0)",
+Require-Bundle: org.wcs.smart;bundle-version="[8.0.0,9.0.0)",
  org.eclipse.equinox.p2.core,
  org.eclipse.equinox.p2.engine;visibility:=reexport,
  org.eclipse.equinox.p2.operations,
  org.eclipse.equinox.p2.metadata,
- org.eclipse.equinox.p2.ui.sdk;bundle-version="1.1.100"
+ org.eclipse.equinox.p2.ui
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/policy_component.xml, OSGI-INF/licenseManager_component.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-11

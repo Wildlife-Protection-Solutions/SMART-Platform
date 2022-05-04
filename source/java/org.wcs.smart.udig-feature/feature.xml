@@ -602,21 +602,7 @@
          unpack="false"/>
 
    <plugin
-         id="wrapped.com.itextpdf.io"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="wrapped.com.itextpdf.kernel"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="wrapped.com.itextpdf.layout"
+         id="com.github.librepdf.openpdf"
          download-size="0"
          install-size="0"
          version="0.0.0"

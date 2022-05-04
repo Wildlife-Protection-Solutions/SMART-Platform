@@ -29,7 +29,7 @@
 
         <java-version>11</java-version>
         <javafx-lib-version>11.0.2</javafx-lib-version>
-	<tycho-version>2.2.0</tycho-version>
+	<tycho-version>2.5.0</tycho-version>
         <!--<tycho-extras-version>1.3.0</tycho-extras-version>-->
         <tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
         
@@ -312,7 +312,6 @@
 				<module>org.wcs.smart.updatesite</module>
 				
 				<module>org.wcs.smart.plan</module>
-				<module>org.wcs.smart.plan.core.feature</module>
 				<module>org.wcs.smart.plan.feature</module>
 			</modules>
 		</profile>
@@ -338,7 +337,6 @@
 				<module>../extensions/entity/org.wcs.smart.entity</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query.report</module>
-				<module>../extensions/entity/org.wcs.smart.entity.core.feature</module>
 				<module>../extensions/entity/org.wcs.smart.entity.feature</module>
 			</modules>
 		</profile>
@@ -351,7 +349,6 @@
 				
 				<module>../extensions/er/org.wcs.smart.er</module>
 				<module>../extensions/er/org.wcs.smart.er.feature</module>
-				<module>../extensions/er/org.wcs.smart.er.core.feature</module>
 				<module>../extensions/er/org.wcs.smart.er.query</module>
 				<module>../extensions/er/org.wcs.smart.er.query.report</module>
 				<module>../extensions/qa/org.wcs.smart.qa.er</module>
@@ -366,17 +363,13 @@
 				
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.feature</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.feature</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.feature</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
 			</modules>
 		</profile>
@@ -388,12 +381,10 @@
 				
 				<module>../extensions/connect/org.wcs.smart.connect</module>
 				<module>../extensions/connect/org.wcs.smart.connect.feature</module>
-				<module>../extensions/connect/org.wcs.smart.connect.core.feature</module>
 				
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker</module>
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.feature</module>
-				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.core.feature</module>
-
+				
 			</modules>
 		</profile>
 		<profile>
@@ -403,7 +394,6 @@
 				<module>org.wcs.smart.updatesite</module>
 				
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue</module>
-				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.core.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.feature</module>
 
@@ -426,7 +416,6 @@
 				<module>../extensions/i2/org.wcs.smart.i2</module>
 				<module>../extensions/i2/org.wcs.smart.i2.patrol</module>
 				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
-				<module>../extensions/i2/org.wcs.smart.i2.core.feature</module>
 				 
 			</modules>
 		</profile>
@@ -441,7 +430,6 @@
 				<module>../extensions/asset/org.wcs.smart.asset.query</module>
 				<module>../extensions/asset/org.wcs.smart.asset.query.report</module>
 				<module>../extensions/asset/org.wcs.smart.asset.feature</module>
-				<module>../extensions/asset/org.wcs.smart.asset.core.feature</module>
 				 
 			</modules>
 		</profile>
@@ -453,7 +441,6 @@
 				<module>org.wcs.smart.updatesite</module>
 				
 				<module>../extensions/event/org.wcs.smart.event</module>
-				<module>../extensions/event/org.wcs.smart.event.core.feature</module>
 				<module>../extensions/event/org.wcs.smart.event.feature</module>
 				<module>../extensions/event/org.wcs.smart.event.i2</module>
 				<module>../extensions/event/org.wcs.smart.event.i2.feature</module>
@@ -468,7 +455,6 @@
 				<module>org.wcs.smart.updatesite</module>
 				
 				<module>../extensions/r/org.wcs.smart.r</module>
-				<module>../extensions/r/org.wcs.smart.r.core.feature</module>
 				<module>../extensions/r/org.wcs.smart.r.feature</module>
 				 
 			</modules>
@@ -480,7 +466,6 @@
 				<module>org.wcs.smart.updatesite</module>
 				
 				<module>../extensions/paws/org.wcs.smart.paws</module>
-				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module> 
 			</modules>
 		</profile>
@@ -492,7 +477,6 @@
 				<module>org.wcs.smart.updatesite</module>
 
 				<module>org.wcs.smart.plan</module>
-				<module>org.wcs.smart.plan.core.feature</module>
 				<module>org.wcs.smart.plan.feature</module>
 				
 				<module>org.wcs.smart.independentincident</module>
@@ -502,47 +486,37 @@
 				<module>../extensions/entity/org.wcs.smart.entity</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query.report</module>
-				<module>../extensions/entity/org.wcs.smart.entity.core.feature</module>
 				<module>../extensions/entity/org.wcs.smart.entity.feature</module>
 				
 				
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.feature</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.feature</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.feature</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan.feature</module>
 				
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
-				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
 				
 				<module>../extensions/cybertracker/org.wcs.smart.smartcollect</module>
-				<module>../extensions/cybertracker/org.wcs.smart.smartcollect.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.smartcollect.feature</module>
 				
 				<module>../extensions/er/org.wcs.smart.er</module>
 				<module>../extensions/er/org.wcs.smart.er.feature</module>
-				<module>../extensions/er/org.wcs.smart.er.core.feature</module>
 				<module>../extensions/er/org.wcs.smart.er.query</module>
 				<module>../extensions/er/org.wcs.smart.er.query.report</module>
 				<module>../extensions/qa/org.wcs.smart.qa.er</module>
 
 				<module>../extensions/connect/org.wcs.smart.connect</module>
 				<module>../extensions/connect/org.wcs.smart.connect.feature</module>
-				<module>../extensions/connect/org.wcs.smart.connect.core.feature</module>
 				
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker</module>
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.feature</module>
-				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.core.feature</module>
 				
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue</module>
-				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.core.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.feature</module>
 
@@ -558,26 +532,21 @@
 				<module>../extensions/i2/org.wcs.smart.i2</module>
 				<module>../extensions/i2/org.wcs.smart.i2.patrol</module>
 				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
-				<module>../extensions/i2/org.wcs.smart.i2.core.feature</module>
 				
 				<module>../extensions/asset/org.wcs.smart.asset</module>
 				<module>../extensions/asset/org.wcs.smart.asset.query</module>
 				<module>../extensions/asset/org.wcs.smart.asset.query.report</module>
 				<module>../extensions/asset/org.wcs.smart.asset.feature</module>
-				<module>../extensions/asset/org.wcs.smart.asset.core.feature</module>
 				
 				<module>../extensions/event/org.wcs.smart.event</module>
-				<module>../extensions/event/org.wcs.smart.event.core.feature</module>
 				<module>../extensions/event/org.wcs.smart.event.feature</module>
 				<module>../extensions/event/org.wcs.smart.event.i2</module>
 				<module>../extensions/event/org.wcs.smart.event.i2.feature</module>
 				
 				<module>../extensions/r/org.wcs.smart.r</module>
-				<module>../extensions/r/org.wcs.smart.r.core.feature</module>
 				<module>../extensions/r/org.wcs.smart.r.feature</module>
 				
 				<module>../extensions/paws/org.wcs.smart.paws</module>
-				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
 			</modules>
 		</profile>
@@ -589,7 +558,6 @@
 				<module>org.wcs.smart.utils.updatesite</module>
 
 				<module>../extensions/paws/org.wcs.smart.paws</module>
-				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
 				
 				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>

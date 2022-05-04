@@ -62,6 +62,7 @@ import org.wcs.smart.data.oda.smart.impl.QueryDatasetExtensionManager;
 import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.util.UuidUtils;
 
@@ -72,7 +73,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class Report400Upgrader implements IDatabaseUpgrader {
+public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 
 	private static final String JAVA_OBJECT_TYPE = "javaObject"; //$NON-NLS-1$
 	private static final String POSITION_ATT_VALUE = "position"; //$NON-NLS-1$

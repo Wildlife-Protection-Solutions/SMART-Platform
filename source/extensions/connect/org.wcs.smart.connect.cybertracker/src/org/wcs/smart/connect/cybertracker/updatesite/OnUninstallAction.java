@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.connect.cybertracker.updatesite;
 
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -35,19 +39,47 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemoveConnectCtJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			SmartPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-
-	@Override
 	protected String getPluginId() {
 		return ConnectCtPlugIn.PLUGIN_ID;
 	}
+	
+	private static String[] TABLES = new String[]{
+		"CONNECT_ALERT", //$NON-NLS-1$
+		"connect_ct_properties", //$NON-NLS-1$
+	};
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			
+			session.beginTransaction();
+			try {
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				
+				//clear version
+				HibernateManager.setPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.RemoveConnectCtJob_UninstallError, e);
+					}
+				});
+				return;
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+			}
+		}
+	}
+
+
 
 }

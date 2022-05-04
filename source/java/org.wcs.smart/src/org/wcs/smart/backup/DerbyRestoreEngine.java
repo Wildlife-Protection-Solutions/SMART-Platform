@@ -26,7 +26,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +169,7 @@ public class DerbyRestoreEngine {
 	 */
 	public static void restoreSystem(Path backupFile, IProgressMonitor monitor)
 			throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 14);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 20);
 		if (!Files.exists(backupFile)) {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.normalize().toAbsolutePath().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -227,15 +226,9 @@ public class DerbyRestoreEngine {
 		}
 		
 		/* get database versions */
-		HashMap<String, String> versions = new HashMap<String, String>();
-		
+		Map<String, String> installedVersions = null;
 		try(Session s = HibernateManager.openSession()){
-			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
-			for (Object x : tmpversions){
-				String pluginid = (String) ((Object[])x)[0];
-				String version = (String) ((Object[])x)[1];
-				versions.put(pluginid, version);
-			}
+			installedVersions = UpgradeEngine.getVersions(s);
 		}
 		
 		/* shut down the database */
@@ -251,8 +244,9 @@ public class DerbyRestoreEngine {
 		//check to install all plugins in backup and also installed in current version
 		StringBuilder missingPlugins = new StringBuilder();
 			
+		Map<String,String> backupVersions = null;
 		try(Session s = HibernateManager.openSession()){
-			Map<String,String> backupVersions = UpgradeEngine.getVersions(s);
+			backupVersions = UpgradeEngine.getVersions(s);
 			
 			for (Entry<String, String[]> mapping : UpgradeEngine.getPluginMappings().entrySet()) {
 				String oldId = mapping.getKey();
@@ -272,7 +266,7 @@ public class DerbyRestoreEngine {
 					//these get remove in version 7.0 and up so we don't care if they exist
 					continue;
 				}
-				if (!versions.keySet().contains(pluginId)){
+				if (!installedVersions.keySet().contains(pluginId)){
 					missingPlugins.append(pluginId);
 					missingPlugins.append("\n"); //$NON-NLS-1$
 				}
@@ -285,15 +279,43 @@ public class DerbyRestoreEngine {
 			throw new Exception(Messages.DerbyRestoreEngine_MissingSystemPlugins + "\n\n" + missingPlugins.toString()); //$NON-NLS-1$
 		}
 		
+		
+        final StringBuilder sb = new StringBuilder();
+        for (String curPlugin : installedVersions.keySet()) {
+            if (backupVersions.containsKey(curPlugin)) {
+                String curV = installedVersions.get(curPlugin);
+                String backV = backupVersions.get(curPlugin);
+                if (!curV.equals(backV)) {
+                	sb.append(MessageFormat.format("The plugin {0} will be upgraded from {1} to {2}", curPlugin, backV, curV)); //$NON-NLS-1$
+                	sb.append("\n"); //$NON-NLS-1$
+                }
+            } else {
+            	sb.append(MessageFormat.format("The plugin {0} will be installed.", curPlugin)); //$NON-NLS-1$
+            	sb.append("\n"); //$NON-NLS-1$
+            }
+        }
+
+        if (sb.length() > 0) {
+        	SmartPlugIn.log(sb.toString(), null);
+//            Display.getDefault().syncExec(new Runnable(){
+//                @Override
+//                public void run() {
+//                    MessageDialog.openWarning(
+//                            Display.getDefault().getActiveShell(),
+//                            Messages.UpgradeEngine_Confirm_Title,
+//                            sb.toString());
+//                }
+//            });
+        }
+
 		/* Do the upgrade/restore */
 		String datastore = SmartContext.INSTANCE.getFilestoreLocation();
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		try{
 			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.normalize().toAbsolutePath().toString());
-			UpgradeEngine upgrader = new UpgradeEngine();
-			upgrader.upgradeSystem(progress.split(7), versions);
-			validateConfiguration(versions);
-			upgrader.postProcess(progress.split(1));
+			UpgradeEngine upgrader = new UpgradeEngine();			
+			upgrader.upgradeSystem(progress.split(15, SubMonitor.SUPPRESS_NONE));			
+			validateConfiguration(installedVersions);
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true, true);
 			String cleanUpErr = cleanUp(new Path[] { temp });
@@ -403,7 +425,7 @@ public class DerbyRestoreEngine {
 	 * 	@param versions the system plugins and associated versions
 	 * 	@throws Exception
  	*/
-	private static void validateConfiguration(HashMap<String, String> versions) throws Exception {
+	private static void validateConfiguration(Map<String, String> versions) throws Exception {
 		try(Session s = HibernateManager.openSession()){
 			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			List<String> missingFromBackup = new ArrayList<String>();

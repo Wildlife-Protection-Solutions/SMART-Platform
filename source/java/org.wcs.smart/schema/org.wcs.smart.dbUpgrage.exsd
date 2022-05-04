@@ -50,6 +50,11 @@
    </element>
 
    <element name="dbUpgrader">
+      <annotation>
+         <documentation>
+            An extension point for plugins to implement that upgrades the database to the required version.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="upgrader" type="string" use="required">
             <annotation>
@@ -72,6 +77,11 @@
    </element>
 
    <element name="coreUpgrader">
+      <annotation>
+         <documentation>
+            An extension point for the core plugins that allow them to add upgrades. Currently this is used by the birt report query plugin.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="upgrader" type="string" use="required">
             <annotation>

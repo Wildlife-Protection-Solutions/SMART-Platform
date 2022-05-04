@@ -173,5 +173,12 @@
             tooltip="%qafix.tool.tooltip">
       </modalTool>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            requires="org.wcs.smart"
+            upgrader="org.wcs.smart.qa.plugin.QaDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>

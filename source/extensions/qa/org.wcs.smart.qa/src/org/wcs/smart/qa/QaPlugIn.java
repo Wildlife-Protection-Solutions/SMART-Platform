@@ -43,12 +43,10 @@ public class QaPlugIn extends AbstractUIPlugin {
 	/**
 	 * Current database version
 	 */
-	public static final String DB_VERSION = "1.0"; //$NON-NLS-1$
-	/*
-	 * Version 1 of the database
-	 */
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2;
+
 	
 	// The shared instance
 	private static QaPlugIn plugin;

@@ -21,8 +21,13 @@
  */
 package org.wcs.smart.i2.patrol.plugin;
 
-import org.eclipse.core.runtime.jobs.Job;
+import java.text.MessageFormat;
+
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.patrol.PatrolProfilePlugIn;
+import org.wcs.smart.i2.patrol.internal.Messages;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -33,17 +38,44 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 public class OnUninstallAction extends UninstallProvisioningAction {
 
 	@Override
-	protected void performRemove() {
-		Job job = new RemovePluginJob();
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			PatrolProfilePlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-	}
-	@Override
 	protected String getPluginId() {
 		return PatrolProfilePlugIn.PLUGIN_ID;
+	}
+	
+	@Override
+	protected void performRemove() {
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				uninstall(session);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					PatrolProfilePlugIn.log(ex.getMessage(), ex);	
+				}
+				PatrolProfilePlugIn.displayLog(MessageFormat.format(Messages.RemovePluginJob_Error, e.getMessage()), e);
+				return;
+			}
+		}	
+	}
+	
+	
+	private void uninstall(Session session){
+		//to drop and the label tables (objects that extend NamedItem or NamedKeyItem)
+		String[] TABLES = new String[]{	
+			"i_patrol_record_motivation", //$NON-NLS-1$
+		};
+
+		//drop the tables
+		for (String table : TABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+			}
+		}		
+
+		//remove from plugin table
+		HibernateManager.setPlugInVersion(PatrolProfilePlugIn.PLUGIN_ID, null, session);
 	}
 }
