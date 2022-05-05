@@ -342,6 +342,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 				}
 
 				core.setVisible(false);
+				core.setRedraw(false);
 				for (Control kid : core.getChildren()) {
 					if (items.contains(kid.getData(NAMEKEY))){
 						kid.setVisible(true);
@@ -352,6 +353,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 					}
 				}
 				core.setVisible(true);
+				core.setRedraw(true);
 				core.setSize(core.computeSize(iconTable.getClientArea().width, SWT.DEFAULT));
 				iconTable.layout();		
 			}
@@ -366,7 +368,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 		core.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		scroll.setContent(core);
 		
-		
+		core.setRedraw(false);
 		core.setLayout(new RowLayout());
 		((RowLayout)core.getLayout()).wrap = true;
 		((RowLayout)core.getLayout()).marginWidth = 0;
@@ -377,38 +379,24 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 			
 			for (String path : icons) {
 				Composite outer = new Composite(core, SWT.NONE);
-				outer.setLayout(new GridLayout());
 				outer.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-				((GridLayout)outer.getLayout()).marginWidth = 4;
-				((GridLayout)outer.getLayout()).marginHeight = 4;
 				outer.setData(NAMEKEY, name);
 				outer.setLayoutData(new RowData());
 				((RowData)outer.getLayoutData()).exclude = false;
-				
-				Label l = new Label(outer, SWT.NONE);
-				l.setText(name);
-				l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-				l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				
-				Composite icon = new Composite(outer, SWT.NONE);
-				icon.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				icon.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-				((GridData)icon.getLayoutData()).widthHint = THUMB_SIZE;
-				((GridData)icon.getLayoutData()).heightHint = THUMB_SIZE;
+			
 				try {
-					icon.setData(PATH_KEY, new URL(path));
 					outer.setData(PATH_KEY, new URL(path));
-				}catch (Exception ex) {
-					ex.printStackTrace();
+				} catch (MalformedURLException e1) {
 				}
-				icon.addListener(SWT.Paint, e->{
+				outer.setToolTipText(name);
+				outer.addListener(SWT.Paint, e->{
 					Widget w = e.widget;
 
 					URL url = (URL) w.getData(PATH_KEY);
 					if (url != null) {
-						Image img = SmartUtils.getImage(url, THUMB_SIZE - 4);
+						Image img = SmartUtils.getImage(url, THUMB_SIZE);
 						try {
-							e.gc.drawImage((Image)img, 2, 2);
+							e.gc.drawImage((Image)img, 5, 5);
 						}finally {
 							img.dispose();
 						}
@@ -423,26 +411,11 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 				outer.addListener(SWT.MouseUp, itemListener);
 				outer.addListener(SWT.MouseDoubleClick, itemListener);
 				outer.setData(WIDGET_KEY, outer);
-				l.addListener(SWT.MouseEnter, itemListener);
-				l.addListener(SWT.MouseExit, itemListener);
-				l.addListener(SWT.MouseUp, itemListener);
-				l.addListener(SWT.MouseDoubleClick, itemListener);
-				l.setData(WIDGET_KEY, outer);
-				
-				icon.addListener(SWT.MouseEnter, itemListener);
-				icon.addListener(SWT.MouseExit, itemListener);
-				icon.addListener(SWT.MouseUp, itemListener);
-				icon.addListener(SWT.MouseDoubleClick, itemListener);
-				
-				icon.setData(WIDGET_KEY, outer);
-				
-				
-				
-			}
-			
+			}			
 		}
-		
+		core.setRedraw(true);
 		core.setSize(core.computeSize(iconTable.getClientArea().width, SWT.DEFAULT));
+		
 		iconTable.layout();
 	}
 	

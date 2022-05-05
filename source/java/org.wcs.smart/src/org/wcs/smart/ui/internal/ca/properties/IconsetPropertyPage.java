@@ -308,8 +308,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		tblIcons.getTable().addListener(SWT.MeasureItem, e->{
 			if (e.index >= 2) {
-				e.width = 50;
-				e.height = 50;
+				e.width = SIZE;
+				e.height = SIZE;
 			}
 		});
 		tblIcons.getTable().addListener(SWT.PaintItem, e->{
