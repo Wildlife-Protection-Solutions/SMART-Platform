@@ -29,7 +29,7 @@
 
         <java-version>11</java-version>
         <javafx-lib-version>11.0.2</javafx-lib-version>
-	<tycho-version>2.2.0</tycho-version>
+	<tycho-version>2.3.0</tycho-version>
         <!--<tycho-extras-version>1.3.0</tycho-extras-version>-->
         <tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
         
