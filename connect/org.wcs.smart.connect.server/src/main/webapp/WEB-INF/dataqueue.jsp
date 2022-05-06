@@ -8,6 +8,8 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dataqueue.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 	<title><fmt:message key="dataqueue.pagetitle"/></title>
 </head>
 
@@ -20,9 +22,14 @@
 		<div><div id="message" class="msgsection"></div></div>
 		
 		<div style="padding-top: 10px; padding-bottom: 10px">
-			<fmt:message key="dataqueue.cafilter"/><select id="cafilter" class="formtext"  onchange="filterChanged()" style="max-width:24em"></select>
-			<fmt:message key="dataqueue.statusfilter"/><select id="statusfilter" class="formtext"  onchange="filterChanged()" style="max-width:12em"></select>
-			<fmt:message key="dataqueue.typefilter"/><select id="typefilter" class="formtext"  onchange="filterChanged()" style="max-width:12em"></select>
+			<fmt:message key="dataqueue.cafilter"/> <select id="cafilter" class="formtext"  onchange="filterChanged()" style="max-width:24em; margin-left: 1px; margin-right:6px"></select>
+			<fmt:message key="dataqueue.statusfilter"/> <select id="statusfilter" class="formtext"  onchange="filterChanged()" style="max-width:12em; margin-left: 1px; margin-right:6px"></select>
+			<fmt:message key="dataqueue.typefilter"/> <select id="typefilter" class="formtext"  onchange="filterChanged()" style="max-width:12em; margin-left: 1px; margin-right:6px"></select>
+			<fmt:message key="dataqueue.uploadeddatefilter"/> 
+			<input id="datefilter" type="checkbox" onclick="updateDateFilterVisibility(); filterChanged();"/>
+			<input id="startdatefilter"  type="text" name="startdate" class="formtext" style="max-width:8em; margin-left: 1px; margin-right:1px;"/>
+			<fmt:message key="dataqueue.uploadeddatefilterto"/>
+		    <input id="enddatefilter" type="text" name="enddate" class="formtext" style="max-width:8em; margin-left: 1px; margin-right:1px;"/>
 		</div>
 		
 

@@ -5,6 +5,8 @@ var oReq;
 var lastSorted = "name";
 var files = "";
 
+var startDatePicker;
+var endDatePicker;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -29,6 +31,27 @@ window.onload = function(){
 
 	
 	refreshFileList();
+	
+	startDatePicker = new Pikaday({
+		format: 'YYYY-MM-DD',
+		field: document.getElementById('startdatefilter'),
+		firstDay: 1,
+        minDate: new Date('1950-01-01'),
+        yearRange: [1950,2050],
+        i18n: pickaday_i18n,
+        onSelect: filterChanged
+	});
+
+	endDatePicker = new Pikaday({
+		field: document.getElementById('enddatefilter'),
+		firstDay: 1,
+        minDate: new Date('1950-01-01'),
+        yearRange: [1950,2050],
+        i18n: pickaday_i18n,
+        onSelect: filterChanged
+	});
+	
+	updateDateFilterVisibility();
 }
 
 /*uploads the new file to the server API*/  
@@ -213,7 +236,8 @@ function createFilterTable(){
 		 		row.dataset.status = status;
 		 		row.dataset.type = type;
 		 		row.dataset.cauuid = caUuid;
-	
+				row.dataset.uploadeddate = files[i].uploadedDate;
+				
 		 		row.onclick = showFilePreview;
 
 		 		var checkbox = document.createElement("input");
@@ -334,6 +358,28 @@ function dynamicSort(property) {
     }
 }
 
+function updateDateFilterVisibility(){
+
+	if (document.getElementById('datefilter').checked == true){
+		document.getElementById('startdatefilter').style.color="black";
+		document.getElementById('startdatefilter').style.background="white";
+		document.getElementById('startdatefilter').disabled = false;
+		
+		document.getElementById('enddatefilter').style.color="black";
+		document.getElementById('enddatefilter').style.background="white";
+		document.getElementById('enddatefilter').disabled = false;
+	}else{
+		document.getElementById('startdatefilter').style.color="#bbbbbb";
+		document.getElementById('startdatefilter').style.background="#dddddd";
+		document.getElementById('startdatefilter').disabled = true;
+		
+		document.getElementById('enddatefilter').style.color="#bbbbbb";
+		document.getElementById('enddatefilter').style.background="#dddddd";
+		document.getElementById('enddatefilter').disabled = true;
+	}
+}
+
+
 function filterChanged(){
 
 	var ecafilter = document.getElementById('cafilter');
@@ -349,8 +395,22 @@ function filterChanged(){
 	if (statusfilter == "all") statusfilter = null;
 	if (typefilter == "all") typefilter = null;
 	
+	
+	var startDateFilter = null;
+	var endDateFilter = null;
+	
+	if (document.getElementById('datefilter').checked == true){
+		if(document.getElementById('startdatefilter').value != ""){
+			startDateFilter = new Date(document.getElementById('startdatefilter').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
+		}
+		if(document.getElementById('enddatefilter').value != ""){
+			endDateFilter = new Date(document.getElementById('enddatefilter').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
+		}
+	}
+	
+	
 	var etable = document.getElementById('fileTable');
-	rows = etable.getElementsByTagName("div");
+	rows = etable.children;
 	for (i = 0; i < rows.length; i++){
 		
 		var row = rows[i];
@@ -370,7 +430,14 @@ function filterChanged(){
 			bcaok = row.dataset.cauuid == null || (cafilter != null && row.dataset.cauuid != null && row.dataset.cauuid == cafilter);
 		}
 		
-		if (btypeok && bstatusok && bcaok){
+		var dateok = true;
+		if (startDateFilter != null && endDateFilter != null && row.dataset.uploadeddate != null){
+			var lm = new Date(row.dataset.uploadeddate);
+			var lmd = new Date(lm.getFullYear(), lm.getMonth(), lm.getDate());
+			dateok = (lmd >= startDateFilter && lmd <= endDateFilter );
+		}
+		
+		if (btypeok && bstatusok && bcaok && dateok){
 			row.style.display = "";
 		}else{
 			row.style.display = "none";
