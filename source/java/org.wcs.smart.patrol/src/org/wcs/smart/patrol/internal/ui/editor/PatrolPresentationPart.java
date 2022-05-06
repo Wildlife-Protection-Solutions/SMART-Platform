@@ -295,7 +295,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
 			}
 			if (p != null && p.equals(parentEditor.getPatrol())){
-				if (attributeChanged != PatrolEventManager.PATROL_WAYPOINTS) refresh();
+				if (attributeChanged == PatrolEventManager.PATROL_WAYPOINTS) refresh();
 			}
 		}
 	};

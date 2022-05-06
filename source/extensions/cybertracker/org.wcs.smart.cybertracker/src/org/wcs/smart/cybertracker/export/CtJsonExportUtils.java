@@ -98,7 +98,7 @@ public class CtJsonExportUtils {
 	 */
 	public static final String SMART_JSON_VERSION = 
 			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMajor() + "." + //$NON-NLS-1$
-			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMinor() + "." + //$NON-NLS-1$
+			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMinor() + 
 			CyberTrackerPlugIn.getDefault().getBundle().getVersion().getMicro();
 	
 	/**

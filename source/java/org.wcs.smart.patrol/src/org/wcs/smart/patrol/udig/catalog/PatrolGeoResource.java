@@ -69,7 +69,6 @@ public class PatrolGeoResource extends IGeoResource {
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
-		
 	}
 	
 	

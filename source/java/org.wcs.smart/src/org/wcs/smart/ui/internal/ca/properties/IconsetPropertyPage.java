@@ -133,6 +133,29 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	}
 	
 	@Override
+	public boolean close() {
+		if (isDirty) {
+			MessageDialog md = new MessageDialog(getShell(), Messages.IconsetPropertyPage_Closedialog, null, Messages.IconsetPropertyPage_CloseMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			int ret = md.open();
+			if (ret == 2){
+				//cancel
+				return false;
+			}else if (ret == 0){
+				//yes
+				if (!doSave()){
+					return false;
+				}else{
+					setReturnCode(IDialogConstants.OK_ID);
+				}
+			}
+		}else {
+			session.getTransaction().rollback();
+		}
+		session.close();
+		return super.close();
+	}
+	
+	@Override
 	protected void okPressed() {
 		doSave();		
 	}
@@ -148,30 +171,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			return false;
 		}
 	}
-	
-	@Override
-	protected void cancelPressed() {
-		if (isDirty) {
-			MessageDialog md = new MessageDialog(getShell(), Messages.IconsetPropertyPage_Closedialog, null, Messages.IconsetPropertyPage_CloseMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
-			int ret = md.open();
-			if (ret == 2){
-				//cancel
-				return;
-			}else if (ret == 0){
-				//yes
-				if (!doSave()){
-					return;
-				}else{
-					setReturnCode(IDialogConstants.OK_ID);
-				}
-			}
-		}else {
-			session.getTransaction().rollback();
-		}
-		session.close();
-		super.cancelPressed();
-	}
-	
+
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
@@ -308,8 +308,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		tblIcons.getTable().addListener(SWT.MeasureItem, e->{
 			if (e.index >= 2) {
-				e.width = 50;
-				e.height = 50;
+				e.width = SIZE;
+				e.height = SIZE;
 			}
 		});
 		tblIcons.getTable().addListener(SWT.PaintItem, e->{

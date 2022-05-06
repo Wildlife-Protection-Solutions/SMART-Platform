@@ -69,6 +69,10 @@ public class IconImporter {
 		return this.warnings;
 	}
 	
+	/**
+	 * 
+	 * @return all updated or new icons
+	 */
 	public List<Icon> getIcons(){
 		return this.icons;
 	}
