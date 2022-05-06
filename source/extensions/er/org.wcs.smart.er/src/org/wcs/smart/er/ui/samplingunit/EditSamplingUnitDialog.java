@@ -80,7 +80,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements ModifyListener, ISelectionChangedListener{
 
-	private Session session;
 	private SamplingUnit su;
 	
 	private Text txtType;
@@ -93,6 +92,7 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 	private HashMap<SamplingUnitAttribute, ControlDecoration> attribute2Error;
 	
 	private List<SamplingUnit> siblings;
+	
 	public EditSamplingUnitDialog(Shell parentShell, SamplingUnit su, List<SamplingUnit> siblings) {
 		super(parentShell);
 		this.siblings = siblings;
@@ -115,103 +115,99 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
+	
 	@Override
 	public void okPressed(){
 		if (validate()) return;
-		
-		session.beginTransaction();
 
-		try {
-			su.setId(txtId.getText().trim());
-			su.setState((State) ((IStructuredSelection) cmbState.getSelection())
-					.getFirstElement());
-
-			List<SamplingUnitAttributeValue> toDelete = new ArrayList<SamplingUnitAttributeValue>();
-			List<SamplingUnitAttributeValue> toAdd = new ArrayList<SamplingUnitAttributeValue>();
-			for (SamplingUnitAttribute sua : attribute2Control.keySet()) {
-				Object control = attribute2Control.get(sua);
-				
-				boolean isEmpty = false;
-				Object value = null;
-				if (sua.getType() == AttributeType.NUMERIC || 
-						sua.getType() == AttributeType.TEXT){
-					if (((Text)control).getText().trim().isEmpty()){
-						isEmpty = true;
-					}else{
-						value = ((Text)control).getText();
-					}
+		try (Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				su.setId(txtId.getText().trim());
+				su.setState((State) ((IStructuredSelection) cmbState.getSelection())
+						.getFirstElement());
+	
+				List<SamplingUnitAttributeValue> toDelete = new ArrayList<SamplingUnitAttributeValue>();
+				List<SamplingUnitAttributeValue> toAdd = new ArrayList<SamplingUnitAttributeValue>();
+				for (SamplingUnitAttribute sua : attribute2Control.keySet()) {
+					Object control = attribute2Control.get(sua);
 					
-				}else{
-					if (((ComboViewer)control).getSelection().isEmpty() || 
-						!(((StructuredSelection)((ComboViewer)control).getSelection()).getFirstElement() instanceof SamplingUnitAttributeListItem)){ 
-						isEmpty = true;
+					boolean isEmpty = false;
+					Object value = null;
+					if (sua.getType() == AttributeType.NUMERIC || 
+							sua.getType() == AttributeType.TEXT){
+						if (((Text)control).getText().trim().isEmpty()){
+							isEmpty = true;
+						}else{
+							value = ((Text)control).getText();
+						}
+						
 					}else{
-						value = ((StructuredSelection)(((ComboViewer)control).getSelection())).getFirstElement();
-					}
-				}
-				if (isEmpty) {
-					// remove
-					for (SamplingUnitAttributeValue suav : su.getAttributes()) {
-						if (suav.getSamplingUnitAttribute().equals(sua)) {
-							toDelete.add(suav);
-							break;
+						if (((ComboViewer)control).getSelection().isEmpty() || 
+							!(((StructuredSelection)((ComboViewer)control).getSelection()).getFirstElement() instanceof SamplingUnitAttributeListItem)){ 
+							isEmpty = true;
+						}else{
+							value = ((StructuredSelection)(((ComboViewer)control).getSelection())).getFirstElement();
 						}
 					}
-				} else {
-					SamplingUnitAttributeValue toUpdate = null;
-					for (SamplingUnitAttributeValue suav : su.getAttributes()) {
-						if (suav.getSamplingUnitAttribute().equals(sua)) {
-							toUpdate = suav;
+					if (isEmpty) {
+						// remove
+						for (SamplingUnitAttributeValue suav : su.getAttributes()) {
+							if (suav.getSamplingUnitAttribute().equals(sua)) {
+								toDelete.add(suav);
+								break;
+							}
 						}
+					} else {
+						SamplingUnitAttributeValue toUpdate = null;
+						for (SamplingUnitAttributeValue suav : su.getAttributes()) {
+							if (suav.getSamplingUnitAttribute().equals(sua)) {
+								toUpdate = suav;
+							}
+						}
+	
+						if (toUpdate == null) {
+							toUpdate = new SamplingUnitAttributeValue();
+							toUpdate.setSamplingUnit(su);
+							toUpdate.setSamplingUnitAttribute(sua);
+							toAdd.add(toUpdate);
+						}
+	
+						if (sua.getType() == AttributeType.TEXT) {
+							toUpdate.setStringValue(((String)value));
+							toUpdate.setNumberValue(null);
+							toUpdate.setAttributeListItem(null);
+						} else if (sua.getType() == AttributeType.NUMERIC) {
+							toUpdate.setNumberValue(Double.valueOf((String)value));
+							toUpdate.setStringValue(null);
+							toUpdate.setAttributeListItem(null);
+						} else if (sua.getType() == AttributeType.LIST){
+							toUpdate.setAttributeListItem((SamplingUnitAttributeListItem)value);
+							toUpdate.setNumberValue( null );
+							toUpdate.setStringValue( null );
+						}
+	
 					}
-
-					if (toUpdate == null) {
-						toUpdate = new SamplingUnitAttributeValue();
-						toUpdate.setSamplingUnit(su);
-						toUpdate.setSamplingUnitAttribute(sua);
-						toAdd.add(toUpdate);
-					}
-
-					if (sua.getType() == AttributeType.TEXT) {
-						toUpdate.setStringValue(((String)value));
-						toUpdate.setNumberValue(null);
-						toUpdate.setAttributeListItem(null);
-					} else if (sua.getType() == AttributeType.NUMERIC) {
-						toUpdate.setNumberValue(Double.valueOf((String)value));
-						toUpdate.setStringValue(null);
-						toUpdate.setAttributeListItem(null);
-					} else if (sua.getType() == AttributeType.LIST){
-						toUpdate.setAttributeListItem((SamplingUnitAttributeListItem)value);
-						toUpdate.setNumberValue( null );
-						toUpdate.setStringValue( null );
-					}
-
 				}
-			}
-			for (SamplingUnitAttributeValue a : toDelete) {
-				a.setId(null);
-			}
-			su.getAttributes().removeAll(toDelete);
-			su.getAttributes().addAll(toAdd);
-			session.getTransaction().commit();
-		
-			//close so event handlers can open their own
-			session.close();
+				for (SamplingUnitAttributeValue a : toDelete) {
+					a.setId(null);
+				}
+				su.getAttributes().removeAll(toDelete);
+				su.getAttributes().addAll(toAdd);
+				session.saveOrUpdate(su);
+				session.getTransaction().commit();
 			
-			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, su.getSurveyDesign());
-			
-			super.okPressed();
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog(
+			}catch (Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				EcologicalRecordsPlugIn.displayLog(
 					MessageFormat.format(Messages.EditSamplingUnitDialog_ErrorSavingChanges, new Object[]{su.getId()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			if (session.isOpen() && session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-		}finally{
-			if (session.isOpen()){
-				session.close();
+				return;
 			}
 		}
+		
+		SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, su.getSurveyDesign());
+		
+		super.okPressed();
 	}
 
 	
@@ -219,122 +215,122 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 	public Composite createDialogArea(Composite parent){
 		parent = (Composite) super.createDialogArea(parent);
 		
-		session = HibernateManager.openSession();
-		this.su = (SamplingUnit) session.load(SamplingUnit.class, su.getUuid());
-
-		ScrolledComposite sc = new ScrolledComposite(parent, SWT.V_SCROLL);
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Composite comp = new Composite(sc, SWT.NONE);
-		comp.setLayout(new GridLayout(2, false));
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		sc.setContent(comp);
-		
-		Label l = new Label(comp, SWT.NONE);
-		l.setText(Messages.EditSamplingUnitDialog_TypeLabel);
-		
-		txtType = new Text(comp, SWT.BORDER);
-		txtType.setEnabled(false);
-		txtType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		l = new Label(comp, SWT.NONE);
-		l.setText(Messages.EditSamplingUnitDialog_StateLabel);
-		
-		cmbState = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbState.setContentProvider(ArrayContentProvider.getInstance());
-		cmbState.setLabelProvider(new LabelProvider(){
-			public String getText(Object element){
-				if (element instanceof SamplingUnit.State){
-					return ((SamplingUnit.State) element).getGuiName(Locale.getDefault());
-				}
-				return super.getText(element);
-			}
-		});
-		cmbState.setInput(SamplingUnit.State.values());
-		cmbState.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		l = new Label(comp, SWT.NONE);
-		l.setText(Messages.EditSamplingUnitDialog_IdLabel);
-		
-		txtId = new Text(comp, SWT.BORDER);
-		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		cdId = createDecoration(txtId);
-		cdId.hide();
-		txtId.addModifyListener(this);
-		
-		l = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		List<SurveyDesignSamplingUnitAttribute> attributes = new ArrayList<SurveyDesignSamplingUnitAttribute>();
-		attributes.addAll(su.getSurveyDesign().getSamplingUnitAttributes());
-		Collections.sort(attributes, new Comparator<SurveyDesignSamplingUnitAttribute>() {
-			@Override
-			public int compare(SurveyDesignSamplingUnitAttribute arg0,
-					SurveyDesignSamplingUnitAttribute arg1) {
-				return Collator.getInstance().compare(arg0.getSamplingUnitAttribute().getName(),
-						arg1.getSamplingUnitAttribute().getName());
-			}
-		});
+		try(Session session = HibernateManager.openSession()){
+			this.su = (SamplingUnit) session.load(SamplingUnit.class, su.getUuid());
 	
-		attribute2Control = new HashMap<SamplingUnitAttribute, Object>();
-		attribute2Error = new HashMap<SamplingUnitAttribute, ControlDecoration>();
-		
-		for (SurveyDesignSamplingUnitAttribute a : attributes){
+			ScrolledComposite sc = new ScrolledComposite(parent, SWT.V_SCROLL);
+			sc.setExpandHorizontal(true);
+			sc.setExpandVertical(true);
+			sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite comp = new Composite(sc, SWT.NONE);
+			comp.setLayout(new GridLayout(2, false));
+			comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			sc.setContent(comp);
+			
+			Label l = new Label(comp, SWT.NONE);
+			l.setText(Messages.EditSamplingUnitDialog_TypeLabel);
+			
+			txtType = new Text(comp, SWT.BORDER);
+			txtType.setEnabled(false);
+			txtType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			
 			l = new Label(comp, SWT.NONE);
-			l.setText(a.getSamplingUnitAttribute().getName() + ":"); //$NON-NLS-1$
+			l.setText(Messages.EditSamplingUnitDialog_StateLabel);
 			
-			if (a.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC ||
-					a.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-				final Text txtAttribute = new Text(comp, SWT.BORDER);
-				txtAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-				txtAttribute.addModifyListener(this);
-				txtAttribute.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
-				final ControlDecoration cd = createDecoration(txtAttribute);
-				cd.hide();
+			cmbState = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbState.setContentProvider(ArrayContentProvider.getInstance());
+			cmbState.setLabelProvider(new LabelProvider(){
+				public String getText(Object element){
+					if (element instanceof SamplingUnit.State){
+						return ((SamplingUnit.State) element).getGuiName(Locale.getDefault());
+					}
+					return super.getText(element);
+				}
+			});
+			cmbState.setInput(SamplingUnit.State.values());
+			cmbState.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
-				attribute2Control.put(a.getSamplingUnitAttribute(), txtAttribute);
-				attribute2Error.put(a.getSamplingUnitAttribute(), cd);
-			}else if (a.getSamplingUnitAttribute().getType() == AttributeType.LIST){
-				ComboViewer lstViewer = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
-				lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-				lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-				lstViewer.setLabelProvider(SamplingUnitLabelProvider.INSTANCE);
-				List<Object> values = new ArrayList<Object>();
-				values.add(""); //$NON-NLS-1$
-				values.addAll(a.getSamplingUnitAttribute().getAttributeList());
-				lstViewer.setInput(values);
-				lstViewer.addSelectionChangedListener(this);
+			l = new Label(comp, SWT.NONE);
+			l.setText(Messages.EditSamplingUnitDialog_IdLabel);
+			
+			txtId = new Text(comp, SWT.BORDER);
+			txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			cdId = createDecoration(txtId);
+			cdId.hide();
+			txtId.addModifyListener(this);
+			
+			l = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			List<SurveyDesignSamplingUnitAttribute> attributes = new ArrayList<SurveyDesignSamplingUnitAttribute>();
+			attributes.addAll(su.getSurveyDesign().getSamplingUnitAttributes());
+			Collections.sort(attributes, new Comparator<SurveyDesignSamplingUnitAttribute>() {
+				@Override
+				public int compare(SurveyDesignSamplingUnitAttribute arg0,
+						SurveyDesignSamplingUnitAttribute arg1) {
+					return Collator.getInstance().compare(arg0.getSamplingUnitAttribute().getName(),
+							arg1.getSamplingUnitAttribute().getName());
+				}
+			});
+		
+			attribute2Control = new HashMap<SamplingUnitAttribute, Object>();
+			attribute2Error = new HashMap<SamplingUnitAttribute, ControlDecoration>();
+			
+			for (SurveyDesignSamplingUnitAttribute a : attributes){
+				l = new Label(comp, SWT.NONE);
+				l.setText(a.getSamplingUnitAttribute().getName() + ":"); //$NON-NLS-1$
 				
-				attribute2Control.put(a.getSamplingUnitAttribute(), lstViewer);
-			}
-		}
-		
-		txtType.setText(su.getType().getGuiName(Locale.getDefault()));
-		cmbState.setSelection(new StructuredSelection(su.getState()));
-		txtId.setText(su.getId());
-		
-		for(SamplingUnitAttributeValue v : su.getAttributes()){
-			Object control = attribute2Control.get(v.getSamplingUnitAttribute()); 
-			if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-				((Text)control).setText(v.getStringValue());
-			}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-				((Text)control).setText(v.getNumberValue().toString());
-			}else if (v.getSamplingUnitAttribute().getType() == AttributeType.LIST){
-				if (v.getSamplingUnitAttribute() != null){
-					((ComboViewer)control).setSelection(new StructuredSelection(v.getAttributeListItem()));
+				if (a.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC ||
+						a.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+					final Text txtAttribute = new Text(comp, SWT.BORDER);
+					txtAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					txtAttribute.addModifyListener(this);
+					txtAttribute.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
+					final ControlDecoration cd = createDecoration(txtAttribute);
+					cd.hide();
+				
+					attribute2Control.put(a.getSamplingUnitAttribute(), txtAttribute);
+					attribute2Error.put(a.getSamplingUnitAttribute(), cd);
+				}else if (a.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+					ComboViewer lstViewer = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+					lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					lstViewer.setContentProvider(ArrayContentProvider.getInstance());
+					lstViewer.setLabelProvider(SamplingUnitLabelProvider.INSTANCE);
+					List<Object> values = new ArrayList<Object>();
+					values.add(""); //$NON-NLS-1$
+					values.addAll(a.getSamplingUnitAttribute().getAttributeList());
+					lstViewer.setInput(values);
+					lstViewer.addSelectionChangedListener(this);
+					
+					attribute2Control.put(a.getSamplingUnitAttribute(), lstViewer);
 				}
 			}
+			
+			txtType.setText(su.getType().getGuiName(Locale.getDefault()));
+			cmbState.setSelection(new StructuredSelection(su.getState()));
+			txtId.setText(su.getId());
+			
+			for(SamplingUnitAttributeValue v : su.getAttributes()){
+				Object control = attribute2Control.get(v.getSamplingUnitAttribute()); 
+				if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+					((Text)control).setText(v.getStringValue());
+				}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+					((Text)control).setText(v.getNumberValue().toString());
+				}else if (v.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+					if (v.getSamplingUnitAttribute() != null){
+						((ComboViewer)control).setSelection(new StructuredSelection(v.getAttributeListItem()));
+					}
+				}
+			}
+			
+			sc.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			
+			getShell().setText(Messages.EditSamplingUnitDialog_ShellTitle);
+			setTitle(Messages.EditSamplingUnitDialog_Title + su.getId());
+			setMessage(Messages.EditSamplingUnitDialog_Message);
 		}
-		
-		sc.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		getShell().setText(Messages.EditSamplingUnitDialog_ShellTitle);
-		setTitle(Messages.EditSamplingUnitDialog_Title + su.getId());
-		setMessage(Messages.EditSamplingUnitDialog_Message);
-		
 		return parent;
 	}
 	

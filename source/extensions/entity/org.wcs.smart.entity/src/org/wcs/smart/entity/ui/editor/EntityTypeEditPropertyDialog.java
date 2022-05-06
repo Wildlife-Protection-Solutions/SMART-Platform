@@ -105,6 +105,14 @@ public class EntityTypeEditPropertyDialog extends SmartStyledTitleDialog{
 	public boolean isResizable(){
 		return true;
 	}
+	
+	@Override
+	public boolean close() {
+		if (session.getTransaction().isActive()) session.getTransaction().rollback();
+		session.close();
+		
+		return super.close();
+	}
 
 	@Override
 	protected void okPressed() {
@@ -119,13 +127,4 @@ public class EntityTypeEditPropertyDialog extends SmartStyledTitleDialog{
 		}
 		super.okPressed();
 	}
-	
-	@Override
-	protected void cancelPressed() {
-		session.getTransaction().rollback();
-		session.close();
-		
-		super.cancelPressed();
-	}
-
 }

@@ -348,8 +348,14 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 			handleExport(btnToDevice.getSelection());
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
-		if (session.isOpen()) session.close();
+		
 		close();
+	}
+	
+	@Override
+	public boolean close() {
+		if (session.isOpen()) session.close();
+		return super.close();
 	}
 
 	private Path getOutputFile() {
