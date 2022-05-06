@@ -239,6 +239,8 @@ public class ResizeAttachmentDialog extends SmartStyledTitleDialog {
 		ImageResizeProcessor pp = new ImageResizeProcessor(srcs, maxSize, width, height);
 		ProcessingStatusDialog dialog = new ProcessingStatusDialog(getShell(), pp);
 		dialog.open();
+		
+		super.close();
 	}
 	
 	@Override
