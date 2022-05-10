@@ -8,7 +8,7 @@ echo %outputlocation%
 MKDIR %outputlocation%
 
 REM run maven to build packages
-call mvn clean install -Pallplatforms,core,plugins,utils,migrationtools,languagepacks
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils,migrationtools,languagepacks
 REM call mvn install -Pallplatforms,migrationtools
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip

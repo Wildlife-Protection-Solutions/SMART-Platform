@@ -269,9 +269,21 @@
 			</build>
 		</profile>
 		<profile>
+			<id>update</id>
+			<modules>
+				<module>org.wcs.smart.updatesite</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>product</id>
+			<modules>
+				<module>org.wcs.smart.updatesite</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>core</id>
 			<modules>
-				<module>org.wcs.smart-product</module>
+				<!--<module>org.wcs.smart-product</module>-->
 				<module>org.wcs.smart.hibernate.libs</module>
 				<module>org.wcs.smart</module>
 				
@@ -282,7 +294,6 @@
 				<module>org.wcs.smart.udig-feature</module>
 				<module>org.wcs.smart.target</module>
 				<module>org.wcs.smart.p2</module>
-				<module>org.wcs.smart.dom.events</module>
 				<module>org.wcs.smart.udig.catalog.image.auxxml</module>
         			<module>org.wcs.smart.udig.customization</module>
         			<module>org.wcs.smart.birt</module>
@@ -599,6 +610,10 @@
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.feature</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er.feature</module>
+				
+				<module>../extensions/imageprocessor/org.wcs.smart.imageprocessor</module>
+				<module>../extensions/imageprocessor/org.wcs.smart.imageprocessor.feature</module>
+
 			</modules>
 		</profile>
 		<profile>
