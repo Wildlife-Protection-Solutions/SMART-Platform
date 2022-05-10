@@ -217,7 +217,8 @@ public class PatrolLegDayInputComposite {
 				}
 				//link it back into the main patrol editor object
 				for (PatrolLeg pl : editor.getPatrolEditor().getPatrol().getLegs()) {
-					int index = pl.getPatrolLegDays().indexOf(pld);
+					int index = pl.getPatrolLegDays().indexOf(pld); 
+					if (index < 0) continue;
 					pld.setPatrolLeg(pl);
 					pl.getPatrolLegDays().set(index, pld);
 					
