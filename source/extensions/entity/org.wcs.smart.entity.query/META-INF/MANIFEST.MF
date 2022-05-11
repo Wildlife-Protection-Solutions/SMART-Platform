@@ -17,3 +17,4 @@ Export-Package: org.wcs.smart.entity.query.engine,
  org.wcs.smart.entity.query.model,
  org.wcs.smart.entity.query.model.type
 Automatic-Module-Name: org.wcs.smart.entity.query
+Bundle-Vendor: org.wcs.smart
