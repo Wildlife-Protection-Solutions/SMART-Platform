@@ -1,66 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.wcs.smart.plan.feature" >
+   <feature id="org.wcs.smart.plan.feature">
       <category name="planning"/>
    </feature>
-   <feature id="org.wcs.smart.independentincident.feature" >
+   <feature id="org.wcs.smart.independentincident.feature">
       <category name="independentincident"/>
    </feature>
-   <feature id="org.wcs.smart.entity.feature" >
+   <feature id="org.wcs.smart.entity.feature">
       <category name="entity"/>
    </feature>
-   <feature id="org.wcs.smart.cybertracker.patrol.feature" >
+   <feature id="org.wcs.smart.cybertracker.patrol.feature">
       <category name="smartmobile"/>
    </feature>
-   <feature id="org.wcs.smart.cybertracker.survey.feature" >
+   <feature id="org.wcs.smart.cybertracker.survey.feature">
       <category name="smartmobile"/>
    </feature>
-   <feature id="org.wcs.smart.i2.feature" >
+   <feature id="org.wcs.smart.i2.feature">
       <category name="profiles"/>
    </feature>
-   <feature id="org.wcs.smart.er.feature" >
+   <feature id="org.wcs.smart.er.feature">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature id="org.wcs.smart.connect.dataqueue.er.feature" >
+   <feature id="org.wcs.smart.connect.dataqueue.er.feature">
       <category name="connectdq"/>
    </feature>
-   <feature id="org.wcs.smart.connect.dataqueue.feature" >
+   <feature id="org.wcs.smart.connect.dataqueue.feature">
       <category name="connectdq"/>
    </feature>
-   <feature id="org.wcs.smart.connect.dataqueue.independentincident.feature" >
+   <feature id="org.wcs.smart.connect.dataqueue.independentincident.feature">
       <category name="connectdq"/>
    </feature>
-   <feature id="org.wcs.smart.connect.feature" >
+   <feature id="org.wcs.smart.connect.feature">
       <category name="connect"/>
    </feature>
-   <feature id="org.wcs.smart.connect.cybertracker.feature" >
+   <feature id="org.wcs.smart.connect.cybertracker.feature">
       <category name="connect"/>
    </feature>
-   <feature id="org.wcs.smart.connect.dataqueue.cybertracker.feature" >
+   <feature id="org.wcs.smart.connect.dataqueue.cybertracker.feature">
       <category name="connectdq"/>
    </feature>
-   <feature id="org.wcs.smart.connect.dataqueue.i2.feature" >
+   <feature id="org.wcs.smart.connect.dataqueue.i2.feature">
       <category name="connectdq"/>
    </feature>
-   <feature id="org.wcs.smart.asset.feature" >
+   <feature id="org.wcs.smart.asset.feature">
       <category name="asset"/>
    </feature>
-   <feature id="org.wcs.smart.event.i2.feature" >
+   <feature id="org.wcs.smart.event.i2.feature">
       <category name="events"/>
    </feature>
-   <feature id="org.wcs.smart.r.feature" >
+   <feature id="org.wcs.smart.r.feature">
       <category name="r"/>
    </feature>
-   <feature id="org.wcs.smart.cybertracker.incident.feature" >
+   <feature id="org.wcs.smart.cybertracker.incident.feature">
       <category name="smartmobile"/>
    </feature>
-   <feature id="org.wcs.smart.cybertracker.plan.feature" >
+   <feature id="org.wcs.smart.cybertracker.plan.feature">
       <category name="smartmobile"/>
    </feature>
-   <feature id="org.wcs.smart.event.feature" >
+   <feature id="org.wcs.smart.event.feature">
       <category name="events"/>
    </feature>
-   <feature id="org.wcs.smart.cybertracker.feature" >
+   <feature id="org.wcs.smart.cybertracker.feature">
       <category name="smartmobile"/>
    </feature>
    <feature id="org.wcs.smart.independentincident.feature.nl">
@@ -117,7 +117,7 @@
    <feature id="org.wcs.smart.event.feature.nl">
       <category name="events"/>
    </feature>
-   <feature id="org.wcs.smart.event.i2.feature.nl" >
+   <feature id="org.wcs.smart.event.i2.feature.nl">
       <category name="events"/>
    </feature>
    <feature id="org.wcs.smart.r.feature.nl">
@@ -131,6 +131,12 @@
    </feature>
    <feature id="org.wcs.smart.plan.feature.nl">
       <category name="planning"/>
+   </feature>
+   <feature id="org.wcs.smart.imageprocessor.feature">
+      <category name="image_resize"/>
+   </feature>
+   <feature id="org.wcs.smart.feature">
+      <category name="smart"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
@@ -193,4 +199,10 @@
       </description>
    </category-def>
    <category-def name="smartcollect" label="SMART Collect"/>
+   <category-def name="image_resize" label="Image Resize Tools"/>
+   <category-def name="smart" label="SMART Core Updates">
+      <description>
+         Updates to SMART core application.
+      </description>
+   </category-def>
 </site>
