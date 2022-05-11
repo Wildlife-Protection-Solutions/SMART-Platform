@@ -53,8 +53,7 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
 
-		
-		
+		SmartPlugIn.log("Running uninstall action: " + getPluginId(), null); //$NON-NLS-1$
 		IInstallableUnit upgradeTo = null;
 		Object operand = parameters.get("operand"); //$NON-NLS-1$
 		try {
