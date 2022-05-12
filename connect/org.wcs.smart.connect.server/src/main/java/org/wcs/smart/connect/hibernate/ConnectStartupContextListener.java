@@ -372,7 +372,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-
+		
 	    //this is required to get the geotiff writer to work when writing raster map layers
 		//for reports
 	    IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());

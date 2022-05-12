@@ -47,7 +47,6 @@ public class SmartConnectExceptionMapper implements ExceptionMapper<SmartConnect
 			ObjectMapper mapper = new ObjectMapper();
 			StringBuilder sb = new StringBuilder();
 			sb.append("{ \"status\": " + ex.getResponseCode()); //$NON-NLS-1$
-
 			sb.append(",\"error\": "); //$NON-NLS-1$
 			try {
 				sb.append(mapper.writeValueAsString(ex.getMessage()));

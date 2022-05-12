@@ -103,7 +103,7 @@ public class HtmlStreamingExporter extends AbstractQueryExporter{
 		htmlText.append("table { border-collapse: collapse; width: 50%; } th, td { text-align: left; padding: 8px; } tr:nth-child(even){background-color: #f2f2f2}");
 		htmlText.append("tr:hover {background-color: #e2f4ff;}");
 		htmlText.append("</style>");
-		htmlText.append("<link rel = stylesheet type = text/css href = smart.css>");
+//		htmlText.append("<link rel = stylesheet type = text/css href = smart.css>");
 		htmlText.append("<title>" + queryName + "</title>");
 		htmlText.append("</head>");
 		htmlText.append("<body>");

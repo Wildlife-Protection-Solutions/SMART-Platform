@@ -48,6 +48,7 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 
@@ -119,11 +120,10 @@ public enum ChangeLogManager {
 	 * Area).  Other Conservation Area modifications will still be written.
 	 * Also disables the filestore watcher for the Conservation Area.
 	 * 
-	 * 
-	 * 
 	 */
+	//ca.getuuid must be the uuid with -'s removed
 	public void disableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
-		session.createNativeQuery("SET  \"ca.trigger.t" + ca.getUuid().toString() + "\" = false ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeQuery("SET  \"ca.trigger.t" + UuidUtils.uuidToString(ca.getUuid()) + "\" = false ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		fileWatcher.ignoreCa(ca);
 	}
 	
@@ -133,8 +133,9 @@ public enum ChangeLogManager {
 	 * Also re-enabled the filestore watcher for the Conservation Area
 	 *  
 	 */
+	//ca.getuuid must be the uuid with -'s removed
 	public void enableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
-		session.createNativeQuery("SET  \"ca.trigger.t" + ca.getUuid().toString() + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeQuery("SET  \"ca.trigger.t" +UuidUtils.uuidToString(ca.getUuid()) + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		fileWatcher.addCa(ca);
 	}
 	

@@ -47,9 +47,8 @@ import javax.ws.rs.core.Response;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.filter.AlertFilter;
@@ -821,85 +820,87 @@ public class ConnectAlert extends HttpServlet {
     //It was easier to duplicate the data since it is being drawn directly. 
     //Otherwise the javascript would have to process the data etc, which didn't work well with leaflet.
     
-    private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
-    	 JSONObject featureCollection = new JSONObject();
-    	    try {
-    	        featureCollection.put("type", "FeatureCollection"); //$NON-NLS-1$ //$NON-NLS-2$
-    	        JSONArray featureList = new JSONArray();
+    @SuppressWarnings("unchecked")
+	private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
+		JSONObject featureCollection = new JSONObject();
 
-    	        for (Alert obj : list) {
-    	            // {"geometry": {"type": "Point", "coordinates": [-94.149, 36.33]}
-    	            JSONObject point = new JSONObject();
-    	            point.put("type", "Point"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            // construct a JSONArray from a string; can also use an array or list
-    	            JSONArray coord = new JSONArray("["+obj.getX()+","+obj.getY()+"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    	            point.put("coordinates", coord); //$NON-NLS-1$
-    	            JSONObject feature = new JSONObject();
-    	            feature.put("geometry", point); //$NON-NLS-1$
-    	            
-    	            JSONObject properties = new JSONObject();
-    	            properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
-    	            if (obj.getCa() != null) {
-    	            	properties.put("cauuid", obj.getCa().getUuid()); //$NON-NLS-1$
-    	            }else {
-    	            	properties.put("cauuid", (String)null); //$NON-NLS-1$
-    	            }
-    	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
-    	            //date is expected to look like: //29 Sep 2020 16:29:54 GMT
-    	            properties.put("date", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
-    	            //properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
-    	            properties.put("desc", obj.getDescription()); //$NON-NLS-1$
-    	            properties.put("level", obj.getLevel()); //$NON-NLS-1$
-    	            properties.put("status", obj.getStatus().getGuiName(SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-    	            properties.put("typeuuid", obj.getTypeUuid()); //$NON-NLS-1$
+		featureCollection.put("type", "FeatureCollection"); //$NON-NLS-1$ //$NON-NLS-2$
+		JSONArray featureList = new JSONArray();
 
-    	            AlertType type = HibernateManager.getAlertTypeIncludeUnknown(s, obj.getTypeUuid());
-    	    		properties.put("type", type.getLabel()); //$NON-NLS-1$
-    	            
-    	            properties.put("id", obj.getUserGeneratedId()); //$NON-NLS-1$
-    	            properties.put("x", obj.getX()); //$NON-NLS-1$
-    	            properties.put("y", obj.getY()); //$NON-NLS-1$
-    	
-    	    		//add ca name/label and type label
-    	    		if (obj.getCa() != null) {
-	    	    		ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, obj.getCa().getUuid());
-	    	    		if(ca != null){
-	    	    			properties.put("caname", ca.getLabel()); //$NON-NLS-1$
-	    	    		}else{
-	    	    			properties.put("caname", ""); //$NON-NLS-1$ //$NON-NLS-2$
-	    	    		}
-    	    		}
-    	    		
+		for (Alert obj : list) {
+			// {"geometry": {"type": "Point", "coordinates": [-94.149, 36.33]}
+			JSONObject point = new JSONObject();
+			point.put("type", "Point"); //$NON-NLS-1$ //$NON-NLS-2$
+			// construct a JSONArray from a string; can also use an array or list
+			JSONArray coord = new JSONArray();
+			coord.add(obj.getX());
+			coord.add(obj.getY()); // $NON-NLS-1$ 
+			point.put("coordinates", coord); //$NON-NLS-1$
+			JSONObject feature = new JSONObject();
+			feature.put("geometry", point); //$NON-NLS-1$
 
-    	            feature.put("properties", properties); //$NON-NLS-1$
-    	            feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            featureList.put(feature);
-    	            
-    	            //the Track feature
-    	            JSONObject propertiesTrack = new JSONObject();
-    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
-    	            propertiesTrack.put("date", obj.getDate() ); //$NON-NLS-1$
-    	            //propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
-    	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
-    	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
-    	            JSONObject line = new JSONObject();
-	    	            
-    	            JSONArray a = new JSONArray(obj.getTrack());
-    	            line.put("coordinates", a); //$NON-NLS-1$
-    	            line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            JSONObject featureTrack = new JSONObject();
-    	            featureTrack.put("geometry", line); //$NON-NLS-1$
-    	            featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
-    	            featureList.put(featureTrack);
+			JSONObject properties = new JSONObject();
+			properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
+			if (obj.getCa() != null) {
+				properties.put("cauuid", obj.getCa().getUuid()); //$NON-NLS-1$
+			} else {
+				properties.put("cauuid", (String) null); //$NON-NLS-1$
+			}
+			properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
+			// date is expected to look like: //29 Sep 2020 16:29:54 GMT
+			properties.put("date", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
+			// properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
+			properties.put("desc", obj.getDescription()); //$NON-NLS-1$
+			properties.put("level", obj.getLevel()); //$NON-NLS-1$
+			properties.put("status", obj.getStatus().getGuiName(SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			properties.put("typeuuid", obj.getTypeUuid()); //$NON-NLS-1$
 
-    	        }
-    	        featureCollection.put("features", featureList); //$NON-NLS-1$
-    	        
-    	    } catch (JSONException e) {
-    	    	throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectAlert.ConvertError", SmartUtils.getRequestLocale(request))+e.toString()); //$NON-NLS-1$
-    	    }
+			AlertType type = HibernateManager.getAlertTypeIncludeUnknown(s, obj.getTypeUuid());
+			properties.put("type", type.getLabel()); //$NON-NLS-1$
+
+			properties.put("id", obj.getUserGeneratedId()); //$NON-NLS-1$
+			properties.put("x", obj.getX()); //$NON-NLS-1$
+			properties.put("y", obj.getY()); //$NON-NLS-1$
+
+			// add ca name/label and type label
+			if (obj.getCa() != null) {
+				ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class,
+						obj.getCa().getUuid());
+				if (ca != null) {
+					properties.put("caname", ca.getLabel()); //$NON-NLS-1$
+				} else {
+					properties.put("caname", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+
+			feature.put("properties", properties); //$NON-NLS-1$
+			feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+			featureList.add(feature);
+
+			// the Track feature
+			JSONObject propertiesTrack = new JSONObject();
+			propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
+			propertiesTrack.put("typeuuid", obj.getTypeUuid()); // need these to draw the right colors and //$NON-NLS-1$
+																// popups
+			propertiesTrack.put("date", obj.getDate()); //$NON-NLS-1$
+			// propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
+			propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
+			propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
+			JSONObject line = new JSONObject();
+
+			JSONArray a = new JSONArray();
+			a.add(obj.getTrack());
+			line.put("coordinates", a); //$NON-NLS-1$
+			line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
+			JSONObject featureTrack = new JSONObject();
+			featureTrack.put("geometry", line); //$NON-NLS-1$
+			featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+			featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
+			featureList.add(featureTrack);
+
+		}
+		featureCollection.put("features", featureList); //$NON-NLS-1$
+
     	 return featureCollection;
     }
 

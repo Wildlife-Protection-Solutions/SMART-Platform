@@ -31,8 +31,8 @@ import java.util.UUID;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor.IncidentLinkDataType;
@@ -141,11 +141,12 @@ public class CustomIncidentQueryEngine extends CustomQueryEngine {
 	public JSONArray convertToJSON(List<Waypoint> pws, Session session) {
 		JSONArray items = new JSONArray(); 
 		for(Waypoint pw : pws) {
-			items.put(convertToJSON(pw, session));
+			items.add(convertToJSON(pw, session));
 		}
 		return items;
 		
 	}
+	@SuppressWarnings("unchecked")
 	public JSONObject convertToJSON(Waypoint pw, Session session) {
 		JSONObject feature = new JSONObject();
 		feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -153,8 +154,8 @@ public class CustomIncidentQueryEngine extends CustomQueryEngine {
 		JSONObject geom = new JSONObject();
 		geom.put("type","Point"); //$NON-NLS-1$ //$NON-NLS-2$
 		JSONArray coords = new JSONArray();
-		coords.put(pw.getX());
-		coords.put(pw.getY());
+		coords.add(pw.getX());
+		coords.add(pw.getY());
 		geom.put("coordinates", coords); //$NON-NLS-1$
 		feature.put("geometry", geom); //$NON-NLS-1$
 		

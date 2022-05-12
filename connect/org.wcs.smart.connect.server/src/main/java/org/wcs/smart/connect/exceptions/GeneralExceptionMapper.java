@@ -40,6 +40,7 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
 
 	@Override
 	public Response toResponse(Exception ex) {
+		ex.printStackTrace();
 		Response.ResponseBuilder builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
 		builder.type(MediaType.APPLICATION_JSON);
 		

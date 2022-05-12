@@ -33,8 +33,8 @@ import java.util.UUID;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -295,11 +295,12 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 	public JSONArray convertToJSON(List<PatrolWaypoint> pws, Session session, Locale l) {
 		JSONArray items = new JSONArray(); 
 		for(PatrolWaypoint pw : pws) {
-			items.put(convertToJSON(pw, session, l));
+			items.add(convertToJSON(pw, session, l));
 		}
 		return items;
 		
 	}
+	@SuppressWarnings("unchecked")
 	public JSONObject convertToJSON(PatrolWaypoint pw, Session session, Locale l) {
 		JSONObject feature = new JSONObject();
 		feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -307,8 +308,8 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		JSONObject geom = new JSONObject();
 		geom.put("type","Point"); //$NON-NLS-1$ //$NON-NLS-2$
 		JSONArray coords = new JSONArray();
-		coords.put(pw.getWaypoint().getX());
-		coords.put(pw.getWaypoint().getY());
+		coords.add(pw.getWaypoint().getX());
+		coords.add(pw.getWaypoint().getY());
 		geom.put("coordinates", coords); //$NON-NLS-1$
 		feature.put("geometry", geom); //$NON-NLS-1$
 		
@@ -448,7 +449,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			member.put(NAME_FIELD, SmartLabelProvider.getFullName(m.getMember(), l));
 			member.put("is_leader", m.getIsLeader()); //$NON-NLS-1$
 			member.put("is_pilot", m.getIsPilot()); //$NON-NLS-1$
-			members.put(member);
+			members.add(member);
 		}
 		patrolleg.put("members",members); //$NON-NLS-1$
 				
@@ -481,10 +482,11 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 	public JSONArray convertPatrolsToJSON(List<Patrol> patrols, Session session, Locale l) {
 		JSONArray ptrs = new JSONArray();
 		for (Patrol p : patrols) {
-			ptrs.put(convertToJSON(p, session, l));
+			ptrs.add(convertToJSON(p, session, l));
 		}
 		return ptrs;
 	}
+	@SuppressWarnings("unchecked")
 	public JSONObject convertToJSON(Patrol ptr, Session session, Locale l) {
 		
 		JSONObject patrol = new JSONObject();
@@ -575,7 +577,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			patrolleg.put(ID_FIELD, leg.getId());
 			patrolleg.put("start_date", leg.getStartDate()); //$NON-NLS-1$
 			patrolleg.put("end_date", leg.getEndDate()); //$NON-NLS-1$
-			legs.put(patrolleg);
+			legs.add(patrolleg);
 			
 			//find a client uuid
 			link = session
@@ -619,7 +621,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 				member.put(NAME_FIELD, SmartLabelProvider.getFullName(m.getMember(), l));
 				member.put("is_leader", m.getIsLeader()); //$NON-NLS-1$
 				member.put("is_pilot", m.getIsPilot()); //$NON-NLS-1$
-				members.put(member);
+				members.add(member);
 			}
 			patrolleg.put("members",members); //$NON-NLS-1$
 					
@@ -631,7 +633,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 				patrolLegDay.put("date", day.getDate()); //$NON-NLS-1$
 				patrolLegDay.put("start_time", day.getStartTime()); //$NON-NLS-1$
 				patrolLegDay.put("end_time", day.getEndTime()); //$NON-NLS-1$
-				legdays.put(patrolLegDay);
+				legdays.add(patrolLegDay);
 			}
 			patrolleg.put("patrol_leg_days",legdays); //$NON-NLS-1$
 			

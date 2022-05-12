@@ -85,7 +85,12 @@ public class ConnectRESTApplication extends Application {
 		
 		resources.add(SmartConnectExceptionMapper.class);
 		resources.add(GeneralExceptionMapper.class);
+		
+		resources.add(ObjectMapperContextResolver.class);
+		
 		return resources;
 	}
 	 
+	
+	
 }

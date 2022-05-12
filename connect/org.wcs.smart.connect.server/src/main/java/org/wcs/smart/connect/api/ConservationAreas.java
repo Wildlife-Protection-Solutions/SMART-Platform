@@ -320,7 +320,7 @@ public class ConservationAreas extends HttpServlet{
 				
 			if(includeSpatialBoundaries){							
 				StringBuilder sb = new StringBuilder();
-				sb.append("select st_asgeojson(1,  st_force2d(st_collect(geom))) "); //$NON-NLS-1$
+				sb.append("select st_asgeojson(st_force2d(st_collect(geom))) "); //$NON-NLS-1$
 				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
 				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
 				
@@ -814,7 +814,7 @@ public class ConservationAreas extends HttpServlet{
 				proxy.setOwner(ca.getOwner());
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append("select st_asgeojson(1,  st_force2d(st_collect(geom))) "); //$NON-NLS-1$
+				sb.append("select st_asgeojson(st_force2d(st_collect(geom))) "); //$NON-NLS-1$
 				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
 				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
 				

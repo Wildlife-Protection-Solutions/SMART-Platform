@@ -28,8 +28,8 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -110,6 +110,7 @@ public class CustomQueryEngine {
 	 * @param session
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public JSONObject convertWaypoint(Waypoint pw, Session session) {
 		JSONObject jwp = new JSONObject();
 		jwp.put(UUID_FIELD, UuidUtils.uuidToString(pw.getUuid()));
@@ -194,7 +195,7 @@ public class CustomQueryEngine {
 
 				for (WaypointObservationAttribute at: wo.getAttributes()) {
 					JSONObject joa = new JSONObject();
-					jattributes.put(joa);
+					jattributes.add(joa);
 					joa.put("attribute_key", at.getAttribute().getKeyId()); //$NON-NLS-1$
 					for (Label ll : at.getAttribute().getNames()) {
 						joa.put("attribute_name_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
@@ -220,7 +221,7 @@ public class CustomQueryEngine {
 							for (Label ll : i.getAttributeListItem().getNames()) {
 								temp.put(LABEL_FIELD + "_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
 							}
-							array.put(temp);
+							array.add(temp);
 						}
 						joa.put(VALUE_FIELD, array);
 						break;
@@ -258,11 +259,11 @@ public class CustomQueryEngine {
 					}
 				}
 				
-				jobs.put(job);
+				jobs.add(job);
 			}
 			
 			obsgroup.put("observations", jobs); //$NON-NLS-1$
-			jgroups.put(obsgroup);
+			jgroups.add(obsgroup);
 		}
 		return jwp;
 	}
