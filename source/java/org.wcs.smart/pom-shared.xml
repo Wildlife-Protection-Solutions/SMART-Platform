@@ -148,12 +148,7 @@
 			<artifactId>org.eclipse.birt.report.model</artifactId>
 			<version>${birt.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.equinox.registry</artifactId>
-			<version>${org.eclipse.equinox.registry.version}</version>
-		</dependency>
-
+	
 		<!--eclipse dependencies -->
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>

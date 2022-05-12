@@ -49,11 +49,10 @@
 			<version>${udig.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.mozilla</groupId>
-			<artifactId>rhino</artifactId>
+  			<groupId>org.eclipse.birt.runtime</groupId>
+			<artifactId>org.mozilla.javascript</artifactId>
 			<version>${mozilla.javascript.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.ui.workbench</artifactId>

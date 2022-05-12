@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect;
 
-import jakarta.ws.rs.ext.RuntimeDelegate;
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -87,6 +87,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 		ChangeLogInstaller.INSTANCE.setEnabled(true);
 		super.start(context);
 		plugin = this;
+		
 	}
 
 	/*

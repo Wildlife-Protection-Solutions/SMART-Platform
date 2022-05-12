@@ -28,8 +28,8 @@
 		<dependency>
   			<groupId>org.eclipse.platform</groupId>
   			<artifactId>org.eclipse.jface</artifactId>
-  			<version>3.25.0</version>
-  			<scope>${org.eclipse.jface.version}</scope>
+  			<version>${org.eclipse.jface.version}</version>
+  			<scope>compile</scope>
 		</dependency>
 	</dependencies>	
 </project>

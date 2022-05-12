@@ -16,7 +16,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<resteasy.version>6.0.0.Final</resteasy.version>
+		<resteasy.version>5.0.3.Final</resteasy.version>
 	</properties>
 
 	<dependencies>
@@ -29,8 +29,6 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jackson2-provider</artifactId>
 			<version>${resteasy.version}</version>
-		</dependency>
-
-		
+		</dependency>		
 	</dependencies>
 </project>
