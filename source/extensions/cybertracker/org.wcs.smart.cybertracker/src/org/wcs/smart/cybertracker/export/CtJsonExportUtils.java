@@ -449,8 +449,12 @@ public class CtJsonExportUtils {
 	}
 	
 	public static JSONObject convertStringOp(MetadataFieldValue metadataValue, String opKey,
-			String defaultLabel, HashMap<String,String> translations,
-			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+			String defaultLabel, HashMap<String,String> translations, boolean isFixed, 
+			Session session, ConservationArea ca) {
+		
+		boolean isRequired = false;
+		if (metadataValue != null) isRequired = metadataValue.isRequired();
+		
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
 		
@@ -527,15 +531,17 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertEmployees(MetadataFieldValue screenOption, boolean isRequired, 
+	public static JSONObject convertEmployees(MetadataFieldValue metadataOption, 
 			boolean isFixed, Session session, ConservationArea ca) {
 		//find all employees - they are either directly linked or linked through a employee team
 		Set<Employee> allEmployees = new HashSet<>();
 		
 		Set<EmployeeTeam> selectedTeams = new HashSet<>();
 		
-		if (screenOption != null) {
-			for (MetadataFieldUuidValue uuid : screenOption.getUuidList()) {
+		boolean isRequired = true;
+		if (metadataOption != null) {
+			isRequired = metadataOption.isRequired();
+			for (MetadataFieldUuidValue uuid : metadataOption.getUuidList()) {
 				UUID item = uuid.getUuidValue();
 				Employee e = session.get(Employee.class, item);
 				if (e != null) {
@@ -560,9 +566,9 @@ public class CtJsonExportUtils {
 		}
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
-		if (screenOption != null) {
-			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
-			if (!screenOption.isVisible()) {
+		if (metadataOption != null) {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, metadataOption.isVisible());
+			if (!metadataOption.isVisible()) {
 				JSONArray defaultValues = new JSONArray();
 				for (Employee e : allEmployees) {
 					defaultValues.add(UuidUtils.uuidToString(e.getUuid()));
@@ -640,9 +646,13 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertLeaderPilot(MetadataFieldValue screenOption, String opKey, 
-			String defaultLabel, HashMap<String,String> translations,   
-			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertLeaderPilot(MetadataFieldValue metadataValue, String opKey, 
+			String defaultLabel, HashMap<String,String> translations, boolean isFixed, 
+			Session session, ConservationArea ca) {
+		
+		boolean isRequired = true;
+		if (metadataValue != null) isRequired = metadataValue.isRequired();
+		
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
@@ -653,10 +663,10 @@ public class CtJsonExportUtils {
 		}
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(JSON_FIXED_PROP_KEY, isFixed);
-		if (screenOption != null) {
-			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
-			if (!screenOption.isVisible() && screenOption.getUuidValue() != null) {
-				objective.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(screenOption.getUuidValue()));
+		if (metadataValue != null) {
+			objective.put(JSON_ISVISIBILE_PROP_KEY, metadataValue.isVisible());
+			if (!metadataValue.isVisible() && metadataValue.getUuidValue() != null) {
+				objective.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(metadataValue.getUuidValue()));
 			}
 		}else {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, true);
@@ -715,20 +725,23 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertKeyOptions(MetadataFieldValue screenOption, 
+	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
 			String defaultLabel, HashMap<String,String> translations, 
-			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+			boolean isFixed, Session session, ConservationArea ca) {
 		
-		return  convertKeyOptions(screenOption, clazz, screenKey, 
-				defaultLabel, translations, isRequired, isFixed, session, ca, (i,j)->{});
+		return  convertKeyOptions(metadataValue, clazz, screenKey, 
+				defaultLabel, translations, isFixed, session, ca, (i,j)->{});
 	}
 	
-	public static JSONObject convertKeyOptions(MetadataFieldValue screenOption, 
+	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
 			String defaultLabel, HashMap<String,String> translations, 
-			boolean isRequired, boolean isFixed, Session session, ConservationArea ca, 
+			boolean isFixed, Session session, ConservationArea ca, 
 			BiConsumer<NamedKeyItem, JSONObject> customValuesAdded) {
+		
+		boolean isRequired = false;
+		if (metadataValue != null) isRequired = metadataValue.isRequired();
 		
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
@@ -740,11 +753,11 @@ public class CtJsonExportUtils {
 		}
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
-		if (screenOption != null) {
-			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
-			if (!screenOption.isVisible()) {
-				if (screenOption.getUuidValue() != null) {
-					optionType.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(screenOption.getUuidValue()));
+		if (metadataValue != null) {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, metadataValue.isVisible());
+			if (!metadataValue.isVisible()) {
+				if (metadataValue.getUuidValue() != null) {
+					optionType.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(metadataValue.getUuidValue()));
 				}else {
 					optionType.put(JSON_DEFAULT_PROP_KEY, null);
 				}

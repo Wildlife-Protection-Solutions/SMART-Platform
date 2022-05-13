@@ -151,9 +151,7 @@ public class ResultsPanel {
 				});
 		((GridLayout)header.getLayout()).numColumns = 4;
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-//		WidgetElement.setCSSClass(bottom, SectionHeader.TAB_BAR_CLASS); 
-		
+				
 		// icon size for images table
 		iconSizeComp = toolkit.createComposite(header);
 		iconSizeComp.setBackground(bottom.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));

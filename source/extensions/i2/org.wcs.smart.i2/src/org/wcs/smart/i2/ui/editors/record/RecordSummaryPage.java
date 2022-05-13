@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -139,7 +138,6 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class RecordSummaryPage extends EditorPart{
 
 	private static int[] LAST_WEIGHTS = null;
@@ -262,7 +260,7 @@ public class RecordSummaryPage extends EditorPart{
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
 		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
-		WidgetElement.setCSSClass(buttonPanel, "SMARTFormHeader"); //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(buttonPanel,SmartUiUtils.FORM_HEADER_CLASS);
 		
 		headerLabel = toolkit.createLabel(buttonPanel, ""); //$NON-NLS-1$
 		

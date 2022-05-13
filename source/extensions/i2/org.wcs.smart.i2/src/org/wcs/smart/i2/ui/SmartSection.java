@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MouseAdapter;
@@ -41,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Twistie;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
@@ -114,7 +114,7 @@ public class SmartSection extends Composite{
 		((GridLayout)header.getLayout()).marginWidth = 2;
 		((GridLayout)header.getLayout()).marginHeight = 2;
 		
-		WidgetElement.setCSSClass(header, "SMARTSection");  //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(header, "SMARTSection");  //$NON-NLS-1$
 		
 		img = new Twistie(header, SWT.NONE){
 			@Override

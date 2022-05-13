@@ -22,17 +22,22 @@
 package org.wcs.smart.cybertracker.survey.ui;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -49,6 +54,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -58,8 +64,10 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
@@ -67,6 +75,9 @@ import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.MissionMetadataField;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -83,9 +94,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class SurveyMetadataPackageContribution implements IPackageUiContribution {
 
-	private Button btnCmt, btnMembers, btnLeader;
+	private static final String CUSTOMKEY = "ISCUSTOM"; //$NON-NLS-1$
+	
+	private Button btnCmt, btnMembers, btnLeader, btnCmtrq, btnMembersrq, btnLeaderrq;
 	private ComboViewer cmbLeader;
 	private Text txtComment;
+	
+	private HashMap<MissionAttribute, Object[]> customAttributes;
 	
 	private CheckboxTableViewer lstEmployees;
 	private Listener onModified;
@@ -94,6 +109,13 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	private boolean fireEvents = true;
 	private Font boldFont;
 	private Runnable onInitilized;
+	private Composite core;
+	
+	@Inject private IEclipseContext context;
+
+	
+
+	private SurveyDesign current = null;
 	
 	@Override
 	public boolean isTab() { 
@@ -123,14 +145,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		((GridLayout)outer.getLayout()).verticalSpacing = 0;
 		
 		Composite headerComp = new Composite(outer, SWT.NONE);
-		headerComp.setLayout(new GridLayout(4, false));
+		headerComp.setLayout(new GridLayout(5, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(headerComp, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.setCSSClass(headerComp, SmartUiUtils.HEADER_CLASS);
 
+		Label col0 = new Label(headerComp, SWT.NONE);
+		col0.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
 		Label col1 = new Label(headerComp, SWT.NONE);
 		col1.setText(Messages.SurveyMetadataPackageContribution_MetadataColumn);
 		col1.setToolTipText(Messages.SurveyMetadataPackageContribution_MetadataTooltip);
-		col1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		col1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		Label col2 = new Label(headerComp, SWT.NONE);
 		col2.setText(Messages.SurveyMetadataPackageContribution_UserSelectedLabel);
@@ -138,39 +163,55 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		col2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Label col3 = new Label(headerComp, SWT.NONE);
-		col3.setText(Messages.SurveyMetadataPackageContribution_FixedValueLabel);
-		col3.setToolTipText(Messages.SurveyMetadataPackageContribution_FixedValueTooltip);
+		col3.setText(Messages.SurveyMetadataPackageContribution_RequiredField);
+		col3.setToolTipText(Messages.SurveyMetadataPackageContribution_RequiredFieldTooltip);
 		col3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Label col4 = new Label(headerComp, SWT.NONE);
+		col4.setText(Messages.SurveyMetadataPackageContribution_FixedValueLabel);
+		col4.setToolTipText(Messages.SurveyMetadataPackageContribution_FixedValueTooltip);
+		col4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		ScrolledComposite table = new ScrolledComposite(outer, SWT.V_SCROLL);
 		table.setExpandHorizontal(true);
 		table.setExpandVertical(true);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite core = new Composite(table, SWT.NONE);
-		core.setLayout(new GridLayout(4, false));
+		core = new Composite(table, SWT.NONE);
+		core.setLayout(new GridLayout(5, false));
 		table.setContent(core);
 		
 		Label c1 = new Label(core, SWT.NONE);
 		c1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)c1.getLayoutData()).heightHint = 0;
+		((GridData)c1.getLayoutData()).widthHint = 32;
 		
 		Label c2 = new Label(core, SWT.NONE);
 		c2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)c2.getLayoutData()).heightHint = 0;
+		c2.setText(col1.getText());
 		
 		Label c3 = new Label(core, SWT.NONE);
 		c3.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)c3.getLayoutData()).heightHint = 0;
+		c3.setText(col2.getText());
 		
 		Label c4 = new Label(core, SWT.NONE);
-		c4.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		c4.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)c4.getLayoutData()).heightHint = 0;
+		c4.setText(col3.getText());
+		
+		Label c5 = new Label(core, SWT.NONE);
+		c5.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)c5.getLayoutData()).heightHint = 0;
+		c5.setText(col4.getText());
 		
 		// comment
-		Object[] d = createTextSection(Messages.SurveyMetadataPackageContribution_MissionCommentLabel, core, null);
+		Object[] d = createTextSection(Messages.SurveyMetadataPackageContribution_MissionCommentLabel, core, null, true);
 		btnCmt = (Button) d[0];
-		txtComment = (Text) d[1];		
+		btnCmtrq = (Button) d[1];
+		btnCmtrq.setSelection(MissionMetadataField.COMMENT.isRequired());
+		txtComment = (Text) d[2];		
 		
 		
 		ColumnLabelProvider employeeLblProvider = new ColumnLabelProvider() {
@@ -202,6 +243,11 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		btnMembers.setSelection(true);
 		btnMembers.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
+		btnMembersrq = new Button(core, SWT.CHECK);
+		btnMembersrq.setSelection(true);
+		btnMembersrq.setEnabled(false);
+		btnMembersrq.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		
 		Composite cemp = new Composite(core, SWT.NONE);
 		cemp.setLayout(new GridLayout());
 		((GridLayout)cemp.getLayout()).marginWidth = 0;
@@ -241,9 +287,11 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		});
 		
 		// leader
-		d = createComboViewerSection(Messages.SurveyMetadataPackageContribution_LeaderLabel, core, EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON));
+		d = createComboViewerSection(Messages.SurveyMetadataPackageContribution_LeaderLabel, core, 
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON), false);
 		btnLeader = (Button) d[0];
-		cmbLeader = (ComboViewer) d[1];
+		btnLeaderrq = (Button) d[1];
+		cmbLeader = (ComboViewer) d[2];
 		cmbLeader.setLabelProvider(employeeLblProvider);
 		btnLeader.setEnabled(false);
 		cmbLeader.getControl().setEnabled(false);
@@ -267,12 +315,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			fireChanged();
 		});
 		
-		table.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		createMetadataAttributes();
 		
+		table.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
 		core.layout(true);
-		((GridData)col1.getLayoutData()).widthHint = c1.getSize().x + c2.getSize().x + 5;
-		((GridData)c3.getLayoutData()).widthHint = col2.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-	
+		((GridData) col0.getLayoutData()).widthHint = 0;
+		((GridData) col1.getLayoutData()).widthHint = c2.getSize().x + c1.getSize().x;
+		((GridData) col2.getLayoutData()).widthHint = c3.getSize().x;
+		((GridData) col3.getLayoutData()).widthHint = c4.getSize().x;
+		((GridData) col4.getLayoutData()).widthHint = c5.getSize().x;
+				
 		loadValues.schedule();
 		
 		return outer;
@@ -297,7 +350,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		if (cmbLeader.getStructuredSelection().isEmpty() && items.size() > 0) cmbLeader.setSelection(new StructuredSelection(sorted.get(0)));
 	}
 	
-	private Object[] createComboViewerSection(String sectionName, Composite parent, Image icon) {
+	private Object[] createComboViewerSection(String sectionName, Composite parent, Image icon, boolean isOptional) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
@@ -309,7 +362,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		Button btn = new Button(g, SWT.CHECK);
 		btn.setSelection(true);
 		btn.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-
+		
+		Button btnrq = new Button(g, SWT.CHECK);
+		btnrq.setSelection(true);
+		btnrq.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		
+		if (!isOptional) {
+			btnrq.setEnabled(false);
+		}else {
+			btnrq.addListener(SWT.Selection,e->fireChanged());
+		}
+		
 		ComboViewer cmb = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		cmb.setLabelProvider(new NamedItemLabelProvider());
@@ -319,16 +382,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		
 		btn.addListener(SWT.Selection, e-> {
 			cmb.getControl().setEnabled(!btn.getSelection());
+			if (isOptional) btnrq.setEnabled(btn.getSelection());
 			fireChanged();
 		});
 		
 		cmb.setSelection(new StructuredSelection(DialogConstants.LOADING_TEXT));
 		cmb.addSelectionChangedListener(e->fireChanged());
 		
-		return new Object[] {btn, cmb};
+		return new Object[] {btn,btnrq, cmb};
 	}
 	
-	private Object[] createTextSection(String sectionName, Composite parent, Image icon) {
+	private Object[] createTextSection(String sectionName, Composite parent, Image icon, boolean isOptional) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
@@ -342,6 +406,16 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		btn.setSelection(true);
 		btn.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
+		Button btnrq = new Button(g, SWT.CHECK);
+		btnrq.setSelection(true);
+		btnrq.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		
+		if (!isOptional) {
+			btnrq.setEnabled(false);
+		}else {
+			btnrq.addListener(SWT.Selection,e->fireChanged());
+		}
+		
 		Text txt = new Text(g, SWT.BORDER);
 		txt.setEnabled(false);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -349,15 +423,28 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		
 		btn.addListener(SWT.Selection, e-> {
 			txt.setEnabled(!btn.getSelection());
+			if (isOptional) btnrq.setEnabled(btn.getSelection());
 			fireChanged();
 		});
 		
 		txt.addListener(SWT.Modify, e->fireChanged());
 		
-		return new Object[] {btn, txt};
+		return new Object[] {btn, btnrq, txt};
 	}
+	
+	
+	
 	@Override
 	public String isValid() {
+		
+		//the survey design may have changed
+		fireEvents = false;
+		try {
+			createMetadataAttributes();
+		}finally {
+			fireEvents = true;
+		}
+		
 		boolean ok = false;
 		for (Object type : lstEmployees.getCheckedElements()) {
 			if (type instanceof Employee) {
@@ -377,6 +464,21 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
 			return Messages.SurveyMetadataPackageContribution_LeaderRequired;
 		}
+		
+		if (customAttributes == null) return null;
+		
+		for (Entry<MissionAttribute, Object[]> item : customAttributes.entrySet()) {
+			MissionAttribute pa = item.getKey();
+			Button btnVisible = (Button)item.getValue()[0];
+			if (!btnVisible.getSelection() && pa.getType() == AttributeType.NUMERIC) {
+				Text txt = (Text) item.getValue()[2];
+				try {
+					Double.parseDouble(txt.getText());
+				}catch (Exception ex) {
+					return MessageFormat.format(Messages.SurveyMetadataPackageContribution_InvalidAttributeValue, pa.getName(), txt.getText()); 
+				}
+			}
+		}
 		return null;
 	}
 
@@ -391,17 +493,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			map.put(v.getMetadataKey(), v);
 		}
 		
-		MetadataFieldValue v = findMetadataValue(map, MissionMetadataField.COMMENT,  btnCmt, cpackage);
+		MetadataFieldValue v = findMetadataValue(map, MissionMetadataField.COMMENT,  btnCmt, btnCmtrq, cpackage);
 		v.setStringValue(txtComment.getText().strip());
 		
-		v = findMetadataValue(map, MissionMetadataField.LEADER,  btnLeader, cpackage);
+		v = findMetadataValue(map, MissionMetadataField.LEADER, btnLeader, btnLeaderrq, cpackage);
 		if (cmbLeader.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
 			v.setUuidValue( ((Employee)cmbLeader.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
-		v = findMetadataValue(map, MissionMetadataField.MEMBERS,  btnMembers, cpackage);
+		v = findMetadataValue(map, MissionMetadataField.MEMBERS, btnMembers, btnMembersrq, cpackage);
 		if (v.getUuidList() == null) v.setUuidList(new ArrayList<>());
 		v.getUuidList().clear();
 		
@@ -418,19 +520,218 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				v.getUuidList().add(uuidValue);
 			}
 		}
+		
+		Set<String> customKeys = new HashSet<>();
+		for (Entry<MissionAttribute, Object[]> custom : customAttributes.entrySet()) {
+			Object[] fields = custom.getValue();
+			MissionAttribute ma = custom.getKey();
+			v = findMetadataValue(map, ma, (Button)fields[0], (Button)fields[1], cpackage);
+			customKeys.add(MissionMetadataField.generateKey(ma));
+			if (ma.getType() == AttributeType.LIST) {
+				ComboViewer cmb = (ComboViewer) fields[2];
+				Object o = cmb.getStructuredSelection().getFirstElement();
+				if (o instanceof MissionAttributeListItem) {
+					v.setUuidValue(((MissionAttributeListItem)o).getUuid());
+				}else {
+					v.setUuidValue(null);
+				}
+			}else if (ma.getType() == AttributeType.TEXT) {
+				v.setStringValue(((Text)fields[2]).getText());
+			}else if (ma.getType() == AttributeType.NUMERIC) {
+				v.setStringValue(((Text)fields[2]).getText());
+			}
+		}
+		//remove no longer used attribute metadata values
+		List<MetadataFieldValue> toremove = new ArrayList<>();
+		for (MetadataFieldValue mv : cpackage.getMetadataValues()) {
+			if (mv.getMetadataKey().startsWith(MissionMetadataField.getCustomAttributePrefix())) {
+				if (!customKeys.contains(mv.getMetadataKey())) toremove.add(mv);
+			}
+		}
+		cpackage.getMetadataValues().removeAll(toremove);
 	}
 	
-	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, MissionMetadataField field, Button btnVisible, SurveyCtPackage cpackage) {
+	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, MissionMetadataField field, 
+			Button btnVisible, Button btnRequired, SurveyCtPackage cpackage) {
 		MetadataFieldValue v = items.get(field.name());
 		if (v == null) {
 			v = new MetadataFieldValue();
 			v.setCtPackage(cpackage);
 			v.setConservationArea(cpackage.getConservationArea());
 			v.setMetadataKey(field.name());
+			v.setRequired(field.isRequired());
 			cpackage.getMetadataValues().add(v);
 		}
 		v.setVisible(btnVisible.getSelection());
+		v.setRequired(btnRequired.getSelection());
 		return v;
+	}
+	
+	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, 
+			MissionAttribute attribute, Button btnVisible, Button btnRequired,
+			SurveyCtPackage ppackage) {
+		
+		MetadataFieldValue v = items.get(MissionMetadataField.generateKey(attribute));
+		if (v == null) {
+			v = new MetadataFieldValue();
+			v.setCtPackage((AbstractCtPackage)ppackage);
+			v.setConservationArea(ppackage.getConservationArea());
+			v.setMetadataKey(MissionMetadataField.generateKey(attribute));
+			v.setRequired(false);
+			ppackage.getMetadataValues().add(v);
+		}
+		v.setVisible(btnVisible.getSelection());
+		v.setRequired(btnRequired.getSelection());
+		return v;
+	}
+	
+	private void createMetadataAttributes() {
+		
+		SurveyDesign ctx = context.get(SurveyDesign.class);
+		
+		if (ctx == null && current == null) return;
+		if (ctx != null && ctx.equals(current)) return;
+		
+		current = ctx;
+		customAttributes = new HashMap<>();
+		for (Control kid : core.getChildren()) {
+			Object d = kid.getData(CUSTOMKEY);
+			if ( d != null && (Boolean)d) kid.dispose();
+		}
+		
+		if (current == null) return;
+		
+		//add custom patrol attributes
+		try (Session session = HibernateManager.openSession()) {
+
+			SurveyDesign sd = session.get(SurveyDesign.class, current.getUuid());
+			List<MissionAttribute> attributes = sd.getMissionProperties()
+					.stream().map(p->p.getAttribute()).collect(Collectors.toList());
+			
+			attributes.sort((a, b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+
+			for (MissionAttribute attribute : attributes) {
+
+				// TODO: populate with icon
+				Label icon = new Label(core, SWT.NONE);
+				icon.setData(CUSTOMKEY, true);
+				icon.setBackground(icon.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				
+				Label name = new Label(core, SWT.NONE);
+				name.setText(attribute.getName());
+				name.setData(CUSTOMKEY, true);
+				name.setBackground(name.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				
+				Object[] data = new Object[4];
+
+				Button btnSelected = new Button(core, SWT.CHECK);
+				btnSelected.setSelection(true);
+				btnSelected.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+				btnSelected.setData(CUSTOMKEY, true);
+				
+				Button btnRequired = new Button(core, SWT.CHECK);
+				btnRequired.setSelection(false);
+				btnRequired.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+				btnRequired.setData(CUSTOMKEY, true);
+				
+				data[0] = btnSelected;
+				data[1] = btnRequired;
+
+				// only text, number, list
+				if (attribute.getType() == AttributeType.TEXT) {
+					Text txt = new Text(core, SWT.BORDER);
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					txt.setEnabled(false);
+					txt.addListener(SWT.Modify, e -> fireChanged());
+					txt.setData(CUSTOMKEY, true);
+					data[2] = txt;
+					btnSelected.addListener(SWT.Selection, e -> {
+						txt.setEnabled(!btnSelected.getSelection());
+					});
+				} else if (attribute.getType() == AttributeType.NUMERIC) {
+					Text txt = new Text(core, SWT.BORDER);
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					txt.setEnabled(false);
+					txt.addListener(SWT.Modify, e -> fireChanged());
+					txt.setData(CUSTOMKEY, true);
+					data[2] = txt;
+					btnSelected.addListener(SWT.Selection, e -> {
+						txt.setEnabled(!btnSelected.getSelection());
+					});
+				} else if (attribute.getType() == AttributeType.LIST) {
+					ComboViewer cmb = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
+					cmb.getControl().setData(CUSTOMKEY, true);
+					data[2] = cmb;
+					cmb.setContentProvider(ArrayContentProvider.getInstance());
+					cmb.setLabelProvider(new NamedItemLabelProvider());
+					List<Object> items = new ArrayList<>();
+					items.add(""); //$NON-NLS-1$
+					items.addAll(attribute.getAttributeList());
+					cmb.setInput(items);
+					cmb.getControl().setEnabled(false);
+					cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+					cmb.addSelectionChangedListener(e -> fireChanged());
+
+					btnSelected.addListener(SWT.Selection, e -> {
+						cmb.getControl().setEnabled(!btnSelected.getSelection());
+					});
+				} else {
+					Label temp = new Label(core, SWT.NONE);
+					temp.setData(CUSTOMKEY, true);
+					data[2] = null;
+				}
+
+				btnSelected.addListener(SWT.Selection, e -> {
+					btnRequired.setEnabled(btnSelected.getSelection());
+					fireChanged();
+				});
+
+				btnRequired.addListener(SWT.Selection, e -> fireChanged());
+
+				customAttributes.put(attribute, data);
+			}
+		}
+
+		//initialize
+		initializeCustomAttributes();
+		
+		core.layout(true);
+		((ScrolledComposite)core.getParent()).setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+	}
+	
+	private void initializeCustomAttributes() {
+		if (customAttributes == null) return;
+		for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+			for (Entry<MissionAttribute, Object[]> custom : customAttributes.entrySet()) {
+				
+				Object[] fields = custom.getValue();
+				MissionAttribute pa = custom.getKey();
+				
+				String key = MissionMetadataField.generateKey(pa);
+				if (!v.getMetadataKey().equalsIgnoreCase(key)) continue;
+				
+				((Button)fields[0]).setSelection(v.isVisible());
+				((Button)fields[1]).setSelection(v.isRequired());
+				
+				if (pa.getType() == AttributeType.LIST) {
+					ComboViewer cmb = (ComboViewer) fields[2];
+					if (v.getUuidValue() != null) {
+						MissionAttributeListItem temp = new MissionAttributeListItem();
+						temp.setUuid(v.getUuidValue());
+						cmb.setSelection(new StructuredSelection(temp));
+					}else {
+						cmb.setSelection(new StructuredSelection("")); //$NON-NLS-1$
+					}
+				}else if (pa.getType() == AttributeType.TEXT) {
+					((Text)fields[2]).setText(v.getStringValue());
+				}else if (pa.getType() == AttributeType.NUMERIC) {
+					((Text)fields[2]).setText(v.getStringValue());
+				}
+				
+				((Button)fields[0]).notifyListeners(SWT.Selection, new Event());
+			}
+		}
 	}
 	
 	private Job loadValues = new Job("loading metadata values") { //$NON-NLS-1$
@@ -478,6 +779,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 						//populate members first
 						 if (v.getMetadataKey().equals(MissionMetadataField.MEMBERS.name())) {
 							btnMembers.setSelection(v.isVisible());
+							btnMembersrq.setSelection(v.isRequired());
 							for (MetadataFieldUuidValue item : v.getUuidList()) {
 								//either an employee or a team
 								Employee e = new Employee();
@@ -493,17 +795,21 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 					for (MetadataFieldValue v : metadataValues) {
 						if (v.getMetadataKey().equals(MissionMetadataField.COMMENT.name())) {
 							btnCmt.setSelection(v.isVisible());
+							btnCmtrq.setSelection(v.isRequired());
 							txtComment.setText(v.getStringValue());
 						}else if (v.getMetadataKey().equals(MissionMetadataField.LEADER.name())) {
 							btnLeader.setSelection(v.isVisible());
+							btnLeaderrq.setSelection(v.isRequired());
 							Employee temp = new Employee();
 							temp.setUuid(v.getUuidValue());
 							cmbLeader.setSelection(new StructuredSelection(temp));
-						}
+						}						
 					}
 					btnCmt.notifyListeners(SWT.Selection, new Event());
 					btnMembers.notifyListeners(SWT.Selection, new Event());
 					btnLeader.notifyListeners(SWT.Selection, new Event());
+					
+					initializeCustomAttributes();
 				}finally {
 					fireEvents = true;
 				}

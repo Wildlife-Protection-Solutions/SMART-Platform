@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -66,6 +65,7 @@ import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -99,7 +99,6 @@ import org.wcs.smart.ui.SmartWizardDialog;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEditor{
 
 	public static final String ID = "org.wcs.smart.i2.editor.query.entityrecord"; //$NON-NLS-1$
@@ -311,7 +310,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		headerComp.setLayout(new GridLayout(2, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");  //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(headerComp, SmartUiUtils.FORM_HEADER_CLASS);
 
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));

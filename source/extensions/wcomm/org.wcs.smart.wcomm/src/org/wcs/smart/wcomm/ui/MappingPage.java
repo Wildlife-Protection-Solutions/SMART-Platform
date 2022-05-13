@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -68,6 +67,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -170,8 +170,7 @@ public class MappingPage  extends EditorPart {
 		((GridLayout)btns.getLayout()).marginHeight = 0;
 		btns.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		WidgetElement.setCSSClass(btns, "SMARTFormHeader"); //$NON-NLS-1$
-
+		SmartUiUtils.setCSSClass(btns, SmartUiUtils.FORM_HEADER_CLASS);
 		
 		Label l = toolkit.createLabel(btns, Messages.MappingPage_SectionTitle);
 		l.setFont(form.getFont());

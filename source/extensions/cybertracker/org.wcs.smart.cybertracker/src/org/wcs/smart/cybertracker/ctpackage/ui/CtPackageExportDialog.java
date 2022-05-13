@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -190,7 +189,7 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 			
 			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(key, true);
 			btnAction.setSelection(dogenerate);
-			WidgetElement.setCSSClass(small, "donotstyle"); //$NON-NLS-1$
+			SmartUiUtils.setCSSClass(small, "donotstyle"); //$NON-NLS-1$
 			updateBackground(small, btnAction, selectionColor);
 			
 		}

@@ -108,8 +108,9 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 		parent.setLayout(new GridLayout(1, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		
 		config = CtPackageExtensionPointManager.INSTANCE.findManager(toEdit).createConfigurator();
-		ContextInjectionFactory.inject(config, context);
+		ContextInjectionFactory.inject(config, context.createChild());
 		if (config == null) {
 			throw new IllegalStateException(Messages.ConfigurePackageDialog_ManagerNotFound + toEdit.getTypeIdentifier());
 		}

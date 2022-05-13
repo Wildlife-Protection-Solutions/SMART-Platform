@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -62,7 +61,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class IncidentPackageUiContribution implements IPackageUiContribution{
 
 	//data model 
@@ -91,7 +89,7 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
 		headerLabel.setText(Messages.IncidentPackageContribution_ConfigurationGroupLablel);
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
 		
 		Composite incidentComposite = new Composite(g, SWT.NONE);
 		incidentComposite.setLayout(new GridLayout());

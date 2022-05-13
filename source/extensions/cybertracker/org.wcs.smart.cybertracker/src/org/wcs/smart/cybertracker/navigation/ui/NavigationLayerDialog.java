@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -619,7 +618,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		pointColorLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 		((GridData)pointColorLabel.getLayoutData()).widthHint = 30;
 		pointColorLabel.addListener(SWT.Dispose, e->disposeColor(pointColorLabel));		
-		WidgetElement.setCSSClass(pointColorLabel, "customcolor"); //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(pointColorLabel, "customcolor"); //$NON-NLS-1$
 		pointColorLabel.addListener(SWT.Paint, e->{
 			if (pointColorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, pointColorLabel.getBounds().width-1, pointColorLabel.getBounds().height-1);
 		});
@@ -698,7 +697,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		((GridData)lineColorLabel.getLayoutData()).widthHint = 30;
 		((GridData)lineColorLabel.getLayoutData()).heightHint = 20;
 		lineColorLabel.addListener(SWT.Dispose, e->disposeColor(lineColorLabel));		
-		WidgetElement.setCSSClass(lineColorLabel, "customcolor"); //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(lineColorLabel, "customcolor"); //$NON-NLS-1$
 		lineColorLabel.addListener(SWT.Paint, e->{
 			if (lineColorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, lineColorLabel.getBounds().width-1, lineColorLabel.getBounds().height-1);
 		});

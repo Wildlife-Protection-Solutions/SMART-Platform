@@ -68,7 +68,6 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SmartUtils;
@@ -264,6 +263,9 @@ public enum SurveyPackageExporter {
 	@SuppressWarnings("unchecked")
 	private void metadataToJson(AbstractCtPackage ctpackage, SurveyDesign design, Session session, Path outputFile) throws IOException {
 		
+		List<MetadataFieldValue> metadataFields = ((SurveyCtPackage)ctpackage).getMetadataValues();
+		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
+		
 		JSONArray metadataScreens = new JSONArray();
 		
 		//add mission attribute options
@@ -272,32 +274,28 @@ public enum SurveyPackageExporter {
 			MissionAttribute a = session.get(MissionAttribute.class, prop.getAttribute().getUuid());
 			//only supports number, text and list
 			if (prop.getAttribute().getType() == AttributeType.NUMERIC) {
-				metadataScreens.add(covertNumberProperty(a, session, ctpackage.getConservationArea()));
+				metadataScreens.add(covertNumberProperty(map.get(MissionMetadataField.generateKey(a)), a, session, ctpackage.getConservationArea()));
 			}else if (prop.getAttribute().getType() == AttributeType.TEXT) {
-				metadataScreens.add(covertStringProperty(a, session, ctpackage.getConservationArea()));
+				metadataScreens.add(covertStringProperty(map.get(MissionMetadataField.generateKey(a)), a, session, ctpackage.getConservationArea()));
 			}else if (prop.getAttribute().getType() == AttributeType.LIST) {
-				metadataScreens.add(covertListProperty(a, session, ctpackage.getConservationArea()));
+				metadataScreens.add(covertListProperty(map.get(MissionMetadataField.generateKey(a)), a, session, ctpackage.getConservationArea()));
 			}	
 		}
-				
-		List<MetadataFieldValue> metadataFields = ((SurveyCtPackage)ctpackage).getMetadataValues();
-
-		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
-	
+		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(MissionMetadataField.COMMENT.name()), 
 				MissionMetadataField.COMMENT.getJsonKey(), 
 				Messages.SurveyPackageExporter_CommentPageLabel,
 				getTranslations(Messages.SurveyPackageExporter_CommentPageLabel, "SurveyPackageExporter_CommentPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
-				MissionScreenOptionMeta.COMMENT.isRequired(), false, session, ctpackage.getConservationArea()));
+				false, session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(MissionMetadataField.MEMBERS.name()), 
-				MissionMetadataField.MEMBERS.isRequired(), false, session, ctpackage.getConservationArea()));
+				false, session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(MissionMetadataField.LEADER.name()),
 				MissionMetadataField.LEADER.getJsonKey(), 
 				Messages.SurveyPackageExporter_LeaderPageLabel,
 				getTranslations(Messages.SurveyPackageExporter_LeaderPageLabel, "SurveyPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
-				MissionScreenOptionMeta.LEADER.isRequired(), false, session, ctpackage.getConservationArea())); 
+				false, session, ctpackage.getConservationArea())); 
 		
 		
 		//add sampling units
@@ -343,15 +341,25 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertNumberProperty(MissionAttribute prop, Session session, ConservationArea ca) {
+	private JSONObject covertNumberProperty(MetadataFieldValue metadata, MissionAttribute prop, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
 		for (Label l : prop.getNames()) {
 			objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 		}
-		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
-		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		boolean isRequired = false;
+		boolean isVisible = true;
+		if (metadata != null) {
+			isRequired = metadata.isRequired();
+			isVisible = metadata.isVisible();
+			
+			if (!isVisible) {
+				objective.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, Double.parseDouble(metadata.getStringValue()));
+			}
+		}
+		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, isVisible);
 		
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
@@ -359,15 +367,24 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertStringProperty(MissionAttribute prop, Session session, ConservationArea ca) {
+	private JSONObject covertStringProperty(MetadataFieldValue metadata, MissionAttribute prop, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());	
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
 		for (Label l : prop.getNames()) {
 			objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 		}
-		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
-		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		boolean isRequired = false;
+		boolean isVisible = true;
+		if (metadata != null) {
+			isRequired = metadata.isRequired();
+			isVisible = metadata.isVisible();
+			if (!isVisible) {
+				objective.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, metadata.getStringValue());
+			}
+		}
+		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, isVisible);
 		
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
@@ -375,15 +392,25 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertListProperty(MissionAttribute prop, Session session, ConservationArea ca) {
+	private JSONObject covertListProperty(MetadataFieldValue metadata, MissionAttribute prop, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
 		for (Label l : prop.getNames()) {
 			objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 		}
-		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
-		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		boolean isRequired = false;
+		boolean isVisible = true;
+		if (metadata != null) {
+			isRequired = metadata.isRequired();
+			isVisible = metadata.isVisible();
+			
+			if (!isVisible) {
+				objective.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(metadata.getUuidValue()));
+			}
+		}
+		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, isVisible);
 		
 		JSONArray optionOptions = new JSONArray();
 		

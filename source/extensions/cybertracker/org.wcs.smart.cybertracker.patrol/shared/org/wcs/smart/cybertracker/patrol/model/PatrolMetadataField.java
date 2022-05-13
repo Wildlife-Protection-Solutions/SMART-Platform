@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.patrol.model;
 
+import org.wcs.smart.patrol.model.PatrolAttribute;
+
 /**
  * Patrol metadata fields
  * 
@@ -70,5 +72,15 @@ public enum PatrolMetadataField {
 	 */
 	public boolean isFixed() {
 		return this.isFixed;
+	}
+	
+	/**
+	 * Generates the metadata field keyid for a custom patrol attribute
+	 * 
+	 * @param attribute
+	 * @return
+	 */
+	public static String generateKey(PatrolAttribute attribute) {
+		return "custom_" + attribute.getKeyId(); //$NON-NLS-1$
 	}
 }

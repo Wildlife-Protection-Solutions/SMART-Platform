@@ -214,7 +214,7 @@ public enum IncidentPackageExporter {
 			ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctpackage.getConservationArea(), session);
 			md.setVisible(ops.getTrackObserver());
 			
-			JSONObject emp = CtJsonExportUtils.convertEmployees(md, false, false, session, ctpackage.getConservationArea());
+			JSONObject emp = CtJsonExportUtils.convertEmployees(md, false, session, ctpackage.getConservationArea());
 			metadataScreens.add(emp);
 		}
 		

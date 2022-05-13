@@ -18,6 +18,12 @@ BEGIN
 END$$;
 
 
+ALTER TABLE smart.ct_metadata_value ADD COLUMN is_required boolean default false not null;
+
+
+update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker';
+update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker';
+
 
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.asset.query';
 update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.asset.query';

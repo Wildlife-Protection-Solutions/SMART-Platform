@@ -27,7 +27,6 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -47,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**
@@ -56,7 +56,6 @@ import org.wcs.smart.patrol.internal.Messages;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class PresentationHeader extends Composite{
 
 	public static final String TAB_BAR_CLASS = "SMARTTabBar"; //$NON-NLS-1$
@@ -81,10 +80,7 @@ public class PresentationHeader extends Composite{
 		super(parent, style);
 		
 		this.dateModified = dateModified;
-		
-		WidgetElement.setCSSClass(this, TAB_BAR_CLASS);
-		WidgetElement.applyStyles(this, true);
-		
+		SmartUiUtils.setCSSClass(this, TAB_BAR_CLASS);
 		createComponent();
 	}
 

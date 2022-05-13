@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
@@ -57,6 +56,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -72,7 +72,6 @@ import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class RecordDescriptionPage extends EditorPart{
 
 	private FormToolkit  toolkit;
@@ -121,7 +120,7 @@ public class RecordDescriptionPage extends EditorPart{
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
 		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
-		WidgetElement.setCSSClass(buttonPanel, "SMARTFormHeader");  //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(buttonPanel, SmartUiUtils.FORM_HEADER_CLASS);
 		
 		headerLabel = toolkit.createLabel(buttonPanel, ""); //$NON-NLS-1$
 		

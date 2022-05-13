@@ -54,7 +54,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -139,6 +138,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.control.MultiLineText;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -153,6 +153,7 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -170,7 +171,6 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
@@ -206,7 +206,6 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class EntityEditor extends EditorPart implements MapPart{
 	
 	private static final String ERROR_LINK_NOT_FOUND = Messages.EntityEditor_LinkNotFound;
@@ -999,7 +998,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		Composite header = toolkit.createComposite(rightPart);
 		header.setLayout(new GridLayout(2, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(header, "SMARTFormHeader");  //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(header, SmartUiUtils.FORM_HEADER_CLASS);
 		
 		lblIdentifier = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

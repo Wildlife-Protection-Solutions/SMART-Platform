@@ -444,6 +444,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			v.setCtPackage((AbstractCtPackage)ppackage);
 			v.setConservationArea(ppackage.getConservationArea());
 			v.setMetadataKey(field.name());
+			v.setRequired(false);
 			ppackage.getMetadataValues().add(v);
 		}
 		v.setVisible(true);

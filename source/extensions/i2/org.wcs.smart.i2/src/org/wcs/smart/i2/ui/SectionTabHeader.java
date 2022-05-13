@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
@@ -69,7 +70,7 @@ public class SectionTabHeader extends Composite implements Listener{
 	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Runnable onMaximize){
 		super(parent, SWT.NONE);
 		
-		WidgetElement.setCSSClass(this, TAB_BAR_CLASS);
+		SmartUiUtils.setCSSClass(this, TAB_BAR_CLASS);
 		
 		addListener(SWT.Paint, e->{
 			CLabel t = null;
@@ -96,7 +97,7 @@ public class SectionTabHeader extends Composite implements Listener{
 			CLabel header = new CLabel(this, SWT.NONE);
 			header.setText(tabs[i]);
 			header.setMargins(3, 5, 7, 3);
-			WidgetElement.setCSSClass(header, TAB_CLASS);
+			SmartUiUtils.setCSSClass(header, TAB_CLASS);
 			header.addListener(SWT.Paint,e->drawBorder(e.gc));
 			
 			headers[i] = header;
@@ -113,7 +114,7 @@ public class SectionTabHeader extends Composite implements Listener{
 					
 					lastClass = WidgetElement.getCSSClass(header);
 					if (lastClass != null && !lastClass.equals(TAB_SELECTED_CLASS)) {
-						WidgetElement.setCSSClass(header, TAB_MOUSEOVER_CLASS);
+						SmartUiUtils.setCSSClass(header, TAB_MOUSEOVER_CLASS);
 						WidgetElement.applyStyles(header, true);
 					}
 				}
@@ -123,7 +124,7 @@ public class SectionTabHeader extends Composite implements Listener{
 					header.setCursor(null);
 					String currentClass = WidgetElement.getCSSClass(header);
 					if (!currentClass.equals(TAB_SELECTED_CLASS)) {
-						WidgetElement.setCSSClass(header, lastClass);
+						SmartUiUtils.setCSSClass(header, lastClass);
 						WidgetElement.applyStyles(header, true);
 					}
 				}
@@ -204,8 +205,8 @@ public class SectionTabHeader extends Composite implements Listener{
 	}
 	
 	private void selectTabItem(CLabel link) {
-		for (CLabel l : headers) WidgetElement.setCSSClass(l, TAB_CLASS);
-		WidgetElement.setCSSClass(link, TAB_SELECTED_CLASS);
+		for (CLabel l : headers) SmartUiUtils.setCSSClass(l, TAB_CLASS);
+		SmartUiUtils.setCSSClass(link, TAB_SELECTED_CLASS);
 		WidgetElement.applyStyles(this, true);	
 	}
 }

@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
@@ -100,7 +99,6 @@ import org.wcs.smart.ui.properties.KeyInputDialog;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class ProfileDialog extends SmartStyledDialog {
 
 	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
@@ -351,7 +349,7 @@ public class ProfileDialog extends SmartStyledDialog {
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT ));
-		WidgetElement.setCSSClass(header, "customcolor"); //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(header, "customcolor"); //$NON-NLS-1$
 
 		
 		Composite temp = new Composite(header, SWT.NONE);
@@ -535,7 +533,7 @@ public class ProfileDialog extends SmartStyledDialog {
 		btnColor.addListener(SWT.Paint, e->{
 			if (btnColor.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, btnColor.getBounds().width-1, btnColor.getBounds().height-1);
 		});
-		WidgetElement.setCSSClass(btnColor, "customcolor"); //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(btnColor, "customcolor"); //$NON-NLS-1$
 		
 		Button btnSetTrackColor = new Button(ctemp, SWT.PUSH);
 		btnSetTrackColor.setText("..."); //$NON-NLS-1$

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -38,6 +37,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.navigation.INavigationExportAction;
@@ -149,7 +149,7 @@ public class CtNavigationExportDialog extends SmartStyledTitleDialog {
 			
 			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(key, true);
 			btnAction.setSelection(dogenerate);
-			WidgetElement.setCSSClass(small, "donotstyle"); //$NON-NLS-1$
+			SmartUiUtils.setCSSClass(small, "donotstyle"); //$NON-NLS-1$
 			updateBackground(small, btnAction, selectionColor);
 			
 		}

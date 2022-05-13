@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -185,8 +184,8 @@ public class FileDetailsPanel {
 		
 		//get background color
 		Composite temp = new Composite(exifMetadataComp, SWT.NONE);
-		WidgetElement.setCSSClass(temp, SmartUiUtils.HEADER_CLASS);
-		WidgetElement.applyStyles(temp, false);
+		SmartUiUtils.setCSSClass(temp, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.applyStyles(temp, false);
 		Color bgColor = temp.getBackground();
 		temp.dispose();
 

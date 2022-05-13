@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -75,6 +74,7 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -112,7 +112,6 @@ import org.wcs.smart.ui.SmartWizardDialog;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class IntelRecordObservationQueryEditor extends EditorPart implements MapPart, IQueryEditor{
 
 	public static final String ID = "org.wcs.smart.i2.editor.query.recordobservation"; //$NON-NLS-1$
@@ -335,7 +334,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		headerComp.setLayout(new GridLayout(2, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");  //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(headerComp, SmartUiUtils.FORM_HEADER_CLASS);
 		
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

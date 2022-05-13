@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
 /**
@@ -51,6 +52,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class SmartUiUtils {
 
 	private static Color dialogColor ;
@@ -61,6 +63,8 @@ public class SmartUiUtils {
 	
 	public static final String HEADER_CLASS = "SMARTSection";  //$NON-NLS-1$
 	public static final String SUB_HEADER_CLASS = "SMARTSubSection";  //$NON-NLS-1$
+	
+	public static final String FORM_HEADER_CLASS = "SMARTFormHeader"; //$NON-NLS-1$
 	
 	public static void configure(TableComboViewer viewer) {
 		//the height for these does not configure nicely on mac so for mac only we adjust the height
@@ -97,13 +101,20 @@ public class SmartUiUtils {
 		Composite sectionheader = new Composite(parent, SWT.NONE);
 		sectionheader.setLayout(new GridLayout());
 		sectionheader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(sectionheader, style);
+		setCSSClass(sectionheader, style);
 		Label headerLabel = new Label(sectionheader, SWT.NONE);
 		headerLabel.setText(text);
 		
 		return sectionheader;
 	}
 	
+	public static void setCSSClass(Widget widget, String className) {
+		WidgetElement.setCSSClass(widget, className);
+	}
+	
+	public static void applyStyles(Widget widget, boolean applyStylesToChildNodes) {
+		WidgetElement.applyStyles(widget, applyStylesToChildNodes);
+	}
 	
 	/**
 	 * Assigns a transparent background to the given control

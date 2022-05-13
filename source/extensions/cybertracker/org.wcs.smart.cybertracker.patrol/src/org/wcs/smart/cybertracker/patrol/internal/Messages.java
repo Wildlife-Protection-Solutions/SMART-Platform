@@ -196,6 +196,8 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_FixedTooltip;
 
+	public static String PatrolMetadataPackageContribution_InvalidDefaultValue;
+
 	public static String PatrolMetadataPackageContribution_LeaderLabel;
 
 	public static String PatrolMetadataPackageContribution_LeaderRequired;
@@ -215,6 +217,10 @@ public class Messages extends NLS {
 	public static String PatrolMetadataPackageContribution_ObjectiveLabel;
 
 	public static String PatrolMetadataPackageContribution_PilotLabel;
+
+	public static String PatrolMetadataPackageContribution_RequiredField;
+
+	public static String PatrolMetadataPackageContribution_RequiredFieldTooltip;
 
 	public static String PatrolMetadataPackageContribution_ShowChecked;
 

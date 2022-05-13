@@ -141,6 +141,7 @@ public class Messages extends NLS {
 	public static String SurveyMetadataPackageContribution_FilterMsg;
 	public static String SurveyMetadataPackageContribution_FixedValueLabel;
 	public static String SurveyMetadataPackageContribution_FixedValueTooltip;
+	public static String SurveyMetadataPackageContribution_InvalidAttributeValue;
 	public static String SurveyMetadataPackageContribution_LeaderLabel;
 	public static String SurveyMetadataPackageContribution_LeaderRequired;
 	public static String SurveyMetadataPackageContribution_MembersLabel;
@@ -148,6 +149,8 @@ public class Messages extends NLS {
 	public static String SurveyMetadataPackageContribution_MetadataColumn;
 	public static String SurveyMetadataPackageContribution_MetadataTooltip;
 	public static String SurveyMetadataPackageContribution_MissionCommentLabel;
+	public static String SurveyMetadataPackageContribution_RequiredField;
+	public static String SurveyMetadataPackageContribution_RequiredFieldTooltip;
 	public static String SurveyMetadataPackageContribution_TabName;
 	public static String SurveyMetadataPackageContribution_UserSelectedLabel;
 	public static String SurveyMetadataPackageContribution_UserSelectedTooltip;

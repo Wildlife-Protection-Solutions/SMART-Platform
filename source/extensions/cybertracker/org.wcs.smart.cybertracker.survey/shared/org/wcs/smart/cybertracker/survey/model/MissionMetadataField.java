@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.survey.model;
 
+import org.wcs.smart.er.model.MissionAttribute;
+
 /**
  * Survey Metadata fields
  * @author Emily
@@ -49,4 +51,21 @@ public enum MissionMetadataField {
 		return this.isRequired;
 	}
 	
+	/**
+	 * The prefix for the key for custom mission attributes
+	 * 
+	 * @return
+	 */
+	public static String getCustomAttributePrefix() {
+		return "custom_"; //$NON-NLS-1$
+	}
+	/**
+	 * Generates the metadata field keyid for a custom mission attribute
+	 * 
+	 * @param attribute
+	 * @return
+	 */
+	public static String generateKey(MissionAttribute attribute) {
+		return getCustomAttributePrefix() + attribute.getKeyId(); 
+	}
 }

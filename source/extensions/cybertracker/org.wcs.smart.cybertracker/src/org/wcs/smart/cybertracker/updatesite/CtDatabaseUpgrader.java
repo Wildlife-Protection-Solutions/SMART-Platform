@@ -90,20 +90,27 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			update40to50(session);
 			update50to60(session);
 			update60to70(session);
+			update70to80(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)) {
 			(new CtDatabaseUpgrader30To40()).upgrade(session);
 			update40to50(session);
 			update50to60(session);
 			update60to70(session);
+			update70to80(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
 			update40to50(session);
 			update50to60(session);
 			update60to70(session);
+			update70to80(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_5_0)) {
 			update50to60(session);
 			update60to70(session);
+			update70to80(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_6_0)) {
 			update60to70(session);
+			update70to80(session);
+		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_7_0)) {
+			update70to80(session);
 		}
 		
 	}
@@ -187,6 +194,18 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_7_0, session);
+	}
+	
+	private void update70to80(Session session) {
+		String[] sql = new String[] {
+			"ALTER TABLE smart.ct_metadata_value ADD COLUMN is_required boolean default false not null", //$NON-NLS-1$
+		};
+		
+		for (String s : sql) {
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_8_0, session);
 	}
 	
 	private void createTables(Session session) {

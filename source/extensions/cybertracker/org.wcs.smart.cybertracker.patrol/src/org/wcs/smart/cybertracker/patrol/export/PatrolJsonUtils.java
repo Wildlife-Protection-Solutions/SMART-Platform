@@ -209,7 +209,11 @@ public class PatrolJsonUtils {
 				}
 				if (!(value instanceof PatrolAttributeListItem)) value = null;
 			}else if (pa.getType() == Attribute.AttributeType.DATE) {
-				value = LocalDate.parse((String)value, DATEFORMAT);
+				if (!value.toString().isBlank()) {
+					value = LocalDate.parse((String)value, DATEFORMAT);
+				}else {
+					value = null;
+				}
 			}
 			
 			if (value == null) continue;

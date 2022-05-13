@@ -69,7 +69,6 @@ import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
-import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -100,7 +99,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	private Text txtName;
 	
 	private List<IPackageUiContribution> contributions = null;
-	private ConfigurableModel selectedModel = null;
+	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 
 	private Consumer<String> onValidate;
@@ -112,6 +111,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	private IEclipseContext context;
 	
 	public CtSurveyPackageConfigurator() {
+		
 		contributions = new ArrayList<>();
 		contributions.add(new SurveyMetadataPackageContribution());
 		for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
@@ -188,21 +188,25 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		designViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				selectedModel = null;
+				SurveyDesign design = null;
 				Object profile = ((IStructuredSelection)designViewer.getSelection()).getFirstElement();
-				if (profile instanceof ConfigurableModel) {
-					selectedModel = (ConfigurableModel)profile;
-					cmDefaultProfile = getAssciatedProfile(selectedModel);
-					profileViewer.setSelection(new StructuredSelection(cmDefaultProfile));
-				}else if (profile instanceof DataModelWrapper) {
-					selectedModel = null;					
-				}
-				if (selectedModel == null) {
+				if (profile instanceof SurveyDesign) {
+					design = (SurveyDesign)profile;
+				};
+				
+				if (design == null) {
 					context.set(ConfigurableModel.class, new ConfigurableModel());
+					context.set(SurveyDesign.class, null);
 				}else {
-					context.set(ConfigurableModel.class, selectedModel);
+					ConfigurableModel cm = design.getConfigurableModel();
+					cmDefaultProfile = getAssciatedProfile(cm);
+					profileViewer.setSelection(new StructuredSelection(cmDefaultProfile));
+					
+					context.set(ConfigurableModel.class, cm != null ? cm : new ConfigurableModel());
+					context.set(SurveyDesign.class, design);
 				}
-				{ if (!isInit) validate();}
+				
+				if (!isInit) validate();
 			}
 		});
 
@@ -359,6 +363,9 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 							new Object[] {"state", SurveyDesign.State.ACTIVE}).getResultList()); //$NON-NLS-1$
 					
+					designs.forEach(e->{
+						if (e.getConfigurableModel() != null) e.getConfigurableModel().hashCode();
+					});
 					profiles.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
 					
 					if (ctpackage != null && ctpackage.getUuid() != null) {

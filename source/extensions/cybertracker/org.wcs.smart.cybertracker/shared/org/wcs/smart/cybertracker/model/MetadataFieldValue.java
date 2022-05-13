@@ -59,6 +59,8 @@ public class MetadataFieldValue extends UuidItem {
 	
 	//if the item should be visible or not
 	private boolean visible = true;
+	
+	private boolean isRequired = true;
 
 	//default value
 	private String stringValue;
@@ -99,6 +101,14 @@ public class MetadataFieldValue extends UuidItem {
 	}
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+	}
+	
+	@Column(name="is_required")
+	public boolean isRequired() {
+		return isRequired;
+	}
+	public void setRequired(boolean isRequired) {
+		this.isRequired = isRequired;
 	}
 	
 	@Column(name="string_value")

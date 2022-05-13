@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -303,11 +302,10 @@ public class ObservationItemList {
 			return this.wo;
 		}
 		
-		@SuppressWarnings("restriction")
 		private void createComposite() {
 			//do this so initial highlighting is respected
 			//otherwise it is overwritten
-			WidgetElement.setCSSClass(this, "DO-NOT-STYLE"); //$NON-NLS-1$
+			SmartUiUtils.setCSSClass(this, "DO-NOT-STYLE"); //$NON-NLS-1$
 			setLayout(new GridLayout(2, true));
 
 			Composite left = new Composite(this, SWT.NONE);

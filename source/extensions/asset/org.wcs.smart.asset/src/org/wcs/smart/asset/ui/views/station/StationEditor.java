@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -86,6 +85,7 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.IdFieldHeader;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.SectionHeader;
 
@@ -422,7 +422,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
-		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");  //$NON-NLS-1$
+		SmartUiUtils.setCSSClass(headerComp, SmartUiUtils.FORM_HEADER_CLASS);
 		headerComp.setLayout(new GridLayout(5, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
