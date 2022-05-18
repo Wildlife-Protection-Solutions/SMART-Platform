@@ -251,6 +251,7 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 			});
 			cmbState.setInput(SamplingUnit.State.values());
 			cmbState.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			cmbState.addSelectionChangedListener(this);
 			
 			l = new Label(comp, SWT.NONE);
 			l.setText(Messages.EditSamplingUnitDialog_IdLabel);
