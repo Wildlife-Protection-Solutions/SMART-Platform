@@ -31,6 +31,8 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 
+import com.ibm.icu.text.Collator;
+
 /**
  * Access the merged Data Model for Cross Conservation Area Analysis.
  * 
@@ -122,6 +124,9 @@ public abstract class CcaaDataModel {
 		for (AttributeListItem li : items) {
 			li.setIcon( DataModelMerger.findIcon(session, findIconKey(li, session)) );
 		}
+		
+		//sort alphabetically as orders may be duplicated
+		items.sort((a,b)->Collator.getInstance().compare(a.getName(),  b.getName()));
 		return items;
 	}
 	

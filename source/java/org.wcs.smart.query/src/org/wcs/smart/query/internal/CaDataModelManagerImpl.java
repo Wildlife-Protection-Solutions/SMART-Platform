@@ -129,7 +129,10 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 		Object[][] filters = new Object[onlyActive ? 2 : 1][2];
 		filters[0] = new Object[] {"attribute", attribute}; //$NON-NLS-1$
 		if (onlyActive) filters[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
-		return QueryFactory.buildQuery(session, AttributeListItem.class, filters).getResultList();
+		List<AttributeListItem> items = QueryFactory.buildQuery(session, AttributeListItem.class, filters)
+				.getResultList();
+		items.sort((a,b)->Integer.compare(a.getListOrder(), b.getListOrder()));
+		return items;
 	}
 	
 	/**
