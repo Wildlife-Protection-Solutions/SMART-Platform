@@ -137,7 +137,7 @@ public class Upgrader620To630 implements IDatabaseUpgrader {
 					if (icon[0].equalsIgnoreCase("afropavo_congensis")) { //$NON-NLS-1$
 						found = true;
 					}
-					if (!found) continue;
+					if (!found) continue;				
 					
 					byte[] iconuuid = DerbyUtils.createUuid();
 					
