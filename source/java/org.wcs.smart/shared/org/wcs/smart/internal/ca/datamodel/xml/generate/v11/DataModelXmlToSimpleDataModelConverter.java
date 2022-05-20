@@ -273,6 +273,8 @@ public class DataModelXmlToSimpleDataModelConverter implements IXmlToDataModelCo
 			newAttribute.setConservationArea(null);
 			newAttribute.setIsRequired(xmlAtt.isIsrequired());
 			newAttribute.setKeyId(xmlAtt.getKey());
+			newAttribute.setType(parseAttributeType(xmlAtt.getType()));
+			
 			processIcon(newAttribute, xmlAtt.getIconkey());
 			
 			/* Names */
@@ -292,34 +294,35 @@ public class DataModelXmlToSimpleDataModelConverter implements IXmlToDataModelCo
 			}
 			
 			/* Attribute List */
-			if (xmlAtt.getValues() != null){
-				List<ListNode> items = xmlAtt.getValues();
-				if (items.size() > 0){
-					newAttribute.setAttributeList(new ArrayList<AttributeListItem>());
-				}
-				for (int i = 0; i < items.size(); i ++){
-					ListNode item = items.get(i);
-					AttributeListItem newItem = new AttributeListItem();
-					newItem.setKeyId(item.getKey());
-					newItem.setListOrder(i);
-					updateNames(newItem, item.getNames());
-					newItem.setUuid(null);
-					newItem.setAttribute(newAttribute);
-					newItem.setIsActive(item.isIsactive());
-					processIcon(newItem, item.getIconkey());
-					newAttribute.getAttributeList().add(newItem);
-					
+			if (newAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+				newAttribute.setAttributeList(new ArrayList<AttributeListItem>());
+				if (xmlAtt.getValues() != null){
+					List<ListNode> items = xmlAtt.getValues();
+					for (int i = 0; i < items.size(); i ++){
+						ListNode item = items.get(i);
+						AttributeListItem newItem = new AttributeListItem();
+						newItem.setKeyId(item.getKey());
+						newItem.setListOrder(i);
+						updateNames(newItem, item.getNames());
+						newItem.setUuid(null);
+						newItem.setAttribute(newAttribute);
+						newItem.setIsActive(item.isIsactive());
+						processIcon(newItem, item.getIconkey());
+						newAttribute.getAttributeList().add(newItem);		
+					}
 				}
 			}
 			
 			/* Tree List */
-			List<TreeNodeType> rootNodes = xmlAtt.getTree();
-			if (rootNodes != null && rootNodes.size() > 0){
+			if (newAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.TREE) {
 				newAttribute.setTree(new ArrayList<AttributeTreeNode>());
-				for (int i = 0; i < rootNodes.size(); i ++){
-					AttributeTreeNode newNode = processAttributeTreeNode(null, newAttribute, rootNodes.get(i));
-					newNode.setNodeOrder(i);
-					newAttribute.getTree().add(newNode);
+				List<TreeNodeType> rootNodes = xmlAtt.getTree();
+				if (rootNodes != null){
+					for (int i = 0; i < rootNodes.size(); i ++){
+						AttributeTreeNode newNode = processAttributeTreeNode(null, newAttribute, rootNodes.get(i));
+						newNode.setNodeOrder(i);
+						newAttribute.getTree().add(newNode);
+					}
 				}
 			}
 			
@@ -333,7 +336,7 @@ public class DataModelXmlToSimpleDataModelConverter implements IXmlToDataModelCo
 				}
 			}
 
-			newAttribute.setType(parseAttributeType(xmlAtt.getType()));
+			
 			newAttribute.setUuid(null);	
 			attributeLookUp.put(xmlAtt.getKey(), newAttribute);
 		}
