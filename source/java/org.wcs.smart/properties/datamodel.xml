@@ -29,7 +29,7 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="numberofadultfemales" isrequired="false" type="NUMERIC" iconkey="adult_female">
+        <attribute key="numberofadultfemales" isrequired="false" type="NUMERIC" iconkey="number_of_adult_females">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -358,7 +358,7 @@
             <tree key="hornsorantlers" isactive="true" iconkey="antlers">
                 <names language_code="en" value="Horns or Antlers"/>
             </tree>
-            <tree key="bones" isactive="true">
+            <tree key="bones" isactive="true" iconkey="bones">
                 <names language_code="en" value="Bones"/>
             </tree>
             <tree key="gallbladder" isactive="true" iconkey="gall_bladder">
@@ -370,7 +370,7 @@
             <tree key="skin" isactive="true" iconkey="skin">
                 <names language_code="en" value="Skin"/>
             </tree>
-            <tree key="skull" isactive="true">
+            <tree key="skull" isactive="true" iconkey="skull">
                 <names language_code="en" value="Skull"/>
             </tree>
             <tree key="paw" isactive="true" iconkey="paws">
@@ -473,7 +473,7 @@
                 <names language_code="en" value="Destroyed"/>
             </values>
         </attribute>
-        <attribute key="numberofyoung" isrequired="false" type="NUMERIC" iconkey="young">
+        <attribute key="numberofyoung" isrequired="false" type="NUMERIC" iconkey="number_of_young">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -483,14 +483,14 @@
         <attribute key="isactive" isrequired="false" type="BOOLEAN">
             <names language_code="en" value="Is Active"/>
         </attribute>
-        <attribute key="numberofadultmales" isrequired="false" type="NUMERIC" iconkey="adult_male">
+        <attribute key="numberofadultmales" isrequired="false" type="NUMERIC" iconkey="number_of_adult_males">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
             <names language_code="ka" value="ზრდასრული მამრის რაოდენობა"/>
             <names language_code="en" value="Number of Adult Males"/>
         </attribute>
-        <attribute key="phonenumber" isrequired="false" type="TEXT">
+        <attribute key="phonenumber" isrequired="false" type="TEXT" iconkey="phone_number">
             <qa_regex></qa_regex>
             <names language_code="en" value="Phone Number"/>
         </attribute>
@@ -509,19 +509,19 @@
         <attribute key="ageofsign" isrequired="false" type="LIST" iconkey="age_of_sign">
             <names language_code="en" value="Age of Sign"/>
             <names language_code="ka" value="ნიშანის სიძველე"/>
-            <values key="fresh" isactive="true">
+            <values key="fresh" isactive="true" iconkey="fresh_2">
                 <names language_code="en" value="Fresh"/>
                 <names language_code="ka" value="ახალი"/>
             </values>
-            <values key="recent" isactive="true">
+            <values key="recent" isactive="true" iconkey="recent">
                 <names language_code="en" value="Recent"/>
                 <names language_code="ka" value="არც ისე დიდი ხნის"/>
             </values>
-            <values key="old" isactive="true">
+            <values key="old" isactive="true" iconkey="old">
                 <names language_code="ka" value="ძველი"/>
                 <names language_code="en" value="Old"/>
             </values>
-            <values key="veryold" isactive="true">
+            <values key="veryold" isactive="true" iconkey="very_old">
                 <names language_code="en" value="Very old"/>
                 <names language_code="ka" value="ძალიან ძველი"/>
             </values>
@@ -873,7 +873,7 @@
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="numberoflogs" isrequired="false" type="NUMERIC">
+        <attribute key="numberoflogs" isrequired="false" type="NUMERIC" iconkey="number_of_logs">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -962,7 +962,7 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="numberofdomesticanimals" isrequired="false" type="NUMERIC">
+        <attribute key="numberofdomesticanimals" isrequired="false" type="NUMERIC" iconkey="number_of_domestic_animals">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -978,7 +978,7 @@
             </qa_minmax>
             <names language_code="en" value="Area Burned ha"/>
         </attribute>
-        <attribute key="positiontype" isrequired="false" type="LIST">
+        <attribute key="positiontype" isrequired="false" type="LIST" iconkey="position_type">
             <names language_code="ka" value="პოზიციის ტიპი"/>
             <names language_code="en" value="Position Type"/>
             <values key="start" isactive="true">
@@ -1725,7 +1725,7 @@
                 <attributes isactive="true" attributekey="typeofsaltlick"/>
                 <attributes isactive="true" attributekey="species"/>
             </category>
-            <category key="waterhole" ismultiple="true" isactive="true">
+            <category key="waterhole" ismultiple="true" isactive="true" iconkey="waterhole">
                 <names language_code="ka" value="წყალში გასასვლელი (ხვრელი)"/>
                 <names language_code="en" value="Water Hole"/>
                 <attributes isactive="true" attributekey="haswater"/>
