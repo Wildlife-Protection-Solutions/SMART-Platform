@@ -13,6 +13,6 @@
 	<name>SMART Cybertracker Survey Module </name>
 	<artifactId>org.wcs.smart.cybertracker.survey</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.0-SNAPSHOT</version>
+	<version>7.5.1-SNAPSHOT</version>
 	
 </project>

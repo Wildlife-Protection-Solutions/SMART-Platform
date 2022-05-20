@@ -184,6 +184,7 @@
    <extension
          point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
+            requires="org.wcs.smart.cybertracker"
             upgrader="org.wcs.smart.cybertracker.survey.updatesite.DataQueueCtMissionDatabaseUpgrader">
       </dbUpgrader>
       <pluginMapping
