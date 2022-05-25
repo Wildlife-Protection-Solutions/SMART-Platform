@@ -52,7 +52,7 @@ public class Upgrader700To750 extends AbstractInteralDatabaseUpgrader {
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
 		
-		monitor.subTask(MessageFormat.format(Messages.Upgrader700To741_UpgradeMsg, UpgradeEngine.UpgradeFromVersion.V750.fromVersion, UpgradeEngine.UpgradeFromVersion.V750.toVersion));  
+		monitor.subTask(MessageFormat.format(Messages.Upgrader700To741_UpgradeMsg, UpgradeEngine.UpgradeFromVersion.V700.fromVersion, UpgradeEngine.UpgradeFromVersion.V750.toVersion));  
 		thrownException = null;
 		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
@@ -65,7 +65,7 @@ public class Upgrader700To750 extends AbstractInteralDatabaseUpgrader {
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
-						thrownException = new Exception(MessageFormat.format(Messages.Upgrader700To741_UpgradeErrorMsage, UpgradeEngine.UpgradeFromVersion.V750.fromVersion, UpgradeEngine.UpgradeFromVersion.V750.toVersion), e); 
+						thrownException = new Exception(MessageFormat.format(Messages.Upgrader700To741_UpgradeErrorMsage, UpgradeEngine.UpgradeFromVersion.V700.fromVersion, UpgradeEngine.UpgradeFromVersion.V750.toVersion), e); 
 					}
 				}
 			});
