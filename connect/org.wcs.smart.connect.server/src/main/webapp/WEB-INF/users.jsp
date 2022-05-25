@@ -143,7 +143,7 @@
     	<div id="desktoperror" class="errorsection"></div>
     	<span>
     	<button class="block button top-spacer" id="btnNewDesktopUser" style="display:inline"><fmt:message key="users.newdesktopuserbutton"/></button>
-    	<button class="block button top-spacer " id="btnRefreshDesktop"style="display:inline">Refresh</button>
+    	<button class="block button top-spacer " id="btnRefreshDesktop"style="display:inline"><fmt:message key="users.refreshbutton"/></button>
     	</span>
   	</div>
   

@@ -36,6 +36,7 @@ window.onload = function(){
 	document.querySelector("#btnNewDesktopUser").onclick=showNewDesktopUserDialogSpecial;
 	document.querySelector("#canceldesktopnewuser").onclick = function(){closeDialog('newDesktopUserDialog');};
 	document.querySelector("#newdesktopuserform").onsubmit = createNewDesktopUser;
+	document.querySelector("#btnRefreshDesktop").onclick=refreshDesktopUsers;
 	
 	//edit desktop dialog
 	document.querySelector("#canceldesktopedituser").onclick = function(){closeDialog('editDesktopUserDialog');};

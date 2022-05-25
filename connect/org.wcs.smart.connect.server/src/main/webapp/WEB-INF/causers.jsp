@@ -27,15 +27,15 @@
     	<div id="message" class="msgsection"></div>
   	</div>
   <!--  user tab section  -->
-  <div id="users_body" class="tabbody">
+  <div id="users_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
   	<p class="infomessage"><fmt:message key="users.usermessage"/></p>
   	<div>
     	<button class="block button top-spacer" id="btnNewUser"><fmt:message key="users.createnewbutton"/></button>
   	</div>
   
-	<div class="top-spacer"  style="margin-left: -20px" >
+	<div class="top-spacer">
 
-		<div class="user-tables-wrapper user-tables-float">
+		
   		<div id="usertable" class="user-tables-float table-cell smart-table">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.userlabel"/></div>
@@ -49,10 +49,10 @@
 				<div class="table-cell smart-table-cell"><fmt:message key="users.emaillabel"/></div>
 			</div>
   		</div>
-  		</div>
+  		
 
 
-		<div id="userdetails" style="width:100%;" class="table-cell border-section">
+		<div id="userdetails" style="width:100%; min-width:250px;" class="table-cell border-section">
 			<div class="pageheader"><fmt:message key="users.userdetails"/></div>
 			<div id="userinfo">
 				<div id="userinfodefaults"></div>
@@ -75,15 +75,16 @@
 
 
 	<!--  Desktop Users tab section  -->
-	<div id="desktopusers_body" class="tabbody" style="display:none">
+	<div id="desktopusers_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 	<p class="infomessage"><fmt:message key="users.desktopmessage"/></p>
 	<div>
     	<div id="desktopmessage" class="msgsection"></div>
     	<div id="desktoperror" class="errorsection"></div>
-    	<button class="block button top-spacer" id="btnNewDesktopUser"><fmt:message key="users.newdesktopuserbutton"/></button>
+    	<button class="block button top-spacer" id="btnNewDesktopUser" style="display:inline"><fmt:message key="users.newdesktopuserbutton"/></button>
+    	<button class="block button top-spacer " id="btnRefreshDesktop" style="display:inline"><fmt:message key="users.refreshbutton"/></button>
   	</div>
   
-	<div class="top-spacer"  style="margin-left: -20px" >
+	<div class="top-spacer">
   		<div id="deskptopuserstable" class="table-cell smart-table" style="width:50%">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserlabel"/></div>
