@@ -125,15 +125,21 @@ public class UpgradeServlet extends HttpServlet {
 					upgrade600to620(s);
 					upgrade620to630(s);
 					upgrade630to700(s);
+					upgrade700to751(s);
 				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
 					upgrade600to620(s);
 					upgrade620to630(s);
 					upgrade630to700(s);
+					upgrade700to751(s);
 				}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
 					upgrade620to630(s);
 					upgrade630to700(s);
+					upgrade700to751(s);
 				}else if (filestoreVersion.equals("6.3.0")) { //$NON-NLS-1$
 					upgrade630to700(s);
+					upgrade700to751(s);
+				}else if (filestoreVersion.equals("7.0.0")) { //$NON-NLS-1$
+					upgrade700to751(s);
 				}else {
 					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
@@ -266,6 +272,37 @@ public class UpgradeServlet extends HttpServlet {
 		
 		
 	}
+	
+	
+	private void upgrade700to751(Session s) {
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					//disable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+					
+					//run these commands at end
+					//change ca version so users cannot sync with this and cause problems
+					c.createStatement().execute("update connect.ca_info SET version = uuid_generate_v4()"); //$NON-NLS-1$
+					c.createStatement().execute("delete from connect.change_log"); //$NON-NLS-1$
+					c.createStatement().execute("delete from connect.change_log_history"); //$NON-NLS-1$
+					
+					
+					//upgrade icons
+					upgradeIcons(c, "c38_special_2", "yes");  //$NON-NLS-1$//$NON-NLS-2$
+					
+					//re-enable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$
+					
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});	
+	}
+	
 	
 	private void updateProfilesV6toV7(Connection c) throws SQLException {
 		String profilekey = "profile1"; //$NON-NLS-1$
