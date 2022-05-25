@@ -29,7 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.NamedKeyIconItem;
 
 /**
  * Patrol mandate
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  */
 @Entity
 @Table(name = "smart.patrol_mandate")
-public class PatrolMandate extends NamedKeyItem{
+public class PatrolMandate extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;
 	

@@ -31,7 +31,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.NamedKeyIconItem;
 
 /**
  * Class to represent a sub-transportation 
@@ -42,7 +42,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  */
 @Entity
 @Table(name = "smart.patrol_transport")
-public class PatrolTransportType extends NamedKeyItem{
+public class PatrolTransportType extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;
 	

@@ -42,6 +42,9 @@
    <feature url="features/org.wcs.smart.asset.feature_8.0.0.qualifier.jar" id="org.wcs.smart.asset.feature" version="8.0.0.qualifier">
       <category name="asset"/>
    </feature>
+   <feature url="features/org.wcs.smart.r.feature_8.0.0.qualifier.jar" id="org.wcs.smart.r.feature" version="8.0.0.qualifier">
+      <category name="r"/>
+   </feature>
    <feature url="features/org.wcs.smart.cybertracker.incident.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.incident.feature" version="8.0.0.qualifier">
       <category name="smartmobile"/>
    </feature>
@@ -55,6 +58,9 @@
       <category name="smartmobile"/>
    </feature>
    <feature url="features/org.wcs.smart.smartcollect.feature_8.0.0.qualifier.jar" id="org.wcs.smart.smartcollect.feature" version="8.0.0.qualifier">
+      <category name="smartcollect"/>
+   </feature>
+   <feature id="org.wcs.smart.smartcollect.feature">
       <category name="smartcollect"/>
    </feature>
    <feature id="org.wcs.smart.cybertracker.incident.feature">

@@ -36,6 +36,7 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.IconSelectionDialog;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 

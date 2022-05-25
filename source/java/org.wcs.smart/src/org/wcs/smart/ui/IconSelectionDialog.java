@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -75,7 +75,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.icon.ui.ImageSelectionDialog;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.ui.internal.ca.properties.IconCellHighlighter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 import org.wcs.smart.util.SmartUtils;

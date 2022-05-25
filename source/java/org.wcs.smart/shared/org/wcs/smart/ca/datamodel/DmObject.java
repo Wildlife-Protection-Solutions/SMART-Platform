@@ -32,6 +32,7 @@ import javax.persistence.MappedSuperclass;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.icon.Icon;
 
@@ -46,7 +47,7 @@ import org.wcs.smart.ca.icon.Icon;
 //@Entity
 //@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 @MappedSuperclass
-public class DmObject extends NamedKeyItem{
+public class DmObject extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -54,26 +55,9 @@ public class DmObject extends NamedKeyItem{
 	 * Maximum length of the name identifier
 	 */
 	public static final int MAX_NAME_LENGTH = 1024;
-
-	private Icon icon;
 	
 	protected DmObject(){
 		
-	}
-	
-	
-	/**
-	 * The icon associated with the data model element
-	 * @return
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="icon_uuid", referencedColumnName="uuid")
-	public Icon getIcon() {
-		return icon;
-	}
-	
-	public void setIcon(Icon icon) {
-		this.icon = icon;
 	}
 	
 	/**

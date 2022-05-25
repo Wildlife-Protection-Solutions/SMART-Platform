@@ -632,6 +632,8 @@ public class Messages extends NLS {
 	public static String PatrolMandateComposite_Error_LoadingMandates;
 	public static String PatrolMandateComposite_Mandate_Label;
 	public static String PatrolMandateComposite_Title;
+	public static String PatrolMandatePropertyPage_ClearImage;
+
 	public static String PatrolMandatePropertyPage_ConfirmDeleteMessage;
 	public static String PatrolMandatePropertyPage_ConfirmDeleteTitle;
 	public static String PatrolMandatePropertyPage_DefaultNewMandateName;

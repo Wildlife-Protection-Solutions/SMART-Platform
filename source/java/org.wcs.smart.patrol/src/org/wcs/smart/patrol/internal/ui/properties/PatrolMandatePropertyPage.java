@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,29 +47,29 @@ import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
@@ -76,6 +77,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -83,6 +85,8 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.ui.LabelConstants;
+import org.wcs.smart.ui.IconSelectionDialog;
+import org.wcs.smart.ui.IconSelectionDialog.Type;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -112,10 +116,13 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private HashSet<PatrolMandate> toDelete = new HashSet<PatrolMandate>();
 	private ConservationArea currentCa = null;
 	
+	private HashMap<PatrolMandate, Image> images = new HashMap<>();
+	
 	/*
 	 * columns in the station table
 	 */
 	private enum Column {
+		ICON("", 1), //$NON-NLS-1$
 		NAME(LabelConstants.MANDATE_NAME,2),
 		KEY(LabelConstants.MANDATE_KEY,1);
 		
@@ -138,7 +145,12 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
-	
+	@Override
+	public Point getInitialSize() {
+		Point p = super.getInitialSize();
+		if (p.x < 650) p.x = 650;
+		return p;		
+	}
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
@@ -155,7 +167,10 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					if (b != null) b = b.toLowerCase();
 					return Collator.getInstance().compare(a,b);
 				}});
-			mandates.forEach(m -> m.getNames().size());
+			mandates.forEach(m ->{
+				m.getNames().size();
+				if (m.getIcon() != null) m.getIcon().getFiles().forEach(file->file.computeFileLocation(s));
+			});
 		}
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -167,15 +182,11 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		cmbLanguage = new LanguageViewer(container, SWT.NONE, currentCa);
 		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				tableViewer.refresh();
-			}
-		});
+		cmbLanguage.addSelectionChangedListener(e->tableViewer.refresh());
+		
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		((GridData)composite2.getLayoutData()).heightHint = 150;
+		((GridData)composite2.getLayoutData()).heightHint = 200;
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		composite2.setLayout(tableLayout);
@@ -204,35 +215,67 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		sorter = new MandateSorter();
 		tableViewer.setComparator(sorter);
-		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		tableViewer.addSelectionChangedListener(e-> {
+			PatrolMandate md = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+			if (md == null){
+				btnDisable.setEnabled(false);
+				btnDelete.setEnabled(false);
+				btnEditKey.setEnabled(false);
+				return;
+			}
+			if (md.getIsActive()){
+				btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			}else{
+				btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			}
+			btnDelete.setEnabled(true);
+			btnDisable.setEnabled(true);
+			btnEditKey.setEnabled(true);
+		});
+		
+		tableViewer.getTable().addListener(SWT.MouseDoubleClick, event->{
+			ViewerCell cell = tableViewer.getCell(new Point(event.x, event.y));
+			if (cell == null) return;
+			int index = cell.getColumnIndex();
+			if (index == Column.KEY.ordinal()) editKey();
+			if (index == Column.ICON.ordinal()) editIcon();
+		});
+		
+		Menu menu = new Menu(tableViewer.getTable());
+		
+		tableViewer.getTable().setMenu(menu);
+		tableViewer.getTable().addListener(SWT.MenuDetect, evt->{
+			for (MenuItem mi : menu.getItems()) mi.dispose();
 			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				PatrolMandate md = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-				if (md == null){
-					btnDisable.setEnabled(false);
-					btnDelete.setEnabled(false);
-					btnEditKey.setEnabled(false);
-					return;
-				}
-				if (md.getIsActive()){
-					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-				}else{
-					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-				}
-				btnDelete.setEnabled(true);
-				btnDisable.setEnabled(true);
-				btnEditKey.setEnabled(true);
+			ViewerCell cell = tableViewer.getCell(tableViewer.getControl().toControl(evt.x,  evt.y));
+			if (cell == null) return;
+			
+			int index = cell.getColumnIndex();
+			if (index == Column.ICON.ordinal()) {
+				MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+				miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+				miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+				miEdit.addListener(SWT.Selection, et->editIcon());
+				
+				MenuItem miClear = new MenuItem(menu, SWT.PUSH);
+				miClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+				miClear.setText(Messages.PatrolMandatePropertyPage_ClearImage);
+				miClear.addListener(SWT.Selection, et->updateIcon((PatrolMandate) tableViewer.getStructuredSelection().getFirstElement(), null));
+				
+			}else if (index == Column.KEY.ordinal()) {
+				MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+				miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+				miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+				miEdit.addListener(SWT.Selection, et->editKey());
+			}else if (index == Column.NAME.ordinal()) {
+				MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+				miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+				miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+				miEdit.addListener(SWT.Selection, et->tableViewer.editElement((PatrolMandate) tableViewer.getStructuredSelection().getFirstElement(), Column.NAME.ordinal()));
 			}
 		});
-		tableViewer.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				if (tableViewer.getCell(new Point(event.x, event.y)).getColumnIndex() == Column.KEY.ordinal()){
-					editKey();
-				}
-			}
-		});
+		
+		
 		Composite composite = new Composite(container, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,1, 1));
@@ -244,24 +287,15 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,1, 1));
 		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addMandate();
-			}
-
-		});
+		btnAdd.addListener(SWT.Selection, e->addMandate());
+		
 		btnEditKey = new Button(composite, SWT.NONE);
 		btnEditKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEditKey.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEditKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
 		btnEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		btnEditKey.setEnabled(false);
-		btnEditKey.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e){
-				editKey();
-			}
-		});
+		btnEditKey.addListener(SWT.Selection, e->editKey());
 		
 		btnDisable = new Button(composite, SWT.NONE);
 		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -269,12 +303,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		btnDisable.setEnabled(false);
-		btnDisable.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				disableMandate(btnDisable.getText().equals(DialogConstants.ENABLE_BUTTON_TEXT));
-			}
-		});
+		btnDisable.addListener(SWT.Selection, e-> disableMandate(btnDisable.getText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
 		
 		btnDelete = new Button(composite, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
@@ -282,12 +311,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		btnDelete.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setEnabled(false);
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteMandate();
-			}
-		});
+		btnDelete.addListener(SWT.Selection, e->deleteMandate());
+		
 		setTitle(Messages.PatrolMandatePropertyPage_PageName);
 		setMessage(Messages.PatrolMandatePropertyPage_Dialog_Message);
 		return container;
@@ -495,17 +520,36 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 	}
 	
+	private void editIcon() {
+		PatrolMandate mandate = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		
+		IconSelectionDialog dialog = new IconSelectionDialog(tableViewer.getControl().getShell(), Type.SELECT);
+		if (dialog.open()  != Window.OK) return ;
+		updateIcon(mandate, dialog.getSelectedIcon());
+	}
+	
+	private void updateIcon(PatrolMandate mandate, Icon icon) {
+		if (images.containsKey(mandate)) {
+			images.get(mandate).dispose();
+			images.remove(mandate);
+		}
+		mandate.setIcon(icon);
+		tableViewer.refresh();
+		setChangesMade(true);
+	}
+	
 	/*
 	 * Creates mandate table columns
 	 */
 	private void createColumns(TableViewer viewer) {
 
 		for (int i = 0; i < Column.values().length; i++) {
-			final Column colum = Column.values()[i];
-			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name, colum.size, i);
-			col.setLabelProvider(new MandateLabelProvider(colum));
-			final TextTableEditor editor = new TextTableEditor(viewer, colum);
-			if (colum == Column.NAME){
+			final Column column = Column.values()[i];
+			final TableViewerColumn col = createTableViewerColumn(viewer, column.name, column.size, i);
+			col.setLabelProvider(new MandateLabelProvider(column));
+			
+			if (column == Column.NAME){
+				final TextTableEditor editor = new TextTableEditor(viewer, column);
 				editor.editor.addListener(new ICellEditorListener() {
 				
 					@Override
@@ -526,14 +570,14 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				col.setEditingSupport(editor);
 			}
 			
-			
-			col.getColumn().addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					sorter.setSortColumn(colum, col.getColumn());
-				}
-				
-			});
+			if (column != Column.ICON) {
+				col.getColumn().addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e){
+						sorter.setSortColumn(column, col.getColumn());
+					}
+				});
+			}
 
 		}
 	}
@@ -599,23 +643,51 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	}
 	
 	class MandateLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
+
 		private Column column;
+		
+
+		private final int LIST_ICON_SIZE = 32;
+		
 		public MandateLabelProvider(Column column){
 			this.column = column;
 		}
+		
+		@Override
+		public void dispose() {
+			super.dispose();
+			for (Image img : images.values()) img.dispose();
+			images.clear();
+		}
+		
 		@Override
 		public String getText(Object element) {
 			return findLangValue(column, (PatrolMandate) element);
 		}
 		 
-		public Color getForeground(Object element){
-			 if (((PatrolMandate)element).getIsActive()){
-				 return getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
-			 }else{
-				 return getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY);
-			 }
-		 }
+		@Override
+		public Image getImage(Object element) {
+			if (column != Column.ICON) return null;
+			PatrolMandate mandate = (PatrolMandate)element;
+			if (mandate.getIcon() == null) return null;
+			
+			//create an image merging all icon files together
+			if (images.containsKey(mandate)) return images.get(mandate);
+			Image img = SmartUtils.generateImage(mandate.getIcon(), LIST_ICON_SIZE);
+			images.put(mandate, img);
+			return img;
+		}
 		
+		@Override
+		public Color getForeground(Object element){
+			if (((PatrolMandate)element).getIsActive()){
+				return getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
+			}else{
+				return getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+			}
+		}
+		
+		@Override
 		public Color getBackground(Object element){
 			 return null;
 		 }

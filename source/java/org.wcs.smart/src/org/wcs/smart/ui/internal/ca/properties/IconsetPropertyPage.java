@@ -87,6 +87,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.icon.ui.IconTable;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.IconSelectionDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;

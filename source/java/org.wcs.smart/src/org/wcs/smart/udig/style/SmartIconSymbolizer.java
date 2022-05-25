@@ -46,8 +46,8 @@ import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog;
-import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.Type;
+import org.wcs.smart.ui.IconSelectionDialog;
+import org.wcs.smart.ui.IconSelectionDialog.Type;
 import org.wcs.smart.util.SmartUtils;
 
 /**

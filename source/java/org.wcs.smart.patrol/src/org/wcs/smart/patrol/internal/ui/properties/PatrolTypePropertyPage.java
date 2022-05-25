@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -81,6 +82,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.export.dialog.CsvCaImportDialog;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -94,6 +96,8 @@ import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImporter;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.LabelConstants;
+import org.wcs.smart.ui.IconSelectionDialog;
+import org.wcs.smart.ui.IconSelectionDialog.Type;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -122,6 +126,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private List<PatrolTransportType> transportTypes = null;
 	private ConservationArea currentCa = null;
 	
+	private HashMap<PatrolTransportType, Image> images = new HashMap<>();
+	
 	/**
 	 * @param parent
 	 * @param title
@@ -131,6 +137,13 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
+	
+	@Override
+	public Point getInitialSize() {
+		Point p = super.getInitialSize();
+		if (p.x < 650) p.x = 650;
+		return p;
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
@@ -143,8 +156,17 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			//ensure all types are laziy loaded
 			for (PatrolType t : patrolTypes){
 				if (t.getTransportTypes() != null){
-					t.getTransportTypes().forEach(tt -> tt.getNames().size());
+					t.getTransportTypes().forEach(tt -> {
+						tt.getNames().size();
+						if (tt.getIcon() != null) {
+							tt.getIcon().getFiles().forEach(file->{
+								file.computeFileLocation(s);
+							});
+						}
+					});
 					transportTypes.addAll(t.getTransportTypes());
+					
+					
 				}
 			}
 		}
@@ -226,10 +248,13 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void handleEvent(Event event) {
 				ViewerCell cell = transportTblViewer.getCell(new Point(event.x, event.y));
-				if (cell != null && cell.getColumnIndex() == 3){
+				if (cell == null) return;
+				if (cell.getColumnIndex() == 4){
 					editKey();
-				}else if (cell != null && cell.getColumnIndex() == 2){
+				}else if (cell.getColumnIndex() == 3){
 					disableTransportType();
+				}else if (cell.getColumnIndex() == 0) {
+					editIcon();
 				}
 			}
 		});
@@ -328,6 +353,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		editKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		editKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
 		editKey.addListener(SWT.Selection, l->editKey());
+		
+		MenuItem clearIcon = new MenuItem(tableMenu, SWT.PUSH);
+		clearIcon.setText("Clear Icon");
+		clearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		clearIcon.addListener(SWT.Selection, l->updateIcon((PatrolTransportType)transportTblViewer.getStructuredSelection().getFirstElement(), null));
 		
 		MenuItem delete = new MenuItem(tableMenu, SWT.PUSH);
 		delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -718,19 +748,73 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			
 	}
 	
+	private void editIcon() {
+		PatrolTransportType mandate = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
+		
+		IconSelectionDialog dialog = new IconSelectionDialog(transportTblViewer.getControl().getShell(), Type.SELECT);
+		if (dialog.open()  != Window.OK) return ;
+		updateIcon(mandate, dialog.getSelectedIcon());
+	}
+	
+	private void updateIcon(PatrolTransportType mandate, Icon icon) {
+		if (images.containsKey(mandate)) {
+			images.get(mandate).dispose();
+			images.remove(mandate);
+		}
+		mandate.setIcon(icon);
+		transportTblViewer.refresh();
+		setChangesMade(true);
+	}
 	
 	/*
 	 * Creates station table columns
 	 */
 	private void createTransportColumns(final TableViewer viewer) {
-		/* Transport Type Name Column */
+		
+		// Icon Column
 		TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
+		column.setResizable(true);
+
+		TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+		column.setWidth( 32 * 3 + 20);
+		
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return ""; //$NON-NLS-1$
+			}
+			
+			@Override
+			public void dispose() {
+				super.dispose();
+				for (Image img : images.values()) img.dispose();
+				images.clear();
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (!(element instanceof PatrolTransportType)) return null;
+				PatrolTransportType tt = (PatrolTransportType) element;
+				if (images.containsKey(tt)) return images.get(tt);
+				if (tt.getIcon() == null) return null;
+				Image img = SmartUtils.generateImage(tt.getIcon(), 32);
+				images.put(tt,  img);
+				return img;
+			}
+		});
+			
+		
+		
+		/* Transport Type Name Column */
+		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		column = viewerColumn.getColumn();
 		column.setText(Messages.PatrolTypePropertyPage_TransportType_ColumnHeader);
 		column.setResizable(true);
 		column.setMoveable(true);
 
-		TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
 		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
 			
 		final ColumnLabelProvider lblProvider = new ColumnLabelProvider() {
@@ -750,20 +834,6 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			public Color getForeground(Object element) {
 				if (element instanceof PatrolTransportType){
 					if (!((PatrolTransportType) element).getIsActive()) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
-				}
-				return null;
-			}
-			
-			@Override
-			public Image getImage(Object element) {
-				if (!(element instanceof PatrolTransportType)) return null;
-				
-				PatrolType.Type pt = ((PatrolTransportType)element).getPatrolType();
-				switch(pt) {
-				case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
-				case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
-				case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
-				case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);				
 				}
 				return null;
 			}
@@ -867,19 +937,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				return null;
 				
 			}
-			public Image getImage(Object element) {
-				if (!(element instanceof PatrolTransportType)) return null;
-				
-				PatrolType.Type pt = ((PatrolTransportType)element).getPatrolType();
-				switch(pt) {
-				case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
-				case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
-				case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
-				case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);				
-				}
-				return null;
-			}
 		});
+		
 		viewerColumn.setEditingSupport(new EditingSupport(viewer){
 			@Override
 			protected CellEditor getCellEditor(Object element) {
