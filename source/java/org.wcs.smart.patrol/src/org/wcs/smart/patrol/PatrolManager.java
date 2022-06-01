@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -44,6 +45,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
@@ -243,5 +245,16 @@ public class PatrolManager {
 			deleteHandlers.put(deleteOrder, listeners);
 		}
 		listeners.add(listener);
+	}
+	
+	public Image getImage(PatrolType pt) {
+	
+		switch(pt.getType()) {
+			case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
+			case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+			case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
+			case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);
+		}
+		return null;
 	}
 }

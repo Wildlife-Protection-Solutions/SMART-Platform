@@ -21,18 +21,22 @@
  */
 package org.wcs.smart.ui.properties;
 
+import java.util.HashMap;
+
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
+import org.wcs.smart.util.SmartUtils;
 
 /**
   * Label provided for attribute tree
@@ -44,6 +48,11 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
+
+	protected HashMap<Object, Image> images = new HashMap<>();
+	
+	private int iconSize = -1;
+	
 	private Language currentLang = null;
 		
 	/**
@@ -57,7 +66,25 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	public AttributeTreeLabelProvider(){
 		this(null);
 	}
-		
+	
+	/**
+	 * Size of icon to display, if less than 0 icons are hiddent
+	 * @param iconSize
+	 */
+	public AttributeTreeLabelProvider(int iconSize){
+		this(null);
+		this.iconSize = iconSize;
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		for (Image i : images.values()) {
+			if (i != null) i.dispose();
+		}
+		images.clear();
+	}
+	
 	/**
 	 * Update the display language
 	 * 
@@ -96,10 +123,6 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 		return super.getText(element);
 	}
 
-	@Override
-	public Image getImage(Object element) {
-		return null;
-	}
 		
 	@Override
 	public Color getForeground(Object element) {
@@ -117,6 +140,23 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 		
 	@Override
 	public Color getBackground(Object element) {
+		return null;
+	}
+	
+	@Override
+	public Image getImage(Object element) {
+		if (iconSize < 0) return null;
+		
+		if (element instanceof IconItem) {
+			IconItem team = (IconItem) element;
+
+			if (images.containsKey(team))
+				return images.get(team);
+
+			Image img = SmartUtils.getImage(team.getIcon(), iconSize);
+			images.put(team, img);
+			return img;
+		}
 		return null;
 	}
 

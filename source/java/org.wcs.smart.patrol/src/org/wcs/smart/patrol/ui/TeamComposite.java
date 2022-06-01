@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -50,6 +51,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 /**
  * Patrol item composite for selecting patrol team.
@@ -60,17 +62,7 @@ public class TeamComposite extends PatrolItemComposite{
 
 	private TableViewer teamList;
 
-	/*
-	 * Team label provider
-	 */
-	private LabelProvider lblProvider = new LabelProvider(){
-		public String getText(Object element) {
-			if (element instanceof Team){
-				return ((Team)element).getName();
-			}
-			return super.getText(element);
-		}
-	};
+	private LabelProvider lblProvider = new NamedIconItemLabelProvider();
 	
 	
 	/**
@@ -116,10 +108,11 @@ public class TeamComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	public void setValues(Patrol p, Session session) {
-		List<? extends Object> teams = null;
+		List<Team> teams = null;
 		session.beginTransaction();
 		try{
 			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
+			teams.forEach(team->HibernateManager.loadIcon(team.getIcon(), session));
 			session.getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.TeamComposite_Error_CouldNotLoadTeams, ex);

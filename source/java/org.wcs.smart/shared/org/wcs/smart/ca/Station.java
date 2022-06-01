@@ -28,6 +28,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.wcs.smart.ca.icon.Icon;
+
 
 /**
  * Station object.
@@ -37,7 +39,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "smart.station")
-public class Station extends NamedDescriptionItem {
+public class Station extends NamedDescriptionItem implements IconItem{
 
 	private static final long serialVersionUID = 1L;
 			
@@ -53,11 +55,26 @@ public class Station extends NamedDescriptionItem {
 	private ConservationArea ca;
 	
 	public boolean isActive;
+	protected Icon icon;
 	
 	public Station(){
 		super();
 	}
 
+	/**
+	 * The icon associated with the data model element
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="icon_uuid", referencedColumnName="uuid")
+	public Icon getIcon() {
+		return icon;
+	}
+	
+	public void setIcon(Icon icon) {
+		this.icon = icon;
+	}
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {

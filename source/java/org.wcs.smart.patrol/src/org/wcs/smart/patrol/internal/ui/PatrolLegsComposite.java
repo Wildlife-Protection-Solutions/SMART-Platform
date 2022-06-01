@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -488,8 +489,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		session.beginTransaction();
 		try{
-			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session); 
+			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session);
+			typeOps.forEach(t->HibernateManager.loadIcon(t.getIcon(), session));
 			mandateOps = PatrolHibernateManager.getActiveMandates(patrol.getConservationArea(), session);
+			mandateOps.forEach(t->HibernateManager.loadIcon(t.getIcon(), session));
 			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){

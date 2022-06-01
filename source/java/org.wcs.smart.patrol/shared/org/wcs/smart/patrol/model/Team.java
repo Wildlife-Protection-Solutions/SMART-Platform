@@ -29,7 +29,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.NamedDescriptionKeyItem;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * Team object.
@@ -39,7 +41,7 @@ import org.wcs.smart.ca.NamedDescriptionKeyItem;
  */
 @Entity
 @Table(name="smart.team")
-public class Team extends NamedDescriptionKeyItem{
+public class Team extends NamedDescriptionKeyItem implements IconItem {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -49,8 +51,23 @@ public class Team extends NamedDescriptionKeyItem{
 	private boolean isActive;
 	
 	private ConservationArea ca;
-		
+	protected Icon icon;
+
 	public Team(){}
+	
+	/**
+	 * The icon associated with the data model element
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="icon_uuid", referencedColumnName="uuid")
+	public Icon getIcon() {
+		return icon;
+	}
+	
+	public void setIcon(Icon icon) {
+		this.icon = icon;
+	}
 	
 	/**
 	 * 

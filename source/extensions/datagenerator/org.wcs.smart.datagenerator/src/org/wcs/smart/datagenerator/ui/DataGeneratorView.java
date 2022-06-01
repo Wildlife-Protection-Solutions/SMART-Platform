@@ -627,6 +627,8 @@ public class DataGeneratorView {
 					n.getFullCategoryName();
 					if (n.getActiveChildren() != null) nodes.addAll(n.getActiveChildren());
 				}
+				
+				allatts.forEach(a->HibernateManager.loadIcons(a, session));
 			}
 			
 			//update ui panel

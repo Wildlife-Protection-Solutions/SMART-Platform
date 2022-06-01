@@ -61,4 +61,6 @@ public class DialogConstants {
 	public static final String XML_FILES = Messages.DialogConstants_xmlfiles;
 	public static final String ZIP_FILES = Messages.DialogConstants_zipfiles;
 	public static final String ZIP_XML_FILES = Messages.DialogConstants_xmorzipfiles;
+	
+	public static final String ICON_TEXT = Messages.DialogConstants_IconText;
 }

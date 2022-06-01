@@ -79,9 +79,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.properties.AttributeLabelProvider.IconSetOption;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -105,6 +107,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 	private ToolItem tiAdd, tiEdit, tiDelete, tiUp, tiDown;
 	
 	private Composite listPanel;
+	private IconPanel iconComp;
 	
 	private PatrolAttribute pAttribute;
 	private Collection<PatrolAttribute> siblings;
@@ -209,6 +212,15 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			}
 		});				
 		
+		Label lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+		lbl.setText(DialogConstants.ICON_TEXT + ":"); //$NON-NLS-1$
+		
+		iconComp = new IconPanel(composite, true);
+		iconComp.setIcon(pAttribute.getIcon());
+		iconComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		iconComp.addListener(SWT.Selection, e->setDirty(true));
+		
 		if (pAttribute.getUuid() == null || pAttribute.getType() == AttributeType.LIST) {
 			listPanel = new Composite(composite, SWT.NONE);
 			listPanel.setLayout(new GridLayout(2, false));
@@ -218,7 +230,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			lstViewer = new TableViewer(wrapper,SWT.BORDER);
 			lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-			lstViewer.setLabelProvider(new AttributeLabelProvider());
+			lstViewer.setLabelProvider(new AttributeLabelProvider(16, IconSetOption.ALL));
 			lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
@@ -394,6 +406,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		}
 		pAttribute.setName(name);
 		pAttribute.setType(getType());
+		pAttribute.setIcon(iconComp.getIcon());
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
@@ -404,6 +417,13 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 						.setParameter("item", delete) //$NON-NLS-1$
 						.executeUpdate();
 				}
+				if (pAttribute.getIcon() != null) session.saveOrUpdate(pAttribute.getIcon());
+				if (pAttribute.getAttributeList() != null) {
+					for (PatrolAttributeListItem item : pAttribute.getAttributeList()) {
+						if (item.getIcon() != null) session.saveOrUpdate(item.getIcon());
+					}
+				}
+				
 				session.saveOrUpdate(pAttribute);
 				session.getTransaction().commit();
 				isDirty = false;
@@ -561,12 +581,16 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 					if (pAttribute.getAttributeList() != null) {
 						pAttribute.getAttributeList().forEach(at->{
 							at.getNames().forEach(n->n.getValue());
+							HibernateManager.loadIcon(at.getIcon(), session);
 						});
 					}
 				}
 			}
 		
 			Display.getDefault().syncExec(()->{
+				
+				((AttributeLabelProvider)lstViewer.getLabelProvider()).clearImageCache();
+				
 				nameKeyControls.initFields(pAttribute, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 				cmbType.setSelection(new StructuredSelection(pAttribute.getType()));
 				

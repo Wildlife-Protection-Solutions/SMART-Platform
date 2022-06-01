@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
-import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,6 +64,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.properties.AttributeLabelProvider.IconSetOption;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -115,7 +116,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		
 		lstAttributes = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(new AttributeLabelProvider());
+		lstAttributes.setLabelProvider(new AttributeLabelProvider(32, IconSetOption.DEFAULT));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -360,11 +361,16 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			
 			try(Session session = HibernateManager.openSession()){
 				attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-				attributes.forEach(e->e.getName());
+				attributes.forEach(e->{
+					e.getName();
+					HibernateManager.loadIcon(e.getIcon(), session);
+				});
 			}
-			attributes.sort((a,b)->Collator.getInstance().compare(a.getName(),  b.getName()));
+			Collections.sort(attributes);
+			
 			Display.getDefault().syncExec(()->{
 				if (lstAttributes.getControl().isDisposed()) return;
+				((AttributeLabelProvider)lstAttributes.getLabelProvider()).clearImageCache();
 				lstAttributes.setInput(attributes);
 				lstAttributes.setSelection(selection);
 				lstAttributes.getControl().getParent().layout(true);

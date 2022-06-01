@@ -87,6 +87,7 @@ import org.wcs.smart.ca.datamodel.DataModelTranslationExporter;
 import org.wcs.smart.ca.datamodel.DataModelTranslationImporter;
 import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -620,8 +621,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 
 							//get icons and create target dm with these icons
-							List<Icon> icons = QueryFactory.buildQuery(session, Icon.class,
-									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+							List<Icon> icons = IconManager.INSTANCE.getIcons(session, ca);
+							icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
+							
 							List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class,
 									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 							DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();

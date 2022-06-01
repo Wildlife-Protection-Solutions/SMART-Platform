@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -61,9 +60,12 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -86,6 +88,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -94,6 +97,8 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.LabelConstants;
+import org.wcs.smart.ui.IconSelectionDialog;
+import org.wcs.smart.ui.IconSelectionDialog.Type;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -112,7 +117,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private TableViewer tableViewer;
 	private TeamSorter sorter ; 
 	private Button btnDisable, btnDelete, btnEdit,btnAdd;
-	private MenuItem miDisable, miDelete, miEditKey;
 	private Composite container;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
@@ -122,12 +126,16 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private PatrolMandate[] mandates = null;
 	private ConservationArea currentCa = null;
 	
+	private HashMap<Team, Image> images = new HashMap<>();
+	private int editIndex = -1;
+	
 	private UUIDGenerator uuidGenerator; //for generating uuids for description field
 	
 	/*
 	 * columns in the station table
 	 */
 	private enum Column {
+		ICON(DialogConstants.ICON_TEXT, 1),
 		NAME(LabelConstants.TEAM_NAME, 1),
 		MANDATE(LabelConstants.TEAM_MANDATE,1),
 		DESCRIPTION(LabelConstants.TEAM_DESCRIPTION,2),
@@ -154,28 +162,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		List<PatrolMandate> ms =  null;
 		try(Session s = HibernateManager.openSession()){
 			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, s));
-			Collections.sort(teams, new Comparator<Team>(){
-
-				@Override
-				public int compare(Team o1, Team o2) {
-					String a = o1.getName();
-					String b = o2.getName();
-					if (a != null) a = a.toLowerCase();
-					if (b != null) b = b.toLowerCase();
-					return Collator.getInstance().compare(a,b);
-				}});
-			teams.forEach(t -> t.getNames().size());
+			Collections.sort(teams);
+			teams.forEach(t -> {
+				t.getNames().size();
+				if (t.getIcon() != null) t.getIcon().getFiles().forEach(file->file.computeFileLocation(s));
+			});
 			
 			ms = PatrolHibernateManager.getActiveMandates(currentCa, s);
-			Collections.sort(ms, new Comparator<PatrolMandate>(){
-				@Override
-				public int compare(PatrolMandate o1, PatrolMandate o2) {
-					String a = o1.getName();
-					String b = o2.getName();
-					if (a != null) a = a.toLowerCase();
-					if (b != null) b= b.toLowerCase();
-					return Collator.getInstance().compare(a,b);
-				}});
+			Collections.sort(ms);
 			ms.forEach(m -> m.getNames().size());
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates, ex);
@@ -193,6 +187,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
 				UUIDGenerationStrategy.class.getName());
 		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+	}
+	
+	@Override
+	public Point getInitialSize() {
+		Point p = super.getInitialSize();
+		if (p.x < 650) p.x = 650;
+		return p;		
 	}
 	
 	/* (non-Javadoc)
@@ -257,26 +258,26 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 					btnDisable.setEnabled(false);
 					btnDelete.setEnabled(false);
 					btnEdit.setEnabled(false);
-					miDisable.setEnabled(false);
-					miDelete.setEnabled(false);
-					miEditKey.setEnabled(false);
+//					miDisable.setEnabled(false);
+//					miDelete.setEnabled(false);
+//					miEditKey.setEnabled(false);
 					return;
 				}
 				btnDisable.setEnabled(true);
 				btnDelete.setEnabled(true);
 				btnEdit.setEnabled(true);
-				miDisable.setEnabled(true);
-				miDelete.setEnabled(true);
-				miEditKey.setEnabled(true);
+//				miDisable.setEnabled(true);
+//				miDelete.setEnabled(true);
+//				miEditKey.setEnabled(true);
 				if (!team.getIsActive()){
-					miDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+//					miDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+//					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 					btnDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
 					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 				}else{
-					miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+//					miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+//					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 					btnDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
 					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
@@ -288,8 +289,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void handleEvent(Event event) {
 				ViewerCell cell = tableViewer.getCell(new Point(event.x, event.y));
-				if (cell != null && cell.getColumnIndex() == Column.KEY.ordinal()){
+				if (cell == null) return;
+				if (cell.getColumnIndex() == Column.KEY.ordinal()){
 					editKey();
+				}else if (cell.getColumnIndex() == Column.ICON.ordinal()){
+					editIcon();
 				}
 			}
 		});
@@ -331,33 +335,74 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		btnDelete.setEnabled(false);
 		btnDelete.addListener(SWT.Selection, e->deleteTeam());
 		
-		Menu mnu = new Menu(tableViewer.getTable());
-		tableViewer.getTable().setMenu(mnu);
-		
-		MenuItem miAdd = new MenuItem(mnu, SWT.NONE);
+		Menu menu = new Menu(tableViewer.getTable());
+		tableViewer.getTable().setMenu(menu);
+			
+		MenuItem miAdd = new MenuItem(menu, SWT.NONE);
 		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miAdd.addListener(SWT.Selection, e->addTeam());
 		
-		miEditKey = new MenuItem(mnu, SWT.NONE);
-		miEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
-		miEditKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		miEditKey.setEnabled(false);
-		miEditKey.addListener(SWT.Selection, e->editKey());
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		miDisable = new MenuItem(mnu, SWT.NONE);
+		MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.addListener(SWT.Selection, evt->{
+			if (editIndex == -1) return;
+			if (editIndex == Column.ICON.ordinal()) {
+				editIcon();
+			}else if (editIndex == Column.KEY.ordinal()) {
+				editKey();
+			}else {
+				tableViewer.editElement((Team) tableViewer.getStructuredSelection().getFirstElement(), editIndex);
+			}
+		});
+		
+				
+		MenuItem miClear = new MenuItem(menu, SWT.PUSH);
+		miClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miClear.setText(LabelConstants.CLEAR_IMAGE);
+		miClear.addListener(SWT.Selection, et->updateIcon((Team) tableViewer.getStructuredSelection().getFirstElement(), null));
+			
+		MenuItem miDisable = new MenuItem(menu, SWT.NONE);
 		miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-		miDisable.setEnabled(false);
+		miDisable.setEnabled(!tableViewer.getStructuredSelection().isEmpty());
 		miDisable.addListener(SWT.Selection, e->disableTeam(btnDisable.getToolTipText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
+			
+		new MenuItem(menu, SWT.SEPARATOR);
 		
-		miDelete = new MenuItem(mnu, SWT.NONE);
+		MenuItem miDelete = new MenuItem(menu, SWT.NONE);
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		miDelete.setEnabled(false);
 		miDelete.addListener(SWT.Selection, e->deleteTeam());
-		
 
+		tableViewer.getTable().addListener(SWT.MenuDetect, evt->{
+			ViewerCell cell = tableViewer.getCell(tableViewer.getControl().toControl(evt.x,  evt.y));
+			editIndex = -1;
+			if (cell != null) editIndex = cell.getColumnIndex();	
+		});
+		
+		menu.addMenuListener(new MenuAdapter() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				
+				Object x = tableViewer.getStructuredSelection().getFirstElement();
+				
+				miEdit.setEnabled(x != null);
+				miClear.setEnabled(x != null);
+				miDelete.setEnabled(x != null);
+				
+				if (x != null) {
+					miDisable.setEnabled(true);
+					miDisable.setText( ((Team)x).getIsActive() ? DialogConstants.DISABLE_BUTTON_TEXT : DialogConstants.ENABLE_BUTTON_TEXT );
+					miDisable.setImage( ((Team)x).getIsActive() ? SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON) : SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON) );
+				}else {
+					miDisable.setEnabled(false);
+				}
+		}});
+		
 		setTitle(Messages.TeamPropertyPage_PageName);
 		setMessage(Messages.TeamPropertyPage_Dialog_Message);
 		return container;
@@ -418,6 +463,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 				for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
 					Team team = (Team) iterator.next();
+					if (team.getIcon() != null) s.saveOrUpdate(team.getIcon());
 					siblings.remove(team);
 					String error = DataModelManager.INSTANCE.validateKey(team.getKeyId(), siblings);
 					siblings.add(team);
@@ -484,15 +530,34 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			btnDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
 			btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
-			miDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
-			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));			
+//			miDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+//			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));			
 		}else{
 			btnDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
 			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-			miDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
-			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+//			miDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+//			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		}
+	}
+	
+	
+	private void editIcon() {
+		Team team = (Team)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		
+		IconSelectionDialog dialog = new IconSelectionDialog(tableViewer.getControl().getShell(), Type.SELECT);
+		if (dialog.open()  != Window.OK) return ;
+		updateIcon(team, dialog.getSelectedIcon());
+	}
+	
+	private void updateIcon(Team team, Icon icon) {
+		if (images.containsKey(team)) {
+			images.get(team).dispose();
+			images.remove(team);
+		}
+		team.setIcon(icon);
+		tableViewer.refresh();
+		setChangesMade(true);
 	}
 	
 	/**
@@ -614,8 +679,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 
 		for (int i = 0; i < Column.values().length; i++) {
 			final Column colum = Column.values()[i];
-			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name,
-					colum.weight, i);
+			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name, colum.weight, i);
+			
+			if (colum == Column.ICON) col.getColumn().setWidth( 32 * 3 + 20);
+
 			col.setLabelProvider(new TeamLabelProvider(colum));
 			if (colum == Column.NAME || colum == Column.DESCRIPTION){
 				final TextTableEditor ed = new TextTableEditor(viewer, colum);
@@ -642,11 +709,15 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				col.setEditingSupport(new ComboTableEditor(viewer, colum));
 			}
 			
-			col.getColumn().addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					sorter.setSortColumn(colum, col.getColumn());
-				}});
+			if (colum != Column.ICON) {
+				col.getColumn().addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e){
+						sorter.setSortColumn(colum, col.getColumn());
+					}
+				});
+			}
+
 		}
 
 		
@@ -754,6 +825,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	class TeamLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
 		private Column column;
+		private final int LIST_ICON_SIZE = 32;
+		
 		public TeamLabelProvider(Column column){
 			this.column = column;
 		}
@@ -766,6 +839,19 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return x;
 		}
 		 
+		@Override
+		public Image getImage(Object element) {
+			if (column != Column.ICON) return null;
+			Team team = (Team)element;
+			if (team.getIcon() == null) return null;
+			
+			//create an image merging all icon files together
+			if (images.containsKey(team)) return images.get(team);
+			Image img = SmartUtils.generateImage(team.getIcon(), LIST_ICON_SIZE);
+			images.put(team, img);
+			return img;
+		}
+		
 		public Color getForeground(Object element){
 			 if (((Team)element).getIsActive()){
 				 return container.getDisplay().getSystemColor(SWT.COLOR_BLACK);
@@ -778,6 +864,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			 return null;
 		 }
 	}
+	
 	class TeamSorter extends ViewerComparator{
 		private Column column = null;
 		private int direction = SWT.DOWN;

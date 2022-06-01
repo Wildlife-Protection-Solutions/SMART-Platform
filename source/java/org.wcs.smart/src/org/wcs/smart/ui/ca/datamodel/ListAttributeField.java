@@ -28,15 +28,13 @@ import java.util.List;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -44,6 +42,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -65,7 +64,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	private AttributeListItem originalValue = null;
 	
 	/* ui fields */
-	private ComboViewer cmbViewer;
+	private TableComboViewer cmbViewer;
 	private ControlDecoration cd;
 	private Label lbl;
 	
@@ -110,23 +109,15 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	@Override
 	public void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
-		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
+		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName())); 
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		cmbViewer = new ComboViewer(new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY));
+		cmbViewer = new TableComboViewer(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbViewer.getControl().getLayoutData()).horizontalIndent = 5;
 		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 50;
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());	
-		cmbViewer.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof AttributeListItem){
-					return ((AttributeListItem) element).getName();
-				}
-				return super.getText(element);
-			}
-		});
+		cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -196,6 +187,8 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	@Override
 	public void clear() {
 		cmbViewer.setSelection(null);
+		//seems to be required for nebula widget otherwise text field doesn't get cleared
+		cmbViewer.getTableCombo().setText(""); //$NON-NLS-1$
 		validate();
 		originalValue = null;
 		isModified = false;

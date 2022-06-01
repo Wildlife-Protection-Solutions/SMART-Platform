@@ -75,6 +75,7 @@ public class StationCsvExporter implements ICsvDataExporter {
 				// entry in string array (csv_out) of names
 				int i = 0;
 				String csvout[] = new String[stationColumns.length];
+				csvout[i++] = station.getIcon() == null ? "" : station.getIcon().getKeyId(); //$NON-NLS-1$
 				for(Language l : languages){
 					csvout[i++] = station.findName(l);
 					csvout[i++] = station.findDescriptionNull(session, l) == null ? "" : station.findDescriptionNull(session, l); //$NON-NLS-1$
@@ -89,9 +90,10 @@ public class StationCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] stationCols = new String[(2*langs.size())];
+		String[] stationCols = new String[(2*langs.size()) + 1];
 		
 		int i = 0;
+		stationCols[i++] = "Icon"; //$NON-NLS-1$
 		for (Language lng : langs) {
 			stationCols[i++] = "Name>" + lng.getCode(); //$NON-NLS-1$
 			stationCols[i++] = "Description>" + lng.getCode(); //$NON-NLS-1$

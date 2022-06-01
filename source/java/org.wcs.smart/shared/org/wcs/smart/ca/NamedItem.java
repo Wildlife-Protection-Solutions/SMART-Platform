@@ -22,6 +22,7 @@
  */
 package org.wcs.smart.ca;
 
+import java.text.Collator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -46,7 +47,7 @@ import org.hibernate.annotations.Type;
  *
  */
 @MappedSuperclass
-public class NamedItem extends UuidItem {
+public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 
 	private static final long serialVersionUID = 1L;
 	
@@ -189,4 +190,13 @@ public class NamedItem extends UuidItem {
 		return lbl;
 	}
 	
+	@Override
+	public int compareTo(NamedItem o) {
+		String s1 = getName().toLowerCase();
+		String s2 = o.getName().toLowerCase();
+		if (s1 != null && s2 != null) return Collator.getInstance().compare(getName(), o.getName());
+		if (s1 == null && s2 == null) return 0;
+		if (s1 == null && s2 != null) return -1;
+		return 1;
+	}
 }

@@ -204,7 +204,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		c5.setText(col4.getText());
 		
 		// transport type
-		Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON), false);
+		Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TRANSPORTTYPE_ICON), false);
 		btnTT = (Button) d[0];
 		btnTTrq = (Button) d[1];
 		cmbTt = (ComboViewer) d[2];
@@ -264,14 +264,14 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		cmbMandate = (ComboViewer) d[2];
 				
 		// objective
-		d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, null, true);
+		d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_OBJECTIVE_ICON), true);
 		btnObj = (Button) d[0];
 		btnObjrq = (Button) d[1];
 		btnObjrq.setSelection(false);
 		txtObj = (Text) d[2];
 		
 		// comment
-		d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel, core, null, true);
+		d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_COMMENT_ICON), true);
 		btnCmt = (Button) d[0];
 		btnCmtrq = (Button) d[1];
 		btnCmtrq.setSelection(false);

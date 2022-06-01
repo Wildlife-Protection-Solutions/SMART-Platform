@@ -73,10 +73,16 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.export.TableInfo;
-import org.wcs.smart.ca.icon.IconUtils;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.user.UserLevelManager;
@@ -109,6 +115,33 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public synchronized static Session openSession(){
 		return openSession(null);
+	}
+	
+	public static void loadIcon(Icon icon, Session session) {
+		if (icon == null) return;
+		icon.getFiles().size();
+		for (IconFile file : icon.getFiles()) {
+			file.getIconSet().getIsDefault();
+			file.computeFileLocation(session);
+		}
+	}
+	
+	public static void loadIcons(Attribute attribute, Session session) {
+		if (attribute == null) return;
+		loadIcon(attribute.getIcon(), session);
+		if (attribute.getAttributeList() != null) {
+			for (AttributeListItem li : attribute.getAttributeList()) loadIcon(li.getIcon(), session);
+		}
+		if (attribute.getTree() != null) {
+			attribute.getTree().forEach(at->at.accept(new ITreeNodeVisitor() {
+				@Override
+				public boolean visit(AttributeTreeNode node) {
+					loadIcon(node.getIcon(), session);
+					return true;
+				}
+			}));
+		}
+		
 	}
 	
 	/**
@@ -588,7 +621,7 @@ public class HibernateManager extends SmartHibernateManager{
 				s.save(prj);
 				
 				//create icons
-				IconUtils.createDefaultIconSet(s, newCa);
+				IconManager.INSTANCE.createDefaultIconSet(s, newCa);
 				s.flush();
 				
 				//fire extension points

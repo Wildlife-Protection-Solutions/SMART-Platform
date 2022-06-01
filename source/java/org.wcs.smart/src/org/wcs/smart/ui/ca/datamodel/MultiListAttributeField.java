@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.ui.CheckBoxDropDown;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -65,7 +66,7 @@ public class MultiListAttributeField implements IAttributeField<Collection<Attri
 	private CheckBoxDropDown cmbViewer;
 	private ControlDecoration cd;
 	private Label lbl;
-	
+
 	private Collection<Listener> listeners;
 	
 	/**
@@ -112,15 +113,7 @@ public class MultiListAttributeField implements IAttributeField<Collection<Attri
 		((GridData)cmbViewer.getLayoutData()).horizontalIndent = 5;
 		((GridData)cmbViewer.getLayoutData()).widthHint = 50;
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());	
-		cmbViewer.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof AttributeListItem){
-					return ((AttributeListItem) element).getName();
-				}
-				return super.getText(element);
-			}
-		});
+		cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

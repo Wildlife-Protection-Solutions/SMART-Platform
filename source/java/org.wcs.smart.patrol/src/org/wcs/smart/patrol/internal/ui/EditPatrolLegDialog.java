@@ -38,10 +38,10 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -61,6 +61,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SmartUtils;
@@ -96,8 +97,8 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 	private Label lblGroupAPilot;
 	private ComboViewer groupALeader;
 	private ComboViewer groupAPilot;
-	private ComboViewer cmbTransportTypeA;
-	private ComboViewer cmbMandateA;
+	private TableComboViewer cmbTransportTypeA;
+	private TableComboViewer cmbMandateA;
 	private List<Employee> patrolMembers;
 	
 	private List<PatrolTransportType> typeOps;
@@ -317,48 +318,41 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 	/*
 	 * Transport type combo viewer
 	 */
-	private ComboViewer createTransportTypeComboViewer(Composite parent){
+	private TableComboViewer createTransportTypeComboViewer(Composite parent){
 		Composite ttype = new Composite(parent, SWT.NONE);
 		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		ttype.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(ttype, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
-		ComboViewer cmbTransportType = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmbTransportType.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				return ((PatrolTransportType)element).getName();
-			}
-		});
+		
+		TableComboViewer cmbTransportType = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTransportType.setInput( typeOps );
 		cmbTransportType.setSelection(new StructuredSelection(editLeg.getType()));
-		cmbTransportType.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTransportType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return cmbTransportType;
 	}
 	
 	/*
 	 * Transport type combo viewer
 	 */
-	private ComboViewer createMandateComboViewer(Composite parent){
+	private TableComboViewer createMandateComboViewer(Composite parent){
 		Composite ttype = new Composite(parent, SWT.NONE);
 		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		ttype.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(ttype, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_MandateLabel);
-		ComboViewer cmb = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmb.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof PatrolMandate) return ((PatrolMandate)element).getName();
-				return super.getText(element);
-			}
-		});
+		
+		TableComboViewer cmb = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		cmb.setInput( mandateOps );
 		if (editLeg.getMandate() != null)
 			cmb.setSelection(new StructuredSelection(editLeg.getMandate()));
-		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return cmb;
 	}
 	

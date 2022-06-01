@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,6 +56,8 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -117,12 +117,13 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private ConservationArea currentCa = null;
 	
 	private HashMap<PatrolMandate, Image> images = new HashMap<>();
+	private int editIndex = -1;
 	
 	/*
 	 * columns in the station table
 	 */
 	private enum Column {
-		ICON("", 1), //$NON-NLS-1$
+		ICON(DialogConstants.ICON_TEXT, 1),
 		NAME(LabelConstants.MANDATE_NAME,2),
 		KEY(LabelConstants.MANDATE_KEY,1);
 		
@@ -158,15 +159,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	protected Composite createContent(Composite parent) {
 		try(Session s = HibernateManager.openSession()){
 			mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, s));
-			Collections.sort(mandates, new Comparator<PatrolMandate>(){
-				@Override
-				public int compare(PatrolMandate o1, PatrolMandate o2) {
-					String a = o1.getName();
-					String b = o2.getName();
-					if (a != null) a = a.toLowerCase();
-					if (b != null) b = b.toLowerCase();
-					return Collator.getInstance().compare(a,b);
-				}});
+			Collections.sort(mandates);
 			mandates.forEach(m ->{
 				m.getNames().size();
 				if (m.getIcon() != null) m.getIcon().getFiles().forEach(file->file.computeFileLocation(s));
@@ -242,38 +235,72 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		
 		Menu menu = new Menu(tableViewer.getTable());
-		
 		tableViewer.getTable().setMenu(menu);
-		tableViewer.getTable().addListener(SWT.MenuDetect, evt->{
-			for (MenuItem mi : menu.getItems()) mi.dispose();
-			
-			ViewerCell cell = tableViewer.getCell(tableViewer.getControl().toControl(evt.x,  evt.y));
-			if (cell == null) return;
-			
-			int index = cell.getColumnIndex();
-			if (index == Column.ICON.ordinal()) {
-				MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
-				miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-				miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-				miEdit.addListener(SWT.Selection, et->editIcon());
-				
-				MenuItem miClear = new MenuItem(menu, SWT.PUSH);
-				miClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-				miClear.setText(Messages.PatrolMandatePropertyPage_ClearImage);
-				miClear.addListener(SWT.Selection, et->updateIcon((PatrolMandate) tableViewer.getStructuredSelection().getFirstElement(), null));
-				
-			}else if (index == Column.KEY.ordinal()) {
-				MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
-				miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-				miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-				miEdit.addListener(SWT.Selection, et->editKey());
-			}else if (index == Column.NAME.ordinal()) {
-				MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
-				miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-				miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-				miEdit.addListener(SWT.Selection, et->tableViewer.editElement((PatrolMandate) tableViewer.getStructuredSelection().getFirstElement(), Column.NAME.ordinal()));
+		
+		MenuItem miAdd = new MenuItem(menu, SWT.NONE);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->addMandate());
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.addListener(SWT.Selection, evt->{
+			if (editIndex == -1) return;
+			if (editIndex == Column.ICON.ordinal()) {
+				editIcon();
+			}else if (editIndex == Column.KEY.ordinal()) {
+				editKey();
+			}else {
+				tableViewer.editElement((PatrolMandate) tableViewer.getStructuredSelection().getFirstElement(), editIndex);
 			}
 		});
+		
+				
+		MenuItem miClear = new MenuItem(menu, SWT.PUSH);
+		miClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miClear.setText(LabelConstants.CLEAR_IMAGE);
+		miClear.addListener(SWT.Selection, et->updateIcon((PatrolMandate) tableViewer.getStructuredSelection().getFirstElement(), null));
+			
+		MenuItem miDisable = new MenuItem(menu, SWT.NONE);
+		miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		miDisable.setEnabled(!tableViewer.getStructuredSelection().isEmpty());
+		miDisable.addListener(SWT.Selection, e->disableMandate());
+			
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem miDelete = new MenuItem(menu, SWT.NONE);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->deleteMandate());
+
+		tableViewer.getTable().addListener(SWT.MenuDetect, evt->{
+			ViewerCell cell = tableViewer.getCell(tableViewer.getControl().toControl(evt.x,  evt.y));
+			editIndex = -1;
+			if (cell != null) editIndex = cell.getColumnIndex();	
+		});
+		
+		menu.addMenuListener(new MenuAdapter() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				
+				Object x = tableViewer.getStructuredSelection().getFirstElement();
+				
+				miEdit.setEnabled(x != null);
+				miClear.setEnabled(x != null);
+				miDelete.setEnabled(x != null);
+				
+				if (x != null) {
+					miDisable.setEnabled(true);
+					miDisable.setText( ((PatrolMandate)x).getIsActive() ? DialogConstants.DISABLE_BUTTON_TEXT : DialogConstants.ENABLE_BUTTON_TEXT );
+					miDisable.setImage( ((PatrolMandate)x).getIsActive() ? SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON) : SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON) );
+				}else {
+					miDisable.setEnabled(false);
+				}
+		}});
 		
 		
 		Composite composite = new Composite(container, SWT.NONE);
@@ -303,7 +330,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		btnDisable.setEnabled(false);
-		btnDisable.addListener(SWT.Selection, e-> disableMandate(btnDisable.getText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
+		btnDisable.addListener(SWT.Selection, e-> disableMandate());
 		
 		btnDelete = new Button(composite, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
@@ -360,6 +387,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				siblings = new ArrayList<PatrolMandate>();
 				for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 					PatrolMandate pm = (PatrolMandate) iterator.next();
+					if (pm.getIcon() != null) s.saveOrUpdate(pm.getIcon());
 					siblings.remove(pm);
 					String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
 					siblings.add(pm);
@@ -431,12 +459,12 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * Disables/enables selected mandate 
 	 * @param enable
 	 */
-	private void disableMandate(boolean enable){
+	private void disableMandate(){
 		PatrolMandate md = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-		md.setIsActive(enable);
+		md.setIsActive(!md.getIsActive());
 		setChangesMade(true);
 		tableViewer.refresh();
-		if (enable){
+		if (md.getIsActive()){
 			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		}else{
 			btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);

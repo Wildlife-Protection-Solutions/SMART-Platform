@@ -28,6 +28,7 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -42,7 +43,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ILazyContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
@@ -51,10 +53,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -63,12 +67,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
@@ -90,6 +95,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.IconSelectionDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.FilterComposite;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -115,12 +121,30 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	private List<Path> toDeleteFiles = new ArrayList<>();
 	
 	private List<IconSet> sets = null;
-	private List<Icon> icons = null;
+	private List<Icon> caicons = null;
+	
+	private HashMap<IconFile,Image> imagecache = new HashMap<>();
 	
 	private Composite main = null;
 	
 	private Session session;
 	private boolean isDirty = false;
+	
+	private String txtFilterText = null;
+	
+	private ViewerFilter iconFilter = new ViewerFilter() {
+		
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (txtFilterText == null || txtFilterText.isEmpty()) return true;
+			
+			if (element instanceof Icon) {
+				return ((Icon)element).getName().toLowerCase().contains(txtFilterText);
+			}
+			return false;
+		}
+	};
+	
 	
 	public IconsetPropertyPage(Shell parent) {
 		super(parent);
@@ -187,9 +211,14 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		this.isDirty = dirty;
 	}
 	
+	
 	@Override
 	public Control createDialogArea(Composite parent){
-	
+		parent.addListener(SWT.Dispose, e->{
+			imagecache.values().forEach(img->img.dispose());
+			imagecache.clear();
+		});
+		
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		
@@ -230,27 +259,20 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		return main;
 	}
-	
-	private Image getImage(Icon icon, IconSet s) {
-		
-		IconFile ff = icon.getIconFile(s);
-		if (ff == null) return null;
-		try {
-			Path f = null;
-			if (ff.getCopyFromLocation() != null) {
-				f = ff.getCopyFromLocation();
-			}else {
-				f = ff.getAttachmentFile();
+
+	private void createFilterText(Composite parent) {
+		FilterComposite txtFilter = new FilterComposite(parent, SWT.NONE);
+		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtFilter.addChangeListener(new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				txtFilterText = txtFilter.getPatternFilter();
+				if (txtFilterText != null) txtFilterText = txtFilterText.toLowerCase().trim();
+				tblIcons.refresh();	
 			}
-			Image img = SmartUtils.getImage(f,SIZE);
-//			if (img != null) images.add(img);
-			return img;
-		}catch (Throwable t) {
-			
-		}
-		return null;
-	
+		});		
 	}
+	
 	private void createIconTable(List<IconSet> sets, List<Icon> icons) {
 		for (Control c : iconComp.getChildren()) c.dispose();
 		
@@ -288,84 +310,119 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		deleteIcon.addListener(SWT.Selection, e->deleteIcons());
 		deleteIcon.setToolTipText(Messages.IconPreferencePage_deleteicontooltip);
 		
-		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.MULTI | SWT.VIRTUAL);
-		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblIcons.setContentProvider(new ILazyContentProvider() {
-			List<?> data;
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				if (newInput instanceof List) {
-					data = (List<?>) newInput;
-				}else {
-					data = Collections.singletonList(newInput);
-				}
-			}
-
-			@Override
-			public void updateElement(int index) {
-				tblIcons.replace(data.get(index), index);
-			}
-		});
+		createFilterText(panel);
 		
-		tblIcons.getTable().addListener(SWT.MeasureItem, e->{
-			if (e.index >= 2) {
-				e.width = SIZE;
-				e.height = SIZE;
-			}
-		});
-		tblIcons.getTable().addListener(SWT.PaintItem, e->{
-			int col = e.index;
-			if (col >= 2) {
-				int w = 0;
-				for (int i = 0; i < col; i ++) {
-					w+=tblIcons.getTable().getColumn(i).getWidth();	
-				}
-				IconSet s = sets.get(col-2);
-				Icon icon = (Icon)((TableItem)e.item).getData();
-				Image img = getImage(icon, s);
-				if (img != null) {
-					e.gc.drawImage(img, w, e.y);
-					img.dispose();
-				}
-			}
-		});
+		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.MULTI | SWT.VIRTUAL);
+		tblIcons.setFilters(new ViewerFilter[] {iconFilter});
+		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblIcons.setContentProvider(ArrayContentProvider.getInstance());
+		
 		tblIcons.getTable().setHeaderVisible(true);
 		tblIcons.getTable().setLinesVisible(false);
-		
-		ColumnLabelProvider emptyLabelProvider = new ColumnLabelProvider() {
+		tblIcons.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
-			public String getText(Object element) {
-				return ""; //$NON-NLS-1$
+			public void doubleClick(DoubleClickEvent event) {
+				okPressed();
 			}
-		};
+		});
+		tblIcons.getTable().addListener(SWT.KeyDown, e->{
+			//scroll to first item that start with key e.character
+			Object in = tblIcons.getInput();
+			if (!(in instanceof List)) return;
+			List<?> c = (List<?>) in;
+			e.doit = false;
+			
+			Object selection = tblIcons.getStructuredSelection().getFirstElement();
+			
+			int startIndex = 0;
+			if (selection != null) {
+				int a = c.indexOf(selection);
+				if (a >= 0) startIndex = ( a + 1 ) % c.size();
+			}
+			
+			char toFind = Character.toLowerCase(e.character);
+			int index = startIndex;
+			while(true) {
+				Object item =  c.get(index);
+				if (item instanceof Icon) {
+					char cc = Character.toLowerCase( ((Icon) item).getName().charAt(0) );
+					if (toFind == cc) {
+						tblIcons.getTable().setSelection(index);
+						tblIcons.getTable().showSelection();
+						return;
+					}
+				}
+				
+				index = (index + 1) % c.size();	
+				if (index == startIndex) break;
+			}
+		});
+		
 		
 		TableViewerColumn emptycolumn = new TableViewerColumn(tblIcons, SWT.NONE);
 		emptycolumn.getColumn().setText(""); //$NON-NLS-1$
 		emptycolumn.getColumn().setWidth(0);
-		emptycolumn.setLabelProvider(emptyLabelProvider);
+		emptycolumn.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				return null;
+			}
+		});
 		
 		
 		TableViewerColumn colName = new TableViewerColumn(tblIcons, SWT.NONE);
-		colName.getColumn().setText(Messages.IconPreferencePage_NameColumn);
+		colName.getColumn().setText(Messages.IconSelectionDialog_NameColumn);
 		colName.getColumn().setWidth(150);
 		colName.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
-				if (element instanceof Icon) {
-					Icon icn = (Icon)element;
-					return icn.getName() + " (" + icn.getKeyId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				if (element instanceof Icon) return ((Icon)element).getName();
 				return super.getText(element);
 			}
 		});
 		
+		
 		for (IconSet s : sets) {
-			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.NONE);
+			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.DEFAULT);
+			
 			colIcon.getColumn().setText(s.getName());
-			colIcon.setLabelProvider(emptyLabelProvider);
+			colIcon.setLabelProvider(new ColumnLabelProvider() {
+				
+				@Override
+				public String getText(Object element) {
+					return null;
+				}
+				
+				@Override
+				public Color getBackground(Object element) {
+					
+					return null;
+				}
+				@Override
+				public Image getImage(Object element) {
+					
+					if (element instanceof Icon) {
+						IconFile ff = ((Icon)element).getIconFile(s);
+						if (imagecache.containsKey(ff))  return imagecache.get(ff);
+						try {
+							Path file = null;
+							if (ff.getCopyFromLocation() != null) {
+								file = ff.getCopyFromLocation();
+							}else {
+								file = ff.getAttachmentFile();
+							}
+							Image img = SmartUtils.getImage(file, SIZE);
+							imagecache.put(ff, img);
+							return img;
+						}catch (Throwable t) {
+							
+						}
+					}
+					return null;
+				}
+			});
 			colIcon.getColumn().pack();
 			if (colIcon.getColumn().getWidth() < SIZE) { colIcon.getColumn().setWidth(SIZE); }
 		}
-		tblIcons.setItemCount(icons.size());
+		tblIcons.setItemCount(1);
 		tblIcons.setUseHashlookup(true);
 		tblIcons.setInput(icons);
 
@@ -401,6 +458,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		if (dialog.open() != Window.OK) return;
 		session.saveOrUpdate(toEdit);
 		
+		for (IconFile file : toEdit.getFiles()) imagecache.remove(file);
+		
 		setDirty(true);
 		tblIcons.refresh();
 		selectIconSet(true);
@@ -415,9 +474,9 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		if (icon == null) return;
 		session.saveOrUpdate(icon);
 		setDirty(true);
-		icons.add(icon);
+		caicons.add(icon);
 		sortIcons();
-		tblIcons.setItemCount(icons.size());
+		tblIcons.setItemCount(caicons.size());
 		tblIcons.refresh();
 		selectIconSet(true);
 	}
@@ -498,7 +557,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			try {
 				IconImporter importer = new IconImporter();
 				ConservationArea ca = session.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-				importer.importIcons(ca, sets, icons, iconFile, iconDirectory);
+				importer.importIcons(ca, sets, caicons, iconFile, iconDirectory);
 				
 				if (importer.getIcons().isEmpty()) {
 					MessageDialog.openWarning(getShell(), Messages.IconsetPropertyPage_ImportIconsTitle, Messages.IconsetPropertyPage_NoIconsFound);
@@ -521,10 +580,10 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				setDirty(true);
 				//add any new icons
 				for (Icon c : importer.getIcons()) {
-					if (!icons.contains(c)) icons.add(c);
+					if (!caicons.contains(c)) caicons.add(c);
 				}				
 				sortIcons();
-				tblIcons.setItemCount(icons.size());
+				tblIcons.setItemCount(caicons.size());
 				tblIcons.refresh();
 				selectIconSet(true);
 				
@@ -580,7 +639,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 							monitor.worked(1);
 						});
 						
-						icons.removeAll(toDelete);
+						caicons.removeAll(toDelete);
 						monitor.done();
 						
 					}
@@ -591,7 +650,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			
 			setDirty(true);
 			
-			tblIcons.setItemCount(icons.size());
+			tblIcons.setItemCount(caicons.size());
 			tblIcons.refresh();
 			tblIcons.setSelection(null);
 			selectIconSet(true);
@@ -714,7 +773,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		lstIconsets.setData(CURRENT_SET_KEY, item);
 		
 		List<IconFile> files = new ArrayList<>();
-		for (Icon c : icons) {
+		for (Icon c : caicons) {
 			IconFile iconfile = c.getIconFile((IconSet)item);
 			if (iconfile != null) files.add(iconfile);
 		}
@@ -729,7 +788,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		newIconSet.setConservationArea(SmartDB.getCurrentConservationArea());
 		newIconSet.setIsDefault(false);
 		
-		NewIconSetDialog dialog = new NewIconSetDialog(getShell(),newIconSet, sets, icons, session);
+		NewIconSetDialog dialog = new NewIconSetDialog(getShell(),newIconSet, sets, caicons, session);
 		if (dialog.open() != Window.OK) return;
 		
 		toDeleteFiles.addAll(dialog.getDeleteFiles());
@@ -737,7 +796,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		if (sets.isEmpty()) newIconSet.setIsDefault(true);
 		sets.add(newIconSet);
 		lstIconsets.refresh();
-		createIconTable(sets, icons);
+		createIconTable(sets, caicons);
 	}
 	
 	private void deleteIconSet() {
@@ -748,7 +807,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		if (!MessageDialog.openConfirm(getShell(), Messages.IconPreferencePage_DeleteDialogTitle, MessageFormat.format(Messages.IconPreferencePage_DeleteSetMsg, set.getName()))) return;
 		
-		for (Icon i : icons) {
+		for (Icon i : caicons) {
 			IconFile f = i.getIconFile(set);
 			if (f != null) {
 				i.getFiles().remove(f);
@@ -766,7 +825,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		}
 		
 		lstIconsets.refresh();
-		createIconTable(sets, icons);
+		createIconTable(sets, caicons);
 		selectIconSet(true);
 	}
 	
@@ -790,29 +849,29 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		session.saveOrUpdate(toEdit);
 		setDirty(true);
 		lstIconsets.refresh();
-		createIconTable(sets, icons);
+		createIconTable(sets, caicons);
 	}
 	
 	private void sortIcons() {
-		icons.sort((a,b)->java.text.Collator.getInstance().compare(a.getName(), b.getName()));
+		Collections.sort(caicons);
 	}
 	private Job loadJob = new Job(Messages.IconPreferencePage_LoadJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			sets = new ArrayList<>();
-			icons = new ArrayList<>();
+			caicons = new ArrayList<>();
 			
 			sets.addAll(QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
-			icons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+			caicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 			
-			icons.forEach(icn->icn.getFiles().forEach(iconfile->iconfile.computeFileLocation(session)));
+			caicons.forEach(icn->icn.getFiles().forEach(iconfile->iconfile.computeFileLocation(session)));
 						
 			sortIcons();
 			
 			Display.getDefault().asyncExec(()->{
 				lstIconsets.setInput(sets);
-				createIconTable(sets, icons);
+				createIconTable(sets, caicons);
 				if (!sets.isEmpty()) {
 					lstIconsets.setSelection(new StructuredSelection(sets.get(0)));
 				}

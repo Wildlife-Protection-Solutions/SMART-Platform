@@ -88,6 +88,7 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.export.PatrolTransportCsvExportConfig;
@@ -127,6 +128,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private ConservationArea currentCa = null;
 	
 	private HashMap<PatrolTransportType, Image> images = new HashMap<>();
+	private int editIndex = -1;
 	
 	/**
 	 * @param parent
@@ -345,20 +347,47 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		Menu tableMenu = new Menu(transportTblViewer.getControl());
 		transportTblViewer.getControl().setMenu(tableMenu);
 		
+		MenuItem miAdd = new MenuItem(tableMenu, SWT.CASCADE);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		
+		Menu addType = new Menu(miAdd);
+		miAdd.setMenu(addType);
+		for (PatrolType pt: patrolTypes){
+			MenuItem addtype = new MenuItem(addType, SWT.PUSH);
+			addtype.setText(pt.getType().getGuiName(Locale.getDefault()));
+			addtype.addListener(SWT.Selection, l->addTransportType(pt));
+			addtype.setImage( PatrolManager.getInstance().getImage(pt) );
+		}
+		
+		new MenuItem(tableMenu, SWT.SEPARATOR);
+		
+		MenuItem editKey = new MenuItem(tableMenu, SWT.PUSH);
+		editKey.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		editKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editKey.addListener(SWT.Selection, evt->{
+			if (editIndex == -1) return;
+			if (editIndex == 0) {
+				editIcon();
+			}else if (editIndex == transportTblViewer.getTable().getColumnCount()-1) {
+				editKey();
+			}else {
+				transportTblViewer.editElement((PatrolTransportType) transportTblViewer.getStructuredSelection().getFirstElement(), editIndex);
+			}
+		});
+		
+		
+		MenuItem clearIcon = new MenuItem(tableMenu, SWT.PUSH);
+		clearIcon.setText(LabelConstants.CLEAR_IMAGE);
+		clearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		clearIcon.addListener(SWT.Selection, l->updateIcon((PatrolTransportType)transportTblViewer.getStructuredSelection().getFirstElement(), null));
+		
 		MenuItem disableItem = new MenuItem(tableMenu, SWT.PUSH);
 		disableItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		disableItem.addListener(SWT.Selection, l->disableTransportType());
 		
-		MenuItem editKey = new MenuItem(tableMenu, SWT.PUSH);
-		editKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
-		editKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
-		editKey.addListener(SWT.Selection, l->editKey());
-		
-		MenuItem clearIcon = new MenuItem(tableMenu, SWT.PUSH);
-		clearIcon.setText("Clear Icon");
-		clearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		clearIcon.addListener(SWT.Selection, l->updateIcon((PatrolTransportType)transportTblViewer.getStructuredSelection().getFirstElement(), null));
-		
+		new MenuItem(tableMenu, SWT.SEPARATOR);
+
 		MenuItem delete = new MenuItem(tableMenu, SWT.PUSH);
 		delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -377,8 +406,10 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					if (x instanceof PatrolTransportType){
 						if (((PatrolTransportType) x).getIsActive()){
 							disableItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+							disableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 						}else{
 							disableItem.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+							disableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 						}
 					}
 				}
@@ -388,20 +419,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			public void menuHidden(MenuEvent e) {}
 		});
 		
-		new MenuItem(tableMenu, SWT.SEPARATOR);
-		
-		MenuItem miAdd = new MenuItem(tableMenu, SWT.CASCADE);
-		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		
-		Menu addType = new Menu(miAdd);
-		miAdd.setMenu(addType);
-		for (PatrolType pt: patrolTypes){
-			MenuItem addtype = new MenuItem(addType, SWT.PUSH);
-			addtype.setText(pt.getType().getGuiName(Locale.getDefault()));
-			addtype.addListener(SWT.Selection, l->addTransportType(pt));
-		}
-		
+		transportTblViewer.getTable().addListener(SWT.MenuDetect, evt->{
+			ViewerCell cell = transportTblViewer.getCell(transportTblViewer.getControl().toControl(evt.x,  evt.y));
+			editIndex = -1;
+			if (cell != null) editIndex = cell.getColumnIndex();	
+		});
 		
 		/* --------- Patrol Type -------------- */
 		CTabItem typeTab = new CTabItem(folder, SWT.NONE);
@@ -632,15 +654,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			
 			public Image getImage(Object element) {
 				if (!(element instanceof PatrolType)) return null;
-				
 				PatrolType pt = (PatrolType)element;
-				switch(pt.getType()) {
-				case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
-				case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
-				case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
-				case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);				
-				}
-				return null;
+				return PatrolManager.getInstance().getImage(pt);
 			}
 		});
 		
@@ -775,6 +790,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
 		column.setResizable(true);
+		column.setText(DialogConstants.ICON_TEXT);
 
 		TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
 		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
@@ -1190,6 +1206,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					s.saveOrUpdate(type);
 				}
 				for (PatrolTransportType tt : transportTypes){
+					if (tt.getIcon() != null && tt.getIcon().getUuid() == null) s.saveOrUpdate(tt.getIcon());
 					s.saveOrUpdate(tt);
 				}
 				s.getTransaction().commit();

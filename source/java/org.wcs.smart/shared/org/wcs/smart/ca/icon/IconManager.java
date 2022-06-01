@@ -25,11 +25,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 
-public class IconUtils {
+public enum IconManager {
+	
+	INSTANCE;
 	
 	//these are the default icons set keys
 	public static enum FixedIconSet{
@@ -47,6 +55,85 @@ public class IconUtils {
 		
 	}
 	
+	/**
+	 * Gets the conservation area specific icons - these are used in the CA
+	 * or have been manually configured.
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public List<Icon> getIcons(Session session, ConservationArea ca){
+		List<Icon> icons = QueryFactory.buildQuery(session, Icon.class, 
+				new Object[] {"conservationArea", ca}).list();
+		icons.forEach(e->e.getFiles().forEach(f->{
+			f.getIconSet().getUuid();
+			try {
+				f.computeFileLocation(session);
+			}catch (Exception ex) {
+				SmartPlugIn.log(ex.getMessage(), ex);
+			}
+		}));
+		return icons;
+	}
+	
+	/**
+	 * Returns all system icons that aren't already used in the conservation area.
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public List<Icon> getSystemIcons(Session session, ConservationArea ca) {
+
+		String query = "SELECT keyId FROM Icon WHERE conservationArea = :ca";
+		List<String> icons = session.createQuery(query).setParameter("ca", ca).list();
+
+		Set<String> existingIcons = new HashSet<>(icons);
+
+		List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, new Object[] { "conservationArea", ca })
+				.list();
+
+		List<Icon> libraryIcons = new ArrayList<>();
+		
+		for (String[] icondef : SMART_ICON_MAPPING) {
+			if (existingIcons.contains(icondef[0].toLowerCase()))
+				continue;
+
+			Icon icon = new Icon();
+
+			icon.setKeyId(icondef[0]);
+
+			icon.setName(icondef[1]);
+			icon.updateName(SmartDB.getCurrentLanguage(), icondef[1]);
+			icon.updateName(ca.getDefaultLanguage(), icondef[1]);
+			icon.setFiles(new ArrayList<>());
+			icon.setConservationArea(ca);
+			
+			libraryIcons.add(icon);
+			
+			// black
+			for (IconSet set : sets) {
+				String filename = null;
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) {
+					filename = icondef[2];
+				} else if (set.getKeyId().equalsIgnoreCase(FixedIconSet.LINE.key)) {
+					filename = icondef[3];
+				} else if (set.getKeyId().equalsIgnoreCase(FixedIconSet.COLOR.key)) {
+					filename = icondef[4];
+				}
+				if (filename == null)
+					continue;
+
+				IconFile file = new IconFile();
+				file.setIcon(icon);
+				file.setFilename(filename);
+				file.setIconSet(set);
+				icon.getFiles().add(file);
+			}
+		}
+		return libraryIcons;
+
+	}
 	
 	/**
 	 * This table contains an array of elements where
@@ -57,7 +144,7 @@ public class IconUtils {
 	 * 4 - color icon reference
 	 * 5 - data model mappings (comma seperated)
 	 */
-	public static final String[][] SMART_ICON_MAPPING = new String[][] {
+	public final String[][] SMART_ICON_MAPPING = new String[][] {
 		{"abandoned","Abandoned","platform:/plugin/org.wcs.smart/images/datamodel/black/Abandoned_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Abandoned_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Abandoned_icon.svg","attribute:status:abandoned"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"action","Action","platform:/plugin/org.wcs.smart/images/datamodel/black/Action_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Action_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Action_icon.svg","attribute:actiontakenmp"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"action_taken","Action taken","platform:/plugin/org.wcs.smart/images/datamodel/black/Action_taken_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Action_taken_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Action_taken_icon.svg","attribute:actiontaken,attribute:actiontakenitems,attribute:actiontakencamp,attribute:actiontakencarcass,attribute:actiontaken_items,attribute:actiontaken_landclearning,attribute:actiontaken_liveanimals,attribute:actiontakenliveanimals,attribute:actiontakenrcass"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
@@ -939,7 +1026,7 @@ public class IconUtils {
 		{"blackberry_crowberry","Blackberry Crowberry","platform:/plugin/org.wcs.smart/images/datamodel/black/Blackberry_crowberry_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Blackberry_crowberry_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Blackberry_crowberry_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"black_bear","Black Bear","platform:/plugin/org.wcs.smart/images/datamodel/black/Black_bear_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Black_bear_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Black_bear_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"blue_whale","Blue Whale","platform:/plugin/org.wcs.smart/images/datamodel/black/Blue_whale_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Blue_whale_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Blue_whale_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		{"bones","Bones","platform:/plugin/org.wcs.smart/images/datamodel/black/Bones_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Bones_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Bones_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		{"bones","Bones","platform:/plugin/org.wcs.smart/images/datamodel/black/Bones_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Bones_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Bones_color_icon.svg","attribute:typeofanimalpart:bones"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"bowhead","Bowhead","platform:/plugin/org.wcs.smart/images/datamodel/black/Bowhead_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Bowhead_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Bowhead_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"branding","Branding","platform:/plugin/org.wcs.smart/images/datamodel/black/Branding_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Branding_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Branding_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"brant_goose","Brant Goose","platform:/plugin/org.wcs.smart/images/datamodel/black/Brant_goose_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Brant_goose_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Brant_goose_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
@@ -1135,7 +1222,7 @@ public class IconUtils {
 		{"size_large_for_fish","Size large for fish","platform:/plugin/org.wcs.smart/images/datamodel/black/Size_large_for_fish_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Size_large_for_fish_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Size_large_for_fish_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"size_medium_for_fish","Size medium for fish","platform:/plugin/org.wcs.smart/images/datamodel/black/Size_medium_for_fish_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Size_medium_for_fish_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Size_medium_for_fish_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"size_small_for_fish","Size small for fish","platform:/plugin/org.wcs.smart/images/datamodel/black/Size_small_for_fish_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Size_small_for_fish_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Size_small_for_fish_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		{"skull","Skull","platform:/plugin/org.wcs.smart/images/datamodel/black/Skull_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Skull_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Skull_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		{"skull","Skull","platform:/plugin/org.wcs.smart/images/datamodel/black/Skull_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Skull_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Skull_color_icon.svg","attribute:typeofanimalpart:skull"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"snow_bunting","Snow Bunting","platform:/plugin/org.wcs.smart/images/datamodel/black/Snow_bunting_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Snow_bunting_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Snow_bunting_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"snow_goose","Snow Goose","platform:/plugin/org.wcs.smart/images/datamodel/black/Snow_goose_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Snow_goose_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Snow_goose_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"species_arctic_fox_track","Species Arctic Fox track","platform:/plugin/org.wcs.smart/images/datamodel/black/Species_arctic_fox_track_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Species_arctic_fox_track_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Species_arctic_fox_track_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
@@ -1200,7 +1287,7 @@ public class IconUtils {
 	 * @param mappingString data model mapping string from SMART_ICON_MAPPING array
 	 * @throws SQLException
 	 */
-	public static void upgradeDataModel(Connection c, Object iconuuid, String mappingString, Object cauuid) throws SQLException {
+	public void upgradeDataModel(Connection c, Object iconuuid, String mappingString, Object cauuid) throws SQLException {
 		if (mappingString == null || mappingString.trim().length() == 0) return;
 		
 		PreparedStatement pscat = c.prepareStatement("UPDATE smart.dm_category SET icon_uuid = ? WHERE hkey = ? and ca_uuid = ?"); //$NON-NLS-1$
@@ -1252,7 +1339,8 @@ public class IconUtils {
 	}
 	
 	/**
-	 * Creates the default icon sets.
+	 * Creates the default icon sets with no icons. Icons will be added as they are
+	 * used in the Conservation Area.
 	 * 
 	 */
 	/*
@@ -1263,7 +1351,7 @@ public class IconUtils {
 	 * 4 - color icon reference
 	 * 5 - data model mappings (comma separated)
 	 */
-	public static void createDefaultIconSet(Session session, ConservationArea ca) {
+	public void createDefaultIconSet(Session session, ConservationArea ca) {
 		IconSet blackIs = new IconSet();
 		blackIs.setConservationArea(ca);
 		blackIs.setIsDefault(false);
@@ -1288,39 +1376,39 @@ public class IconUtils {
 		lineIs.updateName(ca.getDefaultLanguage(), FixedIconSet.LINE.name);
 		session.save(lineIs);
 		
-		for (String[] row : SMART_ICON_MAPPING) {
-			String iconKey = row[0];
-			String name = row[1];
-			String black = row[2];
-			String line = row[3];
-			String color = row[4];
-			
-			Icon i = new Icon();
-			i.setConservationArea(ca);
-			i.setKeyId(iconKey);
-			i.setName(name);
-			i.updateName(ca.getDefaultLanguage(), name);
-			i.setFiles(new ArrayList<>());
-			
-			IconFile file1 = new IconFile();
-			file1.setFilename(black);
-			file1.setIcon(i);
-			file1.setIconSet(blackIs);
-			i.getFiles().add(file1);
-			
-			IconFile file2 = new IconFile();
-			file2.setFilename(line);
-			file2.setIcon(i);
-			file2.setIconSet(lineIs);
-			i.getFiles().add(file2);
-			
-			IconFile file3 = new IconFile();
-			file3.setFilename(color);
-			file3.setIcon(i);
-			file3.setIconSet(colorIs);
-			i.getFiles().add(file3);
-			
-			session.save(i);
-		}
+//		for (String[] row : SMART_ICON_MAPPING) {
+//			String iconKey = row[0];
+//			String name = row[1];
+//			String black = row[2];
+//			String line = row[3];
+//			String color = row[4];
+//			
+//			Icon i = new Icon();
+//			i.setConservationArea(ca);
+//			i.setKeyId(iconKey);
+//			i.setName(name);
+//			i.updateName(ca.getDefaultLanguage(), name);
+//			i.setFiles(new ArrayList<>());
+//			
+//			IconFile file1 = new IconFile();
+//			file1.setFilename(black);
+//			file1.setIcon(i);
+//			file1.setIconSet(blackIs);
+//			i.getFiles().add(file1);
+//			
+//			IconFile file2 = new IconFile();
+//			file2.setFilename(line);
+//			file2.setIcon(i);
+//			file2.setIconSet(lineIs);
+//			i.getFiles().add(file2);
+//			
+//			IconFile file3 = new IconFile();
+//			file3.setFilename(color);
+//			file3.setIcon(i);
+//			file3.setIconSet(colorIs);
+//			i.getFiles().add(file3);
+//			
+//			session.save(i);
+//		}
 	}
 }

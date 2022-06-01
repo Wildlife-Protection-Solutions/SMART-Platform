@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -194,7 +195,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			if (thisCategory.getIcon() != null && thisCategory.getIcon().getIconFile(getWizardInternal().getIconSet()) != null) {
 				thisCategory.getIcon().getIconFile(getWizardInternal().getIconSet()).computeFileLocation(session);
 			}
-			catAttributes = findAttributes(thisCategory);
+			
+			catAttributes = findAttributes(thisCategory, session);
+			
 			requiresObservation = false;
 			if (thisCategory.getIsMultiple()){
 				for (Attribute a : catAttributes){
@@ -331,17 +334,29 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	/*
 	 * Finds all the attributes associated with the given category
 	 */
-	private List<Attribute> findAttributes(Category category){
+	private List<Attribute> findAttributes(Category category, Session session){
 		List<Attribute> catAttributes = new ArrayList<Attribute>();
+		HibernateManager.loadIcon(category.getIcon(), session);
+		
 		category.getAllAttribute(catAttributes, true);
+		
 		catAttributes.forEach(ca->{
-			if (ca.getAttributeList() != null) ca.getAttributeList().forEach(l->l.getName());
+			HibernateManager.loadIcon(ca.getIcon(), session);
+			if (ca.getAttributeList() != null) {
+				ca.getAttributeList().forEach(l->{
+					l.getName();
+					
+					if (l.getIcon() != null) Hibernate.initialize(l.getIcon().getFiles());
+					HibernateManager.loadIcon(l.getIcon(), session);
+				});
+			}
 			if (ca.getActiveTreeNodes() != null) {
 				List<AttributeTreeNode> nodes = new ArrayList<>();
 				nodes.addAll(ca.getActiveTreeNodes());
 				while(!nodes.isEmpty()) {
 					AttributeTreeNode n = nodes.remove(0);
 					n.getName();
+					HibernateManager.loadIcon(n.getIcon(), session);
 					if (n.getActiveChildren() != null) nodes.addAll(n.getActiveChildren());
 				}
 			}

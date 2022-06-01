@@ -84,6 +84,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -91,8 +92,8 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
-import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
@@ -105,7 +106,6 @@ import org.wcs.smart.patrol.internal.ui.PatrolLegsComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolMandateComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolTransportComposite;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolLegDayLabelProvider.PatrolLegDayColumn;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolItemDialog;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
@@ -113,12 +113,15 @@ import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolAttributeComposite;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
 import org.wcs.smart.patrol.ui.TeamComposite;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Editor part for displaying and editing patrol information.
@@ -137,16 +140,16 @@ public class PatrolSummaryEditor extends EditorPart {
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolSummaryEditor"; //$NON-NLS-1$
 
 	private boolean isDirty = false;
-	private FormText txtPatrolType;
+	private TextImageField txtPatrolType;
 	private FormText txtPatrolId;
-	private Text txtMandate;
-	private Text txtStation;
-	private Text txtTeam;
+	private TextImageField txtMandate;
+	private TextImageField txtStation;
+	private TextImageField txtTeam;
 	private Text txtObjective;
 	private Text txtComment;
 	private Text txtStartDate;
 	private Text txtEndDate;
-	private Text txtTransport;
+	private TextImageField txtTransport;
 	
 	private Button btnArmed;
 	
@@ -177,7 +180,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Composite customAttributes;
 	
 	private SashForm sashForm;
-
+	private HashMap<Object, Image> imagecache = new HashMap<>();
+	
 	/**
 	 * listener for patrol change events.
 	 */
@@ -287,16 +291,17 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		
 		/* left side */		
-		toolkit.createLabel(left, Messages.PatrolSummaryEditor_PatrolType_Label);
-		txtPatrolType = toolkit.createFormText(left, false);
+		Label lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_PatrolType_Label);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtPatrolType = new TextImageField(left, SWT.NONE);
+		txtPatrolType.adapt(toolkit);
 		txtPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		Label lbl = null;
-		
 		transportTypelbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
-		transportTypelbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
-		txtTransport.setEditable(false);
+		transportTypelbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		txtTransport = new TextImageField(left);
+		txtTransport.adapt(toolkit);
 		txtTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtTransport.getLayoutData()).widthHint = WIDTH_HINT;
 		editLinkTransportType = createEditLink(toolkit, left, new PatrolTransportComposite());
@@ -313,6 +318,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		}
 		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Armed_Label);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
 		btnArmed = toolkit.createButton(left, null, SWT.CHECK);
 		btnArmed.setEnabled(false);
 		btnArmed.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -320,9 +327,10 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		
 		mandateLbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Mandate_Label);
-		mandateLbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		txtMandate = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
-		txtMandate.setEditable(false);
+		mandateLbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtMandate = new TextImageField(left);
+		txtMandate.adapt(toolkit);
 		txtMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtMandate.getLayoutData()).widthHint = WIDTH_HINT;
 		editLinkMandate = createEditLink(toolkit, left, new PatrolMandateComposite());
@@ -339,15 +347,19 @@ public class PatrolSummaryEditor extends EditorPart {
 		}
 		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Team_Label);
-		txtTeam= toolkit.createText(left, ""); //$NON-NLS-1$
-		txtTeam .setEditable(false);
-		txtTeam .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtTeam = new TextImageField(left);
+		txtTeam.adapt(toolkit);
+		txtTeam.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtTeam.getLayoutData()).widthHint = WIDTH_HINT;
 		createEditLink(toolkit, left, new TeamComposite()); 
 	
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Station_Label);
-		txtStation = toolkit.createText(left, ""); //$NON-NLS-1$
-		txtStation .setEditable(false);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtStation = new TextImageField(left);
+		txtStation.adapt(toolkit);
 		txtStation .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtStation.getLayoutData()).widthHint = WIDTH_HINT;
 		createEditLink(toolkit, left, new StationComposite()); 
@@ -739,6 +751,11 @@ public class PatrolSummaryEditor extends EditorPart {
 					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					txt.setEditable(false);
 					txt.addListener(SWT.Resize, e->scrolltop.setMinSize(top.computeSize(SWT.DEFAULT,  SWT.DEFAULT)));
+				}else if (pa.getType() == AttributeType.LIST) {
+					TextImageField field = new TextImageField(core);
+					field.adapt(toolkit);
+					field.setValue(value.getAttributeListItem());
+					field.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}else {
 					Text txt = toolkit.createText(core, attributeValue, SWT.WRAP);
 					txt.setEditable(false);
@@ -757,6 +774,12 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * Updates the widgets with the value from the patrol.
 	 */
 	private void initValues(){
+		for (Image image : imagecache.values()) {
+			if (image != null) image.dispose();
+		}
+		imagecache.clear();
+		
+		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
@@ -765,13 +788,10 @@ public class PatrolSummaryEditor extends EditorPart {
 				frmPatrolSummary.setText(editor.getPatrol().getId());
 				
 				txtPatrolId.setText(patrol.getId(), false, false);
-				txtPatrolType.setText(patrol.getPatrolType().getGuiName(Locale.getDefault()), false, false);
-				if (patrol.getStation() == null) {
-					txtStation.setText(Messages.PatrolSummaryEditor_NoStationLabel);
-				} else {
-					txtStation.setText(patrol.getStation().getName());
-				}
-			
+				txtPatrolType.setValue(patrol.getPatrolType().getGuiName(Locale.getDefault()), UiPatrolUtils.getImage(patrol.getPatrolType()));
+				txtStation.setValue(patrol.getStation());
+				
+				
 				if (patrol.getComment() != null){
 					txtComment.setText(patrol.getComment());
 				}else{
@@ -779,12 +799,8 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 				btnArmed.setSelection(patrol.isArmed());
 	
-				if (patrol.getTeam() != null) {
-					txtTeam.setText(patrol.getTeam().getName());
-				} else {
-					txtTeam.setText(Messages.PatrolSummaryEditor_NoTeamLabel);
-				}
-	
+				txtTeam.setValue(patrol.getTeam());
+				
 				if (patrol.getObjective() != null) {
 					txtObjective.setText(patrol.getObjective());
 				} else {
@@ -794,26 +810,28 @@ public class PatrolSummaryEditor extends EditorPart {
 				Set<Employee> allEmployee = new HashSet<Employee>();
 				Set<Employee> leaders = new HashSet<Employee>();
 				Set<Employee> pilots = new HashSet<Employee>();
-				for (int i = 0; i < patrol.getLegs().size(); i++) {
-					session.update(patrol.getLegs().get(i));
-					List<PatrolLegMember> members = patrol.getLegs().get(i)
-							.getMembers();
+				for (PatrolLeg leg : patrol.getLegs()) {
+					session.update(leg);
+					List<PatrolLegMember> members = leg.getMembers();
 					for (PatrolLegMember mem : members) {
 						allEmployee.add(mem.getMember());
-						if (mem.getIsLeader()) {
-							leaders.add(mem.getMember());
-						}
-						if (mem.getIsPilot()) {
-							pilots.add(mem.getMember());
-						}
+						if (mem.getIsLeader()) leaders.add(mem.getMember());
+						if (mem.getIsPilot()) pilots.add(mem.getMember());
+					}
+					
+					if (leg.getMandate() != null) {
+						leg.setMandate(session.get(PatrolMandate.class, leg.getMandate().getUuid()));
+						HibernateManager.loadIcon(leg.getMandate().getIcon(), session);
+					}
+					if (leg.getType() != null) {
+						leg.setType(session.get(PatrolTransportType.class, leg.getType().getUuid()));
+						HibernateManager.loadIcon(leg.getMandate().getIcon(), session);
 					}
 				}
 				
 				
-				((EmployeeLabelProvider) employeeList.getLabelProvider())
-						.setLeaders(leaders);
-				((EmployeeLabelProvider) employeeList.getLabelProvider())
-						.setPilots(pilots);
+				((EmployeeLabelProvider) employeeList.getLabelProvider()).setLeaders(leaders);
+				((EmployeeLabelProvider) employeeList.getLabelProvider()).setPilots(pilots);
 				
 				Employee[] employeeArray = allEmployee.toArray(new Employee[allEmployee.size()]);
 				Arrays.sort(employeeArray, new Comparator<Employee>(){
@@ -827,12 +845,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	
 				updateDateTable();
 				if (!isMulti){
-					txtTransport.setText(patrol.getFirstLeg().getType().getName());
-					if (patrol.getFirstLeg().getMandate() != null) {
-						txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
-					}else {
-						txtMandate.setText(Messages.PatrolSummaryEditor_NoMandateLabel);
-					}
+					txtTransport.setValue(patrol.getFirstLeg().getType());
+					txtMandate.setValue(patrol.getFirstLeg().getMandate());
 				}
 				
 				configureAttributes(session);
@@ -1002,8 +1016,8 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 			cs[0].getParent().layout(true, true);
 			
-			txtTransport.setText(patrol.getFirstLeg().getType().getName());
-			if (patrol.getFirstLeg().getMandate() != null) txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
+			txtTransport.setValue(patrol.getFirstLeg().getType());
+			txtMandate.setValue(patrol.getFirstLeg().getMandate());
 			
 			editEmployee.setVisible(true);
 			multiLegTextlbl.setVisible(false);
@@ -1022,16 +1036,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 
 
-}
-
-/**
- * Label provider for patrol day summary table
- * @author Emily
- *
- */
-class PatrolLegDayLabelProvider extends ColumnLabelProvider{
-	
-	public enum PatrolLegDayColumn{
+	private enum PatrolLegDayColumn {
 		LEG(Messages.PatrolSummaryEditor_LegId_ColumnName, 1, true),
 		DAY(Messages.PatrolSummaryEditor_LegDay_ColumnName, 1, false),
 		HAS_DATA(Messages.PatrolSummaryEditor_HasData_ColumnName, 1, false),
@@ -1044,83 +1049,122 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 		MANDATE(Messages.PatrolSummaryEditor_Mandate_ColumnName, 1, true),
 		LEADER(Messages.PatrolSummaryEditor_LegLeader_ColumnName, 1, true),
 		PILOT(Messages.PatrolSummaryEditor_LegPilot_ColumnName, 1, true);
-		
+
 		int weight;
 		String name;
 		boolean multi;
-		private PatrolLegDayColumn(String name, int weight, boolean multi){
+
+		private PatrolLegDayColumn(String name, int weight, boolean multi) {
 			this.name = name;
 			this.weight = weight;
 			this.multi = multi;
 		}
 	};
-	
-	
-	private PatrolLegDayColumn column = null;
-	
-	
-	public PatrolLegDayLabelProvider(PatrolLegDayColumn column){
-		this.column = column;
-	}
-	
-	
-	public String getText(Object element) {
-		if (element instanceof PatrolLegDay){
-			PatrolLegDay legDay = (PatrolLegDay)element;
-			if (column == PatrolLegDayColumn.DAY){
-				LocalDate d = legDay.getDate();
-				return d.format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) ) + " " + DateTimeFormatter.ofPattern("E").format(d) ; //$NON-NLS-1$ //$NON-NLS-2$
-			}else if (column == PatrolLegDayColumn.MANDATE){
-				if (legDay.getPatrolLeg().getMandate() != null) 
-					return legDay.getPatrolLeg().getMandate().getName();
-				return ""; //$NON-NLS-1$
-			}else if (column == PatrolLegDayColumn.DISTANCE){
-				if (legDay.getTrack() != null){
-					return PatrolEditor.formatDistance( legDay.getTrack().getDistance() );
-				}else{
-					return "0"; //$NON-NLS-1$
-				}
-			}else if (column == PatrolLegDayColumn.START){
-				if (legDay.getStartTime() != null){
-					return legDay.getStartTime().format( DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM) );
-				}else{
-					return ""; //$NON-NLS-1$
-				}
-			}else if (column == PatrolLegDayColumn.END){
-				if (legDay.getEndTime() != null){
-					return legDay.getEndTime().format( DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM) );
-				}else{
-					return ""; //$NON-NLS-1$
-				}
-			}else if (column == PatrolLegDayColumn.TOTALPATROLHOURS){
-				double hrs = legDay.getPatrolHoursWorked();
-				return PatrolEditor.formatTimeRange(hrs);
-			}else if (column == PatrolLegDayColumn.TOTALHOURSINFIELD){
-				double hrs = legDay.getFieldHoursWorked();
-				return PatrolEditor.formatTimeRange(hrs);
-			}else if (column == PatrolLegDayColumn.LEG){
-				return legDay.getPatrolLeg().getId();
-			}else if (column == PatrolLegDayColumn.LEADER){
-				if (legDay.getPatrolLeg().getLeader() == null){
-					return ""; //$NON-NLS-1$
-				}
-				return org.wcs.smart.ui.SmartLabelProvider.getFullLabel(((PatrolLegDay)element).getPatrolLeg().getLeader().getMember());
-			}else if (column == PatrolLegDayColumn.PILOT){
-				if (legDay.getPatrolLeg().getPilot() != null){
-					return org.wcs.smart.ui.SmartLabelProvider.getFullLabel(((PatrolLegDay)element).getPatrolLeg().getPilot().getMember());
-				}
-				return ""; //$NON-NLS-1$
-			}else if (column == PatrolLegDayColumn.TRANSPORT){
-				return legDay.getPatrolLeg().getType().getName();
-				
-			}else if (column == PatrolLegDayColumn.HAS_DATA) {
-				return legDay.hasData() ? Messages.PatrolSummaryEditor_YesDataLabel : Messages.PatrolSummaryEditor_NoDataLabel;
-			}
+
+	/**
+	 * Label provider for patrol day summary table
+	 * 
+	 * @author Emily
+	 *
+	 */
+	class PatrolLegDayLabelProvider extends ColumnLabelProvider {
+
+		private PatrolLegDayColumn column = null;
+
+		public PatrolLegDayLabelProvider(PatrolLegDayColumn column) {
+			this.column = column;
 		}
-		return super.getText(element);
+
+		@Override
+		public void dispose() {
+			super.dispose();
+			for (Image img : imagecache.values()) {
+				if (img != null)
+					img.dispose();
+			}
+			imagecache.clear();
+		}
+
+		public Image getImage(Object element) {
+			IconItem item = null;
+			if (element instanceof PatrolLegDay) {
+				if (column == PatrolLegDayColumn.MANDATE) {
+					item = ((PatrolLegDay) element).getPatrolLeg().getMandate();
+				} else if (column == PatrolLegDayColumn.TRANSPORT) {
+					item = ((PatrolLegDay) element).getPatrolLeg().getType();
+				}
+			}
+			if (item != null) {
+				if (imagecache.containsKey(item))
+					return imagecache.get(item);
+
+				Image img = SmartUtils.getImage(item.getIcon(), 16);
+				imagecache.put(item, img);
+				return img;
+			}
+			return null;
+		}
+
+		public String getText(Object element) {
+			if (element instanceof PatrolLegDay) {
+				PatrolLegDay legDay = (PatrolLegDay) element;
+				if (column == PatrolLegDayColumn.DAY) {
+					LocalDate d = legDay.getDate();
+					return d.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) + " " //$NON-NLS-1$
+							+ DateTimeFormatter.ofPattern("E").format(d); //$NON-NLS-1$
+				} else if (column == PatrolLegDayColumn.MANDATE) {
+					if (legDay.getPatrolLeg().getMandate() != null)
+						return legDay.getPatrolLeg().getMandate().getName();
+					return ""; //$NON-NLS-1$
+				} else if (column == PatrolLegDayColumn.DISTANCE) {
+					if (legDay.getTrack() != null) {
+						return PatrolEditor.formatDistance(legDay.getTrack().getDistance());
+					} else {
+						return "0"; //$NON-NLS-1$
+					}
+				} else if (column == PatrolLegDayColumn.START) {
+					if (legDay.getStartTime() != null) {
+						return legDay.getStartTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM));
+					} else {
+						return ""; //$NON-NLS-1$
+					}
+				} else if (column == PatrolLegDayColumn.END) {
+					if (legDay.getEndTime() != null) {
+						return legDay.getEndTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM));
+					} else {
+						return ""; //$NON-NLS-1$
+					}
+				} else if (column == PatrolLegDayColumn.TOTALPATROLHOURS) {
+					double hrs = legDay.getPatrolHoursWorked();
+					return PatrolEditor.formatTimeRange(hrs);
+				} else if (column == PatrolLegDayColumn.TOTALHOURSINFIELD) {
+					double hrs = legDay.getFieldHoursWorked();
+					return PatrolEditor.formatTimeRange(hrs);
+				} else if (column == PatrolLegDayColumn.LEG) {
+					return legDay.getPatrolLeg().getId();
+				} else if (column == PatrolLegDayColumn.LEADER) {
+					if (legDay.getPatrolLeg().getLeader() == null) {
+						return ""; //$NON-NLS-1$
+					}
+					return org.wcs.smart.ui.SmartLabelProvider
+							.getFullLabel(((PatrolLegDay) element).getPatrolLeg().getLeader().getMember());
+				} else if (column == PatrolLegDayColumn.PILOT) {
+					if (legDay.getPatrolLeg().getPilot() != null) {
+						return org.wcs.smart.ui.SmartLabelProvider
+								.getFullLabel(((PatrolLegDay) element).getPatrolLeg().getPilot().getMember());
+					}
+					return ""; //$NON-NLS-1$
+				} else if (column == PatrolLegDayColumn.TRANSPORT) {
+					return legDay.getPatrolLeg().getType().getName();
+
+				} else if (column == PatrolLegDayColumn.HAS_DATA) {
+					return legDay.hasData() ? Messages.PatrolSummaryEditor_YesDataLabel
+							: Messages.PatrolSummaryEditor_NoDataLabel;
+				}
+			}
+			return super.getText(element);
+		}
+
 	}
-	
-	
 
 }
-

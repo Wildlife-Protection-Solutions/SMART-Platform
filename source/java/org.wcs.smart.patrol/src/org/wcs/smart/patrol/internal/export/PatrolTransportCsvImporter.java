@@ -42,6 +42,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
@@ -62,9 +64,10 @@ import au.com.bytecode.opencsv.CSVReader;
 public class PatrolTransportCsvImporter implements ICsvDataImporter {
 
 	private Collection<PatrolTransportType> importedData;
+	private ConservationArea ca;
 	
-	public PatrolTransportCsvImporter() {
-		//nothing
+	public PatrolTransportCsvImporter(ConservationArea ca) {
+		this.ca = ca;
 	}
 	
 	@Override
@@ -91,6 +94,9 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		
 		ArrayList<PatrolTransportType> types = new ArrayList<PatrolTransportType>();
 		
+		List<Icon> icons = IconManager.INSTANCE.getIcons(session,  ca);
+		icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
+		
 		try(CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(file), cs), delimiter)){
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
@@ -108,7 +114,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 				if (row.length != headerRow.length) {
 					throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidLine, new Object[]{line, row.length, headerRow.length}));
 				}
-				PatrolTransportType type = handleTransportType(row, langCodes, code2Language, line);
+				PatrolTransportType type = handleTransportType(row, langCodes, code2Language, line, icons);
 				types.add(type);
 				line++;
 			}
@@ -119,6 +125,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		return true;
 	}
 
+	
 	/**
 	 *  Returns already existing agency for given row record or creates new one if required
 	 * @param row
@@ -126,7 +133,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 	 * @return
 	 * @throws Exception 
 	 */
-	private PatrolTransportType handleTransportType(String[] row, List<String> columnLanguages, Map<String, Language> langCodes, int linenumber) throws Exception {
+	private PatrolTransportType handleTransportType(String[] row, List<String> columnLanguages, Map<String, Language> langCodes, int linenumber, List<Icon> icons) throws Exception {
 		PatrolTransportType type = new PatrolTransportType();
 		type.setIsActive(true);
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -138,11 +145,20 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 			throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidPatrolType, new Object[]{row[0], linenumber}));
 		}
 		
-		String key = row[1];
+		String icon = row[1];
+		for (Icon i : icons) {
+			if (i.getKeyId().equalsIgnoreCase(icon)) {
+				type.setIcon(i);
+				break;
+			}
+		}
+		
+		String key = row[2];
 		type.setKeyId(key);
-		for (int i = 2; i < row.length; i ++){
+		
+		for (int i = 3; i < row.length; i ++){
 			String name = row[i];
-			String code = columnLanguages.get(i-2);
+			String code = columnLanguages.get(i-3);
 			Language l = langCodes.get(code);
 			if (l != null){
 				if (name.length() > 0){
@@ -156,7 +172,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 
 	private List<String> getLanguageCodes(String[] columns) {
 		List<String> result = new ArrayList<String>();
-		for (int i = 2; i < columns.length; i ++){
+		for (int i = 3; i < columns.length; i ++){
 			int index = columns[i].lastIndexOf('>');
 			result.add(columns[i].substring(index+1));
 		}

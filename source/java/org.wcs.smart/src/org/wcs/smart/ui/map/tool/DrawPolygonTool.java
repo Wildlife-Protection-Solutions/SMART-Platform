@@ -207,19 +207,24 @@ public class DrawPolygonTool extends SimpleTool {
 		INewPolygonEvent editor = (INewPolygonEvent) getContext().getMap().getBlackboard().get(INewPolygonEvent.class.getName());
 		if (editor == null) return;
 		
-		Coordinate[] c = new Coordinate[coordinates.size()];
-		
-		for (int i = 0; i < coordinates.size(); i ++){
-			c[i] = coordinates.get(i);
+
+    	//remove duplicates
+    	List<Coordinate> items = new ArrayList<>();
+    	for (int i = 0; i < coordinates.size(); i ++){
+			if (i != 0) {
+				if (!coordinates.get(i).equals2D(coordinates.get(i-1))) {
+					items.add(coordinates.get(i));
+				}
+			}else {
+				items.add(coordinates.get(i));
+			}
+			
 		}
-//			Point temp = coordinates.get(i);
-//			c[i] = getContext().getViewportModel().pixelToWorld(temp.x, temp.y);
-//		}
 		
 		Polygon p = null;
 		String error = null;
 		try {
-			p = GeometryFactoryProvider.getFactory().createPolygon(c);
+			p = GeometryFactoryProvider.getFactory().createPolygon(items.toArray(new Coordinate[items.size()]));
 			p = (Polygon) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
 			if (p.isEmpty() || !p.isSimple() || !p.isValid()){
 				error = Messages.DrawPolygonTool_InvalidPolygon;
@@ -253,7 +258,7 @@ public class DrawPolygonTool extends SimpleTool {
     	coordinates.add(coordinates.get(0));
     	finish();
     	coordinates.clear();
-
+    	
     	redraw(null);
     	
     	if (drawCommand != null){

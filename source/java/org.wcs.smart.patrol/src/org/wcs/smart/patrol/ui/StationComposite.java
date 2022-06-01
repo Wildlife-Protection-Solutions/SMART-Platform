@@ -49,6 +49,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 /**
  * Patrol Item composite for selecting patrol station.
@@ -59,18 +60,8 @@ import org.wcs.smart.patrol.model.Patrol;
 public class StationComposite extends PatrolItemComposite{
 
 	private TableViewer stationList;
-
-	/*
-	 * Station label provider
-	 */
-	private LabelProvider lblProvider = new LabelProvider(){
-		public String getText(Object element) {
-			if (element instanceof Station){
-				return ((Station)element).getName();
-			}
-			return super.getText(element);
-		}
-	};
+	private LabelProvider lblProvider = new NamedIconItemLabelProvider();
+	
 	
 	/**
 	 * 

@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -349,10 +350,10 @@ public class ImportAttributeProcessor {
 		List<Icon> icons;
 		List<IconSet> sets;
 		try(Session session = HibernateManager.openSession()){
-			icons = QueryFactory.buildQuery(session, Icon.class, 
-				new Object[] {"conservationArea", attribute.getConservationArea()}) //$NON-NLS-1$
-					.list();
-			icons.forEach(i->i.getFiles().forEach(ic->ic.computeFileLocation(session)));
+			
+			icons = IconManager.INSTANCE.getIcons(session, attribute.getConservationArea());
+			icons.addAll(IconManager.INSTANCE.getSystemIcons(session, attribute.getConservationArea()));
+
 			sets = QueryFactory.buildQuery(session, IconSet.class, 
 					new Object[] {"conservationArea", attribute.getConservationArea()}) //$NON-NLS-1$
 					.list();

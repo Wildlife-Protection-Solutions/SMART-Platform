@@ -56,6 +56,8 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		monitor.subTask(Messages.DeleteConservationAreaHandler_DeletePropertiesProgress);
 		deleteCaProperties(ca, session);
 		deleteSignatures(ca, session);
+		
+		deleteIcons(ca, session);
 	}
 	
 	private void deleteSignatures(ConservationArea ca, Session session) throws Exception{
@@ -107,5 +109,19 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();	
 	}	
+
 	
+	private void deleteIcons(ConservationArea ca, Session session) throws Exception{
+		Query<?> q = session.createQuery("delete from Icon where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from IconSet where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+
+//		q = session.createQuery("delete from Attribute where conservationArea = :ca"); //$NON-NLS-1$
+//		q.setParameter("ca", ca); //$NON-NLS-1$
+//		q.executeUpdate();	
+	}	
 }

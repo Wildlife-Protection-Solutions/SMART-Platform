@@ -94,9 +94,9 @@ import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.internal.ca.properties.AttributeTree;
-import org.wcs.smart.ui.internal.ca.properties.IconPanel;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -1109,7 +1109,7 @@ public class AttributeInfoPanel extends Composite {
 			//can edit
 			validate();
 		}
-		iconPanel.setDmObject(att);
+		iconPanel.setIcon(att.getIcon());
 		resize();
 	}
 	
@@ -1177,7 +1177,8 @@ public class AttributeInfoPanel extends Composite {
 			
 			att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 			att.setIsRequired(chRequired.getSelection());
-			iconPanel.updateDmObject(att);
+			att.setIcon(iconPanel.getIcon());
+			
 			
 			if (att.getUuid() == null){
 				session.saveOrUpdate(att);

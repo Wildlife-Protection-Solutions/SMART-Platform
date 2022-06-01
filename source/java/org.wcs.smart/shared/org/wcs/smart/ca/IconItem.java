@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2022 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,42 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui;
+package org.wcs.smart.ca;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.icon.Icon;
 
-/**
- * LabelProvider for {@link NamedItem}
- * 
- * @author elitvin
- * @since 2.0.0
- */
-public class NamedItemLabelProvider extends LabelProvider {
+public interface IconItem {
 
-	protected Language currentLanguage = null;
+	public Icon getIcon();
 	
-	public void setLanguage(Language language){
-		this.currentLanguage = language;
-	}
-	
-	@Override
-	public String getText(Object element) {
-		if (element instanceof NamedItem) {
-			NamedItem i = (NamedItem) element;
-			if (currentLanguage == null){
-				return i.getName();
-			}else{
-				String x = i.findNameNull(currentLanguage);
-				if (x == null){
-					x = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-				}
-				return x;
-			}
-		}
-		return super.getText(element);
-	}
+	public void setIcon(Icon icon);
 	
 }

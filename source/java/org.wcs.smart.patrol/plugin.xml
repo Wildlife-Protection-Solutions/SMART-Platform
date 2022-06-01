@@ -65,7 +65,7 @@
                </command>
                <command
                      commandId="org.wcs.smart.patrol.patrolTypes"
-                     icon="images/icons/obj16/patrol.png"
+                     icon="images/icons/obj16/patrol_transport_type.png"
                      label="%patro.types.command.label"
                      mnemonic="%patro.types.command.mnemonic"
                      style="push"

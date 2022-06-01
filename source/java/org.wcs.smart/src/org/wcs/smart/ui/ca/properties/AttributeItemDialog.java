@@ -33,12 +33,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
-import org.wcs.smart.ui.internal.ca.properties.IconPanel;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -107,14 +107,14 @@ public class AttributeItemDialog  extends SmartStyledTitleDialog{
 		});
 		comp.initFields(toUpdate, siblings, lang);
 	
-		if (toUpdate instanceof DmObject) {
+		if (toUpdate instanceof NamedKeyIconItem) {
 			Label l = new Label(container, SWT.NONE);
 			l.setText(Messages.AttributeItemDialog_IconLabel);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			icon = new IconPanel(container, true);
 			icon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-			icon.setDmObject((DmObject) toUpdate);
+			icon.setIcon(((NamedKeyIconItem) toUpdate).getIcon());
 			icon.addListener(SWT.Selection, e->{
 				modified();
 				container.layout(true);
@@ -147,7 +147,7 @@ public class AttributeItemDialog  extends SmartStyledTitleDialog{
 			setReturnCode(OK);
 			comp.updateFields(toUpdate);
 			if (icon != null) {
-				icon.updateDmObject((DmObject)toUpdate);
+				((NamedKeyIconItem)toUpdate).setIcon(icon.getIcon());
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);

@@ -6,6 +6,8 @@ import org.wcs.smart.patrol.model.PatrolType;
 
 public class LabelConstants {
 
+	public static final String CLEAR_IMAGE = Messages.PatrolMandatePropertyPage_ClearImage;
+	
 	public static final String TEAM_NAME = Messages.Team_Name;
 	public static final String TEAM_DESCRIPTION = Messages.Team_DescriptionFieldName;
 	public static final String TEAM_MANDATE = Messages.Team_MandateFieldName;

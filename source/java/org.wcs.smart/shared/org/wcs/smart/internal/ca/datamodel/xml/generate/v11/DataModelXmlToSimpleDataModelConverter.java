@@ -294,7 +294,8 @@ public class DataModelXmlToSimpleDataModelConverter implements IXmlToDataModelCo
 			}
 			
 			/* Attribute List */
-			if (newAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+			if (newAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST || 
+					newAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.MLIST ) {
 				newAttribute.setAttributeList(new ArrayList<AttributeListItem>());
 				if (xmlAtt.getValues() != null){
 					List<ListNode> items = xmlAtt.getValues();

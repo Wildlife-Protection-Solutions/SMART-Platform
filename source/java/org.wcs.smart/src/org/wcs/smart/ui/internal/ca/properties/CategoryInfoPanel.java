@@ -36,6 +36,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 
 /**
@@ -110,7 +111,7 @@ public class CategoryInfoPanel extends Composite {
 		nameKeyFields.initFields(c, siblings, language);
 		chMultiple.setSelection(c.getIsMultiple());
 		
-		iconPanel.setDmObject(c);
+		iconPanel.setIcon(c.getIcon());
 		layout(true);
 	}
 	
@@ -123,7 +124,7 @@ public class CategoryInfoPanel extends Composite {
 	public void updateCategory(Category c){
 		nameKeyFields.updateFields(c);
 		c.setIsMultiple(chMultiple.getSelection());
-		iconPanel.updateDmObject(c);
+		c.setIcon(iconPanel.getIcon());
 	}
 	
 	public boolean validate(){

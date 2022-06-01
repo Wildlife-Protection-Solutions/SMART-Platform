@@ -45,7 +45,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.ca.icon.IconUtils;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -66,7 +66,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 	private List<Icon> icons;
 	
 	private IconSet templateSet = null;
-	private IconUtils.FixedIconSet defaultSet = null;
+	private IconManager.FixedIconSet defaultSet = null;
 	
 	private Button btnCustom, btnDefault;
 	private Composite compDefault, compCustom;
@@ -115,6 +115,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 					try {
 						if (copyIcon.isSystemIcon()) {
 							newfile.setFilename(copyIcon.getFilename());
+							newfile.computeFileLocation(session);
 						}else {
 							Path temp = Files.createTempFile("smart", "icon"); //$NON-NLS-1$ //$NON-NLS-2$
 							Path inputFile = null;
@@ -140,6 +141,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 			}
 		}
 	}
+	
 	private boolean createDefaultIconSet() {
 		if (defaultSet == null) {
 			MessageDialog.openError(getShell(), Messages.NewIconSetDialog_ErrorTitle, Messages.NewIconSetDialog_IconsetREquired);
@@ -159,57 +161,6 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 		newSet.updateName(newSet.getConservationArea().getDefaultLanguage(), defaultSet.name);
 		session.saveOrUpdate(newSet);
 		
-		for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
-					//0 - icon key
-					//1 - icon name
-					//2 - black icon reference
-					//3 - line icon reference
-					//4 - color icon reference
-					//5 - data model mappings (comma seperated)
-		
-			String file = null;
-			switch(defaultSet) {
-			case BLACK:
-				file = icon[2];
-				break;
-			case COLOR:
-				file = icon[4];
-				break;
-			case LINE:
-				file = icon[3];
-				break;
-			default:
-				break;
-			
-			}
-			String key = icon[0];
-			Icon toUpdate = null;
-			for (Icon i : icons) {
-				if (i.getKeyId().equalsIgnoreCase(key)) {
-					toUpdate = i;
-					break;
-				}
-			}
-			if (toUpdate == null) {
-				toUpdate = new Icon();
-				icons.add(toUpdate);
-				toUpdate.setConservationArea(newSet.getConservationArea());
-				toUpdate.setFiles(new ArrayList<>());
-				toUpdate.setKeyId(key.toLowerCase());
-				toUpdate.setName(icon[1]);
-				toUpdate.updateName(newSet.getConservationArea().getDefaultLanguage(), icon[1]);
-				toUpdate.updateName(SmartDB.getCurrentLanguage(), icon[1]);
-			}
-			
-			IconFile iconfile = new IconFile();		
-			iconfile.setIcon(toUpdate);
-			iconfile.setIconSet(newSet);
-			iconfile.setFilename(file);
-			toUpdate.getFiles().add(iconfile);
-			
-			session.saveOrUpdate(toUpdate);
-					
-		}
 		return true;
 	}
 	
@@ -238,11 +189,11 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 		cmbDefaultSet.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDefaultSet.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				return ((IconUtils.FixedIconSet)element).name;
+				return ((IconManager.FixedIconSet)element).name;
 			}
 		});
-		cmbDefaultSet.setInput(IconUtils.FixedIconSet.values());
-		cmbDefaultSet.addSelectionChangedListener(e->defaultSet=(IconUtils.FixedIconSet) cmbDefaultSet.getStructuredSelection().getFirstElement());
+		cmbDefaultSet.setInput(IconManager.FixedIconSet.values());
+		cmbDefaultSet.addSelectionChangedListener(e->defaultSet=(IconManager.FixedIconSet) cmbDefaultSet.getStructuredSelection().getFirstElement());
 
 		
 		btnCustom = new Button(temp, SWT.RADIO);

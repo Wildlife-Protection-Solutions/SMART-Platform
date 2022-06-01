@@ -201,7 +201,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case PATROL_TRANSPORT_TYPE:
 			case PATROL_TRANSPORT_TYPE_KEY:
 			default:
-				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TRANSPORTTYPE_ICON);
 		}
 		
 	}

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -32,12 +32,9 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.IconSelectionDialog;
-import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -68,9 +65,9 @@ public class IconPanel extends Composite {
 		}
 	}
 
-	public void setDmObject(DmObject object) {
-		this.newIcon = object.getIcon();
-		updateIcon(object.getIcon());
+	public void setIcon(Icon object) {
+		this.newIcon = object;
+		updateIcon(object);
 	}
 	
 	private void updateIcon(Icon icon) {
@@ -166,12 +163,8 @@ public class IconPanel extends Composite {
 	 * Updates the datamodel icon 
 	 * @param object
 	 */
-	public void updateDmObject(DmObject object) {
-		if(newIcon != null) {
-			object.setIcon(newIcon);
-		}else {
-			object.setIcon(null);
-		}
+	public Icon getIcon() {
+		return newIcon;
 	}
 	
 	private void clearIcon() {

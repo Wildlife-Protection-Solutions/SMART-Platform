@@ -25,7 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -58,11 +58,15 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -86,6 +90,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.export.StationCsvImporter;
 import org.wcs.smart.export.config.impl.StationCsvExportConfig;
 import org.wcs.smart.export.config.impl.StationCsvImportConfig;
@@ -94,11 +99,14 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.IconSelectionDialog;
+import org.wcs.smart.ui.IconSelectionDialog.Type;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
+
 
 /**
  * Dialog for managing conservation area station 
@@ -118,18 +126,20 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private TableViewer tableViewer;
 	private StationSorter sorter;
 	private Button btnDisable, btnDelete;
-	private MenuItem miDisable, miDelete;
+	private MenuItem miDisable, miDelete, miEdit, miClearIcon;
 	
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
 	private UUIDGenerator uuidGenerator = null;
-	 
+	private HashMap<Station,Image> images = new HashMap<>();
+	private int editIndex = -1;
 	
 	/*
 	 * columns in the station table
 	 */
 	private enum Column {
+		ICON(DialogConstants.ICON_TEXT, 1),
 		NAME(SmartLabelProvider.STATION_NAME, 1), 
 		DESCIPTION(SmartLabelProvider.STATION_DESCRIPTION, 3);
 
@@ -159,6 +169,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 
+	public void clearImageCache() {
+		for (Image i : images.values()) {
+			if (i != null) i.dispose();
+		}
+		images.clear();
+	}
+	
 	/**
 	 * Create contents of the property page.
 	 * 
@@ -168,23 +185,14 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	public Composite createContent(Composite parent) {
 		try(Session s = HibernateManager.openSession()){
 			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,s));
-			Collections.sort(stations, new Comparator<Station>() {
-				@Override
-				public int compare(Station o1, Station o2) {
-					String name1 = o1.getName();
-					if (name1 != null){
-						name1 = name1.toLowerCase();
-					}
-					String name2 = o2.getName();
-					if (name2 != null){
-						name2 = name2.toLowerCase();
-					}
-					return nullStringComparator.compare(name1, name2);
-				}
+			Collections.sort(stations);
+			stations.forEach(station ->{
+				HibernateManager.loadIcon(station.getIcon(), s);
+				station.getNames().size();
 			});
-			stations.forEach(station -> station.getNames().size());
 		}
-
+		parent.addListener(SWT.Dispose, e->clearImageCache());
+		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
 
@@ -233,6 +241,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		TableViewerEditor.create(tableViewer, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
 		
+		tableViewer.getTable().addListener(SWT.MouseDoubleClick, event->{
+			ViewerCell cell = tableViewer.getCell(new Point(event.x, event.y));
+			if (cell == null) return;
+			if (cell.getColumnIndex() == Column.ICON.ordinal()) editIcon();
+		});
+		
+		
 		sorter = new StationSorter();
 		tableViewer.setComparator(sorter);
 		
@@ -243,6 +258,28 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miAdd.addListener(SWT.Selection, e->addStation());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		miEdit = new MenuItem(mnu, SWT.PUSH);
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.addListener(SWT.Selection, e->{
+			if (editIndex == -1) return;
+			if (editIndex == Column.ICON.ordinal()) {
+				editIcon();
+			}else {
+				tableViewer.editElement((Station) tableViewer.getStructuredSelection().getFirstElement(), editIndex);
+			}
+		});
+		
+		miClearIcon = new MenuItem(mnu, SWT.PUSH);
+		miClearIcon.setText("Clear Image");
+		miClearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miClearIcon.addListener(SWT.Selection, e->{
+			Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+			updateIcon(stn, null);
+		});
 		
 		miDisable = new MenuItem(mnu, SWT.PUSH);
 		miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
@@ -255,6 +292,11 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			setChangesMade(true);
 		});
 		
+		tableViewer.getTable().addListener(SWT.MenuDetect, evt->{
+			ViewerCell cell = tableViewer.getCell(tableViewer.getControl().toControl(evt.x,  evt.y));
+			editIndex = -1;
+			if (cell != null) editIndex = cell.getColumnIndex();	
+		});
 		
 		Composite composite = new Composite(container, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
@@ -288,6 +330,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 		
 		if (PermissionManager.INSTANCE.canDelete(Station.class)){
+			new MenuItem(mnu, SWT.SEPARATOR);
+			
 			miDelete = new MenuItem(mnu, SWT.PUSH);
 			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -336,11 +380,29 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 
 	}
 	
+	
+	private void editIcon() {
+		Station team = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		
+		IconSelectionDialog dialog = new IconSelectionDialog(tableViewer.getControl().getShell(), Type.SELECT);
+		if (dialog.open()  != Window.OK) return ;
+		updateIcon(team, dialog.getSelectedIcon());
+	}
+	
+	private void updateIcon(Station team, Icon icon) {
+		clearImageCache();
+		team.setIcon(icon);
+		tableViewer.refresh();
+		setChangesMade(true);
+	}
+	
 	private void updateButtons() {
 		Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 		if (stn != null){
 			if (btnDelete != null) btnDelete.setEnabled(true);
 			if (miDelete != null) miDelete.setEnabled(true);
+			if (miEdit != null) miEdit.setEnabled(true);
+			if (miClearIcon != null) miClearIcon.setEnabled(true);
 			
 			miDisable.setEnabled(true);
 			btnDisable.setEnabled(true);
@@ -535,26 +597,29 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name,
 					colum.bounds, i);
 			col.setLabelProvider(new StationLabelProvider(colum));
-			final TextTableEditor ed = new TextTableEditor(viewer, colum);
-			ed.editor.addListener(new ICellEditorListener() {
-				
-				@Override
-				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
-					setErrorMessage(ed.editor.getErrorMessage());
-				}
-				
-				@Override
-				public void cancelEditor() {
-					setErrorMessage(null);
-				}
-				
-				@Override
-				public void applyEditorValue() {
-					setErrorMessage(null);
+			
+			if (colum == Column.DESCIPTION || colum == Column.NAME) {
+				final TextTableEditor ed = new TextTableEditor(viewer, colum);
+				ed.editor.addListener(new ICellEditorListener() {
 					
-				}
-			});
-			col.setEditingSupport(ed);
+					@Override
+					public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+						setErrorMessage(ed.editor.getErrorMessage());
+					}
+					
+					@Override
+					public void cancelEditor() {
+						setErrorMessage(null);
+					}
+					
+					@Override
+					public void applyEditorValue() {
+						setErrorMessage(null);
+						
+					}
+				});
+				col.setEditingSupport(ed);
+			}
 					
 			col.getColumn().addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -590,7 +655,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * Saves the station changes to the database
 	 */
 	@Override
-	protected boolean  performSave() {
+	protected boolean performSave() {
 		try (Session s = HibernateManager.openSession()){
 			Transaction tx = s.beginTransaction();
 			try {
@@ -600,6 +665,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				// add/update stations
 				for (int i = 0; i < stations.size(); i++) {
 					Station stn = (Station) stations.get(i);
+					if (stn.getIcon() != null && stn.getIcon().getUuid() == null) s.saveOrUpdate(stn.getIcon());
 					s.saveOrUpdate(stn);
 	
 					for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(s)) {
@@ -729,9 +795,11 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	class StationLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
 		private Column column;
+		
 		public StationLabelProvider(Column column){
 			this.column = column;
 		}
+		
 		@Override
 		public String getText(Object element) {
 			return findLangValue(column, (Station) element);
@@ -748,6 +816,19 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		public Color getBackground(Object element){
 			return null;
-		 }
+		}
+		
+
+		@Override
+		public Image getImage(Object element) {
+			if (column != Column.ICON) return null;
+			
+			Station station = (Station)element;
+			if (images.containsKey(station)) return images.get(station);
+			
+			Image img = SmartUtils.getImage(station.getIcon(), 32);
+			images.put(station, img);
+			return img;
+		}
 	}
 }

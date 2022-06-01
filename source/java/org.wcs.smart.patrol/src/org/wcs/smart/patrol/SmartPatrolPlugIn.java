@@ -110,6 +110,21 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public static final String PATROL_MANDATE_ICON = "org.wsc.smart.patrol.PATROL_MANDATE"; //$NON-NLS-1$
 
 	/**
+	 * Image descriptor key for patrol comment icon
+	 */
+	public static final String PATROL_COMMENT_ICON = "org.wsc.smart.patrol.PATROL_COMMENT"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor key for patrol objective icon
+	 */
+	public static final String PATROL_OBJECTIVE_ICON = "org.wsc.smart.patrol.PATROL_OBJECTIVE"; //$NON-NLS-1$
+	/**
+	 * Image descriptor key for patrol transport type icon
+	 */
+	public static final String PATROL_TRANSPORTTYPE_ICON = "org.wsc.smart.patrol.PATROL_TRANSPORTTYPE"; //$NON-NLS-1$
+	
+	
+	/**
 	 * Image descriptor key for month icon
 	 */
 	public static final String MONTH_ICON = "org.wsc.smart.patrol.YEAR"; //$NON-NLS-1$
@@ -145,7 +160,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		reg.put(PATROL_LEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_leader.png")); //$NON-NLS-1$
 		reg.put(PATROL_MEMBER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_member.png")); //$NON-NLS-1$
 		reg.put(PATROL_PILOT_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_pilot.png")); //$NON-NLS-1$
-		reg.put(PATROL_MANDATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mandate.png")); //$NON-NLS-1$			
+		reg.put(PATROL_MANDATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mandate.png")); //$NON-NLS-1$
+		reg.put(PATROL_COMMENT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_comment.png")); //$NON-NLS-1$
+		reg.put(PATROL_OBJECTIVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_objective.png")); //$NON-NLS-1$
+		reg.put(PATROL_TRANSPORTTYPE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_transport_type.png")); //$NON-NLS-1$
 		
 		reg.put(MONTH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_month.png")); //$NON-NLS-1$
 		reg.put(YEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_year.png")); //$NON-NLS-1$

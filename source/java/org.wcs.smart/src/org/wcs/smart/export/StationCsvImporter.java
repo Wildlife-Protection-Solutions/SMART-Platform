@@ -42,6 +42,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -61,9 +63,12 @@ public class StationCsvImporter implements ICsvDataImporter {
 
 	private Collection<Station> importedData;
 	
-	public StationCsvImporter() {
-		//nothing
+	private ConservationArea ca;
+	
+	public StationCsvImporter(ConservationArea ca) {
+		this.ca = ca;
 	}
+	
 	
 	@Override
 	public List<String> getWarnings(){
@@ -84,13 +89,18 @@ public class StationCsvImporter implements ICsvDataImporter {
 		if (!Files.exists(file)){
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{ file.toString() }));
 		}
+		
+		List<Icon> icons = IconManager.INSTANCE.getIcons(session,  ca);
+		icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
+		
+		
 		ArrayList<Station> stations = new ArrayList<Station>();
 		try(CSVReader reader = new CSVReader(
 				new InputStreamReader(Files.newInputStream(file), cs), delimiter)){
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
 			List<String> langCodes = getLanguageCodes(headerRow);
-			if (headerRow.length % 2 != 0){
+			if ((headerRow.length-1) % 2 != 0){
 				throw new Exception(Messages.StationCsvImporter_InvalidStationCsvFileFormat);
 			}
 			Map<String,Language> code2Language = createCode2Language(langCodes);
@@ -106,7 +116,7 @@ public class StationCsvImporter implements ICsvDataImporter {
 					throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, headerRow.length}));
 				}
 				
-				Station station = handleStation(row, langCodes, code2Language, session);
+				Station station = handleStation(row, langCodes, code2Language, session, icons);
 				stations.add(station);
 				line++;
 			}
@@ -124,15 +134,22 @@ public class StationCsvImporter implements ICsvDataImporter {
 	 * @return
 	 */
 	private Station handleStation(String[] row, List<String> columnLanguages, 
-			Map<String, Language> langCodes, Session session) {
+			Map<String, Language> langCodes, Session session, List<Icon> icons) {
 		Station station = new Station();
 		station.setIsActive(true);
 		station.setConservationArea(SmartDB.getCurrentConservationArea());
 		
-		for (int i = 0; i < row.length; i += 2){
+		String iconKey = row[0];
+		for (Icon i : icons) {
+			if (i.getKeyId().equalsIgnoreCase(iconKey)) {
+				station.setIcon(i);
+				break;
+			}
+		}
+		for (int i = 1; i < row.length; i += 2){
 			String name = row[i];
 			String description = row[i+1];
-			String code = columnLanguages.get(i);
+			String code = columnLanguages.get(i-1);
 			Language l = langCodes.get(code);
 			if (l != null){
 				if (name.length() > 0){
@@ -149,7 +166,7 @@ public class StationCsvImporter implements ICsvDataImporter {
 
 	private List<String> getLanguageCodes(String[] columns) {
 		List<String> result = new ArrayList<String>();
-		for (int i = 0; i < columns.length; i ++){
+		for (int i = 1; i < columns.length; i ++){
 			int index = columns[i].lastIndexOf('>');
 			result.add(columns[i].substring(index+1));
 		}

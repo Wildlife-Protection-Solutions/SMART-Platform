@@ -40,7 +40,7 @@ import org.wcs.smart.util.SharedUtils;
 public class PatrolTransportCsvImportConfig extends AbstractCsvImportConfig {
 
 	private PatrolTransportCsvExporter exporter = new PatrolTransportCsvExporter();
-	private PatrolTransportCsvImporter importer = new PatrolTransportCsvImporter();
+	private PatrolTransportCsvImporter importer = new PatrolTransportCsvImporter(SmartDB.getCurrentConservationArea());
 	
 	@Override
 	public String getDefaultFileName(){

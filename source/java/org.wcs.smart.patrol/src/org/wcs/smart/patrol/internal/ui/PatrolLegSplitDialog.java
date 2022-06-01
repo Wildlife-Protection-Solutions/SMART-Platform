@@ -40,10 +40,10 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -65,6 +65,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SmartUtils;
@@ -98,8 +99,8 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 	private ComboViewer groupAPilot;
 	private ComboViewer groupBLeader;
 	private ComboViewer groupBPilot;
-	private ComboViewer cmbTransportTypeA;
-	private ComboViewer cmbTransportTypeB;
+	private TableComboViewer cmbTransportTypeA;
+	private TableComboViewer cmbTransportTypeB;
 	private List<PatrolTransportType> typeOps;
 	private Collection<PatrolLeg> legsToUpdate;
 	
@@ -372,25 +373,22 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 	/*
 	 * create transport type combo viewer
 	 */
-	private ComboViewer createTransportTypeComboViewer(Composite parent){
+	private TableComboViewer createTransportTypeComboViewer(Composite parent){
 		Composite ttype = new Composite(parent, SWT.NONE);
 		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		ttype.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(ttype, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_TransportType_Label);
-		ComboViewer cmbTransportType = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmbTransportType.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				return ((PatrolTransportType)element).getName();
-			}
-		});
+		
+		TableComboViewer cmbTransportType = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
 		
 		cmbTransportType.setInput( typeOps );
 		
 		cmbTransportType.setSelection(new StructuredSelection(existingLeg.getType()));
-		cmbTransportType.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTransportType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTransportType.addSelectionChangedListener(new ISelectionChangedListener() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

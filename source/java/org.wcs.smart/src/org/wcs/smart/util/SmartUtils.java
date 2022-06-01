@@ -963,6 +963,24 @@ public class SmartUtils {
 		}
 		return img;
 	}
+	
+	/**
+	 * 
+	 * @param icon
+	 * @param size
+	 * @return the image associated with the default icon set
+	 */
+	public static Image getImage(Icon icon, Integer size) {
+		if (icon == null) return null;
+		for (IconFile file : icon.getFiles()) {
+			if (file.getIconSet().getIsDefault()) {
+				if (file.getCopyFromLocation() != null) return getImage(file.getCopyFromLocation(), size);
+				return getImage(file.getAttachmentFile(), size);
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Converts the file to an image of the given size.  Works for svg as well as png etc.
 	 * Users must dispose of image when done with it.

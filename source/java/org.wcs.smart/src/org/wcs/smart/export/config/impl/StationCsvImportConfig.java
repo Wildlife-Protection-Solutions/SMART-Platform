@@ -41,7 +41,7 @@ import org.wcs.smart.util.SharedUtils;
 public class StationCsvImportConfig extends AbstractCsvImportConfig {
 
 	private StationCsvExporter exporter = new StationCsvExporter();
-	private StationCsvImporter importer = new StationCsvImporter();
+	private StationCsvImporter importer = new StationCsvImporter(SmartDB.getCurrentConservationArea());
 	
 	@Override
 	public ICsvDataImporter getImporter() {

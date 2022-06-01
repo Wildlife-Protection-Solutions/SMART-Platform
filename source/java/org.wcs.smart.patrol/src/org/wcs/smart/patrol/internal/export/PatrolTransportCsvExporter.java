@@ -80,6 +80,7 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 				int i = 0;
 				String csvout[] = new String[columns.length];
 				csvout[i++] = type.getPatrolType().name();
+				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
 				csvout[i++] = type.getKeyId();
 				
 				for(Language l : languages){
@@ -95,9 +96,10 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] cols = new String[langs.size() + 2];
+		String[] cols = new String[langs.size() + 3];
 		int i = 0;
 		cols[i++] = "Type"; //$NON-NLS-1$
+		cols[i++] = "Icon"; //$NON-NLS-1$
 		cols[i++] = "Key"; //$NON-NLS-1$
 		for (Language lng : langs) {
 			cols[i++] = "Name>" + lng.getCode(); //$NON-NLS-1$
@@ -107,16 +109,11 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 
 	private List<PatrolTransportType> getTransportTypes(ConservationArea ca, Session session) {
-		session.beginTransaction();
-		try{
-			List<PatrolTransportType> tt = QueryFactory.buildQuery(session, PatrolTransportType.class, new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
-			tt.forEach(t->{
-				t.getNames().size();
-			});
-			return tt;
-		}finally{
-			session.getTransaction().rollback();
-		}
+		List<PatrolTransportType> tt = QueryFactory.buildQuery(session, 
+				PatrolTransportType.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		tt.forEach(t->t.getNames().size());
+		return tt;
 	}
 
 }

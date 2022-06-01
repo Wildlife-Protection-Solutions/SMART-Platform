@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.ui;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.wcs.smart.ca.Language;
+import java.util.HashMap;
+
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * LabelProvider for {@link NamedItem}
@@ -32,29 +34,42 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author elitvin
  * @since 2.0.0
  */
-public class NamedItemLabelProvider extends LabelProvider {
+public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 
-	protected Language currentLanguage = null;
+	protected HashMap<Object, Image> images = new HashMap<>();
 	
-	public void setLanguage(Language language){
-		this.currentLanguage = language;
+	private int iconSize = 32;
+	
+	public NamedIconItemLabelProvider() {
+		
+	}
+	
+	public NamedIconItemLabelProvider(int iconSize) {
+		this();
+		this.iconSize = iconSize;
 	}
 	
 	@Override
-	public String getText(Object element) {
-		if (element instanceof NamedItem) {
-			NamedItem i = (NamedItem) element;
-			if (currentLanguage == null){
-				return i.getName();
-			}else{
-				String x = i.findNameNull(currentLanguage);
-				if (x == null){
-					x = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-				}
-				return x;
-			}
+	public Image getImage(Object element) {
+		if (element instanceof IconItem) {
+			IconItem team = (IconItem) element;
+
+			if (images.containsKey(team))
+				return images.get(team);
+
+			Image img = SmartUtils.getImage(team.getIcon(), iconSize);
+			images.put(team, img);
+			return img;
 		}
-		return super.getText(element);
+		return null;
 	}
-	
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		for (Image i : images.values()) {
+			if (i != null) i.dispose();
+		}
+		images.clear();
+	}
 }

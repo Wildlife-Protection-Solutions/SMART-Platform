@@ -23,10 +23,8 @@ package org.wcs.smart.ui;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -65,10 +63,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -108,18 +106,21 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	}
 	private Composite stackPanel;
 	
-	private Composite iconLibraryPanel;
+	
+	private Composite iconCaPanel;
 	private Composite importPanel;
 	
-	private TableViewer tblIcons;
-	private Button btnLibrary;
+	private TableViewer tblCaIcons;
+		
+	private Button btnIcon;
 	private Button btnImport;
 	
 	private Icon selectedIcon;
 	private Text txtName, txtKey;
 	
 	private HashMap<IconSet, Label> imports;
-	private List<Icon> icons;
+	private List<Icon> caIcons;
+	private List<Icon> systemIcons;
 	
 	private Type type;
 	
@@ -177,15 +178,16 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			if (index < 0) index = 0;
 			if (!activeSets.isEmpty()) currentSet = activeSets.get(index);
 			
-			Object x = tblIcons.getStructuredSelection().getFirstElement();
+			//Object x = tblIcons.getStructuredSelection().getFirstElement();
+			Object x = tblCaIcons.getStructuredSelection().getFirstElement();
 			if (x instanceof Icon) {
 				selectedIcon = (Icon)x;
 			}
 			
 		} else if (type == Type.SELECT) {
 			this.selectedIcon = null;
-			if (btnLibrary.getSelection()) {
-				Object x = tblIcons.getStructuredSelection().getFirstElement();
+			if (btnIcon.getSelection()) {
+				Object x = tblCaIcons.getStructuredSelection().getFirstElement();
 				if (x instanceof Icon) {
 					selectedIcon = (Icon)x;
 				}
@@ -247,7 +249,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		
 		Icon icon = new Icon();
 		icon.setConservationArea(SmartDB.getCurrentConservationArea());
-		icon.setKeyId(  DataModelManager.INSTANCE.generateKey(name, icons) );
+		icon.setKeyId(  DataModelManager.INSTANCE.generateKey(name, caIcons) );
 		icon.setName(name);
 		icon.updateName(SmartDB.getCurrentLanguage(), name);
 		icon.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
@@ -298,9 +300,9 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			((GridLayout)btn.getLayout()).marginWidth = 0;
 			((GridLayout)btn.getLayout()).marginHeight = 0;
 			
-			btnLibrary = new Button(btn, SWT.RADIO);
-			btnLibrary.setText(Messages.IconSelectionDialog_SmartSrc);
-			btnLibrary.setSelection(true);
+			btnIcon = new Button(btn, SWT.RADIO);
+			btnIcon.setText(Messages.IconSelectionDialog_SmartSrc);
+			btnIcon.setSelection(true);
 			
 			btnImport = new Button(btn, SWT.RADIO);
 			btnImport.setText(Messages.IconSelectionDialog_NewSrc);
@@ -308,8 +310,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
-			btnLibrary.addListener(SWT.Selection, e->{
-				((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
+			btnIcon.addListener(SWT.Selection, e->{
+				((StackLayout)stackPanel.getLayout()).topControl = iconCaPanel;
 				stackPanel.layout();	
 			});
 			
@@ -326,13 +328,13 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		((StackLayout)stackPanel.getLayout()).marginHeight = 0;
 		
 		if (type == Type.SELECT || type == Type.SINGLE_SELECT) {
-			iconLibraryPanel = createLibraryComposite(stackPanel, activeSets);
+			iconCaPanel = createLibraryComposite(stackPanel, activeSets);
 			loadDataJob.schedule();
 		}
 		importPanel = createImportComposite(stackPanel, activeSets);
 		
 		if (type == Type.SELECT || type == Type.SINGLE_SELECT) {
-			((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
+			((StackLayout)stackPanel.getLayout()).topControl = iconCaPanel;
 		}else {
 			((StackLayout)stackPanel.getLayout()).topControl = importPanel;
 		}
@@ -453,17 +455,11 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		return panel;
 	}
 	
-	private void createFilterText(Composite parent) {
+	private FilterComposite createFilterText(Composite parent) {
 		FilterComposite txtFilter = new FilterComposite(parent, SWT.NONE);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtFilter.addChangeListener(new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				txtFilterText = txtFilter.getPatternFilter();
-				if (txtFilterText != null) txtFilterText = txtFilterText.toLowerCase().trim();
-				tblIcons.refresh();	
-			}
-		});		
+		return txtFilter;
+				
 	}
 	
 	private Composite createLibraryComposite(Composite parent, List<IconSet> sets) {
@@ -472,9 +468,9 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight= 0;
 		
-		createFilterText(panel);
+		FilterComposite txtFilter = createFilterText(panel);
 		
-		tblIcons = new TableViewer(panel,  SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
+		TableViewer tblIcons = new TableViewer(panel,  SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
 		tblIcons.setFilters(new ViewerFilter[] {iconFilter});
 		if (type == Type.SINGLE_SELECT) {
 			IconCellHighlighter cellHighlighter = new IconCellHighlighter(tblIcons);
@@ -482,6 +478,15 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			ColumnViewerEditorActivationStrategy ss = new ColumnViewerEditorActivationStrategy(tblIcons);
 			TableViewerEditor.create(tblIcons, focusManager, ss, TableViewerEditor.KEYBOARD_ACTIVATION);			
 		}		
+		
+		txtFilter.addChangeListener(new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				txtFilterText = txtFilter.getPatternFilter();
+				if (txtFilterText != null) txtFilterText = txtFilterText.toLowerCase().trim();
+				tblIcons.refresh();	
+			}
+		});
 		
 		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblIcons.setContentProvider(ArrayContentProvider.getInstance());
@@ -546,6 +551,12 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				if (element instanceof Icon) return ((Icon)element).getName();
 				return super.getText(element);
 			}
+			
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof Icon) return null;
+				return tblIcons.getControl().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+			}
 		});
 		
 		
@@ -567,13 +578,13 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				
 				@Override
 				public Color getBackground(Object element) {
-					
-					return null;
+					if (element instanceof Icon) return null;
+					return tblIcons.getControl().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 				}
 				@Override
 				public Image getImage(Object element) {
-					if (images.containsKey(element))  return images.get(element);
 					if (element instanceof Icon) {
+						if (images.containsKey(element))  return images.get(element);
 						IconFile ff = ((Icon)element).getIconFile(s);
 						try {
 							Image img = SmartUtils.getImage(ff.getAttachmentFile(), SIZE);
@@ -592,19 +603,29 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		tblIcons.setItemCount(1);
 		tblIcons.setUseHashlookup(true);
 		tblIcons.setInput(DialogConstants.LOADING_TEXT);
-
-//		tblIcons.getTable().addListener(SWT.MouseDown, e->{
-//			ViewerCell cell = tblIcons.getCell(new Point(e.x,e.y));
-//			if (cell == null) return;
-//			int index = cell.getColumnIndex() - 2;
-//			if (index < 0) index = 0;
-//			IconSet is = sets.get(index);
-//			currentSet = is;
-////			Object item = cell.getElement();
-////			System.out.println(item.toString());
-////			IconFile fileSelection = ((Icon)item).getIconFile(is);
-////			selectedFile = fileSelection;
-//		});
+		
+		TableViewerColumn colIsCa = new TableViewerColumn(tblIcons, SWT.NONE);
+		colIsCa.getColumn().setText("Conservation Area Icon");
+		colIsCa.getColumn().setToolTipText("Yes if the icon is configured for the Conservation Area, no if the icon is from the SMART System Library");
+		colIsCa.getColumn().setWidth(50);
+		colIsCa.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof Icon) {
+					if (caIcons.contains(element)) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+					return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
+				}
+				return "";
+			}
+			
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof Icon) return null;
+				return tblIcons.getControl().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+			}
+		});
+		
+		tblCaIcons = tblIcons;
+		
 		return panel;
 	}
 	
@@ -639,35 +660,25 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<Icon> thisicons = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				session.doWork(new Work() {
-				@Override
-				public void execute(Connection c) throws SQLException {
-					c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-					session.beginTransaction();
-					try {
-						thisicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
-						for (Icon ii : thisicons) {
-							ii.getFiles().forEach(ff->{
-								ff.computeFileLocation(session);
-								session.get(IconSet.class, ff.getIconSet().getUuid());
-							});
-						}
-					}finally {
-						session.getTransaction().rollback();
-					}
-				}
-			});
+				caIcons = IconManager.INSTANCE.getIcons(session, SmartDB.getCurrentConservationArea());
+				systemIcons = IconManager.INSTANCE.getSystemIcons(session, SmartDB.getCurrentConservationArea());
 			}
-			thisicons.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			icons = thisicons;
+			Collections.sort(caIcons);
+			Collections.sort(systemIcons);
+			
+			List<Object> allIcons = new ArrayList<>();
+			allIcons.add("Conservation Area Icons");
+			allIcons.addAll(caIcons);
+			allIcons.add("SMART Library Icons");
+			allIcons.addAll(systemIcons);
 			
 			Display.getDefault().syncExec(()->{
-				if (tblIcons.getControl().isDisposed()) return;
-				tblIcons.setItemCount(thisicons.size());
-				tblIcons.setInput(thisicons);
-//				tblIcons.getTable().getColumn(1).pack();
+				if (tblCaIcons.getControl().isDisposed()) return;
+				
+				tblCaIcons.setItemCount(allIcons.size());
+				tblCaIcons.setInput(allIcons);
+				
 			});
 			
 			return Status.OK_STATUS;

@@ -33,8 +33,8 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -59,6 +59,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
@@ -77,8 +78,8 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 	
 	private ComboViewer groupLeader;
 	private ComboViewer groupPilot;
-	private ComboViewer cmbTransportTypes;
-	private ComboViewer cmbMandates;
+	private TableComboViewer cmbTransportTypes;
+	private TableComboViewer cmbMandates;
 	
 	private List<PatrolTransportType> typeOps;
 	
@@ -195,43 +196,34 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 	/*
 	 * Transport type combo viewer
 	 */
-	private ComboViewer createTransportTypeComboViewer(Composite parent){
-//		Composite ttype = new Composite(parent, SWT.NONE);
-//		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-//		ttype.setLayout(new GridLayout(2, false));
-		
+	private TableComboViewer createTransportTypeComboViewer(Composite parent){
+
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
-		ComboViewer cmbTransportType = new ComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmbTransportType.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				return ((PatrolTransportType)element).getName();
-			}
-		});
+		
+		TableComboViewer cmbTransportType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTransportType.setInput( typeOps );
 		cmbTransportType.setSelection(new StructuredSelection(legsToMerge.get(0).getType()));
-		cmbTransportType.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTransportType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return cmbTransportType;
 	}
 	
 	/*
 	 * Mandate combo viewer
 	 */
-	private ComboViewer createMandateComboViewer(Composite parent){
+	private TableComboViewer createMandateComboViewer(Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.MergePatrolLegDialog_MandateLabel);
-		ComboViewer cmb = new ComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmb.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				return ((PatrolMandate)element).getName();
-			}
-		});
+		
+		TableComboViewer cmb = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		if (!mandates.contains(legsToMerge.get(0).getMandate())) mandates.add(legsToMerge.get(0).getMandate());
 		cmb.setInput( mandates); 
 		cmb.setSelection(new StructuredSelection(legsToMerge.get(0).getMandate()));
-		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return cmb;
 	}
 	

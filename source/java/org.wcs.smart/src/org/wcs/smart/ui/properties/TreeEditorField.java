@@ -40,12 +40,14 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
@@ -70,11 +72,14 @@ public class TreeEditorField<T>  {
 	protected TreeDropDown tree = null;
 	protected ControlDecoration cd;
 	private Composite dropDownComposite;
+	
+	protected Label txtImage;
 	protected Text txtText;
+	
 	private Button btnDownArrow;
 	private Display focusDisplay = null;
-	private Collection<Listener> listeners = null; 
-		
+	private Collection<Listener> listeners = null;
+			
 	private Listener focusListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
@@ -95,6 +100,7 @@ public class TreeEditorField<T>  {
 	/**
 	 * Creates a new tree drop down field
 	 * 
+	 * @param imageSize - size of icon to display; if < 0 no icon is displayed
 	 */
 	public TreeEditorField(){
 		listeners = new ArrayList<Listener>();
@@ -107,6 +113,7 @@ public class TreeEditorField<T>  {
 	 */
 	public void setEnabled(boolean enabled) {
 		if (txtText != null) txtText.setEnabled(enabled);
+		if (txtImage != null) txtImage.setEnabled(enabled);
 		if (btnDownArrow != null) btnDownArrow.setEnabled(enabled);
 		if (tree != null) tree.getTreeViewer().getControl().setEnabled(enabled);
 	}
@@ -130,15 +137,30 @@ public class TreeEditorField<T>  {
 	 * Updates the ui text field with the given selection.
 	 */
 	private void updateSelection(T selection){
+		
+		if (txtImage != null) {
+			if (txtImage.getImage() != null) {
+				txtImage.getImage().dispose();
+				txtImage.setImage(null);
+			}
+		}
 		if (selection == null){
 			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);
 		}else{
-			txtText.setText(((LabelProvider)tree.getTreeViewer().getLabelProvider()).getText(selection));
+			LabelProvider lbl = ((LabelProvider)tree.getTreeViewer().getLabelProvider());
+			txtText.setText(lbl.getText(selection));
 			txtText.setData(selection);
+			
+			Image img = lbl.getImage(selection);
+			if (img != null) {
+				img = new Image(txtText.getDisplay(), img.getImageData());
+			}
+			txtImage.setImage(img);
 			lastValidSelection = selection;
 		}
 		txtText.selectAll();
+		txtText.getParent().layout(true);
 		validate();
 		
 		//fire events
@@ -169,7 +191,7 @@ public class TreeEditorField<T>  {
 		
 		dropDownComposite = new Composite(parent,  SWT.BORDER );
 		dropDownComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(3, false);
 		layout.marginWidth = 
 				layout.marginHeight = 
 				layout.marginLeft = 
@@ -183,6 +205,15 @@ public class TreeEditorField<T>  {
 		((GridData)dropDownComposite.getLayoutData()).horizontalIndent = 5;
 		((GridData)dropDownComposite.getLayoutData()).widthHint = 50;
 
+		
+		txtImage = new Label(dropDownComposite, SWT.NONE);
+		txtImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		txtImage.addListener(SWT.Dispose,e->{
+			if (txtImage.getImage() != null) txtImage.getImage().dispose();
+			txtImage.setImage(null);
+		});
+		
+		
 		txtText = new Text(dropDownComposite, SWT.NONE);
 		txtText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -354,6 +385,11 @@ public class TreeEditorField<T>  {
 	public void clear() {
 		txtText.setText(""); //$NON-NLS-1$
 		txtText.setData(null);
+		
+		if (txtImage != null && txtImage.getImage() != null) {
+			txtImage.getImage().dispose();
+			txtImage.setImage(null);
+		}
 		originalValue = null;
 		validate();
 	}
@@ -374,9 +410,22 @@ public class TreeEditorField<T>  {
 	/**
 	 */
 	public void setSelectedValue(T x) {
+		if (txtImage != null && txtImage.getImage() != null) {
+			txtImage.getImage().dispose();
+			txtImage.setImage(null);
+		}
+		
 		if (x != null) {
-			txtText.setText(((LabelProvider)tree.getTreeViewer().getLabelProvider()).getText(x));
+			LabelProvider lbl = ((LabelProvider)tree.getTreeViewer().getLabelProvider());
+			txtText.setText(lbl.getText(x));
 			txtText.setData(x);
+			
+			Image img = lbl.getImage(x);
+			if (img != null) {
+				img = new Image(txtText.getDisplay(), img.getImageData());
+			}
+			txtImage.setImage(img);
+			
 			this.originalValue = (T) x;
 		}else{
 			txtText.setText(""); //$NON-NLS-1$
@@ -384,6 +433,7 @@ public class TreeEditorField<T>  {
 			this.originalValue = null;
 			
 		}
+		txtText.getParent().layout(true);
 		this.lastValidSelection = this.originalValue;
 		validate();
 		

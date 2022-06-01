@@ -76,8 +76,9 @@ public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> imple
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		super.createComposite(parent, new AttributeTreeContentProvider(true, false),new AttributeTreeLabelProvider());
+
+		super.createComposite(parent, new AttributeTreeContentProvider(true, false),
+				new AttributeTreeLabelProvider(16));
 		
 		super.setInput(this.attribute);
 	}

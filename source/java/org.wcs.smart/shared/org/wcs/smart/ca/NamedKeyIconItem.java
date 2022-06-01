@@ -15,7 +15,7 @@ import org.wcs.smart.ca.icon.Icon;
  *
  */
 @MappedSuperclass
-public class NamedKeyIconItem extends NamedKeyItem {
+public class NamedKeyIconItem extends NamedKeyItem implements IconItem{
 
 	private static final long serialVersionUID = 1L;
 

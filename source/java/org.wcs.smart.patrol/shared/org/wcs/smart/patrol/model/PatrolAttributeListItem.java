@@ -28,7 +28,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.NamedKeyIconItem;
 
 /**
  * Attribute list item for patrol attributes of type list.
@@ -38,7 +38,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  */
 @Entity
 @Table(name = "smart.patrol_attribute_list")
-public class PatrolAttributeListItem extends NamedKeyItem{
+public class PatrolAttributeListItem extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;
 

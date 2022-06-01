@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -107,19 +108,13 @@ public class AttributeTable {
 		private TableViewer viewer;
 		
 		private Color yellow;
-//		private Color grey1;
-//		private Color grey2;
 		
 		public AttributeTableLabelProvider(Attribute attribute, TableViewer viewer){
 			this.attribute = attribute;
 			this.viewer = viewer;
 			yellow = new Color(viewer.getControl().getDisplay(), 255, 255, 212);
-//			grey1 = new Color(viewer.getControl().getDisplay(), 245, 245, 245);
-//			grey2 = new Color(viewer.getControl().getDisplay(), 230, 230, 230);
 			viewer.getControl().addDisposeListener(e->{
 				yellow.dispose();
-//				grey1.dispose();
-//				grey2.dispose();
 			});
 		}
 
@@ -136,9 +131,6 @@ public class AttributeTable {
 		@Override
 		public Color getBackground(Object element) {
 			if (element.equals(getEditingObservation())) return yellow;			
-//			int index = ((List)viewer.getInput()).indexOf(element);
-//			if (index %2 == 0) return grey1;
-//			return grey2;
 			return null;
 		}
 
@@ -158,6 +150,23 @@ public class AttributeTable {
 				}
 			}
 			return ""; //$NON-NLS-1$
+		}
+		
+		@Override
+		public Image getImage(Object element) {
+			if (attribute == null) return null;
+			
+			if (element instanceof WaypointObservation) {
+				WaypointObservation observation = (WaypointObservation) element;
+				WaypointObservationAttribute att = observation.findAttribute(attribute);
+				if (att == null) return null;
+				if (att.getAttributeListItem() != null && att.getAttributeListItem().getIcon() != null) {
+					return SmartUtils.getImage(att.getAttributeListItem().getIcon(), 16);
+				}else if (att.getAttributeTreeNode() != null && att.getAttributeTreeNode().getIcon() != null) {
+					return SmartUtils.getImage(att.getAttributeTreeNode().getIcon(), 16);					
+				}
+			}
+			return null;
 		}
 		
 	}

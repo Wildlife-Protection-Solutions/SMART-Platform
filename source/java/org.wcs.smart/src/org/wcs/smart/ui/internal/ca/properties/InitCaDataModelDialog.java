@@ -66,6 +66,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -181,10 +182,8 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 	}
 
 	private List<Icon> getIcons(){
-		List<Icon> icons = new ArrayList<>();
-		icons.addAll(QueryFactory.buildQuery(session, Icon.class,
-				new Object[] {"conservationArea", ca}).list()); //$NON-NLS-1$
-		
+		List<Icon> icons = IconManager.INSTANCE.getIcons(session, ca);
+		icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
 		return icons;
 	}
 	
