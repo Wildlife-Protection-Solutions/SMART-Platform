@@ -16,6 +16,7 @@ update smart.iconfile set filename = 'platform:/plugin/org.wcs.smart/images/data
 
 update smart.iconfile set filename = 'platform:/plugin/org.wcs.smart/images/datamodel/black/Weapons_and_Gear_seized_icon.svg' where filename = 'platform:/plugin/org.wcs.smart/images/datamodel/black/Weapons & Gear_seized_icon.svg';
 
+alter table smart.icon add constraint icon_key_unq unique (ca_uuid, keyid);
 
 --update versions
 update connect.connect_plugin_version set version = '7.5.1' where plugin_id = 'org.wcs.smart';
