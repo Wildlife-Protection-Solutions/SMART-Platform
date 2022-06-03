@@ -56,27 +56,35 @@ public class DataModelListener implements IDataModelListener {
 				Query<?> q = session.createQuery("DELETE CmAttributeListItem a where a IN (SELECT cma FROM CmAttributeListItem cma WHERE cma.listItem.attribute.conservationArea = :ca and cma.listItem.isActive = 'false')"); //$NON-NLS-1$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				q.executeUpdate();
+				session.flush();
 				
 				//delete default attribute option
 				q = session.createQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeListItem it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				q.executeUpdate();
+				session.flush();
 				
 				//delete all disabled tree items
 				q = session.createQuery("DELETE CmAttributeTreeNode a WHERE a IN (SELECT cm FROM CmAttributeTreeNode cm WHERE cm.dmTreeNode.attribute.conservationArea = :ca AND cm.dmTreeNode.isActive = 'false')"); //$NON-NLS-1$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				q.executeUpdate();
+				session.flush();
 				
 				//delete default attribute option
 				q = session.createQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeTreeNode it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				q.executeUpdate();
-						
+				session.flush();
+				
 				//delete all nodes that reference in-active categories
 				Query<CmNode> nodeQuery = session.createQuery("FROM CmNode n WHERE n.category.conservationArea = :ca AND n.category.isActive = 'false'", CmNode.class); //$NON-NLS-1$
 				nodeQuery.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<CmNode> toDelete = nodeQuery.list();
 				for (CmNode delete : toDelete){
+					//this seems to be required for hibernate to correctly remove category
+					//see: https://app.assembla.com/spaces/smart-cs/tickets/3433
+					delete.getCmAttributes().clear();
+					
 					if (delete.getParent() != null){
 						//remove from parent are re-order siblings
 						delete.getParent().getChildren().remove(delete);
@@ -90,7 +98,9 @@ public class DataModelListener implements IDataModelListener {
 						session.delete(delete);
 						//TODO: re-order root nodes
 					}
+					session.flush();
 				}
+				session.flush();
 				
 				//delete all attributes that reference invalid attributes
 				//note it could be parent category attribute
@@ -109,7 +119,7 @@ public class DataModelListener implements IDataModelListener {
 					}
 					delete.setNode(null);
 				}
-				
+				session.flush();
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				if(session.getTransaction().isActive()){
