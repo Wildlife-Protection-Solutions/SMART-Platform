@@ -47,6 +47,8 @@ public class Team extends NamedDescriptionKeyItem implements IconItem {
 	
 	public static final int MAX_NAME_LENGTH = 64;
 	
+	public static final String LIBRARY_ICON_KEY = "team"; //$NON-NLS-1$
+			
 	private PatrolMandate mandate;
 	private boolean isActive;
 	

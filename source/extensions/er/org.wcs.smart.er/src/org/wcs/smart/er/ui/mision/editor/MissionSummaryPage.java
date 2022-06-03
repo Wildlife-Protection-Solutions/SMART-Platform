@@ -73,6 +73,7 @@ import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -280,12 +281,24 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		nameColumn.getColumn().setText(Messages.MissionSummaryPage_PropertyLabel);
 		nameColumn.getColumn().setWidth(100);
 		nameColumn.setLabelProvider(new ColumnLabelProvider() {
+			NamedIconItemLabelProvider provider = new NamedIconItemLabelProvider(16);
+			public void dispose() {
+				super.dispose();
+				provider.dispose();
+			}
 			@Override
 			public String getText(Object element) {
 				if (element instanceof MissionPropertyValue){
-					return ((MissionPropertyValue) element).getMissionAttribute().getName();
+					return provider.getText(((MissionPropertyValue) element).getMissionAttribute());
 				}
 				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof MissionPropertyValue){
+					return provider.getImage(((MissionPropertyValue) element).getMissionAttribute());
+				}
+				return null;
 			}
 		});
 		tLayout.setColumnData(nameColumn.getColumn(), new ColumnWeightData(25));
@@ -295,12 +308,27 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		valueColumn.getColumn().setText(Messages.MissionSummaryPage_ValueLabel);
 		valueColumn.getColumn().setWidth(100);
 		valueColumn.setLabelProvider(new ColumnLabelProvider() {
+			
+			NamedIconItemLabelProvider provider = new NamedIconItemLabelProvider(16);
 			@Override
 			public String getText(Object element) {
 				if (element instanceof MissionPropertyValue){
 					return ((MissionPropertyValue) element).getValueAsString(Locale.getDefault());
 				}
 				return super.getText(element);
+			}
+			
+			public void dispose() {
+				super.dispose();
+				provider.dispose();
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof MissionPropertyValue && ((MissionPropertyValue)element).getAttributeListItem() != null){
+					return provider.getImage(((MissionPropertyValue) element).getAttributeListItem());
+				}
+				return null;
 			}
 		});
 		tLayout.setColumnData(valueColumn.getColumn(), new ColumnWeightData(75));

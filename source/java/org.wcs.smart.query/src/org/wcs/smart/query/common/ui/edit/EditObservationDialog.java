@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -207,7 +206,6 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 						if (!c.equals(lastCategory)){
 							loadTrees(allatts);
 							configureAttribute(allatts);
-							allatts.forEach(a->HibernateManager.loadIcons(a, session));
 						}
 						lastCategory = c;
 					}
@@ -227,7 +225,6 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			all.addListener(SWT.Resize, e->resize());
 			lastCategory = category;
 			loadTrees(allAttributes);
-			allAttributes.forEach(a->HibernateManager.loadIcons(a, s));
 			configureAttribute(allAttributes);
 		}
 		

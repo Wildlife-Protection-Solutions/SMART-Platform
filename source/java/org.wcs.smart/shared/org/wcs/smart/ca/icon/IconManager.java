@@ -1411,4 +1411,15 @@ public enum IconManager {
 //			session.save(i);
 //		}
 	}
+	
+	public String getLibraryFile(String iconKey, IconSet set) {
+		for (String[] icons : SMART_ICON_MAPPING) {
+			if (icons[0].equalsIgnoreCase(iconKey)) {
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) return icons[2];
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.LINE.key)) return icons[3];
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.COLOR.key)) return icons[4];
+			}
+		}
+		return null;
+	}
 }

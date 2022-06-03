@@ -26,15 +26,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -45,7 +46,6 @@ import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -60,14 +60,48 @@ import org.wcs.smart.util.ZipUtil;
 /**
  * SMART Collect Cybertracker package exporter.
  */
-public enum IncidentPackageExporter {
-
-	INSTANCE;
+public class IncidentPackageExporter {
 	
 	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	private static final String SMARTCOLLECT_METADATA_FILE = "incident_metadata.json"; //$NON-NLS-1$
 
+	
+	public static void exportPackage(IncidentCtPackage ctPackage, 
+			List<IPackageContribution.PackageContribution> updates, Path exportFile, 
+			IProgressMonitor monitor) throws Exception{
+		
+		IncidentPackageExporter exporter = new IncidentPackageExporter(ctPackage, updates, exportFile);
+		exporter.exportPackageInternal(monitor);
+		
+	}
+	
+	public static void exportIncidentMetadata(IncidentCtPackage ctPackage, 
+			Session session, Path exportFile, 
+			IProgressMonitor monitor) throws IOException{
+		
+		IncidentPackageExporter exporter = new IncidentPackageExporter(ctPackage, Collections.emptyList(), exportFile);
+		exporter.session = session;
+		exporter.createIncidentMetadataJson(exportFile);
+		
+	}
+	
+	private IncidentCtPackage ctpackage; 
+	private List<IPackageContribution.PackageContribution> contribs; 
+	private Path exportFile;
+	
+	private Path workingDir;
+	private Session session;
+	
+	private IncidentPackageExporter(IncidentCtPackage ctpackage, 
+			List<IPackageContribution.PackageContribution> updates, 
+			Path exportFile) {
+		
+		this.ctpackage = ctpackage;
+		this.contribs = updates;
+		this.exportFile = exportFile;
+		
+	}
 	/**
 	 * Exports patrol cybertracker package.
 	 * 
@@ -77,38 +111,38 @@ public enum IncidentPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(IncidentCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
+	private void exportPackageInternal(IProgressMonitor monitor) throws Exception{
+	
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.IncidentPackageExporter_TaskName, 8);
-		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		workingDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		Set<Path> toIncludeInZip = new HashSet<>();
+		
 		try {
 			try(Session session = HibernateManager.openSession()){
-
+				this.session = session;
 				//the ctpackage object is configured with the model to use
-				ConfigurableModel modelToExport = ctPackage.getConfigurableModel();
+				ConfigurableModel modelToExport = ctpackage.getConfigurableModel();
 				if (modelToExport.getUuid() != null) {
 					modelToExport = session.get(ConfigurableModel.class, modelToExport.getUuid());
 				}
 				
 				//reload package so we don't have hibernate issues
-				IncidentCtPackage localpackage = session.get(IncidentCtPackage.class, ctPackage.getUuid());
+				ctpackage = session.get(IncidentCtPackage.class, ctpackage.getUuid());
 				
-				
-				Set<Path> toIncludeInZip = new HashSet<>();
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
 				
-				for (IPackageContribution.PackageContribution update : updates) {
+				for (IPackageContribution.PackageContribution update : contribs) {
 					for (Path p : update.getAddedFiles()) {
 						if (Files.isDirectory(p)) {
-							Path dirPath = tempDir.resolve(p.getFileName().toString());
+							Path dirPath = workingDir.resolve(p.getFileName().toString());
 							Files.createDirectory(dirPath);
-							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
-							if (mapfiles != null) toIncludeInZip.add(mapfiles);
+							CtJsonExportUtils.copyFiles(p, dirPath);
+							
 							
 						}else {
-							Path moveTo = tempDir.resolve(p.getFileName().toString());
+							Path moveTo = workingDir.resolve(p.getFileName().toString());
 							Files.move(p, moveTo);
-							toIncludeInZip.add(moveTo);
 						}
 					}
 					if (update.getProjectMetadata() != null) {
@@ -119,7 +153,7 @@ public enum IncidentPackageExporter {
 					}
 				}
 				
-				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
+				
 				
 				//convert to xml
 				CmSmartToXml convert = new CmSmartToXml(session, true);
@@ -129,21 +163,20 @@ public enum IncidentPackageExporter {
 				//create and add help files
 				//must be done before we write to xml as this changes xml
 				sub.split(1);
-				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, tempDir) );
+				CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, workingDir);
 				
 				//write xml
+				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
-				toIncludeInZip.add(cmFile);
 				
 				//include data model image files and update xmlModel
 				sub.split(1);
 				for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {
-					Path toPath = tempDir.resolve(icon.getKey());
+					Path toPath = workingDir.resolve(icon.getKey());
 					Path fromPath = icon.getValue();
 					if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
-					toIncludeInZip.add(toPath);
 				}
 
 				//include ca logo
@@ -153,18 +186,15 @@ public enum IncidentPackageExporter {
 				}
 
 				sub.split(1);
-				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctPackage.getConservationArea(),session);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), 
+				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
+				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctpackage.getConservationArea(),session);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, ctpackage.getCtProfile().getUuid()), 
 						ops.getTrackDistanceDirection(), ops.getTrackObserver(),
-						session, context, profileFile, ctprofileAdditions);
-				
-				toIncludeInZip.add(profileFile);
-				
+						profileFile, ctprofileAdditions);
 				
 				//get version number from output file
 				String version = null;
-				if (localpackage.getUuid() != null) {
+				if (ctpackage.getUuid() != null) {
 					String fname = exportFile.getFileName().toString();
 					int start = fname.indexOf('.') + 1;
 					int end = fname.lastIndexOf('.');
@@ -174,31 +204,34 @@ public enum IncidentPackageExporter {
 				sub.split(1);
 				
 				//metadata
-				Path metadataFile = tempDir.resolve(SMARTCOLLECT_METADATA_FILE);
-				createIncidentMetadataJson(metadataFile, localpackage, session);
-				toIncludeInZip.add(metadataFile);
-				
+				Path metadataFile = workingDir.resolve(SMARTCOLLECT_METADATA_FILE);
+				createIncidentMetadataJson(metadataFile);
+								
 				//project file
-				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(localpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
-				toIncludeInZip.add(projectFile);
+				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				writeProjectFile(ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				
-				ZipUtil.createZip(toIncludeInZip.toArray(new Path[toIncludeInZip.size()]), exportFile, sub.split(1));
+				//add all files in working directory to package
+				try(Stream<Path> files = Files.list(workingDir)){
+					files.forEach(file->toIncludeInZip.add(file));
+				}
+
+				ZipUtil.createZip(toIncludeInZip, exportFile, sub.split(1));
 			}
 		}finally {
 			try {
-				SmartUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(workingDir);
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error cleaning up directory after exporting ct patrol package", e); //$NON-NLS-1$
 			}
-			for (IPackageContribution.PackageContribution update : updates) {
+			for (IPackageContribution.PackageContribution update : contribs) {
 				update.cleanUp();
 			}
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void createIncidentMetadataJson(Path incidentJson, AbstractCtPackage ctpackage, Session session) throws IOException {
+	private void createIncidentMetadataJson(Path incidentJson) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
 		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentPackageContribution.INCIDENT_RESOURCE_ID));
 		
@@ -229,9 +262,13 @@ public enum IncidentPackageExporter {
 		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 
-	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, boolean collectObserver, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, 
+			boolean distanceDirection, boolean collectObserver, 
+			Path outputFile, HashMap<String, Object> additions ) throws IOException {
+		
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, 
+					additions, session));
 		}
 	}
 

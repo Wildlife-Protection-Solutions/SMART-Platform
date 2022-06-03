@@ -88,15 +88,21 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_2)){
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_3)){
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
+		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_4)){
+			upgradeV4ToV5(session);
 		}
 	}
 	
@@ -355,5 +361,32 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_1, session);
 
+	}
+	
+	
+	private void upgradeV4ToV5(Session session){
+		String[] sql = new String[]{
+//				"ALTER TABLE smart.mission_attribute DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
+				"ALTER TABLE smart.mission_attribute ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER table smart.mission_attribute ADD CONSTRAINT mission_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+//				"ALTER TABLE smart.mission_attribute_list DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
+				"ALTER TABLE smart.mission_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER table smart.mission_attribute_list ADD CONSTRAINT mission_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+//				"ALTER TABLE smart.sampling_unit_attribute DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
+				"ALTER TABLE smart.sampling_unit_attribute ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER table smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+//				"ALTER TABLE smart.sampling_unit_attribute_list DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
+				"ALTER TABLE smart.sampling_unit_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+		};
+		
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_5, session);
 	}
 }

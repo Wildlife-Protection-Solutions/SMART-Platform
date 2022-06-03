@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.cybertracker.patrol.model;
 
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
 
 /**
  * Patrol metadata fields
@@ -31,27 +35,31 @@ import org.wcs.smart.patrol.model.PatrolAttribute;
  */
 public enum PatrolMetadataField {
 	
-	TRANSPORT("SMART_PatrolTransport", true, false), //$NON-NLS-1$
-	ARMED("SMART_Armed", true, true), //$NON-NLS-1$
-	STATION("SMART_Station", false, true), //$NON-NLS-1$
-	TEAM("SMART_Team", false, true), //$NON-NLS-1$
-	MANDATE("SMART_Mandate", true, false), //$NON-NLS-1$
-	OBJECTIVE("SMART_Objective", false, true), //$NON-NLS-1$
-	COMMENT("SMART_Comments", false, true), //$NON-NLS-1$
-	MEMBERS("SMART_Members", true, false), //$NON-NLS-1$
-	LEADER("SMART_Leader", true, false), //$NON-NLS-1$
-	PILOT("SMART_Pilot", false, false); //$NON-NLS-1$
+	TRANSPORT("SMART_PatrolTransport", true, false, PatrolTransportType.LIBRARY_ICON_KEY), //$NON-NLS-1$
+	ARMED("SMART_Armed", true, true, "patrol_is_armed"), //$NON-NLS-1$ //$NON-NLS-2$
+	STATION("SMART_Station", false, true, Station.LIBRARY_ICON_KEY), //$NON-NLS-1$
+	TEAM("SMART_Team", false, true, Team.LIBRARY_ICON_KEY), //$NON-NLS-1$
+	MANDATE("SMART_Mandate", true, false, PatrolMandate.LIBRARY_ICON_KEY), //$NON-NLS-1$
+	OBJECTIVE("SMART_Objective", false, true, "patrol_objective"), //$NON-NLS-1$ //$NON-NLS-2$
+	COMMENT("SMART_Comments", false, true, "patrol_comment"), //$NON-NLS-1$ //$NON-NLS-2$
+	MEMBERS("SMART_Members", true, false, "patrol_members"), //$NON-NLS-1$ //$NON-NLS-2$
+	LEADER("SMART_Leader", true, false, "patrol_leader"), //$NON-NLS-1$ //$NON-NLS-2$
+	PILOT("SMART_Pilot", false, false, "patrol_pilot"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
+	public static final String PATROL_ICONSET_KEY = "patrol_metadata_iconset"; //$NON-NLS-1$
 	
 	private String jsonKey;
 	private boolean isRequired;
 	private boolean isFixed;
 	
-	PatrolMetadataField(String jsonKey, boolean isRequired, boolean isFixed){
+	private String libraryIcon;
+	
+	PatrolMetadataField(String jsonKey, boolean isRequired, boolean isFixed, String libraryIcon){
 		this.jsonKey = jsonKey;
 		this.isRequired = isRequired;
 		this.isFixed = isFixed;
+		this.libraryIcon = libraryIcon;
 	}
 	
 	public String getJsonKey() {

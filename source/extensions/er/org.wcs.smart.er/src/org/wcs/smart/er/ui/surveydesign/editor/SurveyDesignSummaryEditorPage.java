@@ -246,7 +246,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Table missionPropertiesTable = toolkit.createTable(missionComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		missionPropertiesList = new TableViewer(missionPropertiesTable);
 		missionPropertiesList.setContentProvider(ArrayContentProvider.getInstance());
-		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider());
+		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider(16));
 		missionPropertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
 		((GridData)missionPropertiesTable.getLayoutData()).widthHint = 60;

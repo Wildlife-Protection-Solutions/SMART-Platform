@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -19,6 +20,8 @@ public class TextImageField extends Composite {
 	
 	private Label image;
 	private Text text;
+	
+	private String noValueLabel = Messages.PatrolSummaryEditor_NoTeamLabel;
 	
 	private boolean disposeImage = true;
 	
@@ -30,6 +33,10 @@ public class TextImageField extends Composite {
 	public TextImageField(Composite parent, int style) {
 		super(parent, style );
 		createControl();
+	}
+	
+	public void setNoValueLabel(String noValue) {
+		this.noValueLabel = noValue;
 	}
 	
 	private void createControl() {
@@ -63,14 +70,14 @@ public class TextImageField extends Composite {
 		}
 		disposeImage = true;
 		if (item == null) {
-			text.setText(Messages.PatrolSummaryEditor_NoTeamLabel);
+			text.setText(noValueLabel);
 			return;
 		}
 		
 		text.setText(item.getName());
 		
 		if (item instanceof IconItem && ((IconItem)item).getIcon() != null) {
-			Image img = SmartUtils.getImage(((IconItem)item).getIcon(), ICONSIZE);
+			Image img = SmartUtils.getImage( HibernateManager.loadIcon((IconItem)item), ICONSIZE);
 			image.setImage(img);
 			((GridData)image.getLayoutData()).widthHint = SWT.DEFAULT;
 		}else {
@@ -94,7 +101,7 @@ public class TextImageField extends Composite {
 		}
 		disposeImage = false;
 		if (name == null) {
-			text.setText(Messages.PatrolSummaryEditor_NoTeamLabel);
+			text.setText(noValueLabel);
 		}
 		
 		text.setText(name);

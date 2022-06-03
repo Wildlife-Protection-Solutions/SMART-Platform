@@ -34,7 +34,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 
@@ -46,7 +46,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
  */
 @Entity
 @Table(name="smart.sampling_unit_attribute")
-public class SamplingUnitAttribute extends NamedKeyItem{
+public class SamplingUnitAttribute extends NamedKeyIconItem{
 
 	private static final long serialVersionUID = 1L;
 	

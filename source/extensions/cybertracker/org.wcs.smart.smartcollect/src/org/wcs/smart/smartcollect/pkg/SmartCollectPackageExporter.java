@@ -31,10 +31,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -46,7 +46,6 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.smartcollect.internal.Messages;
@@ -57,14 +56,39 @@ import org.wcs.smart.util.ZipUtil;
 /**
  * SMART Collect Cybertracker package exporter.
  */
-public enum SmartCollectPackageExporter {
+public class SmartCollectPackageExporter {
 
-	INSTANCE;
+	
 	
 	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	private static final String SMARTCOLLECT_METADATA_FILE = "smartcollect_metadata.json"; //$NON-NLS-1$
 
+
+	public static void exportPackage(SmartCollectPackage ctPackage, 
+			List<IPackageContribution.PackageContribution> updates, Path exportFile, 
+			IProgressMonitor monitor) throws Exception{
+		SmartCollectPackageExporter exporter = new SmartCollectPackageExporter(ctPackage, updates, exportFile);
+		exporter.exportPackageInternal(monitor);
+	}
+	
+	private SmartCollectPackage ctPackage; 
+	private List<IPackageContribution.PackageContribution> contribs; 
+	private Path exportFile;
+	
+	
+	private Session session;
+	private Path workingDir;
+	
+	private SmartCollectPackageExporter (SmartCollectPackage ctPackage, 
+			List<IPackageContribution.PackageContribution> updates, 
+			Path exportFile) {
+		
+		this.ctPackage = ctPackage;
+		this.contribs = updates;
+		this.exportFile = exportFile;
+	}
+	
 	/**
 	 * Exports patrol cybertracker package.
 	 * 
@@ -74,12 +98,12 @@ public enum SmartCollectPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SmartCollectPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
+	private void exportPackageInternal(IProgressMonitor monitor) throws Exception{
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartCollectPackageExporter_TaskName, 8);
-		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		workingDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
-
+				this.session = session;
 				//the ctpackage object is configured with the model to use
 				ConfigurableModel modelToExport = ctPackage.getConfigurableModel();
 				if (modelToExport.getUuid() != null) {
@@ -87,25 +111,22 @@ public enum SmartCollectPackageExporter {
 				}
 				
 				//reload package so we don't have hiberante issues
-				SmartCollectPackage localpackage = session.get(SmartCollectPackage.class, ctPackage.getUuid());
+				this.ctPackage = session.get(SmartCollectPackage.class, ctPackage.getUuid());
 				
 				
 				Set<Path> toIncludeInZip = new HashSet<>();
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
 				
-				for (IPackageContribution.PackageContribution update : updates) {
+				for (IPackageContribution.PackageContribution update : contribs) {
 					for (Path p : update.getAddedFiles()) {
 						if (Files.isDirectory(p)) {
-							Path dirPath = tempDir.resolve(p.getFileName().toString());
+							Path dirPath = workingDir.resolve(p.getFileName().toString());
 							Files.createDirectory(dirPath);
-							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
-							if (mapfiles != null) toIncludeInZip.add(mapfiles);
-							
+							CtJsonExportUtils.copyFiles(p, dirPath);
 						}else {
-							Path moveTo = tempDir.resolve(p.getFileName().toString());
+							Path moveTo = workingDir.resolve(p.getFileName().toString());
 							Files.move(p, moveTo);
-							toIncludeInZip.add(moveTo);
 						}
 					}
 					if (update.getProjectMetadata() != null) {
@@ -116,8 +137,6 @@ public enum SmartCollectPackageExporter {
 					}
 				}
 				
-				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
-				
 				//convert to xml
 				//convert to xml
 				CmSmartToXml convert = new CmSmartToXml(session, true);
@@ -127,22 +146,22 @@ public enum SmartCollectPackageExporter {
 				//create and add help files
 				//must be done before we write to xml as this changes xml
 				sub.split(1);
-				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, tempDir) );
+				CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, workingDir);
 
 
 				//write xml
+				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
-				toIncludeInZip.add(cmFile);
+				
 				
 				//include data model image files and update xmlModel
 				sub.split(1);
 				for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {
-					Path toPath = tempDir.resolve(icon.getKey());
+					Path toPath = workingDir.resolve(icon.getKey());
 					Path fromPath = icon.getValue();
 					if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
-					toIncludeInZip.add(toPath);
 				}
 				
 				//include ca logo
@@ -152,15 +171,14 @@ public enum SmartCollectPackageExporter {
 				}
 
 				sub.split(1);
-				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), ops.getTrackDistanceDirection(), session, context, profileFile, ctprofileAdditions);
-				toIncludeInZip.add(profileFile);
+				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
+				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctPackage.getConservationArea(), session);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, ctPackage.getCtProfile().getUuid()), ops.getTrackDistanceDirection(), profileFile, ctprofileAdditions);
 				
 				
 				//get version number from output file
 				String version = null;
-				if (localpackage.getUuid() != null) {
+				if (ctPackage.getUuid() != null) {
 					String fname = exportFile.getFileName().toString();
 					int start = fname.indexOf('.') + 1;
 					int end = fname.lastIndexOf('.');
@@ -170,24 +188,28 @@ public enum SmartCollectPackageExporter {
 				sub.split(1);
 				
 				//metadata
-				Path metadataFile = tempDir.resolve(SMARTCOLLECT_METADATA_FILE);
+				Path metadataFile = workingDir.resolve(SMARTCOLLECT_METADATA_FILE);
 				createMetadata(metadataFile);
-				toIncludeInZip.add(metadataFile);
 				
 				//project file
-				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(localpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
-				toIncludeInZip.add(projectFile);
+				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				writeProjectFile(ctPackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				
-				ZipUtil.createZip(toIncludeInZip.toArray(new Path[toIncludeInZip.size()]), exportFile, sub.split(1));
+				
+				//add all files in working directory to package
+				try(Stream<Path> files = Files.list(workingDir)){
+					files.forEach(file->toIncludeInZip.add(file));
+				}
+
+				ZipUtil.createZip(toIncludeInZip, exportFile, sub.split(1));
 			}
 		}finally {
 			try {
-				SmartUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(workingDir);
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error cleaning up directory after exporting ct patrol package", e); //$NON-NLS-1$
 			}
-			for (IPackageContribution.PackageContribution update : updates) {
+			for (IPackageContribution.PackageContribution update : contribs) {
 				update.cleanUp();
 			}
 		}
@@ -218,9 +240,10 @@ public enum SmartCollectPackageExporter {
 		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 
-	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, 
+			Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, false, additions, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, false, additions, session));
 		}
 	}
 

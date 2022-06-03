@@ -43,6 +43,8 @@ public class Station extends NamedDescriptionItem implements IconItem{
 
 	private static final long serialVersionUID = 1L;
 			
+	public static final String LIBRARY_ICON_KEY = "station"; //$NON-NLS-1$
+	
 	/**
 	 * Maximum length of station name
 	 */

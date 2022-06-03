@@ -74,13 +74,6 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 
 		patrol = new Patrol();
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
-//		Session s = getSession();
-//		s.beginTransaction();
-//		try{
-//			patrol.setId(PatrolHibernateManager.generatePatrolId(patrol, s));
-//		}finally{
-//			s.getTransaction().rollback();
-//		}
 	}
 
 	/**
@@ -180,10 +173,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		try(Session session = HibernateManager.openSession()){
 			attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-					new Object[] {"isActive", true}).list(); //$NON-NLS-1$
-			attributes.forEach(e->{
-				if (e.getAttributeList() != null) e.getAttributeList().forEach(li->li.getName());
-			});			
+					new Object[] {"isActive", true}).list(); //$NON-NLS-1$	
 		}
 		for (NewPatrolWizardPage p : thisitems) {
 			if (!p.getName().equals(PatrolAttributeWizardPage.ID)) continue;

@@ -26,7 +26,6 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -56,7 +55,6 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.CombinedSelectionProvider;
-import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
@@ -240,8 +238,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				try{
 					this.mission = (Mission) session.load(Mission.class, muuid);
 					missionDates = new LocalDate[]{mission.getStartDate(), mission.getEndDate()};
+
 					//load mission items so don't have lazy loading issues later.
-					
 					for (MissionDay md : mission.getMissionDays()){
 						md.getTracks().size();
 						try{

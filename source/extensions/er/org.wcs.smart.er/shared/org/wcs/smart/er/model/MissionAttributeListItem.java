@@ -33,7 +33,7 @@ import javax.persistence.Table;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.NamedKeyIconItem;
 /**
  * Mission attribute list item model object.
  * 
@@ -42,7 +42,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  */
 @Entity
 @Table(name="smart.mission_attribute_list")
-public class MissionAttributeListItem extends NamedKeyItem {
+public class MissionAttributeListItem extends NamedKeyIconItem {
 
 	private static final long serialVersionUID = 1L;
 	

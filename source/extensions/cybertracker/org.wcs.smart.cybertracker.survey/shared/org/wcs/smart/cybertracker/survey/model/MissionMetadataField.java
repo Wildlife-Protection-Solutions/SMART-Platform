@@ -35,6 +35,8 @@ public enum MissionMetadataField {
 	LEADER("SMART_Leader", true), //$NON-NLS-1$
 	SAMPING_UNIT("SMART_SamplingUnit", true); //$NON-NLS-1$
 	
+	public static final String MISSION_ICONSET_KEY = "mission_metadata_iconset"; //$NON-NLS-1$
+	
 	private String jsonKey;
 	private boolean isRequired;
 	

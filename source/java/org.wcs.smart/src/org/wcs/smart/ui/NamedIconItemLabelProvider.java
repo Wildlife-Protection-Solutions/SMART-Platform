@@ -21,12 +21,10 @@
  */
 package org.wcs.smart.ui;
 
-import java.util.HashMap;
-
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.ca.icon.IconCache;
 
 /**
  * LabelProvider for {@link NamedItem}
@@ -36,30 +34,37 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 
-	protected HashMap<Object, Image> images = new HashMap<>();
+	protected IconCache images ;
 	
 	private int iconSize = 32;
 	
+	/**
+	 * Create a new label provide that generates icons with default size (32)
+	 * 
+	 * @param iconSize
+	 */
 	public NamedIconItemLabelProvider() {
-		
+		images = new IconCache();
 	}
 	
+	/**
+	 * Create a new label provide that generates icons of a specific size. If size
+	 * is < 0 no icon will be generated.
+	 * 
+	 * @param iconSize
+	 */
 	public NamedIconItemLabelProvider(int iconSize) {
 		this();
-		this.iconSize = iconSize;
+		images = new IconCache(null, iconSize);
 	}
 	
 	@Override
 	public Image getImage(Object element) {
+		if (iconSize <= 0) return null;
+		
 		if (element instanceof IconItem) {
-			IconItem team = (IconItem) element;
-
-			if (images.containsKey(team))
-				return images.get(team);
-
-			Image img = SmartUtils.getImage(team.getIcon(), iconSize);
-			images.put(team, img);
-			return img;
+			IconItem iconItem = (IconItem) element;
+			return images.getImage(iconItem);
 		}
 		return null;
 	}
@@ -67,9 +72,11 @@ public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 	@Override
 	public void dispose() {
 		super.dispose();
-		for (Image i : images.values()) {
-			if (i != null) i.dispose();
-		}
-		images.clear();
+		images.dispose();
 	}
+	
+	public void clearCachedImages() {
+		images.clearCache();
+	}
+	
 }

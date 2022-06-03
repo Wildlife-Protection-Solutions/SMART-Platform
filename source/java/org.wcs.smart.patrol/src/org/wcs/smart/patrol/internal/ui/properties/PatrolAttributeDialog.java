@@ -361,10 +361,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			
 			try(Session session = HibernateManager.openSession()){
 				attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-				attributes.forEach(e->{
-					e.getName();
-					HibernateManager.loadIcon(e.getIcon(), session);
-				});
+				attributes.forEach(e->e.getName());
 			}
 			Collections.sort(attributes);
 			

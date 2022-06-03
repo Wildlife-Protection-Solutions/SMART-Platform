@@ -73,6 +73,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -92,6 +93,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 	private MissionAttribute toUpdate;	//attribute to update
 	
 	private NameKeyComposite nameKeyControls;
+	private IconPanel iconPanel;
 	
 	private ComboViewer cmbType;
 	private TableViewer lstViewer;
@@ -144,6 +146,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 				item.setAttribute(toUpdate);
 				item.setListOrder(i.getListOrder());
 				item.setName(i.getName());
+				item.setIcon(i.getIcon());
 				for (org.wcs.smart.ca.Label l : i.getNames()){
 					item.updateName(l.getLanguage(), l.getValue());
 				}
@@ -227,16 +230,26 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 				validate();
 			}
 		});				
+		
+		Label lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+		lbl.setText(DialogConstants.ICON_TEXT + ":"); //$NON-NLS-1$
+		
+		iconPanel = new IconPanel(composite, true);
+		iconPanel.setIcon(toUpdate.getIcon());
+		iconPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		iconPanel.addListener(SWT.Selection, e->composite.layout(true));
+		
 		listPanel = new Composite(composite, SWT.NONE);
 		listPanel.setLayout(new GridLayout(2, false));
 		listPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-		lstViewer.setLabelProvider(new AttributeLabelProvider());
+		lstViewer.setLabelProvider(new AttributeLabelProvider(16));
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
+		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 150;
 		((GridData)lstViewer.getControl().getLayoutData()).widthHint = 300;
 		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -423,6 +436,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 		toUpdate.setName(name);
 		
 		toUpdate.setType(getType());
+		toUpdate.setIcon(iconPanel.getIcon());
 		
 		if (toUpdate.getType() == AttributeType.LIST){
 			if (toUpdate.getAttributeList() == null){
@@ -447,6 +461,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 					mi.setKeyId(found.getKeyId());
 					mi.setListOrder(found.getListOrder());
 					mi.setName(found.getName());
+					mi.setIcon(found.getIcon());
 					
 					for (org.wcs.smart.ca.Label l : found.getNames()){
 						mi.updateName(l.getLanguage(), l.getValue());
@@ -528,6 +543,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 		siblings.remove(mi);
 		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), mi, siblings,nameKeyControls.getSelectedLanguage());
 		if (dialog.open() == OK){
+			((AttributeLabelProvider)lstViewer.getLabelProvider()).clearCachedImages();
 			lstViewer.refresh();
 		}
 	}

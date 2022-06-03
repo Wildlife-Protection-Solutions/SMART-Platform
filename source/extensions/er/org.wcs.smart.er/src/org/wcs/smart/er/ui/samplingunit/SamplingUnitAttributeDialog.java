@@ -51,12 +51,14 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -127,7 +129,7 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	}
 	
 	protected Control createDialogArea(Composite parent) {
-		session = HibernateManager.openSession();
+		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		
 		Composite main = new Composite((Composite)super.createDialogArea(parent), SWT.NONE);
@@ -136,7 +138,7 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 		
 		lstAttributes = new TableViewer(main, SWT.BORDER);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(new SamplingUnitAttributeLabelProvider());
+		lstAttributes.setLabelProvider(new NamedIconItemLabelProvider(32));
 		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -216,6 +218,7 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 				getShell(), ma, attributes, session);
 		if (dialog.open() == OK){
 			attributes.add(ma);
+			saveIcon(ma);
 			session.save(ma);
 			sortAttributes();
 			
@@ -262,9 +265,17 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 		if (ma != null){
 			EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(getShell(), ma, attributes, session);
 			dialog.open();
-			lstAttributes.refresh();
+			saveIcon(ma);
+			((NamedIconItemLabelProvider)lstAttributes.getLabelProvider()).clearCachedImages();
 			getButton(IDialogConstants.OK_ID).setEnabled(true);
+			lstAttributes.refresh();
 		}
+	}
+	
+	private void saveIcon(SamplingUnitAttribute ma) {
+		if (ma.getIcon() != null) session.saveOrUpdate(ma.getIcon());
+		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null).forEach(li->session.saveOrUpdate(li.getIcon()));
+		
 	}
 	
 	private void enableButtons(){
@@ -278,7 +289,8 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	}
 	
 	private void initData(){
-		attributes = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		attributes = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, 
+				"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		lstAttributes.setInput(attributes);
 		sortAttributes();
 	}

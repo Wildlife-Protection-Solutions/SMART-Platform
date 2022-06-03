@@ -21,12 +21,9 @@
  */
 package org.wcs.smart.er.ui.missionattribute;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 /**
  * Mission attribute label provider.  Provides images and labels
@@ -35,60 +32,35 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
  * @author Emily
  *
  */
-public class AttributeLabelProvider extends LabelProvider {
+public class AttributeLabelProvider extends NamedIconItemLabelProvider {
 
-	private Language language;
+	public AttributeLabelProvider(int iconSize){
+		super(iconSize);
+	}
+
 	
 	public AttributeLabelProvider(){
-		
+		super();
 	}
 	
 	public AttributeLabelProvider(Language lang){
-		this.language = lang;
+		super();
+		setLanguage(lang);
 	}
-
-	public void setLanguage(Language l){
-		this.language = l;
-	}
-	/**
-	 * The <code>LabelProvider</code> implementation of this
-	 * <code>ILabelProvider</code> method returns <code>null</code>.
-	 * Subclasses may override.
-	 */
-	public Image getImage(Object element) {
-		if (element instanceof MissionAttribute){
-			MissionAttribute ma = (MissionAttribute)element;
-			return DataModel.getAttributeImage(ma.getType());
-		}
-		return super.getImage(element);
-	}
-
+	
 	/**
 	 * The <code>LabelProvider</code> implementation of this
 	 * <code>ILabelProvider</code> method returns the element's
 	 * <code>toString</code> string. Subclasses may override.
 	 */
 	public String getText(Object element) {
-		if (element instanceof MissionAttribute){
-			if (language == null){
-				return ((MissionAttribute)element).getName();
-			}else{
-				String value = ((MissionAttribute)element).findNameNull(language);
-				if (value == null){
-					value = ((MissionAttribute)element).findNameNull(language) ;
-				}
-				return value;
+		if (element instanceof MissionAttributeListItem && currentLanguage != null){
+			//if we have a language we are adding key
+			String value = ((MissionAttributeListItem)element).findNameNull(currentLanguage);
+			if (value == null){
+				value = ((MissionAttributeListItem)element).getName();
 			}
-		}else if (element instanceof MissionAttributeListItem){
-			if (language == null){
-				return ((MissionAttributeListItem)element).getName();
-			}else{
-				String value = ((MissionAttributeListItem)element).findNameNull(language);
-				if (value == null){
-					value = ((MissionAttributeListItem)element).getName();
-				}
-				return value + " [" + ((MissionAttributeListItem)element).getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-			}
+			return value + " [" + ((MissionAttributeListItem)element).getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.getText(element);
 	}

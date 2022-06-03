@@ -43,7 +43,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -51,9 +50,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -71,6 +73,7 @@ import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -158,6 +161,7 @@ public class CtJsonExportUtils {
 	 * JSON options property key that identifies the type
 	 */
 	public static final String JSON_OPTION_TYPE_KEY = "type"; //$NON-NLS-1$
+	public static final String JSON_IMAGEFILE_KEY = "imagefile"; //$NON-NLS-1$
 	
 	/**
 	 * JSON options property key that identifies the type
@@ -253,8 +257,7 @@ public class CtJsonExportUtils {
 	 * @return
 	 */
 	public static String toJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection,
-			boolean collectObserver, HashMap<String, Object> additions, 
-			IEclipseContext context, Session session) {
+			boolean collectObserver, HashMap<String, Object> additions, Session session) {
 		
 		JSONObject profileObj = new JSONObject();
 		
@@ -325,9 +328,9 @@ public class CtJsonExportUtils {
 		}
 	}
 	
-	public static Path copyFiles(Path srcDirectory, Path targetDir) throws IOException {
-		if (srcDirectory == null) return null;
-		if (!Files.exists(srcDirectory)) return null;
+	public static void copyFiles(Path srcDirectory, Path targetDir) throws IOException {
+		if (srcDirectory == null) return ;
+		if (!Files.exists(srcDirectory)) return ;
 		
 		Files.createDirectories(targetDir);
 		//copy over all map files
@@ -344,8 +347,8 @@ public class CtJsonExportUtils {
 			    	return FileVisitResult.CONTINUE;
 			    }
 		});
-		return targetDir;
 	}
+	
 	private static boolean isColor(ProfileOptionID option) {
 		return option == ProfileOptionID.THEME_COLOR_1 
 				|| option == ProfileOptionID.THEME_COLOR_2
@@ -728,17 +731,20 @@ public class CtJsonExportUtils {
 	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
 			String defaultLabel, HashMap<String,String> translations, 
-			boolean isFixed, Session session, ConservationArea ca) {
+			boolean isFixed, Session session, ConservationArea ca,
+			IconSet set, Path workingDir) throws IOException {
 		
 		return  convertKeyOptions(metadataValue, clazz, screenKey, 
-				defaultLabel, translations, isFixed, session, ca, (i,j)->{});
+				defaultLabel, translations, isFixed, session, ca, 
+				set, workingDir, (i,j)->{});
 	}
 	
 	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
 			String defaultLabel, HashMap<String,String> translations, 
-			boolean isFixed, Session session, ConservationArea ca, 
-			BiConsumer<NamedKeyItem, JSONObject> customValuesAdded) {
+			boolean isFixed, Session session, ConservationArea ca,
+			IconSet set, Path workingDir,
+			BiConsumer<NamedKeyItem, JSONObject> customValuesAdded) throws IOException {
 		
 		boolean isRequired = false;
 		if (metadataValue != null) isRequired = metadataValue.isRequired();
@@ -782,6 +788,9 @@ public class CtJsonExportUtils {
 			}
 			customValuesAdded.accept(t, ttype);
 			optionOptions.add(ttype);
+			if (t instanceof IconItem) {
+				addIconToJson((IconItem)t, set, ttype, workingDir, session);
+			}
 		}
 		optionType.put(JSON_OPTION_PROP_KEY, optionOptions);
 		
@@ -900,6 +909,27 @@ public class CtJsonExportUtils {
 			}
 		}
 		return filesToAdd;
+	}
+	
+	public static void addIconToJson(IconItem iconitem, IconSet set, 
+			JSONObject toUpdate, Path tempDir, Session session) throws IOException {
+		if (iconitem == null || iconitem.getIcon() == null || set == null) return ;
+		
+		IconFile file = iconitem.getIcon().getIconFile(set);
+		if (file == null) return ;
+		
+		file.computeFileLocation(session);
+		Path path = file.getAttachmentFile();
+		
+		
+		String filename = UuidUtils.uuidToString(file.getUuid());
+		String ext = SharedUtils.getFilenameExtension(file.getFilename());
+		if (!ext.isEmpty()) filename = filename + "." + ext; //$NON-NLS-1$
+		
+		Path target = tempDir.resolve(filename);
+		if (!Files.exists(target)) Files.copy(path, target);
+		toUpdate.put(CtJsonExportUtils.JSON_IMAGEFILE_KEY, filename);
+		
 	}
 }
 

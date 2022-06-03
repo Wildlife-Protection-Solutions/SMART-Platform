@@ -36,25 +36,24 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
@@ -85,16 +84,35 @@ import org.wcs.smart.util.ZipUtil;
  * directory with map files to use in the ct application (selected by user on export)
  * 
  */
-public enum SurveyPackageExporter {
+public class SurveyPackageExporter {
 
-	INSTANCE;
-	
 	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	
 	private static final String METADATA_FILE = "survey_metadata.json"; //$NON-NLS-1$
 	
 	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	
+	
+	public static void exportPackage(SurveyCtPackage ctpackage, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IProgressMonitor monitor) throws Exception{
+		SurveyPackageExporter exporter = new SurveyPackageExporter(ctpackage, exportFile, contributions);
+		exporter.exportPackageInternal(monitor);
+	}
+	
+	
+	private SurveyCtPackage ctpackage;
+	private Path exportFile;
+	private List<IPackageContribution.PackageContribution> contributions;
+	
+	private Session session;
+	private Path workingDir;
+	private SurveyDesign surveyDesign;
+	
+	private SurveyPackageExporter(SurveyCtPackage ctpackage, Path exportFile, List<IPackageContribution.PackageContribution> contributions) {
+		this.ctpackage = ctpackage;
+		this.exportFile = exportFile;
+		this.contributions = contributions;
+		
+	}
 	/**
 	 * Exports survey data to package for cybertracker.
 	 * 
@@ -104,18 +122,20 @@ public enum SurveyPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SurveyCtPackage ctpackage, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IEclipseContext context, IProgressMonitor monitor) throws Exception{
+	private void exportPackageInternal(IProgressMonitor monitor) throws Exception{
 		
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 7);
-		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		workingDir  = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
+				this.session = session;
+				
 				ctpackage = session.get(SurveyCtPackage.class, ctpackage.getUuid());
-				SurveyDesign sd = ctpackage.getSurveyDesign();
+				surveyDesign = ctpackage.getSurveyDesign();
 				
 				ConfigurableModel modelToExport = null;
-				if (sd.getConfigurableModel() != null) {
-					modelToExport = sd.getConfigurableModel();
+				if (surveyDesign.getConfigurableModel() != null) {
+					modelToExport = surveyDesign.getConfigurableModel();
 				}else {
 					throw new Exception("Survey design requires a configurable model at this time.  Data models are not exported."); //$NON-NLS-1$
 				}
@@ -129,15 +149,13 @@ public enum SurveyPackageExporter {
 				for (IPackageContribution.PackageContribution update : contributions) {
 					for (Path p : update.getAddedFiles()) {
 						if (Files.isDirectory(p)) {
-							Path dirPath = tempDir.resolve(p.getFileName().toString());
+							Path dirPath = workingDir.resolve(p.getFileName().toString());
 							Files.createDirectory(dirPath);
-							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
-							if (mapfiles != null) toIncludeInZip.add(mapfiles);
+							CtJsonExportUtils.copyFiles(p, dirPath);
 							
 						}else {
-							Path moveTo = tempDir.resolve(p.getFileName().toString());
+							Path moveTo = workingDir.resolve(p.getFileName().toString());
 							Files.move(p, moveTo);
-							toIncludeInZip.add(moveTo);
 						}
 					}
 					if (update.getProjectMetadata() != null) {
@@ -149,8 +167,6 @@ public enum SurveyPackageExporter {
 				}
 				
 				//convert to xml
-				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
-
 				CmSmartToXml convert = new CmSmartToXml(session, true);
 				convert.convert(modelToExport, monitor);
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = convert.getXmlModel();
@@ -158,41 +174,38 @@ public enum SurveyPackageExporter {
 				//create and add help files
 				//must be done before we write to xml as this changes xml
 				sub.split(1);
-				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, tempDir) );
+				CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, workingDir) ;
 				
 				//write xml
+				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
-				toIncludeInZip.add(cmFile);
 				
 				//include data model image files and update xmlModel
 				sub.split(1);
 				for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {
-					Path toPath = tempDir.resolve(icon.getKey());
+					Path toPath = workingDir.resolve(icon.getKey());
 					Path fromPath = icon.getValue();
 					if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
-					toIncludeInZip.add(toPath);
 				}
 				
 				//include ca logo
-				Path logo = sd.getConservationArea().getLogo();
+				Path logo = surveyDesign.getConservationArea().getLogo();
 				if (logo != null && Files.exists(logo)) {
 					toIncludeInZip.add(logo);
 				}
 				
 				sub.split(1);
-				Path metadataFile = tempDir.resolve(METADATA_FILE);
-				metadataToJson(ctpackage, sd, session,  metadataFile);
-				toIncludeInZip.add(metadataFile);
+				Path metadataFile = workingDir.resolve(METADATA_FILE);
+				metadataToJson(metadataFile);
+				
 				
 				sub.split(1);
-				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
+				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
 				
-				profileToJson(ctpackage.getCtProfile(), sd.getTrackDistanceDirection(), 
-						sd.getTrackObserver(), session, context, profileFile, ctprofileAdditions);
-
-				toIncludeInZip.add(profileFile);
+				profileToJson(ctpackage.getCtProfile(), surveyDesign.getTrackDistanceDirection(), 
+						surveyDesign.getTrackObserver(), profileFile, ctprofileAdditions);
 								
 				//get version number from output file
 				String fname = exportFile.getFileName().toString();
@@ -201,15 +214,19 @@ public enum SurveyPackageExporter {
 				String version = fname.substring(start,end);
 				
 				sub.split(1);
-				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
 				writeProjectFile( ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
-				toIncludeInZip.add(projectFile);
 				
+				//add all files in working directory to package
+				try(Stream<Path> files = Files.list(workingDir)){
+					files.forEach(file->toIncludeInZip.add(file));
+				}
+
 				ZipUtil.createZip(toIncludeInZip, exportFile, sub.split(1));
 			}
 		}finally {
 			try {
-				SmartUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(workingDir);
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error deleting temp directory creating during ct survey package export.", e); //$NON-NLS-1$
 			}
@@ -220,13 +237,13 @@ public enum SurveyPackageExporter {
 	}
 	
 	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, 
-			boolean collectObserver, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
+			boolean collectObserver, Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, session));
 		}
 	}
 	
-	private HashMap<String,String> getTranslations(String defaultLabel, String key, ConservationArea ca){
+	private HashMap<String,String> getTranslations(String defaultLabel, String key){
 		HashMap<String,String> translations = new HashMap<>();
 		
 		//english
@@ -239,7 +256,7 @@ public enum SurveyPackageExporter {
 				translations.put(locale.getLanguage(), defaultLabel);	
 		}
 		
-		for (Language l : ca.getLanguages()) {
+		for (Language l : ctpackage.getConservationArea().getLanguages()) {
 			locale = new Locale(l.getCode());
 			locale = new Locale(locale.getLanguage());
 			
@@ -261,31 +278,51 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void metadataToJson(AbstractCtPackage ctpackage, SurveyDesign design, Session session, Path outputFile) throws IOException {
+	private void metadataToJson(Path outputFile) throws IOException {
 		
 		List<MetadataFieldValue> metadataFields = ((SurveyCtPackage)ctpackage).getMetadataValues();
 		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
 		
+		String iconset = null;
+		if (map.containsKey(MissionMetadataField.MISSION_ICONSET_KEY)) {
+			iconset = map.get(MissionMetadataField.MISSION_ICONSET_KEY).getStringValue();
+		}
+		IconSet set = null;
+		if (iconset != null) {
+			List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", set}).list(); //$NON-NLS-1$
+			if (sets.size() > 0) set = sets.get(0);
+		}
+		if (set == null) {
+			//find default icon set
+			List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isDefault", true}).list(); //$NON-NLS-1$
+			if (sets.size() > 0) set = sets.get(0);
+		}
+		
+		
 		JSONArray metadataScreens = new JSONArray();
 		
 		//add mission attribute options
-		design = session.get(SurveyDesign.class,  design.getUuid());
-		for (MissionProperty prop : design.getMissionProperties()) {
+//		design = session.get(SurveyDesign.class,  design.getUuid());
+		for (MissionProperty prop : surveyDesign.getMissionProperties()) {
 			MissionAttribute a = session.get(MissionAttribute.class, prop.getAttribute().getUuid());
 			//only supports number, text and list
 			if (prop.getAttribute().getType() == AttributeType.NUMERIC) {
-				metadataScreens.add(covertNumberProperty(map.get(MissionMetadataField.generateKey(a)), a, session, ctpackage.getConservationArea()));
+				metadataScreens.add(covertNumberProperty(map.get(MissionMetadataField.generateKey(a)), a));
 			}else if (prop.getAttribute().getType() == AttributeType.TEXT) {
-				metadataScreens.add(covertStringProperty(map.get(MissionMetadataField.generateKey(a)), a, session, ctpackage.getConservationArea()));
+				metadataScreens.add(covertStringProperty(map.get(MissionMetadataField.generateKey(a)), a));
 			}else if (prop.getAttribute().getType() == AttributeType.LIST) {
-				metadataScreens.add(covertListProperty(map.get(MissionMetadataField.generateKey(a)), a, session, ctpackage.getConservationArea()));
+				metadataScreens.add(covertListProperty(map.get(MissionMetadataField.generateKey(a)), a, set));
 			}	
 		}
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(MissionMetadataField.COMMENT.name()), 
 				MissionMetadataField.COMMENT.getJsonKey(), 
 				Messages.SurveyPackageExporter_CommentPageLabel,
-				getTranslations(Messages.SurveyPackageExporter_CommentPageLabel, "SurveyPackageExporter_CommentPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				getTranslations(Messages.SurveyPackageExporter_CommentPageLabel, "SurveyPackageExporter_CommentPageLabel"), //$NON-NLS-1$
 				false, session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(MissionMetadataField.MEMBERS.name()), 
@@ -294,14 +331,14 @@ public enum SurveyPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(MissionMetadataField.LEADER.name()),
 				MissionMetadataField.LEADER.getJsonKey(), 
 				Messages.SurveyPackageExporter_LeaderPageLabel,
-				getTranslations(Messages.SurveyPackageExporter_LeaderPageLabel, "SurveyPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				getTranslations(Messages.SurveyPackageExporter_LeaderPageLabel, "SurveyPackageExporter_LeaderPageLabel"), //$NON-NLS-1$
 				false, session, ctpackage.getConservationArea())); 
 		
 		
 		//add sampling units
 		JSONArray sus = new JSONArray();	
 		List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, 
-				new Object[] {"surveyDesign", design}).list(); //$NON-NLS-1$
+				new Object[] {"surveyDesign", surveyDesign}).list(); //$NON-NLS-1$
 		
 		GeometryJSON util = new GeometryJSON();
 		
@@ -329,7 +366,7 @@ public enum SurveyPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
 		metadataScreens.add(CtJsonExportUtils.createStartTime());
-		metadataScreens.add(createSurveyDesign(design));
+		metadataScreens.add(createSurveyDesign(surveyDesign));
 				
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(metadataScreens.toJSONString());
@@ -341,7 +378,9 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertNumberProperty(MetadataFieldValue metadata, MissionAttribute prop, Session session, ConservationArea ca) {
+	private JSONObject covertNumberProperty(MetadataFieldValue metadata, 
+			MissionAttribute prop) {
+		
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
@@ -367,7 +406,7 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertStringProperty(MetadataFieldValue metadata, MissionAttribute prop, Session session, ConservationArea ca) {
+	private JSONObject covertStringProperty(MetadataFieldValue metadata, MissionAttribute prop) {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());	
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
@@ -392,7 +431,7 @@ public enum SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertListProperty(MetadataFieldValue metadata, MissionAttribute prop, Session session, ConservationArea ca) {
+	private JSONObject covertListProperty(MetadataFieldValue metadata, MissionAttribute prop, IconSet set) throws IOException {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
@@ -419,6 +458,8 @@ public enum SurveyPackageExporter {
 			ttype.put("uuid", SurveyScreensUtil.JsonSurveyKey.MISSION_ATT_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
 			ttype.put("label", item.getName()); //$NON-NLS-1$
 			optionOptions.add(ttype);
+			
+			CtJsonExportUtils.addIconToJson(item, set, ttype, workingDir, session);
 		}
 		objective.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
 		

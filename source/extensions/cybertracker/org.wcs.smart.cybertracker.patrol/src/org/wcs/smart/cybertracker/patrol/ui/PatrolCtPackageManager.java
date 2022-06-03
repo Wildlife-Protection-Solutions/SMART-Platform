@@ -142,7 +142,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 						}
 						ppackage.setConfigurableModel(toExport);
 						progress.checkCanceled();
-						PatrolPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, context, progress.split(1));
+						PatrolPackageExporter.exportPackage(ppackage, updates, output, progress.split(1));
 					}catch(OperationCanceledException e) {
 						iscancel[0] = true;
 						Display.getDefault().syncExec(()->{

@@ -61,7 +61,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -192,9 +191,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			thisCategory = session.get(Category.class, thisCategory.getUuid());
 			thisCategory.getFullCategoryName();
 			thisCategory.getName();
-			if (thisCategory.getIcon() != null && thisCategory.getIcon().getIconFile(getWizardInternal().getIconSet()) != null) {
-				thisCategory.getIcon().getIconFile(getWizardInternal().getIconSet()).computeFileLocation(session);
-			}
 			
 			catAttributes = findAttributes(thisCategory, session);
 			
@@ -336,19 +332,11 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	 */
 	private List<Attribute> findAttributes(Category category, Session session){
 		List<Attribute> catAttributes = new ArrayList<Attribute>();
-		HibernateManager.loadIcon(category.getIcon(), session);
-		
 		category.getAllAttribute(catAttributes, true);
 		
 		catAttributes.forEach(ca->{
-			HibernateManager.loadIcon(ca.getIcon(), session);
 			if (ca.getAttributeList() != null) {
-				ca.getAttributeList().forEach(l->{
-					l.getName();
-					
-					if (l.getIcon() != null) Hibernate.initialize(l.getIcon().getFiles());
-					HibernateManager.loadIcon(l.getIcon(), session);
-				});
+				ca.getAttributeList().forEach(l->l.getName());
 			}
 			if (ca.getActiveTreeNodes() != null) {
 				List<AttributeTreeNode> nodes = new ArrayList<>();
@@ -356,7 +344,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				while(!nodes.isEmpty()) {
 					AttributeTreeNode n = nodes.remove(0);
 					n.getName();
-					HibernateManager.loadIcon(n.getIcon(), session);
 					if (n.getActiveChildren() != null) nodes.addAll(n.getActiveChildren());
 				}
 			}

@@ -30,12 +30,11 @@ import java.util.Map.Entry;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
@@ -55,6 +54,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 /**
  * Composite for editing mission property values.
@@ -92,7 +92,6 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 			kid.dispose();
 		}
 		List<MissionProperty> properties = mission.getSurvey().getSurveyDesign().getMissionProperties();
-		
 		Composite outer = new Composite(parts, SWT.NONE);
 		outer.setLayout(new GridLayout(2, false));
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -125,20 +124,12 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 				ControlDecoration cd = createDecoration(txt);
 				decorations.put(mp.getAttribute(), cd);
 			} else if(mp.getAttribute().getType() == AttributeType.LIST){
-				ComboViewer cmbViewer = new ComboViewer(outer, SWT.DROP_DOWN | SWT.READ_ONLY);
+				TableComboViewer cmbViewer = new TableComboViewer(outer, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-				cmbViewer.setLabelProvider(new LabelProvider(){
-					@Override
-					public String getText(Object element){
-						if (element instanceof MissionAttributeListItem){
-							return ((MissionAttributeListItem) element).getName();
-						}
-						return super.getText(element);
-					}
-				});
+				cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(16));
+				
 				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-					
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
 						validate();
@@ -165,7 +156,10 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 				}else if (type == AttributeType.NUMERIC){
 					((Text)control).setText(mpv.getNumberValue().toString());
 				}else if (type == AttributeType.LIST){
-					((ComboViewer)control).setSelection(new StructuredSelection(mpv.getAttributeListItem()));
+					((TableComboViewer)control).setSelection(new StructuredSelection(mpv.getAttributeListItem()));
+					if (mpv.getAttributeListItem() == null) {
+						((TableComboViewer)control).getTableCombo().setText(""); //$NON-NLS-1$
+					}
 				}
 			}
 		}
@@ -211,7 +205,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 					}
 				}
 			}else if (mpv.getMissionAttribute().getType() == AttributeType.LIST){
-				ComboViewer cmbViewer = (ComboViewer)entry.getValue();
+				TableComboViewer cmbViewer = (TableComboViewer)entry.getValue();
 				if (!cmbViewer.getSelection().isEmpty()){
 					Object mali = (Object) ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
 					if (mali instanceof MissionAttributeListItem){

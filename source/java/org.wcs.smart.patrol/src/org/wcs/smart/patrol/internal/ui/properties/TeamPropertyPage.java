@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.internal.ui.properties;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +88,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconCache;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -126,7 +127,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private PatrolMandate[] mandates = null;
 	private ConservationArea currentCa = null;
 	
-	private HashMap<Team, Image> images = new HashMap<>();
+	private IconCache iconCache;
+	
 	private int editIndex = -1;
 	
 	private UUIDGenerator uuidGenerator; //for generating uuids for description field
@@ -163,10 +165,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		try(Session s = HibernateManager.openSession()){
 			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, s));
 			Collections.sort(teams);
-			teams.forEach(t -> {
-				t.getNames().size();
-				if (t.getIcon() != null) t.getIcon().getFiles().forEach(file->file.computeFileLocation(s));
-			});
+			teams.forEach(t -> t.getNames().size());
 			
 			ms = PatrolHibernateManager.getActiveMandates(currentCa, s);
 			Collections.sort(ms);
@@ -200,7 +199,9 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	protected Composite createContent(Composite parent) {		
+	protected Composite createContent(Composite parent) {	
+		iconCache = new IconCache(parent);
+		
 		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
 
@@ -258,26 +259,16 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 					btnDisable.setEnabled(false);
 					btnDelete.setEnabled(false);
 					btnEdit.setEnabled(false);
-//					miDisable.setEnabled(false);
-//					miDelete.setEnabled(false);
-//					miEditKey.setEnabled(false);
 					return;
 				}
 				btnDisable.setEnabled(true);
 				btnDelete.setEnabled(true);
 				btnEdit.setEnabled(true);
-//				miDisable.setEnabled(true);
-//				miDelete.setEnabled(true);
-//				miEditKey.setEnabled(true);
 				if (!team.getIsActive()){
-//					miDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-//					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 					btnDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
 					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 				}else{
-//					miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-//					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 					btnDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
 					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
@@ -450,7 +441,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		try(Session s = HibernateManager.openSession()){
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			s.beginTransaction();
 			try {
 				for (Team t : toDelete){
@@ -529,15 +520,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!enable){
 			btnDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
 			btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
-//			miDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
-//			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));			
+			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));			
 		}else{
 			btnDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
 			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-//			miDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
-//			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		}
 	}
 	
@@ -551,10 +538,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	}
 	
 	private void updateIcon(Team team, Icon icon) {
-		if (images.containsKey(team)) {
-			images.get(team).dispose();
-			images.remove(team);
-		}
+		iconCache.clearCache(team);
 		team.setIcon(icon);
 		tableViewer.refresh();
 		setChangesMade(true);
@@ -825,7 +809,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	class TeamLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
 		private Column column;
-		private final int LIST_ICON_SIZE = 32;
 		
 		public TeamLabelProvider(Column column){
 			this.column = column;
@@ -843,13 +826,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		public Image getImage(Object element) {
 			if (column != Column.ICON) return null;
 			Team team = (Team)element;
-			if (team.getIcon() == null) return null;
-			
-			//create an image merging all icon files together
-			if (images.containsKey(team)) return images.get(team);
-			Image img = SmartUtils.generateImage(team.getIcon(), LIST_ICON_SIZE);
-			images.put(team, img);
-			return img;
+			return iconCache.getImage(team);
 		}
 		
 		public Color getForeground(Object element){

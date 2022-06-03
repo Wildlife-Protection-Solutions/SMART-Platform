@@ -119,7 +119,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 						}
 						ppackage.setConfigurableModel(toExport);
 						progress.checkCanceled();
-						IncidentPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, context, progress.split(1));
+						IncidentPackageExporter.exportPackage(ppackage, updates, output, progress.split(1));
 					}catch(OperationCanceledException e) {
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.IncidentPackageManager_CancelTitle, Messages.IncidentPackageManager_CancelMessage);	

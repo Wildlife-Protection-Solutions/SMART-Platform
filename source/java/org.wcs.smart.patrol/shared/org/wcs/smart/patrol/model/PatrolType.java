@@ -68,6 +68,7 @@ public class PatrolType {
 	public static final int MAX_SPEED_MARINE_DEFAULT = 70;
 	public static final int MAX_SPEED_AIR_DEFAULT = 500;
 
+	public static final String LIBRARY_ICON_KEY = "transportation"; //$NON-NLS-1$
 	/**
 	 * The supported patrol types.
 	 * 

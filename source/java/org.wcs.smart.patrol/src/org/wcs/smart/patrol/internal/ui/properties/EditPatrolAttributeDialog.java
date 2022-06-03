@@ -581,7 +581,6 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 					if (pAttribute.getAttributeList() != null) {
 						pAttribute.getAttributeList().forEach(at->{
 							at.getNames().forEach(n->n.getValue());
-							HibernateManager.loadIcon(at.getIcon(), session);
 						});
 					}
 				}

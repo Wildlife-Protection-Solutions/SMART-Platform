@@ -38,24 +38,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
@@ -95,9 +94,8 @@ import org.wcs.smart.util.ZipUtil;
  * This may be expanded in the future to include mapping
  * data or other data useful for Cybertracker.
  */
-public enum PatrolPackageExporter {
+public class PatrolPackageExporter {
 
-	INSTANCE;
 	
 	public static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	
@@ -105,6 +103,31 @@ public enum PatrolPackageExporter {
 	
 	public static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	
+	public static void exportPackage(PatrolCtPackage ctPackage, 
+			List<IPackageContribution.PackageContribution> updates, 
+			Path exportFile, IProgressMonitor monitor) throws Exception{
+
+		PatrolPackageExporter exporter = new PatrolPackageExporter(ctPackage, updates, exportFile);
+		exporter.exportPackageInternal(monitor);
+	};
+	
+	
+	private PatrolCtPackage ctpackage;
+	private List<IPackageContribution.PackageContribution> contribs;
+	private Path outputFile;
+		
+	private Path workingDir;
+	private Session session;
+	
+	private PatrolPackageExporter(PatrolCtPackage ctPackage, 
+			List<IPackageContribution.PackageContribution> updates, 
+			Path exportFile) {
+		
+		this.ctpackage = ctPackage;
+		this.contribs = updates;
+		this.outputFile = exportFile;
+		
+	}
 	/**
 	 * Exports patrol cybertracker package.
 	 * 
@@ -114,37 +137,38 @@ public enum PatrolPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(PatrolCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
+	private void exportPackageInternal(IProgressMonitor monitor) throws Exception{
+
 		//TODO: support cancelling
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
-		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		workingDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		Set<Path> toIncludeInZip = new HashSet<>();
+		
 		try {
 			try(Session session = HibernateManager.openSession()){
+				this.session = session;
+				
 				//the ctpackage object is configured with the model to use
-				ConfigurableModel modelToExport = ctPackage.getConfigurableModel();
+				ConfigurableModel modelToExport = ctpackage.getConfigurableModel();
 				if (modelToExport.getUuid() != null) {
 					modelToExport = session.get(ConfigurableModel.class, modelToExport.getUuid());
 				}
-				
-				//reload package so we don't have hiberante issues
-				PatrolCtPackage localpackage = session.get(PatrolCtPackage.class, ctPackage.getUuid());		
 
-				Set<Path> toIncludeInZip = new HashSet<>();
+				//reload package so we don't have hiberante issues
+				this.ctpackage = session.get(PatrolCtPackage.class, ctpackage.getUuid());
+
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
 				
-				for (IPackageContribution.PackageContribution update : updates) {
+				for (IPackageContribution.PackageContribution update : contribs) {
 					for (Path p : update.getAddedFiles()) {
 						if (Files.isDirectory(p)) {
-							Path dirPath = tempDir.resolve(p.getFileName().toString());
+							Path dirPath = workingDir.resolve(p.getFileName().toString());
 							Files.createDirectory(dirPath);
-							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
-							if (mapfiles != null) toIncludeInZip.add(mapfiles);
-							
+							CtJsonExportUtils.copyFiles(p, dirPath);
 						}else {
-							Path moveTo = tempDir.resolve(p.getFileName().toString());
+							Path moveTo = workingDir.resolve(p.getFileName().toString());
 							Files.move(p, moveTo);
-							toIncludeInZip.add(moveTo);
 						}
 					}
 					if (update.getProjectMetadata() != null) {
@@ -155,9 +179,6 @@ public enum PatrolPackageExporter {
 					}
 				}
 				
-				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
-				
-				
 				//convert to xml
 				CmSmartToXml convert = new CmSmartToXml(session, true);
 				convert.convert(modelToExport, monitor);
@@ -166,21 +187,24 @@ public enum PatrolPackageExporter {
 				//create and add help files
 				//must be done before we write to xml as this changes xml
 				sub.split(1);
-				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, tempDir) );
+//				toIncludeInZip.addAll( 
+					CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, workingDir);
+					//);
 
 				//write xml
+				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
-				toIncludeInZip.add(cmFile);
+//				toIncludeInZip.add(cmFile);
 				
 				//include data model image files and update xmlModel
 				sub.split(1);
 				for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {
-					Path toPath = tempDir.resolve(icon.getKey());
+					Path toPath = workingDir.resolve(icon.getKey());
 					Path fromPath = icon.getValue();
 					if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
-					toIncludeInZip.add(toPath);
+//					toIncludeInZip.add(toPath);
 				}
 
 				//include ca logo
@@ -190,44 +214,46 @@ public enum PatrolPackageExporter {
 				}
 				
 				sub.split(1);
-				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
-				metadataToJson(localpackage, session,  metadataFile);
-				toIncludeInZip.add(metadataFile);
+				Path metadataFile = workingDir.resolve(PATROL_METADATA_FILE);
+				metadataToJson(metadataFile);
+//				toIncludeInZip.add(metadataFile);
 
 				sub.split(1);
-				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
+				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
 				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()),
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, ctpackage.getCtProfile().getUuid()),
 						ops.getTrackDistanceDirection(), ops.getTrackObserver(),
-						session, context, profileFile, ctprofileAdditions);
-				toIncludeInZip.add(profileFile);
+						 profileFile, ctprofileAdditions);
+//				toIncludeInZip.add(profileFile);
 				
 				
 				//get version number from output file
 				String version = null;
-				if (localpackage.getUuid() != null) {
-					String fname = exportFile.getFileName().toString();
+				if (ctpackage.getUuid() != null) {
+					String fname = outputFile.getFileName().toString();
 					int start = fname.indexOf('.') + 1;
 					int end = fname.lastIndexOf('.');
 					version = fname.substring(start,end);
 				}
 				
 				sub.split(1);
-				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				writeProjectFile(ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				
+				//add all files in working directory to package
+				try(Stream<Path> files = Files.list(workingDir)){
+					files.forEach(file->toIncludeInZip.add(file));
+				}
 				
-				writeProjectFile(localpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
-				toIncludeInZip.add(projectFile);
-				
-				ZipUtil.createZip(toIncludeInZip, exportFile, sub.split(1));
+				ZipUtil.createZip(toIncludeInZip, outputFile, sub.split(1));
 			}
 		}finally {
 			try {
-				SmartUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(workingDir);
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error cleaning up directory after exporting ct patrol package", e); //$NON-NLS-1$
 			}
-			for (IPackageContribution.PackageContribution update : updates) {
+			for (IPackageContribution.PackageContribution update : contribs) {
 				update.cleanUp();
 			}
 		}
@@ -238,13 +264,13 @@ public enum PatrolPackageExporter {
 		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 
-	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, boolean collectObserver, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
-		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, context, session));
+	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, boolean collectObserver, Path targetFile, HashMap<String, Object> additions ) throws IOException {
+		try(BufferedWriter fw = Files.newBufferedWriter(targetFile)){
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, session));
 		}
 	}
 
-	private HashMap<String,String> getTranslations(String defaultLabel, String key, ConservationArea ca){
+	private HashMap<String,String> getTranslations(String defaultLabel, String key){
 		HashMap<String,String> translations = new HashMap<>();
 		
 		//english
@@ -257,7 +283,7 @@ public enum PatrolPackageExporter {
 				translations.put(locale.getLanguage(), defaultLabel);	
 		}
 		
-		for (Language l : ca.getLanguages()) {
+		for (Language l : ctpackage.getConservationArea().getLanguages()) {
 			locale = new Locale(l.getCode());
 			locale = new Locale(locale.getLanguage());
 			
@@ -279,7 +305,7 @@ public enum PatrolPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void metadataToJson(AbstractCtPackage ctpackage, Session session, Path outputFile) throws IOException {
+	private void metadataToJson(Path metadataFile) throws IOException {
 		
 		List<MetadataFieldValue> metadataFields = ((PatrolCtPackage)ctpackage).getMetadataValues();
 		if (metadataFields == null) metadataFields = new ArrayList<>();
@@ -289,13 +315,34 @@ public enum PatrolPackageExporter {
 			map.put(v.getMetadataKey(),v);
 		}
 	
+		String iconset = null;
+		if (map.containsKey(PatrolMetadataField.PATROL_ICONSET_KEY)) {
+			iconset = map.get(PatrolMetadataField.PATROL_ICONSET_KEY).getStringValue();
+		}
+		IconSet set = null;
+		if (iconset != null) {
+			List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", set}).list(); //$NON-NLS-1$
+			if (sets.size() > 0) set = sets.get(0);
+		}
+		if (set == null) {
+			//find default icon set
+			List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isDefault", true}).list(); //$NON-NLS-1$
+			if (sets.size() > 0) set = sets.get(0);
+		}
+		
+		
 		JSONArray metadataScreens = new JSONArray();
 		
 		JSONObject transportScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
 				PatrolTransportType.class, PatrolMetadataField.TRANSPORT.getJsonKey(), 
 				Messages.PatrolPackageExporter_TransportTypePageLabel,
-				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel"), //$NON-NLS-1$
 				false, session, ctpackage.getConservationArea(),
+				set, workingDir,
 				(item, json)->{
 					PatrolType ptype = session.createQuery("FROM PatrolType WHERE id.type = :type and id.conservationArea = :ca", PatrolType.class) //$NON-NLS-1$
 							.setParameter("type",  ((PatrolTransportType)item).getPatrolType()) //$NON-NLS-1$
@@ -336,21 +383,21 @@ public enum PatrolPackageExporter {
 		
 		metadataScreens.add(transportScreen);
 		
-		metadataScreens.add(convertArmed(map.get(PatrolMetadataField.ARMED.name()), session, ctpackage.getConservationArea()));
+		metadataScreens.add(convertArmed(map.get(PatrolMetadataField.ARMED.name())));
 		
 		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TEAM.name()), 
 				Team.class, PatrolMetadataField.TEAM.getJsonKey(), 
 				Messages.PatrolPackageExporter_TeamPageLabel, 
-				getTranslations(Messages.PatrolPackageExporter_TeamPageLabel, "PatrolPackageExporter_TeamPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
-				PatrolMetadataField.TEAM.isFixed(), session, ctpackage.getConservationArea()));
+				getTranslations(Messages.PatrolPackageExporter_TeamPageLabel, "PatrolPackageExporter_TeamPageLabel"), //$NON-NLS-1$
+				PatrolMetadataField.TEAM.isFixed(), session, ctpackage.getConservationArea(), set, workingDir));
 		
-		metadataScreens.add(convertStations(map.get(PatrolMetadataField.STATION.name()), session, ctpackage.getConservationArea()));
+		metadataScreens.add(convertStations(map.get(PatrolMetadataField.STATION.name()), set));
 		
 		JSONObject mandateScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.MANDATE.name()), 
 				PatrolMandate.class, PatrolMetadataField.MANDATE.getJsonKey(), 
 				Messages.PatrolPackageExporter_MandatePageLabel,
-				getTranslations(Messages.PatrolPackageExporter_MandatePageLabel, "PatrolPackageExporter_MandatePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
-				PatrolMetadataField.MANDATE.isFixed(), session, ctpackage.getConservationArea());
+				getTranslations(Messages.PatrolPackageExporter_MandatePageLabel, "PatrolPackageExporter_MandatePageLabel"), //$NON-NLS-1$
+				PatrolMetadataField.MANDATE.isFixed(), session, ctpackage.getConservationArea(), set, workingDir);
 		metadataScreens.add(mandateScreen);
 		JSONObject mds = (JSONObject) mandateScreen.get(PatrolMetadataField.MANDATE.getJsonKey());
 		JSONArray mit = (JSONArray) mds.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
@@ -359,14 +406,14 @@ public enum PatrolPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.OBJECTIVE.name()), 
 				PatrolMetadataField.OBJECTIVE.getJsonKey(), 
 				Messages.PatrolPackageExporter_ObjectivePageLabel,
-				getTranslations(Messages.PatrolPackageExporter_ObjectivePageLabel, "PatrolPackageExporter_ObjectivePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				getTranslations(Messages.PatrolPackageExporter_ObjectivePageLabel, "PatrolPackageExporter_ObjectivePageLabel"), //$NON-NLS-1$
 				PatrolMetadataField.OBJECTIVE.isFixed(), session, 
 				ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.COMMENT.name()), 
 				PatrolMetadataField.COMMENT.getJsonKey(),
 				Messages.PatrolPackageExporter_CommentPageLabel,
-				getTranslations(Messages.PatrolPackageExporter_CommentPageLabel, "PatrolPackageExporter_CommentPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				getTranslations(Messages.PatrolPackageExporter_CommentPageLabel, "PatrolPackageExporter_CommentPageLabel"), //$NON-NLS-1$
 				PatrolMetadataField.COMMENT.isFixed(), session, 
 				ctpackage.getConservationArea()));
 		
@@ -390,12 +437,12 @@ public enum PatrolPackageExporter {
 			//force leader and pilot to be visible as well; ticket #2690
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.LEADER.getJsonKey(),
 					Messages.PatrolPackageExporter_LeaderPageLabel,
-					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel"), //$NON-NLS-1$
 					PatrolMetadataField.LEADER.isFixed(), session, ctpackage.getConservationArea()));
 			
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.PILOT.getJsonKey(), 
 					Messages.PatrolPackageExporter_PilotPageLabel, 
-					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel"), //$NON-NLS-1$
 					PatrolMetadataField.PILOT.isFixed(), session, ctpackage.getConservationArea());
 			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
 			metadataScreens.add(oo);
@@ -403,14 +450,14 @@ public enum PatrolPackageExporter {
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.LEADER.name()),
 					PatrolMetadataField.LEADER.getJsonKey(), 
 					Messages.PatrolPackageExporter_LeaderPageLabel,
-					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel"), //$NON-NLS-1$
 					PatrolMetadataField.LEADER.isFixed(), session, 
 					ctpackage.getConservationArea()));
 			
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.PILOT.name()), 
 					PatrolMetadataField.PILOT.getJsonKey(), 
 					Messages.PatrolPackageExporter_PilotPageLabel,
-					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel"), //$NON-NLS-1$
 					PatrolMetadataField.PILOT.isFixed(), session,
 					ctpackage.getConservationArea());
 			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
@@ -427,20 +474,20 @@ public enum PatrolPackageExporter {
 				new Object[] {"isActive", true}).getResultList(); //$NON-NLS-1$
 		
 		for (PatrolAttribute a : attributes) {
-			metadataScreens.add(covertPatrolAttribute(a, map.get(PatrolMetadataField.generateKey(a)), session));
+			metadataScreens.add(covertPatrolAttribute(a, map.get(PatrolMetadataField.generateKey(a)), set));
 		}
 		
-		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
+		try(BufferedWriter fw = Files.newBufferedWriter(metadataFile)){
 			fw.write(metadataScreens.toJSONString());
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject convertArmed(MetadataFieldValue armedOp, Session session, ConservationArea ca) {
+	private JSONObject convertArmed(MetadataFieldValue armedOp) {
 		JSONObject isArmed = new JSONObject();
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.BOOLEAN.name());
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, Messages.PatrolPackageExporter_ArmedPageLabel);
-		for (Entry<String,String> t : getTranslations(Messages.PatrolPackageExporter_ArmedPageLabel, "PatrolPackageExporter_ArmedPageLabel", ca).entrySet()) { //$NON-NLS-1$
+		for (Entry<String,String> t : getTranslations(Messages.PatrolPackageExporter_ArmedPageLabel, "PatrolPackageExporter_ArmedPageLabel").entrySet()) { //$NON-NLS-1$
 			isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
 		}
 		boolean isRequired = true;
@@ -462,12 +509,12 @@ public enum PatrolPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject convertStations(MetadataFieldValue stationOp, Session session, ConservationArea ca) {
+	private JSONObject convertStations(MetadataFieldValue stationOp, IconSet set) throws IOException {
 		JSONObject stationType = new JSONObject();
 		stationType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.SINGLE_CHOICE.name());
 
 		stationType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, Messages.PatrolPackageExporter_StationFieldKey);
-		for (Entry<String,String> t : getTranslations(Messages.PatrolPackageExporter_StationFieldKey, "PatrolPackageExporter_StationFieldKey", ca).entrySet()) { //$NON-NLS-1$
+		for (Entry<String,String> t : getTranslations(Messages.PatrolPackageExporter_StationFieldKey, "PatrolPackageExporter_StationFieldKey").entrySet()) { //$NON-NLS-1$
 			stationType.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
 		}
 		boolean isRequired = true;
@@ -490,7 +537,7 @@ public enum PatrolPackageExporter {
 		JSONArray teamOptions = new JSONArray();
 		
 		List<Station> stations = QueryFactory.buildQuery(session, Station.class, 
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
 				new Object[] {"isActive", true}).list(); //$NON-NLS-1$
 		for (Station t : stations) {
 			JSONObject ttype = new JSONObject();
@@ -499,6 +546,8 @@ public enum PatrolPackageExporter {
 			for (Label l : t.getNames()) {
 				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 			}
+			CtJsonExportUtils.addIconToJson(t, set, ttype, workingDir, session);
+			
 			teamOptions.add(ttype);
 		}
 		stationType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, teamOptions);
@@ -509,7 +558,8 @@ public enum PatrolPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertPatrolAttribute(PatrolAttribute pa, MetadataFieldValue metadata, Session session) throws IOException {
+	private JSONObject covertPatrolAttribute(PatrolAttribute pa, 
+			MetadataFieldValue metadata, IconSet set) throws IOException {
 		
 		JSONObject optionType = new JSONObject();
 		
@@ -566,6 +616,7 @@ public enum PatrolPackageExporter {
 					ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 					
 				}
+				CtJsonExportUtils.addIconToJson(item, set, ttype, workingDir, session);
 				optionOptions.add(ttype);
 			}
 			optionType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);

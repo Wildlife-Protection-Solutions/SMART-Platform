@@ -72,6 +72,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -94,6 +95,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	private SamplingUnitAttribute toUpdate;	//attribute to update
 	
 	private NameKeyComposite nameKeyControls;
+	private IconPanel iconPanel;
 	
 	private ComboViewer cmbType;
 	
@@ -144,6 +146,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 				item.setAttribute(toUpdate);
 				item.setListOrder(i.getListOrder());
 				item.setName(i.getName());
+				item.setIcon(i.getIcon());
 				for (org.wcs.smart.ca.Label l : i.getNames()){
 					item.updateName(l.getLanguage(), l.getValue());
 				}
@@ -217,6 +220,14 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 			}
 		});
 		
+		Label lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+		lbl.setText(DialogConstants.ICON_TEXT + ":"); //$NON-NLS-1$
+		
+		iconPanel = new IconPanel(composite, true);
+		iconPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		iconPanel.setIcon(toUpdate.getIcon());
+		
 		createListPanel(composite);
 		
 		if (toUpdate.getKeyId() == null){
@@ -244,7 +255,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-		lstViewer.setLabelProvider(new SamplingUnitLabelProvider());
+		lstViewer.setLabelProvider(new SamplingUnitLabelProvider(16));
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
@@ -381,6 +392,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		siblings.remove(mi);
 		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), mi, siblings,nameKeyControls.getSelectedLanguage());
 		if (dialog.open() == OK){
+			((SamplingUnitLabelProvider)lstViewer.getLabelProvider()).clearCachedImages();
 			lstViewer.refresh();
 		}
 	}
@@ -440,6 +452,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 			name = toUpdate.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		}
 		toUpdate.setName(name);
+		toUpdate.setIcon(iconPanel.getIcon());
 		
 		if (toUpdate.getType() == AttributeType.LIST){
 			if (toUpdate.getAttributeList() == null){
@@ -464,6 +477,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 					mi.setKeyId(found.getKeyId());
 					mi.setListOrder(found.getListOrder());
 					mi.setName(found.getName());
+					mi.setIcon(found.getIcon());
 					
 					for (org.wcs.smart.ca.Label l : found.getNames()){
 						mi.updateName(l.getLanguage(), l.getValue());

@@ -34,6 +34,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -55,7 +56,7 @@ public class AttributeTable {
 	private static final int MAX_COLUMN_WIDTH = 200;
 
 	private static final String ATTACHMENT_COLUMN_NAME=Messages.AttributeTable_AttachmentsColumnName;
-
+	
 	/**
 	 * Creates a new attribute table.
 	 * 
@@ -109,7 +110,10 @@ public class AttributeTable {
 		
 		private Color yellow;
 		
+		private IconCache iconCache;
+		
 		public AttributeTableLabelProvider(Attribute attribute, TableViewer viewer){
+			this.iconCache = new IconCache(viewer.getControl(), 16);
 			this.attribute = attribute;
 			this.viewer = viewer;
 			yellow = new Color(viewer.getControl().getDisplay(), 255, 255, 212);
@@ -160,10 +164,10 @@ public class AttributeTable {
 				WaypointObservation observation = (WaypointObservation) element;
 				WaypointObservationAttribute att = observation.findAttribute(attribute);
 				if (att == null) return null;
-				if (att.getAttributeListItem() != null && att.getAttributeListItem().getIcon() != null) {
-					return SmartUtils.getImage(att.getAttributeListItem().getIcon(), 16);
-				}else if (att.getAttributeTreeNode() != null && att.getAttributeTreeNode().getIcon() != null) {
-					return SmartUtils.getImage(att.getAttributeTreeNode().getIcon(), 16);					
+				if (att.getAttributeListItem() != null ) {
+					return iconCache.getImage(att.getAttributeListItem());
+				}else if (att.getAttributeTreeNode() != null) {
+					return iconCache.getImage(att.getAttributeTreeNode());					
 				}
 			}
 			return null;

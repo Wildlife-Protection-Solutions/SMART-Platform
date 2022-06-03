@@ -51,6 +51,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -127,7 +128,7 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	}
 	
 	protected Control createDialogArea(Composite parent) {
-		session = HibernateManager.openSession();
+		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		
 		Composite main = new Composite((Composite)super.createDialogArea(parent), SWT.NONE);
@@ -224,6 +225,7 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 				getShell(), ma, attributes, session);
 		if (dialog.open() == OK){
 			attributes.add(ma);
+			saveIcon(ma);
 			session.save(ma);
 			
 			lstAttributes.refresh();
@@ -261,9 +263,16 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes, session);
 			if (dialog.open() == EditMissionAttributeDialog.OK){
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				saveIcon(ma);
+				((AttributeLabelProvider)lstAttributes.getLabelProvider()).clearCachedImages();
 			}
 			lstAttributes.refresh();
 		}
+	}
+	
+	private void saveIcon(MissionAttribute ma) {
+		if (ma.getIcon() != null) session.saveOrUpdate(ma.getIcon());
+		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null).forEach(li->session.saveOrUpdate(li.getIcon()));
 	}
 	
 	private void enableButtons(){
@@ -278,7 +287,10 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	
 	
 	private void initData(){
-		attributes = QueryFactory.buildQuery(session, MissionAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		attributes = QueryFactory.buildQuery(session, 
+				MissionAttribute.class, 
+				"conservationArea", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				.getResultList(); 
 		lstAttributes.setInput(attributes);
 	}
 	

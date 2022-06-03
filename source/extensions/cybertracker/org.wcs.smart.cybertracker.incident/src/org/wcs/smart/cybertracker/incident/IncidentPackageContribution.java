@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -44,8 +45,8 @@ import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
+import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.pkg.IncidentPackageExporter;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -97,7 +98,9 @@ public class IncidentPackageContribution implements IPackageContribution{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
+	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, 
+			IProgressMonitor monitor) throws IOException {
+		
 		if (!(ctpackage instanceof IIncidentCtPackage)) return null;
 		IIncidentCtPackage pp = (IIncidentCtPackage)ctpackage;
 		monitor.subTask(Messages.IncidentPackageContribution_TaskName);
@@ -117,7 +120,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		Path incidentFile = tempDir.resolve(INCIDENT_MODEL_FILE);
 		
-		PackageContribution updates = new PackageContribution() {
+		PackageContribution updates =  new PackageContribution() {
 			@Override
 			public void cleanUp() throws IOException{
 				//delete tempDir and any subfiles
@@ -169,7 +172,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 				updates.addFile(toPath);
 			}
 			
-			IncidentPackageExporter.INSTANCE.createIncidentMetadataJson(metadataFile, (AbstractCtPackage)pp, s);
+			IncidentPackageExporter.exportIncidentMetadata((IncidentCtPackage)pp, s, metadataFile, new NullProgressMonitor());
 			updates.addFile(metadataFile);
 		}
 		

@@ -471,7 +471,6 @@ public class ObservationDialog extends SmartStyledDialog {
 			
 			List<IAttributeField<?>> fields = new ArrayList<>();
 			for (Attribute a :allAttributes){
-				HibernateManager.loadIcons(a, s);
 				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(a);
 				field.createComposite(attributes);
 				attributes.addListener(SWT.Dispose, e->field.dispose());

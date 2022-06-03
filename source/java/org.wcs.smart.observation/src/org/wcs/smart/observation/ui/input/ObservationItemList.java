@@ -52,7 +52,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.internal.Messages;
@@ -86,6 +85,7 @@ public class ObservationItemList {
 	
 	private int lastIndex = -1;
 	private Composite parent;
+	
 	
 	public ObservationItemList(Composite parent, ObservationWizard wizard) {
 		
@@ -311,17 +311,12 @@ public class ObservationItemList {
 			Composite left = new Composite(this, SWT.NONE);
 			left.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			
-			if (wizard.getIconSet() != null && wo.getCategory().getIcon() != null) {
+			Image img = wizard.getIconCache32().getImage(wo.getCategory());
+			if (img != null) {
 				left.setLayout(new GridLayout(2, false));
-				IconFile file = wo.getCategory().getIcon().getIconFile(wizard.getIconSet());
-				if (file != null) {
-					Label img = new Label(left, SWT.NONE);
-					img.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 2));
-					
-					Image image = SmartUtils.getImage(file.getAttachmentFile(), 32);
-					img.setImage(image);
-					img.addListener(SWT.Dispose, e->image.dispose());
-				}
+				Label limg = new Label(left, SWT.NONE);
+				limg.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 2));
+				limg.setImage(img);
 			}else {
 				left.setLayout(new GridLayout(1, false));
 			}

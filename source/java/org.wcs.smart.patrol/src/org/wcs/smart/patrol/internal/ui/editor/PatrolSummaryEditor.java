@@ -86,6 +86,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -121,7 +122,6 @@ import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
 import org.wcs.smart.patrol.ui.TeamComposite;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Editor part for displaying and editing patrol information.
@@ -180,7 +180,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Composite customAttributes;
 	
 	private SashForm sashForm;
-	private HashMap<Object, Image> imagecache = new HashMap<>();
+	private IconCache iconCache ;
 	
 	/**
 	 * listener for patrol change events.
@@ -226,7 +226,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
-
+		iconCache = new IconCache(parent, 16);
+		
 		outline = toolkit.createComposite(parent);
 		outline.setLayout(new GridLayout());
 		outline.setLayoutData(new GridData(SWT.FILL, SWT.FILL ,true, true));
@@ -334,7 +335,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		txtMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtMandate.getLayoutData()).widthHint = WIDTH_HINT;
 		editLinkMandate = createEditLink(toolkit, left, new PatrolMandateComposite());
-		editLinkMandate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		editLinkMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		if (editor.getPatrol().getLegs().size() > 1 ){
 			//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
@@ -707,7 +708,14 @@ public class PatrolSummaryEditor extends EditorPart {
 				new Object[] {"conservationArea", patrol.getConservationArea()}).getResultList(); //$NON-NLS-1$
 		
 		if (!attributes.isEmpty()) {
-			attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			Collections.sort(attributes);
+//			for (PatrolAttribute pa : attributes) {
+//				HibernateManager.loadIcon(pa.getIcon(), session);
+//				if(pa.getAttributeList() != null) {
+//					pa.getAttributeList().forEach(li->HibernateManager.loadIcon(li.getIcon(), session));;
+//				}
+//			}
+//			
 		
 			Section dataSection = toolkit.createSection(customAttributes, Section.TITLE_BAR | Section.EXPANDED );
 			dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -753,8 +761,9 @@ public class PatrolSummaryEditor extends EditorPart {
 					txt.addListener(SWT.Resize, e->scrolltop.setMinSize(top.computeSize(SWT.DEFAULT,  SWT.DEFAULT)));
 				}else if (pa.getType() == AttributeType.LIST) {
 					TextImageField field = new TextImageField(core);
+					field.setNoValueLabel(""); //$NON-NLS-1$
 					field.adapt(toolkit);
-					field.setValue(value.getAttributeListItem());
+					field.setValue(value == null ? null : value.getAttributeListItem());
 					field.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}else {
 					Text txt = toolkit.createText(core, attributeValue, SWT.WRAP);
@@ -774,11 +783,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * Updates the widgets with the value from the patrol.
 	 */
 	private void initValues(){
-		for (Image image : imagecache.values()) {
-			if (image != null) image.dispose();
-		}
-		imagecache.clear();
-		
+		iconCache.clearCache();
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
@@ -821,11 +826,9 @@ public class PatrolSummaryEditor extends EditorPart {
 					
 					if (leg.getMandate() != null) {
 						leg.setMandate(session.get(PatrolMandate.class, leg.getMandate().getUuid()));
-						HibernateManager.loadIcon(leg.getMandate().getIcon(), session);
 					}
 					if (leg.getType() != null) {
 						leg.setType(session.get(PatrolTransportType.class, leg.getType().getUuid()));
-						HibernateManager.loadIcon(leg.getMandate().getIcon(), session);
 					}
 				}
 				
@@ -1075,16 +1078,6 @@ public class PatrolSummaryEditor extends EditorPart {
 			this.column = column;
 		}
 
-		@Override
-		public void dispose() {
-			super.dispose();
-			for (Image img : imagecache.values()) {
-				if (img != null)
-					img.dispose();
-			}
-			imagecache.clear();
-		}
-
 		public Image getImage(Object element) {
 			IconItem item = null;
 			if (element instanceof PatrolLegDay) {
@@ -1094,15 +1087,7 @@ public class PatrolSummaryEditor extends EditorPart {
 					item = ((PatrolLegDay) element).getPatrolLeg().getType();
 				}
 			}
-			if (item != null) {
-				if (imagecache.containsKey(item))
-					return imagecache.get(item);
-
-				Image img = SmartUtils.getImage(item.getIcon(), 16);
-				imagecache.put(item, img);
-				return img;
-			}
-			return null;
+			return iconCache.getImage(item);
 		}
 
 		public String getText(Object element) {

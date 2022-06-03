@@ -45,6 +45,8 @@ public class PatrolMandate extends NamedKeyIconItem{
 	
 	public static final Integer MAX_NAME_LENGTH = 64;
 	
+	public static final String LIBRARY_ICON_KEY = "mandate"; //$NON-NLS-1$
+	
 	private boolean isActive = true;
 	private ConservationArea ca;
 	

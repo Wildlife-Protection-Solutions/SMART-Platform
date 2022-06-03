@@ -34,6 +34,10 @@ import org.wcs.smart.er.ui.missionattribute.AttributeLabelProvider;
  */
 public class MissionPropertyLabelProvider extends AttributeLabelProvider {
 
+	public MissionPropertyLabelProvider(int iconSize) {
+		super(iconSize);
+	}
+	
 	public MissionPropertyLabelProvider() {
 		super();
 	}

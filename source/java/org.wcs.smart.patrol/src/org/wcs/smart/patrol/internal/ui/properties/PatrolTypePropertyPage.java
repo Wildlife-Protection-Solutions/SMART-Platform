@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -83,6 +82,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconCache;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.export.dialog.CsvCaImportDialog;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -127,7 +128,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private List<PatrolTransportType> transportTypes = null;
 	private ConservationArea currentCa = null;
 	
-	private HashMap<PatrolTransportType, Image> images = new HashMap<>();
+	private IconCache iconCache;
 	private int editIndex = -1;
 	
 	/**
@@ -152,23 +153,16 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
+		iconCache = new IconCache(parent);
+		
 		try(Session s = HibernateManager.openSession()){
 			transportTypes = new ArrayList<>();
 			patrolTypes = new ArrayList<>(PatrolHibernateManager.getPatrolTypes(currentCa, s));		
-			//ensure all types are laziy loaded
+			//ensure all types are lazily loaded
 			for (PatrolType t : patrolTypes){
 				if (t.getTransportTypes() != null){
-					t.getTransportTypes().forEach(tt -> {
-						tt.getNames().size();
-						if (tt.getIcon() != null) {
-							tt.getIcon().getFiles().forEach(file->{
-								file.computeFileLocation(s);
-							});
-						}
-					});
+					t.getTransportTypes().forEach(tt -> tt.getNames().size());
 					transportTypes.addAll(t.getTransportTypes());
-					
-					
 				}
 			}
 		}
@@ -771,12 +765,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		updateIcon(mandate, dialog.getSelectedIcon());
 	}
 	
-	private void updateIcon(PatrolTransportType mandate, Icon icon) {
-		if (images.containsKey(mandate)) {
-			images.get(mandate).dispose();
-			images.remove(mandate);
-		}
-		mandate.setIcon(icon);
+	private void updateIcon(PatrolTransportType type, Icon icon) {
+		iconCache.clearCache(type);
+		type.setIcon(icon);
 		transportTblViewer.refresh();
 		setChangesMade(true);
 	}
@@ -803,21 +794,10 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			
 			@Override
-			public void dispose() {
-				super.dispose();
-				for (Image img : images.values()) img.dispose();
-				images.clear();
-			}
-			
-			@Override
 			public Image getImage(Object element) {
 				if (!(element instanceof PatrolTransportType)) return null;
 				PatrolTransportType tt = (PatrolTransportType) element;
-				if (images.containsKey(tt)) return images.get(tt);
-				if (tt.getIcon() == null) return null;
-				Image img = SmartUtils.generateImage(tt.getIcon(), 32);
-				images.put(tt,  img);
-				return img;
+				return iconCache.getImage(tt);
 			}
 		});
 			
@@ -1192,7 +1172,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			return false;
 		}
 		
-		try(Session s = HibernateManager.openSession()){
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			s.beginTransaction();
 			try{
 				for (PatrolTransportType t : toDelete){

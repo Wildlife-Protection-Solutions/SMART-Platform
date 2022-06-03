@@ -315,7 +315,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 					
 					if (this.patrol.getCustomAttributes() == null) this.patrol.setCustomAttributes(new ArrayList<>());
-					this.patrol.getCustomAttributes().forEach(a->a.getAttributeValue());
+					this.patrol.getCustomAttributes().forEach(a->{
+						a.getAttributeValue();	
+					});
 					
 					session.getTransaction().commit();
 					if (ops == null){

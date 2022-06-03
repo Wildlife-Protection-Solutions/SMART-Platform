@@ -169,4 +169,5 @@ public class IconFile extends ISmartAttachment{
 		}
 		return attachmentFile;
 	}
+	
 }

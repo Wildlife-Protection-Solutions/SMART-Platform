@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -112,7 +111,6 @@ public class TeamComposite extends PatrolItemComposite{
 		session.beginTransaction();
 		try{
 			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
-			teams.forEach(team->HibernateManager.loadIcon(team.getIcon(), session));
 			session.getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.TeamComposite_Error_CouldNotLoadTeams, ex);

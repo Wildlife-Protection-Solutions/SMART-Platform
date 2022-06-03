@@ -46,6 +46,8 @@ public class PatrolTransportType extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;
 	
+	public static final String LIBRARY_ICON_KEY = "transportation"; //$NON-NLS-1$
+
 	private boolean isActive = true;
 	private ConservationArea ca;
 	private PatrolType.Type patrol_type;

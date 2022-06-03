@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -91,6 +90,8 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconCache;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.export.StationCsvImporter;
 import org.wcs.smart.export.config.impl.StationCsvExportConfig;
 import org.wcs.smart.export.config.impl.StationCsvImportConfig;
@@ -132,8 +133,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private static NullComparator nullStringComparator = new NullComparator();
 	
 	private UUIDGenerator uuidGenerator = null;
-	private HashMap<Station,Image> images = new HashMap<>();
+	
 	private int editIndex = -1;
+	private IconCache iconCache;
 	
 	/*
 	 * columns in the station table
@@ -169,12 +171,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 
-	public void clearImageCache() {
-		for (Image i : images.values()) {
-			if (i != null) i.dispose();
-		}
-		images.clear();
-	}
+	
 	
 	/**
 	 * Create contents of the property page.
@@ -183,15 +180,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	public Composite createContent(Composite parent) {
+		iconCache = new IconCache(parent);
+		
 		try(Session s = HibernateManager.openSession()){
 			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,s));
 			Collections.sort(stations);
-			stations.forEach(station ->{
-				HibernateManager.loadIcon(station.getIcon(), s);
-				station.getNames().size();
-			});
+			stations.forEach(station ->station.getNames().size());
 		}
-		parent.addListener(SWT.Dispose, e->clearImageCache());
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -390,7 +385,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	}
 	
 	private void updateIcon(Station team, Icon icon) {
-		clearImageCache();
+		iconCache.clearCache();
 		team.setIcon(icon);
 		tableViewer.refresh();
 		setChangesMade(true);
@@ -656,7 +651,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		try (Session s = HibernateManager.openSession()){
+		try (Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			Transaction tx = s.beginTransaction();
 			try {
 				for(Station station : toDelete){
@@ -817,18 +812,11 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		public Color getBackground(Object element){
 			return null;
 		}
-		
 
 		@Override
 		public Image getImage(Object element) {
 			if (column != Column.ICON) return null;
-			
-			Station station = (Station)element;
-			if (images.containsKey(station)) return images.get(station);
-			
-			Image img = SmartUtils.getImage(station.getIcon(), 32);
-			images.put(station, img);
-			return img;
+			return iconCache.getImage(element);
 		}
 	}
 }

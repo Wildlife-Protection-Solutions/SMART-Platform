@@ -71,7 +71,6 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -132,7 +131,6 @@ public class ObservationDialog extends SmartStyledDialog {
 				o.getCategory().getName();
 				o.getCategory().getFullCategoryName();
 				o.getAttributes().forEach(a->{
-					HibernateManager.loadIcons(a.getAttribute(), session);
 					a.getAttributeValueAsString(Locale.getDefault());
 					a.getAttribute().getName();
 					if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(ai->ai.getAttributeListItem().getName());
@@ -552,7 +550,6 @@ public class ObservationDialog extends SmartStyledDialog {
 			
 			ArrayList<Attribute> allAttributes = new ArrayList<>();
 			c.getAllAttribute(allAttributes, true);
-			allAttributes.forEach(a->HibernateManager.loadIcons(a, s));
 			
 			top.addListener(SWT.Resize, e->resize(scattributes, attributes));
 			

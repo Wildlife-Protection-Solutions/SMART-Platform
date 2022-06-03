@@ -34,17 +34,15 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.icon.IconSet;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
@@ -89,7 +87,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	private List<Category> selectedCategories;
 	private WaypointObservation toSelect = null;
 	
-	private IconSet iset;
+	private IconCache iconCache32;
+	private IconCache iconCache16;
 
 	//category counter for tracking categories 
 	private int categoryIndex = 0;
@@ -119,6 +118,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(waypoint.getId())}));
 		this.cm = cm;
 		
+		this.iconCache16 = new IconCache(null, 16);
+		this.iconCache32 = new IconCache(null, 32);
+		
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
 		
@@ -133,20 +135,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			//load observation, categories, and attribute details	
 			this.wp = session.get(Waypoint.class, waypoint.getUuid());
 			
-			iset = QueryFactory.buildQuery(session, IconSet.class, 
-					new Object[] {"conservationArea", wp.getConservationArea()}, //$NON-NLS-1$
-					new Object[] {"isDefault", true}).uniqueResult(); //$NON-NLS-1$
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				for (WaypointObservation ob : g.getObservations()) {
-					ob.getAttributes().forEach(a->{
-						a.getAttributeValueAsString(Locale.getDefault());
-						if (a.getAttributeListItem() != null) HibernateManager.loadIcon(a.getAttributeListItem().getIcon(), session);
-						if (a.getAttributeTreeNode() != null) HibernateManager.loadIcon(a.getAttributeTreeNode().getIcon(), session);
-					});
+					ob.getAttributes().forEach(a->a.getAttributeValueAsString(Locale.getDefault()));
 					
-					if (ob.getCategory().getIcon() != null && ob.getCategory().getIcon().getIconFile(iset) != null) {
-						ob.getCategory().getIcon().getIconFile(iset).computeFileLocation(session);
-					}
+//					if (ob.getCategory().getIcon() != null && ob.getCategory().getIcon().getIconFile(iset) != null) {
+//						ob.getCategory().getIcon().getIconFile(iset).computeFileLocation(session);
+//					}
 					
 					for (ObservationAttachment oa : ob.getAttachments()) {
 						try {
@@ -166,10 +161,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 						temp.getAttributes().forEach(a->{
 							a.getAttribute().getName();
 							if (a.getAttribute().getAttributeList() != null) {
-								a.getAttribute().getAttributeList().forEach(li->{
-									li.getName();
-									HibernateManager.loadIcon(li.getIcon(), session);
-								});
+								a.getAttribute().getAttributeList().forEach(li->li.getName());
 							}
 							if (a.getAttribute().getActiveTreeNodes() != null) {
 								List<AttributeTreeNode> tovisit = new ArrayList<AttributeTreeNode>();
@@ -177,7 +169,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 								while(!tovisit.isEmpty()) {
 									AttributeTreeNode n = tovisit.remove(0);
 									n.getName();
-									HibernateManager.loadIcon(n.getIcon(), session);
 									if (n.getActiveChildren() != null) tovisit.addAll(n.getActiveChildren());
 								}
 							}
@@ -215,10 +206,14 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			}
 		}
 	}
-	
-	public IconSet getIconSet() {
-		return this.iset;
+
+	public IconCache getIconCache32() {
+		return iconCache32;
 	}
+	public IconCache getIconCache16() {
+		return iconCache16;
+	}
+	
 	public Waypoint getWaypoint() {
 		return this.wp;
 	}
@@ -420,16 +415,11 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					cc.getAttributes().size();
 					if (cc.getActiveChildren() != null) cats.addAll(cc.getActiveChildren());
 					
-					if (cc.getIcon() != null && cc.getIcon().getIconFile(iset) != null) {
-						cc.getIcon().getIconFile(iset).computeFileLocation(session);
-					}
+//					if (cc.getIcon() != null && cc.getIcon().getIconFile(iset) != null) {
+//						cc.getIcon().getIconFile(iset).computeFileLocation(session);
+//					}
 				}
 				
-				for (Attribute a : dm.getAttributes()) {
-					HibernateManager.loadIcon(a.getIcon(), session);
-					if (a.getAttributeList() != null) a.getAttributeList().forEach(e->HibernateManager.loadIcon(e.getIcon(), session));
-					
-				}
 			}
 		}
 		return dm;
@@ -440,6 +430,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
 	public void dispose() {
+		iconCache16.dispose();
+		iconCache32.dispose();
 		super.dispose();
 	}
 	

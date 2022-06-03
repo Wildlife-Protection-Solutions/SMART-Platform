@@ -81,6 +81,7 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 			}
 			temp.setType(pa.getType());
 			temp.setKeyId(pa.getKeyId());
+			temp.setIcon(pa.getIcon());
 			if (pa.getAttributeList() != null) {
 				temp.setAttributeList(new ArrayList<>());
 				for (PatrolAttributeListItem item : pa.getAttributeList()) {
@@ -91,6 +92,7 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 					temp.getAttributeList().add(clone);
 					clone.setKeyId(item.getKeyId());
 					clone.setName(item.getName());
+					clone.setIcon(item.getIcon());
 				}
 			}
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(temp);

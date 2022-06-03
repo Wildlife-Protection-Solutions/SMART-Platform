@@ -21,22 +21,19 @@
  */
 package org.wcs.smart.ui.properties;
 
-import java.util.HashMap;
-
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
-import org.wcs.smart.util.SmartUtils;
 
 /**
   * Label provided for attribute tree
@@ -49,9 +46,7 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
 
-	protected HashMap<Object, Image> images = new HashMap<>();
-	
-	private int iconSize = -1;
+	protected IconCache iconCache;
 	
 	private Language currentLang = null;
 		
@@ -60,29 +55,30 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	 * @param lang the working language; if null default is used
 	 */
 	public AttributeTreeLabelProvider(Language lang){
-		this.currentLang = lang;
+		this(lang, -1);
 	}
 		
 	public AttributeTreeLabelProvider(){
-		this(null);
+		this(null, -1);
 	}
 	
 	/**
-	 * Size of icon to display, if less than 0 icons are hiddent
+	 * Size of icon to display, if less than 0 icons are hidden
 	 * @param iconSize
 	 */
 	public AttributeTreeLabelProvider(int iconSize){
-		this(null);
-		this.iconSize = iconSize;
+		this(null, iconSize);
+	}
+	
+	public AttributeTreeLabelProvider(Language lang, int iconSize){
+		this.currentLang = lang;
+		if (iconSize > 0) this.iconCache = new IconCache(null, iconSize);
 	}
 	
 	@Override
 	public void dispose() {
 		super.dispose();
-		for (Image i : images.values()) {
-			if (i != null) i.dispose();
-		}
-		images.clear();
+		if (iconCache != null) iconCache.dispose();
 	}
 	
 	/**
@@ -145,19 +141,8 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	
 	@Override
 	public Image getImage(Object element) {
-		if (iconSize < 0) return null;
-		
-		if (element instanceof IconItem) {
-			IconItem team = (IconItem) element;
-
-			if (images.containsKey(team))
-				return images.get(team);
-
-			Image img = SmartUtils.getImage(team.getIcon(), iconSize);
-			images.put(team, img);
-			return img;
-		}
-		return null;
+		if (iconCache == null) return null;
+		return iconCache.getImage(element);
 	}
 
 }

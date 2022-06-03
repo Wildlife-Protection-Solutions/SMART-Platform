@@ -88,8 +88,9 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 	public void init(SurveyDesign design, Session session) {
 		warn.setVisible(design.getUuid() != null);
 		List<MissionAttribute> allAttributes = 
-				QueryFactory.buildQuery(session, MissionAttribute.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-		 
+				QueryFactory.buildQuery(session, MissionAttribute.class,
+				"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		
 		List<MissionAttribute> selectedAttributes = new ArrayList<MissionAttribute>();
 		
 		if (design.getMissionProperties() != null){

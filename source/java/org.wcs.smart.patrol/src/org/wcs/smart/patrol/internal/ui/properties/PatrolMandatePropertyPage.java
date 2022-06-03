@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.internal.ui.properties;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +77,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconCache;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -116,7 +117,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private HashSet<PatrolMandate> toDelete = new HashSet<PatrolMandate>();
 	private ConservationArea currentCa = null;
 	
-	private HashMap<PatrolMandate, Image> images = new HashMap<>();
+	private IconCache iconCache;
 	private int editIndex = -1;
 	
 	/*
@@ -157,13 +158,13 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
+		
+		iconCache = new IconCache(parent);
+		
 		try(Session s = HibernateManager.openSession()){
 			mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, s));
 			Collections.sort(mandates);
-			mandates.forEach(m ->{
-				m.getNames().size();
-				if (m.getIcon() != null) m.getIcon().getFiles().forEach(file->file.computeFileLocation(s));
-			});
+			mandates.forEach(m ->m.getNames().size());
 		}
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -377,7 +378,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		}
 		
-		try(Session s = HibernateManager.openSession()) {
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())) {
 			s.beginTransaction();
 			try {
 				for (PatrolMandate m : toDelete){
@@ -557,10 +558,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	}
 	
 	private void updateIcon(PatrolMandate mandate, Icon icon) {
-		if (images.containsKey(mandate)) {
-			images.get(mandate).dispose();
-			images.remove(mandate);
-		}
+		iconCache.clearCache(mandate);
 		mandate.setIcon(icon);
 		tableViewer.refresh();
 		setChangesMade(true);
@@ -673,19 +671,9 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	class MandateLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
 
 		private Column column;
-		
 
-		private final int LIST_ICON_SIZE = 32;
-		
 		public MandateLabelProvider(Column column){
 			this.column = column;
-		}
-		
-		@Override
-		public void dispose() {
-			super.dispose();
-			for (Image img : images.values()) img.dispose();
-			images.clear();
 		}
 		
 		@Override
@@ -697,13 +685,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		public Image getImage(Object element) {
 			if (column != Column.ICON) return null;
 			PatrolMandate mandate = (PatrolMandate)element;
-			if (mandate.getIcon() == null) return null;
-			
-			//create an image merging all icon files together
-			if (images.containsKey(mandate)) return images.get(mandate);
-			Image img = SmartUtils.generateImage(mandate.getIcon(), LIST_ICON_SIZE);
-			images.put(mandate, img);
-			return img;
+			return iconCache.getImage(mandate);
 		}
 		
 		@Override

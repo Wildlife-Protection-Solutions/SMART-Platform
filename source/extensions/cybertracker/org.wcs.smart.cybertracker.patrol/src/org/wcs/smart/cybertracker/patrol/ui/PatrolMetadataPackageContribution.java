@@ -40,8 +40,10 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
@@ -83,6 +85,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -99,7 +102,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	private Button btnTTrq, btnArmedrq, btnTeamrq, btnStationrq, btnMandaterq, btnObjrq, btnCmtrq, btnMembersrq, btnLeaderrq, btnPilotrq;
 	
-	private ComboViewer cmbTt, cmbTeam, cmbStation, cmbMandate, cmbLeader, cmbPilot;
+	private TableComboViewer cmbTt, cmbTeam, cmbStation, cmbMandate; 
+	private ComboViewer cmbLeader, cmbPilot;
 	private Text txtObj, txtComment;
 	
 	private HashMap<PatrolAttribute, Object[]> customAttributes;
@@ -204,10 +208,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		c5.setText(col4.getText());
 		
 		// transport type
-		Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TRANSPORTTYPE_ICON), false);
+		Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TRANSPORTTYPE_ICON), false, true);
 		btnTT = (Button) d[0];
 		btnTTrq = (Button) d[1];
-		cmbTt = (ComboViewer) d[2];
+		cmbTt = (TableComboViewer) d[2];
 		
 		// armed
 		Label l = new Label(core, SWT.NONE);
@@ -244,24 +248,24 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		btnArmedNo.addListener(SWT.Selection, e->fireChanged());
 		
 		// team
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TeamLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON), true);
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TeamLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON), true, true);
 		btnTeam = (Button) d[0];
 		btnTeamrq = (Button) d[1];
 		btnTeamrq.setSelection(false);
-		cmbTeam = (ComboViewer) d[2];
+		cmbTeam = (TableComboViewer) d[2];
 		
 		// station
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_StationLabel, core, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON), true);
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_StationLabel, core, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON), true, true);
 		btnStation = (Button) d[0];
 		btnStationrq = (Button) d[1];
 		btnStationrq.setSelection(false);
-		cmbStation = (ComboViewer) d[2];
+		cmbStation = (TableComboViewer) d[2];
 		
 		// mandate
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON), false);
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON), false, true);
 		btnMandate = (Button) d[0];
 		btnMandaterq = (Button) d[1];
-		cmbMandate = (ComboViewer) d[2];
+		cmbMandate = (TableComboViewer) d[2];
 				
 		// objective
 		d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_OBJECTIVE_ICON), true);
@@ -350,7 +354,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		});
 		
 		// leader
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON), false);
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON), false, false);
 		btnLeader = (Button) d[0];
 		btnLeaderrq = (Button)d[1];
 		cmbLeader = (ComboViewer) d[2];
@@ -358,7 +362,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		btnLeader.setEnabled(false);
 		cmbLeader.getControl().setEnabled(false);
 		// pilot
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON), false);
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON), false, false);
 		btnPilot = (Button) d[0];
 		btnPilotrq = (Button) d[1];		
 		cmbPilot = (ComboViewer) d[2];
@@ -447,10 +451,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					dateTime.addListener(SWT.Selection, e->fireChanged());
 					data[2] = dateTime;
 				}else if (attribute.getType() == AttributeType.LIST) {
-					ComboViewer cmb = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
+					TableComboViewer cmb = new TableComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 					data[2] = cmb;
 					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedItemLabelProvider());
+					cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
 					List<Object> items = new ArrayList<>();
 					items.add(""); //$NON-NLS-1$
 					items.addAll(attribute.getAttributeList());
@@ -538,7 +542,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		if (cmbPilot.getStructuredSelection().isEmpty() && items.size() > 0) cmbPilot.setSelection(new StructuredSelection(sorted.get(0)));
 	}
 	
-	private Object[] createComboViewerSection(String sectionName, Composite parent, Image icon, boolean isOptional) {
+	private Object[] createComboViewerSection(String sectionName, Composite parent, 
+			Image icon, boolean isOptional, boolean supportImages) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
@@ -559,9 +564,14 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		}
 		btnrq.addListener(SWT.Selection,e->fireChanged());
 		
-		ComboViewer cmb = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+		StructuredViewer cmb;
+		if (supportImages) {
+			cmb = new TableComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+		}else {
+			cmb = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+		}
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
-		cmb.setLabelProvider(new NamedItemLabelProvider());
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
 		cmb.setInput(new String[] { DialogConstants.LOADING_TEXT });
 		cmb.getControl().setEnabled(false);
 		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -761,7 +771,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				DateTime dt = (DateTime) fields[2];
 				v.setStringValue(SmartUtils.toDate(dt).toString());
 			}else if (pa.getType() == AttributeType.LIST) {
-				ComboViewer cmb = (ComboViewer) fields[2];
+				TableComboViewer cmb = (TableComboViewer) fields[2];
 				Object o = cmb.getStructuredSelection().getFirstElement();
 				if (o instanceof PatrolAttributeListItem) {
 					v.setUuidValue(((PatrolAttributeListItem)o).getUuid());
@@ -854,7 +864,6 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				employees.addAll(QueryFactory.buildQuery(s, Employee.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"endEmploymentDate", null}).list()); //$NON-NLS-1$
-			
 			}
 			
 			eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
@@ -984,13 +993,14 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 										SmartUtils.initDateTimeWidget(dt, LocalDate.parse(v.getStringValue()));
 									}
 								}else if (pa.getType() == AttributeType.LIST) {
-									ComboViewer cmb = (ComboViewer) fields[2];
+									TableComboViewer cmb = (TableComboViewer) fields[2];
 									if (v.getUuidValue() != null) {
 										PatrolAttributeListItem temp = new PatrolAttributeListItem();
 										temp.setUuid(v.getUuidValue());
 										cmb.setSelection(new StructuredSelection(temp));
 									}else {
 										cmb.setSelection(new StructuredSelection("")); //$NON-NLS-1$
+										cmb.getTableCombo().setText(""); //$NON-NLS-1$
 									}
 								}else if (pa.getType() == AttributeType.TEXT) {
 									((Text)fields[2]).setText(v.getStringValue());

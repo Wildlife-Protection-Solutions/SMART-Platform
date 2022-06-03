@@ -75,8 +75,14 @@ public class Upgrader751To800 extends AbstractInteralDatabaseUpgrader {
 		
 		
 		String[] sql = new String[] {
+				
+				//remove icon, iconfiles from conservation areas that are not referenced
+				//leave any custom icons if they are used or not  
+				"DELETE FROM smart.ICONFILE WHERE icon_uuid not in (select distinct icon_uuid from smart.dm_attribute where icon_uuid is not null union  select distinct icon_uuid from smart.DM_ATTRIBUTE_LIST where icon_uuid is not null union select distinct icon_uuid from smart.DM_ATTRIBUTE_TREE where icon_uuid is not null union select distinct icon_uuid from smart.DM_CATEGORY where icon_uuid is not null ) and  filename like 'platform%'", //$NON-NLS-1$
+				"DELETE FROM smart.ICON WHERE uuid not in (SELECT icon_uuid FROM smart.iconfile)", //$NON-NLS-1$
+				
 				//add icon key to patrol attributes
-				//modifications to contraints required
+				//modifications to constraints required
 				"alter table smart.patrol_mandate drop constraint PATROL_MANDATE_CA_UUID_FK", //$NON-NLS-1$
 				"ALTER TABLE smart.patrol_mandate ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER table smart.patrol_mandate ADD CONSTRAINT pm_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
@@ -96,6 +102,7 @@ public class Upgrader751To800 extends AbstractInteralDatabaseUpgrader {
 				"ALTER TABLE smart.patrol_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.patrol_attribute_list ADD CONSTRAINT patrol_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
 				
+				"ALTER TABLE smart.station DROP CONSTRAINT STATION_CA_UUID_FK",   //$NON-NLS-1$
 				"ALTER TABLE smart.station ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.station ADD CONSTRAINT station_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
 				
@@ -107,7 +114,7 @@ public class Upgrader751To800 extends AbstractInteralDatabaseUpgrader {
 				"ALTER TABLE SMART.PATROL_MANDATE ADD CONSTRAINT PATROL_MANDATE_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.patrol_transport ADD CONSTRAINT patrol_Transport_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.team ADD CONSTRAINT TEAM_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER TABLE SMART.patrol_attribute ADD CONSTRAINT PATROL_ATT_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.station ADD CONSTRAINT STATION_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 		};
 		
 		

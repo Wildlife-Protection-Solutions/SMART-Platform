@@ -175,7 +175,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 						}
 						ppackage.setConfigurableModel(toExport);
 						progress.checkCanceled();
-						SmartCollectPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, context, progress.split(1));
+						SmartCollectPackageExporter.exportPackage(ppackage, updates, output, progress.split(1));
 					}catch(OperationCanceledException e) {
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartCollectPackageManager_CancelledTitle, Messages.SmartCollectPackageManager_CancelledMessage);	
