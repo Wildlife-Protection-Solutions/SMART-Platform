@@ -1267,8 +1267,7 @@ public class AttributeInfoPanel extends Composite {
 							iterator.remove();
 						}
 					}
-					
-					
+					session.flush();
 				}
 				for (int i = 0; i < attributeList.size(); i ++){
 					AttributeListItem item = (AttributeListItem) attributeList.get(i);
