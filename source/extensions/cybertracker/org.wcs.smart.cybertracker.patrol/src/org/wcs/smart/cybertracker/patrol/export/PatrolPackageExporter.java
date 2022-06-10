@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.patrol.export;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -49,6 +50,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
@@ -341,6 +343,7 @@ public class PatrolPackageExporter {
 				PatrolTransportType.class, PatrolMetadataField.TRANSPORT.getJsonKey(), 
 				Messages.PatrolPackageExporter_TransportTypePageLabel,
 				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel"), //$NON-NLS-1$
+				PatrolMetadataField.TRANSPORT.getIcon(set),
 				false, session, ctpackage.getConservationArea(),
 				set, workingDir,
 				(item, json)->{
@@ -383,20 +386,23 @@ public class PatrolPackageExporter {
 		
 		metadataScreens.add(transportScreen);
 		
-		metadataScreens.add(convertArmed(map.get(PatrolMetadataField.ARMED.name())));
+		metadataScreens.add(convertArmed(map.get(PatrolMetadataField.ARMED.name()),
+				PatrolMetadataField.ARMED.getIcon(set)));
 		
 		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TEAM.name()), 
 				Team.class, PatrolMetadataField.TEAM.getJsonKey(), 
 				Messages.PatrolPackageExporter_TeamPageLabel, 
 				getTranslations(Messages.PatrolPackageExporter_TeamPageLabel, "PatrolPackageExporter_TeamPageLabel"), //$NON-NLS-1$
+				PatrolMetadataField.TEAM.getIcon(set),
 				PatrolMetadataField.TEAM.isFixed(), session, ctpackage.getConservationArea(), set, workingDir));
 		
-		metadataScreens.add(convertStations(map.get(PatrolMetadataField.STATION.name()), set));
+		metadataScreens.add(convertStations(map.get(PatrolMetadataField.STATION.name()), PatrolMetadataField.STATION.getIcon(set), set));
 		
 		JSONObject mandateScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.MANDATE.name()), 
 				PatrolMandate.class, PatrolMetadataField.MANDATE.getJsonKey(), 
 				Messages.PatrolPackageExporter_MandatePageLabel,
 				getTranslations(Messages.PatrolPackageExporter_MandatePageLabel, "PatrolPackageExporter_MandatePageLabel"), //$NON-NLS-1$
+				PatrolMetadataField.MANDATE.getIcon(set),
 				PatrolMetadataField.MANDATE.isFixed(), session, ctpackage.getConservationArea(), set, workingDir);
 		metadataScreens.add(mandateScreen);
 		JSONObject mds = (JSONObject) mandateScreen.get(PatrolMetadataField.MANDATE.getJsonKey());
@@ -407,18 +413,22 @@ public class PatrolPackageExporter {
 				PatrolMetadataField.OBJECTIVE.getJsonKey(), 
 				Messages.PatrolPackageExporter_ObjectivePageLabel,
 				getTranslations(Messages.PatrolPackageExporter_ObjectivePageLabel, "PatrolPackageExporter_ObjectivePageLabel"), //$NON-NLS-1$
-				PatrolMetadataField.OBJECTIVE.isFixed(), session, 
+				PatrolMetadataField.OBJECTIVE.isFixed(),
+				PatrolMetadataField.OBJECTIVE.getIcon(set), workingDir, session, 
 				ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.COMMENT.name()), 
 				PatrolMetadataField.COMMENT.getJsonKey(),
 				Messages.PatrolPackageExporter_CommentPageLabel,
 				getTranslations(Messages.PatrolPackageExporter_CommentPageLabel, "PatrolPackageExporter_CommentPageLabel"), //$NON-NLS-1$
-				PatrolMetadataField.COMMENT.isFixed(), session, 
+				PatrolMetadataField.COMMENT.isFixed(), 
+				PatrolMetadataField.COMMENT.getIcon(set), workingDir, session, 
 				ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(PatrolMetadataField.MEMBERS.name()),
-				PatrolMetadataField.MEMBERS.isFixed(), session, ctpackage.getConservationArea()));
+				PatrolMetadataField.MEMBERS.isFixed(),
+				PatrolMetadataField.MEMBERS.getIcon(set), workingDir, 
+				session, ctpackage.getConservationArea()));
 		
 		//transport types that require pilot
 		List<PatrolTransportType> requiredBy = new ArrayList<>();
@@ -438,12 +448,16 @@ public class PatrolPackageExporter {
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.LEADER.getJsonKey(),
 					Messages.PatrolPackageExporter_LeaderPageLabel,
 					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel"), //$NON-NLS-1$
-					PatrolMetadataField.LEADER.isFixed(), session, ctpackage.getConservationArea()));
+					PatrolMetadataField.LEADER.isFixed(),
+					PatrolMetadataField.LEADER.getIcon(set), workingDir, 
+					session, ctpackage.getConservationArea()));
 			
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.PILOT.getJsonKey(), 
 					Messages.PatrolPackageExporter_PilotPageLabel, 
 					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel"), //$NON-NLS-1$
-					PatrolMetadataField.PILOT.isFixed(), session, ctpackage.getConservationArea());
+					PatrolMetadataField.PILOT.isFixed(),
+					PatrolMetadataField.PILOT.getIcon(set), workingDir, 
+					session, ctpackage.getConservationArea());
 			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
 			metadataScreens.add(oo);
 		}else {
@@ -451,14 +465,16 @@ public class PatrolPackageExporter {
 					PatrolMetadataField.LEADER.getJsonKey(), 
 					Messages.PatrolPackageExporter_LeaderPageLabel,
 					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel"), //$NON-NLS-1$
-					PatrolMetadataField.LEADER.isFixed(), session, 
+					PatrolMetadataField.LEADER.isFixed(), 
+					PatrolMetadataField.LEADER.getIcon(set), workingDir, session, 
 					ctpackage.getConservationArea()));
 			
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.PILOT.name()), 
 					PatrolMetadataField.PILOT.getJsonKey(), 
 					Messages.PatrolPackageExporter_PilotPageLabel,
 					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel"), //$NON-NLS-1$
-					PatrolMetadataField.PILOT.isFixed(), session,
+					PatrolMetadataField.PILOT.isFixed(), 
+					PatrolMetadataField.PILOT.getIcon(set), workingDir, session,
 					ctpackage.getConservationArea());
 			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
 			metadataScreens.add(oo);
@@ -483,7 +499,7 @@ public class PatrolPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject convertArmed(MetadataFieldValue armedOp) {
+	private JSONObject convertArmed(MetadataFieldValue armedOp, URI metadataIcon) throws IOException {
 		JSONObject isArmed = new JSONObject();
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.BOOLEAN.name());
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, Messages.PatrolPackageExporter_ArmedPageLabel);
@@ -502,6 +518,7 @@ public class PatrolPackageExporter {
 		}else {
 			isArmed.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
 		}
+		CtJsonExportUtils.addMetadataIconToJson(metadataIcon, workingDir, isArmed);
 		
 		JSONObject isArmedOp = new JSONObject();
 		isArmedOp.put(PatrolMetadataField.ARMED.getJsonKey(), isArmed);
@@ -509,7 +526,7 @@ public class PatrolPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject convertStations(MetadataFieldValue stationOp, IconSet set) throws IOException {
+	private JSONObject convertStations(MetadataFieldValue stationOp, URI metadataIcon, IconSet set) throws IOException {
 		JSONObject stationType = new JSONObject();
 		stationType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.SINGLE_CHOICE.name());
 
@@ -533,6 +550,7 @@ public class PatrolPackageExporter {
 		}else {
 			stationType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
 		}
+		CtJsonExportUtils.addMetadataIconToJson(metadataIcon, workingDir, stationType);
 		
 		JSONArray teamOptions = new JSONArray();
 		
@@ -587,11 +605,11 @@ public class PatrolPackageExporter {
 		for (Label l : pa.getNames()) {
 			optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 		}
-		optionType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, metadata.isRequired());
+		optionType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, metadata == null ? Boolean.FALSE : metadata.isRequired());
 		optionType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY, false);
-		optionType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, metadata.isVisible());
+		optionType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, metadata == null ? Boolean.TRUE : metadata.isVisible());
 		
-		if (!metadata.isVisible()) {
+		if (metadata != null && !metadata.isVisible()) {
 			if (metadata.getUuidValue() != null)  optionType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(metadata.getUuidValue()));
 			if (metadata.getBooleanValue() != null)  optionType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, metadata.getBooleanValue());
 			if (metadata.getStringValue() != null) {
@@ -600,6 +618,14 @@ public class PatrolPackageExporter {
 					value = DateTimeFormatter.ofPattern(JsonUtils.JSON_ATTRIBUTE_DATE_FORMAT_STR).format( LocalDate.parse(metadata.getStringValue()));			
 				}
 				optionType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, value);
+			}
+		}
+		if (pa.getIcon() != null) {
+			IconFile file = pa.getIcon().getIconFile(set);
+			if (file != null) {
+				file.computeFileLocation(session);
+				URI iconMetadata = pa.getIcon().getIconFile(set).getAttachmentFile().toUri();
+				CtJsonExportUtils.addMetadataIconToJson(iconMetadata, workingDir, optionType);
 			}
 		}
 		

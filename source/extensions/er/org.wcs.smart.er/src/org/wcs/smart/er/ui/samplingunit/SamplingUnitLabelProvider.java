@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
@@ -52,6 +53,10 @@ public class SamplingUnitLabelProvider extends NamedIconItemLabelProvider {
 		super(iconSize);
 	}
 
+	public SamplingUnitLabelProvider(int iconSize, IconCache.IconSetOption iconType){
+		super(iconSize, iconType);
+	}
+	
 	public void setLanguage(Language lang){
 		this.currentLanguage = lang;
 	}

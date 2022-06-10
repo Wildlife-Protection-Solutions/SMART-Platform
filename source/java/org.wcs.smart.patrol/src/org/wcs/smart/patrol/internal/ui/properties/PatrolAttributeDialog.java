@@ -64,7 +64,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.properties.AttributeLabelProvider.IconSetOption;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -116,7 +115,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		
 		lstAttributes = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(new AttributeLabelProvider(32, IconSetOption.DEFAULT));
+		lstAttributes.setLabelProvider(new AttributeLabelProvider(32));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -361,7 +360,13 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			
 			try(Session session = HibernateManager.openSession()){
 				attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-				attributes.forEach(e->e.getName());
+				attributes.forEach(e->{
+					e.getName();
+					if (e.getIcon() != null) e.getIcon().getFiles().forEach(f->{
+						f.getIconSet().getName();
+						f.computeFileLocation(session);	
+					});
+				});
 			}
 			Collections.sort(attributes);
 			

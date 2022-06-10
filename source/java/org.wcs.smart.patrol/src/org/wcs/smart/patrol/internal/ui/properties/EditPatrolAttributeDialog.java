@@ -75,11 +75,11 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.properties.AttributeLabelProvider.IconSetOption;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
@@ -230,7 +230,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			lstViewer = new TableViewer(wrapper,SWT.BORDER);
 			lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-			lstViewer.setLabelProvider(new AttributeLabelProvider(16, IconSetOption.ALL));
+			lstViewer.setLabelProvider(new AttributeLabelProvider(16, IconCache.IconSetOption.ALL));
 			lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
@@ -514,6 +514,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		siblings.remove(mi);
 		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), mi, siblings,nameKeyControls.getSelectedLanguage());
 		if (dialog.open() == OK){
+			((AttributeLabelProvider)lstViewer.getLabelProvider()).clearImageCache();
 			lstViewer.refresh();
 			setDirty(true);
 		}
@@ -578,17 +579,27 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 				try(Session session = HibernateManager.openSession()){
 					pAttribute = session.get(PatrolAttribute.class, pAttribute.getUuid());
 					pAttribute.getNames().forEach(e->e.getValue());
+
 					if (pAttribute.getAttributeList() != null) {
 						pAttribute.getAttributeList().forEach(at->{
 							at.getNames().forEach(n->n.getValue());
+							if (at.getIcon() != null) {
+								at.getIcon().getFiles().forEach(f->{
+									f.getIconSet().getName();
+									f.computeFileLocation(session);		
+								});
+							}
 						});
 					}
+					
+					
+					
 				}
 			}
 		
 			Display.getDefault().syncExec(()->{
 				
-				((AttributeLabelProvider)lstViewer.getLabelProvider()).clearImageCache();
+				if (lstViewer != null) ((AttributeLabelProvider)lstViewer.getLabelProvider()).clearImageCache();
 				
 				nameKeyControls.initFields(pAttribute, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 				cmbType.setSelection(new StructuredSelection(pAttribute.getType()));

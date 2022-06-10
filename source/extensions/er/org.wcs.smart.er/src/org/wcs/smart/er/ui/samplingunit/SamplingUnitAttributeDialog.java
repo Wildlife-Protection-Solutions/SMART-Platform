@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.er.ui.samplingunit;
 
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -55,6 +56,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -136,17 +138,23 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lstAttributes = new TableViewer(main, SWT.BORDER);
+		Composite wrapper = new Composite(main, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstAttributes = new TableViewer(wrapper, SWT.BORDER);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
 		lstAttributes.setLabelProvider(new NamedIconItemLabelProvider(32));
-		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				editAttribute();	
 			}
 		});
-		lstAttributes.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		TableColumn tc = new TableColumn(lstAttributes.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		Composite btnComp = new Composite(main, SWT.NONE);
 		btnComp.setLayout(new GridLayout(1, false));
@@ -227,13 +235,7 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	}
 
 	private void sortAttributes(){
-		Collections.sort(attributes, new Comparator<SamplingUnitAttribute>() {
-			@Override
-			public int compare(SamplingUnitAttribute o1,
-					SamplingUnitAttribute o2) {
-				return Collator.getInstance().compare(o1.getName(), o2.getName());
-			}
-		});
+		Collections.sort(attributes);
 		lstAttributes.refresh();
 	}
 	
@@ -273,8 +275,8 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	}
 	
 	private void saveIcon(SamplingUnitAttribute ma) {
-		if (ma.getIcon() != null) session.saveOrUpdate(ma.getIcon());
-		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null).forEach(li->session.saveOrUpdate(li.getIcon()));
+		if (ma.getIcon() != null && ma.getIcon().getUuid() == null) session.saveOrUpdate(ma.getIcon());
+		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null && e.getIcon().getUuid() == null).forEach(li->session.saveOrUpdate(li.getIcon()));
 		
 	}
 	
@@ -293,6 +295,16 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 				"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		lstAttributes.setInput(attributes);
 		sortAttributes();
+		
+		attributes.forEach(a->{
+			if (a.getIcon() != null) {
+				a.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
+			}
+			for (SamplingUnitAttributeListItem li : a.getAttributeList()) {
+				if (li.getIcon() == null) continue;
+				li.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
+			}
+		});
 	}
 	
 	@Override

@@ -69,6 +69,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -246,7 +247,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 		
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-		lstViewer.setLabelProvider(new AttributeLabelProvider(16));
+		lstViewer.setLabelProvider(new AttributeLabelProvider(16, IconCache.IconSetOption.ALL));
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 150;

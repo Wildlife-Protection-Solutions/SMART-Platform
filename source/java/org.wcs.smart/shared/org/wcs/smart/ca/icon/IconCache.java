@@ -12,10 +12,27 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
 public class IconCache {
-
+	
+	/**
+	 * Type of icon to generate for cache 
+	 * 
+	 */
+	public enum IconSetOption{
+		/**
+		 * Generates a single icon that concatenates all icons
+		 */
+		ALL,
+		/**
+		 * Generates a single icon using the default icon set
+		 */
+		DEFAULT
+	}
+	
 	private Map<IconItem,Image> images = Collections.synchronizedMap(new HashMap<>());
 
 	private int iconSize = 32;
+	private IconSetOption iconType = IconSetOption.DEFAULT;
+	
 	/**
 	 * Creates a new icon cache that gets disposed when 
 	 * ui control gets disposed
@@ -41,15 +58,26 @@ public class IconCache {
 		this.iconSize = iconSize;
 	}
 	
+	public void setIconSetOption(IconSetOption option) {
+		this.iconType = option;
+	}
 	public Image getImage(Object element) {
+		if (iconSize < 0) return null;
 		if (element == null) return null;
 		if (!(element instanceof IconItem)) return null;
 		
-		IconItem station = (IconItem)element;
-		if (images.containsKey(station)) return images.get(station);
+		IconItem item = (IconItem)element;
+		if (images.containsKey(item)) return images.get(item);
 		
-		Image img = SmartUtils.getImage(HibernateManager.loadIcon(station), iconSize);
-		images.put(station, img);
+		
+		Image img = null;
+		if (iconType == IconSetOption.DEFAULT) {
+			img = SmartUtils.getImage(HibernateManager.loadIcon(item), iconSize);
+		}else if (iconType == IconSetOption.ALL) {
+			img = SmartUtils.generateImage(HibernateManager.loadIcon(item), iconSize);
+		}
+		
+		images.put(item, img);
 		return img;
 	}
 	

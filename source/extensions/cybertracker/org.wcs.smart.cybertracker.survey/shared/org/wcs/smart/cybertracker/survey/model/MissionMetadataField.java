@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.cybertracker.survey.model;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.wcs.smart.ca.icon.IconManager;
+import org.wcs.smart.ca.icon.IconSet;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.er.model.MissionAttribute;
 
 /**
@@ -30,19 +36,21 @@ import org.wcs.smart.er.model.MissionAttribute;
  */
 public enum MissionMetadataField {
 	
-	COMMENT("SMART_Comments", false), //$NON-NLS-1$
-	MEMBERS("SMART_Members", true), //$NON-NLS-1$
-	LEADER("SMART_Leader", true), //$NON-NLS-1$
-	SAMPING_UNIT("SMART_SamplingUnit", true); //$NON-NLS-1$
+	COMMENT("SMART_Comments", false, "patrol_comment"), //$NON-NLS-1$ //$NON-NLS-2$
+	MEMBERS("SMART_Members", true, "patrol_members"), //$NON-NLS-1$ //$NON-NLS-2$
+	LEADER("SMART_Leader", true, "patrol_leader"), //$NON-NLS-1$ //$NON-NLS-2$
+	SAMPING_UNIT("SMART_SamplingUnit", true, null); //$NON-NLS-1$
 	
 	public static final String MISSION_ICONSET_KEY = "mission_metadata_iconset"; //$NON-NLS-1$
 	
 	private String jsonKey;
 	private boolean isRequired;
+	private String libraryIcon;
 	
-	MissionMetadataField(String jsonKey, boolean isRequired){
+	MissionMetadataField(String jsonKey, boolean isRequired, String libraryIcon){
 		this.jsonKey = jsonKey;
 		this.isRequired = isRequired;
+		this.libraryIcon = libraryIcon;
 	}
 	
 	public String getJsonKey() {
@@ -69,5 +77,24 @@ public enum MissionMetadataField {
 	 */
 	public static String generateKey(MissionAttribute attribute) {
 		return getCustomAttributePrefix() + attribute.getKeyId(); 
+	}
+	
+	public URI getIcon(IconSet set) {
+		if (this.libraryIcon == null) return null;
+		String filename = IconManager.INSTANCE.getLibraryFile(this.libraryIcon, set);
+		if (filename == null) {
+			IconSet temp = new IconSet();
+			temp.setKeyId(IconManager.FixedIconSet.COLOR.key);
+			filename = IconManager.INSTANCE.getLibraryFile(this.libraryIcon, temp);
+		}
+		//this shouldn't happen
+		if (filename == null) return null;
+		
+		try {
+			return new URI(filename);
+		} catch (URISyntaxException e) {
+			CyberTrackerPlugIn.log(e.getMessage(), e);
+		}
+		return null;
 	}
 }

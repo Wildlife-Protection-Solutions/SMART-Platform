@@ -24,10 +24,14 @@ package org.wcs.smart.cybertracker.export;
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.time.ZonedDateTime;
@@ -46,6 +50,7 @@ import java.util.function.BiConsumer;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
@@ -453,7 +458,8 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject convertStringOp(MetadataFieldValue metadataValue, String opKey,
 			String defaultLabel, HashMap<String,String> translations, boolean isFixed, 
-			Session session, ConservationArea ca) {
+			URI metadataIcon, Path workingDir,
+			Session session, ConservationArea ca) throws IOException {
 		
 		boolean isRequired = false;
 		if (metadataValue != null) isRequired = metadataValue.isRequired();
@@ -475,6 +481,7 @@ public class CtJsonExportUtils {
 		}else {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, true);
 		}
+		addMetadataIconToJson(metadataIcon, workingDir, objective);
 		
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(opKey, objective);
@@ -535,7 +542,8 @@ public class CtJsonExportUtils {
 	}
 	
 	public static JSONObject convertEmployees(MetadataFieldValue metadataOption, 
-			boolean isFixed, Session session, ConservationArea ca) {
+			boolean isFixed, URI metadataIcon, Path workingDir,
+			Session session, ConservationArea ca) throws IOException {
 		//find all employees - they are either directly linked or linked through a employee team
 		Set<Employee> allEmployees = new HashSet<>();
 		
@@ -581,7 +589,9 @@ public class CtJsonExportUtils {
 		}else {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
 		}
+		addMetadataIconToJson(metadataIcon, workingDir, optionType);
 		
+
 		ArrayList<Employee> sortede = new ArrayList<>(allEmployees);
 		sortede.sort( (a,b)-> Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a),SmartLabelProvider.getShortLabel(b)));
 
@@ -621,7 +631,7 @@ public class CtJsonExportUtils {
 		teamTypeOp.put(JSON_EMPLOYEE_METADATA_KEY, optionType);
 		return teamTypeOp;
 	}
-	
+
 	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, 
 			String defaultLabel, HashMap<String,String> translations,  
 			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
@@ -651,7 +661,8 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject convertLeaderPilot(MetadataFieldValue metadataValue, String opKey, 
 			String defaultLabel, HashMap<String,String> translations, boolean isFixed, 
-			Session session, ConservationArea ca) {
+			URI metadataIcon, Path workingDir,
+			Session session, ConservationArea ca) throws IOException {
 		
 		boolean isRequired = true;
 		if (metadataValue != null) isRequired = metadataValue.isRequired();
@@ -674,7 +685,8 @@ public class CtJsonExportUtils {
 		}else {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, true);
 		}
-		
+		addMetadataIconToJson(metadataIcon, workingDir, objective);
+
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(opKey, objective);
 		return objectiveOp;
@@ -730,18 +742,20 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
-			String defaultLabel, HashMap<String,String> translations, 
+			String defaultLabel, HashMap<String,String> translations,
+			URI metadataIcon, 
 			boolean isFixed, Session session, ConservationArea ca,
 			IconSet set, Path workingDir) throws IOException {
 		
 		return  convertKeyOptions(metadataValue, clazz, screenKey, 
-				defaultLabel, translations, isFixed, session, ca, 
+				defaultLabel, translations, metadataIcon, isFixed, session, ca, 
 				set, workingDir, (i,j)->{});
 	}
 	
 	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
 			String defaultLabel, HashMap<String,String> translations, 
+			URI metadataIcon,
 			boolean isFixed, Session session, ConservationArea ca,
 			IconSet set, Path workingDir,
 			BiConsumer<NamedKeyItem, JSONObject> customValuesAdded) throws IOException {
@@ -772,6 +786,8 @@ public class CtJsonExportUtils {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
 		}
 		
+		addMetadataIconToJson(metadataIcon, workingDir, optionType);
+				
 		JSONArray optionOptions = new JSONArray();
 		
 		List<? extends NamedKeyItem> items = QueryFactory.buildQuery(session, clazz, 
@@ -913,6 +929,7 @@ public class CtJsonExportUtils {
 	
 	public static void addIconToJson(IconItem iconitem, IconSet set, 
 			JSONObject toUpdate, Path tempDir, Session session) throws IOException {
+		
 		if (iconitem == null || iconitem.getIcon() == null || set == null) return ;
 		
 		IconFile file = iconitem.getIcon().getIconFile(set);
@@ -929,7 +946,33 @@ public class CtJsonExportUtils {
 		Path target = tempDir.resolve(filename);
 		if (!Files.exists(target)) Files.copy(path, target);
 		toUpdate.put(CtJsonExportUtils.JSON_IMAGEFILE_KEY, filename);
-		
 	}
+	
+	public static void addMetadataIconToJson(URI metadataIcon, Path workingDir, JSONObject optionType)
+			throws IOException {
+		if (metadataIcon == null) return;
+		try {
+			String fname = ""; //$NON-NLS-1$
+			if (metadataIcon.getScheme().equalsIgnoreCase("platform")) { //$NON-NLS-1$
+				fname = Paths.get(metadataIcon.getPath()).getFileName().toString();
+			}else {
+				fname = Paths.get(metadataIcon).getFileName().toString();
+			}
+			fname = URLUtils.cleanFilename(SharedUtils.getFilenameWithoutExtension(fname)) + "." + SharedUtils.getFilenameExtension(fname); //$NON-NLS-1$
+			fname = fname.toLowerCase();
+			
+			Path target = workingDir.resolve(fname);
+			if (!Files.exists(target)) {
+				try(InputStream inputStream = metadataIcon.toURL().openConnection().getInputStream()){
+					Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+			optionType.put(CtJsonExportUtils.JSON_IMAGEFILE_KEY, fname);
+		}catch (Exception ex) {
+			throw new IOException(ex);
+		}
+	}
+	
+	
 }
 

@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
@@ -46,12 +47,14 @@ import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.SmartUtils;
@@ -76,24 +79,25 @@ public class IncidentPackageExporter {
 		
 	}
 	
-	public static void exportIncidentMetadata(IncidentCtPackage ctPackage, 
-			Session session, Path exportFile, 
+	public static void exportIncidentMetadata(AbstractCtPackage ctPackage, 
+			Session session, Path exportFile, Path workingDir,
 			IProgressMonitor monitor) throws IOException{
 		
 		IncidentPackageExporter exporter = new IncidentPackageExporter(ctPackage, Collections.emptyList(), exportFile);
 		exporter.session = session;
+		exporter.workingDir = workingDir;
 		exporter.createIncidentMetadataJson(exportFile);
 		
 	}
 	
-	private IncidentCtPackage ctpackage; 
+	private AbstractCtPackage ctpackage; 
 	private List<IPackageContribution.PackageContribution> contribs; 
 	private Path exportFile;
 	
 	private Path workingDir;
 	private Session session;
 	
-	private IncidentPackageExporter(IncidentCtPackage ctpackage, 
+	private IncidentPackageExporter(AbstractCtPackage ctpackage, 
 			List<IPackageContribution.PackageContribution> updates, 
 			Path exportFile) {
 		
@@ -121,7 +125,7 @@ public class IncidentPackageExporter {
 			try(Session session = HibernateManager.openSession()){
 				this.session = session;
 				//the ctpackage object is configured with the model to use
-				ConfigurableModel modelToExport = ctpackage.getConfigurableModel();
+				ConfigurableModel modelToExport = ((IncidentCtPackage)ctpackage).getConfigurableModel();
 				if (modelToExport.getUuid() != null) {
 					modelToExport = session.get(ConfigurableModel.class, modelToExport.getUuid());
 				}
@@ -232,6 +236,10 @@ public class IncidentPackageExporter {
 	
 	@SuppressWarnings("unchecked")
 	private void createIncidentMetadataJson(Path incidentJson) throws IOException {
+		IconSet defaultSet = QueryFactory.buildQuery(session, 
+				IconSet.class, new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+				new Object[] {"isDefault", true}).getSingleResult(); //$NON-NLS-1$
+		
 		JSONArray metadataScreens = new JSONArray();
 		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentPackageContribution.INCIDENT_RESOURCE_ID));
 		
@@ -247,7 +255,9 @@ public class IncidentPackageExporter {
 			ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctpackage.getConservationArea(), session);
 			md.setVisible(ops.getTrackObserver());
 			
-			JSONObject emp = CtJsonExportUtils.convertEmployees(md, false, session, ctpackage.getConservationArea());
+			JSONObject emp = CtJsonExportUtils.convertEmployees(md, false,
+					IncidentMetadataField.MEMBERS.getIcon(defaultSet),
+					workingDir, session, ctpackage.getConservationArea());
 			metadataScreens.add(emp);
 		}
 		

@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
@@ -82,6 +83,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -528,7 +530,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			v = findMetadataValue(map, ma, (Button)fields[0], (Button)fields[1], cpackage);
 			customKeys.add(MissionMetadataField.generateKey(ma));
 			if (ma.getType() == AttributeType.LIST) {
-				ComboViewer cmb = (ComboViewer) fields[2];
+				TableComboViewer cmb = (TableComboViewer) fields[2];
 				Object o = cmb.getStructuredSelection().getFirstElement();
 				if (o instanceof MissionAttributeListItem) {
 					v.setUuidValue(((MissionAttributeListItem)o).getUuid());
@@ -659,17 +661,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 						txt.setEnabled(!btnSelected.getSelection());
 					});
 				} else if (attribute.getType() == AttributeType.LIST) {
-					ComboViewer cmb = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
+					TableComboViewer cmb = new TableComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 					cmb.getControl().setData(CUSTOMKEY, true);
 					data[2] = cmb;
 					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedItemLabelProvider());
+					cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
 					List<Object> items = new ArrayList<>();
 					items.add(""); //$NON-NLS-1$
 					items.addAll(attribute.getAttributeList());
 					cmb.setInput(items);
 					cmb.getControl().setEnabled(false);
-					cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 					cmb.addSelectionChangedListener(e -> fireChanged());
 
@@ -715,7 +717,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				((Button)fields[1]).setSelection(v.isRequired());
 				
 				if (pa.getType() == AttributeType.LIST) {
-					ComboViewer cmb = (ComboViewer) fields[2];
+					TableComboViewer cmb = (TableComboViewer) fields[2];
 					if (v.getUuidValue() != null) {
 						MissionAttributeListItem temp = new MissionAttributeListItem();
 						temp.setUuid(v.getUuidValue());

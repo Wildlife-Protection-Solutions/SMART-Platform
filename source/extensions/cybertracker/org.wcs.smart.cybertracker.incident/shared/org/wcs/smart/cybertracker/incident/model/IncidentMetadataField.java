@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.cybertracker.incident.model;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.wcs.smart.ca.icon.IconManager;
+import org.wcs.smart.ca.icon.IconSet;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+
 /**
  * Incident metadata fields for SMART Mobile
  * 
@@ -29,16 +36,18 @@ package org.wcs.smart.cybertracker.incident.model;
  */
 public enum IncidentMetadataField {
 	
-	MEMBERS("SMART_Employee", true, false); //$NON-NLS-1$
+	MEMBERS("SMART_Employee", true, false, "patrol_members"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private String jsonKey;
 	private boolean isRequired;
 	private boolean isFixed;
+	private String libraryIcon;
 	
-	IncidentMetadataField(String jsonKey, boolean isRequired, boolean isFixed){
+	IncidentMetadataField(String jsonKey, boolean isRequired, boolean isFixed, String libraryIcon){
 		this.jsonKey = jsonKey;
 		this.isRequired = isRequired;
 		this.isFixed = isFixed;
+		this.libraryIcon = libraryIcon;
 	}
 	
 	public String getJsonKey() {
@@ -59,5 +68,24 @@ public enum IncidentMetadataField {
 	 */
 	public boolean isFixed() {
 		return this.isFixed;
+	}
+	
+	public URI getIcon(IconSet set) {
+		if (this.libraryIcon == null) return null;
+		String filename = IconManager.INSTANCE.getLibraryFile(this.libraryIcon, set);
+		if (filename == null) {
+			IconSet temp = new IconSet();
+			temp.setKeyId(IconManager.FixedIconSet.COLOR.key);
+			filename = IconManager.INSTANCE.getLibraryFile(this.libraryIcon, temp);
+		}
+		//this shouldn't happen
+		if (filename == null) return null;
+		
+		try {
+			return new URI(filename);
+		} catch (URISyntaxException e) {
+			CyberTrackerPlugIn.log(e.getMessage(), e);
+		}
+		return null;
 	}
 }

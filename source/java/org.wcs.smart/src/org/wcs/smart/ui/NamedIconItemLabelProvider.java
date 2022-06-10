@@ -23,14 +23,12 @@ package org.wcs.smart.ui;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.IconItem;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.icon.IconCache;
 
 /**
- * LabelProvider for {@link NamedItem}
+ * LabelProvider for {@link IconItem} that returns icons in 
+ * specified sizes (default size is 32)
  * 
- * @author elitvin
- * @since 2.0.0
  */
 public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 
@@ -54,8 +52,20 @@ public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 	 * @param iconSize
 	 */
 	public NamedIconItemLabelProvider(int iconSize) {
-		this();
 		images = new IconCache(null, iconSize);
+	}
+	
+	/**
+	 * Create a new label provide that generates icons of a specific size. If size
+	 * is < 0 no icon will be generated.
+	 * 
+	 * IconSetOption will determine what type of icons will be generated.
+	 * 
+	 * @param iconSize
+	 */
+	public NamedIconItemLabelProvider(int iconSize, IconCache.IconSetOption iconType) {
+		this(iconSize);
+		images.setIconSetOption(iconType);
 	}
 	
 	@Override

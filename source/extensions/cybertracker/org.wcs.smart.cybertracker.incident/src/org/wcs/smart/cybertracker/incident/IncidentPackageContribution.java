@@ -45,8 +45,8 @@ import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
-import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.pkg.IncidentPackageExporter;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -172,7 +172,8 @@ public class IncidentPackageContribution implements IPackageContribution{
 				updates.addFile(toPath);
 			}
 			
-			IncidentPackageExporter.exportIncidentMetadata((IncidentCtPackage)pp, s, metadataFile, new NullProgressMonitor());
+			IncidentPackageExporter.exportIncidentMetadata((AbstractCtPackage)pp, s, 
+					metadataFile, tempDir, new NullProgressMonitor());
 			updates.addFile(metadataFile);
 		}
 		

@@ -64,7 +64,7 @@ public enum IconManager {
 	 */
 	public List<Icon> getIcons(Session session, ConservationArea ca){
 		List<Icon> icons = QueryFactory.buildQuery(session, Icon.class, 
-				new Object[] {"conservationArea", ca}).list();
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 		icons.forEach(e->e.getFiles().forEach(f->{
 			f.getIconSet().getUuid();
 			try {
@@ -85,12 +85,14 @@ public enum IconManager {
 	 */
 	public List<Icon> getSystemIcons(Session session, ConservationArea ca) {
 
-		String query = "SELECT keyId FROM Icon WHERE conservationArea = :ca";
-		List<String> icons = session.createQuery(query).setParameter("ca", ca).list();
+		String query = "SELECT keyId FROM Icon WHERE conservationArea = :ca"; //$NON-NLS-1$
+		List<String> icons = session.createQuery(query, String.class)
+				.setParameter("ca", ca).list();  //$NON-NLS-1$
 
 		Set<String> existingIcons = new HashSet<>(icons);
 
-		List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, new Object[] { "conservationArea", ca })
+		List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
+				new Object[] { "conservationArea", ca }) //$NON-NLS-1$
 				.list();
 
 		List<Icon> libraryIcons = new ArrayList<>();
@@ -1413,6 +1415,8 @@ public enum IconManager {
 	}
 	
 	public String getLibraryFile(String iconKey, IconSet set) {
+		if (set == null) return null;
+		
 		for (String[] icons : SMART_ICON_MAPPING) {
 			if (icons[0].equalsIgnoreCase(iconKey)) {
 				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) return icons[2];

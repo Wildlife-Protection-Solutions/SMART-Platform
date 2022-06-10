@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
-import java.util.HashMap;
-
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -30,10 +28,9 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedKeyIconItem;
+import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol attribute label provider.  Provides images and labels
@@ -44,27 +41,23 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AttributeLabelProvider extends LabelProvider implements IColorProvider{
 
-	public enum IconSetOption{
-		ALL,
-		DEFAULT
-	}
 	private Language language;
-	private HashMap<Object, Image> images = new HashMap<>();
-	
-	private int iconSize = 16;
-	private IconSetOption option = IconSetOption.DEFAULT; 
+	private IconCache iconCache;
 	
 	public AttributeLabelProvider(){
-		
 	}
 	
-	public AttributeLabelProvider(int iconSize, IconSetOption op){
-		this.iconSize = iconSize;
-		this.option = op;
+	public AttributeLabelProvider(int iconSize){
+		this(iconSize, IconCache.IconSetOption.DEFAULT);
 	}
 	
+	public AttributeLabelProvider(int iconSize, IconCache.IconSetOption op){
+		this.iconCache = new IconCache(null, iconSize);
+		iconCache.setIconSetOption(op);
+	}
 
 	public AttributeLabelProvider(Language lang){
+		this(16, IconCache.IconSetOption.DEFAULT);
 		this.language = lang;
 	}
 
@@ -73,13 +66,13 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 	}
 	
 	public void clearImageCache() {
-		for (Image img : images.values()) img.dispose();
-		images.clear();
+		iconCache.clearCache();
 	}
+	
 	@Override
 	public void dispose() {
 		super.dispose();
-		clearImageCache();
+		iconCache.dispose();
 	}
 	
 	/**
@@ -88,25 +81,7 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 	 * Subclasses may override.
 	 */
 	public Image getImage(Object element) {
-		
-		if (element instanceof NamedKeyIconItem){
-			NamedKeyIconItem ma = (NamedKeyIconItem)element;
-			if (ma.getIcon() == null) return null;
-			if (images.containsKey(ma)) return images.get(ma);
-		
-			//find icon for default icon set
-			if (option == IconSetOption.DEFAULT) {
-				Image img = SmartUtils.getImage(ma.getIcon(), iconSize);
-				images.put(ma, img);			
-				return img;
-			}else if (option == IconSetOption.ALL) {
-				Image img = SmartUtils.generateImage(ma.getIcon(), iconSize);
-				images.put(element, img);			
-				return img;
-			}
-		}
-		
-		return super.getImage(element);
+		return iconCache.getImage(element);
 	}
 
 	/**

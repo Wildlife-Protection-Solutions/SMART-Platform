@@ -55,6 +55,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -271,8 +272,8 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	}
 	
 	private void saveIcon(MissionAttribute ma) {
-		if (ma.getIcon() != null) session.saveOrUpdate(ma.getIcon());
-		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null).forEach(li->session.saveOrUpdate(li.getIcon()));
+		if (ma.getIcon() != null && ma.getIcon().getUuid() == null) session.saveOrUpdate(ma.getIcon());
+		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null && e.getIcon().getUuid() == null).forEach(li->session.saveOrUpdate(li.getIcon()));
 	}
 	
 	private void enableButtons(){
@@ -292,6 +293,17 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 				"conservationArea", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.getResultList(); 
 		lstAttributes.setInput(attributes);
+		
+		attributes.forEach(a->{
+			if (a.getIcon() != null) {
+				a.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
+			}
+			
+			for (MissionAttributeListItem li : a.getAttributeList()) {
+				if (li.getIcon() == null) continue;
+				li.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
+			}
+		});
 	}
 	
 	@Override

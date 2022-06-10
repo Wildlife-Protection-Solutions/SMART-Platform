@@ -25,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
@@ -311,9 +313,9 @@ public class SurveyPackageExporter {
 			MissionAttribute a = session.get(MissionAttribute.class, prop.getAttribute().getUuid());
 			//only supports number, text and list
 			if (prop.getAttribute().getType() == AttributeType.NUMERIC) {
-				metadataScreens.add(covertNumberProperty(map.get(MissionMetadataField.generateKey(a)), a));
+				metadataScreens.add(covertNumberProperty(map.get(MissionMetadataField.generateKey(a)), a, set));
 			}else if (prop.getAttribute().getType() == AttributeType.TEXT) {
-				metadataScreens.add(covertStringProperty(map.get(MissionMetadataField.generateKey(a)), a));
+				metadataScreens.add(covertStringProperty(map.get(MissionMetadataField.generateKey(a)), a, set));
 			}else if (prop.getAttribute().getType() == AttributeType.LIST) {
 				metadataScreens.add(covertListProperty(map.get(MissionMetadataField.generateKey(a)), a, set));
 			}	
@@ -323,16 +325,18 @@ public class SurveyPackageExporter {
 				MissionMetadataField.COMMENT.getJsonKey(), 
 				Messages.SurveyPackageExporter_CommentPageLabel,
 				getTranslations(Messages.SurveyPackageExporter_CommentPageLabel, "SurveyPackageExporter_CommentPageLabel"), //$NON-NLS-1$
-				false, session, ctpackage.getConservationArea()));
+				false, MissionMetadataField.COMMENT.getIcon(set), workingDir, session, ctpackage.getConservationArea()));
 		
-		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(MissionMetadataField.MEMBERS.name()), 
-				false, session, ctpackage.getConservationArea()));
+		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(MissionMetadataField.MEMBERS.name()),
+				false, MissionMetadataField.MEMBERS.getIcon(set), workingDir,
+				session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(MissionMetadataField.LEADER.name()),
 				MissionMetadataField.LEADER.getJsonKey(), 
 				Messages.SurveyPackageExporter_LeaderPageLabel,
 				getTranslations(Messages.SurveyPackageExporter_LeaderPageLabel, "SurveyPackageExporter_LeaderPageLabel"), //$NON-NLS-1$
-				false, session, ctpackage.getConservationArea())); 
+				false, MissionMetadataField.MEMBERS.getIcon(set), workingDir,
+				session, ctpackage.getConservationArea())); 
 		
 		
 		//add sampling units
@@ -379,7 +383,7 @@ public class SurveyPackageExporter {
 	
 	@SuppressWarnings("unchecked")
 	private JSONObject covertNumberProperty(MetadataFieldValue metadata, 
-			MissionAttribute prop) {
+			MissionAttribute prop, IconSet set) throws IOException {
 		
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
@@ -399,6 +403,14 @@ public class SurveyPackageExporter {
 		}
 		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, isVisible);
+		if (prop.getIcon() != null) {
+			IconFile file = prop.getIcon().getIconFile(set);
+			if (file != null) {
+				file.computeFileLocation(session);
+				URI iconMetadata = prop.getIcon().getIconFile(set).getAttachmentFile().toUri();
+				CtJsonExportUtils.addMetadataIconToJson(iconMetadata, workingDir, objective);
+			}
+		}
 		
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
@@ -406,7 +418,7 @@ public class SurveyPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject covertStringProperty(MetadataFieldValue metadata, MissionAttribute prop) {
+	private JSONObject covertStringProperty(MetadataFieldValue metadata, MissionAttribute prop, IconSet set) throws IOException {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());	
 		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
@@ -424,6 +436,14 @@ public class SurveyPackageExporter {
 		}
 		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, isVisible);
+		if (prop.getIcon() != null) {
+			IconFile file = prop.getIcon().getIconFile(set);
+			if (file != null) {
+				file.computeFileLocation(session);
+				URI iconMetadata = prop.getIcon().getIconFile(set).getAttachmentFile().toUri();
+				CtJsonExportUtils.addMetadataIconToJson(iconMetadata, workingDir, objective);
+			}
+		}
 		
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
@@ -462,7 +482,14 @@ public class SurveyPackageExporter {
 			CtJsonExportUtils.addIconToJson(item, set, ttype, workingDir, session);
 		}
 		objective.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
-		
+		if (prop.getIcon() != null) {
+			IconFile file = prop.getIcon().getIconFile(set);
+			if (file != null) {
+				file.computeFileLocation(session);
+				URI iconMetadata = prop.getIcon().getIconFile(set).getAttachmentFile().toUri();
+				CtJsonExportUtils.addMetadataIconToJson(iconMetadata, workingDir, objective);
+			}
+		}
 		JSONObject objectiveOp = new JSONObject();
 		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
 		return objectiveOp;
