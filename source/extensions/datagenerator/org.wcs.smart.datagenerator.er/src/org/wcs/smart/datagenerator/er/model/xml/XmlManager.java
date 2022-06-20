@@ -156,10 +156,12 @@ public enum XmlManager {
 								 add = true;
 							 }else if (attribute.getType() == Attribute.AttributeType.LIST) {
 								 AttributeListItem item = null;
-								 for (AttributeListItem i : attribute.getAttributeList()) {
-									 if (i.getKeyId().equals(a.getStringValue())) {
-										 item = i;
-										 break;
+								 if (a.getStringValue() != null) {
+									 for (AttributeListItem i : attribute.getAttributeList()) {
+										 if (i.getKeyId().equals(a.getStringValue())) {
+											 item = i;
+											 break;
+										 }
 									 }
 								 }
 								 if (item != null) {
@@ -173,39 +175,44 @@ public enum XmlManager {
 								 woa.setStringValue(a.getStringValue());
 								 add = true;
 							 }else if (attribute.getType() == Attribute.AttributeType.TREE) {
-								 ArrayDeque<AttributeTreeNode> search = new ArrayDeque<>();
-								 search.addAll(attribute.getTree());
 								 AttributeTreeNode item = null;
-								 while(!search.isEmpty()) {
-									 AttributeTreeNode n = search.removeFirst();
-									 if (n.getHkey().equals(a.getStringValue())) {
-										 item = n;
-										 break;
+								 if (a.getStringValue() != null) {
+									 ArrayDeque<AttributeTreeNode> search = new ArrayDeque<>();
+									 search.addAll(attribute.getTree());
+									 
+									 while(!search.isEmpty()) {
+										 AttributeTreeNode n = search.removeFirst();
+										 if (n.getHkey().equals(a.getStringValue())) {
+											 item = n;
+											 break;
+										 }
+										 if (n.getChildren() != null) search.addAll(n.getChildren());
 									 }
-									 if (n.getChildren() != null) search.addAll(n.getChildren());
 								 }
-								 
 								 if (item != null) {
 									 add = true;
 									 woa.setAttributeTreeNode(item);
 								 }
 							 }else if (attribute.getType() == Attribute.AttributeType.MLIST) {
-								 String[] keys = a.getStringValue().split(","); //$NON-NLS-1$
 								 woa.setAttributeListItems(new ArrayList<>());
-								 for (String key : keys) {
-									 AttributeListItem item = null;
-									 for (AttributeListItem i : attribute.getAttributeList()) {
-										 if (i.getKeyId().equals(key)) {
-											 item = i;
-											 break;
+								 if (a.getStringValue() != null) {
+									 String[] keys = a.getStringValue().split(","); //$NON-NLS-1$
+									 
+									 for (String key : keys) {
+										 AttributeListItem item = null;
+										 for (AttributeListItem i : attribute.getAttributeList()) {
+											 if (i.getKeyId().equals(key)) {
+												 item = i;
+												 break;
+											 }
 										 }
-									 }
-									 if (item != null) {
-										 add = true;
-										 WaypointObservationAttributeList li = new WaypointObservationAttributeList();
-										 li.setAttributeLisItem(item);
-										 li.setObservationAttribute(woa);
-										 woa.getAttributeListItems().add(li);
+										 if (item != null) {
+											 add = true;
+											 WaypointObservationAttributeList li = new WaypointObservationAttributeList();
+											 li.setAttributeLisItem(item);
+											 li.setObservationAttribute(woa);
+											 woa.getAttributeListItems().add(li);
+										 }
 									 }
 								 }
 							 }
@@ -291,7 +298,8 @@ public enum XmlManager {
 						xmlAttribute.setStringValue(woa.getStringValue());
 						break;
 					case LIST:
-						xmlAttribute.setStringValue(woa.getAttributeListItem().getKeyId());
+						if (woa.getAttributeListItem() != null)
+							xmlAttribute.setStringValue(woa.getAttributeListItem().getKeyId());
 						break;
 					case NUMERIC:
 						xmlAttribute.setDoubleValue(woa.getNumberValue());
@@ -300,10 +308,13 @@ public enum XmlManager {
 						xmlAttribute.setStringValue(woa.getStringValue());
 						break;
 					case TREE:
-						xmlAttribute.setStringValue(woa.getAttributeTreeNode().getHkey());
+						
+						if (woa.getAttributeTreeNode() != null)
+							xmlAttribute.setStringValue(woa.getAttributeTreeNode().getHkey());
 						break;
 					case MLIST:
-						xmlAttribute.setStringValue( woa.getAttributeListItems().stream().map(e->e.getAttributeListItem().getKeyId()).collect(Collectors.joining(",")) ); //$NON-NLS-1$
+						if (woa.getAttributeListItems() != null)
+							xmlAttribute.setStringValue( woa.getAttributeListItems().stream().map(e->e.getAttributeListItem().getKeyId()).collect(Collectors.joining(",")) ); //$NON-NLS-1$
 					}
 				}
 			}
