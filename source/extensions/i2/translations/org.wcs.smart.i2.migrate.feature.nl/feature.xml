@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.i2.migrate.feature.nl"
+      label="SMART Profile Migration Tools Language Pack"
+      version="7.5.0"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="7.4.0.qualifier">
+
+   <description>
+      Translations for the Profile plugin.
+   </description>
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <plugin
+         id="org.wcs.smart.i2.migrate.nl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+
+</feature>
