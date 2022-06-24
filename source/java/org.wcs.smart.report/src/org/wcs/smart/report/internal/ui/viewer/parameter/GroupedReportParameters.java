@@ -32,6 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
@@ -83,7 +84,7 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameterComponent#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onParameterModified) {
 
 		Composite group = new Composite(parent, SWT.NONE);
 		group.setLayout(new GridLayout(2, false));
@@ -95,8 +96,20 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		for (IBirtParameterComponent p : params){
-			p.createComposite(group, settings);
+			p.createComposite(group, settings, onParameterModified);
 		}
 	}
 
+	@Override
+	public String validate() {
+		String error = null;
+		for (int i = params.size() - 1; i >= 0; i --) {
+			IBirtParameterComponent p = params.get(i);
+			String parterror = p.validate();
+			if (parterror != null) {
+				error = parterror;
+			}
+		}
+		return error;
+	}
 }

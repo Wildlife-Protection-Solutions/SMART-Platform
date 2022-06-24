@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -70,7 +71,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameter#createComponent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onParameterModified) {
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ReportParameterDialog.SIMPLE_DATE_FORMAT);
 		Object initValue = super.getInitializeValue(settings);
 		
@@ -102,6 +103,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 			if (initDate != null){
 				SmartUtils.initDateTimeWidget(datePicker, initDate.toLocalDate());
 			}
+			datePicker.addListener(SWT.Modify, onParameterModified);
 			
 		}
 		if (tFormat != -1){
@@ -110,6 +112,8 @@ public class DateParameterComponent extends AbstractBirtParameter {
 			if (initDate != null){
 				SmartUtils.initDateTimeWidget(timePicker, initDate.toLocalTime());
 			}
+			timePicker.addListener(SWT.Modify, onParameterModified);
+			
 		}
 	}
 

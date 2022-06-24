@@ -26,6 +26,7 @@ import java.util.HashMap;
 import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 
 /**
  * Interface all components that collect birt parameters must implement
@@ -44,5 +45,14 @@ public interface IBirtParameterComponent {
 	 * @param parent
 	 * @return
 	 */
-	public void createComposite(Composite parent, IDialogSettings dialogSettings);
+	public void createComposite(Composite parent, IDialogSettings dialogSettings, Listener modified);
+	
+	/**
+	 * returns null if all components valid, otherwise returns string
+	 * describing the error
+	 * @return
+	 */
+	public default String validate() {
+		return null;
+	}
 }

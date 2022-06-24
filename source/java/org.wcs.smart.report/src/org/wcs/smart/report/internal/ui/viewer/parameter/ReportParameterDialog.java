@@ -37,6 +37,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -92,8 +93,9 @@ public class ReportParameterDialog extends SmartStyledTitleDialog {
 		comp.setLayout(new GridLayout(1, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		Listener onModified = e->validate();
 		for(IBirtParameterComponent param: params){
-			param.createComposite(comp, dialogSettings);
+			param.createComposite(comp, dialogSettings, onModified);
 		}
 		
 		super.getShell().setText(Messages.ReportParameterDialog_DialogTitle);
@@ -101,6 +103,21 @@ public class ReportParameterDialog extends SmartStyledTitleDialog {
 		setTitle(Messages.ReportParameterDialog_DialogTitle);
 		
 		return comp;
+	}
+	
+	private void validate() {
+		if (getButton(IDialogConstants.OK_ID) == null) return;
+		
+		for(IBirtParameterComponent param: params){
+			String error = param.validate();
+			if (error != null) {
+				setErrorMessage(error);
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+				return;
+			}
+		}
+		getButton(IDialogConstants.OK_ID).setEnabled(true);
+		setErrorMessage(null);
 	}
 	
 	@Override

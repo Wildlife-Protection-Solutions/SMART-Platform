@@ -147,6 +147,9 @@ public class Messages extends NLS {
 	public static String NewReportHandler_Error_NoLibrary;
 	public static String NewReportHandler_Progress_CreatingReport;
 	public static String NumberParameterComponent_ConversionError;
+	public static String NumberParameterComponent_InvalidValue;
+	public static String NumberParameterComponent_ValueToBig;
+	public static String NumberParameterComponent_ValueToSmall;
 	public static String ParameterCollecter_OtherParamGroup;
 	public static String ParameterCollecter_TypeNotSupported;
 	public static String ParameterCollecter_TypeXNotSupported;

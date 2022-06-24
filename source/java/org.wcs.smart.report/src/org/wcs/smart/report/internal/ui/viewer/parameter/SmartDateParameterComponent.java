@@ -66,7 +66,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class SmartDateParameterComponent implements IBirtParameterComponent, Listener{
+public class SmartDateParameterComponent implements IBirtParameterComponent {
 
 	
 	private static final String DATE_OP_KEY = "org.wcs.smart.report.parameter.dateOp"; //$NON-NLS-1$
@@ -106,7 +106,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameter#createComponent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onParameterModified) {
 		this.settings = settings;
 		
 		Composite param = new Composite(parent, SWT.NONE);
@@ -146,7 +146,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		startPicker = new DateTime(custom, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
 		startPicker.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		initDateTime(SmartReportParameters.PARAM_START_DATE_KEY, startPicker, settings);
-		startPicker.addListener(SWT.Selection, this);
+		startPicker.addListener(SWT.Selection, onParameterModified);
 		
 		lblEnd = new Label(custom, SWT.NONE);
 		lblEnd.setText(Messages.SmartDateParameterComponent_EndDateLabel);
@@ -157,11 +157,11 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		endPicker = new DateTime(custom, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
 		endPicker.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		initDateTime(SmartReportParameters.PARAM_END_DATE_KEY, endPicker, settings);
-		endPicker.addListener(SWT.Selection, this);
+		endPicker.addListener(SWT.Selection, onParameterModified);
 		
 		cdEnd = new ControlDecoration(endPicker, SWT.LEFT | SWT.TOP);
 		cdEnd.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		cdEnd.setShowHover(true);
 		cdEnd.hide();
 		
@@ -176,7 +176,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 				lblEnd.setEnabled(enabled);
 				startPicker.setEnabled(enabled);
 				endPicker.setEnabled(enabled);
-				
+								
 				if (!enabled && filterOp != null){
 					LocalDate[] d = filterOp.getDates();
 					if (d != null){
@@ -190,8 +190,9 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 						}
 					}
 				}
+				onParameterModified.handleEvent(event);
 		}});
-		
+				
 		String x = settings.get(DATE_OP_KEY);
 		IDateFilter defaultSelection = IDateFilter.DATE_FILTERS[0];
 		for (int i = 0; i < IDateFilter.DATE_FILTERS.length; i++){
@@ -299,24 +300,30 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		return params;
 	}
 
+	
 	@Override
-	public void handleEvent(Event event) {
-		IDateFilter op = (IDateFilter) 
-				((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
+	public String validate() {
+		
+		String error = null;
+//		IDateFilter op = (IDateFilter) 
+//				((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement(); 
+//		if (op.getQueryKey().equals(CustomDateFilter.KEY)){
+		
+		LocalDate start = SmartUtils.toDate(startPicker);
+		LocalDate end = SmartUtils.toDate(endPicker);
+			
+		if (end.isBefore(start)){
+			//warning
+			error = Messages.SmartDateParameterComponent_DateWarning;
+			cdEnd.setDescriptionText(error);
+			cdEnd.show();
+			
+		}else{
+			cdEnd.hide();
+		}			
 
-		if (op.getQueryKey().equals(CustomDateFilter.KEY)){
-			LocalDate start = SmartUtils.toDate(startPicker);
-			LocalDate end = SmartUtils.toDate(endPicker);
-			
-			if (end.isBefore(start)){
-				//warning
-				cdEnd.setDescriptionText(Messages.SmartDateParameterComponent_DateWarning);
-				cdEnd.show();
-			}else{
-				cdEnd.hide();
-			}
-			
-		}
+		
+		return error;
 	}
 
 }

@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import java.text.MessageFormat;
+
 import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -59,7 +60,11 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 		@Override
 		public Object validate(String text) throws Exception {
 			if (text.length() == 0) return true;
-			return  Float.parseFloat(text);
+			Float f = Float.parseFloat(text);
+			if (f == Float.POSITIVE_INFINITY) throw new Exception(Messages.NumberParameterComponent_ValueToBig);
+			if (f == Float.NEGATIVE_INFINITY) throw new Exception(Messages.NumberParameterComponent_ValueToSmall);
+			return f;
+			
 		}
 	};
 
@@ -71,7 +76,10 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 		@Override
 		public Object validate(String text) throws Exception {
 			if (text.length() == 0) return true;
-			return Double.parseDouble(text);
+			Double d = Double.parseDouble(text);
+			if (d == Double.POSITIVE_INFINITY) throw new Exception(Messages.NumberParameterComponent_ValueToBig);
+			if (d == Double.NEGATIVE_INFINITY) throw new Exception(Messages.NumberParameterComponent_ValueToSmall);
+			return d;
 	}};
 				
 	private Text inputValue = null;
@@ -88,30 +96,30 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	}
 
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onParameterModified) {
 		Object initValue = super.getInitializeValue(settings);
 
 		createNameLabel(parent);
 
 		inputValue = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		inputValue.addVerifyListener(new VerifyListener(){
-			@Override
-			public void verifyText(VerifyEvent e) {
-				 String oldS = ((Text) e.getSource()).getText();
-				 String newS = oldS.substring(0, e.start) + e.text + oldS.substring(e.end);
-				 try{
-					 validator.validate(newS);
-				 }catch(Exception ex){
-					 e.doit = false;
-				 }
-	
-			}});
+		inputValue.addListener(SWT.Modify, onParameterModified);
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if (initValue != null){
 			inputValue.setText(initValue.toString());
 		}		
 	}
 
+	@Override
+	public String validate() {
+		String input = inputValue.getText();
+		try {
+			validator.validate(input);
+			return null;
+		}catch (Exception ex) {
+			return MessageFormat.format(Messages.NumberParameterComponent_InvalidValue, def.getName(), ex.getMessage());
+		}
+		
+	}
 	@Override
 	public Object getParameterValue() {
 		try{
