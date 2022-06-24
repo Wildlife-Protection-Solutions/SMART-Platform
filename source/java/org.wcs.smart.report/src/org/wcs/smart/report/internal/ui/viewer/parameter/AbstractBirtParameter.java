@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 
 /**
  * Abstract class for ui component for displaying report parameters.
@@ -76,7 +77,7 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 	 * @param parent
 	 * @return
 	 */
-	public abstract void createComposite(Composite parent, IDialogSettings settings);
+	public abstract void createComposite(Composite parent, IDialogSettings settings, Listener onModified);
 	
 	protected void createNameLabel(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);

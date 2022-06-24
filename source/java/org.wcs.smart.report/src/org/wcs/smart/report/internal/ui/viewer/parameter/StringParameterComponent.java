@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 /**
@@ -42,7 +43,7 @@ public class StringParameterComponent extends AbstractBirtParameter{
 	}
 
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onParameterModified) {
 		Object initValue = super.getInitializeValue(settings);
 		
 		createNameLabel(parent);
@@ -52,6 +53,7 @@ public class StringParameterComponent extends AbstractBirtParameter{
 		if (initValue != null){
 			inputValue.setText(initValue.toString());
 		}
+		inputValue.addListener(SWT.Modify, onParameterModified);
 	}
 
 	@Override

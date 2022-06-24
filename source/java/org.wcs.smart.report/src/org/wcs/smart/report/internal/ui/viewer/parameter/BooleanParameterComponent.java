@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.report.internal.Messages;
 
 /**
@@ -48,7 +49,7 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 	private Button btnTrue;
 	
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onModified) {
 		Object initValue = super.getInitializeValue(settings);
 		
 		createNameLabel(parent);

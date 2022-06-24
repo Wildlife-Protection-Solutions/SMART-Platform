@@ -36,6 +36,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.birt.parameter.ISmartBirtParameter;
 import org.wcs.smart.birt.parameter.ParameterManager;
@@ -58,7 +60,7 @@ public class ComboParameterComponent extends AbstractBirtParameter {
 	}
 
 	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings, Listener onParameterModified) {
 		Object initValue = super.getInitializeValue(settings);
 
 		createNameLabel(parent);
@@ -113,6 +115,7 @@ public class ComboParameterComponent extends AbstractBirtParameter {
 		if (cmbOptions.getStructuredSelection().isEmpty() && def.isRequired() && !data.isEmpty()) {
 			cmbOptions.setSelection(new StructuredSelection(data.get(0)));
 		}
+		cmbOptions.addSelectionChangedListener(e->onParameterModified.handleEvent(new Event()));
 	}
 
 	@Override
