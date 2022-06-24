@@ -11,6 +11,6 @@
 	<name>SMART Report Module</name>
 	<artifactId>org.wcs.smart.report</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.0-SNAPSHOT</version>
+	<version>7.5.2-SNAPSHOT</version>
 	
 </project>
