@@ -99,7 +99,9 @@ public class QueryEditorUtils {
 				monitor.setCanceled(true);
 				return null;
 			}else if (index == 0){
-				return doSaveAs(editor, false).getQuery();
+				QueryProxy proxy = doSaveAs(editor, false);
+				if (proxy == null) return null;
+				return proxy.getQuery();
 			}
 			//otherwise continue with save
 		}
