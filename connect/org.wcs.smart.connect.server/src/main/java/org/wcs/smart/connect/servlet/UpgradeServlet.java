@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -57,6 +59,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
@@ -126,20 +129,27 @@ public class UpgradeServlet extends HttpServlet {
 					upgrade620to630(s);
 					upgrade630to700(s);
 					upgrade700to751(s);
+					upgrade751to752(s);
 				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
 					upgrade600to620(s);
 					upgrade620to630(s);
 					upgrade630to700(s);
 					upgrade700to751(s);
+					upgrade751to752(s);
 				}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
 					upgrade620to630(s);
 					upgrade630to700(s);
 					upgrade700to751(s);
+					upgrade751to752(s);
 				}else if (filestoreVersion.equals("6.3.0")) { //$NON-NLS-1$
 					upgrade630to700(s);
 					upgrade700to751(s);
+					upgrade751to752(s);
 				}else if (filestoreVersion.equals("7.0.0")) { //$NON-NLS-1$
 					upgrade700to751(s);
+					upgrade751to752(s);
+				}else if (filestoreVersion.equals("7.5.1")) { //$NON-NLS-1$
+					upgrade751to752(s);
 				}else {
 					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
@@ -303,6 +313,24 @@ public class UpgradeServlet extends HttpServlet {
 		});	
 	}
 	
+	private void upgrade751to752(Session s) throws IOException{
+		//need to delete all cached conservation area exports
+		
+		
+		Path exportDirectory = DataStoreManager.INSTANCE.getRootDirectory()
+				.resolve(DataStoreManager.CA_EXPORT_LOCATION);
+		try(Stream<Path> files = Files.list(exportDirectory)){
+			files.forEach(f->{
+				if (!Files.isDirectory(f)) {
+					try {
+						Files.delete(f);
+					}catch (Exception ex) {
+						logger.log(Level.WARNING, MessageFormat.format("Could not delete file: {0} during upgrade. File should be removed manually or desktop data will be inconsistent.", f.toString())); //$NON-NLS-1$
+					}
+				}
+			});
+		}
+	}
 	
 	private void updateProfilesV6toV7(Connection c) throws SQLException {
 		String profilekey = "profile1"; //$NON-NLS-1$
