@@ -395,6 +395,11 @@
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
+            <artifactId>org.wcs.smart.core.cybertracker.incident</artifactId>
+            <version>${smart.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.smartcollect</artifactId>
             <version>${smart.version}</version>
         </dependency>

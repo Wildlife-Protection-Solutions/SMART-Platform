@@ -81,6 +81,7 @@ import org.wcs.smart.connect.model.Dashboard;
 import org.wcs.smart.connect.model.Quicklink;
 import org.wcs.smart.connect.model.UserQuicklink;
 import org.wcs.smart.connect.model.UsersDefaultDashboard;
+import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
@@ -477,6 +478,7 @@ public enum SmartTable {
 	PATROLCTPACKAGE(PatrolCtPackage.class, null),
 	SURVEYCTPACKAGE(SurveyCtPackage.class, null),
 	CTNAVIGATION(NavigationLayer.class, null), 
+	INCIDENTPACKAGE(IncidentCtPackage.class, null),
 	
 	METADATAVALUES(MetadataFieldValue.class, null),
 	METADTAVALUESUUID(MetadataFieldUuidValue.class, ".metadata.conservationArea"),

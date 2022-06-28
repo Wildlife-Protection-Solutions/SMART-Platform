@@ -73,6 +73,7 @@
 		<module>../extensions/cybertracker/org.wcs.smart.cybertracker/pom-shared.xml</module>
 		<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol/pom-shared.xml</module>
 		<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey/pom-shared.xml</module>
+		<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident/pom-shared.xml</module>
 		<module>../extensions/cybertracker/org.wcs.smart.smartcollect/pom-shared.xml</module>
 
 		<module>../extensions/connect/org.wcs.smart.connect/pom-shared.xml</module>
