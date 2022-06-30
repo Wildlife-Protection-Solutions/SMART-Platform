@@ -84,7 +84,6 @@ import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor.INodeVisitHandler;
-import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelChangeListener;
@@ -818,30 +817,12 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				}
 				protected void loadDatabaseInformation(){
 					Session s = dialog.getSession();
-					s.beginTransaction();
 					cs = ConnectHibernateManager.getConnectServer(s);
 					user = ConnectHibernateManager.getConnectUser(employee, s);			
-					s.getTransaction().commit();
 				}
-				protected void saveUserInfo(final String newName, String newPassword)
-						throws Exception {
+				protected void saveUserInfo(final String newName, String newPassword) throws Exception{
 					Session s = dialog.getSession();
-					try{
-						s.beginTransaction();
-						if (user == null){
-							ConnectUser newuser = new ConnectUser();
-							newuser.setConnectUsername(newName);
-							newuser.setServer(cs);
-							newuser.setSmartUser(employee);
-							user = newuser;
-							s.save(newuser);
-						}
-						user.setConnectPassword(newPassword);
-						s.saveOrUpdate(user);
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						s.getTransaction().rollback();
-					}
+					saveUserInfo(s, newName, newPassword);
 				}
 			};
 			

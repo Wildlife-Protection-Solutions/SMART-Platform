@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.query.model;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -61,6 +64,8 @@ public class AttributeQueryColumn extends QueryColumn {
 			ctype = ColumnType.NUMBER;
 		}else if (type == AttributeType.BOOLEAN){
 			ctype = ColumnType.BOOLEAN;
+		}else if (type == AttributeType.DATE) {
+			ctype = ColumnType.DATE;
 		}else {
 			ctype = ColumnType.STRING;
 		}
@@ -95,8 +100,15 @@ public class AttributeQueryColumn extends QueryColumn {
 		if (queryResultItem instanceof ObservationQueryResultItem) {
 			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
 			Object x = item.getAttributeValue(attributeKey);
-			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
-				return Boolean.valueOf((Double)x >= 0.5);
+			if (x != null) {
+				if (getType() == QueryColumn.ColumnType.BOOLEAN){
+					return Boolean.valueOf((Double)x >= 0.5);
+				}else if(getType() == QueryColumn.ColumnType.DATE) {
+					if (x instanceof String) {
+						//convert strings to dates
+						return LocalDate.parse((String)x, DateTimeFormatter.ISO_LOCAL_DATE);
+					}
+				}
 			}
 			return x;
 		}

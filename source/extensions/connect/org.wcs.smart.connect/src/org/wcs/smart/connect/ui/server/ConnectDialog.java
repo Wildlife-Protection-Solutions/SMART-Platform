@@ -225,28 +225,35 @@ public class ConnectDialog extends SmartStyledTitleDialog {
 	 * @param newPassword
 	 * @throws Exception
 	 */
-	protected void saveUserInfo(final String user, String newPassword)
+	protected void saveUserInfo(String user, String newPassword)
 			throws Exception {
 		try(Session s = HibernateManager.openSession()){
-		
 			s.beginTransaction();
 			try{
-				if (ConnectDialog.this.user == null){
-					ConnectUser newuser = new ConnectUser();
-					newuser.setConnectUsername(user);
-					newuser.setServer(cs);
-					newuser.setSmartUser(employee);
-					ConnectDialog.this.user = newuser;
-					s.save(newuser);
-				}
-				ConnectDialog.this.user.setConnectPassword(newPassword);
-				s.saveOrUpdate(ConnectDialog.this.user);
+				saveUserInfo(s, user, newPassword);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
 				throw ex;
 			}
 		}
+	}
+	
+	protected void saveUserInfo(Session session, String user, String newPassword)
+			throws Exception {
+		ConnectUser toUpdate = ConnectDialog.this.user;
+		if (toUpdate == null){
+			toUpdate = new ConnectUser();
+			toUpdate.setServer(cs);
+			toUpdate.setSmartUser(employee);
+			session.save(toUpdate);	
+		}
+		
+		//update user name
+		toUpdate.setConnectUsername(user);
+		ConnectDialog.this.user.setConnectPassword(newPassword);
+		session.saveOrUpdate(toUpdate);
+		ConnectDialog.this.user = toUpdate;
 	}
 	
 	private void initData(){
@@ -352,12 +359,16 @@ public class ConnectDialog extends SmartStyledTitleDialog {
 								existingPassword = ""; //$NON-NLS-1$
 							}
 							
-							if (!strequals(existingPassword, pass)){
+							//if user or password is different then update user info
+							if (!strequals(ConnectDialog.this.user.getConnectUsername(),user) ||
+									!strequals(existingPassword, pass)){
 								String newPassword = ConnectPlugIn.encryptPassword(pass);
 								saveUserInfo(user, newPassword);
 							}
 						}else{
-							if (ConnectDialog.this.user != null && ConnectDialog.this.user.getConnectPassword() != null){
+							if (ConnectDialog.this.user != null && (
+									!strequals(ConnectDialog.this.user.getConnectUsername(),user) ||
+									ConnectDialog.this.user.getConnectPassword() != null)){
 								//set to null
 								saveUserInfo(user, null);
 							}
