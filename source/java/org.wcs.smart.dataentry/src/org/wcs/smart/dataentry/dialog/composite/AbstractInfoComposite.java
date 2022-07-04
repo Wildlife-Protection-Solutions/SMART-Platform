@@ -54,7 +54,6 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
@@ -245,18 +244,20 @@ public abstract class AbstractInfoComposite extends Composite {
 				
 				//this can be slow for large trees or many categories; put it in a pmd
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+				
 				pmd.run(true, false, new IRunnableWithProgress() {
 
 					@Override
 					public void run(IProgressMonitor monitor)
 							throws InvocationTargetException,
 							InterruptedException {
+						
 						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
-					
+						
 						for (Category c : dialog.getCategories()){
 							monitor.subTask(c.getName());
-
 							Category start = c;
+							
 							while(c != null){
 								c.getNames().size();
 								loadFiles(c.getIcon(), session);
@@ -279,8 +280,7 @@ public abstract class AbstractInfoComposite extends Composite {
 							addCategory(start);
 							monitor.worked(1);
 						}
-						monitor.done();
-						
+						monitor.done();						
 					}
 					private void visitTreeNodes(List<AttributeTreeNode> nodes, Session s){
 						if (nodes == null) return;
@@ -292,7 +292,7 @@ public abstract class AbstractInfoComposite extends Composite {
 					}
 				});
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
 		}
 	}
@@ -333,7 +333,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	private void ensureDefaultTreeExists(Attribute a) {
 		ConfigurableModel m = getModel();
 		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
-		if (!existingTrees.contains(a)) {
+		if (!existingTrees.contains(a) || m.getDefaultConfigs().get(a) == null) {
 			CmAttributeConfig cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
 			m.getDefaultConfigs().put(a, cfg);
 		}
@@ -342,7 +342,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	private void ensureDefaultListExists(Attribute a) {
 		ConfigurableModel m = getModel();
 		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
-		if (!existingLists.contains(a)) {
+		if (!existingLists.contains(a) || m.getDefaultConfigs().get(a) == null) {
 			CmAttributeConfig cfg = CmDefaultListsUtil.buildDefaultListConfig(m, a);
 			m.getDefaultConfigs().put(a, cfg);
 		}
