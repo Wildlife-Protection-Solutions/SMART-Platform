@@ -50,8 +50,13 @@ public class CmTreeNodesVisitor {
 			handler.handle(cmNode, null);
 			for (CmAttribute attr : cmNode.getCmAttributes()) {
 				handler.handle(attr, null);
-				visitList(handler, attr, attr.getCurrentList());
-				visitTree(handler, attr, attr.getCurrentTree());
+				//TODO: work around https://app.assembla.com/spaces/smart-cs/tickets/3453
+				//I could never find the source of this bug; so this works around it
+				//for this specific error but does not affect other areas of the s/w
+				if (attr.getConfig() != null) {
+					visitList(handler, attr, attr.getCurrentList());
+					visitTree(handler, attr, attr.getCurrentTree());
+				}
 			}
 			visitNodes(handler, cmNode.getChildren());
 		}
