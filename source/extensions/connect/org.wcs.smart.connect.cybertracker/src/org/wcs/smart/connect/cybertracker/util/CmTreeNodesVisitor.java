@@ -24,6 +24,7 @@ package org.wcs.smart.connect.cybertracker.util;
 import java.util.List;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -54,6 +55,7 @@ public class CmTreeNodesVisitor {
 				//I could never find the source of this bug; so this works around it
 				//for this specific error but does not affect other areas of the s/w
 				if (attr.getConfig() != null) {
+					CyberTrackerPlugIn.log("Attribute config is null for attribute: " + attr.getName() + ". This state is invalid.", null); //$NON-NLS-1$ //$NON-NLS-2$
 					visitList(handler, attr, attr.getCurrentList());
 					visitTree(handler, attr, attr.getCurrentTree());
 				}
