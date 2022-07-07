@@ -3,6 +3,7 @@ package org.wcs.smart.connect.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,13 +13,15 @@ import java.util.HashMap;
 
 public class Mergei18n {
 
-	public static final String[] languages = new String[]{"th"};
+	public static final String[] languages = new String[]{"es", "ar", "ka", "th"};
+//	public static final String[] languages = new String[]{"es", "ar", "ka", "th", "fr", "hi", "in", "km", "lo", "ms", "ru", "th", "vi","zh"};
 	
-	public static final String ROOT = "C:\\data\\SMART\\Source\\trunk\\connect\\org.wcs.smart.connect.server";
+	//public static final String ROOT = "C:\\data\\SMART\\Source\\trunk\\connect\\org.wcs.smart.connect.server";
+	public static final String ROOT = "C:\\data\\SMART\\Source\\Version7.X\\svn\\connect\\org.wcs.smart.connect.server";
 	
 	private void processWebMessages() throws IOException{
 		System.out.println("Web Processing Messages");
-		String path = ROOT + "\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+		String path = ROOT + "\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\";
 		String enFile = path + "web_messages_en.properties";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -30,7 +33,7 @@ public class Mergei18n {
 	
 	private void processMessages() throws IOException{
 		System.out.println("Processing Messages");
-		String path = ROOT + "\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+		String path = ROOT + "\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\";
 		String enFile = path + "messages.properties";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -44,9 +47,10 @@ public class Mergei18n {
 		HashMap<String, String> values = new HashMap<>();
 		
 		Path p = Paths.get(enFile);
-		try(BufferedReader reader = Files.newBufferedReader(p)){
+		try(BufferedReader reader = Files.newBufferedReader(p, StandardCharsets.UTF_8)){
 			String line = null;
 			while((line = reader.readLine()) != null){
+				System.out.println(line);
 				if (line.trim().isEmpty()) continue;
 				int index = line.indexOf("=");
 				if (index < 0) {
@@ -88,6 +92,7 @@ public class Mergei18n {
 				if (!writevalues.containsKey(key)){
 					System.out.println("adding:" + key);
 					writevalues.put(key, "**NEW**" + values.get(key));
+//					writevalues.put(key, values.get(key));
 				}
 			}
 			
@@ -211,6 +216,7 @@ public class Mergei18n {
 				if (!newvalues.containsKey(key)){
 					System.out.println("adding:" + key);
 					newvalues.put(key, "**NEW**" + values.get(key));
+//					newvalues.put(key, values.get(key));
 				}
 			}
 			
@@ -244,4 +250,5 @@ public class Mergei18n {
 		merger.processJavascript();
 	}
 }
+
 
