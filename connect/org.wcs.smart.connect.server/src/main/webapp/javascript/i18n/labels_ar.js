@@ -309,5 +309,5 @@ labels_ar = {
  "users.userdeactivationerror": "Error deactivating user ",
  "users.userdeleted": " deleted",
  "users.usernamelabel": "Username: ",
- "users.userupdated": " updated",
-}\n
+ "users.userupdated": " updated"
+}

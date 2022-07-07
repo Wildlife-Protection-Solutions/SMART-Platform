@@ -309,5 +309,5 @@ labels_es = {
  "users.userdeactivationerror": "Error al desactivar usuario",
  "users.userdeleted": " eliminado",
  "users.usernamelabel": "Usuario: ",
- "users.userupdated": " actualizado",
-}\n
+ "users.userupdated": " actualizado"
+}
