@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_AttachmentsAllowed;
 	public static String CmNodeInfoComposite_AttachmentsAllowedTooltip;
 	public static String CmNodeInfoComposite_Category;
+	public static String CmNodeInfoComposite_ClassicOptionsLbl;
+	public static String CmNodeInfoComposite_ClassicOptionsTooltip;
 	public static String CmNodeInfoComposite_CollectMultiplObservations;
 	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
