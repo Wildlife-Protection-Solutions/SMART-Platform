@@ -66,11 +66,8 @@ public class Packagei18nNew {
 	
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
-//    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
-//	public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
-//	public static final String[] LANGUAGES =  new String[] {"es","pt"};
-//	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
-	public static final String[] LANGUAGES = {"my"};
+	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
+	//public static final String[] LANGUAGES = {"my"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
@@ -149,15 +146,18 @@ public class Packagei18nNew {
 					
 					Path toFile = getToPath(sourceDir,  file, outputPath);
 					
-					boolean copy = true;
-//					boolean copy = false;
-//					List<String> data = Files.readAllLines(file, StandardCharsets.UTF_8);
-//					for (String d : data) {
-//						if (d.contains("**NEW**")) {
-//							copy = true;
-//							break;
-//						}
-//					}
+//					boolean copy = true;
+					//only copy files with changes
+					boolean copy = false;
+					System.out.println("Processing:" + file.toString());
+					List<String> data = Files.readAllLines(file, StandardCharsets.UTF_8);
+					for (String d : data) {
+						if (d.contains("**NEW**")) {
+							copy = true;
+							break;
+						}
+					}
+					
 					if (copy) {
 						Files.createDirectories(toFile.getParent());
 						System.out.println(file.toString() + " to " + toFile.toString());
