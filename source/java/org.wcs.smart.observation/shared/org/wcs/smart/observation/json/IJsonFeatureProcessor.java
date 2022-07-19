@@ -253,7 +253,7 @@ public abstract class IJsonFeatureProcessor {
 	/**
 	 * Converts a JSON object that represents an observation into an observation
 	 * feature. Sets uuids if provided; they should be set to null before
-	 * saving.
+	 * saving. Will return null if category cannot be parsed.
 	 * 
 	 * @param properties
 	 * @param ca
@@ -293,6 +293,12 @@ public abstract class IJsonFeatureProcessor {
 			c = findCategory(categoryKey, ca, session);
 		}
 		
+		if (c == null) {
+			warnings.add(MessageFormat.format(
+					Messages.CATEGORY_NOT_FOUND.getMessage(locale),
+					categoryKey));
+			return null;
+		}
 		if (properties.containsKey("attachments")) { //$NON-NLS-1$
 			List<WaypointAttachment> attachments = parseAttachments(properties, ca, session, locale);
 			attachments.forEach(a->{
@@ -304,42 +310,34 @@ public abstract class IJsonFeatureProcessor {
 				wo.getAttachments().add(oa);
 			});
 		}
-
-		if (c == null) {
-			warnings.add(MessageFormat.format(
-					Messages.CATEGORY_NOT_FOUND.getMessage(locale),
-					categoryKey));
-
-		} else {
-			wo.setCategory(c);
-			if (properties.containsKey("attributes")) { //$NON-NLS-1$
-				JSONObject obatts = (JSONObject) properties.get("attributes"); //$NON-NLS-1$
-				for (Object s : obatts.keySet()) {
-					String attributeKey = s.toString();
-					Object attributeValue = obatts.get(s);
-
-					if (attributeValue == null) continue;
-					
-					Attribute a = findAttribute(attributeKey, c, session);
-					if (a == null) {
-						warnings.add(MessageFormat.format(
-								Messages.ATTRIBUTE_NOT_FOUND.getMessage(locale),
-								attributeKey, c.getName()));
-					} else {
-						WaypointObservationAttribute woa = new WaypointObservationAttribute();
-						woa.setAttribute(a);
-						try {
-							updateObservationAttribute(woa, attributeValue, locale);
-							wo.getAttributes().add(woa);
-							woa.setObservation(wo);
-						} catch (Exception ex) {
-							warnings.add(ex.getMessage());
-						}
+		
+		wo.setCategory(c);
+		if (properties.containsKey("attributes")) { //$NON-NLS-1$
+			JSONObject obatts = (JSONObject) properties.get("attributes"); //$NON-NLS-1$
+			for (Object s : obatts.keySet()) {
+				String attributeKey = s.toString();
+				Object attributeValue = obatts.get(s);
+				if (attributeValue == null) continue;
+				
+				Attribute a = findAttribute(attributeKey, c, session);
+				if (a == null) {
+					warnings.add(MessageFormat.format(
+							Messages.ATTRIBUTE_NOT_FOUND.getMessage(locale),
+							attributeKey, c.getName()));
+				} else {
+					WaypointObservationAttribute woa = new WaypointObservationAttribute();
+					woa.setAttribute(a);
+					try {
+						updateObservationAttribute(woa, attributeValue, locale);
+						wo.getAttributes().add(woa);
+						woa.setObservation(wo);
+					} catch (Exception ex) {
+						warnings.add(ex.getMessage());
 					}
 				}
-
 			}
 		}
+		
 		return wo;
 	}
 
@@ -435,7 +433,7 @@ public abstract class IJsonFeatureProcessor {
 				}
 				
 				wgroup.setWaypoint(wp);
-				wp.getObservationGroups().add(wgroup);
+				
 				wgroup.setObservations(new ArrayList<>());
 
 				if (group.containsKey("observations")) { //$NON-NLS-1$
@@ -445,11 +443,16 @@ public abstract class IJsonFeatureProcessor {
 
 						JSONObject ob = (JSONObject) obs.get(i);
 						WaypointObservation wo = createWaypointObservation(ob, ca, session, locale);
-						wo.setObservationGroup(wgroup);
-						
-						if (wo.getObserver() == null) wo.setObserver(wpobserver);
-						wgroup.getObservations().add(wo);
+						if (wo != null) {
+							wo.setObservationGroup(wgroup);	
+							if (wo.getObserver() == null) wo.setObserver(wpobserver);
+							wgroup.getObservations().add(wo);
+						}
 					}
+				}
+				
+				if (wgroup.getObservations().size() > 0) {
+					wp.getObservationGroups().add(wgroup);
 				}
 			}
 		}

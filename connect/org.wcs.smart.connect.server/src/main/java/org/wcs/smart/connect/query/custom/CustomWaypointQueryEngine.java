@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.custom;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -57,15 +58,18 @@ public class CustomWaypointQueryEngine extends CustomQueryEngine {
 
 		UUID cuuid = UuidUtils.stringToUuid(clientuuid);
 		
-		DataLink link = session
+		List<DataLink> links = session
 				.createQuery("FROM DataLink WHERE providerId = :clientUuid ", DataLink.class) //$NON-NLS-1$
 				.setParameter("clientUuid", cuuid) //$NON-NLS-1$
-				.uniqueResult();
-		if (link == null)
+				.list();
+		if (links.isEmpty())
 			throw new SmartConnectException(Status.NOT_FOUND,
 					MessageFormat.format("No incident found with link to client id {0}", clientuuid)); //$NON-NLS-1$
-
-		return getWaypointsByUUID(session, link.getSmartId(), conservationAreas);
+		List<Waypoint> results = new ArrayList<>();
+		for (DataLink link : links) {
+			results.addAll(getWaypointsByUUID(session, link.getSmartId(), conservationAreas));
+		}
+		return results;
 	}
 	
 	public List<Waypoint> getWaypointsByUUID(Session session, UUID wpuuid, Set<UUID> conservationAreas) {
@@ -156,9 +160,8 @@ public class CustomWaypointQueryEngine extends CustomQueryEngine {
 		
 		//find a client uuid
 		DataLink link = session
-			.createQuery("FROM DataLink WHERE smartId = :smartUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+			.createQuery("FROM DataLink WHERE smartId = :smartUuid", DataLink.class) //$NON-NLS-1$
 			.setParameter("smartUuid", pw.getUuid()) //$NON-NLS-1$
-			.setParameter("dataType", IncidentLinkDataType.INCIDENT.getKey()) //$NON-NLS-1$
 			.uniqueResult();
 		if (link != null) {
 			jwp.put(CLIENT_UUID_FIELD, UuidUtils.uuidToString(link.getProviderId()));
