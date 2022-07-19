@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>7.5.0</version>
+		<version>7.5.3</version>
 		<relativePath>../../../java/pom-shared.xml</relativePath>
 	</parent>
 	
@@ -13,7 +13,6 @@
 	<artifactId>org.wcs.smart.core.er</artifactId>
 	<name>Survey Module</name>
 	<packaging>jar</packaging>
-	<version>7.5.0</version>
 	
 	<dependencies>
 		<dependency>

@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wcs.smart.connect</groupId>
         <artifactId>org.wcs.smart.connect</artifactId>
-        <version>7.5.1</version>
+        <version>7.5.3</version>
     </parent>
     
     <groupId>org.wcs.smart.connect.server</groupId>
@@ -221,7 +221,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.core</artifactId>
-            <version>${smart.version751}</version>
+            <version>${smart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -271,7 +271,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.dataentry</artifactId>
-            <version>${smart.version751}</version>
+            <version>${smart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
@@ -326,7 +326,7 @@
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.cybertracker</artifactId>
-            <version>${smart.version751}</version>
+            <version>${smart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
