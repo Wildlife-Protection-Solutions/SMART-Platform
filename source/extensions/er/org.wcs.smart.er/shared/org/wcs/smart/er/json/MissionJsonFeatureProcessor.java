@@ -61,6 +61,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor.Messages;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -405,8 +406,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				if (g.getUuid() != null) {
 					//clear any old link
-					session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+					session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 						.setParameter("uuid", g.getUuid()) //$NON-NLS-1$
+						.setParameter("datatype", LinkDataType.OBSERVATION_GROUP.getKey()) //$NON-NLS-1$
 						.executeUpdate();
 					links.put(g,g.getUuid());
 					g.setUuid(null);
@@ -416,8 +418,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				for (WaypointObservation wo : g.getObservations()) {
 					if (wo.getUuid() != null) {
 						//clear any old link
-						session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+						session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 							.setParameter("uuid", wo.getUuid()) //$NON-NLS-1$
+							.setParameter("datatype", LinkDataType.OBSERVATION.getKey()) //$NON-NLS-1$
 							.executeUpdate();	
 						obslinks.put(wo,  wo.getUuid());
 						wo.setUuid(null);
@@ -1016,8 +1019,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (!attributes.containsKey(JSON_OBSERVATIONUUID_KEY)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_OBSERVATIONUUID_KEY));
 
 		WaypointObservation observation = super.createWaypointObservation(attributes, ca, session, l);
+		if (observation == null) throw new Exception(warnings.get(warnings.size() - 1));
+				
 		WaypointObservation toUpdate = findObservationLink(observation.getUuid(), ca, session);
-		
 		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.OBSERVATION_NOT_FOUND.getMessage(l), observation.getUuid().toString()));
 		
 		SurveyWaypoint sw = session.createQuery("FROM SurveyWaypoint WHERE id.waypoint = :wp ", SurveyWaypoint.class) //$NON-NLS-1$

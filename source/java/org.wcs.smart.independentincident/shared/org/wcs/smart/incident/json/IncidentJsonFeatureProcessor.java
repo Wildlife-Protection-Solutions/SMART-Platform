@@ -178,8 +178,9 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			wp.getObservationGroups().forEach(g->{
 				if (g.getUuid() != null) {
 					//clear any old link
-					session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+					session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 						.setParameter("uuid", g.getUuid()) //$NON-NLS-1$
+						.setParameter("datatype", LinkDataType.OBSERVATION_GROUP.getKey()) //$NON-NLS-1$
 						.executeUpdate();
 					links.put(g.getUuid(), g);
 					g.setUuid(null);
@@ -189,8 +190,9 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			for (WaypointObservation wo : wp.getAllObservations()) {
 				if (wo.getUuid() != null) {
 					//clear any old link
-					session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+					session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 						.setParameter("uuid", wo.getUuid()) //$NON-NLS-1$
+						.setParameter("datatype", LinkDataType.OBSERVATION.getKey()) //$NON-NLS-1$
 						.executeUpdate();
 					observationlinks.put(wo.getUuid(), wo);
 					wo.setUuid(null);
@@ -321,7 +323,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			throw new Exception("Link Conservation Area doesn't match waypoint Conservation Area"); //$NON-NLS-1$
 		}
 		
-		if (!waypoint.getSourceId().equals(IndepedentIncidentSource.KEY)) {
+		if (!(waypoint.getSourceId().equals(IndepedentIncidentSource.KEY) 
+				|| waypoint.getSourceId().equals(IntegrateIncidentSource.KEY))) {
 			throw new Exception("Link is not independent incident"); //$NON-NLS-1$
 		}
 		//update last modified
@@ -379,8 +382,9 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (!attributes.containsKey(JSON_OBSERVATIONUUID_KEY)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), JSON_OBSERVATIONUUID_KEY));
 
 		WaypointObservation observation = super.createWaypointObservation(attributes, ca, session, l);
-		WaypointObservation toUpdate = findObservationLink(observation.getUuid(), ca, session);
+		if (observation == null) throw new Exception(warnings.get(warnings.size() - 1));
 		
+		WaypointObservation toUpdate = findObservationLink(observation.getUuid(), ca, session);
 		if (toUpdate == null) throw new Exception(MessageFormat.format(Messages.OBSERVATION_NOT_FOUND.getMessage(l), observation.getUuid().toString()));
 
 		if (attributes.containsKey(IJsonFeatureProcessor.JSON_OBSERVER_KEY)) {
