@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.util;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.derby.agg.Aggregator;
 
 /**
  * Apache derby aggregate function for concatenating a set of strings
- * with a comma.
+ * with a comma. Strings are sorted alphabetically
  * 
  * @author Emily
  *
@@ -37,19 +42,19 @@ public class StringConcatAggregate implements Aggregator<String, String, StringC
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	StringBuilder sb = new StringBuilder();
+	List<String> sb = new ArrayList<>();
 	
 	@Override
 	public void accumulate(String b) {
-		sb.append(b);
-		sb.append(", "); //$NON-NLS-1$
+		sb.add(b);
 	}
 
 
 	@Override
 	public String terminate() {
-		if (sb.length() == 0) return null;
-		return sb.substring(0,  sb.length() - 2);
+		if (sb.isEmpty()) return null;
+		Collections.sort(sb, (a,b)->Collator.getInstance().compare(a, b));
+		return String.join(", ",sb); //$NON-NLS-1$
 	}
 
 
