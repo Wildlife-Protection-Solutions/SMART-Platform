@@ -88,6 +88,7 @@ public class ConnectRESTApplication extends Application {
 		
 		resources.add(ObjectMapperContextResolver.class);
 		
+		resources.add(SmartInfo.class);
 		return resources;
 	}
 	 

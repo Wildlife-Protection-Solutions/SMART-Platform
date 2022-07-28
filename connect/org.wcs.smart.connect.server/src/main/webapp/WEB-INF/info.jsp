@@ -19,8 +19,11 @@
 			<div>
 				<br>
 				<p>Build Version: ${buildversion}</p>
-				<p>Connect Version: ${connectVersion}</p>
-				<p>Last Updated (db):  ${connectUpdated}</p>
+				<br>
+				<p>Database Version: ${connectVersion}</p>
+				<p>Database Last Updated:  ${connectUpdated}</p>
+				<p>Filestore Version:  ${filestoreVersion}</p>
+				<br>
 			</div>
 	
 			<div class="catable table-cell smart-table info-tables-float">
