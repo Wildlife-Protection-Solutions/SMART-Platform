@@ -77,6 +77,7 @@ public class VersionInfo extends HttpServlet{
 		List<ConnectPluginVersion> plugins = null;
 		String connectVersion = ""; //$NON-NLS-1$
 		String connectUpdated = ""; //$NON-NLS-1$
+		String filestoreVersion = ""; //$NON-NLS-1$
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		
@@ -89,9 +90,10 @@ public class VersionInfo extends HttpServlet{
 			areas = QueryFactory.buildQuery(session, ConservationAreaInfo.class).list();
 			plugins = QueryFactory.buildQuery(session, ConnectPluginVersion.class).list(); 
 			
-			Object[] data = (Object[]) session.createNativeQuery("SELECT version, last_updated FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
+			Object[] data = (Object[]) session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
 			connectVersion = data[0].toString();
 			connectUpdated = data[1].toString();
+			filestoreVersion = data[2].toString();
 			 
 			
 		}finally{
@@ -106,6 +108,7 @@ public class VersionInfo extends HttpServlet{
 		request.setAttribute("versions", versions); //$NON-NLS-1$
 		request.setAttribute("connectVersion", connectVersion); //$NON-NLS-1$
 		request.setAttribute("connectUpdated", connectUpdated); //$NON-NLS-1$
+		request.setAttribute("filestoreVersion", filestoreVersion); //$NON-NLS-1$
 		request.setAttribute("areas", areas); //$NON-NLS-1$
 		request.setAttribute("plugins", plugins); //$NON-NLS-1$
 		request.setAttribute("buildversion", buildVersion); //$NON-NLS-1$
