@@ -92,7 +92,9 @@ public abstract class LoadAlertTypesJob extends Job {
 				}
 
 			}
-			if (loadedTypes == null) {
+			if (loadedTypes == null && (forceReload ||
+					(context.get(ConnectCtPackageProperties.CONTEXT_SERVER_CANCELLED_KEY) == null || 
+					context.get(ConnectCtPackageProperties.CONTEXT_SERVER_CANCELLED_KEY) == Boolean.FALSE))) {
 				ConnectServer cs = null;
 				try(Session s = HibernateManager.openSession()){
 					cs = ConnectHibernateManager.getConnectServer(s);
@@ -114,6 +116,8 @@ public abstract class LoadAlertTypesJob extends Job {
 							if (cd.open() == Window.OK) {
 								SmartConnect connect = cd.getConnection();
 								if (context != null) context.set(SmartConnect.class, connect);
+							}else {
+								if (!forceReload) context.set(ConnectCtPackageProperties.CONTEXT_SERVER_CANCELLED_KEY, Boolean.TRUE);
 							}
 						}
 						

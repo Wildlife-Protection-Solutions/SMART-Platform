@@ -60,6 +60,7 @@ public class Messages extends NLS {
 	public static String ConnectAlertConfigDialog_DataExtractError;
 	public static String ConnectAlertConfigDialog_Message;
 	public static String ConnectAlertConfigDialog_Title;
+	public static String ConnectAlertContribution_CaNotFound;
 	public static String ConnectAlertContribution_ConnectRequired;
 	public static String ConnectAlertUiController_AlertsNotSupported;
 	public static String ConnectAlertUiController_createtooltip;
@@ -98,6 +99,7 @@ public class Messages extends NLS {
 	public static String ConnectCtPackageProperties_VersionPropertyShortName;
 	public static String ConnectCtTemplateCloner_CloneAlerts;
 	public static String ConnectCtTemplateCloner_TaskName;
+	public static String ConnectDataContribution_CaNotFound;
 	public static String ConnectDataContribution_ConnectRequired;
 	public static String ConnectDataUiController_AertTypeRequired;
 	public static String ConnectDataUiController_AutoUploadTooltip;
@@ -126,6 +128,7 @@ public class Messages extends NLS {
 	public static String ConnectDataUiController_WarningMsg;
 	public static String ConnectDataUiController_WarningTitle;
 	public static String ConnectUrlContribution_AutoUpdateMsg;
+	public static String ConnectUrlContribution_CaNotFound;
 	public static String ConnectUrlContribution_Warning;
 	public static String ConvertedConnectCt2CmExtraData_InvalidReference;
 	public static String ConvertedConnectCt2CmExtraData_Missing_AlertItem;

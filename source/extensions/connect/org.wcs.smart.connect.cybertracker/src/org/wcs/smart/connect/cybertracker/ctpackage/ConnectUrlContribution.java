@@ -23,6 +23,8 @@ package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.io.IOException;
 
+import javax.ws.rs.NotFoundException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -67,6 +69,15 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 			String[] parts = null;
 			try {
 				parts = super.getServerDetails(context, ctpackage.getConservationArea(), true, PackageType.PRIVATE);
+			}catch (NotFoundException ex) {
+				//ca not found on server
+				//warn user but allow export to proceed
+				Display.getDefault().syncExec(()->{
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
+							Messages.ConnectUrlContribution_Warning,
+							Messages.ConnectUrlContribution_CaNotFound);						
+				});
+				return null;
 			}catch (Exception ex) {
 				throw new IOException(ex);
 			}
@@ -75,7 +86,7 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 				Display.getDefault().syncExec(()->{
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConnectUrlContribution_Warning, Messages.ConnectUrlContribution_AutoUpdateMsg);
 				});
-				return cc;
+				return null;
 			}
 			String url = parts[0];
 			String apikey = parts[1];

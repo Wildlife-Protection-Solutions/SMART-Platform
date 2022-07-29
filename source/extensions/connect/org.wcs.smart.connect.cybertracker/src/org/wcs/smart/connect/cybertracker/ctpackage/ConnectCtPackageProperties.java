@@ -68,6 +68,12 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 
+	/**
+	 * A key for falling when user cancels server configuration dialog so we don't keep
+	 * asking for server configuration if it doesn't exist.
+	 */
+	public static final String CONTEXT_SERVER_CANCELLED_KEY = "org.wcs.smart.connect.cybertracker.package.connection.cancelled"; //$NON-NLS-1$
+	
 	private ConnectDateProperty p1 = new ConnectDateProperty();
 	private ConnectVersionProperty p2 = new ConnectVersionProperty();
 	private List<ICtPackageProperty> pps = (List<ICtPackageProperty>) List.of(p1,p2);
@@ -138,7 +144,9 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (connect == null) {
-				if (context == null || context.get(SmartConnect.class) == null) {
+				if (context == null || (context.get(SmartConnect.class) == null
+						&& (context.get(CONTEXT_SERVER_CANCELLED_KEY) == null || 
+						 context.get(CONTEXT_SERVER_CANCELLED_KEY) == Boolean.FALSE))) {
 					
 					ConnectServer cs = null;
 					ConnectUser user = null;
@@ -181,6 +189,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 							});
 						}
 						if (context != null && connect != null) context.set(SmartConnect.class, connect);
+						if (context != null && connect == null) context.set(CONTEXT_SERVER_CANCELLED_KEY, Boolean.TRUE);
 
 					}
 				} else {
