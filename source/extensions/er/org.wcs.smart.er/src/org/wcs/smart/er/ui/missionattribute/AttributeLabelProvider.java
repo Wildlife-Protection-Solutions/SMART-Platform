@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.ui.missionattribute;
 
+import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 

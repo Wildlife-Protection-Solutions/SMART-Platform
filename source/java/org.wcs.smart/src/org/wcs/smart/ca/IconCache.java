@@ -1,4 +1,4 @@
-package org.wcs.smart.ca.icon;
+package org.wcs.smart.ca;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
-import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 

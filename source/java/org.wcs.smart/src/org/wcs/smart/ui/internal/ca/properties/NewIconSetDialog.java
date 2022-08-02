@@ -42,10 +42,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
+import org.wcs.smart.ca.icon.FixedIconSet;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.ca.icon.IconManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -66,7 +67,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 	private List<Icon> icons;
 	
 	private IconSet templateSet = null;
-	private IconManager.FixedIconSet defaultSet = null;
+	private FixedIconSet defaultSet = null;
 	
 	private Button btnCustom, btnDefault;
 	private Composite compDefault, compCustom;
@@ -189,11 +190,11 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 		cmbDefaultSet.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDefaultSet.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				return ((IconManager.FixedIconSet)element).name;
+				return ((FixedIconSet)element).name;
 			}
 		});
-		cmbDefaultSet.setInput(IconManager.FixedIconSet.values());
-		cmbDefaultSet.addSelectionChangedListener(e->defaultSet=(IconManager.FixedIconSet) cmbDefaultSet.getStructuredSelection().getFirstElement());
+		cmbDefaultSet.setInput(FixedIconSet.values());
+		cmbDefaultSet.addSelectionChangedListener(e->defaultSet=(FixedIconSet) cmbDefaultSet.getStructuredSelection().getFirstElement());
 
 		
 		btnCustom = new Button(temp, SWT.RADIO);

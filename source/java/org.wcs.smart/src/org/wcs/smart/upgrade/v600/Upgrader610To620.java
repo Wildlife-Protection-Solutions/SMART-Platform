@@ -31,7 +31,8 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.icon.IconManager;
+import org.wcs.smart.ca.icon.FixedIconSet;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
@@ -129,45 +130,45 @@ public class Upgrader610To620 extends AbstractInteralDatabaseUpgrader {
 				
 				byte[] lineuuid = DerbyUtils.createUuid();
 				psiconset.setBytes(1, lineuuid);
-				psiconset.setString(2, IconManager.FixedIconSet.LINE.key);
+				psiconset.setString(2, FixedIconSet.LINE.key);
 				psiconset.setBytes(3, cuuid);
 				psiconset.setBoolean(4, false);
 				psiconset.addBatch();
 				
 				pslabel.setBytes(1, luuid);
 				pslabel.setBytes(2, lineuuid);
-				pslabel.setString(3, IconManager.FixedIconSet.LINE.name); 
+				pslabel.setString(3, FixedIconSet.LINE.name); 
 				pslabel.addBatch();
 				
 				byte[] blackuuid = DerbyUtils.createUuid();
 				psiconset.setBytes(1, blackuuid);
-				psiconset.setString(2, IconManager.FixedIconSet.BLACK.key);
+				psiconset.setString(2, FixedIconSet.BLACK.key);
 				psiconset.setBytes(3, cuuid);
 				psiconset.setBoolean(4, false);
 				psiconset.addBatch();
 				
 				pslabel.setBytes(1, luuid);
 				pslabel.setBytes(2, blackuuid);
-				pslabel.setString(3, IconManager.FixedIconSet.BLACK.name);
+				pslabel.setString(3, FixedIconSet.BLACK.name);
 				pslabel.addBatch();
 				
 				byte[] coloruuid = DerbyUtils.createUuid();
 				psiconset.setBytes(1, coloruuid);
-				psiconset.setString(2, IconManager.FixedIconSet.COLOR.key);
+				psiconset.setString(2, FixedIconSet.COLOR.key);
 				psiconset.setBytes(3, cuuid);
 				psiconset.setBoolean(4, true);
 				psiconset.addBatch();
 				
 				pslabel.setBytes(1, luuid);
 				pslabel.setBytes(2, coloruuid);
-				pslabel.setString(3, IconManager.FixedIconSet.COLOR.name); 
+				pslabel.setString(3, FixedIconSet.COLOR.name); 
 				pslabel.addBatch();
 				
 				psiconset.executeBatch();
 				pslabel.executeBatch();
 				
 				
-				for (String[] icon : IconManager.INSTANCE.SMART_ICON_MAPPING) {
+				for (String[] icon : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 					if (icon[0].equalsIgnoreCase("afropavo_congensis")) break; //anything after this is dealt with in smart630 //$NON-NLS-1$
 					
 					byte[] iconuuid = DerbyUtils.createUuid();
@@ -210,7 +211,7 @@ public class Upgrader610To620 extends AbstractInteralDatabaseUpgrader {
 					
 					
 					//update data model items
-					IconManager.INSTANCE.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					IconUtils.INSTANCE.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 				}
 				
 			}
@@ -222,8 +223,4 @@ public class Upgrader610To620 extends AbstractInteralDatabaseUpgrader {
 		c.commit();
 	}
 
-	
-
-	
-	
 }

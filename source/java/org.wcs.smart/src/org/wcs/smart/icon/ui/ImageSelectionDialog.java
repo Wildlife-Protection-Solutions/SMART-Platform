@@ -66,7 +66,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.ca.icon.IconManager;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -426,7 +426,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 			
 			SortedMap<String, Set<String>> files = new TreeMap<>();
 			
-			for (String[] s : IconManager.INSTANCE.SMART_ICON_MAPPING) {
+			for (String[] s : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 				Set<String> items = files.get(s[1]);
 				if (items == null) {
 					items = new HashSet<>();

@@ -39,7 +39,7 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @author Emily
  *
  */
-public class Upgrader751To800 extends AbstractInteralDatabaseUpgrader { 
+public class Upgrader753To800 extends AbstractInteralDatabaseUpgrader { 
 	
 	private Exception thrownException = null;
 

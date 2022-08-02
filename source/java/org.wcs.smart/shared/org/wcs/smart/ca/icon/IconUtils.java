@@ -24,117 +24,83 @@ package org.wcs.smart.ca.icon;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
-
-public enum IconManager {
+public enum IconUtils {
 	
 	INSTANCE;
 	
-	//these are the default icons set keys
-	public static enum FixedIconSet{
-		BLACK("black", "Black and White"),  //$NON-NLS-1$//$NON-NLS-2$
-		LINE("line", "Outline Only"),  //$NON-NLS-1$//$NON-NLS-2$
-		COLOR("color", "Full Color");  //$NON-NLS-1$//$NON-NLS-2$
 		
-		public String key;
-		public String name;
+	public String getLibraryFile(String iconKey, IconSet set) {
+		if (set == null) return null;
 		
-		private FixedIconSet(String key, String name) {
-			this.key = key;
-			this.name = name;
-		}
-		
-	}
-	
-	/**
-	 * Gets the conservation area specific icons - these are used in the CA
-	 * or have been manually configured.
-	 * @param session
-	 * @param ca
-	 * @return
-	 */
-	public List<Icon> getIcons(Session session, ConservationArea ca){
-		List<Icon> icons = QueryFactory.buildQuery(session, Icon.class, 
-				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
-		icons.forEach(e->e.getFiles().forEach(f->{
-			f.getIconSet().getUuid();
-			try {
-				f.computeFileLocation(session);
-			}catch (Exception ex) {
-				SmartPlugIn.log(ex.getMessage(), ex);
+		for (String[] icons : SMART_ICON_MAPPING) {
+			if (icons[0].equalsIgnoreCase(iconKey)) {
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) return icons[2];
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.LINE.key)) return icons[3];
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.COLOR.key)) return icons[4];
 			}
-		}));
-		return icons;
+		}
+		return null;
 	}
 	
 	/**
-	 * Returns all system icons that aren't already used in the conservation area.
 	 * 
-	 * @param session
-	 * @param ca
-	 * @return
+	 * Used for upgrading existing data models and mapping icons to data model
+	 * 
+	 * @param c database connection
+	 * @param iconuuid byte[] or UUID depending on underlying database support 
+	 * @param mappingString data model mapping string from SMART_ICON_MAPPING array
+	 * @throws SQLException
 	 */
-	public List<Icon> getSystemIcons(Session session, ConservationArea ca) {
-
-		String query = "SELECT keyId FROM Icon WHERE conservationArea = :ca"; //$NON-NLS-1$
-		List<String> icons = session.createQuery(query, String.class)
-				.setParameter("ca", ca).list();  //$NON-NLS-1$
-
-		Set<String> existingIcons = new HashSet<>(icons);
-
-		List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
-				new Object[] { "conservationArea", ca }) //$NON-NLS-1$
-				.list();
-
-		List<Icon> libraryIcons = new ArrayList<>();
+	public void upgradeDataModel(Connection c, Object iconuuid, String mappingString, Object cauuid) throws SQLException {
+		if (mappingString == null || mappingString.trim().length() == 0) return;
 		
-		for (String[] icondef : SMART_ICON_MAPPING) {
-			if (existingIcons.contains(icondef[0].toLowerCase()))
-				continue;
+		PreparedStatement pscat = c.prepareStatement("UPDATE smart.dm_category SET icon_uuid = ? WHERE hkey = ? and ca_uuid = ?"); //$NON-NLS-1$
+		PreparedStatement psatt = c.prepareStatement("UPDATE smart.dm_attribute SET icon_uuid = ? WHERE keyid = ? and ca_uuid = ?"); //$NON-NLS-1$
+		
+		PreparedStatement psattlist = c.prepareStatement("UPDATE smart.dm_attribute_list SET icon_uuid = ? WHERE keyid = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyid = ? and ca_uuid = ?)"); //$NON-NLS-1$
+		PreparedStatement psatttree = c.prepareStatement("UPDATE smart.dm_attribute_tree SET icon_uuid = ? WHERE hkey = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyid = ? and ca_uuid = ?)"); //$NON-NLS-1$
 
-			Icon icon = new Icon();
-
-			icon.setKeyId(icondef[0]);
-
-			icon.setName(icondef[1]);
-			icon.updateName(SmartDB.getCurrentLanguage(), icondef[1]);
-			icon.updateName(ca.getDefaultLanguage(), icondef[1]);
-			icon.setFiles(new ArrayList<>());
-			icon.setConservationArea(ca);
+		
+		String[] mappings = mappingString.split(","); //$NON-NLS-1$
+		for (String mapping : mappings) {
+			if (mapping.trim().isEmpty()) continue;
 			
-			libraryIcons.add(icon);
+			String[] parts = mapping.split(":"); //$NON-NLS-1$
 			
-			// black
-			for (IconSet set : sets) {
-				String filename = null;
-				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) {
-					filename = icondef[2];
-				} else if (set.getKeyId().equalsIgnoreCase(FixedIconSet.LINE.key)) {
-					filename = icondef[3];
-				} else if (set.getKeyId().equalsIgnoreCase(FixedIconSet.COLOR.key)) {
-					filename = icondef[4];
+			if (parts[0].equalsIgnoreCase("attribute")) { //$NON-NLS-1$
+				if (parts.length == 2) {
+					//attribute
+					psatt.setObject(1, iconuuid);
+					psatt.setString(2, parts[1]);
+					psatt.setObject(3, cauuid);
+					psatt.executeUpdate();
+					
+				}else if (parts.length > 2) {
+					String keyid = parts[2];
+					psattlist.setObject(1, iconuuid);
+					psattlist.setString(2, keyid);
+					psattlist.setString(3, parts[1]);
+					psattlist.setObject(4, cauuid);
+					psattlist.executeUpdate();
+					
+					psatttree.setObject(1, iconuuid);
+					psatttree.setString(2, keyid + "."); //$NON-NLS-1$
+					psatttree.setString(3, parts[1]);
+					psatttree.setObject(4, cauuid);
+					psatttree.executeUpdate();
 				}
-				if (filename == null)
-					continue;
-
-				IconFile file = new IconFile();
-				file.setIcon(icon);
-				file.setFilename(filename);
-				file.setIconSet(set);
-				icon.getFiles().add(file);
+				
+				
+			}else if (parts[0].equalsIgnoreCase("category")) { //$NON-NLS-1$
+				String hkey = parts[1];
+				
+				pscat.setObject(1, iconuuid);
+				pscat.setString(2, hkey + "."); //$NON-NLS-1$
+				pscat.setObject(3, cauuid);
+				pscat.executeUpdate();
 			}
 		}
-		return libraryIcons;
-
 	}
 	
 	/**
@@ -1279,151 +1245,5 @@ public enum IconManager {
 		{"yes","Yes","platform:/plugin/org.wcs.smart/images/datamodel/black/Yes_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Yes_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Yes_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 
 	};
-	
-	/**
-	 * 
-	 * Used for upgrading existing data models and mapping icons to data model
-	 * 
-	 * @param c database connection
-	 * @param iconuuid byte[] or UUID depending on underlying database support 
-	 * @param mappingString data model mapping string from SMART_ICON_MAPPING array
-	 * @throws SQLException
-	 */
-	public void upgradeDataModel(Connection c, Object iconuuid, String mappingString, Object cauuid) throws SQLException {
-		if (mappingString == null || mappingString.trim().length() == 0) return;
-		
-		PreparedStatement pscat = c.prepareStatement("UPDATE smart.dm_category SET icon_uuid = ? WHERE hkey = ? and ca_uuid = ?"); //$NON-NLS-1$
-		PreparedStatement psatt = c.prepareStatement("UPDATE smart.dm_attribute SET icon_uuid = ? WHERE keyid = ? and ca_uuid = ?"); //$NON-NLS-1$
-		
-		PreparedStatement psattlist = c.prepareStatement("UPDATE smart.dm_attribute_list SET icon_uuid = ? WHERE keyid = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyid = ? and ca_uuid = ?)"); //$NON-NLS-1$
-		PreparedStatement psatttree = c.prepareStatement("UPDATE smart.dm_attribute_tree SET icon_uuid = ? WHERE hkey = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyid = ? and ca_uuid = ?)"); //$NON-NLS-1$
 
-		
-		String[] mappings = mappingString.split(","); //$NON-NLS-1$
-		for (String mapping : mappings) {
-			if (mapping.trim().isEmpty()) continue;
-			
-			String[] parts = mapping.split(":"); //$NON-NLS-1$
-			
-			if (parts[0].equalsIgnoreCase("attribute")) { //$NON-NLS-1$
-				if (parts.length == 2) {
-					//attribute
-					psatt.setObject(1, iconuuid);
-					psatt.setString(2, parts[1]);
-					psatt.setObject(3, cauuid);
-					psatt.executeUpdate();
-					
-				}else if (parts.length > 2) {
-					String keyid = parts[2];
-					psattlist.setObject(1, iconuuid);
-					psattlist.setString(2, keyid);
-					psattlist.setString(3, parts[1]);
-					psattlist.setObject(4, cauuid);
-					psattlist.executeUpdate();
-					
-					psatttree.setObject(1, iconuuid);
-					psatttree.setString(2, keyid + "."); //$NON-NLS-1$
-					psatttree.setString(3, parts[1]);
-					psatttree.setObject(4, cauuid);
-					psatttree.executeUpdate();
-				}
-				
-				
-			}else if (parts[0].equalsIgnoreCase("category")) { //$NON-NLS-1$
-				String hkey = parts[1];
-				
-				pscat.setObject(1, iconuuid);
-				pscat.setString(2, hkey + "."); //$NON-NLS-1$
-				pscat.setObject(3, cauuid);
-				pscat.executeUpdate();
-			}
-		}
-	}
-	
-	/**
-	 * Creates the default icon sets with no icons. Icons will be added as they are
-	 * used in the Conservation Area.
-	 * 
-	 */
-	/*
-	 *  * 0 - icon key
-	 * 1 - icon name
-	 * 2 - black icon reference
-	 * 3 - line icon reference
-	 * 4 - color icon reference
-	 * 5 - data model mappings (comma separated)
-	 */
-	public void createDefaultIconSet(Session session, ConservationArea ca) {
-		IconSet blackIs = new IconSet();
-		blackIs.setConservationArea(ca);
-		blackIs.setIsDefault(false);
-		blackIs.setKeyId(FixedIconSet.BLACK.key);
-		blackIs.setName(FixedIconSet.BLACK.name);
-		blackIs.updateName(ca.getDefaultLanguage(), FixedIconSet.BLACK.name);
-		session.save(blackIs);
-		
-		IconSet colorIs = new IconSet();
-		colorIs.setConservationArea(ca);
-		colorIs.setIsDefault(true);
-		colorIs.setKeyId(FixedIconSet.COLOR.key);
-		colorIs.setName(FixedIconSet.COLOR.name);
-		colorIs.updateName(ca.getDefaultLanguage(), FixedIconSet.COLOR.name);
-		session.save(colorIs);
-		
-		IconSet lineIs = new IconSet();
-		lineIs.setConservationArea(ca);
-		lineIs.setIsDefault(false);
-		lineIs.setKeyId(FixedIconSet.LINE.key);
-		lineIs.setName(FixedIconSet.LINE.name);
-		lineIs.updateName(ca.getDefaultLanguage(), FixedIconSet.LINE.name);
-		session.save(lineIs);
-		
-//		for (String[] row : SMART_ICON_MAPPING) {
-//			String iconKey = row[0];
-//			String name = row[1];
-//			String black = row[2];
-//			String line = row[3];
-//			String color = row[4];
-//			
-//			Icon i = new Icon();
-//			i.setConservationArea(ca);
-//			i.setKeyId(iconKey);
-//			i.setName(name);
-//			i.updateName(ca.getDefaultLanguage(), name);
-//			i.setFiles(new ArrayList<>());
-//			
-//			IconFile file1 = new IconFile();
-//			file1.setFilename(black);
-//			file1.setIcon(i);
-//			file1.setIconSet(blackIs);
-//			i.getFiles().add(file1);
-//			
-//			IconFile file2 = new IconFile();
-//			file2.setFilename(line);
-//			file2.setIcon(i);
-//			file2.setIconSet(lineIs);
-//			i.getFiles().add(file2);
-//			
-//			IconFile file3 = new IconFile();
-//			file3.setFilename(color);
-//			file3.setIcon(i);
-//			file3.setIconSet(colorIs);
-//			i.getFiles().add(file3);
-//			
-//			session.save(i);
-//		}
-	}
-	
-	public String getLibraryFile(String iconKey, IconSet set) {
-		if (set == null) return null;
-		
-		for (String[] icons : SMART_ICON_MAPPING) {
-			if (icons[0].equalsIgnoreCase(iconKey)) {
-				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) return icons[2];
-				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.LINE.key)) return icons[3];
-				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.COLOR.key)) return icons[4];
-			}
-		}
-		return null;
-	}
 }

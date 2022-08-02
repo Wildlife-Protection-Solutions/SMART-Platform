@@ -57,6 +57,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.FixedIconSet;
 import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -130,26 +131,35 @@ public class UpgradeServlet extends HttpServlet {
 					upgrade630to700(s);
 					upgrade700to751(s);
 					upgrade751to752(s);
+					upgrade752to800(s);
 				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
 					upgrade600to620(s);
 					upgrade620to630(s);
 					upgrade630to700(s);
 					upgrade700to751(s);
 					upgrade751to752(s);
+					upgrade752to800(s);
 				}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
 					upgrade620to630(s);
 					upgrade630to700(s);
 					upgrade700to751(s);
 					upgrade751to752(s);
+					upgrade752to800(s);
 				}else if (filestoreVersion.equals("6.3.0")) { //$NON-NLS-1$
 					upgrade630to700(s);
 					upgrade700to751(s);
 					upgrade751to752(s);
+					upgrade752to800(s);
 				}else if (filestoreVersion.equals("7.0.0")) { //$NON-NLS-1$
 					upgrade700to751(s);
 					upgrade751to752(s);
+					upgrade752to800(s);
 				}else if (filestoreVersion.equals("7.5.1")) { //$NON-NLS-1$
 					upgrade751to752(s);
+					upgrade752to800(s);
+				}else if (filestoreVersion.equals("7.5.2")) { //$NON-NLS-1$
+					upgrade751to752(s);
+					upgrade752to800(s);
 				}else {
 					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
@@ -319,17 +329,23 @@ public class UpgradeServlet extends HttpServlet {
 		
 		Path exportDirectory = DataStoreManager.INSTANCE.getRootDirectory()
 				.resolve(DataStoreManager.CA_EXPORT_LOCATION);
-		try(Stream<Path> files = Files.list(exportDirectory)){
-			files.forEach(f->{
-				if (!Files.isDirectory(f)) {
-					try {
-						Files.delete(f);
-					}catch (Exception ex) {
-						logger.log(Level.WARNING, MessageFormat.format("Could not delete file: {0} during upgrade. File should be removed manually or desktop data will be inconsistent.", f.toString())); //$NON-NLS-1$
+		if (Files.exists(exportDirectory)) {
+			try(Stream<Path> files = Files.list(exportDirectory)){
+				files.forEach(f->{
+					if (!Files.isDirectory(f)) {
+						try {
+							Files.delete(f);
+						}catch (Exception ex) {
+							logger.log(Level.WARNING, MessageFormat.format("Could not delete file: {0} during upgrade. File should be removed manually or desktop data will be inconsistent.", f.toString())); //$NON-NLS-1$
+						}
 					}
-				}
-			});
+				});
+			}
 		}
+	}
+	
+	private void upgrade752to800(Session s) throws IOException{
+
 	}
 	
 	private void updateProfilesV6toV7(Connection c) throws SQLException {
@@ -866,7 +882,7 @@ public class UpgradeServlet extends HttpServlet {
 				pslabel.executeBatch();
 				
 				
-				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+				for (String[] icon : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 					
 					UUID iconuuid = createUuid(c);
 					
@@ -908,7 +924,7 @@ public class UpgradeServlet extends HttpServlet {
 					
 					
 					//update data model items
-					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					IconUtils.INSTANCE.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 				}
 				
 			}
@@ -972,7 +988,7 @@ public class UpgradeServlet extends HttpServlet {
 				}
 				
 				boolean found = false;				
-				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+				for (String[] icon : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 					//anything after this is new in SMART630
 					if (icon[0].equalsIgnoreCase(startkey)) {
 						found = true;
@@ -1019,7 +1035,7 @@ public class UpgradeServlet extends HttpServlet {
 					
 					
 					//update data model items
-					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					IconUtils.INSTANCE.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 					
 					if (icon[0].equalsIgnoreCase(endkey)) break;
 				}
@@ -1059,19 +1075,19 @@ public class UpgradeServlet extends HttpServlet {
 		ps.setObject(1, cuuid);
 
 		psiconset.setObject(1, lineuuid);
-		psiconset.setString(2, IconUtils.FixedIconSet.LINE.key);
+		psiconset.setString(2, FixedIconSet.LINE.key);
 		psiconset.setObject(3, cuuid);
 		psiconset.setBoolean(4, false);
 		psiconset.addBatch();
 
 		psiconset.setObject(1, blackuuid);
-		psiconset.setString(2, IconUtils.FixedIconSet.BLACK.key);
+		psiconset.setString(2, FixedIconSet.BLACK.key);
 		psiconset.setObject(3, cuuid);
 		psiconset.setBoolean(4, false);
 		psiconset.addBatch();
 
 		psiconset.setObject(1, coloruuid);
-		psiconset.setString(2, IconUtils.FixedIconSet.COLOR.key);
+		psiconset.setString(2, FixedIconSet.COLOR.key);
 		psiconset.setObject(3, cuuid);
 		psiconset.setBoolean(4, true);
 		psiconset.addBatch();
@@ -1099,24 +1115,24 @@ public class UpgradeServlet extends HttpServlet {
 		for (UUID language : langs) {
 			pslabel.setObject(1, language);
 			pslabel.setObject(2, lineuuid);
-			pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
+			pslabel.setString(3, FixedIconSet.LINE.name);
 			pslabel.addBatch();
 
 			pslabel.setObject(1, language);
 			pslabel.setObject(2, blackuuid);
-			pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
+			pslabel.setString(3, FixedIconSet.BLACK.name);
 			pslabel.addBatch();
 
 			pslabel.setObject(1, language);
 			pslabel.setObject(2, coloruuid);
-			pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
+			pslabel.setString(3, FixedIconSet.COLOR.name);
 			pslabel.addBatch();
 		}
 
 		psiconset.executeBatch();
 		pslabel.executeBatch();
 
-		for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+		for (String[] icon : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 
 			UUID iconuuid = createUuid(c);
 

@@ -24,8 +24,8 @@ package org.wcs.smart.er.ui.samplingunit;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
+import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;

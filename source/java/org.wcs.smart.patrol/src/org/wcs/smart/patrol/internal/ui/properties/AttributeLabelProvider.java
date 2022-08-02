@@ -27,8 +27,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.icon.IconCache;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 

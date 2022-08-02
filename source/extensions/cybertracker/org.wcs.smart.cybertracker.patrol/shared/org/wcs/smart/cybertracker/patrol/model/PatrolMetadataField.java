@@ -23,11 +23,13 @@ package org.wcs.smart.cybertracker.patrol.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.wcs.smart.ca.Station;
-import org.wcs.smart.ca.icon.IconManager;
+import org.wcs.smart.ca.icon.FixedIconSet;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -78,11 +80,11 @@ public enum PatrolMetadataField {
 	
 	public URI getIcon(IconSet set) {
 		if (this.libraryIcon == null) return null;
-		String filename = IconManager.INSTANCE.getLibraryFile(this.libraryIcon, set);
+		String filename = IconUtils.INSTANCE.getLibraryFile(this.libraryIcon, set);
 		if (filename == null) {
 			IconSet temp = new IconSet();
-			temp.setKeyId(IconManager.FixedIconSet.COLOR.key);
-			filename = IconManager.INSTANCE.getLibraryFile(this.libraryIcon, temp);
+			temp.setKeyId(FixedIconSet.COLOR.key);
+			filename = IconUtils.INSTANCE.getLibraryFile(this.libraryIcon, temp);
 		}
 		//this shouldn't happen
 		if (filename == null) return null;
@@ -90,7 +92,7 @@ public enum PatrolMetadataField {
 		try {
 			return new URI(filename);
 		} catch (URISyntaxException e) {
-			CyberTrackerPlugIn.log(e.getMessage(), e);
+			Logger.getLogger(PatrolMetadataField.class.getName()).log(Level.WARNING, e.getMessage(), e); 
 		}
 		return null;
 	}

@@ -33,7 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.icon.IconManager;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
@@ -175,7 +175,7 @@ public class Upgrader750To751 extends AbstractInteralDatabaseUpgrader {
 					continue;
 				}
 				boolean found = false;
-				for (String[] icon : IconManager.INSTANCE.SMART_ICON_MAPPING) {
+				for (String[] icon : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 					
 					//anything after this is new in SMART751
 					if (icon[0].equalsIgnoreCase("c38_special_2")) { //$NON-NLS-1$
@@ -232,7 +232,7 @@ public class Upgrader750To751 extends AbstractInteralDatabaseUpgrader {
 					
 					
 					//update data model items
-					IconManager.INSTANCE.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					IconUtils.INSTANCE.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 					
 					//end of updates
 					if (icon[0].equalsIgnoreCase("yes")) break; //$NON-NLS-1$

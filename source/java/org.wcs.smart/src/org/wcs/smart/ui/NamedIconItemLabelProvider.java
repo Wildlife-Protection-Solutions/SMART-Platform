@@ -22,8 +22,8 @@
 package org.wcs.smart.ui;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconItem;
-import org.wcs.smart.ca.icon.IconCache;
 
 /**
  * LabelProvider for {@link IconItem} that returns icons in 

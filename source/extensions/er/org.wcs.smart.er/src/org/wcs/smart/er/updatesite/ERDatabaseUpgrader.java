@@ -366,22 +366,14 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	private void upgradeV4ToV5(Session session){
 		String[] sql = new String[]{
-//				"ALTER TABLE smart.mission_attribute DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
 				"ALTER TABLE smart.mission_attribute ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER table smart.mission_attribute ADD CONSTRAINT mission_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				
-//				"ALTER TABLE smart.mission_attribute_list DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
 				"ALTER TABLE smart.mission_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER table smart.mission_attribute_list ADD CONSTRAINT mission_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				
-//				"ALTER TABLE smart.sampling_unit_attribute DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
 				"ALTER TABLE smart.sampling_unit_attribute ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER table smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				
-//				"ALTER TABLE smart.sampling_unit_attribute_list DROP CONSTRAINT TEAM_CA_UUID_FK", //$NON-NLS-1$
 				"ALTER TABLE smart.sampling_unit_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
-				"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				
+				"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$				
 		};
 		
 		for (String s : sql){
