@@ -91,7 +91,7 @@ public class DataModelXmlToSmartConverter {
 		cmimporter.processInputStream(is);
 		SimpleDataModel sdm = cmimporter.getImportedDataModel();
 		
-		return processDataModelInternal(targetCa, syncLanguages, sdm);
+		return processDataModelInternal(syncLanguages, sdm);
 	}
 	
 	/**
@@ -139,10 +139,10 @@ public class DataModelXmlToSmartConverter {
 		XmlDataModelImporter cmimporter = new XmlDataModelImporter(icons, sets, Locale.getDefault(), workingDirectory);
 		cmimporter.processFile(file);
 		SimpleDataModel sdm = cmimporter.getImportedDataModel();
-		return processDataModelInternal(targetCa, syncLanguages, sdm);
+		return processDataModelInternal(syncLanguages, sdm);
 	}
 
-	private DataModel processDataModelInternal(ConservationArea targetCa, boolean syncLanguages, SimpleDataModel sdm)
+	private DataModel processDataModelInternal(boolean syncLanguages, SimpleDataModel sdm)
 			throws ParseException {
 		//get aggregations
 		aggs = DataModel.getAggregations();
@@ -168,6 +168,7 @@ public class DataModelXmlToSmartConverter {
 		//update aggregations and labels for attributes
 		for (Attribute a : dm.getAttributes()) {
 			a.setConservationArea(targetCa);
+			
 			List<Aggregation> newAggregations = new ArrayList<>();
 			for (Aggregation c : newAggregations) {
 				Aggregation newAgg = lookUpAggregation(c.getName());
@@ -176,20 +177,20 @@ public class DataModelXmlToSmartConverter {
 			a.getAggregations().clear();
 			a.getAggregations().addAll(newAggregations);
 			
-			updateNames(a);
+			updateNamesAndIcons(a);
 			if (a.getAttributeList() != null) {
-				a.getAttributeList().forEach(item->updateNames(item));
+				a.getAttributeList().forEach(item->updateNamesAndIcons(item));
 			}
 			
 			if (a.getTree() != null) {
-				DataModel.processAttributeTree(a, node->updateNames(node));
+				DataModel.processAttributeTree(a, node->updateNamesAndIcons(node));
 			}
 		}
 		
 		//update labels for categories
 		DataModel.processCategories(dm, c->{
 			c.setConservationArea(targetCa);
-			updateNames(c);
+			updateNamesAndIcons(c);
 		});
 		
 		return dm;
@@ -285,11 +286,12 @@ public class DataModelXmlToSmartConverter {
 	/*
 	 * updates the names associated with a data model object
 	 */
-	private void updateNames(DmObject dmobject){
+	private void updateNamesAndIcons(DmObject dmobject){
 		updateNamedKeyItem(dmobject);
 		if (dmobject.getIcon() != null && dmobject.getIcon().getUuid() == null) {
 			updateNamedKeyItem(dmobject.getIcon());
 		}
+		if (dmobject.getIcon() != null) dmobject.getIcon().setConservationArea(targetCa);
 	}
 	
 	private void updateNamedKeyItem(NamedKeyItem nameditem){

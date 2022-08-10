@@ -56,6 +56,8 @@ public class CmTreeNodesVisitor {
 				if (attr.getConfig() != null) {
 					visitList(handler, attr, attr.getCurrentList());
 					visitTree(handler, attr, attr.getCurrentTree());
+				}else {
+					CyberTrackerPlugIn.log("Attribute config is null for attribute: " + attr.getName() + ". This state is invalid.", null); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 			visitNodes(handler, cmNode.getChildren());
