@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,6 +86,8 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 		
 		List<JSONObject> processed = new ArrayList<JSONObject>();
 		
+		HashMap<String, List<CtMissionLink>> linkmap = new HashMap<>();
+		
 		for (JSONObject feature : features){
 			if (!JsonCtParser.isTrackPoint(feature)) continue;
 
@@ -99,8 +102,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			
-			List<CtMissionLink> links = QueryFactory.buildQuery(session, CtMissionLink.class, "deviceId", deviceId).list(); //$NON-NLS-1$
-
+			List<CtMissionLink> links = linkmap.get(deviceId);
+			if (links == null) {
+				links = QueryFactory.buildQuery(session, CtMissionLink.class, "deviceId", deviceId).list(); //$NON-NLS-1$
+				linkmap.put(deviceId, links);
+			}
+			
 			//we want to find the patrol leg with a day that matches this day and time
 			Set<MissionDay> matches = new HashSet<MissionDay>();
 			for (CtMissionLink link : links){
