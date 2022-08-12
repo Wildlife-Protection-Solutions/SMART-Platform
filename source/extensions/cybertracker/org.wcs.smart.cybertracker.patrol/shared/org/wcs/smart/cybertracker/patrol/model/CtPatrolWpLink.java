@@ -141,7 +141,7 @@ public class CtPatrolWpLink extends UuidItem{
 	
 	public void setObservationGroup(WaypointObservationGroup group) {
 		this.group = group;
-		setObservationGroupUuid(group.getUuid());
+		setObservationGroupUuid(group == null ? null : group.getUuid());
 	}
 	
 	@Transient
