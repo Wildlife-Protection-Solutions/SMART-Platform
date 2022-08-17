@@ -176,7 +176,7 @@ public class UpgradeEngine {
 					isOk[0] = MessageDialog.openQuestion(
 							Display.getDefault().getActiveShell(),
 							Messages.UpgradeEngine_Confirm_Title,
-							MessageFormat.format(Messages.UpgradeEngine_Confirm_Message, newDbVersion, expectedDbVersion));
+							Messages.UpgradeEngine_Confirm_Message1);
 				}
 			});
 			if (!isOk[0]) {
