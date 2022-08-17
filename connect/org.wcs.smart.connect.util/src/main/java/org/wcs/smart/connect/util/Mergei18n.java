@@ -13,7 +13,8 @@ import java.util.HashMap;
 
 public class Mergei18n {
 
-	public static final String[] languages = new String[]{"es", "ar", "ka", "th"};
+	public static final String[] languages = new String[]{"hr"};
+//	public static final String[] languages = new String[]{"es", "ar", "ka", "th"};
 //	public static final String[] languages = new String[]{"es", "ar", "ka", "th", "fr", "hi", "in", "km", "lo", "ms", "ru", "th", "vi","zh"};
 	
 	//public static final String ROOT = "C:\\data\\SMART\\Source\\trunk\\connect\\org.wcs.smart.connect.server";
