@@ -35,15 +35,18 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
@@ -113,7 +116,7 @@ public class FileStoreWatcher implements Runnable {
     	}catch (Exception ex){
     		//not in a ca directory so we do not replicate 
     		//System.out.println("FileStoreWatcher: Process Event: Error cannot determine CA from '" + relativePath.getName(0).toString() + "', directory not being watched"); //$NON-NLS-1$ //$NON-NLS-2$
-    		logger.log(Level.INFO, "FileStoreWatcher: Process Event: Error cannot determine CA from '" + dir.toString() + "', directory not being watched");
+    		logger.log(Level.INFO, "FileStoreWatcher: Process Event: Error cannot determine CA from '" + dir.toString() + "', directory not being watched"); //$NON-NLS-1$
     		return true; //we do want to check sub-directories
     	}
     	//logger.log(Level.SEVERE, "Watching directory: " + dir.toString());
@@ -200,7 +203,6 @@ public class FileStoreWatcher implements Runnable {
 
     	
     	try(Session s = sessionFactory.openSession()){
-    		
 			ChangeLogItem item = new ChangeLogItem();
 			item.setUuid(ChangeLogManager.INSTANCE.generateUuid(s, item));
 			item.setAction(type);
@@ -242,9 +244,18 @@ public class FileStoreWatcher implements Runnable {
 				continue;
 			}
 
+			//track any new directories created; sometimes if a file
+			//is created in this directory a race condition is created and
+			//the file doesn't get tracked; so at the end we visit
+			//all files in the directory and add them too
+			List<Path> newdirs = new ArrayList<>();
+			
+			//events to process; store these up and process them at the end
+			List<Object[]> events = new ArrayList<>();
+			
 			for (WatchEvent<?> event : key.pollEvents()) {
 				Kind<?> kind = event.kind();
-
+				
 				// TODO: - provide example of how OVERFLOW event is handled
 				if (kind == StandardWatchEventKinds.OVERFLOW) {
 					logger.log(Level.WARNING, "OVERFLOW FILE SYSTEM EVENTS not supported.  Files may not be replicated as expected."); //$NON-NLS-1$
@@ -261,7 +272,8 @@ public class FileStoreWatcher implements Runnable {
 				if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
 					try {
 						if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
-							register(child);
+							newdirs.add(child);
+							register(child);		
 						}
 					} catch (IOException x) {
 						// ignore to keep sample readbale
@@ -276,11 +288,7 @@ public class FileStoreWatcher implements Runnable {
 						}
 					}
 				}
-				try {
-					processEvent(child, kind);
-				} catch (Throwable t) {
-					logger.log(Level.WARNING, "Error processing filestore event. Files may not be replicated as expected. " + t.getMessage(), t); //$NON-NLS-1$
-				}
+				events.add(new Object[] {child, kind});
 			}
 
 			// reset key and remove from set if directory no longer accessible
@@ -292,6 +300,34 @@ public class FileStoreWatcher implements Runnable {
 				if (keys.isEmpty()) {
 					break;
 				}
+			}
+			
+			Set<Path> toProcess = new HashSet<>();
+			for (Path dirx : newdirs) {
+				try {
+					try(Stream<Path> stream = Files.walk(dirx)){
+						stream.forEach(p->toProcess.add(p));
+					}
+				}catch (IOException ex) {
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+				}
+			}
+
+			for (Object[] x : events) {
+				try {
+					processEvent((Path)x[0], (Kind<?>)x[1]);
+					toProcess.remove((Path)x[0]);
+				} catch (Throwable t) {
+					logger.log(Level.WARNING, "Error processing filestore event. Files may not be replicated as expected. " + t.getMessage(), t); //$NON-NLS-1$
+				}
+			}
+			
+			//it seems files within the dir may not 
+			//get events fired - race condition where file is created before
+			//registered so log a create event for any file in this directory
+			//see: #3466
+			for (Path p : toProcess) {
+				processEvent(p, StandardWatchEventKinds.ENTRY_CREATE);
 			}
 		}
 	}
