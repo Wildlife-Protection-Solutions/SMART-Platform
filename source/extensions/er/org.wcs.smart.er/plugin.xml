@@ -485,7 +485,7 @@
                   label="%command.importmission.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%command.exportmission.tooltip">
+                  tooltip="%command.importmission.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -510,7 +510,7 @@
                   label="%command.exportmission.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%command.importmission.tooltip">
+                  tooltip="%command.exportmission.tooltip">
                <visibleWhen>
                   <and>
                      <test

@@ -24,6 +24,7 @@ package org.wcs.smart.connect.cybertracker.util;
 import java.util.List;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
