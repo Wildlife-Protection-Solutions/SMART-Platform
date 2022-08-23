@@ -541,7 +541,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 					attribute.setAttributeListItems(items);
 				}
 			}else if (dmAttribute.getType() == AttributeType.TREE){
-				if (type.getItemKey() == null || type.getItemKey().size() != 0){
+				if (type.getItemKey() == null || type.getItemKey().size() == 0){
 					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_12, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
