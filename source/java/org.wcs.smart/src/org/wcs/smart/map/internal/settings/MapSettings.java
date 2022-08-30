@@ -860,7 +860,14 @@ public class MapSettings {
 		String jsonMap = this.baseMap.getMapDef();
 		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
 		Gson gson = gsonBuilder.create();
-		final MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
+		
+		MapRegister userMap = null;
+		try {
+			userMap = gson.fromJson(jsonMap, MapRegister.class);
+		}catch (Exception ex) {
+			SmartPlugIn.displayLog(Messages.MapSettings_InvalidJson, ex);
+			return new ArrayList<>();
+		}
 		
 		ArrayList<Path> toDelete = new ArrayList<>();
 		

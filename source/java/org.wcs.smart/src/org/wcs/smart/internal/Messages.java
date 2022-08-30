@@ -1246,6 +1246,7 @@ public class Messages extends NLS {
 	public static String MapSettings_Error_CreateMapLayer;
 	public static String MapSettings_Error_SaveBasemap;
 	public static String MapSettings_FileImportError;
+	public static String MapSettings_InvalidJson;
 	public static String SmartMapEditorPart_Error_SettingMapProjection;
 	public static String SmartMapEditorPart_MapCoordinate_Label;
 	public static String SmartMapEditorPart_MapCoordinate_XYSeparator;
