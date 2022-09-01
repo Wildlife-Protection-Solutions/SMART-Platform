@@ -60,9 +60,6 @@
    <feature id="org.wcs.smart.i2.feature.nl">
       <category name="profiles"/>
    </feature>
-   <feature id="org.wcs.smart.i2.migrate.feature.nl">
-      <category name="profiles"/>
-   </feature>
    <feature id="org.wcs.smart.cybertracker.patrol.feature">
       <category name="smartmobile"/>
    </feature>

@@ -614,17 +614,10 @@
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er.feature</module>
 
-			</modules>
-		</profile>
-		<profile>
-			<id>migrationtools</id>
-			
-			<modules>
-				<module>org.wcs.smart.license.feature</module>
-				<module>org.wcs.smart.migrationtools.updatesite</module>
-
 				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
 				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
+				<module>../extensions/i2/translations/org.wcs.smart.i2.migrate.nl</module>
+				<module>../extensions/i2/translations/org.wcs.smart.i2.migrate.feature.nl</module>
 				
 				<module>../extensions/wcomm/org.wcs.smart.wcomm</module>
 				<module>../extensions/wcomm/org.wcs.smart.wcomm.feature</module>
