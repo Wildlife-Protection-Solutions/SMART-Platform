@@ -322,7 +322,7 @@ font-size: 40px;</textarea>
 			<select id="type_markerIcon" class="formtext" style="width: auto !important" name="type_markerIcon">
 		<!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->				
 			</select> <fmt:message key="settings.oroneof"/> 
-			<a title="<fmt:message key="settings.iconHover" />" target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">
+			<a title="<fmt:message key="settings.iconHover" />" target="_blank" href="https://fontawesome.com/v4/icons/">
 			(<fmt:message key="settings.list" />)</a>:
 			<input class="formtext" type="text" name="iconOveride" id="iconOveride" style="width: auto !important" value=""/>
 			</span>
