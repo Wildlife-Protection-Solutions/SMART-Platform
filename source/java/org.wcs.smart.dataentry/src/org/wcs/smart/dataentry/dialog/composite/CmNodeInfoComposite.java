@@ -227,12 +227,12 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		});
 		
 		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_ClassicOptionsLbl);
-		label.setToolTipText(Messages.CmNodeInfoComposite_ClassicOptionsTooltip);
-		
+//		label.setText(Messages.CmNodeInfoComposite_ClassicOptionsLbl);
+//		label.setToolTipText(Messages.CmNodeInfoComposite_ClassicOptionsTooltip);
+//		
 		btnCollectMultiple = new Button(container, SWT.CHECK);
 		btnCollectMultiple.setText(Messages.CmNodeInfoComposite_CollectMultiplObservations);
-		btnCollectMultiple.setToolTipText(Messages.CmNodeInfoComposite_CollectMultiplObservationsTooltip);
+		btnCollectMultiple.setToolTipText(Messages.CmNodeInfoComposite_CollectMultiplObservationsTooltip1);
 		btnCollectMultiple.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
