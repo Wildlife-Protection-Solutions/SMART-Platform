@@ -597,7 +597,7 @@ public class EntitySearchView {
 
 	@Optional
 	@Inject
-	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+	private void dbModified(@UIEventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
 		basicPanel.refresh();
 		spatialPanel.refresh();
 		allPanel.refresh(searchDelay);

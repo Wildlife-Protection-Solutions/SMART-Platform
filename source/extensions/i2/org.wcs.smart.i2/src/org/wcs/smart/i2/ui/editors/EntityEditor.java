@@ -308,7 +308,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				temp = (IntelEntity) s.get(IntelEntity.class, input.getUuid());
 				if (temp == null){
 					//close editor
-					closeEditor(false);
+					Display.getDefault().syncExec(()->closeEditor(false));
 					return Status.OK_STATUS;
 				}
 				temp.getProfile().getName();

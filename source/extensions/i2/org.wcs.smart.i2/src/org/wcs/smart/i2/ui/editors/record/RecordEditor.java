@@ -160,7 +160,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				try(Session s = HibernateManager.openSession()){
 					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
 					if (temp == null){
-						closeEditor(false);
+						Display.getDefault().syncExec(()->closeEditor(false));
 						return Status.OK_STATUS; //not found
 					}
 					temp.getProfile().getName();
