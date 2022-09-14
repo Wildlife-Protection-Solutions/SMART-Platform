@@ -12,6 +12,6 @@
 	
 	<artifactId>org.wcs.smart.cybertracker.patrol.feature</artifactId>
   	<packaging>eclipse-feature</packaging>
-	<version>7.5.2-SNAPSHOT</version>
+	<version>7.5.3-SNAPSHOT</version>
 	
 </project>

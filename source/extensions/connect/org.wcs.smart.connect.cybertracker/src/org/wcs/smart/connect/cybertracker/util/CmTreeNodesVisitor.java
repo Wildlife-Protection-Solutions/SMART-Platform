@@ -55,9 +55,10 @@ public class CmTreeNodesVisitor {
 				//I could never find the source of this bug; so this works around it
 				//for this specific error but does not affect other areas of the s/w
 				if (attr.getConfig() != null) {
-					CyberTrackerPlugIn.log("Attribute config is null for attribute: " + attr.getName() + ". This state is invalid.", null); //$NON-NLS-1$ //$NON-NLS-2$
 					visitList(handler, attr, attr.getCurrentList());
 					visitTree(handler, attr, attr.getCurrentTree());
+				}else {
+					CyberTrackerPlugIn.log("Attribute config is null for attribute: " + attr.getName() + ". This state is invalid.", null); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 			visitNodes(handler, cmNode.getChildren());

@@ -265,21 +265,27 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					if (link != null) {
 						LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 						
-						MissionDay currentDay = findDay(link.getMission(), dt.toLocalDate(), true, LocalTime.MAX, session);
+						MissionDay currentDay = findDay(link.getMission(), dt.toLocalDate(), true, LocalTime.MIN, session);
 						//the pause event is recorded as a track point; not a waypoint
 						//so find the previous track point
 						List<MissionDay> sorts = new ArrayList<MissionDay>(currentDay.getMission().getMissionDays());
 						sorts.sort((a,b)->-1*a.getDate().compareTo(b.getDate()));
 						LocalDateTime pausepoint = null;
 						for (MissionDay d : sorts) {
-							if (d.getTracks() == null) continue;
+							if (d.getTracks() == null || d.getTracks().isEmpty()) continue;
 							
 							List<Double> lastValues = new ArrayList<>();
 							for (MissionTrack t : d.getTracks()) {
 								lastValues.add(t.getLineString().getCoordinateN(t.getLineString().getNumPoints() - 1).getZ());
 							}
+							if (lastValues.isEmpty()) continue;
 							lastValues.sort((a,b)->-1*a.compareTo(b));
-							pausepoint = SharedUtils.toLocalDateTime(lastValues.get(0).longValue());	
+							pausepoint = SharedUtils.toLocalDateTime(lastValues.get(0).longValue());
+							break;
+						}
+						if (pausepoint == null) {
+							warnings.add("Could not compute rest time between pause and resume points"); //$NON-NLS-1$
+							pausepoint = dt;
 						}
 						
 						LocalDateTime end = dt;
@@ -512,7 +518,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						wplink.setCtGroupId(ctObsGroup);
 						wplink.setCtRootId(ctRootId);
 						wplink.setWaypoint(wp);
-						wplink.setObservationGroup(wp.getObservationGroups().get(0));
+						if (wp.getObservationGroups() != null && !wp.getObservationGroups().isEmpty()) {
+							wplink.setObservationGroup(wp.getObservationGroups().get(0));
+						}else {
+							wplink.setObservationGroup(null);
+						}
 						link.getWaypointLinks().add(wplink);
 					}
 				}
@@ -825,7 +835,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		}
 		
 		
-		//make a single patrol leg day for the start date and time
+		//make a single mission day for the start date and time
 		MissionDay md = new MissionDay();
 		md.setDate(dStartDate );
 		md.setStartTime( dStartTime );

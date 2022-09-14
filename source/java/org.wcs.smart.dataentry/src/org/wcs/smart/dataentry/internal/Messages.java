@@ -53,7 +53,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_ClassicOptionsLbl;
 	public static String CmNodeInfoComposite_ClassicOptionsTooltip;
 	public static String CmNodeInfoComposite_CollectMultiplObservations;
-	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip;
+	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip1;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
 	public static String CmNodeInfoComposite_Image;

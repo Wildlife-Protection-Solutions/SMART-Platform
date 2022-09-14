@@ -158,7 +158,7 @@ public abstract class ObservationQueryResult<T extends ObservationQueryResultIte
 		attrSql.append(") UNION "); //$NON-NLS-1$
 
 		attrSql.append("SELECT r.ob_uuid, a.keyid, cast(null as double precision), "); //$NON-NLS-1$
-		attrSql.append("cast(null as varchar(500)), string_agg(ll.value, ','), r.ca_uuid "); //$NON-NLS-1$
+		attrSql.append("cast(null as varchar(500)), string_agg(ll.value, ', ' order by ll.value), r.ca_uuid "); //$NON-NLS-1$
 		attrSql.append(" FROM "); //$NON-NLS-1$
 		attrSql.append(engine.getQueryDataTable());
 		attrSql.append(" r join "); //$NON-NLS-1$

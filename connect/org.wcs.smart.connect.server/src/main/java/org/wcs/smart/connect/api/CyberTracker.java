@@ -318,7 +318,12 @@ public class CyberTracker extends HttpServlet{
 			//delete the file 
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 					.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(p.getFilename());
-			Files.delete(toDelete);
+			if (!Files.exists(toDelete)) {
+				logger.log(Level.WARNING, "Package file doesn't exists on server: " + toDelete.toString()); //$NON-NLS-1$
+			}else {
+				Files.delete(toDelete);
+			}
+				
 			
 			s.delete(p);
 			s.getTransaction().commit();
@@ -329,7 +334,7 @@ public class CyberTracker extends HttpServlet{
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					"Could not list cybertracker packages", ex); //$NON-NLS-1$
+					"Could not delete cybertracker package.", ex); //$NON-NLS-1$
 		}
 	}
 	

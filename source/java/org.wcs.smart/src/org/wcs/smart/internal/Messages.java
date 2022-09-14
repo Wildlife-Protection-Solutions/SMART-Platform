@@ -1243,6 +1243,7 @@ public class Messages extends NLS {
 	public static String MapSettings_Error_CreateMapLayer;
 	public static String MapSettings_Error_SaveBasemap;
 	public static String MapSettings_FileImportError;
+	public static String MapSettings_InvalidJson;
 	public static String SmartMapEditorPart_Error_SettingMapProjection;
 	public static String SmartMapEditorPart_MapCoordinate_Label;
 	public static String SmartMapEditorPart_MapCoordinate_XYSeparator;
@@ -1586,7 +1587,7 @@ public class Messages extends NLS {
 	public static String TranslateSimpleListItemDialog_Error_LabelRequired;
 	public static String TranslateSimpleListItemDialog_LanguageLabel;
 	public static String TranslateSimpleListItemDialog_NameLabel;
-	public static String UpgradeEngine_Confirm_Message;
+	public static String UpgradeEngine_Confirm_Message1;
 	public static String UpgradeEngine_Confirm_Title;
 	public static String UpgradeEngine_Error_Message1;
 	public static String UpgradeEngine_IncompatibleVersion;

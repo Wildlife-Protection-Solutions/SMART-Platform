@@ -23,6 +23,8 @@ package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.io.IOException;
 
+import javax.ws.rs.NotFoundException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Composite;
@@ -112,6 +114,8 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		String[] parts = null;
 		try {
 			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false, PackageType.PRIVATE);
+		}catch (NotFoundException ex) {
+			throw new IOException(Messages.ConnectDataContribution_CaNotFound);
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}

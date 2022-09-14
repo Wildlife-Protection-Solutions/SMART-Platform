@@ -87,7 +87,8 @@ public class SurveyDesignTreeContentProvider implements ITreeContentProvider {
 	public Object getParent(Object element) {
 		if (element instanceof SurveyMissionProxy){
 			SurveyMissionProxy p = (SurveyMissionProxy) element;
-			if (p.getType() == Type.SURVEY) return false;
+//			if (p.getType() == Type.SURVEY) return false;
+			if (p.getType() == Type.SURVEY) return null;
 			return p.getParent();
 		}
 		return null;
