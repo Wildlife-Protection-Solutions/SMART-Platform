@@ -402,6 +402,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 			//we cannot determine db version so we don't let the user login
 			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
 		}
+		
 		if (currentVersion.equals(smartDbVersion) ){
 			isokay = true;
 		}else {

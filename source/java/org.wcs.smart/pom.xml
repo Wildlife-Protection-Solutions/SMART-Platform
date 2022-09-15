@@ -13,6 +13,6 @@
 	<name>SMART Core Module</name>
 	<artifactId>org.wcs.smart</artifactId>
   	<packaging>eclipse-plugin</packaging>
-  	<version>7.5.3-SNAPSHOT</version>
+  	<version>7.5.4-SNAPSHOT</version>
   	
 </project>
