@@ -13,6 +13,6 @@
 	<name>SMART Cybertracker Module</name>
 	<artifactId>org.wcs.smart.cybertracker</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.1-SNAPSHOT</version>
+	<version>7.5.4-SNAPSHOT</version>
 	
 </project>
