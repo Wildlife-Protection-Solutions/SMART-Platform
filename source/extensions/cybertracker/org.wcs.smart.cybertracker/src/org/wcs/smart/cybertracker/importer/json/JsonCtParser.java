@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -502,14 +503,22 @@ public class JsonCtParser {
 				newWaypoint.getObservationGroups().add(g);
 				g.setObservations(new ArrayList<>());
 			}
-			
-			category = (Category) session.get(Category.class, UuidUtils.stringToUuid(categoryUuid));
-			if (category == null || !category.getConservationArea().equals(ca)){
-				//category not found, lets return the waypoint without observations so we can
-				//still load the rest of the data if desired
+			UUID puuid = null;
+			try {
+				puuid = UuidUtils.stringToUuid(categoryUuid);
+				
+				category = (Category) session.get(Category.class, puuid);
+				if (category == null || !category.getConservationArea().equals(ca)){
+					//category not found, lets return the waypoint without observations so we can
+					//still load the rest of the data if desired
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
+					return newWaypoint;
+				}
+			}catch (Exception ex) {
 				warnings.add(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
 				return newWaypoint;
 			}
+			
 		}else{
 			//no category found, so lets assume no observations
 			//happens on patrol pause/resume
