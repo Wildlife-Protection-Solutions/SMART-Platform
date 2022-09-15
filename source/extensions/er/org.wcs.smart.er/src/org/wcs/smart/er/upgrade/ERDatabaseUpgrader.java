@@ -75,13 +75,19 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
 		}
 		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_2)){
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
 		}
 		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_3)){
 			upgradeV3ToV4(session);
+			upgradeV4ToV5(session);
+		}
+		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_4)){
+			upgradeV4ToV5(session);
 		}
 	}
 	
@@ -211,5 +217,15 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			}
 
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_4, session);
+	}
+	
+	private static void upgradeV4ToV5(Session session){
+		String[] sql = new String[] {
+				"ALTER TABLE SMART.SURVEY_WAYPOINT ADD CONSTRAINT SURVEY_WAYPOINT_WP_UUID_FK FOREIGN KEY (WP_UUID) REFERENCES SMART.WAYPOINT(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_5, session);
 	}
 }
