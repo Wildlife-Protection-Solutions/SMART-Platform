@@ -247,6 +247,8 @@ public class ConnectDialog extends SmartStyledTitleDialog {
 			toUpdate.setServer(cs);
 			toUpdate.setSmartUser(employee);
 			session.save(toUpdate);	
+			
+			ConnectDialog.this.user = toUpdate;
 		}
 		
 		//update user name
@@ -360,7 +362,8 @@ public class ConnectDialog extends SmartStyledTitleDialog {
 							}
 							
 							//if user or password is different then update user info
-							if (!strequals(ConnectDialog.this.user.getConnectUsername(),user) ||
+							if (ConnectDialog.this.user == null ||
+									!strequals(ConnectDialog.this.user.getConnectUsername(),user) ||
 									!strequals(existingPassword, pass)){
 								String newPassword = ConnectPlugIn.encryptPassword(pass);
 								saveUserInfo(user, newPassword);

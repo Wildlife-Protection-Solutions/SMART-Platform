@@ -81,6 +81,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.io.IOUtils;
@@ -478,22 +479,24 @@ public class SmartConnect {
 	 */
 	private String parseFilenameFromContent(String content){
 		if (content == null) return null;
+		
+		String filename = null;
 		int index = content.indexOf("filename="); //$NON-NLS-1$
 		if (index > 0){
 			int index2 = content.indexOf(";", index); //$NON-NLS-1$
 			if (index2 < 0) index2 = content.length();
-			String filename = content.substring(index+"filename=".length(), index2); //$NON-NLS-1$
+			filename = content.substring(index+"filename=".length(), index2); //$NON-NLS-1$
 			if(filename.startsWith("\"")){ //$NON-NLS-1$
 				filename = filename.substring(1);
 			}
 			if (filename.endsWith("\"")){ //$NON-NLS-1$
 				filename = filename.substring(0, filename.length() - 1);
 			}
-			if (filename.length() > 0){
-				return filename;
-			}
 		}
-		return null;
+		
+		if (filename == null || filename.length() == 0) return null;
+		return filename = URLUtils.cleanFilename(filename);
+		
 	}
 	/**
 	 * Downloads a file from a given URL.  This will try multiple
