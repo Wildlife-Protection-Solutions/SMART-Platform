@@ -213,9 +213,7 @@ public class DeleteSurveyElementHandler {
 								if (md.getWaypoints() != null){
 									for (SurveyWaypoint sw : md.getWaypoints()){
 										session.delete(sw.getWaypoint());
-										session.delete(sw);
 									}
-									
 								}
 							}
 						}
@@ -292,7 +290,6 @@ public class DeleteSurveyElementHandler {
 							if (md.getWaypoints() != null){
 								for (SurveyWaypoint sw : md.getWaypoints()){
 									session.delete(sw.getWaypoint());
-									session.delete(sw);
 								}
 							}
 						}
@@ -371,7 +368,6 @@ public class DeleteSurveyElementHandler {
 					if (md.getWaypoints() != null){
 						for (SurveyWaypoint w : md.getWaypoints()){
 							session.delete(w.getWaypoint());
-							session.delete(w);
 						}
 					}
 				}
