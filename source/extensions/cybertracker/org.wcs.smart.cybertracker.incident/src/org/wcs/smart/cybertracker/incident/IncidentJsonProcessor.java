@@ -152,7 +152,11 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				if (currentLink.getWaypoint() == null) {
 					currentLink.setWaypoint(parsedWp);
 					if (rootLink != null) rootLink.setWaypoint(parsedWp);
-					if (currentLink.getRootId() != null && currentLink.getIncidentGroupId() != null) currentLink.setObservationGroup(parsedWp.getObservationGroups().get(0));
+					if (currentLink.getRootId() != null && currentLink.getIncidentGroupId() != null) {
+						if(parsedWp.getObservationGroups().size() > 0) {
+							currentLink.setObservationGroup(parsedWp.getObservationGroups().get(0));
+						}
+					}
 					
 					Employee observer = null;
 					for (WaypointObservation so : currentLink.getWaypoint().getAllObservations()) {
