@@ -8,4 +8,6 @@ update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.
 update connect.connect_plugin_version set version = '7.5.4' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '7.5.4' where plugin_id = 'org.wcs.smart';
 
-update connect.connect_version set version = '7.5.4', last_updated = now();
+--don't update the version as we are not deploying a new jar file
+--update connect.connect_version set version = '7.5.4', last_updated = now();
+update connect.connect_version set last_updated = now();
