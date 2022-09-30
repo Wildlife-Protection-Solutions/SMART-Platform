@@ -609,15 +609,15 @@ public class MapSettings {
 	     	for( IResolve resolve : resolveList ) {
 
             	geoResources = new ArrayList<IGeoResource>();
-            	List<IResolve> members = resolve.members(monitor);
-                if (members.size() < 1 && resolve.canResolve(IGeoResource.class)) {
-                	geoResources.add(resolve.resolve(IGeoResource.class, monitor));
-
-                } else if (members.get(0).canResolve(IGeoResource.class)) {
-                	
+            	if (resolve.canResolve(IGeoResource.class)) {
+            		geoResources.add(resolve.resolve(IGeoResource.class, monitor));
+            	}else {
+            		List<IResolve> members = resolve.members(monitor);
                     for( IResolve tmp : members ) {
-                        IGeoResource finalResolve = tmp.resolve(IGeoResource.class, monitor);
-                        geoResources.add(finalResolve);
+                    	if (tmp.canResolve(IGeoResource.class)) {
+                    		IGeoResource finalResolve = tmp.resolve(IGeoResource.class, monitor);
+                    		geoResources.add(finalResolve);
+                    	}
                     }
                 }
                 if (!geoResources.isEmpty()) break;
