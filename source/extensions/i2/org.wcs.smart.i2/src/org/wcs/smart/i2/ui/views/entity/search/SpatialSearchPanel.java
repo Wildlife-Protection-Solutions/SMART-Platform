@@ -285,17 +285,18 @@ public class SpatialSearchPanel extends Composite{
 					elink.setEnabled(false);
 				}
 				if (cmbLocations.getStructuredSelection().getFirstElement() == CUSTOM_LOCATION) {
-					SelectPointMapDialog pointOnMap = new SelectPointMapDialog(getShell()) {
-						
-					};
-					if (pointOnMap.open() == Window.OK) {
-						double x = pointOnMap.getPoint().getX();
-						double y = pointOnMap.getPoint().getY();
-						
-						CustomLocation location = new CustomLocation(x,y);
-						locations.add(location);
-						cmbLocations.refresh();
-						cmbLocations.setSelection(new StructuredSelection(location));
+					SelectPointMapDialog pointOnMap = new SelectPointMapDialog(getShell()) {};
+					
+					if (pointOnMap.open() == Window.OK ) {
+						if (pointOnMap.getPoint() != null) {
+							double x = pointOnMap.getPoint().getX();
+							double y = pointOnMap.getPoint().getY();
+							
+							CustomLocation location = new CustomLocation(x,y);
+							locations.add(location);
+							cmbLocations.refresh();
+							cmbLocations.setSelection(new StructuredSelection(location));
+						}
 					}
 				}
 				if (validate()) {
