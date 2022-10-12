@@ -80,6 +80,7 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -847,6 +848,11 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	
 		pl.setType(ct.getPatrolTransportType());
 		
+		//update patrol type if required
+		if (patrol.getPatrolType() != Type.MIXED && 
+				patrol.getPatrolType() != pl.getType().getPatrolType()) {
+			patrol.setPatrolType(Type.MIXED);
+		}
 		
 		//make a single patrol leg day for the start date and time
 		PatrolLegDay one = new PatrolLegDay();
