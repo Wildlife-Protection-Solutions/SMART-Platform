@@ -24,6 +24,7 @@ package org.wcs.smart.connect.cybertracker.util;
 import java.util.List;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -57,7 +58,8 @@ public class CmTreeNodesVisitor {
 				if (attr.getConfig() != null) {
 					visitList(handler, attr, attr.getCurrentList());
 					visitTree(handler, attr, attr.getCurrentTree());
-				}else {
+				}else if (attr.getAttribute().getType().isList() ||
+						attr.getAttribute().getType() == AttributeType.TREE) {
 					CyberTrackerPlugIn.log("Attribute config is null for attribute: " + attr.getName() + ". This state is invalid.", null); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}

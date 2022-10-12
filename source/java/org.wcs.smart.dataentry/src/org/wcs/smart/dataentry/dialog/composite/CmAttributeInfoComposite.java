@@ -23,7 +23,9 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
@@ -364,10 +367,18 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		try {
 			fireChanged = false;
 			//load icon files as necessary
-			if (attribute.getAttribute().getIcon() != null) loadFiles(attribute.getAttribute().getIcon(), session);
+			
+			Set<Icon> toload = new HashSet<>();
+			toload.add(attribute.getAttribute().getIcon());
+			
 			if (attribute.getCurrentList() != null) {
 				for (CmAttributeListItem li : attribute.getCurrentList()) {
-					if (li.getListItem().getIcon() != null) loadFiles(li.getListItem().getIcon(), session);
+					if (li.getListItem().getIcon() != null) toload.add(li.getListItem().getIcon());
+				}
+			}
+			if (attribute.getAttribute().getAttributeList() != null) {
+				for (AttributeListItem li : attribute.getAttribute().getAttributeList()) {
+					if (li.getIcon() != null) toload.add(li.getIcon());
 				}
 			}
 			if (attribute.getCurrentTree() != null) {
@@ -375,11 +386,22 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				nodes.addAll(attribute.getCurrentTree());
 				while(!nodes.isEmpty()) {
 					CmAttributeTreeNode node = nodes.remove(0);
-					if (node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null) loadFiles(node.getDmTreeNode().getIcon(), session);
+					if (node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null) toload.add(node.getDmTreeNode().getIcon());
 					if (node.getChildren() != null) nodes.addAll(node.getChildren());
 	
 				}
 			}
+			if (attribute.getAttribute().getTree() != null) {
+				attribute.getAttribute().getTree().forEach(e->{
+					if (e.getIcon() != null) toload.add(e.getIcon());
+					e.accept(vi->{
+						if (vi.getIcon() != null) toload.add(vi.getIcon());
+						return true;
+					});
+				});
+			}
+			toload.forEach(icon->loadFiles(icon, session));
+			
 			imageSelection.updateImage();
 			fireSourceObjectChanged(attribute, language);
 		}finally {
