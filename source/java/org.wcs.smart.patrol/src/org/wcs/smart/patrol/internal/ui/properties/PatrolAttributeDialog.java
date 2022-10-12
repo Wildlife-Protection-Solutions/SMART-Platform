@@ -362,7 +362,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 				attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 				attributes.forEach(e->e.getName());
 			}
-			attributes.sort((a,b)->Collator.getInstance().compare(a.getName(),  b.getName()));
+			attributes.sort((a,b)->Collator.getInstance().compare(a.getName() == null ? "" : a.getName(),  b.getName() == null ? "" : b.getName())); //$NON-NLS-1$ //$NON-NLS-2$
 			Display.getDefault().syncExec(()->{
 				if (lstAttributes.getControl().isDisposed()) return;
 				lstAttributes.setInput(attributes);
