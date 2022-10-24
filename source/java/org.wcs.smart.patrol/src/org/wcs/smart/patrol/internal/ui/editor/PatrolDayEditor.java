@@ -250,8 +250,12 @@ public class PatrolDayEditor extends EditorPart {
 								
 							}
 						});
-//						sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
-						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
+
+						sec.setText(MessageFormat.format(HEADER_STRING, 
+								pld.getPatrolLeg().getId(), 
+								pld.getPatrolLeg().getType().getName(), 
+								pld.getPatrolLeg().getMandate() == null? "" : pld.getPatrolLeg().getMandate().getName(),  //$NON-NLS-1$
+								SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
 
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 						Composite comp2 = comp.createComposite(sec, toolkit);
