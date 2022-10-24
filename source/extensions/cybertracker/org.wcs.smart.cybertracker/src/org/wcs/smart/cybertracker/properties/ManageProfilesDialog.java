@@ -182,9 +182,9 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	protected void updateState() {
 		CyberTrackerPropertiesProfile p = getSelectedProfile();
 		btnEdit.setEnabled(p != null);
-		btnDelete.setEnabled(p != null && !p.isDefault());
-		miEdit.setEnabled(p != null);
-		miDelete.setEnabled(p != null && !p.isDefault());
+		btnDelete.setEnabled(p != null && (!p.isDefault() || (p.isDefault() && hasMultipleDefaults())));
+		miEdit.setEnabled(btnEdit.isEnabled());
+		miDelete.setEnabled(btnDelete.isEnabled());
 	}
 	
 	private void reloadData() {
@@ -192,6 +192,22 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		
 		profilesViewer.refresh();
 		updateState();
+	}
+	
+	//support delete when there are multiple profiles
+	//ideally this doesn't happen but because of sync'ing with connect it might
+	//if things happened in a specific order
+	//https://app.assembla.com/spaces/smart-cs/tickets/3499
+	private boolean hasMultipleDefaults() {
+		Object x = profilesViewer.getInput();
+		if (!(x instanceof List)) return false;
+		
+		List<CyberTrackerPropertiesProfile> items = (List<CyberTrackerPropertiesProfile>)x;
+		int cnt = 0;
+		for (CyberTrackerPropertiesProfile p : items) {
+			if (p.isDefault()) cnt++;
+		}
+		return cnt > 1;
 	}
 	
 	protected CyberTrackerPropertiesProfile getSelectedProfile() {
@@ -227,6 +243,9 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		final CyberTrackerPropertiesProfile p = getSelectedProfile();
 		if (p == null){
 			return;
+		}
+		if (p.isDefault() && !hasMultipleDefaults()) {
+			MessageDialog.openInformation(getShell(), "Cannot delete", "Cannot delete the only default profile.");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		if (!MessageDialog.openConfirm(getShell(), Messages.ManageProfilesDialog_DeleteConfirmDialog_Title, MessageFormat.format(Messages.ManageProfilesDialog_DeleteConfirmDialog_Message, p.getName()))){
 			return;
