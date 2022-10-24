@@ -556,7 +556,9 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				case SWT.PaintItem: {
 					PatrolLeg pl = (PatrolLeg)element;
 					GC gc = event.gc;
-					String text = MessageFormat.format(Messages.PatrolPresentationPart_PatrolLegHeader, pl.getId(), pl.getType().getName(), pl.getMandate().getName()); 
+					String text = MessageFormat.format(Messages.PatrolPresentationPart_PatrolLegHeader, 
+							pl.getId(), pl.getType().getName(), 
+							pl.getMandate() == null ? "" : pl.getMandate().getName());  //$NON-NLS-1$
 					final Point extent = gc.stringExtent(text);
 
 					int width = 0;
@@ -970,6 +972,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			
 			for (int i = 1; i < legs.size(); i ++) {
 				if (mandates.contains(legs.get(i).getMandate())) continue;
+				if (legs.get(i).getMandate() == null) continue;
 				new Label(left, SWT.NONE);
 				toolkit.createLabel(left, legs.get(i).getMandate().getName());
 				mandates.add(legs.get(1).getMandate());
