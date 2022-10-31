@@ -255,8 +255,16 @@ public class RScriptView {
 					MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
 					miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 					miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-					
 					miEdit.addListener(SWT.Selection, s->editScript((UuidItem)x));
+					
+					new MenuItem(mnu, SWT.SEPARATOR);
+					
+					MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
+					miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+					miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+					miDelete.addListener(SWT.Selection, s->deleteScript((UuidItem)x));
+					
+					
 				}else if (x == SCRIPT_NODE) {
 					MenuItem miNewScript = new MenuItem(mnu, SWT.PUSH);
 					miNewScript.setText(Messages.RScriptView_NewRScriptMenuItem);
@@ -285,6 +293,17 @@ public class RScriptView {
 		type.setUuid(item.uuid);
 		RScriptDialog dialog = new RScriptDialog(context.get(Shell.class), type);
 		if (dialog.open() == Window.OK) updateContent();
+	}
+	
+	private void deleteScript(UuidItem item) {
+		RScript s = null;
+		try(Session session = HibernateManager.openSession()) {
+			s = session.get(RScript.class, item.uuid);
+		}
+		if (s != null) {
+			RScriptManager.INSTANCE.deleteScripts(Collections.singletonList(s), context.get(Shell.class));
+		}
+		updateContent();
 	}
 	
 	private void deleteQueries() {

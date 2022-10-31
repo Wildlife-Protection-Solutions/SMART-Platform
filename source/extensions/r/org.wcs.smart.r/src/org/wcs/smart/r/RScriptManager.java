@@ -22,13 +22,28 @@
  */
 package org.wcs.smart.r;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
+import org.wcs.smart.r.ui.RunScriptMenuContribution;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.user.UserLevelManager;
 
 /**
@@ -103,5 +118,62 @@ public enum RScriptManager {
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.MANAGER) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ANALYST);
+	}
+	
+	
+	public void deleteScripts(List<RScript> toDelete, Shell activeShell) {
+		StringBuilder sb = new StringBuilder();
+		
+		for (RScript r : toDelete) {
+			sb.append(r.getName());
+			sb.append(", "); //$NON-NLS-1$
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.deleteCharAt(sb.length() - 1);
+		
+		if (!MessageDialog.openConfirm(activeShell, Messages.RScriptListDialog_DeleteTitle, MessageFormat.format(Messages.RScriptListDialog_DeleteMessage, sb.toString()))){
+			return;
+		}
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+
+					monitor.beginTask(Messages.RScriptListDialog_DeleteTask, toDelete.size());
+					List<RScript> deleted = new ArrayList<RScript>();
+					try(Session s = HibernateManager.openSession(new RScriptInterceptor())){
+
+						for (RScript t : toDelete){
+							monitor.subTask(t.getName());
+							try {
+								DeleteManager.canDelete(t, s);
+							}catch (Exception ex) {
+								//cannot delete
+								activeShell.getDisplay().syncExec(()->MessageDialog.openError(activeShell, DialogConstants.ERROR_STRING, ex.getMessage()));
+								continue;
+							}
+							
+							s.beginTransaction();
+							try{
+								s.delete(t);
+								s.getTransaction().commit();
+								deleted.add(t);
+							}catch(Exception ex){
+								s.getTransaction().rollback();
+								RPlugIn.displayLog(MessageFormat.format(Messages.RScriptListDialog_DeleteError1, t.getName(), ex.getMessage()), ex);
+							}
+							monitor.worked(1);
+						}
+					}
+					deleted.forEach(e->RunScriptMenuContribution.removeScript(e));
+					monitor.done();
+				}
+			});
+		} catch (Exception e) {
+			RPlugIn.displayLog(Messages.RScriptListDialog_DeleteError2 + e.getMessage(), e);
+		}
 	}
 }
