@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.r.ui;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,10 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -60,12 +55,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.r.RPlugIn;
-import org.wcs.smart.r.RScriptInterceptor;
+import org.wcs.smart.r.RScriptManager;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.ui.NamedItemLabelProvider;
@@ -251,63 +244,13 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 	
 	private void delete(){
 		List<RScript> toDelete = new ArrayList<RScript>();
-		StringBuilder sb = new StringBuilder();
-		
 		for (Iterator<?> iterator = ((IStructuredSelection)cmbScripts.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
 			if (x instanceof RScript){
 				toDelete.add((RScript)x);
-				sb.append(((RScript) x).getName());
-				sb.append(", "); //$NON-NLS-1$
 			}
 		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.deleteCharAt(sb.length() - 1);
-		
-		if (!MessageDialog.openConfirm(getShell(), Messages.RScriptListDialog_DeleteTitle, MessageFormat.format(Messages.RScriptListDialog_DeleteMessage, sb.toString()))){
-			return;
-		}
-		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-
-					monitor.beginTask(Messages.RScriptListDialog_DeleteTask, toDelete.size());
-					List<RScript> deleted = new ArrayList<RScript>();
-					try(Session s = HibernateManager.openSession(new RScriptInterceptor())){
-
-						for (RScript t : toDelete){
-							monitor.subTask(t.getName());
-							try {
-								DeleteManager.canDelete(t, s);
-							}catch (Exception ex) {
-								//cannot delete
-								getShell().getDisplay().syncExec(()->MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, ex.getMessage()));
-								continue;
-							}
-							
-							s.beginTransaction();
-							try{
-								s.delete(t);
-								s.getTransaction().commit();
-								deleted.add(t);
-							}catch(Exception ex){
-								s.getTransaction().rollback();
-								RPlugIn.displayLog(MessageFormat.format(Messages.RScriptListDialog_DeleteError1, t.getName(), ex.getMessage()), ex);
-							}
-							monitor.worked(1);
-						}
-					}
-					deleted.forEach(e->RunScriptMenuContribution.removeScript(e));
-					monitor.done();
-				}
-			});
-		} catch (Exception e) {
-			RPlugIn.displayLog(Messages.RScriptListDialog_DeleteError2 + e.getMessage(), e);
-		}
+		RScriptManager.INSTANCE.deleteScripts(toDelete, getShell());
 		refresh();
 	}
 	

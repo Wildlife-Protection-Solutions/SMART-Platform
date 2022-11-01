@@ -897,23 +897,12 @@ public class EmployeeComposite extends Composite {
 		e.setAgency(null);
 		e.setRank(null);
 		if (cmbViewerAgency != null){
-		
-			IStructuredSelection a = (IStructuredSelection) cmbViewerAgency.getSelection();
-			if (!a.isEmpty()) {
-				Agency ag = (Agency) a.getFirstElement();
-				if (ag.getUuid() != null) {
-					e.setAgency(ag);
-				}
-			}
-
-			if (cmbViewerRank.getCombo().isEnabled()) {
-				a = (IStructuredSelection) cmbViewerRank.getSelection();
-				if (!a.isEmpty()) {
-					Rank ag = (Rank) a.getFirstElement();
-					if (ag.getUuid() != null) {
-						e.setRank(ag);
-					}
-				}
+			Agency ag = (Agency) cmbViewerAgency.getStructuredSelection().getFirstElement();
+			if (ag != null && ag.getUuid() != null) e.setAgency(ag);
+			
+			if (e.getAgency() != null && cmbViewerRank!= null) {
+				Rank rk = (Rank) cmbViewerRank.getStructuredSelection().getFirstElement();
+				if (rk != null && rk.getUuid() != null) e.setRank(rk);
 			}
 		}
 		

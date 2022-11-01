@@ -75,7 +75,7 @@ public class RScriptDialog extends SmartStyledTitleDialog{
 	}
 	
 	public RScriptDialog(Shell parentShell) {
-		super(parentShell);
+		this(parentShell, null);
 		
 		script = new RScript();
 		script.setNames(new HashSet<>());
@@ -278,10 +278,12 @@ public class RScriptDialog extends SmartStyledTitleDialog{
 		}
 		try(Session session = HibernateManager.openSession(new RScriptInterceptor())){
 			session.beginTransaction();
+			boolean isNew = script.getUuid() == null;
 			try {
 				session.saveOrUpdate(script);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
+				if (isNew) script.setUuid(null);
 				RPlugIn.displayLog(MessageFormat.format(Messages.RScriptDialog_SaveError, ex.getMessage()), ex);
 				session.getTransaction().rollback();
 				return;
