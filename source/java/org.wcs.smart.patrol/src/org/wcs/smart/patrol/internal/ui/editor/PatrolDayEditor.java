@@ -201,7 +201,10 @@ public class PatrolDayEditor extends EditorPart {
 						PatrolLegDay pld = plds.get(0);
 						final Section sec = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED);
 						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), pld.getPatrolLeg().getType().getName(), pld.getPatrolLeg().getMandate().getName(), SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
+						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), 
+								pld.getPatrolLeg().getType().getName(), 
+								pld.getPatrolLeg().getMandate() == null ? "" : pld.getPatrolLeg().getType().getName(), 
+										SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
 
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 						Composite comp2 = comp.createComposite(sec, toolkit);
