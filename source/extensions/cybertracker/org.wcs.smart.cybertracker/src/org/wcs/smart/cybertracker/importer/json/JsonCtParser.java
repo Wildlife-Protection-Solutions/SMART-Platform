@@ -736,7 +736,9 @@ public class JsonCtParser {
 			//determine file extension; assume jpeg by default
 			String ext = JPEG_EXT;
 			byte[] data = DatatypeConverter.parseBase64Binary(info.getData());
-			try(ImageInputStream iis = ImageIO.createImageInputStream(data)){
+			
+			try(ByteArrayInputStream bis = new ByteArrayInputStream(data);
+					ImageInputStream iis = ImageIO.createImageInputStream(bis)){
 				Iterator<ImageReader> iter = ImageIO.getImageReaders(iis);
 				if (iter.hasNext()) {
 					ImageReader ir = iter.next();
