@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Independent Incident Data Queue Processor Fragment
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.independentincident.nl
-Bundle-Version: 7.5.5
+Bundle-Version: 7.5.6
 Fragment-Host: org.wcs.smart.connect.dataqueue.independentincident;bundle-version="7.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart
