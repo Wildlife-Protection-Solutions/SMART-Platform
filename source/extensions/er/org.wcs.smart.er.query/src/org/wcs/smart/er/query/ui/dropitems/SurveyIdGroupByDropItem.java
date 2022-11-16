@@ -107,7 +107,7 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 					filters[1] = cb.equal(from.get("surveyDesign"), currentDesign); //$NON-NLS-1$
 				}
 				c.where(cb.and(filters));
-				c.orderBy(cb.asc(from.get("surveyDesign").get("keyId")), cb.desc(from.get("surveyDesign").get("startDate")), cb.desc(from.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				c.orderBy(cb.asc(from.get("surveyDesign").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				List<Survey> ss = s.createQuery(c).getResultList();
 				for (Survey survey : ss){
