@@ -96,7 +96,7 @@ public class DataModelTranslationExporter {
 				String key = createKey(a);
 				writeValues(key, a, lang, writer);
 			
-				if (a.getType() == AttributeType.LIST) {
+				if (a.getType().isList()) {
 					for (AttributeListItem ali : a.getAttributeList()) {
 						key = createKey(a, ali);
 						writeValues(key, ali, lang, writer);
