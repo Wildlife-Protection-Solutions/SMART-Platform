@@ -37,6 +37,7 @@ public class Sumaryi18n {
 		LAOS("lo", "Laos"),
 		MONGOLIAN("mn", "Mongolian"),
 		MALAY("ms", "Malay"),
+		BURMESE("my", "Burmese"),
 		PORTUGUESE("pt", "Portuguese"),
 		RUSSIAN("ru", "Russian"),
 		SWAHILI("sw", "Swahili"),

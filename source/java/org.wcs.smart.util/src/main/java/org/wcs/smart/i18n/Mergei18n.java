@@ -45,7 +45,8 @@ public class Mergei18n {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
-//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\paws",
 		
 		
     };
@@ -61,7 +62,8 @@ public class Mergei18n {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
-//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\paws\\translations",
     };
 	
     public static final String LINE_SEP = "\n";
