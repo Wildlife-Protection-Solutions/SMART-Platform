@@ -35,9 +35,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.IntegrateIncidentSource;
 import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor.IncidentLinkDataType;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -88,7 +90,10 @@ public class CustomIncidentQueryEngine extends CustomQueryEngine {
 			throw new SmartConnectException(Status.NOT_FOUND,
 					MessageFormat.format("No incident found with uuid {0}", wpuuid)); //$NON-NLS-1$
 		}
-		if (!wp.getSourceId().equals(IndepedentIncidentSource.KEY)) {
+		//TODO: add additional incident sources here if they are added to desktop
+		if (!wp.getSourceId().equals(IndepedentIncidentSource.KEY) && 
+				wp.getSourceId().equals(IntegrateIncidentSource.KEY) &&
+				wp.getSourceId().equals(SmartCollectWaypointSource.KEY) ) {
 			throw new SmartConnectException(Status.NOT_FOUND,
 					MessageFormat.format("No independent incident found with uuid {0}", wpuuid)); //$NON-NLS-1$
 		}
