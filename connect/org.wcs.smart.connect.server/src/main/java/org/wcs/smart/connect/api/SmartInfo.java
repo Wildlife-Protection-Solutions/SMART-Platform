@@ -46,7 +46,6 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -163,11 +162,7 @@ public class SmartInfo extends HttpServlet{
 		info.put("build-version", buildVersion); //$NON-NLS-1$
 		info.put("build-date", buildDate); //$NON-NLS-1$
 		
-		
-		return Response.ok(info.toJSONString()).build();
-		
+		return Response.ok(info.toJSONString()).build();	
 	}
-
-	
 	
 }
