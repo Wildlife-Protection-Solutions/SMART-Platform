@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.naming.NamingException;
@@ -42,6 +43,7 @@ import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
@@ -82,12 +84,22 @@ public class VersionInfo extends HttpServlet{
 		session.beginTransaction();
 		
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-				return;
-			}
+			
 			versions = QueryFactory.buildQuery(session, CaPluginVersion.class).list();
+			for (Iterator<CaPluginVersion> iterator = versions.iterator(); iterator.hasNext();) {
+				CaPluginVersion caversion = iterator.next();
+				if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, caversion.getConservationAreaUuid())) {
+					iterator.remove();
+				}
+			}
 			areas = QueryFactory.buildQuery(session, ConservationAreaInfo.class).list();
+			for (Iterator<ConservationAreaInfo> iterator = areas.iterator(); iterator.hasNext();) {
+				ConservationAreaInfo caversion = iterator.next();
+				if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, caversion.getUuid())) {
+					iterator.remove();
+				}
+			}
+			
 			plugins = QueryFactory.buildQuery(session, ConnectPluginVersion.class).list(); 
 			
 			Object[] data = (Object[]) session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
@@ -95,23 +107,28 @@ public class VersionInfo extends HttpServlet{
 			connectUpdated = data[1].toString();
 			filestoreVersion = data[2].toString();
 			 
+		
+			if (SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
+				//if admin include environment variables
+				try {
+					request.setAttribute("vars", EnvironmentVariables.INSTANCE.getAllEnvironmentVariables() ); //$NON-NLS-1$
+				} catch (NamingException e) {
+					e.printStackTrace();
+				}
+			}
 			
+			request.setAttribute("versions", versions); //$NON-NLS-1$
+			request.setAttribute("connectVersion", connectVersion); //$NON-NLS-1$
+			request.setAttribute("connectUpdated", connectUpdated); //$NON-NLS-1$
+			request.setAttribute("filestoreVersion", filestoreVersion); //$NON-NLS-1$
+			request.setAttribute("areas", areas); //$NON-NLS-1$
+			request.setAttribute("plugins", plugins); //$NON-NLS-1$
+			request.setAttribute("buildversion", buildVersion); //$NON-NLS-1$
+					
 		}finally{
 			session.getTransaction().rollback();
 		}
 		
-		try {
-			request.setAttribute("vars", EnvironmentVariables.INSTANCE.getAllEnvironmentVariables() ); //$NON-NLS-1$
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-		request.setAttribute("versions", versions); //$NON-NLS-1$
-		request.setAttribute("connectVersion", connectVersion); //$NON-NLS-1$
-		request.setAttribute("connectUpdated", connectUpdated); //$NON-NLS-1$
-		request.setAttribute("filestoreVersion", filestoreVersion); //$NON-NLS-1$
-		request.setAttribute("areas", areas); //$NON-NLS-1$
-		request.setAttribute("plugins", plugins); //$NON-NLS-1$
-		request.setAttribute("buildversion", buildVersion); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/info.jsp").forward(request, response); //$NON-NLS-1$
 		
