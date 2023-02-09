@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -371,6 +372,9 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 			Set<Icon> toload = new HashSet<>();
 			toload.add(attribute.getAttribute().getIcon());
 			
+			//ensure session for attribute is linked
+			attribute.setAttribute((Attribute) session.merge(attribute.getAttribute()));
+			
 			if (attribute.getCurrentList() != null) {
 				for (CmAttributeListItem li : attribute.getCurrentList()) {
 					if (li.getListItem().getIcon() != null) toload.add(li.getListItem().getIcon());
@@ -392,6 +396,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				}
 			}
 			if (attribute.getAttribute().getTree() != null) {
+				
 				attribute.getAttribute().getTree().forEach(e->{
 					if (e.getIcon() != null) toload.add(e.getIcon());
 					e.accept(vi->{
