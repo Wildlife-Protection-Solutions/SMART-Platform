@@ -109,57 +109,75 @@ public class UpgradeServlet extends HttpServlet {
 					return;
 				}
 				
+				boolean updated = false;
 				String version = (String) data[0];
+				//if (!version.equals(HibernateManager.DATABASE_VERSION)) {
+				//	request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
+				//	request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
+				//	return;
+				//}
 				if (!version.equals(HibernateManager.DATABASE_VERSION)) {
-					request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
-					request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
-					return;
+					if (version.equals("7.5.3") || version.equals("7.5.4")) { //$NON-NLS-1$ //$NON-NLS-2$
+						//7.5.4 should exist as we didn't upgrade version number
+						upgradeDb754to757(s);
+						updated = true;
+					}else {
+						request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
+						request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
+						return;	
+					}
+					
 				}
+				
 				String filestoreVersion = (String) data[1];
-				if (filestoreVersion.equals(HibernateManager.FILESTORE_VERSION)) {
+				if (!filestoreVersion.equals(HibernateManager.FILESTORE_VERSION)) {
+					updated = true;
+					if (filestoreVersion.equals("5.0.0")) { //$NON-NLS-1$
+						upgrade500to600(s);
+						upgrade600to620(s);
+						upgrade620to630(s);
+						upgrade630to700(s);
+						upgrade700to751(s);
+						upgrade751to752(s);
+					}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
+						upgrade600to620(s);
+						upgrade620to630(s);
+						upgrade630to700(s);
+						upgrade700to751(s);
+						upgrade751to752(s);
+					}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
+						upgrade620to630(s);
+						upgrade630to700(s);
+						upgrade700to751(s);
+						upgrade751to752(s);
+					}else if (filestoreVersion.equals("6.3.0")) { //$NON-NLS-1$
+						upgrade630to700(s);
+						upgrade700to751(s);
+						upgrade751to752(s);
+					}else if (filestoreVersion.equals("7.0.0")) { //$NON-NLS-1$
+						upgrade700to751(s);
+						upgrade751to752(s);
+					}else if (filestoreVersion.equals("7.5.1")) { //$NON-NLS-1$
+						upgrade751to752(s);
+					}else {
+						throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
+					}
+					
+					//update filestore version
+					String sql = "UPDATE connect.connect_version set filestore_version = :version"; //$NON-NLS-1$
+					s.createNativeQuery(sql)
+						.setParameter("version",  HibernateManager.FILESTORE_VERSION) //$NON-NLS-1$
+						.executeUpdate();
+				}
+				
+				s.getTransaction().commit();
+				
+				if (!updated) {
 					//we are up to date; there is nothing to do here
 					request.setAttribute("org.wcs.smart.upgrade", "NOACTION");  //$NON-NLS-1$//$NON-NLS-2$
 					request.getRequestDispatcher("WEB-INF/upgrade.jsp").forward(request, response); //$NON-NLS-1$
 					return;
 				}
-				
-				if (filestoreVersion.equals("5.0.0")) { //$NON-NLS-1$
-					upgrade500to600(s);
-					upgrade600to620(s);
-					upgrade620to630(s);
-					upgrade630to700(s);
-					upgrade700to751(s);
-					upgrade751to752(s);
-				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
-					upgrade600to620(s);
-					upgrade620to630(s);
-					upgrade630to700(s);
-					upgrade700to751(s);
-					upgrade751to752(s);
-				}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
-					upgrade620to630(s);
-					upgrade630to700(s);
-					upgrade700to751(s);
-					upgrade751to752(s);
-				}else if (filestoreVersion.equals("6.3.0")) { //$NON-NLS-1$
-					upgrade630to700(s);
-					upgrade700to751(s);
-					upgrade751to752(s);
-				}else if (filestoreVersion.equals("7.0.0")) { //$NON-NLS-1$
-					upgrade700to751(s);
-					upgrade751to752(s);
-				}else if (filestoreVersion.equals("7.5.1")) { //$NON-NLS-1$
-					upgrade751to752(s);
-				}else {
-					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
-				}
-				
-				//update filestore version
-				String sql = "UPDATE connect.connect_version set filestore_version = :version"; //$NON-NLS-1$
-				s.createNativeQuery(sql)
-					.setParameter("version",  HibernateManager.FILESTORE_VERSION) //$NON-NLS-1$
-					.executeUpdate();
-				s.getTransaction().commit();
 				
 				//we are up to date; there is nothing to do here
 				request.setAttribute("org.wcs.smart.upgrade", "UPGRADE_COMPLETE"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1158,5 +1176,51 @@ public class UpgradeServlet extends HttpServlet {
 			psiconfile.executeBatch();
 
 		}
+	}
+	
+	
+	private void upgradeDb754to757(Session s) {
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					//disable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+					
+					//https://app.assembla.com/spaces/smart-cs/tickets/realtime_list?ticket=3518
+					StringBuilder sb = new StringBuilder();
+					sb.append("with errors as ("); //$NON-NLS-1$
+					sb.append("select a.uuid AS list_item_uuid,  d.uuid AS correct_icon_uuid "); //$NON-NLS-1$
+					sb.append("from smart.dm_attribute_list a join smart.dm_attribute b on a.attribute_uuid = b.uuid ");  //$NON-NLS-1$
+					sb.append("join smart.icon c on c.uuid = a.icon_uuid ");  //$NON-NLS-1$
+					sb.append("LEFT JOIN smart.icon d ON d.keyid = c.keyid AND d.ca_uuid = b.ca_uuid "); //$NON-NLS-1$
+					sb.append("where b.ca_uuid != c.ca_uuid) "); //$NON-NLS-1$
+					sb.append("update smart.dm_attribute_list set icon_uuid = e.correct_icon_uuid "); //$NON-NLS-1$
+					sb.append("from errors e where e.list_item_uuid = smart.dm_attribute_list.uuid "); //$NON-NLS-1$
+					//System.out.println(sb.toString());
+					c.createStatement().executeUpdate(sb.toString());
+					
+					String[] sql = new String[] {
+						"update smart.waypoint set last_modified_by = null where last_modified_by not in (select uuid from smart.employee)", //$NON-NLS-1$
+						"alter table smart.waypoint add constraint wp_last_modified_by_fk foreign key (last_modified_by) references smart.employee(uuid)", //$NON-NLS-1$
+						
+						"update connect.connect_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+						"update connect.connect_version set version = '7.5.7', last_updated = now()" //$NON-NLS-1$
+					};
+					for (String s : sql) {
+						//System.out.println(s);
+						c.createStatement().executeUpdate(s);
+					}
+					
+					//re-enable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$
+					
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});	
 	}
 }
