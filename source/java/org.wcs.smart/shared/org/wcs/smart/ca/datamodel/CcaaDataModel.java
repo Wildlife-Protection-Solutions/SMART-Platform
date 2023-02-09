@@ -123,6 +123,7 @@ public abstract class CcaaDataModel {
 		List<AttributeListItem> items = (List<AttributeListItem>) q.list();
 		for (AttributeListItem li : items) {
 			li.setIcon( DataModelMerger.findIcon(session, findIconKey(li, session)) );
+			session.evict(li);
 		}
 		
 		//sort alphabetically as orders may be duplicated
