@@ -230,12 +230,12 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
+        	final List<Patrol> data = loadPatrolIds();
+        	
             if (viewer == null || viewer.getControl().isDisposed() || isDisposed()){
                 return Status.OK_STATUS;
             }
-            final List<Patrol> data = loadPatrolIds();
-
-            getDisplay().asyncExec(new Runnable(){
+            viewer.getControl().getDisplay().asyncExec(new Runnable(){
                 @Override
                 public void run() {
                     if (viewer.getControl().isDisposed()){
