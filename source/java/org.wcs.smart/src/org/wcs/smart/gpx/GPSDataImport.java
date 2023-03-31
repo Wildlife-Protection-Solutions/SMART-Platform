@@ -224,7 +224,10 @@ public class GPSDataImport {
 		} else if (wptType.getCmt() != null) {
 			String[] formats = new String[] {
 					"dd-MMM-yy h:mm:ssa", 	// am-pm //$NON-NLS-1$
-					"dd-MMM-yy H:mm:ss" //$NON-NLS-1$
+					"dd-MMM-yy h:mm:ss a", 	// am-pm //$NON-NLS-1$
+					"dd-MMM-yy H:mm:ss", //$NON-NLS-1$
+					"dd/MM/yyyy h:mm:ssa", //$NON-NLS-1$
+					"dd/MM/yyyy h:mm:ss a", //$NON-NLS-1$
 			};
 			for (String f : formats) {
 				try {
