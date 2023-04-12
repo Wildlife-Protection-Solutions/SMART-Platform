@@ -246,11 +246,17 @@ public class JsonCtParser {
 	/**
 	 * Determines if the time represented by date1 is between the times
 	 * represented by date2 and date3.  Only compares time parts not
-	 * date parts.
+	 * date parts. 
+	 * Also drop milliseconds and only compares seconds - see #3530.
 	 * @return
 	 */
 	public static boolean isTimeBetween(LocalTime d1, LocalTime d2, LocalTime d3){
 		if (d3 == null) d3 = LocalTime.MAX;
+		
+		d1 = d1.withNano(0);
+		d2 = d2.withNano(0);
+		d3 = d3.withNano(0);
+		
 		return ((d1.equals(d2) || d1.isAfter(d2)) && 
 				(d1.equals(d3) || d1.isBefore(d3)));
 	}
