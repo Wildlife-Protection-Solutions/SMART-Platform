@@ -144,7 +144,11 @@ public class Packagei18nNew {
 						fileName.equals("messages_" + lang + ".properties") ||
 						fileName.equals("bundle_" + lang + ".properties") ||
 						fileName.endsWith("_" + lang + ".html")) {
-					
+				
+//				if (fileName.equals("plugin.properties") ||
+//						fileName.equals("messages.properties") ||
+//						fileName.equals("bundle.properties") ||) {
+//					
 					
 					Path toFile = getToPath(sourceDir,  file, outputPath);
 					
