@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.core.feature"
       label="SMART Mobile Module (Internal)"
-      version="7.5.6.qualifier"
+      version="7.5.7.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.cybertracker"
       license-feature="org.wcs.smart.license.feature"

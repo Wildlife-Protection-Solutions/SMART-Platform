@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.wcs.smart.cybertracker.feature">
-      <category name="smartmobile"/>
-   </feature>
-   <feature id="org.wcs.smart.er.feature">
-      <category name="ecologicalrecords"/>
-   </feature>
    <feature id="org.wcs.smart.feature">
       <category name="smart"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.feature">
+      <category name="smartmobile"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
