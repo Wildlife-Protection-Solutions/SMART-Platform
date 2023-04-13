@@ -43,6 +43,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="displayMode" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="instantGps" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="photoFirst" type="{http://www.w3.org/2001/XMLSchema}boolean" />
+ *       &lt;attribute name="useEarthRanger" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="iconSet" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -86,6 +87,8 @@ public class ConfigurableModel {
     protected Boolean instantGps;
     @XmlAttribute(name = "photoFirst")
     protected Boolean photoFirst;
+    @XmlAttribute(name = "useEarthRanger")
+    protected Boolean useEarthRanger;
     @XmlAttribute(name = "iconSet")
     protected String iconSet;
 
@@ -440,6 +443,30 @@ public class ConfigurableModel {
         this.photoFirst = value;
     }
 
+    /**
+     * Gets the value of the useEarthRanger property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isUseEarthRanger() {
+        return useEarthRanger;
+    }
+
+    /**
+     * Sets the value of the useEarthRanger property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setUseEarthRanger(Boolean value) {
+        this.useEarthRanger = value;
+    }
+    
     /**
      * Gets the value of the iconSet property.
      * 

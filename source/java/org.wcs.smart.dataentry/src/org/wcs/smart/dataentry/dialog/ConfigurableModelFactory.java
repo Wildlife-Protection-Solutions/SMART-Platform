@@ -94,6 +94,7 @@ public class ConfigurableModelFactory {
 		clone.setInstantGps(cm.isInstantGps());
 		clone.setPhotoFirst(cm.isPhotoFirst());
 		clone.setIconSet(cm.getIconSet());
+		clone.setUseEarthRanger(cm.getUseEarthRanger());
 		
 		ConfigurableModelCloneResult cloneResult = new ConfigurableModelCloneResult(clone);
 		Map<UUID, UuidItem> o2iMap = cloneResult.getOriginal2CloneItemMap();

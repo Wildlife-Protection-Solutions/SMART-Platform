@@ -508,6 +508,8 @@ public class DataModelApi extends HttpServlet{
 		String caName;
 		String caId;
 		String name;
+		boolean useEarthRanger;
+		
 		List<Translation> translations;
 		
 		public ConfigurableModelProxy(ConfigurableModel cm) {
@@ -516,7 +518,7 @@ public class DataModelApi extends HttpServlet{
 			this.caName = cm.getConservationArea().getName();
 			this.caId = cm.getConservationArea().getId();
 			this.name = cm.getName();
-			
+			this.useEarthRanger = cm.getUseEarthRanger();
 			this.translations= new ArrayList<>();
 			for (Label l : cm.getNames()) {
 				this.translations.add(new Translation(l));
@@ -544,6 +546,10 @@ public class DataModelApi extends HttpServlet{
 			return this.caId;
 		}
 		
+		@JsonProperty("use_with_earth_ranger")
+		public Boolean getUseEarthRanger() {
+			return this.useEarthRanger;
+		}
 		public List<Translation> getTranslations(){
 			return this.translations;
 		}

@@ -206,6 +206,11 @@ public class CmXmlToSmartImporter {
 			cm.setDisplayMode(getDisplayMode(xmlCm.getDisplayMode()));
 			cm.setInstantGps(xmlCm.isInstantGps());
 			cm.setPhotoFirst(xmlCm.isPhotoFirst());
+			if (xmlCm.isUseEarthRanger() != null) {
+				cm.setUseEarthRanger(xmlCm.isUseEarthRanger());
+			}else {
+				cm.setUseEarthRanger(Boolean.FALSE);
+			}
 			
 			//signatures
 			List<SignatureType> types = SignatureTypeManager.INSTANCE.getTypes(session,  SmartDB.getCurrentConservationArea());
@@ -658,8 +663,16 @@ public class CmXmlToSmartImporter {
 				CmAttribute temp = new CmAttribute();
 				temp.setUuid(UuidUtils.stringToUuid( xmlAttr.getId()) );
 				String helpFileName = temp.getHelpImageFileRootName() + "." + cmAttr.getHelpFormat(); //$NON-NLS-1$
-				Path f = fileLookup.get(helpFileName);
-				if (f != null && Files.exists(f)) cmAttr.setImportHelpFile(f);
+				if (fileLookup == null) {
+					warnings.add(Messages.CmXmlToSmartImporter_NoHelpFiles);
+				}else {
+					Path f = fileLookup.get(helpFileName);
+					if (f != null && Files.exists(f)) {
+						cmAttr.setImportHelpFile(f);
+					}else {
+						warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_HelpFileNotFound, helpFileName));
+					}
+				}
 			}
 			if ( (xmlAttr.isIsCustomImage() == null || xmlAttr.isIsCustomImage() == Boolean.TRUE) && xmlAttr.getImageFile() != null) {
 				cmAttr.setImageFile(findFile(xmlAttr.getImageFile()));

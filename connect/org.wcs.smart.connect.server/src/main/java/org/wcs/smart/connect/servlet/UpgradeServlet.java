@@ -1205,6 +1205,15 @@ public class UpgradeServlet extends HttpServlet {
 						"update smart.waypoint set last_modified_by = null where last_modified_by not in (select uuid from smart.employee)", //$NON-NLS-1$
 						"alter table smart.waypoint add constraint wp_last_modified_by_fk foreign key (last_modified_by) references smart.employee(uuid)", //$NON-NLS-1$
 						
+						//quick link support
+						"CREATE TABLE smart.quicklink(uuid uuid not null, ca_uuid uuid not null, url varchar(32000), uiorder smallint, employee_uuid uuid, primary key (uuid) )", //$NON-NLS-1$
+						"ALTER TABLE smart.quicklink ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) on delete cascade on update restrict deferrable initially deferred", //$NON-NLS-1$
+						"ALTER TABLE smart.quicklink ADD FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) on delete cascade on update restrict deferrable initially deferred", //$NON-NLS-1$
+						"CREATE TRIGGER trg_quicklink AFTER INSERT OR UPDATE OR DELETE ON smart.quicklink FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
+						
+						//earth ranger
+						"ALTER TABLE smart.configurable_model add column use_earth_ranger boolean default false", //$NON-NLS-1$
+						
 						"update connect.connect_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.connect_version set version = '7.5.7', last_updated = now()" //$NON-NLS-1$

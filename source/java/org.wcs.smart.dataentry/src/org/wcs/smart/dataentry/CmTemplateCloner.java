@@ -95,6 +95,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clone.setDisplayMode(cm.getDisplayMode());
 		clone.setInstantGps(cm.isInstantGps());
 		clone.setPhotoFirst(cm.isPhotoFirst());
+		clone.setUseEarthRanger(cm.getUseEarthRanger());
 		
 		//look for iconset in new ca
 		if (clone.getIconSet() != null) {

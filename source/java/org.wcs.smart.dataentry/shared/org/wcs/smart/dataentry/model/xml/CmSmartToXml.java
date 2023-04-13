@@ -150,6 +150,8 @@ public class CmSmartToXml {
 		if (cmModel.getIconSet() != null) xmlModel.setIconSet(cmModel.getIconSet().getKeyId());
 		xmlModel.setInstantGps(cmModel.isInstantGps());
 		xmlModel.setPhotoFirst(cmModel.isPhotoFirst());
+		xmlModel.setUseEarthRanger(cmModel.getUseEarthRanger());
+		
 		monitor.worked(1);
 		
 		if (monitor.isCanceled()) throw new OperationCanceledException();

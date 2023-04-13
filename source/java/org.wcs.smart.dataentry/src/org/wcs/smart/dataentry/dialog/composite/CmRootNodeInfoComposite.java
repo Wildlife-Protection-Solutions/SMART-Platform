@@ -61,6 +61,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 	private Button btnInstantGps;
 	private Button btnPhotoFirst;
+	private Button btnUseEr;
 	private ComboViewer cmbIconSet;
 	
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
@@ -136,6 +137,19 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
             }
         });
         
+        
+        Label lblEr= new Label(container, SWT.NONE);
+        lblEr.setText(Messages.CmRootNodeInfoComposite_UseErIntegration);
+        //lblEr.setToolTipText();
+        btnUseEr = new Button(container, SWT.CHECK);
+        btnUseEr.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                getSourceObject().getModel().setUseEarthRanger(btnUseEr.getSelection());
+                fireModelChanged();
+            }
+        });
+        
         addSourceObjectChangedListener(new ISourceObjectChangedListener() {
             @Override
             public void sourceObjectChanged(Object newObject, Language language) {
@@ -145,6 +159,9 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
                 }
                 if (btnPhotoFirst != null) {
                 	btnPhotoFirst.setSelection(cm.isPhotoFirst());
+                }
+                if (btnUseEr != null) {
+                	btnUseEr.setSelection(cm.getUseEarthRanger());
                 }
                 if (cmbIconSet != null) {
                 	if (cm.getIconSet() != null) {

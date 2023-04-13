@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/dataentry" 
-xmlns:smrt="http://www.smartconservationsoftware.org/xml/1.0/dataentry"
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.1/dataentry" 
+xmlns:smrt="http://www.smartconservationsoftware.org/xml/1.1/dataentry"
 elementFormDefault="qualified">
   	
     <element name="ConfigurableModel" type="smrt:ConfigurableModel"></element>
@@ -49,6 +49,7 @@ elementFormDefault="qualified">
     	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="instantGps" type="boolean" />
     	<attribute name="photoFirst" type="boolean" />
+    	<attribute name="useEarthRanger" type="boolean" />
     	<attribute name="iconSet" type="string"></attribute>
     </complexType>
 

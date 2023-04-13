@@ -58,6 +58,7 @@ import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.QuickLink;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.SmartStyle;
@@ -350,7 +351,7 @@ public enum SmartTable {
 	PLANTARGET(PlanTarget.class,null),
 	PROJECTION(Projection.class,null),
 	QUERYFOLDER(QueryFolder.class,null),
-	QUICKLINK(Quicklink.class, null),
+	CONNECTQUICKLINK(Quicklink.class, null),
 	RANK(Rank.class,".agency.conservationArea"),
 	REPORT(Report.class, null),
 	REPORTFOLDER(ReportFolder.class, null),
@@ -497,6 +498,7 @@ public enum SmartTable {
 	COMMUNITY_PACKAGE(SmartCollectPackage.class, null),
 	
 	SIGNATURE_TYPE(SignatureType.class, null),
+	CAQUICKLINK(QuickLink.class, null),
 	;
 	
 	public Class<?> hibernateClass;

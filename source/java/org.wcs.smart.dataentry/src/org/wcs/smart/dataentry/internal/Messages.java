@@ -70,6 +70,7 @@ public class Messages extends NLS {
 	public static String CmRootNodeInfoComposite_NoneOption;
 	public static String CmRootNodeInfoComposite_PhotoFirst;
 	public static String CmRootNodeInfoComposite_PhotoFirstTooltip;
+	public static String CmRootNodeInfoComposite_UseErIntegration;
 	public static String CmSmartToXmlConverter_invalidVisibleWhenExpression;
 	public static String CmSmartToXmlConverter_ProcessAttributeConfigs;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
@@ -87,6 +88,7 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_DefaultConfigName;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
 	public static String CmXmlToSmartImporter_ExtractingZip;
+	public static String CmXmlToSmartImporter_HelpFileNotFound;
 	public static String CmXmlToSmartImporter_ImportingConfigs;
 	public static String CmXmlToSmartImporter_ImportingFromXml;
 	public static String CmXmlToSmartImporter_ImportingListItems;
@@ -96,6 +98,7 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_InvalidXml;
 	public static String CmXmlToSmartImporter_LanguageSelect_Message;
 	public static String CmXmlToSmartImporter_LanguageSelect_Title;
+	public static String CmXmlToSmartImporter_NoHelpFiles;
 	public static String CmXmlToSmartImporter_Problem_Attribute;
 	public static String CmXmlToSmartImporter_Problem_Category;
 	public static String CmXmlToSmartImporter_Problem_CategoryHkey;
