@@ -197,6 +197,7 @@ public class DeleteEntityTypeHandler {
 								boolean deletel = DataModelManager.INSTANCE.validateDelete(type2.getDmAttribute(), new NullProgressMonitor(), session);
 								if (deletel){
 									DataModelManager.INSTANCE.fireDeleteListener(session, type2.getDmAttribute());
+									DataModelManager.INSTANCE.updateLastModified(session);
 									session.delete(type2.getDmAttribute());
 								}
 							}
@@ -249,6 +250,7 @@ public class DeleteEntityTypeHandler {
 							if (DeleteManager.canDelete(ca, session)){
 								session.delete(ca);
 								DataModelManager.INSTANCE.fireDeleteListener(session, ca);
+								DataModelManager.INSTANCE.updateLastModified(session);
 							}else{
 								//we cannot delete so rollback and exit
 								session.getTransaction().rollback();
@@ -258,6 +260,7 @@ public class DeleteEntityTypeHandler {
 						}
 						
 						session.delete(dmAttribute);
+						DataModelManager.INSTANCE.updateLastModified(session);
 						DataModelManager.INSTANCE.fireDeleteListener(session, dmAttribute);
 					}else{
 						//we cannot delete so we want to rollback and not delete anything

@@ -429,6 +429,9 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 				itemToDelete.getAttribute().getAttributeList().remove(itemToDelete);
 				itemToDelete.setAttribute(null);
 				s.flush();
+				
+				DataModelManager.INSTANCE.updateLastModified(s);
+				
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

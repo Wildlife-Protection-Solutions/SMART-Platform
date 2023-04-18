@@ -142,9 +142,12 @@ public class NewEntityDialog extends SmartStyledTitleDialog {
 				newEntity.setAttributeListItem(ai);
 				
 				session.saveOrUpdate(newEntity);
+			
+				DataModelManager.INSTANCE.updateLastModified(session);
 				
 			}else{
 				AttributeListItem ai = (AttributeListItem) session.load(AttributeListItem.class, newEntity.getAttributeListItem().getUuid());
+				String currentName = ai.getName();
 				
 				session.saveOrUpdate(newEntity);
 				eaComp.updateEntity();
@@ -154,8 +157,12 @@ public class NewEntityDialog extends SmartStyledTitleDialog {
 				ai.updateName(SmartDB.getCurrentLanguage(), newEntity.getId());
 				ai.setIsActive(newEntity.getStatus() == Status.ACTIVE);
 				
+				//only fire if attribute list item names are different
+				if (!currentName.equals(ai.getName())) DataModelManager.INSTANCE.updateLastModified(session);
 			}
 		
+			
+			
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			EntityPlugIn.displayLog(Messages.NewEntityDialog_SaveEntityError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

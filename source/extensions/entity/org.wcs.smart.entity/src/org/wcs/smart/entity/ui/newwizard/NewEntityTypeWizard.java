@@ -77,6 +77,8 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 				session.beginTransaction();
 				session.saveOrUpdate(newType.getDmAttribute());
 				session.save(newType);
+				
+				DataModelManager.INSTANCE.updateLastModified(session);
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				session.getTransaction().rollback();

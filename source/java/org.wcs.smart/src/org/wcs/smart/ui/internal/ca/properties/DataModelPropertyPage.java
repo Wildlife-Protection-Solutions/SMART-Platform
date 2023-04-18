@@ -131,7 +131,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private CategoryInfoPanel catInfoPanel;
 	private AttributeInfoPanel attInfoPanel;
 	private Composite infoInnerPanel;
-	private Composite emptyComposite;
+	private Composite rootComposite;
+	private Label lblLastModified;
 
 	private Button btnModifyElement;
 	
@@ -440,8 +441,18 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		infoInnerPanel.setLayout(new StackLayout());
 		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
-		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		rootComposite = new Composite(infoInnerPanel, SWT.NONE);
+		rootComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		rootComposite.setLayout(new GridLayout(2, false));
+		((GridLayout)rootComposite.getLayout()).marginWidth = 0;
+		((GridLayout)rootComposite.getLayout()).marginHeight = 0;
+		
+		Label l = new Label(rootComposite, SWT.NONE);
+		l.setText("Last Modified:");
+		
+		lblLastModified = new Label(rootComposite, SWT.NONE);
+		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblLastModified.setText(DataModelManager.INSTANCE.getLastModified(getSession()));
 		
 		catInfoPanel = new CategoryInfoPanel(infoInnerPanel, SWT.NONE, false, false);
 		
@@ -752,6 +763,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					try {
+						DataModelManager.INSTANCE.updateLastModified(session);
 						currentTransaction.commit();
 						DataModelManager.INSTANCE.fireChangeListeners();
 						
@@ -773,6 +785,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getLocalizedMessage(), ex);
 			return false;
 		}
+		
+		lblLastModified.setText(DataModelManager.INSTANCE.getLastModified(session));
 		return true;
 		
 	}
@@ -1229,14 +1243,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			btnDisableElement.setEnabled(true);
 		} else	if (o instanceof DataModelContentProvider.RootNode){
 			btnAddCategory.setEnabled(true);
-			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			((StackLayout)infoInnerPanel.getLayout()).topControl = rootComposite;
 			btnAddAttribute.setEnabled(false);
 			
 			btnModifyElement.setEnabled(false);
 			btnDisableElement.setEnabled(false);
 			btnDeleteElement.setEnabled(false);
 		} else{
-			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			((StackLayout)infoInnerPanel.getLayout()).topControl = rootComposite;
 			
 			btnAddCategory.setEnabled(false);
 			btnAddAttribute.setEnabled(false);
