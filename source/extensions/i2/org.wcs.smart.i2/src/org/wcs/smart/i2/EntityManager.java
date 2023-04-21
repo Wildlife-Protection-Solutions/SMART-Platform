@@ -122,13 +122,19 @@ public enum EntityManager {
 		
 	}
 	
-	
-	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
+	/**
+	 * 
+	 * @param entity
+	 * @param session
+	 * @return true if data model modified false otherwise
+	 * @throws Exception
+	 */
+	public boolean deleteEntity(IntelEntity entity, Session session) throws Exception{
 
 		//first see if the entity is linked to a data model attribute list item
 		//then determine if that list item can be deleted
 		//if ok then delete list item othrwise throw exception
-		
+		boolean isDmModified = false;
 		if (entity.getDmAttributeListItem() != null) {
 			
 			try {
@@ -140,6 +146,7 @@ public enum EntityManager {
 			}
 			
 			session.delete(entity.getDmAttributeListItem());
+			isDmModified = true;
 		}
 		
 		//delete all record attribute links 
@@ -176,6 +183,8 @@ public enum EntityManager {
 				}
 			}
 		}
+		
+		return isDmModified;
 	}
 	
 

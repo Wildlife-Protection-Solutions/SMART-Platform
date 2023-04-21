@@ -37,6 +37,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -119,6 +120,7 @@ public enum InternalEntityManager {
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try{
+							boolean dmModified = false;
 							for (UUID entityUuid : entitiesToDelete){
 								IntelEntity entity = s.get(IntelEntity.class, entityUuid);
 								
@@ -128,9 +130,12 @@ public enum InternalEntityManager {
 											MessageFormat.format(Messages.InternalEntityManager_InvalidPermissions, entity.getIdAttributeAsText()));
 									continue;
 								}
-								EntityManager.INSTANCE.deleteEntity(entity, s);
+								dmModified = dmModified || EntityManager.INSTANCE.deleteEntity(entity, s);
 								deletedItems.add(entity);
 								monitor.worked(1);
+							}
+							if (dmModified) {
+								DataModelManager.INSTANCE.updateLastModified(s);
 							}
 							s.getTransaction().commit();
 						}catch (Exception ex){

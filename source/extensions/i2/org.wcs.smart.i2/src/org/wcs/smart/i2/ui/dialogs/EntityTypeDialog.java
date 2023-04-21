@@ -285,8 +285,10 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						
 						s.beginTransaction();
 						try {
+							boolean dmModified = false;
 							
 							if (type.getDmAttribute() != null && type.getDmAttribute().getUuid() == null) {
+								dmModified = true;
 								//create new data model attribute and configure list items
 								s.saveOrUpdate(type.getDmAttribute());
 								s.saveOrUpdate(type);
@@ -309,6 +311,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 									}
 								}
 							}else if (type.getDmAttribute() != null && idAttributeModified) {
+								dmModified = true;
 								s.saveOrUpdate(type);
 								
 								//if the ID attribute was updated so we want to update list values for all entities
@@ -351,7 +354,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 												.setParameter("type",  type).scroll(); //$NON-NLS-1$
 								while(scroll.next()) {
 									IntelEntity ie = (IntelEntity) scroll.get(0);
-									ie.updateActiveValue();
+									dmModified = dmModified || ie.updateActiveValue();
 									s.flush();
 									sub.split(1);
 								}
@@ -457,6 +460,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								type.setProfiles(currentprofiles);
 								throw new Exception(v);
 							}
+							
+							if (dmModified) DataModelManager.INSTANCE.updateLastModified(s);
 							
 							s.getTransaction().commit();
 							
