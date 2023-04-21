@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2023 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,22 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.ui;
+package org.wcs.smart.incident;
 
-import org.wcs.smart.incident.IntegrateIncidentSource;
+import org.eclipse.ui.IStartup;
 
 /**
- * UI Provider for SMART Integrate Incident
+ * 
+ * This class forces the plugin to load on startup so it can register
+ * the patrol listeners which are required for the integrate incident 
+ * processing
  * 
  * @author Emily
+ * @since 7.5.7
  *
  */
-public class IntegrateIncidentSourceUiProvider extends AbstractIncidentSourceUiProvider {
+public class StartUp implements IStartup {
 
 	@Override
-	protected String getSourceKey() {
-		return IntegrateIncidentSource.KEY;
+	public void earlyStartup() {
 	}
-	
 
 }

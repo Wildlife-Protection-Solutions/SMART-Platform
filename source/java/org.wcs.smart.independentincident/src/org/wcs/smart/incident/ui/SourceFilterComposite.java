@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.text.Collator;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -71,7 +74,9 @@ public class SourceFilterComposite extends Composite {
 				return ((IIncidentProvider)element).getName();
 			}
 		});
-		viewer.setInput(IncidentManager.getInstance().getIncidentProviders());
+		List<IIncidentProvider> providers = new ArrayList<>(IncidentManager.getInstance().getIncidentProviders());
+		providers.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		viewer.setInput(providers);
 		
 	}
 

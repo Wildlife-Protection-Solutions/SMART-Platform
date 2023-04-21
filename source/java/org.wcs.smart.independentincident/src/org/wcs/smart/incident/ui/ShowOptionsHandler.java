@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,20 +21,29 @@
  */
 package org.wcs.smart.incident.ui;
 
-import org.wcs.smart.incident.IntegrateIncidentSource;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.swt.widgets.Shell;
 
 /**
- * UI Provider for SMART Integrate Incident
+ * Handler for displaying patrol options dialog.
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public class IntegrateIncidentSourceUiProvider extends AbstractIncidentSourceUiProvider {
+@SuppressWarnings("restriction")
+public class ShowOptionsHandler {
 
-	@Override
-	protected String getSourceKey() {
-		return IntegrateIncidentSource.KEY;
+	@Execute
+	public void execute(Shell activeShell) {
+		IncidentOptionsPropertyPage dialog = new IncidentOptionsPropertyPage(activeShell);
+		dialog.open();
+		return;
 	}
 	
-
+	public static class ShowOptionsHandlerWrapper extends DIHandler<ShowOptionsHandler>{
+		public ShowOptionsHandlerWrapper(){
+			super(ShowOptionsHandler.class);
+		}
+	}
 }

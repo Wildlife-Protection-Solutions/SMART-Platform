@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.incident.ui;
 
-import org.wcs.smart.incident.IntegrateIncidentSource;
+import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
 
 /**
  * UI Provider for SMART Integrate Incident
@@ -29,12 +29,10 @@ import org.wcs.smart.incident.IntegrateIncidentSource;
  * @author Emily
  *
  */
-public class IntegrateIncidentSourceUiProvider extends AbstractIncidentSourceUiProvider {
+public class IntegratePatrolLinkIncidentSourceUiProvider extends AbstractIncidentSourceUiProvider {
 
 	@Override
 	protected String getSourceKey() {
-		return IntegrateIncidentSource.KEY;
+		return IntegratePatrolLinkIncidentSource.KEY;
 	}
-	
-
 }

@@ -169,7 +169,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelListViewer = new TableViewer(temp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(getModelsList().toArray());
-		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider(true));
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

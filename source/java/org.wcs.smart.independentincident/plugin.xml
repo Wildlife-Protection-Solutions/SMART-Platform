@@ -40,6 +40,14 @@
             class="org.wcs.smart.incident.IntegrateIncidentSource"
             ui_provider="org.wcs.smart.incident.ui.IntegrateIncidentSourceUiProvider">
       </ObservationSource>
+      <ObservationSource
+            class="org.wcs.smart.incident.IntegratePatrolIncidentSource"
+            ui_provider="org.wcs.smart.incident.ui.IntegratePatrolIncidentSourceUiProvider">
+      </ObservationSource>
+      <ObservationSource
+            class="org.wcs.smart.incident.IntegratePatrolLinkIncidentSource"
+            ui_provider="org.wcs.smart.incident.ui.IntegratePatrolLinkIncidentSourceUiProvider">
+      </ObservationSource>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -549,6 +557,14 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.fielddata?after=org.wcs.smart.observation.options">
+         <command
+               commandId="org.wcs.smart.incident.options"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -609,6 +625,10 @@
                name="Single Export Or Multiple Export"
                optional="true">
          </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.incident.options"
+            name="%command.name.options">
       </command>
    </extension>
    <extension
@@ -797,6 +817,22 @@
             class="org.wcs.smart.incident.birt.ui.ExportIncidentPdfHandler$ExportIncidentPdfHandlerWrapper"
             commandId="org.wcs.smart.incident.pdf">
       </handler>
+      <handler
+            class="org.wcs.smart.incident.ui.ShowOptionsHandler$ShowOptionsHandlerWrapper"
+            commandId="org.wcs.smart.incident.options">
+         <activeWhen>
+            <and>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -822,6 +858,12 @@
       </incidentprovider>
       <incidentprovider
             class="org.wcs.smart.incident.IntegrateIncidentProvider">
+      </incidentprovider>
+      <incidentprovider
+            class="org.wcs.smart.incident.IntegratePatrolIncidentProvider">
+      </incidentprovider>
+      <incidentprovider
+            class="org.wcs.smart.incident.IntegratePatrolLinkIncidentProvider">
       </incidentprovider>
    </extension>
    <extension
@@ -1141,6 +1183,20 @@
             properties="editor"
             type="java.lang.Object">
       </propertyTester>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.wcs.smart.incident.StartUp">
+      </startup>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+      <class
+            ca_property=".waypoint.ca_uuid"
+            class="org.wcs.smart.incident.model.IncidentWaypoint"
+            supportsCcaa="false">
+      </class>
    </extension>
 
 </plugin>
