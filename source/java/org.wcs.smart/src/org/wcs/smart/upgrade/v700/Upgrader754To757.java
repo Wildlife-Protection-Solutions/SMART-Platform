@@ -103,6 +103,7 @@ public class Upgrader754To757 implements IDatabaseUpgrader {
 			"create table smart.incident_waypoint(wp_uuid char(16) for bit data not null, patrol_uuid char(16) for bit data not null, primary key (wp_uuid, patrol_uuid) )", //$NON-NLS-1$
 			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_wpuuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
 			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_patroluuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_wpuuid_unq UNIQUE(wp_uuid)", //$NON-NLS-1$
 
 		};	
 

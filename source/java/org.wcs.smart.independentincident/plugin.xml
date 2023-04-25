@@ -1193,7 +1193,7 @@
    <extension
          point="org.wcs.smart.hibernate.libs.mapping">
       <class
-            ca_property=".waypoint.ca_uuid"
+            ca_property=".waypoint.conservationArea"
             class="org.wcs.smart.incident.model.IncidentWaypoint"
             supportsCcaa="false">
       </class>
