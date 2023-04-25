@@ -33,8 +33,13 @@ import java.util.UUID;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -50,6 +55,8 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -59,6 +66,34 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class CustomPatrolQueryEngine extends CustomQueryEngine {
+	
+	public List<PatrolLeg> getPatrolLegByUuid(Session session, String patrolLegUuid, Set<UUID> conservationAreas) {
+		UUID puuid = UuidUtils.stringToUuid(patrolLegUuid);
+		return getPatrolLegByPatrolUuid(session, puuid, conservationAreas);
+	}
+
+	public List<PatrolLeg> getPatrolLegByPatrolUuid(Session session, UUID patrolLegUuid, Set<UUID> conservationAreas) {
+		PatrolLeg p = session.get(PatrolLeg.class, patrolLegUuid);
+		if (p == null || !conservationAreas.contains(p.getPatrol().getConservationArea().getUuid()))
+			throw new SmartConnectException(Status.NOT_FOUND,
+					MessageFormat.format("No patrol leg with uuid {0}", patrolLegUuid)); //$NON-NLS-1$
+		return Collections.singletonList(p);
+	}
+	
+	public List<PatrolLeg> getPatrolLegByClientUuid(Session session, String clientPatrolLegUuid, Set<UUID> conservationAreas) {
+
+		UUID clientuuid = UuidUtils.stringToUuid(clientPatrolLegUuid);
+		DataLink link = session
+				.createQuery("FROM DataLink WHERE providerId = :clientUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+				.setParameter("clientUuid", clientuuid)  //$NON-NLS-1$
+				.setParameter("dataType", PatrolLinkDataType.LEG.getKey()) //$NON-NLS-1$
+				.uniqueResult();
+		if (link == null)
+			throw new SmartConnectException(Status.NOT_FOUND,
+					MessageFormat.format("No patrol leg found with link to client id {0}", clientPatrolLegUuid)); //$NON-NLS-1$
+
+		return getPatrolLegByPatrolUuid(session, link.getSmartId(), conservationAreas);
+	}
 	
 	public List<Patrol> getPatrolsByPatrolUuid(Session session, String patrolUuid, Set<UUID> conservationAreas) {
 		UUID puuid = UuidUtils.stringToUuid(patrolUuid);
@@ -162,11 +197,17 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		return getWaypointsByPatrolLegUuid(session, link.getSmartId(), conservationAreas);
 	}
 
-	public List<PatrolWaypoint> getWaypointsByPatrolId(Session session, String patrolId, Set<UUID> conservationAreas) {
-
-		List<Patrol> patrols = session.createQuery("FROM Patrol WHERE id = :id AND conservationArea.uuid IN (:uuids) ", Patrol.class) //$NON-NLS-1$
+	
+	public List<Patrol> getPatrolsById(Session session, String patrolId, Set<UUID> conservationAreas){
+		return session.createQuery("FROM Patrol WHERE id = :id AND conservationArea.uuid IN (:uuids) ", Patrol.class) //$NON-NLS-1$
 				.setParameterList("uuids", conservationAreas) //$NON-NLS-1$
 				.setParameter("id", patrolId).list(); //$NON-NLS-1$
+		
+	}
+	
+	public List<PatrolWaypoint> getWaypointsByPatrolId(Session session, String patrolId, Set<UUID> conservationAreas) {
+
+		List<Patrol> patrols = getPatrolsById(session, patrolId, conservationAreas); 
 
 		List<PatrolWaypoint> waypoints = new ArrayList<>();
 		for (Patrol p : patrols) {
@@ -201,6 +242,23 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		
 		return pws;
 	}
+	
+	public List<Track> getPatrolTracksByDate(Session session, LocalDate min, LocalDate max, Set<UUID> conservationAreas){
+		Query<Track> query = null;
+		if (max == null) {
+			query = session.createQuery("FROM Track t WHERE t.patrolLegDay.date = :date ", Track.class) //$NON-NLS-1$
+					.setParameter("date",  min); //$NON-NLS-1$
+		}else {
+			query = session.createQuery("FROM Track t WHERE t.patrolLegDay.date between :min and :max ", Track.class) //$NON-NLS-1$
+					.setParameter("min",  min) //$NON-NLS-1$
+					.setParameter("max",  max); //$NON-NLS-1$
+		}
+		List<Track> tracks = query.list();
+		if (tracks.size() > MAX_RESULTS) throw TOO_MANY_ROWS;
+		
+		return tracks;		
+	}
+	
 	
 	
 	public List<PatrolWaypoint> getWaypointsByPatrolWaypointDate(Session session, LocalDate min, LocalDate max, Set<UUID> conservationAreas){
@@ -300,6 +358,8 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		return items;
 		
 	}
+
+	
 	public JSONObject convertToJSON(PatrolWaypoint pw, Session session, Locale l) {
 		JSONObject feature = new JSONObject();
 		feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -473,6 +533,129 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			jwp.put(CLIENT_UUID_FIELD, UuidUtils.uuidToString(link.getProviderId()));
 		}
 		props.put(WAYPOINT_FIELD,jwp);
+		
+		return feature;
+		
+	}
+	
+	/**
+	 * return GeoJSON feature collection of the tracks
+	 * @param tracks
+	 * @param session
+	 * @param l
+	 * @return
+	 * @throws JSONException
+	 * @throws ParseException
+	 */
+	public JSONObject convertTrackToJSON(List<Track> tracks, Session session, Locale l) throws JSONException, ParseException {
+		JSONArray items = new JSONArray(); 
+		for(Track track : tracks) {
+			items.put(convertTrackToJSON(track, session, l));
+		}
+		JSONObject collection = new JSONObject();
+		collection.put("type",  "FeatureCollection"); //$NON-NLS-1$ //$NON-NLS-2$
+		collection.put("features",  items); //$NON-NLS-1$
+		return collection;
+		
+	}
+	
+	public JSONObject convertTrackToJSON(Track track, Session session, Locale l) throws JSONException, ParseException {
+		JSONObject feature = new JSONObject();
+		feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		JSONObject geom = new JSONObject();
+		
+		JSONArray times = new JSONArray();
+		
+		if (track.getLineStrings().isEmpty()) {
+			//no geometries
+			geom.put("type","LineString"); //$NON-NLS-1$ //$NON-NLS-2$
+			geom.put("coordinates", new JSONArray()); //$NON-NLS-1$
+		}else if (track.getLineStrings().size() == 1) {
+			//single line
+			geom.put("type","LineString"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			LineString ls = track.getLineStrings().get(0);
+			JSONArray coords = new JSONArray();
+			geom.put("coordinates", coords); //$NON-NLS-1$
+				
+			for (Coordinate c : ls.getCoordinates()) {
+				JSONArray values = new JSONArray();
+				values.put(c.getX());
+				values.put(c.getY());
+				coords.put(values);
+				
+				times.put(SharedUtils.toLocalDateTime(c));
+			}
+		}else {
+			//multiple lines
+			geom.put("type","MultiLineString"); //$NON-NLS-1$ //$NON-NLS-2$
+			JSONArray linestrings = new JSONArray();
+			geom.put("coordinates", linestrings); //$NON-NLS-1$
+			
+			
+			for (LineString ls : track.getLineStrings()) {
+				JSONArray ltimes = new JSONArray();
+				times.put(ltimes);
+				JSONArray coords = new JSONArray();
+				linestrings.put(coords);
+				for (Coordinate c : ls.getCoordinates()) {
+					JSONArray values = new JSONArray();
+					values.put(c.getX());
+					values.put(c.getY());
+					ltimes.put(SharedUtils.toLocalDateTime(c));
+					coords.put(values);
+				}
+			}
+		}
+		
+		feature.put("geometry", geom); //$NON-NLS-1$
+		
+		JSONObject props = new JSONObject();
+		feature.put("properties", props); //$NON-NLS-1$
+		
+		props.put("fid", UuidUtils.uuidToString(track.getUuid())); //$NON-NLS-1$
+		props.put("date", track.getPatrolLegDay().getDate()); //$NON-NLS-1$
+		props.put("distance_km", track.getDistance()); //$NON-NLS-1$
+		props.put("timestamps", times); //$NON-NLS-1$
+		
+		Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
+		JSONObject patrol = new JSONObject();
+		patrol.put(UUID_FIELD, UuidUtils.uuidToString(p.getUuid()));	
+		patrol.put(ID_FIELD, p.getId());
+		patrol.put("ca_uuid", UuidUtils.uuidToString(p.getConservationArea().getUuid()) ); //$NON-NLS-1$
+		
+		//find a client uuid
+		DataLink link = session
+				.createQuery("FROM DataLink WHERE smartId = :smartUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+				.setParameter("smartUuid", p.getUuid()) //$NON-NLS-1$
+				.setParameter("dataType", PatrolLinkDataType.PATROL.getKey()) //$NON-NLS-1$
+				.uniqueResult();
+		if (link != null) {
+			patrol.put(CLIENT_UUID_FIELD, UuidUtils.uuidToString(link.getProviderId()));
+		}
+		
+		props.put("patrol", patrol); //$NON-NLS-1$
+		
+		
+		JSONObject patrolleg = new JSONObject();
+		patrolleg.put(UUID_FIELD, UuidUtils.uuidToString(track.getPatrolLegDay().getPatrolLeg().getUuid()));
+		patrolleg.put(ID_FIELD, track.getPatrolLegDay().getPatrolLeg().getId());
+		
+		//find a client uuid
+		link = session
+				.createQuery("FROM DataLink WHERE smartId = :smartUuid and dataType = :dataType", DataLink.class) //$NON-NLS-1$
+				.setParameter("smartUuid", track.getPatrolLegDay().getPatrolLeg().getUuid()) //$NON-NLS-1$
+				.setParameter("dataType", PatrolLinkDataType.LEG.getKey()) //$NON-NLS-1$
+				.uniqueResult();
+		if (link != null) {
+			patrolleg.put(CLIENT_UUID_FIELD, UuidUtils.uuidToString(link.getProviderId()));
+		}
+		props.put("patrol_leg", patrolleg); //$NON-NLS-1$
+		
+		
+		
+		
 		
 		return feature;
 		
