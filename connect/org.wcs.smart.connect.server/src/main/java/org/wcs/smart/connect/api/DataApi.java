@@ -47,6 +47,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.core.runtime.RegistryFactory;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -265,7 +266,7 @@ public class DataApi extends HttpServlet{
 			
 			s.beginTransaction();
 			try {
-				DataLink.cleanUp(s);
+				DataLink.cleanUp(RegistryFactory.getRegistry(),s);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				logger.log(Level.WARNING, ex.getMessage(), ex);

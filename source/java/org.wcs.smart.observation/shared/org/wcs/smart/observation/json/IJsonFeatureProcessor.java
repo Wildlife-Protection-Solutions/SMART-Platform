@@ -78,9 +78,11 @@ import org.wcs.smart.util.UuidUtils;
 public abstract class IJsonFeatureProcessor {
 
 	public enum LinkDataType{
-		OBSERVATION_GROUP("obsgroup"), //$NON-NLS-1$
-		OBSERVATION("observation"); //$NON-NLS-1$
+		OBSERVATION_GROUP("obsgroup"), //$NON-NLS-1$ 
+		OBSERVATION("observation"); //$NON-NLS-1$ 
+		
 		private String key;
+		
 		LinkDataType(String key){
 			this.key = key;
 		}

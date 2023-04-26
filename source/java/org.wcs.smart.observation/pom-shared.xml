@@ -15,7 +15,7 @@
 
 	<artifactId>org.wcs.smart.core.observation</artifactId>
 	<name>Observation Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<dependencies>
 		<dependency>

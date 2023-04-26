@@ -1,6 +1,8 @@
 package org.wcs.smart.observation.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -11,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -95,9 +100,34 @@ public class DataLink extends UuidItem{
 	 * processing is supposed to be happening on connect so this
 	 * should be ok.
 	 */
-	public static void cleanUp(Session session) {
-		session.createQuery("DELETE FROM DataLink WHERE lastModified < :date") //$NON-NLS-1$
-			.setParameter("date",LocalDateTime.now().minusMonths(6)) //$NON-NLS-1$
-			.executeUpdate();
+	public static void cleanUp(IExtensionRegistry registry, Session session) throws Exception{
+
+		if (registry == null) throw new Exception("Extension Registry cannot be null"); //$NON-NLS-1$
+		
+		List<String[]> linktypes = new ArrayList<>();
+		IExtensionPoint pnt = registry.getExtensionPoint("org.wcs.smart.datalink.type"); //$NON-NLS-1$
+		if (pnt == null) throw new Exception("Extension point org.wcs.smart.datalink.type not found"); //$NON-NLS-1$
+		
+		IConfigurationElement[] config = pnt.getConfigurationElements();
+		for (IConfigurationElement e : config) { 
+			linktypes.add(new String[] { e.getAttribute("type_key"), e.getAttribute("hibernate_class")} ); //$NON-NLS-1$ //$NON-NLS-2$			
+		}
+		
+		for (String[] links : linktypes) {
+			String type = links[0];
+			String clazz = links[1];
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("DELETE FROM DataLink"); //$NON-NLS-1$
+			sb.append(" WHERE dataType = :type" ); //$NON-NLS-1$
+			sb.append(" AND smartId NOT IN ( " ); //$NON-NLS-1$
+			sb.append(" SELECT uuid FROM " ); //$NON-NLS-1$
+			sb.append(clazz);
+			sb.append(" ) "); //$NON-NLS-1$
+			
+			session.createQuery(sb.toString() )
+				.setParameter("type", type) //$NON-NLS-1$
+				.executeUpdate();
+		}
 	}
 }

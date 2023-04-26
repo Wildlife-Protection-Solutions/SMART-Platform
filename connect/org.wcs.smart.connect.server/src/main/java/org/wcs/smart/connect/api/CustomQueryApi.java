@@ -44,7 +44,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
-import org.hibernate.loader.custom.CustomQuery;
 import org.json.JSONArray;
 import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -267,7 +266,6 @@ public class CustomQueryApi extends HttpServlet{
 			throw ex;
 		}
 	}
-	
 	
 	/**
 	 * <p>Queries patrols for tracks and returns the results as GeoJSON</p>

@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.core.patrol</artifactId>
 	<name>Patrol Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 		
 	<dependencies>
 		<dependency>
