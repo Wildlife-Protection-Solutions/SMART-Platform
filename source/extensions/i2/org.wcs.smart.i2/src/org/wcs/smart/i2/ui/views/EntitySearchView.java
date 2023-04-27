@@ -258,6 +258,12 @@ public class EntitySearchView {
 		
 		allResults = toolkit.createComposite(resultsStacks, SWT.NONE);
 		allResults.setLayout(new GridLayout());
+		((GridLayout)allResults.getLayout()).marginWidth = 0;
+		((GridLayout)allResults.getLayout()).marginHeight = 0;
+		
+		l = toolkit.createLabel(allResults, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		Composite c = allPanel.createResultsComposite(allResults);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -428,13 +434,9 @@ public class EntitySearchView {
 	
 	
 	private Composite createAdvancedSearch(Composite parent){
-		Composite core = toolkit.createComposite(parent, SWT.NONE);
-		core.setLayout(new GridLayout(2, false));
-		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		advancedSearchPanel = new AdvancedEntitySearchPanel(core, this, toolkit);
+		advancedSearchPanel = new AdvancedEntitySearchPanel(parent, this, toolkit);
 		advancedSearchPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		return core;
+		return advancedSearchPanel;
 	}
 	
 	/**
@@ -556,14 +558,10 @@ public class EntitySearchView {
 	 * Creates the basic search panel
 	 */
 	private Composite createBasicSearch(Composite parent){
-		Composite core = toolkit.createComposite(parent, SWT.NONE);
-		core.setLayout(new GridLayout(2, false));
-		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		basicPanel = new BasicEntitySearchPanel(core, this, toolkit);
+		basicPanel = new BasicEntitySearchPanel(parent, this, toolkit);
 		basicPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		return core;
+		return basicPanel;
 	}
 
 	@Inject
