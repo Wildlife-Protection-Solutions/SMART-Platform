@@ -1215,10 +1215,10 @@ public class UpgradeServlet extends HttpServlet {
 						"ALTER TABLE smart.configurable_model add column use_earth_ranger boolean default false", //$NON-NLS-1$
 						
 						//link incident to patrol
-						"create table smart.incident_waypoint(wp_uuid uuid not null, patrol_uuid uuid not null, primary key (wp_uuid, patrol_uuid) )", //$NON-NLS-1$
+						"create table smart.incident_waypoint(wp_uuid uuid not null, patrol_uuid uuid, primary key (wp_uuid) )", //$NON-NLS-1$
 						"ALTER TABLE smart.incident_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially deferred", //$NON-NLS-1$
 						"ALTER TABLE smart.incident_waypoint ADD FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially deferred", //$NON-NLS-1$											
-						"alter table smart.incident_waypoint add constraint wp_uuid_unq unique(wp_uuid)", //$NON-NLS-1$
+						
 						
 						"CREATE OR REPLACE FUNCTION connect.trg_incident_waypoint() RETURNS trigger AS $$ " + //$NON-NLS-1$
 						"	DECLARE " + //$NON-NLS-1$
@@ -1238,6 +1238,15 @@ public class UpgradeServlet extends HttpServlet {
 						
 						"CREATE TRIGGER trg_incident_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.incident_waypoint FOR EACH ROW execute procedure connect.trg_incident_waypoint()", //$NON-NLS-1$
 						
+						"alter table smart.waypoint add column source_cm_uuid uuid", //$NON-NLS-1$
+						"alter table smart.waypoint add foreign key (source_cm_uuid) references smart.configurable_model(uuid) on delete set null on update restrict deferrable initially deferred", //$NON-NLS-1$
+
+						"delete from smart.CT_INCIDENT_LINK where obs_group_uuid is not null and obs_group_uuid not in (select uuid from smart.WP_OBSERVATION_GROUP)", //$NON-NLS-1$
+						"alter table smart.ct_incident_link add foreign key (obs_group_uuid) references smart.wp_observation_group on delete cascade on update restrict deferrable initially deferred",  //$NON-NLS-1$
+
+						"update connect.connect_plugin_version set version = '7.5' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '7.5' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
+								
 						"update connect.connect_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.connect_version set version = '7.5.7', last_updated = now()" //$NON-NLS-1$

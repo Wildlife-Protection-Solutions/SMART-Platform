@@ -41,6 +41,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -83,6 +84,7 @@ import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
+import org.wcs.smart.query.model.summary.WaypointCmGroupBy;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
@@ -795,7 +797,12 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
-						key += UuidUtils.uuidToString(UuidUtils.byteToUUID(rs.getBytes(rsindex++)));
+						byte[] value = rs.getBytes(rsindex++);
+						if (value == null) {
+							key+= IFilter.NULL_OP;
+						}else {
+							key += UuidUtils.uuidToString(UuidUtils.byteToUUID(value));
+						}
 						break;
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
@@ -1103,6 +1110,20 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
 				groupByInnerSql.append(tablePrefix(Waypoint.class));
 				groupByInnerSql.append(".source"); //$NON-NLS-1$
+				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
+				
+				groupBySql.append(categoryKey);
+				
+				if (!waypointAdd) {
+					fromSql.append(" join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
+			}else if (gb instanceof WaypointCmGroupBy){
+				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
+				groupByInnerSql.append(tablePrefix(Waypoint.class));
+				groupByInnerSql.append(".source_cm_uuid"); //$NON-NLS-1$
 				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				
 				groupBySql.append(categoryKey);

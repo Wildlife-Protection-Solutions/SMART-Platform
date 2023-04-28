@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;

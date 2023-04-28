@@ -81,19 +81,26 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			update40to50(session);
 			update50to60(session);
 			update60to70(session);
+			update70to75(session);
 		}
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
 			update40to50(session);
 			update50to60(session);
 			update60to70(session);
+			update70to75(session);
 		}
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_5_0)) {
 			update50to60(session);
 			update60to70(session);
+			update70to75(session);
 		}
 		
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_6_0)) {
 			update60to70(session);
+			update70to75(session);
+		}
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_7_0)) {
+			update70to75(session);
 		}
 		
 	}
@@ -177,5 +184,18 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_7_0, session);
+	}
+	
+	private static void update70to75(Session session) {
+		String[] sql = new String[] {
+			"delete from smart.CT_INCIDENT_LINK where obs_group_uuid is not null and obs_group_uuid not in (select uuid from smart.WP_OBSERVATION_GROUP)", //$NON-NLS-1$
+			"alter table smart.ct_incident_link add constraint ct_incident_link_obs_group_fk foreign key (obs_group_uuid) references smart.wp_observation_group on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$		
+		};
+		
+		for (String s : sql) {
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_7_5, session);
 	}
 }

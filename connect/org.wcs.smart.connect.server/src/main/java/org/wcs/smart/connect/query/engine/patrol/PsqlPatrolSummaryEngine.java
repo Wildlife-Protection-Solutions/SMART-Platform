@@ -242,7 +242,17 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					needsObservationValue = vv.hasCategory() || vv.hasAttribute();
 					
 					if(!needsObservationValue){
-						HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor();
+						HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor() {
+							public void visit(IGroupBy item) {
+								if (hasCategory && hasAttribute) return;
+								super.visit(item);
+								if (item instanceof PatrolGroupBy) {
+									if ( ((PatrolGroupBy)item).getOption() == PatrolQueryOption.CM){
+										hasCategory = true;
+									}
+								}
+							}
+						};
 						ldef.getColumnGroupByPart().visit(cv);
 						needsObservationValue = cv.hasCategory()  || cv.hasAttribute();;
 						if (!needsObservationValue){
@@ -1413,6 +1423,15 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 						fromSql.append(tablePrefix(PatrolLegMember.class));
 						fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
+				}else if (option == PatrolQueryOption.CM){
+					if (!usedTables.contains(Waypoint.class)) {
+						fromSql.append(" left join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(Waypoint.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(Waypoint.class));
+						fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+						usedTables.add(Waypoint.class);
+					}
 				}else if (option == PatrolQueryOption.AGENCY || option == PatrolQueryOption.AGENCY_KEY || option == PatrolQueryOption.RANK) {
 					if (!usedTables.contains(PatrolLegMember.class)) {
 						fromSql.append(" join "); //$NON-NLS-1$
@@ -1888,6 +1907,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			return "employee_uuid"; //$NON-NLS-1$
 		case CONSERVATION_AREA:
 			return "temp.ca_uuid"; //$NON-NLS-1$
+		case CM:
+			return tablePrefix.get(Waypoint.class) + ".source_cm_uuid"; //$NON-NLS-1$
 		case TEAM_KEY:
 			return tablePrefix.get(Team.class) + ".keyid"; //$NON-NLS-1$
 		case MANDATE_KEY:

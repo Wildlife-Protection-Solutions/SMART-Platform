@@ -39,6 +39,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -181,6 +182,8 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value == Operator.STR_EQUALS) return Messages.SmartLabelProvider_EqualsOperator;
 		if (value == Operator.STR_NOTCONTAINS) return Messages.SmartLabelProvider_NotContainsOperator;
 		if (value == Operator.EXACT) return Messages.SmartLabelProvider_ExactOperator;
+		
+		if (value == IFilter.NULL_OP) return Messages.SmartLabelProvider_NoneFilterOption;
 		return null;
 	}
 

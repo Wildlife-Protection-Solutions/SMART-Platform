@@ -51,7 +51,7 @@ TOKEN :
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
- | < BYTE_STRING : (< DIGIT > | < LETTER > )* > 
+ | < BYTE_STRING : (< DIGIT > | < LETTER > )+ (< DIGIT > | < LETTER > )* > 
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
@@ -61,7 +61,8 @@ TOKEN :
  | < WAYPOINT_FILTER_TYPE_KEY : "waypoint" >
  | < WAYPOINT_SOURCE_KEY : "wpn:src" >
  | < WAYPOINT_ID_KEY : "wpn:id" >
- | < WAYPOINT_OBSERVER_KEY : "wpnobs:observer" >}
+ | < WAYPOINT_OBSERVER_KEY : "wpnobs:observer" >
+ | < WAYPOINT_CM_KEY : "waypoint:cm" >}
 /* Summary Query */
 TOKEN :
 {
@@ -83,9 +84,10 @@ TOKEN :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_MLIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |   <  WAYPOINT_SOURCE_GROUP_BY : "wpt:src:" ( < DM_KEY > )? (":" < DM_KEY > )* >
-|   <  CA_GROUP_BY : "ca:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
+|   <  WAYPOINT_CM_GROUP_BY : "waypoint:cm:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
+|   <  CA_GROUP_BY : "ca:" (< BYTE_STRING >)? (":" < BYTE_STRING > )*  >
 }
-TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
+TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
 SumQueryDefinition SumQuery() :
 {	ValuePart values = null;
@@ -293,6 +295,11 @@ IGroupBy GroupByItem() :
     |  
 		< WAYPOINT_SOURCE_GROUP_BY >		{
 		  	item = WaypointSourceGroupBy.createGroupBy(token.image);		}
+		    |  
+		< WAYPOINT_CM_GROUP_BY >
+		{
+		  	item = WaypointCmGroupBy.createGroupBy(token.image);
+		}
 	|  
 		< CA_GROUP_BY >
 		{
@@ -571,6 +578,14 @@ IFilter StringExpression():
 		op = StringOp()
 		< QUOTED_STRING >		{		  value = token.image;
 		  filter = ObserverFilter.createFilter(value);
+		}
+	|
+		< WAYPOINT_CM_KEY >
+		< EQUAL >
+		< QUOTED_STRING >
+		{
+		  value = token.image;
+		  filter = WaypointCmFilter.createFilter(value);
 		} 
 	)
 	{  		return filter;

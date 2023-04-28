@@ -54,6 +54,9 @@ public class IncidentWaypoint implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private Waypoint waypoint;	
+	//for linking incidents to a patrol
+	//this is NOT the same as the patrolwaypoint as
+	//these incidents are not part of a patrol
 	private Patrol patrol;
 	
     @Id

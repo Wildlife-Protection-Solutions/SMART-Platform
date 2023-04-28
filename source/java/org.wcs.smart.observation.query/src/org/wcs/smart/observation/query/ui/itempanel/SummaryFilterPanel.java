@@ -114,7 +114,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		if (SmartDB.isMultipleAnalysis()){
 			generalItems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.CONSERVATION_AREA};
 		}else{
-			generalItems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE};
+			generalItems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_CM};
 		}
 		
 		groupbynodes.add(new GeneralTreeNode(Messages.SummaryFilterPanel_GeneralItemGroupBy, generalItems));

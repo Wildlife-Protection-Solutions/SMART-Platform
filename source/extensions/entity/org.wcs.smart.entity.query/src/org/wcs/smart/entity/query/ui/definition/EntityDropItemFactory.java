@@ -60,7 +60,7 @@ import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.observation.query.ui.WaypointSourceGroupByViewer;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
-import org.wcs.smart.observation.query.ui.definition.WaypointSourceFilterDropItem;
+import org.wcs.smart.observation.query.ui.definition.WaypointListOpFilterDropItem;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -362,7 +362,7 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IQuer
 			di = new ErrorDropItem(MessageFormat.format(Messages.EntityDropItemFactory_SourceNotFound, new Object[]{filter.getWaypointSourceKey()}));
 		}else{
 	
-			di = new WaypointSourceFilterDropItem();
+			di = new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.SOURCE);
 			di.initializeData(new Object[]{filter.getOperator(), src});
 		}
 		return new DropItem[]{di};

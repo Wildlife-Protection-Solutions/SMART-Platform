@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.patrol.model;
 
+
 /**
  * Patrol metadata fields
  * 
@@ -38,7 +39,8 @@ public enum PatrolMetadataField {
 	COMMENT("SMART_Comments", false, true), //$NON-NLS-1$
 	MEMBERS("SMART_Members", true, false), //$NON-NLS-1$
 	LEADER("SMART_Leader", true, false), //$NON-NLS-1$
-	PILOT("SMART_Pilot", false, false); //$NON-NLS-1$
+	PILOT("SMART_Pilot", false, false), //$NON-NLS-1$
+	CM_ID("SMART_cmUuid", true, true);  //$NON-NLS-1$ //JsonCtParser.CM_UUID_KEY
 	
 	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
 	

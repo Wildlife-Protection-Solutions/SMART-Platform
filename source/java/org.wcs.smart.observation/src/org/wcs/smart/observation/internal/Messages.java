@@ -222,11 +222,15 @@ public class Messages extends NLS {
 
 	public static String ObservationLabelProvider_categorynotfound;
 
+	public static String ObservationLabelProvider_CmNotFound;
+
 	public static String ObservationLabelProvider_employeenotfound;
 
 	public static String ObservationLabelProvider_invaldjson;
 
 	public static String ObservationLabelProvider_invalidbooleanvalue;
+
+	public static String ObservationLabelProvider_InvalidCmUuid;
 
 	public static String ObservationLabelProvider_invalidlistitem;
 

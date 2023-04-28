@@ -203,6 +203,8 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_AttachmentsLabel;
 	public static String IncidentSummaryPage_bearingtooltip;
 	public static String IncidentSummaryPage_CannotEdit;
+	public static String IncidentSummaryPage_CmLabel;
+	public static String IncidentSummaryPage_CmTooltip;
 	public static String IncidentSummaryPage_ObserverLbl;
 	public static String IncidentSummaryPage_CommentsLabel;
 	public static String IncidentSummaryPage_DateLabel;

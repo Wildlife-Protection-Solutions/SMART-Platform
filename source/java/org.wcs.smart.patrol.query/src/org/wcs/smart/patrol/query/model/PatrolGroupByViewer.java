@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
@@ -49,12 +50,18 @@ public class PatrolGroupByViewer extends AbstractGroupByViewer<PatrolGroupBy> {
 				ListItem[] initItems = new ListItem[items.length];
 				for (int i = 0; i < initItems.length; i++) {
 					if (groupBy.getOption().getType() == PatrolQueryOptionType.UUID){
-						UUID uuid = UuidUtils.stringToUuid(items[i]);
-						String name = groupBy.getOption().getName(session, uuid, Locale.getDefault());
-						if (name == null){
-							throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_PatrolOptionParseError, new Object[]{groupBy.getOption().getGuiName(Locale.getDefault())}));
+						if (groupBy.getOption() == PatrolQueryOption.CM && items[i].equals(IFilter.NULL_OP)) {
+							String name = groupBy.getOption().getName(session, null, Locale.getDefault());
+							initItems[i] = new ListItem(null, name, IFilter.NULL_OP);
+						}else {
+							UUID uuid = UuidUtils.stringToUuid(items[i]);
+							String name = groupBy.getOption().getName(session, uuid, Locale.getDefault());
+							if (name == null){
+								throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_PatrolOptionParseError, new Object[]{groupBy.getOption().getGuiName(Locale.getDefault())}));
+							}
+							initItems[i] = new ListItem(uuid, name);
 						}
-						initItems[i] = new ListItem(uuid, name);
+						
 					}else{
 						initItems[i] = new ListItem(null, items[i], items[i]);
 					}

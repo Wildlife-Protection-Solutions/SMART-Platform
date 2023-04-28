@@ -260,7 +260,8 @@ public class PatrolLegDayInputComposite {
 		COMMENT(Messages.PatrolLegDayInputComposite_Comment_ColumnHeader, 3), 
 		ATTACHMENTS(Messages.PatrolLegDayInputComposite_Attachment_ColumnHeader, 3),
 		LAST_MODIFIED(Messages.PatrolLegDayInputComposite_LastUpdated_ColumnHeader, 3),
-		LAST_MODIFIED_BY(Messages.PatrolLegDayInputComposite_LastUpdatedBy_ColumnHeader, 3);
+		LAST_MODIFIED_BY(Messages.PatrolLegDayInputComposite_LastUpdatedBy_ColumnHeader, 3),
+		CM_MODEL(Messages.PatrolLegDayInputComposite_SourceCmColumnName, 3);
 
 		protected String guiName;
 		protected int weight;
@@ -1079,6 +1080,9 @@ public class PatrolLegDayInputComposite {
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
+		} else if (column == OtColumn.CM_MODEL) {
+			if (wp.getSourceConfigurableModel() == null) return ""; //$NON-NLS-1$
+			return wp.getSourceConfigurableModel().getName();
 		}
 	
 		return ""; //$NON-NLS-1$
@@ -1138,7 +1142,11 @@ public class PatrolLegDayInputComposite {
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
+		}else if (column == OtColumn.CM_MODEL) {
+			if (wp.getSourceConfigurableModel() == null) return ""; //$NON-NLS-1$
+			return wp.getSourceConfigurableModel().getName();
 		}
+	
 
 		return ""; //$NON-NLS-1$
 	}
@@ -1317,6 +1325,7 @@ public class PatrolLegDayInputComposite {
 		protected boolean canEdit(Object element) {
 			if (column == OtColumn.LAST_MODIFIED) return false;
 			if (column == OtColumn.LAST_MODIFIED_BY) return false;
+			if (column == OtColumn.CM_MODEL) return false;
 			
 			if (PatrolLegDayInputComposite.this.editor.getPatrolEditor().canEdit() != null){
 				return false;

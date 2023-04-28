@@ -136,6 +136,7 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDistance;
 	private Text txtPrjLocation;
 	private Text txtDirection;
+	private Text txtCm;
 	private Link txtPatrol;
 	private Label txtType;
 	private Label lblLastModified;
@@ -211,6 +212,12 @@ public class IncidentSummaryPage extends EditorPart {
 				txtComments.setText(""); //$NON-NLS-1$
 			}else{
 				this.txtComments.setText(incident.getComment());
+			}
+			
+			if (incident.getSourceConfigurableModel() != null) {
+				txtCm.setText(incident.getSourceConfigurableModel().getName());
+			}else {
+				txtCm.setText(""); //$NON-NLS-1$
 			}
 		
 			StringBuilder sb = new StringBuilder();
@@ -510,9 +517,14 @@ public class IncidentSummaryPage extends EditorPart {
 			toolkit.createLabel(left, ""); //$NON-NLS-1$
 		}
 		
-		toolkit.createLabel(left, Messages.IncidentSummaryPage_PatrolLabel);
 		
-		txtPatrol= new Link(left, SWT.NONE);
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_IncidentSourceField);
+		txtType = toolkit.createLabel(left, ""); //$NON-NLS-1$
+		txtType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		
+		toolkit.createLabel(right, Messages.IncidentSummaryPage_PatrolLabel);
+		txtPatrol= new Link(right, SWT.NONE);
 		txtPatrol.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtPatrol.addListener(SWT.Selection, e->{
 			PatrolEditorInput pi = (PatrolEditorInput)txtPatrol.getData();
@@ -523,15 +535,17 @@ public class IncidentSummaryPage extends EditorPart {
 			ctx.set(OpenPatrolHandler.PATROL_PARAM, pi);
 			ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, ctx);
 		});
-		createEdit(left, canEdit, IncidentPatrolIdComposite.ID);
+		createEdit(right, canEdit, IncidentPatrolIdComposite.ID);
 		
-		toolkit.createLabel(left, Messages.IncidentSummaryPage_IncidentSourceField);
+		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CmLabel);
+		l.setToolTipText(Messages.IncidentSummaryPage_CmTooltip);
+		txtCm = toolkit.createText(right, ""); //$NON-NLS-1$
+		txtCm.setEditable(false);
+		txtCm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolkit.createLabel(right, ""); //$NON-NLS-1$
 		
-		txtType = toolkit.createLabel(left, ""); //$NON-NLS-1$
-		txtType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
-		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		txtComments = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtComments.setEditable(false);
 		txtComments.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -540,7 +554,7 @@ public class IncidentSummaryPage extends EditorPart {
 		createEdit(right, canEdit, CommentComposite.ID);
 		
 		l = toolkit.createLabel(right, Messages.IncidentSummaryPage_AttachmentsLabel);
-		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		attachments = new ListViewer(right);
 		attachments.setContentProvider(ArrayContentProvider.getInstance());
 		attachments.setLabelProvider(new ObservationAttachmentLabelProvider(){

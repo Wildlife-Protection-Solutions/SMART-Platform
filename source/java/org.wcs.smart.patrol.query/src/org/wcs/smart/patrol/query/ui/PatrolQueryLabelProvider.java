@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
@@ -118,6 +119,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case MANDATE: return Messages.PatrolQueryOptions_QueryOpMandate;
 				case MANDATE_KEY: return Messages.PatrolQueryOptions_QueryOpMandate;
 				case PATROL_TYPE: return Messages.PatrolQueryOptions_QueryOpType;
+				case CM: return "Configurable Model";
 				case PATROL_TRANSPORT_TYPE: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case CONSERVATION_AREA: return Messages.PatrolQueryOptions_CaGroupByOptionName;
@@ -198,6 +200,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			case CONSERVATION_AREA:
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
+			case CM:
+				return DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.CONFIG_MODEL_ICON);
 			case PATROL_TRANSPORT_TYPE:
 			case PATROL_TRANSPORT_TYPE_KEY:
 			default:

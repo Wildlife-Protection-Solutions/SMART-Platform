@@ -96,7 +96,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	private LocalDate endDate;
 	private String comment;
 	private PatrolFolder parentFolder;
-	
+
 	private List<PatrolAttributeValue> customAttributes;
 	
 	private List<PatrolLeg> legs;
@@ -114,7 +114,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
 	}
-	
+
 	@Column(name = "id")
 	public String getId(){
 		return this.id;

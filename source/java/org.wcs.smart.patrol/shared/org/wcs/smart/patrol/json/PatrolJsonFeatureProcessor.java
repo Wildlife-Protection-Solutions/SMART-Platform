@@ -462,6 +462,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
+		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
 		
 		//attachments
 		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());

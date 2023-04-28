@@ -288,7 +288,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		if (cm == null){
 			return;
 		}
-		if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete, new Object[]{cm.getName()}))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, 
+				MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete1, 
+						new Object[]{cm.getName()}))){
 			return;
 		}
 

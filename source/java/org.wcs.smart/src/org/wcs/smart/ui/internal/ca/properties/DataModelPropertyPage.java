@@ -448,7 +448,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		((GridLayout)rootComposite.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(rootComposite, SWT.NONE);
-		l.setText("Last Modified:");
+		l.setText(Messages.DataModelPropertyPage_LastModifiedLbl);
 		
 		lblLastModified = new Label(rootComposite, SWT.NONE);
 		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

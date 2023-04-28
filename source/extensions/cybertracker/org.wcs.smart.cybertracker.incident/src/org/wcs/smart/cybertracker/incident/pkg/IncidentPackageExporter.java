@@ -41,6 +41,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
 import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
@@ -175,7 +176,7 @@ public enum IncidentPackageExporter {
 				
 				//metadata
 				Path metadataFile = tempDir.resolve(SMARTCOLLECT_METADATA_FILE);
-				createIncidentMetadataJson(metadataFile, localpackage, session);
+				createIncidentMetadataJson(metadataFile, localpackage, modelToExport, session);
 				toIncludeInZip.add(metadataFile);
 				
 				//project file
@@ -198,7 +199,7 @@ public enum IncidentPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void createIncidentMetadataJson(Path incidentJson, AbstractCtPackage ctpackage, Session session) throws IOException {
+	public void createIncidentMetadataJson(Path incidentJson, AbstractCtPackage ctpackage, ConfigurableModel cm, Session session) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
 		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentPackageContribution.INCIDENT_RESOURCE_ID));
 		
@@ -218,6 +219,8 @@ public enum IncidentPackageExporter {
 			metadataScreens.add(emp);
 		}
 		
+		JSONObject cmmd = CtJsonExportUtils.createConfigurableModelUuid(JsonCtParser.CM_UUID_KEY, cm );
+		if (cmmd != null) metadataScreens.add(cmmd);
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
 			fw.write(metadataScreens.toJSONString());

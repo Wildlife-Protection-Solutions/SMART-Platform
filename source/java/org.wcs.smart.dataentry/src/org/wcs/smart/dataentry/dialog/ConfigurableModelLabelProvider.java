@@ -89,7 +89,7 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 			
 			if (element instanceof ConfigurableModel && this.showEr
 					&& ((ConfigurableModel)element).getUseEarthRanger()) {
-				name += " (Earth Ranger)";
+				name += Messages.ConfigurableModelLabelProvider_ErTagLabel;
 			}
 			return name;
 		}

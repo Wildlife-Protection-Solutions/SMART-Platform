@@ -82,8 +82,8 @@ import org.wcs.smart.user.UserLevelManager;
 public class QuickLinkPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
-	private static final String MOVE_UP = "Move Up";
-	private static final String MOVE_DOWN = "Move Down";
+	private static final String MOVE_UP = Messages.QuickLinkPreferencePage_MoveUp;
+	private static final String MOVE_DOWN = Messages.QuickLinkPreferencePage_MoveDown;
 	
 	private List<QuickLink> userLinks = new ArrayList<>();
 	private List<QuickLink> systemLinks = new ArrayList<>();
@@ -159,7 +159,7 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("User Links");
+		l.setText(Messages.QuickLinkPreferencePage_UserLinks);
 		
 		Composite userArea = new Composite(main, SWT.NONE);
 		userArea.setLayout(new GridLayout(2, false));
@@ -255,7 +255,7 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 		miMoveDown.setEnabled(!userViewer.getStructuredSelection().isEmpty());
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("System Links");
+		l.setText(Messages.QuickLinkPreferencePage_SystemLinks);
 		
 		Composite systemArea = new Composite(main, SWT.NONE);
 		systemArea.setLayout(new GridLayout(2, false));
@@ -431,7 +431,7 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 				for (QuickLink l : this.removedLinks) session.delete(l);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, MessageFormat.format("Unable to save updates to QuickLink: {0}", ex.getMessage()));
+				MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, MessageFormat.format(Messages.QuickLinkPreferencePage_SaveError, ex.getMessage()));
 				loadDataJob.schedule();
 				return;
 			}
@@ -476,7 +476,7 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 		TableViewer tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 
 		TableViewerColumn viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-		viewerColumn.getColumn().setText("Name");
+		viewerColumn.getColumn().setText(Messages.QuickLinkPreferencePage_NameCol);
 		viewerColumn.getColumn().setResizable(true);
 		viewerColumn.getColumn().setMoveable(true);
 
@@ -490,7 +490,7 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 		});
 		
 		viewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-		viewerColumn.getColumn().setText("URL");
+		viewerColumn.getColumn().setText(Messages.QuickLinkPreferencePage_UrlCol);
 		viewerColumn.getColumn().setResizable(true);
 		viewerColumn.getColumn().setMoveable(true);
 
@@ -580,15 +580,15 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 		
 		@Override
 		protected Control createDialogArea(Composite parent) {
-			setTitle("Configure Quick Link");
-			setMessage("Configure the quick link name and location");
+			setTitle(Messages.QuickLinkPreferencePage_Title);
+			setMessage(Messages.QuickLinkPreferencePage_Message);
 			Composite composite = (Composite) super.createDialogArea(parent);
 			composite = new Composite(composite, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			composite.setLayout(new GridLayout(2, false));
 			
 			Label l = new Label(composite, SWT.NONE);
-			l.setText("Name:");
+			l.setText(Messages.QuickLinkPreferencePage_NameLbl);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			Composite temp = new Composite(composite, SWT.NONE);
@@ -671,7 +671,7 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 			
 			
 			l = new Label(composite, SWT.NONE);
-			l.setText("URL:");
+			l.setText(Messages.QuickLinkPreferencePage_UrlLbl);
 			
 			txtUrl = new Text(composite, SWT.BORDER);
 			txtUrl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

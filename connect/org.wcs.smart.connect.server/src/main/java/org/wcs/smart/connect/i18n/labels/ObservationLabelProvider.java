@@ -47,17 +47,28 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		if (item == JsonFileProcessor.Messages.MISSING_DATATYPE) return Messages.getString("ObservationLabelProvider_missingproperty1", l); //$NON-NLS-1$
 		if (item == JsonFileProcessor.Messages.MISSING_FEATURETYPE) return Messages.getString("ObservationLabelProvider_missingproperty2", l); //$NON-NLS-1$
 		
-		if (item == IJsonFeatureProcessor.Messages.EMPLOYEE_NOT_FOUND) return Messages.getString("ObservationLabelProvider_employeenotfound", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.CATEGORY_NOT_FOUND) return Messages.getString("ObservationLabelProvider_categorynotfound", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.ATTRIBUTE_NOT_FOUND) return Messages.getString("ObservationLabelProvider_attributenotfound", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_BOOLEAN_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidboolean", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_DATE_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invaliddate", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_LIST_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidlistitem", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_MLIST_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidmlistitem", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_MLIST2_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidemlist2", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_TREE_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidtreeitem", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.INVALID_NUMBER_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidnumeric", l); //$NON-NLS-1$
-		if (item == IJsonFeatureProcessor.Messages.SIGNATURE_TYPE_NOT_FOUND) return Messages.getString("ObservationLabelProvider.SignatureTypeNotFound", l); //$NON-NLS-1$
+		if (item instanceof IJsonFeatureProcessor.Messages) {
+			return getMessageLabel((IJsonFeatureProcessor.Messages)item, l);
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	private String getMessageLabel(IJsonFeatureProcessor.Messages item, Locale l) {
+		switch(item) {
+		case EMPLOYEE_NOT_FOUND: return Messages.getString("ObservationLabelProvider_employeenotfound", l); //$NON-NLS-1$
+		case CATEGORY_NOT_FOUND: return Messages.getString("ObservationLabelProvider_categorynotfound", l); //$NON-NLS-1$
+		case ATTRIBUTE_NOT_FOUND: return Messages.getString("ObservationLabelProvider_attributenotfound", l); //$NON-NLS-1$
+		case INVALID_BOOLEAN_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidboolean", l); //$NON-NLS-1$
+		case INVALID_DATE_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invaliddate", l); //$NON-NLS-1$
+		case INVALID_LIST_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidlistitem", l); //$NON-NLS-1$
+		case INVALID_MLIST_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidmlistitem", l); //$NON-NLS-1$
+		case INVALID_MLIST2_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidemlist2", l); //$NON-NLS-1$
+		case INVALID_TREE_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidtreeitem", l); //$NON-NLS-1$
+		case INVALID_NUMBER_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidnumeric", l); //$NON-NLS-1$
+		case SIGNATURE_TYPE_NOT_FOUND: return Messages.getString("ObservationLabelProvider.SignatureTypeNotFound", l); //$NON-NLS-1$
+		case INVALID_CM_UUID: return Messages.getString("ObservationLabelProvider.InvalidCmUuid", l); //$NON-NLS-1$
+		case CM_MISSING: return Messages.getString("ObservationLabelProvider.CmNotFound", l);	 //$NON-NLS-1$
+		}
 		return ""; //$NON-NLS-1$
 	}
 
