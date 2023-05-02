@@ -338,6 +338,7 @@ function getQueryColor(id) {
 }
 
 function addQueryLayer(id) {
+	console.log("add query: " + id);
 	var color = getQueryColor(id);
  	var oReq = new XMLHttpRequest();
  	oReq.onload = function() {
@@ -394,6 +395,7 @@ function addQueryLayer(id) {
 }
 
 function removeQueryLayer(id) {
+	console.log("remove query: " + id);
 	map.removeLayer(queryLayers[id]);
 	queryLayers[id] = null;
 }
@@ -414,7 +416,7 @@ function queryDateRangeUpdate() {
 function refreshQueries() {
 	// update query layers to use new date range
 	for(id in queryLayers) {
-		addQueryLayer(id);
+		if (queryLayers[id] != null) addQueryLayer(id);
 	}
 }
 
