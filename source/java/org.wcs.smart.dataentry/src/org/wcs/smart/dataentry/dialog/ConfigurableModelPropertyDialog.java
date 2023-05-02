@@ -169,7 +169,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelListViewer = new TableViewer(temp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(getModelsList().toArray());
-		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider(true));
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -288,7 +288,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		if (cm == null){
 			return;
 		}
-		if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete, new Object[]{cm.getName()}))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, 
+				MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete1, 
+						new Object[]{cm.getName()}))){
 			return;
 		}
 

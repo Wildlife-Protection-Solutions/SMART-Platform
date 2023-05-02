@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -312,7 +313,9 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 			try {
 				session.saveOrUpdate(newEntity);
 				session.flush();
-				newEntity.createDataModelItem(session);
+				if (newEntity.createDataModelItem(session)) {
+					DataModelManager.INSTANCE.updateLastModified(session);
+				}
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();

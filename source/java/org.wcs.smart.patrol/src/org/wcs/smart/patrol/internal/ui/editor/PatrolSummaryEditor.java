@@ -763,7 +763,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				Patrol patrol = editor.getPatrol();
 				session.update(patrol);
 				frmPatrolSummary.setText(editor.getPatrol().getId());
-				
+							
 				txtPatrolId.setText(patrol.getId(), false, false);
 				txtPatrolType.setText(patrol.getPatrolType().getGuiName(Locale.getDefault()), false, false);
 				if (patrol.getStation() == null) {

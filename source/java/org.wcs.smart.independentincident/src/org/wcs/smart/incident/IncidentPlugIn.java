@@ -30,6 +30,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.patrol.IncidentToPatrolProcessorJob;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.EventType;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 
 /**
  * The activator class for the incident plugin.
@@ -62,6 +66,19 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		SmartContext.INSTANCE.setClass(IIncidentLabelProvider.class, new IncidentLabelProvider());
+		
+		IPatrolEventListener scheduleIncidentProcessing = new IPatrolEventListener() {			
+			@Override
+			public void eventFired(int attributeChanged, Object source) {
+				//wait 5 seconds for other events then run 
+				//processing job
+				IncidentToPatrolProcessorJob.getInstance().schedule(1_000);
+			}
+		};
+		
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, scheduleIncidentProcessing);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, scheduleIncidentProcessing);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, scheduleIncidentProcessing);
 	}
 
 	/*

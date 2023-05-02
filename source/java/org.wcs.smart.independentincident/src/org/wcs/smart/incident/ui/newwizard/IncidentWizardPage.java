@@ -104,6 +104,10 @@ public class IncidentWizardPage extends WizardPage {
 		contents.updateIncident(incident);
 	}
 	
+	public void afterSave(Waypoint incident, Session session){
+		contents.afterSave(incident, session);
+	}
+	
 	public void initPage(Waypoint incident, Session session){
 		contents.initFields(incident, session);
 		validate();

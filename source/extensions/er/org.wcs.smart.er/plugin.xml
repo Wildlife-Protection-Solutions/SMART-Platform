@@ -1004,4 +1004,19 @@
             clazz="org.wcs.smart.er.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.wcs.smart.datalink.type">
+      <type
+            hibernate_class="Mission"
+            type_key="mission">
+      </type>
+      <type
+            hibernate_class="Waypoint"
+            type_key="missionincident">
+      </type>
+      <type
+            hibernate_class="Survey"
+            type_key="survey">
+      </type>
+   </extension>
 </plugin>

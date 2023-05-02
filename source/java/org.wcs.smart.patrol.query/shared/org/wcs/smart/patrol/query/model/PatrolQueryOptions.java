@@ -59,6 +59,7 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.EMPLOYEE,
 			PatrolQueryOption.AGENCY,
 			PatrolQueryOption.RANK,
+			PatrolQueryOption.CM
 	};
 	
 	/**
@@ -89,7 +90,8 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.PILOT,
 			PatrolQueryOption.EMPLOYEE,
 			PatrolQueryOption.AGENCY,
-			PatrolQueryOption.RANK
+			PatrolQueryOption.RANK,
+			PatrolQueryOption.CM,
 	};
 	
 	/**

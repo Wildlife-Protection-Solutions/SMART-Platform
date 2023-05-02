@@ -35,9 +35,12 @@ import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
-import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor.IncidentLinkDataType;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -123,15 +126,15 @@ public class CustomWaypointQueryEngine extends CustomQueryEngine {
 	}
 	
 	
-	public JSONArray convertToJSON(List<Waypoint> pws, Session session) {
+	public JSONArray convertToJSON(List<Waypoint> pws, Session session, boolean addSourceDetails) {
 		JSONArray items = new JSONArray(); 
 		for(Waypoint pw : pws) {
-			items.put(convertToJSON(pw, session));
+			items.put(convertToJSON(pw, session, addSourceDetails));
 		}
 		return items;
 		
 	}
-	public JSONObject convertToJSON(Waypoint pw, Session session) {
+	public JSONObject convertToJSON(Waypoint pw, Session session, boolean addSourceDetails) {
 		JSONObject feature = new JSONObject();
 		feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -167,6 +170,34 @@ public class CustomWaypointQueryEngine extends CustomQueryEngine {
 		}
 				
 		props.put(WAYPOINT_FIELD, jwp);
+		
+		if (addSourceDetails) {
+			//figure out the source details in applicable
+			JSONObject source = new JSONObject();
+			if (pw.getSourceId().equals(PatrolWaypointSource.PATROL_WP_SOURCE_ID)) {
+				//patrol add patrol uuid and patrol leg uuid
+				PatrolWaypoint pdata = session.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp", PatrolWaypoint.class) //$NON-NLS-1$
+						.setParameter("wp", pw).uniqueResult(); //$NON-NLS-1$
+				if (pdata != null) {
+					source.put("patrol_uuid", UuidUtils.uuidToString(pdata.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid() )); //$NON-NLS-1$
+					source.put("patrol_leg_uuid", UuidUtils.uuidToString(pdata.getPatrolLegDay().getPatrolLeg().getUuid() ));					 //$NON-NLS-1$
+				}
+			}else if (pw.getSourceId().equals(SurveyWaypointSource.KEY)) {
+				//survey add mission uuid and survey uuid
+				SurveyWaypoint sdata = session.createQuery("FROM SurveyWaypoint WHERE id.waypoint = :wp", SurveyWaypoint.class) //$NON-NLS-1$
+						.setParameter("wp", pw).uniqueResult(); //$NON-NLS-1$
+				if (sdata != null) {
+					source.put("mission_uuid", UuidUtils.uuidToString(sdata.getMissionDay().getMission().getUuid() )); //$NON-NLS-1$
+					source.put("survey_uuid", UuidUtils.uuidToString(sdata.getMissionDay().getMission().getSurvey().getUuid() )); //$NON-NLS-1$
+				}
+			}else {
+				//these are all ind. incident types and we don't have anything else to add to them
+			}
+			props.put("source", source); //$NON-NLS-1$
+			//for mission this means mission day, mission, survey, survey design details
+			
+			
+		}
 		
 		return feature;
 		

@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -82,6 +83,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
@@ -95,6 +97,7 @@ import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
+import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -313,15 +316,17 @@ public class BasicRecordSearchPanel extends Composite {
 		open.setText(Messages.BasicRecordSearchPanel_OpenMenuItem);
 		open.addListener(SWT.Selection, e->openSelection());
 		
-		MenuItem ws = null;
-		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()){
-				ws = new MenuItem(mnu, SWT.PUSH);
-				ws.setText(Messages.BasicRecordSearchPanel_AddToWsMenuItem);
-				ws.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-				ws.addListener(SWT.Selection, e->addToWorkingset());
-		}
-		final MenuItem wsItem = ws;
-		
+		if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
+			MenuItem miNew = new MenuItem(mnu, SWT.PUSH);
+			miNew.setText(Messages.RecordsView_NewRecordMenuItem);
+			miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miNew.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					(new NewRecordHandler()).createNewRecord(context);
+				}
+			});
+		}	
 		MenuItem delete = null;
 		if (IntelSecurityManager.INSTANCE.canDeleteRecordAny()){
 			delete = new MenuItem(mnu, SWT.PUSH);
@@ -344,6 +349,51 @@ public class BasicRecordSearchPanel extends Composite {
 				}
 			});
 		}
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem ws = null;
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()){
+				ws = new MenuItem(mnu, SWT.PUSH);
+				ws.setText(Messages.BasicRecordSearchPanel_AddToWsMenuItem);
+				ws.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+				ws.addListener(SWT.Selection, e->addToWorkingset());
+		}
+		
+		MenuItem miExport = new MenuItem(mnu, SWT.CASCADE);
+		miExport.setText(Messages.RecordsView_ExportMenuOption);
+		
+		Menu exportMenu = new Menu(miExport);
+		miExport.setMenu(exportMenu);
+		MenuItem miExportCsv = new MenuItem(exportMenu, SWT.PUSH);
+		miExportCsv.setText(Messages.RecordsView_ExportToCsv);
+		miExportCsv.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<UUID> toExport = new ArrayList<UUID>();
+				for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();	
+					if (x instanceof IntelRecordSearchResultItem) toExport.add( ((IntelRecordSearchResultItem)x).getRecordUuid() );
+				}
+				doCsvExport(toExport);
+			}
+		});
+		
+		MenuItem miExportXml = new MenuItem(exportMenu, SWT.PUSH);
+		miExportXml.setText(Messages.RecordsView_ExportToXml);
+		miExportXml.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<UUID> toExport = new ArrayList<UUID>();
+				for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();	
+					if (x instanceof IntelRecordSearchResultItem) toExport.add( ((IntelRecordSearchResultItem)x).getRecordUuid() );
+				}
+				doXmlExport(toExport);
+			}
+		});
+		
+		final MenuItem wsItem = ws;
 		final MenuItem miDelete = delete;
 		tblResults.getControl().setMenu(mnu);
 		
@@ -360,13 +410,24 @@ public class BasicRecordSearchPanel extends Composite {
 			public void menuShown(MenuEvent e) {
 				if (wsItem != null) wsItem.setEnabled(open.isEnabled() && WorkingSetManager.INSTANCE.isSet());
 				if (miDelete != null) miDelete.setEnabled(open.isEnabled());
+				
+				miExportCsv.setEnabled(!tblResults.getSelection().isEmpty());
+				miExportXml.setEnabled(!tblResults.getSelection().isEmpty());
 			}
 			
 			@Override
 			public void menuHidden(MenuEvent e) {}
 		});
-		
 	}
+	
+	private void doXmlExport(List<UUID> toExport){
+		RecordManager.INSTANCE.doXmlExport(toExport,  context.get(Shell.class));
+	}
+	
+	private void doCsvExport(List<UUID> toExport){
+		RecordManager.INSTANCE.doCsvExport(toExport,  context.get(Shell.class));
+	}
+
 	
 	public void setSearch(BasicRecordSearch search) {
 		if (search.getSource() != null) {

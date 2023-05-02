@@ -436,9 +436,14 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @param session
+	 * @return true if data model modified false otherwise
+	 */
 	@Transient
-	public void createDataModelItem(Session session) {
-		if (getEntityType().getDmAttribute() == null) return;
+	public boolean createDataModelItem(Session session) {
+		if (getEntityType().getDmAttribute() == null) return false;
 		
 		Attribute dmAttribute = session.get(Attribute.class, getEntityType().getDmAttribute().getUuid());
 		//make a new list item
@@ -450,18 +455,24 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 		dmAttribute.getAttributeList().add(ali);
 		setDmAttributeListItem(ali);
 		updateActiveValue();
-		
+		return true;
 	}
 	
+	/**
+	 * 
+	 * @return true if value changed, false otherwise
+	 */
 	@Transient
-	public void updateActiveValue()  {
-		if (getDmAttributeListItem() == null) return;
+	public boolean updateActiveValue()  {
+		if (getDmAttributeListItem() == null) return false;
 		
 		boolean defaultActive = true;
 		
-		if (getEntityType().getActiveFilter() == null || getEntityType().getActiveFilter().isBlank()) {
+		boolean current = getDmAttributeListItem().getIsActive();
+		
+		if (getEntityType().getActiveFilter() == null || getEntityType().getActiveFilter().isBlank()) {		
 			getDmAttributeListItem().setIsActive(defaultActive);
-			return;
+			return current != defaultActive;
 		}
 		
 		String[] parts = getEntityType().getActiveFilter().split("\\|"); //$NON-NLS-1$
@@ -496,7 +507,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				
 				if (value == null) {
 					getDmAttributeListItem().setIsActive(defaultActive);
-					return;
+					return current != defaultActive;
 				}
 				
 				boolean match = false;
@@ -507,7 +518,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 					Operator op = Operator.parse(ex[1]);
 					if (op != Operator.BETWEEN && op != Operator.NOT_BETWEEN) {
 						getDmAttributeListItem().setIsActive(defaultActive);
-						return;
+						return current != defaultActive;
 					}
 					try {
 						LocalDate d1 = LocalDate.parse(ex[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
@@ -523,7 +534,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 					}catch (Exception ex2) {
 						ex2.printStackTrace();
 						getDmAttributeListItem().setIsActive(defaultActive);
-						return;
+						return current != defaultActive;
 					}
 				}else if (type == AttributeType.LIST) {
 					match = value.getAttributeListItem().getKeyId().equalsIgnoreCase(ex[2]);
@@ -547,7 +558,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 						match = value.getNumberValue().doubleValue() != d;
 					}else {
 						getDmAttributeListItem().setIsActive(defaultActive);
-						return;
+						return current != defaultActive;
 					}
 					
 					
@@ -562,7 +573,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 						match = !value.getStringValue().contains(text);
 					}else {
 						getDmAttributeListItem().setIsActive(defaultActive);
-						return;
+						return current != defaultActive;
 					}					
 				}
 				if (isnot) match = !match;
@@ -575,7 +586,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 						result = result || match;
 					}else {
 						getDmAttributeListItem().setIsActive(defaultActive);
-						return;
+						return current != defaultActive;
 					}
 				}else {
 					result = match;
@@ -584,7 +595,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 			}	
 		}
 		getDmAttributeListItem().setIsActive(result);
-		return;
+		return current != result;
 	}
 	
 	

@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.incident.ui.newwizard;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -74,7 +78,7 @@ public class IdComposite extends AbstractIncidentComposite {
 			cmbType = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbType.setContentProvider(ArrayContentProvider.getInstance());
 			cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			cmbType.setInput(IncidentManager.getInstance().getIncidentProviders());
+			
 			cmbType.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProviders().iterator().next()));
 			cmbType.setLabelProvider(new LabelProvider() {
 				@Override
@@ -82,6 +86,14 @@ public class IdComposite extends AbstractIncidentComposite {
 					return ((IIncidentProvider)element).getName();
 				}
 			});
+			
+			List<IIncidentProvider> sources = new ArrayList<>(IncidentManager.getInstance().getIncidentProviders());
+			sources.sort((a, b)->{
+				if (a.getWaypointSourceKey().equals(IndepedentIncidentSource.KEY)) return 1;
+				return Collator.getInstance().compare(a.getName(),  b.getName());
+			});
+			
+			cmbType.setInput(sources);
 		}
 		
 		Label l = new Label(item, SWT.NONE);

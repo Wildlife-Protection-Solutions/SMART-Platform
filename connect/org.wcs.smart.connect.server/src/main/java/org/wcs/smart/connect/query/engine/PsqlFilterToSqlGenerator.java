@@ -119,6 +119,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.ObserverFilter;
+import org.wcs.smart.query.model.filter.WaypointCmFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.util.SharedUtils;
@@ -199,6 +200,8 @@ public enum PsqlFilterToSqlGenerator {
 			return asSql((EntityAttributeFilter)filter, engine);
 		}else if (filter instanceof WaypointSourceFilter){
 			return asSql((WaypointSourceFilter)filter, engine);
+		}else if (filter instanceof WaypointCmFilter){
+			return asSql((WaypointCmFilter)filter, engine);
 		}else if (filter instanceof WaypointIdFilter){
 			return asSql((WaypointIdFilter)filter, engine);			
 		}else if (filter instanceof SurveyFilter){
@@ -247,6 +250,27 @@ public enum PsqlFilterToSqlGenerator {
 			sb.append(engine.tablePrefix(WaypointObservation.class));
 			sb.append(".employee_uuid "); //$NON-NLS-1$
 			sb.append(" =  " + param); //$NON-NLS-1$
+			return sb.toString();
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	/*
+	 * Observer source filter
+	 */
+	protected String asSql(WaypointCmFilter filter, IQueryEngine engine) throws SQLException{
+		try {
+			StringBuilder sb = new StringBuilder();
+			if (filter.getValue().equals(IFilter.NULL_OP)) {
+				sb.append(engine.tablePrefix(Waypoint.class));
+				sb.append(".source_cm_uuid is null"); //$NON-NLS-1$
+			}else {
+				String param = engine.addParameterValue(UuidUtils.stringToUuid(filter.getValue())); 
+				sb.append(engine.tablePrefix(Waypoint.class));
+				sb.append(".source_cm_uuid "); //$NON-NLS-1$
+				sb.append(" =  " + param); //$NON-NLS-1$
+			}
 			return sb.toString();
 		} catch (Exception e) {
 			throw new SQLException(e);
@@ -736,13 +760,15 @@ public enum PsqlFilterToSqlGenerator {
 			//uuid
 			try{
 				String value2 = SharedUtils.stripQuotes((String)filter.getValue());
-				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
-				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
-				return x;
+				if (value2.equals(IFilter.NULL_OP)) {
+					return prefix + "." + option.getColumnName() + " is null "; //$NON-NLS-1$ //$NON-NLS-2$ 
+				}else {
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
+					return prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
+				}
 			}catch (Exception ex){
 				throw new IllegalStateException(ex);
-			}
-			
+			}			
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
 			String key = SharedUtils.stripQuotes((String)filter.getValue());
 			String p1 = engine.addParameterValue(key);

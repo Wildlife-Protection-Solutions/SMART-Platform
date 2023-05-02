@@ -45,6 +45,7 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -85,6 +86,7 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
+import org.wcs.smart.query.model.summary.WaypointCmGroupBy;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -692,7 +694,12 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
-						key += UuidUtils.uuidToString((UUID)rs.getObject(rsindex++));
+						Object value = rs.getObject(rsindex++);
+						if (value == null) {
+							key+= IFilter.NULL_OP;
+						}else {
+							key += UuidUtils.uuidToString((UUID)value);
+						}
 						break;
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
@@ -988,6 +995,20 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
 				groupByInnerSql.append(tablePrefix(Waypoint.class));
 				groupByInnerSql.append(".source"); //$NON-NLS-1$
+				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
+				
+				groupBySql.append(categoryKey);
+				
+				if (!waypointAdd) {
+					fromSql.append(" join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
+			}else if (gb instanceof WaypointCmGroupBy){
+				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
+				groupByInnerSql.append(tablePrefix(Waypoint.class));
+				groupByInnerSql.append(".source_cm_uuid"); //$NON-NLS-1$
 				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				
 				groupBySql.append(categoryKey);

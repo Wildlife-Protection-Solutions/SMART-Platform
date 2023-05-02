@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Independent Incident
 Bundle-SymbolicName: org.wcs.smart.independentincident;singleton:=true
-Bundle-Version: 7.5.3.qualifier
+Bundle-Version: 7.5.7.qualifier
 Bundle-Activator: org.wcs.smart.incident.IncidentPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
@@ -10,12 +10,13 @@ Require-Bundle: org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibil
  org.locationtech.udig.style.sld;bundle-version="3.0.0",
  org.eclipse.help;bundle-version="3.5.100",
  org.wcs.smart.report.birt.query;bundle-version="[7.0.3,8.0.0)",
- org.eclipse.datatools.connectivity.oda.design.ui
+ org.eclipse.datatools.connectivity.oda.design.ui,
+ org.wcs.smart.patrol;bundle-version="[7.5.7,8.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.event,
  org.wcs.smart.incident.json,
+ org.wcs.smart.incident.model,
  org.wcs.smart.incident.ui,
  org.wcs.smart.incident.ui.newwizard,
  org.wcs.smart.incident.xml,
@@ -23,3 +24,4 @@ Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.xml.model.v21,
  org.wcs.smart.incident.xml.model.v22
 Automatic-Module-Name: org.wcs.smart.independentincident
+Bundle-ActivationPolicy: lazy

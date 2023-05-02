@@ -369,6 +369,9 @@ public class EntityCsvImporter {
 				entityType.getDmAttribute().getAttributeList().add(e.getAttributeListItem());
 			}
 			s.flush();
+			
+			DataModelManager.INSTANCE.updateLastModified(s);
+			
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();

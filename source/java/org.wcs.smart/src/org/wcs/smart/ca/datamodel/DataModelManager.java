@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,8 +34,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -46,7 +50,8 @@ import org.wcs.smart.internal.Messages;
 public enum DataModelManager {
 
 	INSTANCE;
-	
+
+
 	/*
 	 * Registered change listeners
 	 */
@@ -410,5 +415,48 @@ public enum DataModelManager {
 	 */
 	public String generateKey (String value, Collection<? extends NamedKeyItem> otherValues){
 		return NamedKeyItem.generateKey(value, otherValues);
+	}
+	
+	/**
+	 * To be called in any transaction that updates the data model.
+	 * This updates the last modified date of the data model
+	 * for use with ER integration tools.
+	 * 
+	 * @param session
+	 */
+	/*
+	 * Did not add this as a change listener as we need
+	 * it to happen in the same transaction.
+	 */
+	public void updateLastModified(Session session) {
+		
+		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"key", ConservationAreaProperty.CA_DM_LAST_MODIFIED_KEY}).uniqueResult(); //$NON-NLS-1$
+		
+		if (prop == null) {
+			prop = new ConservationAreaProperty();
+			prop.setConservationArea(SmartDB.getCurrentConservationArea());
+			prop.setKey(ConservationAreaProperty.CA_DM_LAST_MODIFIED_KEY);
+			
+			session.persist(prop);
+		}
+		
+		prop.setValue(Instant.now().toString());
+		
+	}
+	
+	/**
+	 * 
+	 * @param session
+	 * @return the last modified date time as string
+	 */
+	public String getLastModified(Session session) {
+		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"key", ConservationAreaProperty.CA_DM_LAST_MODIFIED_KEY}).uniqueResult(); //$NON-NLS-1$
+		
+		if (prop == null) return Instant.ofEpochMilli(0).toString();
+		return prop.getValue();
 	}
 }

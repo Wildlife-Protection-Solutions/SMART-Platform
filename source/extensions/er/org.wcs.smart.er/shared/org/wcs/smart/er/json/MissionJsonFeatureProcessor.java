@@ -61,7 +61,6 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
-import org.wcs.smart.observation.json.IJsonFeatureProcessor.Messages;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -964,6 +963,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
+		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
 
 		updateObserver(toUpdate, attributes, ca, session, l);
 	

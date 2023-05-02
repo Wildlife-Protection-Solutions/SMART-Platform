@@ -1214,6 +1214,39 @@ public class UpgradeServlet extends HttpServlet {
 						//earth ranger
 						"ALTER TABLE smart.configurable_model add column use_earth_ranger boolean default false", //$NON-NLS-1$
 						
+						//link incident to patrol
+						"create table smart.incident_waypoint(wp_uuid uuid not null, patrol_uuid uuid, primary key (wp_uuid) )", //$NON-NLS-1$
+						"ALTER TABLE smart.incident_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially deferred", //$NON-NLS-1$
+						"ALTER TABLE smart.incident_waypoint ADD FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially deferred", //$NON-NLS-1$											
+						
+						
+						"CREATE OR REPLACE FUNCTION connect.trg_incident_waypoint() RETURNS trigger AS $$ " + //$NON-NLS-1$
+						"	DECLARE " + //$NON-NLS-1$
+						"	ROW RECORD; " + //$NON-NLS-1$
+						"BEGIN " + //$NON-NLS-1$
+						"	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN " +	 //$NON-NLS-1$
+						" 	ROW = NEW; " + //$NON-NLS-1$
+						" 	ELSIF (TG_OP = 'DELETE') THEN " + //$NON-NLS-1$
+						" 		ROW = OLD; " + //$NON-NLS-1$
+						" 	END IF; " + //$NON-NLS-1$
+						" 	INSERT INTO connect.change_log " +  //$NON-NLS-1$
+						" 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) " + //$NON-NLS-1$
+						" 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_uuid', ROW.WP_UUID, 'patrol_uuid', ROW.patrol_uuid, null, wp.CA_UUID " +  //$NON-NLS-1$
+						" 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid; " + //$NON-NLS-1$
+						" RETURN ROW; " + //$NON-NLS-1$
+						"END$$ LANGUAGE 'plpgsql'",  //$NON-NLS-1$
+						
+						"CREATE TRIGGER trg_incident_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.incident_waypoint FOR EACH ROW execute procedure connect.trg_incident_waypoint()", //$NON-NLS-1$
+						
+						"alter table smart.waypoint add column source_cm_uuid uuid", //$NON-NLS-1$
+						"alter table smart.waypoint add foreign key (source_cm_uuid) references smart.configurable_model(uuid) on delete set null on update restrict deferrable initially deferred", //$NON-NLS-1$
+
+						"delete from smart.CT_INCIDENT_LINK where obs_group_uuid is not null and obs_group_uuid not in (select uuid from smart.WP_OBSERVATION_GROUP)", //$NON-NLS-1$
+						"alter table smart.ct_incident_link add foreign key (obs_group_uuid) references smart.wp_observation_group on delete cascade on update restrict deferrable initially deferred",  //$NON-NLS-1$
+
+						"update connect.connect_plugin_version set version = '7.5' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '7.5' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
+								
 						"update connect.connect_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '7.5.7' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.connect_version set version = '7.5.7', last_updated = now()" //$NON-NLS-1$

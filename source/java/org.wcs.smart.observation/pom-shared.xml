@@ -15,12 +15,17 @@
 
 	<artifactId>org.wcs.smart.core.observation</artifactId>
 	<name>Observation Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.wcs.smart.core</groupId>
 			<artifactId>org.wcs.smart.core.core</artifactId>
+			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wcs.smart.core</groupId>
+			<artifactId>org.wcs.smart.core.dataentry</artifactId>
 			<version>${smart.version}</version>
 		</dependency>
 		<dependency>

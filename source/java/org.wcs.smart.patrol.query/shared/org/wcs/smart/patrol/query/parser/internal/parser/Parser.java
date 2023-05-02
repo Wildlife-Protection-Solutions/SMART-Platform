@@ -61,6 +61,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_AGENCY_KEY:
     case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
+    case WAYPOINT_CM_KEY:
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
@@ -114,6 +115,7 @@ public class Parser implements ParserConstants {
       case PATROLLEG_AGENCY_KEY:
       case PATROLLEG_AGENCY_KEY_KEY:
       case PATROLLEG_RANK_KEY:
+      case WAYPOINT_CM_KEY:
       case PATROL_ATTRIBUTE_BOOLEAN_KEY:
       case PATROL_ATTRIBUTE_STRING_KEY:
       case PATROL_ATTRIBUTE_LIST_KEY:
@@ -186,6 +188,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_AGENCY_KEY:
     case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
+    case WAYPOINT_CM_KEY:
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
@@ -237,6 +240,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_AGENCY_KEY:
     case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
+    case WAYPOINT_CM_KEY:
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
@@ -293,6 +297,7 @@ public class Parser implements ParserConstants {
       case PATROLLEG_AGENCY_KEY:
       case PATROLLEG_AGENCY_KEY_KEY:
       case PATROLLEG_RANK_KEY:
+      case WAYPOINT_CM_KEY:
       case PATROL_ATTRIBUTE_BOOLEAN_KEY:
       case PATROL_ATTRIBUTE_STRING_KEY:
       case PATROL_ATTRIBUTE_LIST_KEY:
@@ -606,6 +611,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_AGENCY_KEY:
     case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
+    case WAYPOINT_CM_KEY:
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
@@ -731,6 +737,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_AGENCY_KEY:
     case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
+    case WAYPOINT_CM_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
@@ -932,6 +939,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_AGENCY_KEY:
     case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
+    case WAYPOINT_CM_KEY:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PATROL_ID_KEY:
         jj_consume_token(PATROL_ID_KEY);
@@ -977,6 +985,9 @@ public class Parser implements ParserConstants {
         break;
       case PATROLLEG_RANK_KEY:
         jj_consume_token(PATROLLEG_RANK_KEY);
+        break;
+      case WAYPOINT_CM_KEY:
+        jj_consume_token(WAYPOINT_CM_KEY);
         break;
       default:
         jj_la1[25] = jj_gen;
@@ -1181,10 +1192,10 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0x7fc5fffc,0x7fc5fffc,0x0,0x7fc5fffc,0x7fc5fffc,0x7fc5fffc,0x0,0x40000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7fc1fffc,0x401020,0x810,0x0,0x0,0x7fc1fff8,0x10200,0x7e800000,0x7f800408,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x2dfff,0x2dfff,0x40000000,0x2dfff,0x2dfff,0x2dfff,0x40000000,0x0,0xfd00000,0x0,0x0,0xfd00000,0xa0000000,0x0,0x80000000,0xa0000000,0x0,0x0,0x2dfff,0x4100,0x800,0x0,0x0,0xdfff,0x1000,0xff,0x86ff,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x5bfff,0x5bfff,0x80000000,0x5bfff,0x5bfff,0x5bfff,0x80000000,0x0,0x1fa00000,0x0,0x0,0x1fa00000,0x40000000,0x0,0x0,0x40000000,0x0,0x0,0x5bfff,0x8200,0x1000,0x0,0x0,0x1bfff,0x2000,0x1ff,0x10dff,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_3() {
-      jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7f,0x0,0x2,0x7f,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xff,0x0,0x5,0xff,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1301,7 +1312,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[104];
+    boolean[] la1tokens = new boolean[105];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1324,7 +1335,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 104; i++) {
+    for (int i = 0; i < 105; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

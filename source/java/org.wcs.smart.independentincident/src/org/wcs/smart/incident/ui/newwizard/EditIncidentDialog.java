@@ -81,6 +81,8 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 			});
 		}else if (panelId == DistanceDirectionComposite.ID){
 			panel = new DistanceDirectionComposite();
+		}else if (panelId == IncidentPatrolIdComposite.ID) {
+			panel = new IncidentPatrolIdComposite();
 		}
 		
 		if (panel != null){
@@ -129,7 +131,9 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 				session.beginTransaction();
 				try{
 					Waypoint wp = session.get(Waypoint.class, incident.getUuid());
+					//update and save
 					panel.updateIncident(wp);
+					panel.afterSave(wp, session);
 					session.getTransaction().commit();
 				}catch (Exception ex){
 					session.getTransaction().rollback();

@@ -48,7 +48,7 @@ import org.wcs.smart.user.UserLevelManager;
 public class IncidentManager {
 	
 	private static final String INCIDENT_PROVIDER_EXT_ID = "org.wcs.smart.independentincident.provider"; //$NON-NLS-1$
-	
+		
 	private static IncidentManager instance = null;
 	private static HashMap<String, IIncidentProvider> incidentProviders = null;
 	
@@ -62,6 +62,8 @@ public class IncidentManager {
 		}
 		return instance;
 	}
+	
+		
 	/**
 	 * 
 	 * @param waypoint the waypoint to be edited

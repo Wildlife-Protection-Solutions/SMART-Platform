@@ -397,6 +397,7 @@ public class Messages extends NLS {
 	public static String PatrolLabelProvider_ArmedMetadata;
 
 	public static String PatrolLabelProvider_Bearing;
+
 	public static String PatrolLabelProvider_Comment;
 
 	public static String PatrolLabelProvider_CommentMetadata;
@@ -405,6 +406,8 @@ public class Messages extends NLS {
 	public static String PatrolLabelProvider_Distance;
 	public static String PatrolLabelProvider_EmployeesMetadata;
 	public static String PatrolLabelProvider_EndDateMetadata;
+
+	
 	public static String PatrolLabelProvider_JSONPROCESSOR_1;
 
 	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE;
@@ -524,6 +527,8 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_RestMinutesLabel;
 	public static String PatrolLegDayInputComposite_SetTrackDialog_Message;
 	public static String PatrolLegDayInputComposite_SetTrackLabel;
+
+	public static String PatrolLegDayInputComposite_SourceCmColumnName;
 	public static String PatrolLegDayInputComposite_StartTimeLabel;
 	public static String PatrolLegDayInputComposite_Time_ColumnHeader;
 	public static String PatrolLegDayInputComposite_TotalPatrolHours_Label;

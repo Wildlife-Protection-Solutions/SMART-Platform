@@ -204,6 +204,8 @@ public class SpatialSearchPanel extends Composite{
 	}
 	private void createControls() {
 		setLayout(new GridLayout(2, false));
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 		
 		Label l = toolkit.createLabel(this, Messages.SpatialSearchPanel_LocationsLabel, SWT.NONE);
 		cdLocation = new ControlDecoration(l, SWT.RIGHT | SWT.TOP);

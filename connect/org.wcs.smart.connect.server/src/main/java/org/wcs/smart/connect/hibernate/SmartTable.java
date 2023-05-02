@@ -186,6 +186,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord;
+import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -499,6 +500,8 @@ public enum SmartTable {
 	
 	SIGNATURE_TYPE(SignatureType.class, null),
 	CAQUICKLINK(QuickLink.class, null),
+	
+	INCIDENTWAYPOINT(IncidentWaypoint.class, ".waypoint.conservationArea"),
 	;
 	
 	public Class<?> hibernateClass;

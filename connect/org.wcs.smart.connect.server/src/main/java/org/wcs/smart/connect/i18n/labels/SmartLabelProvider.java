@@ -31,6 +31,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.internal.ca.datamodel.xml.IXmlToDataModelConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
@@ -157,6 +158,9 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 				case EXACT: return Messages.getString("OperatorLabelProvider.ExactOperator", l); //$NON-NLS-1$
 			}
 		}
+		
+		if (value == IFilter.NULL_OP) return Messages.getString("SmartLabelProvider.NoneOp", l); //$NON-NLS-1$
+		
 		return null;
 	}
 	

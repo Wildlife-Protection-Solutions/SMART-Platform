@@ -188,6 +188,8 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 			}else{
 				if (it.getUuid() != null){
 					sb.append( UuidUtils.uuidToString(it.getUuid()));
+				}else {
+					sb.append(it.getKey());
 				}
 			}
 			sb.append("\""); //$NON-NLS-1$

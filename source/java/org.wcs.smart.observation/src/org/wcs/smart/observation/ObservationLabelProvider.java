@@ -45,19 +45,29 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		if (item == JsonFileProcessor.Messages.MISSING_PROPERTIES) return Messages.ObservationLabelProvider_missingproperties;
 		if (item == JsonFileProcessor.Messages.MISSING_DATATYPE) return Messages.ObservationLabelProvider_mssingproperty1;
 		if (item == JsonFileProcessor.Messages.MISSING_FEATURETYPE) return Messages.ObservationLabelProvider_missingproperty2;
-		
-		if (item == IJsonFeatureProcessor.Messages.EMPLOYEE_NOT_FOUND) return Messages.ObservationLabelProvider_employeenotfound;
-		if (item == IJsonFeatureProcessor.Messages.CATEGORY_NOT_FOUND) return Messages.ObservationLabelProvider_categorynotfound;
-		if (item == IJsonFeatureProcessor.Messages.ATTRIBUTE_NOT_FOUND) return Messages.ObservationLabelProvider_attributenotfound;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_BOOLEAN_ATTRIBUTE) return Messages.ObservationLabelProvider_invalidbooleanvalue;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_DATE_ATTRIBUTE) return Messages.ObservationLabelProvider_invaluddatevalue;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_LIST_ATTRIBUTE) return Messages.ObservationLabelProvider_invalidlistitem;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_MLIST_ATTRIBUTE) return Messages.ObservationLabelProvider_invalidmultilist1;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_MLIST2_ATTRIBUTE) return Messages.ObservationLabelProvider_invalidmultilist2;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_TREE_ATTRIBUTE) return Messages.ObservationLabelProvider_invalidtreeitem;
-		if (item == IJsonFeatureProcessor.Messages.INVALID_NUMBER_ATTRIBUTE) return Messages.ObservationLabelProvider_invalidnumbervalue;
-		if (item == IJsonFeatureProcessor.Messages.SIGNATURE_TYPE_NOT_FOUND) return Messages.ObservationLabelProvider_SignatureTypeNotFound;
-
+	
+		if (item instanceof IJsonFeatureProcessor.Messages) {
+			return getMessage((IJsonFeatureProcessor.Messages)item, l);
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	public String getMessage(IJsonFeatureProcessor.Messages item, Locale l) {
+		switch(item) {
+		case EMPLOYEE_NOT_FOUND: return Messages.ObservationLabelProvider_employeenotfound;
+		case CATEGORY_NOT_FOUND: return Messages.ObservationLabelProvider_categorynotfound;
+		case ATTRIBUTE_NOT_FOUND: return Messages.ObservationLabelProvider_attributenotfound;
+		case INVALID_BOOLEAN_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidbooleanvalue;
+		case INVALID_DATE_ATTRIBUTE: return Messages.ObservationLabelProvider_invaluddatevalue;
+		case INVALID_LIST_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidlistitem;
+		case INVALID_MLIST_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidmultilist1;
+		case INVALID_MLIST2_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidmultilist2;
+		case INVALID_TREE_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidtreeitem;
+		case INVALID_NUMBER_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidnumbervalue;
+		case SIGNATURE_TYPE_NOT_FOUND: return Messages.ObservationLabelProvider_SignatureTypeNotFound;
+		case INVALID_CM_UUID: return Messages.ObservationLabelProvider_InvalidCmUuid;
+		case CM_MISSING: return Messages.ObservationLabelProvider_CmNotFound;
+		}
 		return ""; //$NON-NLS-1$
 	}
 

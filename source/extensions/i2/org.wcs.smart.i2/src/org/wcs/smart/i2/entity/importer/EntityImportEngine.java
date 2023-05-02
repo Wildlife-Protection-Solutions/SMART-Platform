@@ -321,14 +321,16 @@ public enum EntityImportEngine {
 				s.flush();
 				
 				//save new entities
+				boolean dmModified = false;
 				for (IntelEntity e : newEntities){
 					s.save(e);
 					s.flush();
 					
-					e.createDataModelItem(s);
+					dmModified = dmModified || e.createDataModelItem(s);
 					kidMonitor.worked(1);
 					kidMonitor.checkCanceled();
 				}
+				if (dmModified) DataModelManager.INSTANCE.updateLastModified(s);
 				s.getTransaction().commit();
 			}catch (OperationCanceledException ex) {
 				s.getTransaction().rollback();

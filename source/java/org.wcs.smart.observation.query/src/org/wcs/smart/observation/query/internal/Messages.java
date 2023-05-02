@@ -39,6 +39,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_WaypointTimeColumnName;
 	public static String FixedQueryColumn_xColumnName;
 	public static String FixedQueryColumn_yColumnName;
+	public static String GeneralContentProvider_CmSourceName;
 	public static String GeneralContentProvider_ConservationAreaLabel;
 	public static String GeneralContentProvider_ObserverLabel;
 	public static String GeneralContentProvider_WaypointIdName;
@@ -98,6 +99,8 @@ public class Messages extends NLS {
 	public static String WaypointSourceGroupByDropItem_FiltersLabel;
 	public static String WaypointSourceGroupByDropItem_WaypointSourceLabel;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String ObservationDropItemFactory_CmError;
+	public static String ObservationDropItemFactory_CmNotFound;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
 	public static String ObservationGridQueryType_QueryName;
 	public static String ObservationQueryLabelProvider_LastModified_ColumnName;

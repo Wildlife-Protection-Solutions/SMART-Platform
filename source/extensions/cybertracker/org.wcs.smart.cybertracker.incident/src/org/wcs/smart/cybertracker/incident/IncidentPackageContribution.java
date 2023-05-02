@@ -169,7 +169,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 				updates.addFile(toPath);
 			}
 			
-			IncidentPackageExporter.INSTANCE.createIncidentMetadataJson(metadataFile, (AbstractCtPackage)pp, s);
+			IncidentPackageExporter.INSTANCE.createIncidentMetadataJson(metadataFile, (AbstractCtPackage)pp, cm, s);
 			updates.addFile(metadataFile);
 		}
 		

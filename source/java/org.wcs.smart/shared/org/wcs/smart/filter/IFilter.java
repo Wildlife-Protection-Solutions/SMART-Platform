@@ -30,6 +30,8 @@ package org.wcs.smart.filter;
  */
 public interface IFilter {
 
+	public static final String NULL_OP = "null"; //$NON-NLS-1$
+	
 	public String asString();
 	
 	public default void accept(IFilterVisitor visitor) {

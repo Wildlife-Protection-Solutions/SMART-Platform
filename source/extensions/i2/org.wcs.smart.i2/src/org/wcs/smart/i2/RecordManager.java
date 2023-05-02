@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.i2;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -39,12 +43,16 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -59,6 +67,8 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
+import org.wcs.smart.i2.xml.RecordXmlExporter;
 
 /**
  * Functions for managing intelligence records
@@ -67,6 +77,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
  *
  */
 public enum RecordManager {
+	
 	
 	INSTANCE;
 	
@@ -79,6 +90,10 @@ public enum RecordManager {
 		return sources;
 
 	}
+	
+	
+	private static final String DIR_PREF_KEY = "org.wcs.smart.i2.records.export.dir"; //$NON-NLS-1$
+	
 	/**
 	 * Delete an intelligence record, associated locations, and attachments
 	 * 
@@ -267,5 +282,80 @@ public enum RecordManager {
 		
 		return dupCnt > 0;
 				
+	}
+	
+	
+	public void doXmlExport(List<UUID> toExport, Shell parentShell){
+		if (toExport == null  || toExport.isEmpty()) return;
+		
+		//need to get a file
+		DirectoryDialog dd = new DirectoryDialog(parentShell);
+		String ppath = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(DIR_PREF_KEY);
+		if (ppath != null){
+			dd.setFilterPath(ppath);
+		}
+		dd.setText(Messages.RecordsView_SelectFolder);
+		dd.setMessage(Messages.RecordsView_DdMessage );
+		String path = dd.open();
+		if (path == null) return;
+		Intelligence2PlugIn.getDefault().getPreferenceStore().putValue(DIR_PREF_KEY, path);
+		
+		final Path folder = Paths.get(path);
+		if (!Files.exists(folder)){
+			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.RecordsView_CreateDirTitle,
+					MessageFormat.format(Messages.RecordsView_CreateDirMessage, folder.toString()))){
+				return;
+			}
+		}
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(parentShell);
+		try{
+			pmd.run(true,  true, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.RecordsView_XmlTaskName, toExport.size());
+				
+				RecordXmlExporter exporter = new RecordXmlExporter(folder);
+				int cnt = 0;
+				for (UUID record : toExport){
+					try{
+						if (exporter.exportToFile(record, progress.newChild(1))) cnt ++;
+					}catch(OperationCanceledException ex) {
+						break;
+					}catch (Exception ex){
+						Display.getDefault().syncExec(()->{
+							MessageDialog.openError(parentShell, Messages.RecordsView_ErrorTitle, Messages.RecordsView_ErrorMessage + ex.getMessage());
+						});
+						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					}
+					if (progress.isCanceled()) break;
+				}
+				
+				if (progress.isCanceled()){
+					Display.getDefault().syncExec(()->{
+						MessageDialog.openInformation(parentShell, Messages.RecordsView_CancelledTitle, Messages.RecordsView_CanclledUser);
+					});
+				}else{
+					
+					final int totalCnt = cnt;
+					Display.getDefault().syncExec(()->{
+						MessageDialog.openInformation(parentShell, Messages.RecordsView_ExportCompleteTitle, MessageFormat.format(Messages.RecordsView_ExportCompleteMessage, totalCnt, toExport.size(), folder.toString()));
+					});
+				}
+				
+			}
+			});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(Messages.RecordsView_ErrorMessage2 + ex.getMessage(), ex);
+		}		
+	}
+	
+	public void doCsvExport(List<UUID> toExport, Shell parentShell){
+		if (toExport == null  || toExport.isEmpty()) return;
+		RecordCsvExporter exporter = new RecordCsvExporter(toExport);
+		CsvExportDialog dialog = new CsvExportDialog(parentShell, exporter.createExportConfiguration());
+		dialog.open();		
 	}
 }

@@ -438,7 +438,7 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 		}
 		
 		if (dm.length() != 0) {
-			MessageDialog.openInformation(getShell(), Messages.EntityTypesPreferencePage_WarningMsg, Messages.EntityTypesPreferencePage_DatamodelLinkWarning + "\n\n" + dm.toString()); //$NON-NLS-3$
+			MessageDialog.openInformation(getShell(), Messages.EntityTypesPreferencePage_WarningMsg, Messages.EntityTypesPreferencePage_DatamodelLinkWarning + "\n\n" + dm.toString()); //$NON-NLS-1$
 		}
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {

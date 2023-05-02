@@ -90,6 +90,34 @@ public class Upgrader754To757 implements IDatabaseUpgrader {
 			"GRANT ALL PRIVILEGES ON  smart.quicklink to manager", //$NON-NLS-1$
 			
 			"ALTER TABLE smart.configurable_model ADD COLUMN use_earth_ranger boolean not null default false", //$NON-NLS-1$
+			
+			
+			//The incident plugin currently doesn't have any database configurations associated
+			//with it. We need this one table to support a new feature in 7.5.7, but since
+			//we are changing the way the database managements is done in 8, I don't want
+			//to go to all the work to add the required classes for this update. So I created
+			//this table here. If users don't have the incident plugin installed it will remain empty
+			//which is ok
+			//NOTE: this also affects the triggers so when migrating to 8 we need to migrate these
+			//statements and the triggers
+			"create table smart.incident_waypoint(wp_uuid char(16) for bit data not null, patrol_uuid char(16) for bit data, primary key (wp_uuid) )", //$NON-NLS-1$
+			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_wpuuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_patroluuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			
+			//link configurable model to patrol
+			"alter table smart.waypoint add column source_cm_uuid char(16) for bit data", //$NON-NLS-1$
+			//drop and re-create indexes are required
+			"alter table smart.waypoint drop constraint WAYPOINT_CA_UUID_FK", //$NON-NLS-1$
+			"alter table smart.configurable_model drop constraint CONFIGURABLE_MODEL_CA_UUID_FK", //$NON-NLS-1$
+			"alter table smart.configurable_model drop constraint cm_iconset_uuid_fk", //$NON-NLS-1$
+			"alter table smart.iconset drop constraint ICONSET_CAUUID_FK", //$NON-NLS-1$
+
+			"ALTER TABLE smart.waypoint add constraint waypoint_source_cm_uuid_fk FOREIGN KEY (source_cm_uuid) REFERENCES smart.configurable_model(uuid) on delete set null on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.waypoint add constraint WAYPOINT_CA_UUID_FK FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.configurable_model add constraint CONFIGURABLE_MODEL_CA_UUID_FK FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.configurable_model add constraint cm_iconset_uuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) on delete set null on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.iconset add constraint ICONSET_CAUUID_FK FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			
 		};	
 
 		for (String s : sql) {

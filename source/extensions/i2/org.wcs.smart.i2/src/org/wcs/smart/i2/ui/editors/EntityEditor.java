@@ -135,6 +135,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -480,7 +481,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 		entity.setComment(txtScratchpad.getText());
 
 		List<IntelEntity> otherEntityModified = new ArrayList<IntelEntity>();
-		
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 	
 			s.beginTransaction();
@@ -541,13 +541,21 @@ public class EntityEditor extends EditorPart implements MapPart{
 					entity.getAttributes().remove(item);
 				}
 				
+				boolean dmModified = false;
 				if (entity.getDmAttributeListItem() != null) {
-					entity.getDmAttributeListItem().updateName(entity.getConservationArea().getDefaultLanguage(), entity.getIdAttributeAsText());
-					entity.getDmAttributeListItem().setName(entity.getIdAttributeAsText());
-					s.saveOrUpdate(entity.getDmAttributeListItem());
+					String newname = entity.getIdAttributeAsText();
+					if (!newname.equals(entity.getDmAttributeListItem().getName()) ||
+							!newname.equals(entity.getDmAttributeListItem().findName(entity.getConservationArea().getDefaultLanguage()) )) {
+						entity.getDmAttributeListItem().updateName(entity.getConservationArea().getDefaultLanguage(), newname);					
+						entity.getDmAttributeListItem().setName(newname);
+						dmModified = true;
+					}
+					//s.saveOrUpdate(entity.getDmAttributeListItem());
 				}
 				
-				entity.updateActiveValue();
+				dmModified = dmModified || entity.updateActiveValue();
+				if (dmModified) DataModelManager.INSTANCE.updateLastModified(s);
+				
 				s.getTransaction().commit();
 				clearLists();
 			}catch (Exception ex){
@@ -1140,7 +1148,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 								try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 									s.beginTransaction();
 									try {
-										EntityManager.INSTANCE.deleteEntity(entity, s);
+										if (EntityManager.INSTANCE.deleteEntity(entity, s)) {
+											DataModelManager.INSTANCE.updateLastModified(s);
+										}
 										s.getTransaction().commit();
 									}catch (Exception ex){
 										s.getTransaction().rollback();

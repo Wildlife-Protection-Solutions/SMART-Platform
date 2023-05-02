@@ -73,6 +73,7 @@ import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -99,6 +100,8 @@ public class JsonCtParser {
 	public static final String LATITUDE_KEY = "latitude"; //$NON-NLS-1$
 	public static final String DATETIME_KEY = "dateTime"; //$NON-NLS-1$
 	public static final String ROOT_ID_KEY = "rootId"; //$NON-NLS-1$
+	
+	public static final String CM_UUID_KEY = "SMART_cmUuid"; //$NON-NLS-1$
 
 	public static final String DISTANCE_KEY = "distance"; //$NON-NLS-1$
 	public static final String DIRECTION_KEY = "bearing"; //$NON-NLS-1$
@@ -378,6 +381,24 @@ public class JsonCtParser {
 		//observations are saved in the sightings object
 		JSONObject observations = (JSONObject)properties.get(SIGHTINGS_KEY);
 		if (observations == null) return newWaypoint;
+		
+		//TODO: what happens with a waypoint with no observations
+		if (observations.containsKey(CM_UUID_KEY)) {
+			//configure cm associated with waypoint (new 7.5.7)
+			String cmuuid = observations.get(CM_UUID_KEY).toString();
+			UUID cmUuid = null;
+			try {
+				cmUuid = UuidUtils.stringToUuid(cmuuid);
+			}catch (Exception ex) {
+				warnings.add(MessageFormat.format("Invalid configurable model uuid {0}. The source configurable model for this waypoint will be null.", cmuuid));
+			}
+			ConfigurableModel cm = session.getReference(ConfigurableModel.class, cmUuid);
+			if (cm == null) {
+				warnings.add("The configurable referenced in the source data could not be found. The source configurable model for this waypoint will be null");
+			}
+			newWaypoint.setSourceConfigurableModel(cm);
+		}
+		
 		
 		//category uuid and level; this uuid is associated with the "largest" level
 		String categoryUuid = null;

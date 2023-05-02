@@ -204,8 +204,6 @@ public class AllPanel extends Composite {
 	
 	private void createContents() {
 		setLayout(new GridLayout());
-		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
 		
 		searchPanel = new EntitySearchPanel(this) {
 			@Override
@@ -306,7 +304,7 @@ public class AllPanel extends Composite {
 		for (Control c : tableComposite.getChildren()) c.dispose();
 
 		
-		entityTable = new TableViewer(tableComposite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
+		entityTable = new TableViewer(tableComposite, SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		entityTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityTable.setContentProvider(provider);
 		entityTable.getTable().setHeaderVisible(true);

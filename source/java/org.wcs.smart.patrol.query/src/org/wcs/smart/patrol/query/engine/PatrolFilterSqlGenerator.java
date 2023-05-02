@@ -261,9 +261,12 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			//uuid
 			try{
 				String value2 = SharedUtils.stripQuotes((String)filter.getValue());
-				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
-				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
-				return x;
+				if (value2.equals(IFilter.NULL_OP)) {
+					return prefix + "." + option.getColumnName() + " is null "; //$NON-NLS-1$ //$NON-NLS-2$ 
+				}else {
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
+					return prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
+				}
 			}catch (Exception ex){
 				throw new IllegalStateException(ex);
 			}

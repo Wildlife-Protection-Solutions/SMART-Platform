@@ -36,6 +36,7 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRoo
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -46,9 +47,15 @@ import org.wcs.smart.hibernate.SmartDB;
 public class ConfigurableModelLabelProvider extends LabelProvider implements IColorProvider {
 
 	private Language currentLanguage;
+	private boolean showEr = false;
 	
 	public ConfigurableModelLabelProvider(){
 		currentLanguage = null;
+	}
+	
+	public ConfigurableModelLabelProvider(boolean showEarthRanger){
+		this();
+		this.showEr = showEarthRanger;;
 	}
 	
 	public void setLanguage(Language currentLanguage){
@@ -68,20 +75,23 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 			if (currentLanguage == null) return ((CmAttribute)element).getName();
 			return ((CmAttribute)element).findDisplayName(currentLanguage, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		}
+		
 		if (element instanceof NamedItem) {
+			String name = null;
 			NamedItem i = (NamedItem)element;
 			if (currentLanguage == null){
-				return i.getName();
+				name = i.getName();
+			}else {
+				String l = i.findNameNull(currentLanguage);
+				if (l != null) name = l;
 			}
-			String l = i.findNameNull(currentLanguage);
-			if (l != null) return l;
+			if (name == null) name = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			
-			return i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-						
-//			if (element instanceof CmAttribute) {
-//				l = l + "(" + ((CmAttribute)element).getOrder() + ")";
-//			}
-//			return l;
+			if (element instanceof ConfigurableModel && this.showEr
+					&& ((ConfigurableModel)element).getUseEarthRanger()) {
+				name += Messages.ConfigurableModelLabelProvider_ErTagLabel;
+			}
+			return name;
 		}
 		if (element instanceof CmRootNode) {
 			return getText(((CmRootNode)element).model);

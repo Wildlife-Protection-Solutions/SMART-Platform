@@ -124,7 +124,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
 		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters,
-				new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER}));
+				new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER, GeneralItem.WAYPOINT_CM}));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 
 		areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters, true);
@@ -186,9 +186,9 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				try(Session session = HibernateManager.openSession()){
 					ObservationOptions options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
 					if (options.getTrackObserver()){
-						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER});
+						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER, GeneralItem.WAYPOINT_CM});
 					}else{
-						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID});
+						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.WAYPOINT_CM});
 					}
 				}
 			}

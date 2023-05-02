@@ -35,6 +35,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -53,12 +56,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
@@ -83,6 +88,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.incident.ui.newwizard.CommentComposite;
 import org.wcs.smart.incident.ui.newwizard.DateTimeComposite;
 import org.wcs.smart.incident.ui.newwizard.DistanceDirectionComposite;
@@ -90,6 +96,7 @@ import org.wcs.smart.incident.ui.newwizard.EditIncidentDialog;
 import org.wcs.smart.incident.ui.newwizard.IdComposite;
 import org.wcs.smart.incident.ui.newwizard.IncidentAttachmentComposite;
 import org.wcs.smart.incident.ui.newwizard.LocationComposite;
+import org.wcs.smart.incident.ui.newwizard.IncidentPatrolIdComposite;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -102,6 +109,8 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.ui.ObservationAttachmentLabelProvider;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
+import org.wcs.smart.patrol.ui.OpenPatrolHandler;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
@@ -127,6 +136,8 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDistance;
 	private Text txtPrjLocation;
 	private Text txtDirection;
+	private Text txtCm;
+	private Link txtPatrol;
 	private Label txtType;
 	private Label lblLastModified;
 //	private Label lblLastModifiedBy;
@@ -202,6 +213,12 @@ public class IncidentSummaryPage extends EditorPart {
 			}else{
 				this.txtComments.setText(incident.getComment());
 			}
+			
+			if (incident.getSourceConfigurableModel() != null) {
+				txtCm.setText(incident.getSourceConfigurableModel().getName());
+			}else {
+				txtCm.setText(""); //$NON-NLS-1$
+			}
 		
 			StringBuilder sb = new StringBuilder();
 			if (incident.getLastModifiedBy() != null) {
@@ -252,6 +269,15 @@ public class IncidentSummaryPage extends EditorPart {
 				}else{
 					this.txtDistance.setText(String.valueOf(incident.getDistance()));
 				}
+			}
+			
+			IncidentWaypoint iw = session.get(IncidentWaypoint.class, incident.getUuid());
+			if (iw != null) {
+				this.txtPatrol.setText("<a>" + iw.getPatrol().getId() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+				this.txtPatrol.setData(new PatrolEditorInput(iw.getPatrol()));
+			}else {
+				this.txtPatrol.setText(Messages.IncidentSummaryPage_NoneOption);
+				this.txtPatrol.setData(null);
 			}
 		
 			//include all attachments 
@@ -491,13 +517,35 @@ public class IncidentSummaryPage extends EditorPart {
 			toolkit.createLabel(left, ""); //$NON-NLS-1$
 		}
 		
-		toolkit.createLabel(left, Messages.IncidentSummaryPage_IncidentSourceField);
 		
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_IncidentSourceField);
 		txtType = toolkit.createLabel(left, ""); //$NON-NLS-1$
 		txtType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
-		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		
+		toolkit.createLabel(right, Messages.IncidentSummaryPage_PatrolLabel);
+		txtPatrol= new Link(right, SWT.NONE);
+		txtPatrol.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtPatrol.addListener(SWT.Selection, e->{
+			PatrolEditorInput pi = (PatrolEditorInput)txtPatrol.getData();
+			if (pi == null) return;
+			
+			IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			ctx = ctx.getActiveLeaf().createChild();
+			ctx.set(OpenPatrolHandler.PATROL_PARAM, pi);
+			ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, ctx);
+		});
+		createEdit(right, canEdit, IncidentPatrolIdComposite.ID);
+		
+		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CmLabel);
+		l.setToolTipText(Messages.IncidentSummaryPage_CmTooltip);
+		txtCm = toolkit.createText(right, ""); //$NON-NLS-1$
+		txtCm.setEditable(false);
+		txtCm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolkit.createLabel(right, ""); //$NON-NLS-1$
+		
+		l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		txtComments = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtComments.setEditable(false);
 		txtComments.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -506,7 +554,7 @@ public class IncidentSummaryPage extends EditorPart {
 		createEdit(right, canEdit, CommentComposite.ID);
 		
 		l = toolkit.createLabel(right, Messages.IncidentSummaryPage_AttachmentsLabel);
-		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		attachments = new ListViewer(right);
 		attachments.setContentProvider(ArrayContentProvider.getInstance());
 		attachments.setLabelProvider(new ObservationAttachmentLabelProvider(){

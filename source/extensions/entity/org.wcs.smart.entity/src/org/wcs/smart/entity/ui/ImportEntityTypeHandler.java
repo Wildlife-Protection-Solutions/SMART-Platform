@@ -159,6 +159,8 @@ public class ImportEntityTypeHandler{
 								session.saveOrUpdate(ea.getDmAttribute());
 							}
 							session.saveOrUpdate(et);
+							DataModelManager.INSTANCE.updateLastModified(session);
+							
 							session.getTransaction().commit();
 							returnInfo[2] = et;
 						}catch (Exception ex){

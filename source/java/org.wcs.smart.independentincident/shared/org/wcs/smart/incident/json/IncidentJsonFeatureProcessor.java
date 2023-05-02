@@ -353,7 +353,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getRawY() != null) toUpdate.setRawY(wp.getRawY());
 		
 		if (wp.getDateTime() != null) toUpdate.setDateTime(wp.getDateTime());
-		
+		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+
 		//update observer
 		updateObserver(toUpdate, attributes, ca, session, l);
 		

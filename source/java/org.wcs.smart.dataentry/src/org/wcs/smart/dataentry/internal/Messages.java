@@ -143,13 +143,14 @@ public class Messages extends NLS {
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
 	public static String ConfigurableModelLabelProvider_AttributeGroupLabel;
+	public static String ConfigurableModelLabelProvider_ErTagLabel;
 	public static String ConfigurableModelPropertyDialog_AllFiles;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_Button_Export_File;
 	public static String ConfigurableModelPropertyDialog_Button_Import_File;
 	public static String ConfigurableModelPropertyDialog_ConfigurableModelDeafultName;
-	public static String ConfigurableModelPropertyDialog_ConfirmDelete;
+	public static String ConfigurableModelPropertyDialog_ConfirmDelete1;
 	public static String ConfigurableModelPropertyDialog_Converting;
 	public static String ConfigurableModelPropertyDialog_CreateCmModelErrorMessage;
 	public static String ConfigurableModelPropertyDialog_DeleteDialogTitle;

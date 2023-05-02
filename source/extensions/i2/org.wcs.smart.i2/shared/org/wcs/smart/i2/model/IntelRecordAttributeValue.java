@@ -173,7 +173,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 				}
 			case DATE:
 				LocalDate dvalue = getDateValue();
-				if (dvalue == null) return "";
+				if (dvalue == null) return ""; //$NON-NLS-1$
 				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dvalue);
 			case LIST:
 			case EMPLOYEE:

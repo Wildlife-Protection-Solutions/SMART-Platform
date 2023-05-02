@@ -72,6 +72,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -88,6 +89,7 @@ import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
@@ -123,6 +125,7 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 import org.wcs.smart.query.model.summary.ObserverGroupBy;
+import org.wcs.smart.query.model.summary.WaypointCmGroupBy;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -385,6 +388,9 @@ public class SummaryItemLabelProvider {
 			results = getName((SamplingUnitGroupBy)item);
 		}else if (item instanceof AssetGroupBy){
 			results = getName((AssetGroupBy)item);
+		}else if (item instanceof WaypointCmGroupBy) {
+			results = getName((WaypointCmGroupBy)item);
+
 		}
 		return results;
 	}
@@ -878,11 +884,16 @@ public class SummaryItemLabelProvider {
 					|| item.getOption() == PatrolQueryOption.PATROL_TYPE){
 				filters.add(cb.equal(from.get("isActive"), true)); //$NON-NLS-1$
 			}
-												
+			
+			int addnull = -1;
 			if (keys != null){
 				List<UUID> uuidkeys = new ArrayList<>(keys.length);
 				for (int i = 0; i < keys.length; i++) {
-					uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
+					if (keys[i].equals(IFilter.NULL_OP)) {
+						addnull = i;
+					}else {
+						uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
+					}
 				}
 				filters.add(from.get("uuid").in(uuidkeys)); //$NON-NLS-1$
 			}else{
@@ -918,6 +929,10 @@ public class SummaryItemLabelProvider {
 				}else if (object instanceof ListItem){
 					results.add((ListItem)object);
 				}
+			}
+			if (addnull >=0 ) {
+				String name = item.getOption().getName(s, null, l);
+				results.add(addnull, new ListItem(null, name, IFilter.NULL_OP));
 			}
 		}else if (type == PatrolQueryOptionType.KEY){
 			Class<?> queryClazz = null;
@@ -1270,6 +1285,36 @@ public class SummaryItemLabelProvider {
 			}
 		}
 		sortItems(items);
+		return items;
+	}
+	
+	private List<ListItem> getName(WaypointCmGroupBy item){
+		String[] keys = item.getKeys();
+		
+		List<ListItem> items = new ArrayList<ListItem>();
+		boolean addnone = false;
+		if (keys == null){
+			addnone = true;
+			
+			List<ConfigurableModel> models = s.createQuery("FROM ConfigurableModel WHERE conservationArea.uuid in (:cas)", ConfigurableModel.class) //$NON-NLS-1$
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.list();
+			for (ConfigurableModel m : models) items.add(new ListItem(m.getUuid(), m.getName()));
+		}else{
+			for (String k : keys){
+				if (k.equals(IFilter.NULL_OP)) {
+					addnone = true;
+				}else {
+					ConfigurableModel cm = s.getReference(ConfigurableModel.class, UuidUtils.stringToUuid(k));
+					if (cm != null && caFilter.getConservationAreaFilterIds().contains(cm.getConservationArea().getUuid())) {
+						items.add(new ListItem(cm.getUuid(), cm.getName()));
+					}
+				}
+			}
+		}
+		sortItems(items);
+		if (addnone)
+			items.add(0, new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(IFilter.NULL_OP, this.l), IFilter.NULL_OP));
 		return items;
 	}
 	
