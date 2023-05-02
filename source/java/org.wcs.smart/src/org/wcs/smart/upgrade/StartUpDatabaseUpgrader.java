@@ -25,8 +25,10 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.UpgradeEngine.UpgradeFromVersion;
 
@@ -72,7 +74,13 @@ public class StartUpDatabaseUpgrader   {
 			SmartPlugIn.log(MessageFormat.format("Upgrading core table from {0}", fromVersion.fromVersion), null); //$NON-NLS-1$
 			//disable change tracking - we don't want to log changes for this
 			boolean isChangeLogInstalled = ChangeLogInstaller.INSTANCE.isChangeLoggingEnabled();
-			ChangeLogInstaller.INSTANCE.setEnabled(false);
+			
+			try (Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session, SmartPlugIn.PLUGIN_ID);
+				session.getTransaction().commit();
+			}
+			
 			try {
 				for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++) {
 					IDatabaseUpgrader upgrader = UpgradeFromVersion.values()[i].upgradeEngine.getDeclaredConstructor().newInstance();
@@ -86,6 +94,12 @@ public class StartUpDatabaseUpgrader   {
 					upgrader.upgrade(new NullProgressMonitor());
 				}
 
+				try (Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					ChangeLogInstaller.INSTANCE.installChangeLogTracking(session, SmartPlugIn.PLUGIN_ID);
+					session.getTransaction().commit();
+				}
+				
 			}finally {
 				ChangeLogInstaller.INSTANCE.setEnabled(isChangeLogInstalled);
 			}
