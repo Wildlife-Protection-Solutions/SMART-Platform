@@ -75,10 +75,11 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 		try{
 			session.beginTransaction();
 			
+			ConservationAreaInfo info = null;
 			try{
 				session.update(item);
 	
-				ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
+				info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 				if (info.getStatus() == Status.NODATA){
 					throw new Exception(Messages.getString("SyncUploadCaProcessor.CaNoData", item.getLocale())); //$NON-NLS-1$
 				}
@@ -110,8 +111,8 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError2", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
 				session.saveOrUpdate(item);
 				session.getTransaction().commit();
-				
 			}
+			
 		}finally{
 			try{
 				LockManager.INSTANCE.releaseDatabase(session, item.getConservationAreaInfo());
