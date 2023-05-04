@@ -184,8 +184,12 @@ public class SmartDB {
 	public static void setConservationAreaConfiguration(Employee user, String plainTextPassword,
 			ConservationArea ca, 
 			ConservationAreaConfiguration configuration) throws Exception{
+		
 		currentCa = ca;
-		if (currentEmployee == null || !currentEmployee.equals(user)){
+		
+		if (user == null) {
+			current = null;
+		}else if (currentEmployee == null || !currentEmployee.equals(user)){
 			//new user
 			current = findDbUser(user);
 			HibernateManager.setUserName(current.username, current.password);

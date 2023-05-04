@@ -301,6 +301,15 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String E4_DATABASE_CHANGED_EVENT = "SMARTDATA"; //$NON-NLS-1$
 	
+	
+	/**
+	 * IEventBroker event topic that is fired when
+	 * download sync event is completed 
+	 * 
+	 * Payload is the conservation area
+	 */
+	public static final String E4_SYNC_DOWNLOAD_DONE = "REPLICATION_SYNC_DOWNLOAD"; //$NON-NLS-1$
+	
 	/**
 	 * The constructor
 	 */

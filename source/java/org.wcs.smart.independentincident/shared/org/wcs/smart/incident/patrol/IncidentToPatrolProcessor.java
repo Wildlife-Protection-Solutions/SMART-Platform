@@ -65,11 +65,21 @@ public class IncidentToPatrolProcessor {
 	private List<PatrolLegDay> updatedPatrols;
 	private List<Waypoint> updatedWaypoints;
 	
+	private boolean doExpire = false;
 	
-	public IncidentToPatrolProcessor(ConservationArea ca ) {
+	/**
+	 * Currently to prevent sync conflicts doExpire should only be set to true
+	 * if this processing is occurring on a Connect server.
+	 * 
+	 * @param ca Conservation Area to process
+	 * @param doExpire true if old incidents should be converted to normal incidents or not
+	 * 
+	 */
+	public IncidentToPatrolProcessor(ConservationArea ca, boolean doExpire ) {
 		this.ca = ca;
 		this.updatedPatrols = new ArrayList<>();
 		this.updatedWaypoints = new ArrayList<>();
+		this.doExpire = doExpire;
 	}
 	
 	public List<PatrolLegDay> getUpdatedPatrols(){
@@ -96,19 +106,21 @@ public class IncidentToPatrolProcessor {
 		
 		for (Waypoint wp : toProcess) {
 
-			//if waypoints are old convert them to normal waypoints			
-			if (ChronoUnit.DAYS.between(wp.getDateTime().toLocalDate(), LocalDate.now()) > expireDays) {
-				//convert to normal integrate waypoint and move on
-				session.beginTransaction();
-				try {
-					wp.setSourceId(IntegrateIncidentSource.KEY);
-					session.getTransaction().commit();
-				}catch (Exception ex) {
-					session.getTransaction().rollback();
-					throw new Exception(ex);
+			//if waypoints are old convert them to normal waypoints	
+			if (doExpire) {
+				if (ChronoUnit.DAYS.between(wp.getDateTime().toLocalDate(), LocalDate.now()) > expireDays) {
+					//convert to normal integrate waypoint and move on
+					session.beginTransaction();
+					try {
+						wp.setSourceId(IntegrateIncidentSource.KEY);
+						session.getTransaction().commit();
+					}catch (Exception ex) {
+						session.getTransaction().rollback();
+						throw new Exception(ex);
+					}
+					updatedWaypoints.add(wp);
+					continue;
 				}
-				updatedWaypoints.add(wp);
-				continue;
 			}
 
 			StringBuilder sb = new StringBuilder();
@@ -196,7 +208,7 @@ public class IncidentToPatrolProcessor {
 						}
 					}
 					matchedTrack.setLineStrings(newtracks);
-
+					updatedPatrols.add(matchedTrack.getPatrolLegDay());
 				}else if (wp.getSourceId().equals(IntegratePatrolLinkIncidentSource.KEY)) {
 					//set to integrate 
 					wp.setSourceId(IntegrateIncidentSource.KEY);
@@ -209,10 +221,6 @@ public class IncidentToPatrolProcessor {
 				
 				session.getTransaction().commit();
 				
-				
-				if (wp.getSourceId().equals(IntegratePatrolIncidentSource.KEY)) {
-					updatedPatrols.add(matchedTrack.getPatrolLegDay());
-				}
 				updatedWaypoints.add(wp);
 				
 			}catch (Exception ex) {

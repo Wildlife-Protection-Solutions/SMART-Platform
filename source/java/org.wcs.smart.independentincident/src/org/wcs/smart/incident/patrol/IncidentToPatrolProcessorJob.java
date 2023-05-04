@@ -53,7 +53,7 @@ public class IncidentToPatrolProcessorJob extends Job{
 	protected IStatus run(IProgressMonitor monitor) {
 		
 		try {
-			IncidentToPatrolProcessor processor = new IncidentToPatrolProcessor(SmartDB.getCurrentConservationArea());
+			IncidentToPatrolProcessor processor = new IncidentToPatrolProcessor(SmartDB.getCurrentConservationArea(), false);
 			
 			try(Session session = HibernateManager.openSession()){
 				processor.doWork(session);	
