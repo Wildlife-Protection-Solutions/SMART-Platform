@@ -78,7 +78,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
-import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -96,7 +95,6 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
-import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -111,6 +109,9 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class BasicRecordSearchPanel extends Composite {
 
+	private static final String CSV_EXPORT_TYPE = "csv"; //$NON-NLS-1$
+	private static final String XML_EXPORT_TYPE = "xml"; //$NON-NLS-1$
+	
 	private final Color LIST_HIGHLIGHT_COLOR = SmartUtils.getListHighlightColor(Display.getDefault());
 	private final Color LIST_SELECTION_COLOR = SmartUtils.getListSelectedColor(Display.getDefault());
 	
@@ -210,16 +211,26 @@ public class BasicRecordSearchPanel extends Composite {
 		
 		Hyperlink btnExport = toolkit.createHyperlink(btnComp, Messages.BasicRecordSearchPanel_ExportLink, SWT.NONE);
 		btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-		btnExport.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				doExport();
-			}
-		});
+		
 		btnExport.setToolTipText(Messages.BasicRecordSearchPanel_ExportTooltip);
 		btnExport.setEnabled(IntelSecurityManager.INSTANCE.canViewRecordAny());
 		
 		
+		Menu mnuIconSize = new Menu(btnExport);
+		MenuItem xml = new MenuItem(mnuIconSize, SWT.PUSH);
+		MenuItem csv= new MenuItem(mnuIconSize, SWT.PUSH);
+		xml.setText(Messages.BasicRecordSearchPanel_ExportToXml);
+		csv.setText(Messages.BasicRecordSearchPanel_ExportToCsv);
+		
+		csv.addListener(SWT.Selection, e->doExport(CSV_EXPORT_TYPE));
+		xml.addListener(SWT.Selection, e->doExport(XML_EXPORT_TYPE));
+		
+		btnExport.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				mnuIconSize.setVisible(true);
+			}
+		});
 	
 	}
 
@@ -464,7 +475,7 @@ public class BasicRecordSearchPanel extends Composite {
 		}
 	}
 	
-	private void doExport(){
+	private void doExport(String type){
 		List<UUID> toExport = new ArrayList<UUID>();
 		List<?> sel = (List<?>) tblResults.getInput();
 		if (sel == null) return;
@@ -476,9 +487,8 @@ public class BasicRecordSearchPanel extends Composite {
 		}
 		if (toExport.isEmpty()) return;
 		
-		RecordCsvExporter exporter = new RecordCsvExporter(toExport);
-		CsvExportDialog dialog = new CsvExportDialog(getShell(), exporter.createExportConfiguration());
-		dialog.open();		
+		if (type.equals(CSV_EXPORT_TYPE)) this.doCsvExport(toExport);
+		if (type.equals(XML_EXPORT_TYPE)) this.doXmlExport(toExport);
 	}
 	
 	

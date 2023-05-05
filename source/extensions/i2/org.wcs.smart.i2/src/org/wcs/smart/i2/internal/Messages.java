@@ -118,7 +118,9 @@ public class Messages extends NLS {
 	public static String BasicEntitySearchPanel_NotFound;
 	public static String BasicRecordSearchPanel_AddToWsMenuItem;
 	public static String BasicRecordSearchPanel_ExportLink;
+	public static String BasicRecordSearchPanel_ExportToCsv;
 	public static String BasicRecordSearchPanel_ExportTooltip;
+	public static String BasicRecordSearchPanel_ExportToXml;
 	public static String BasicRecordSearchPanel_NarrativeLabel;
 	public static String BasicRecordSearchPanel_OpenMenuItem;
 	public static String BasicRecordSearchPanel_SearchBtn;
