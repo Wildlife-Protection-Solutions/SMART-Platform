@@ -272,22 +272,30 @@ public class DataModelMerger {
 		if (c.getIcon() != null) return c.getIcon().getKeyId();
 		
 		String hql = "SELECT distinct icon.keyId FROM Category WHERE hkey = :key AND conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<String> q = session.createQuery(hql, String.class);
 		q.setParameter("key", c.getHkey());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 
-		return (String)q.uniqueResult();
+		//could potential find more than one if they are different per ca
+		//if this is the case pick one to use
+		List<String> keys = q.list();
+		if (keys.size() > 0) return keys.get(0);
+		return null;
 	}
 	
 	private String findIconKey (Attribute a, ConservationArea[] ca, Session session){
 		if (a.getIcon() != null) return a.getIcon().getKeyId();
 		
 		String hql = "SELECT distinct icon.keyId FROM Attribute WHERE keyId = :key AND conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<String> q = session.createQuery(hql, String.class);
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 		
-		return (String)q.uniqueResult();
+		//could potential find more than one if they are different per ca
+		//if this is the case pick one to use
+		List<String> keys = q.list();
+		if (keys.size() > 0) return keys.get(0);
+		return null;
 	}
 	
 	/**

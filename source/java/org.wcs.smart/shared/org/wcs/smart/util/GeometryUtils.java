@@ -60,6 +60,7 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.TopologyException;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -243,14 +244,25 @@ public class GeometryUtils {
 	 */
 	public static Blob intersection (Blob wkb1, Blob wkb2){
 		if (wkb1 == null || wkb2 == null) return null;
+		
+		Geometry g1 = null;
+		Geometry g2 = null;
 		try{
-			Geometry g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
-			Geometry g2 = gFromWKB(wkb2.getBytes(1, (int)wkb2.length()));
+			g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
+			g2 = gFromWKB(wkb2.getBytes(1, (int)wkb2.length()));
+		}catch (Throwable e) {
+			throw new RuntimeException( e );
+		}
+		
+		try {
 			Geometry g3 = g2.intersection(g1);
 			return new SerialBlob(wkbwriter().write(g3));
+		}catch(TopologyException te) {
+			throw new RuntimeException ("A topology exception occured - try checking track geometries for cases where GPS units were not turned off at rest points and cleaning these tracks", te );
 		}catch (Throwable e){
  			throw new RuntimeException ( e );
 		}
+		
 	}
 	
 	
@@ -422,6 +434,7 @@ public class GeometryUtils {
 	 */
 	public static Geometry gFromWKB( byte[] wkb ) {
         try {
+        	//return (new WKBReader(new GeometryFactory(new PrecisionModel(1_000_000_000.0)))).read(wkb);
             return wkbreader().read( wkb );
         }
         catch (ParseException e) {

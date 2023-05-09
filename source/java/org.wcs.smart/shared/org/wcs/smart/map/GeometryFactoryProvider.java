@@ -22,6 +22,7 @@
 package org.wcs.smart.map;
 
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 
 /**
  * Provider for {@link GeometryFactory}
@@ -31,7 +32,7 @@ import org.locationtech.jts.geom.GeometryFactory;
  */
 public class GeometryFactoryProvider {
 
-	private static final GeometryFactory gf = new GeometryFactory();
+	private static final GeometryFactory gf = new GeometryFactory(new PrecisionModel(10_000_000_000d));
 
 	public static GeometryFactory getFactory() {
 		return gf;
