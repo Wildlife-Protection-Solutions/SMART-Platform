@@ -108,6 +108,7 @@ public class ErMissionQueryResult extends AbstractDbFeatureResultSet<SurveyQuery
 	@Override
 	public List<SurveyQueryResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
 		List<SurveyQueryResultItem> items = new ArrayList<>();
+		if (rs.getRow() != from) throw new SQLException("Cannot access rows in result set in non sequential manner"); //$NON-NLS-1$
 		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();
@@ -147,7 +148,6 @@ public class ErMissionQueryResult extends AbstractDbFeatureResultSet<SurveyQuery
 
 	@Override
 	public ResultSet getResultSet(final Session session) {
-
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {

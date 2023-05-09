@@ -92,15 +92,9 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	
 	public boolean hasSortColumns = false;
 	
-	protected int lastfrom = 0;
-	
 	protected int getTo(int from, int pageSize) throws SQLException {
-		if (from != lastfrom) throw new SQLException("Do not support going backwards or skipping results");
 		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
-		lastfrom = to;
+		if (to >= itemCount) to = itemCount;
 		return to;
 	}
 	

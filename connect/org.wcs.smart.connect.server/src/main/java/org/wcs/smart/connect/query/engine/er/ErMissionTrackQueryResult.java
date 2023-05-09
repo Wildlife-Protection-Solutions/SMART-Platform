@@ -120,6 +120,8 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 	 */
 	@Override
 	public List<MissionTrackResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		if (rs.getRow() != from) throw new SQLException("Cannot access rows in result set in non sequential manner"); //$NON-NLS-1$
+		
 		List<MissionTrackResultItem> items = new ArrayList<>();
 		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
@@ -161,7 +163,6 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 
 	@Override
 	public ResultSet getResultSet(final Session session) {
-
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {

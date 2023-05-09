@@ -132,6 +132,7 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 	 */
 	@Override
 	public List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		if (rs.getRow() != from) throw new SQLException("Cannot access rows in result set in non sequential manner"); //$NON-NLS-1$
 		List<T> items = new ArrayList<>();
 		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {

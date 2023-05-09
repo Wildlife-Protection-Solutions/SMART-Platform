@@ -74,19 +74,15 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
 				if (c.getAutoCommit()) throw new SQLException("connection cannot be in auto commit mode"); //$NON-NLS-1$
+				
 				if(sortColumn != null){
 					Statement s = c.createStatement();
 					s.setFetchSize(POSTGRESQL_FETCH_SIZE);
-					return s.executeQuery(engine.getDataQuery(new String[]{"sortkeydbl", "sortkeytxt"}) + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);
-					//return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-					//		ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery(new String[]{"sortkeydbl", "sortkeytxt"}) + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					return s.executeQuery(engine.getDataQuery(new String[]{"sortkeydbl", "sortkeytxt"}) + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				}
 				Statement s = c.createStatement();
 				s.setFetchSize(POSTGRESQL_FETCH_SIZE);
 				return s.executeQuery(engine.getDataQuery(null));
-				//return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-				//		ResultSet.CONCUR_READ_ONLY)
-				//		.executeQuery(engine.getDataQuery(null));
 			}
 		});
 	}
@@ -122,6 +118,7 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 	@Override
 	public List<PatrolQueryResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
 		List<PatrolQueryResultItem> items = new ArrayList<>();
+		if (rs.getRow() != from) throw new SQLException("Cannot access rows in result set in non sequential manner"); //$NON-NLS-1$
 		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();

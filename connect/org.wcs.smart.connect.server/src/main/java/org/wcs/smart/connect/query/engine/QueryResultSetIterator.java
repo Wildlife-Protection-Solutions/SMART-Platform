@@ -68,7 +68,6 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 
 	@Override
 	public T next() {
-		init();
 		if (!hasNext())
 			throw new NoSuchElementException();
 		if (data == null) {
