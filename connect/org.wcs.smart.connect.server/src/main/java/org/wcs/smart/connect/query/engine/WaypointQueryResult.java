@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -102,8 +103,9 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
 				if(sortColumn != null){
-					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					Statement st = c.createStatement();
+					st.setFetchSize(POSTGRESQL_FETCH_SIZE);
+					return st.executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				//default sort by waypoint date/time
 				StringBuilder sql = new StringBuilder();
@@ -112,8 +114,9 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 				sql.append(" ORDER BY "); //$NON-NLS-1$
 				sql.append(getDefaultSortBy());
 				
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
-						ResultSet.CONCUR_READ_ONLY).executeQuery(sql.toString());
+				Statement st = c.createStatement();
+				st.setFetchSize(POSTGRESQL_FETCH_SIZE);
+				return st.executeQuery(sql.toString());
 			}
 		});
 	}
@@ -130,11 +133,7 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 	@Override
 	public List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
 		List<T> items = new ArrayList<>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
+		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();
 			items.add(asQueryResultItem(rs));

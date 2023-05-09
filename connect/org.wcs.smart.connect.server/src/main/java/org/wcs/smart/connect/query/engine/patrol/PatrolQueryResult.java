@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine.patrol;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -72,12 +73,20 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				if (c.getAutoCommit()) throw new SQLException("connection cannot be in auto commit mode"); //$NON-NLS-1$
 				if(sortColumn != null){
-					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery(new String[]{"sortkeydbl", "sortkeytxt"}) + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					Statement s = c.createStatement();
+					s.setFetchSize(POSTGRESQL_FETCH_SIZE);
+					return s.executeQuery(engine.getDataQuery(new String[]{"sortkeydbl", "sortkeytxt"}) + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);
+					//return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+					//		ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery(new String[]{"sortkeydbl", "sortkeytxt"}) + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				}
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery(null));
+				Statement s = c.createStatement();
+				s.setFetchSize(POSTGRESQL_FETCH_SIZE);
+				return s.executeQuery(engine.getDataQuery(null));
+				//return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+				//		ResultSet.CONCUR_READ_ONLY)
+				//		.executeQuery(engine.getDataQuery(null));
 			}
 		});
 	}
@@ -109,14 +118,11 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 	 * @return
 	 * @throws SQLException
 	 */
+	
 	@Override
 	public List<PatrolQueryResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
 		List<PatrolQueryResultItem> items = new ArrayList<>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
+		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();
 			PatrolQueryResultItem it = asQueryResultItem(rs, session);

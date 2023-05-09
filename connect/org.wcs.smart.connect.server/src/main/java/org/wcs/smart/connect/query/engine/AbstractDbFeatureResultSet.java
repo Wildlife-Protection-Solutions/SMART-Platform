@@ -67,6 +67,8 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  */
 public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implements ITablePagedQueryResultSet<T> {
 	
+	public static final int POSTGRESQL_FETCH_SIZE = 1000;
+	
 	public static final String POINT_GEOM_TYPE = "Point"; //$NON-NLS-1$
 	
 	public static final String MULTI_POINT_GEOM_TYPE = "MultiPoint"; //$NON-NLS-1$
@@ -89,6 +91,18 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	public QueryApi.Direction direction = Direction.UP;
 	
 	public boolean hasSortColumns = false;
+	
+	protected int lastfrom = 0;
+	
+	protected int getTo(int from, int pageSize) throws SQLException {
+		if (from != lastfrom) throw new SQLException("Do not support going backwards or skipping results");
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
+		}
+		lastfrom = to;
+		return to;
+	}
 	
 	/**
 	 * Creates the geometry for the given row in the results set.
