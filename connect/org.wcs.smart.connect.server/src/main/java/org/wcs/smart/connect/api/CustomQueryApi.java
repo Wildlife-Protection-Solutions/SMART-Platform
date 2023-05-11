@@ -111,12 +111,13 @@ public class CustomQueryApi extends HttpServlet{
     @Path("/patrol")
 	@Operation(description="Runs query patrol and returns the results as json")
 	public Response runPatrolQuery(
+			@Parameter(description="query by smart patrol id") @QueryParam("patrol_id") String smartid,
 			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
 			@Parameter(description="query by client patrol uuid") @QueryParam("client_patrol_uuid") String clientpatroluuid) {
 	
 		//only one filter is allowed
 		int cnt = 0;
-		String[] params = new String[] {smartpatroluuid, clientpatroluuid};
+		String[] params = new String[] {smartpatroluuid, clientpatroluuid, smartid};
 		for (String x : params) {
 			if (x != null && !x.trim().isEmpty()) cnt++;
 		}
@@ -136,6 +137,8 @@ public class CustomQueryApi extends HttpServlet{
 						patrols = engine.getPatrolsByPatrolUuid(s, smartpatroluuid, conservationAreas);
 					}else if (clientpatroluuid != null) {
 						patrols = engine.getPatrolsByClientUuid(s, clientpatroluuid, conservationAreas);
+					}else if (smartid != null) {
+						patrols = engine.getPatrolsById(s, smartid, conservationAreas);
 					}
 					
 					if (patrols == null || patrols.isEmpty() ) {
