@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -237,7 +238,8 @@ public enum RecordManager {
 				case POSITION:
 					return false; // not supported
 				case DATE:
-					hql.setParameter("test", ((java.sql.Date)newId).toString()); //$NON-NLS-1$
+					LocalDate ld = (LocalDate) newId;					
+					hql.setParameter("test", java.sql.Date.valueOf(ld).toString()); //$NON-NLS-1$
 					break;
 				case LIST:
 				case NUMERIC:

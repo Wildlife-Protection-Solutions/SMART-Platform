@@ -323,6 +323,9 @@ public class CmSmartToXml {
 			nt.setCategoryKey(node.getCategory().getKeyId());
 			nt.setCategoryHkey(node.getCategory().getHkey());
 			nt.setDmUuid(toString(node.getCategory().getUuid()));
+			if (node.getIntegrateIncidentType() != null) {
+				nt.setIntegrateIncidentType(node.getIntegrateIncidentType().name());
+			}
 			
 			//only some cateogories can collect signatures
 			for (UUID uuid : node.getSignatureUuids()) {

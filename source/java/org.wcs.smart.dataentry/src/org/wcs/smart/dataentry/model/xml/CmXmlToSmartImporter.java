@@ -616,6 +616,10 @@ public class CmXmlToSmartImporter {
 					}
 					cmNode.setSignatures(bits);
 				}
+				
+				if (xmlNode.getIntegrateIncidentType() != null) {
+					cmNode.setIntegrateIncidentType(CmNode.IntegrateIncidentType.valueOf(xmlNode.getIntegrateIncidentType()));
+				}
 			}
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());

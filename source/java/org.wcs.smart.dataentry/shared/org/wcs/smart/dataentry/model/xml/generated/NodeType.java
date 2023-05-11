@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="photoRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="displayMode" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="integrateIncidentType" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="collectMultipleObs" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="useSingleGpsPoint" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="imageFile" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -77,6 +78,8 @@ public class NodeType {
     protected Boolean photoRequired;
     @XmlAttribute(name = "displayMode")
     protected String displayMode;
+    @XmlAttribute(name = "integrateIncidentType")
+    protected String integrateIncidentType;
     @XmlAttribute(name = "id")
     protected String id;
     @XmlAttribute(name = "collectMultipleObs")
@@ -346,6 +349,30 @@ public class NodeType {
      */
     public void setDisplayMode(String value) {
         this.displayMode = value;
+    }
+    
+    /**
+     * Gets the value of the integrateIncidentType property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getIntegrateIncidentType() {
+        return integrateIncidentType;
+    }
+
+    /**
+     * Sets the value of the integrateIncidentType property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setIntegrateIncidentType(String value) {
+        this.integrateIncidentType = value;
     }
 
     /**

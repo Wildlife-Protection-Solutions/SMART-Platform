@@ -118,6 +118,7 @@ public class Upgrader754To757 implements IDatabaseUpgrader {
 			"ALTER TABLE smart.configurable_model add constraint cm_iconset_uuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) on delete set null on update restrict deferrable initially immediate", //$NON-NLS-1$
 			"ALTER TABLE smart.iconset add constraint ICONSET_CAUUID_FK FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
 			
+			"ALTER TABLE smart.cm_node add column integrate_incident_type varchar(32)", //$NON-NLS-1$
 		};	
 
 		for (String s : sql) {

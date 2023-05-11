@@ -56,6 +56,12 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip1;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
+	public static String CmNodeInfoComposite_ErOpNewIncident;
+	public static String CmNodeInfoComposite_ErOpPatrolIncident;
+	public static String CmNodeInfoComposite_ErOpPatrolLinkIncident;
+	public static String CmNodeInfoComposite_ErOption;
+	public static String CmNodeInfoComposite_ErOpTooltip;
+	public static String CmNodeInfoComposite_ErOpTooltipDisabled;
 	public static String CmNodeInfoComposite_Image;
 	public static String CmNodeInfoComposite_OptionsSection;	
 	public static String CmNodeInfoComposite_PhotoRequired;

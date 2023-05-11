@@ -97,7 +97,9 @@ elementFormDefault="qualified">
     	<attribute name="collectMultipleObs" type="boolean"></attribute>
     	<attribute name="useSingleGpsPoint" type="boolean"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="isCustomImage" type="boolean"></attribute>
+    	<attribute name="isCustomImage" type="boolean"></attribute>
+
+    	<attribute name="erIncidentType" type="string"></attribute>
     </complexType>
 
     <complexType name="NameType">
