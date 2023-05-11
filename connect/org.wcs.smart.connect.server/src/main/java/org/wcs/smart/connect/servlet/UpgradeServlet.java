@@ -1244,6 +1244,9 @@ public class UpgradeServlet extends HttpServlet {
 						"delete from smart.CT_INCIDENT_LINK where obs_group_uuid is not null and obs_group_uuid not in (select uuid from smart.WP_OBSERVATION_GROUP)", //$NON-NLS-1$
 						"alter table smart.ct_incident_link add foreign key (obs_group_uuid) references smart.wp_observation_group on delete cascade on update restrict deferrable initially deferred",  //$NON-NLS-1$
 
+						
+						"ALTER TABLE smart.cm_node add column integrate_incident_type varchar(32)", //$NON-NLS-1$
+						
 						"update connect.connect_plugin_version set version = '7.5' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '7.5' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 								

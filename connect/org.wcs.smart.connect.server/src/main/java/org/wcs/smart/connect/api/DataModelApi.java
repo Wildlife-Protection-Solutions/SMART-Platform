@@ -242,7 +242,7 @@ public class DataModelApi extends HttpServlet{
 			itemUuid= UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Invalid uuid: " + uuid + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Conservation Area UUID", ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid UUID", ex); //$NON-NLS-1$
 		}
 		return itemUuid;
 	}
