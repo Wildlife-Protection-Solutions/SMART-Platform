@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
@@ -164,12 +166,15 @@ public class IncidentToPatrolProcessor {
 								//make a line between prev and next and compute the distance to that line 							
 								LineString temp = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[] {prev, next});
 								Point tempp =  GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getX(), wp.getY()));
-								
-								double d = GeometryUtils.distanceInMeters(temp, tempp);
-								if (d < distance && d < maxDistance) {
-									distance = d;
-									matchedLs = ls;
-									matchedTrack = t;
+								try {
+									double d = GeometryUtils.distanceInMeters(temp, tempp);
+									if (d < distance && d < maxDistance) {
+										distance = d;
+										matchedLs = ls;
+										matchedTrack = t;
+									}
+								}catch (Throwable tr) {
+									Logger.getLogger(IncidentToPatrolProcessor.class.getName()).log(Level.WARNING, tr.getMessage(), tr); //$NON-NLS-1$
 								}
 							}			
 						}
