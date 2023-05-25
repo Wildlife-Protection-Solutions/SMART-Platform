@@ -52,22 +52,22 @@ public class BirtRasterBuilder {
 	private double originY;
 	private double cellSize;
 	
-	private String xColumn;
-	private String yColumn;
-	private String valueColumn;
+	private int xindex;
+	private int yindex;
+	private int valueindex;
 	
 	double minValue = Double.POSITIVE_INFINITY;
 	double maxValue = Double.NEGATIVE_INFINITY;
 	
 	public BirtRasterBuilder(CoordinateReferenceSystem crs, Point origin, double size,
-			String xColumn, String yColumn, String valueColumn){
+			int xColumn, int yColumn, int valueColumn){
 		this.crs = crs;
 		this.originX = origin.getX();
 		this.originY = origin.getY();
 		this.cellSize = size;
-		this.xColumn = xColumn;
-		this.yColumn = yColumn;
-		this.valueColumn = valueColumn;
+		this.xindex = xColumn;
+		this.yindex = yColumn;
+		this.valueindex = valueColumn;
 		
 	}
 	
@@ -112,15 +112,18 @@ public class BirtRasterBuilder {
 	public void buildRaster(IQueryResults results) throws Exception{
 		generatedFiles = new ArrayList<Path>();
 		
-		
 		IResultIterator data = results.getPreparedQuery().execute(null).getResultIterator();
-	
+		
 		List<GridResultItem> gridresults = new ArrayList<GridResultItem>();
 		long minX = Integer.MAX_VALUE;
 		long maxX = Integer.MIN_VALUE;
 		long minY = Integer.MAX_VALUE;
 		long maxY = Integer.MIN_VALUE;
 
+		String xColumn = data.getResultMetaData().getColumnName(xindex);
+		String yColumn = data.getResultMetaData().getColumnName(yindex);
+		String valueColumn = data.getResultMetaData().getColumnName(valueindex);
+		
 		while(data.next()){
 			GridResultItem i = new GridResultItem();
 			

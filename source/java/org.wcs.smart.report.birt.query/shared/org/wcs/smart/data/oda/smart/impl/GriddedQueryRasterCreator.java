@@ -7,9 +7,13 @@ import java.util.List;
 import org.eclipse.birt.data.engine.api.IQueryResults;
 import org.eclipse.birt.report.engine.extension.IBaseResultSet;
 import org.eclipse.birt.report.engine.extension.IExecutorContext;
+import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.elements.structures.OdaResultSetColumn;
+import org.eclipse.birt.report.model.elements.interfaces.IDataSetModel;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.wcs.smart.data.oda.smart.query.common.GriddedQueryResultSetMetadata;
+import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.report.birt.map.IRasterCreator;
 import org.wcs.smart.report.birt.map.execute.raster.BirtRasterBuilder;
 
@@ -28,8 +32,8 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 		if (metadata != null){
 			//build the raster
 			BirtRasterBuilder builder = new BirtRasterBuilder(metadata.getCoordinateReferenceSystem(), 
-					metadata.getOrigin(), metadata.getCellSize(), metadata.getXColumn(), 
-					metadata.getYColumn(), metadata.getValueColumn());
+					metadata.getOrigin(), metadata.getCellSize(), metadata.getXColumnIndex(), 
+					metadata.getYColumnIndex(), metadata.getValueColumnIndex());
 		
 			builder.buildRaster((IQueryResults)qresult.getQueryResults());
 			f = builder.getFileImage();
@@ -41,6 +45,9 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 		return f;
 	}
 
+	public GriddedQueryResultSetMetadata getMetadata() {
+		return this.metadata;
+	}
 	@Override
 	public double getRasterMinValue() {
 		return minValue;
@@ -57,7 +64,7 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 	}
 
 	@Override
-	public boolean canProcess(IExecutorContext context, String datasetId, String queryText) throws Exception {
+	public boolean canProcess(IExecutorContext context, String datasetId, String queryText, DataSetHandle handle) throws Exception {
 		if (!datasetId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) return false;
 		SmartConnection connection = (SmartConnection) context.getAppContext().get(SmartConnection.class.getCanonicalName());
 		IQuery tmp = connection.newQuery(datasetId);
@@ -65,6 +72,22 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 		IResultSetMetaData md = tmp.getMetaData();
 		if (md instanceof GriddedQueryResultSetMetadata){
 			metadata = (GriddedQueryResultSetMetadata) md;
+			
+			//https://app.assembla.com/spaces/smart-cs/tickets/3552		
+			ArrayList<OdaResultSetColumn> resultset = (ArrayList<OdaResultSetColumn>) handle.getProperty(IDataSetModel.RESULT_SET_PROP);
+			int ycol = 0;
+			int xcol = 0;
+			int valcol = 0;
+			for (OdaResultSetColumn c : resultset) {
+				if (c.getColumnName().equals(GridQueryColumn.GridColumns.TILE_Y.getKey())) {
+					ycol = c.getPosition();
+				}else if (c.getColumnName().equals(GridQueryColumn.GridColumns.TILE_X.getKey())) {
+					xcol = c.getPosition();
+				}else if (c.getColumnName().equals(GridQueryColumn.GridColumns.VALUE.getKey())) {
+					valcol = c.getPosition();		
+				}
+			}			
+			((GriddedQueryResultSetMetadata)metadata).setColumnPositions(xcol, ycol, valcol); 			
 			return true;
 		}
 		return false;

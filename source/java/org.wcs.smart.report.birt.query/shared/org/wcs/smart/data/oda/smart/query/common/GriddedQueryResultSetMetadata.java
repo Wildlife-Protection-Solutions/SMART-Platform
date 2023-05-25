@@ -27,8 +27,6 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.model.GridQueryColumn;
-import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Metadata for gridded query results.
@@ -42,9 +40,12 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 	private Point origin;
 	private double cellSize;
 	
-	private String xColumnName;
-	private String yColumnName;
-	private String valueColumn;
+	
+	private int xindex;
+	private int yindex;
+	private int valueindex;
+	
+
 	
 	public GriddedQueryResultSetMetadata(GriddedQuery query, SmartConnection connection) throws OdaException{
 		super(query, connection);
@@ -57,6 +58,7 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 		this.origin = query.getGridOrigin();
 		this.cellSize = query.getGridSize();
 		
+		/*
 		for (QueryColumn qc : super.queryColumns){
 			if (qc.getKey().equals(GridQueryColumn.GridColumns.TILE_Y.getKey())){
 				yColumnName = qc.getName();
@@ -66,6 +68,14 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 				valueColumn = qc.getName();
 			}
 		}
+		*/
+	}
+	//use column indexes instead of names
+	//https://app.assembla.com/spaces/smart-cs/tickets/3552
+	public void setColumnPositions(int xindex, int yindex, int valueindex) {
+		this.xindex = xindex;
+		this.yindex = yindex;
+		this.valueindex = valueindex;
 	}
 	
 	/**
@@ -91,13 +101,13 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 	public CoordinateReferenceSystem getCoordinateReferenceSystem(){
 		return this.crs;
 	}
-	
+
 	/**
 	 * 
 	 * @return the grid result set x column
 	 */
-	public String getXColumn(){
-		return this.xColumnName;
+	public int getXColumnIndex(){
+		return this.xindex;
 	}
 	
 	
@@ -105,8 +115,8 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 	 * 
 	 * @return the grid result set y column
 	 */
-	public String getYColumn(){
-		return this.yColumnName;
+	public int getYColumnIndex(){
+		return this.yindex;
 	}
 	
 	
@@ -114,7 +124,7 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 	 * 
 	 * @return the grid result set value column
 	 */
-	public String getValueColumn(){
-		return this.valueColumn;
+	public int getValueColumnIndex(){
+		return this.valueindex;
 	}
 }
