@@ -11,6 +11,6 @@
 	<name>SMART BIRT Report Query Module</name>
 	<artifactId>org.wcs.smart.report.birt.query</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.2-SNAPSHOT</version>
+	<version>7.5.7-SNAPSHOT</version>
 	
 </project>
