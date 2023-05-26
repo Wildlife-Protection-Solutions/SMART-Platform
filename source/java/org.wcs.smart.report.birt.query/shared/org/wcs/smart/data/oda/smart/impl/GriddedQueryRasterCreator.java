@@ -74,10 +74,11 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 			metadata = (GriddedQueryResultSetMetadata) md;
 			
 			//https://app.assembla.com/spaces/smart-cs/tickets/3552		
+			@SuppressWarnings("unchecked")
 			ArrayList<OdaResultSetColumn> resultset = (ArrayList<OdaResultSetColumn>) handle.getProperty(IDataSetModel.RESULT_SET_PROP);
-			int ycol = 0;
-			int xcol = 0;
-			int valcol = 0;
+			int ycol = 1;
+			int xcol = 2;
+			int valcol = 3;
 			for (OdaResultSetColumn c : resultset) {
 				if (c.getColumnName().equals(GridQueryColumn.GridColumns.TILE_Y.getKey())) {
 					ycol = c.getPosition();
