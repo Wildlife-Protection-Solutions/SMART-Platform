@@ -24,19 +24,19 @@ package org.wcs.smart.i2.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Style representation for relationship diagram.
@@ -45,7 +45,7 @@ import org.wcs.smart.ca.NamedItem;
  * @since 6.0.0
  */
 @Entity
-@Table(name = "smart.i_diagram_style")
+@Table(name = "i_diagram_style", schema="smart")
 public class RelationshipDiagramStyle extends NamedItem {
 	
 	private static final long serialVersionUID = 1L;
@@ -73,11 +73,12 @@ public class RelationshipDiagramStyle extends NamedItem {
 		this.isDefault = Boolean.TRUE.equals(isDefault); //null <==> false
 	}
 
+	//note: using getOptions and setOptions here causes hibernate failure
 	@Column(name="options")
-	public String getOptions() {
+	public String getOptionValues() {
 		return options;
 	}
-	public void setOptions(String options) {
+	public void setOptionValues(String options) {
 		this.options = options;
 	}
 
@@ -105,10 +106,10 @@ public class RelationshipDiagramStyle extends NamedItem {
 	
 	@Transient
 	public RelationshipDiagramStyleOptions getStyleOptions() {
-		return new RelationshipDiagramStyleOptions(getOptions());
+		return new RelationshipDiagramStyleOptions(getOptionValues());
 	}
 	public void setStyleOptions(RelationshipDiagramStyleOptions styleOptions) {
-		setOptions(styleOptions.getJson().toString());
+		setOptionValues(styleOptions.getJson().toString());
 	}
 	
 }

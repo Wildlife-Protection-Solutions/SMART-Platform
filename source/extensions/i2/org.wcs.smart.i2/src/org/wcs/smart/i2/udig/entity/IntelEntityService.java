@@ -191,10 +191,10 @@ public class IntelEntityService extends IService {
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
 								try(Session s = HibernateManager.openSession()){
-									Query<?> q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid"); //$NON-NLS-1$
+									Query<Long> q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid", Long.class); //$NON-NLS-1$
 									q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 									q.setParameter("uuid", entityUuid); //$NON-NLS-1$
-									Long cnt = (Long) q.uniqueResult();
+									Long cnt = q.uniqueResult();
 									hasPosition = cnt > 0;	
 									
 									

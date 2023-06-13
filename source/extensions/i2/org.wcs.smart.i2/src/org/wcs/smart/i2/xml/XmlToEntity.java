@@ -34,11 +34,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -84,6 +79,11 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Convert xml entity file to entity records linking when possible.
@@ -504,12 +504,12 @@ public class XmlToEntity {
 			}
 		}
 		
-		try(ScrollableResults scroll = QueryFactory.buildQuery(session, IntelEntity.class, 
+		try(ScrollableResults<IntelEntity> scroll = QueryFactory.buildQuery(session, IntelEntity.class, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 				new Object[] {"entityType", type}).scroll()){ //$NON-NLS-1$
 		
 			while(scroll.next()) {
-				IntelEntity entity = (IntelEntity) scroll.get()[0];
+				IntelEntity entity = scroll.get();
 				if (entity.getIdAttributeAsText().equals(entityId)) {
 					possibleEntities.add(entity);
 				}

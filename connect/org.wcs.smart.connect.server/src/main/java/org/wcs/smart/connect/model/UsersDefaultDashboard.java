@@ -24,10 +24,10 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * A UsersDefaultDashboard entity. Keeps detailas of what users want as their default dashboard view and the default parameters for each report in that dashboard.   
@@ -35,7 +35,7 @@ import javax.persistence.Table;
  * @Author Jeff
  */
 @Entity
-@Table(name = "connect.users_default_dashboard")
+@Table(name = "users_default_dashboard", schema="connect")
 public class UsersDefaultDashboard{
 	private UUID userUuid; //primary Key
 	private UUID dashboardUuid;

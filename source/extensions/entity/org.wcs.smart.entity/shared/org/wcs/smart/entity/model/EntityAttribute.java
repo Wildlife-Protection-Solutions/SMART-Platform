@@ -21,16 +21,15 @@
  */
 package org.wcs.smart.entity.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Represents a attribute associated
@@ -39,8 +38,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
  * @author Emily
  *
  */
-@Entity
-@Table(name="smart.entity_attribute")
+@jakarta.persistence.Entity
+@Table(name="entity_attribute", schema="smart")
 public class EntityAttribute extends NamedKeyItem {
 
 	private static final long serialVersionUID = 1L;
@@ -141,8 +140,8 @@ public class EntityAttribute extends NamedKeyItem {
 	 * language the platform is running in.
 	 */
 	@Override
-	@Type(type="org.wcs.smart.ca.LabelUserType")
-	@Column(name="uuid", insertable=false, updatable=false)
+//	@Type(type="org.wcs.smart.ca.LabelUserType")
+//	@Column(name="uuid", insertable=false, updatable=false)
 	public String getName() {
 		String n = super.getName();
 		if (n == null || n.length() == 0){

@@ -57,7 +57,7 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			ServerDataQueueItem dqItem = QueryFactory.buildQuery(session, ServerDataQueueItem.class, "workItem", item.getUuid()).uniqueResult(); //$NON-NLS-1$
 			dqItem.setStatus(ServerDataQueueItem.Status.QUEUED);			
 			item.setStatus(Status.COMPLETE);
-			
+			session.merge(item);
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -66,6 +66,7 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			session.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
 			item.setMessage(MessageFormat.format(Messages.getString("DataQueueProcessor.DataQueueProcessorError", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
+			session.merge(item);
 			session.getTransaction().commit();
 		}
 	}

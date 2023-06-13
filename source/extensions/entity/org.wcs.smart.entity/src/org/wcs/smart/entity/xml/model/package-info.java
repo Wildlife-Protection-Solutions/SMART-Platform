@@ -5,5 +5,8 @@
 // Generated on: 2014.01.15 at 02:52:49 PM PST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/entitytype", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/entitytype", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.entity.xml.model;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

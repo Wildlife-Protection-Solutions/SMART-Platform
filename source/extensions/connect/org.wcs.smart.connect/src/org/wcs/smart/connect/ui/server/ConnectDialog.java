@@ -246,7 +246,7 @@ public class ConnectDialog extends SmartStyledTitleDialog {
 			toUpdate = new ConnectUser();
 			toUpdate.setServer(cs);
 			toUpdate.setSmartUser(employee);
-			session.save(toUpdate);	
+			session.persist(toUpdate);	
 			
 			ConnectDialog.this.user = toUpdate;
 		}
@@ -254,7 +254,7 @@ public class ConnectDialog extends SmartStyledTitleDialog {
 		//update user name
 		toUpdate.setConnectUsername(user);
 		ConnectDialog.this.user.setConnectPassword(newPassword);
-		session.saveOrUpdate(toUpdate);
+		toUpdate = session.merge(toUpdate);
 		ConnectDialog.this.user = toUpdate;
 	}
 	

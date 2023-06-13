@@ -97,7 +97,6 @@ public class AssetCsvImporter {
 		this.dateTimeFormat = formatter;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean processFile() throws Exception {
 		warnings = new ArrayList<>();
 		assetIds = new HashSet<>();
@@ -128,7 +127,7 @@ public class AssetCsvImporter {
 				});
 				typeField = t;	
 			}
-			assetIds.addAll(session.createQuery("SELECT LOWER(id) FROM Asset WHERE conservationArea = :ca").setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
+			assetIds.addAll(session.createQuery("SELECT LOWER(id) FROM Asset WHERE conservationArea = :ca", String.class).setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		//read and parse asset data
@@ -173,7 +172,7 @@ public class AssetCsvImporter {
 			session.beginTransaction();
 			try {
 				for (Asset a : newAssets) {
-					session.save(a);
+					session.persist(a);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

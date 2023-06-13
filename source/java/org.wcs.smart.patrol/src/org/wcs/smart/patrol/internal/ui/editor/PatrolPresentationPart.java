@@ -294,7 +294,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			}else if (source instanceof PatrolLegDay){
 				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
 			}
-			if (p != null && p.equals(parentEditor.getPatrol())){
+			if (p != null && p.getUuid().equals(parentEditor.getPatrolUuid())){
 				if (attributeChanged == PatrolEventManager.PATROL_WAYPOINTS) refresh();
 			}
 		}
@@ -327,7 +327,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 						PatrolWaypoint.class,
 						new Object[] {"id.waypoint", wp}).uniqueResult(); //$NON-NLS-1$
 			
-				if (pw == null || !pw.getPatrolLegDay().getPatrolLeg().getPatrol().equals(parentEditor.getPatrol())) {
+				if (pw == null || !pw.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid().equals(parentEditor.getPatrolUuid())) {
 					return;
 				}
 				refreshWaypointData();
@@ -908,7 +908,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				}
 			}
 
-			Patrol patrol = session.get(Patrol.class, parentEditor.getPatrol().getUuid());
+			Patrol patrol = parentEditor.getPatrol();
 
 			toolkit.createLabel(left, Messages.PatrolPresentationPart_StartDate);
 			toolkit.createLabel(left, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrol.getStartDate()));
@@ -1111,15 +1111,16 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				pdata = new HashMap<>();
 				
 				try(Session session = HibernateManager.openSession()){
-					Patrol patrol = session.get(Patrol.class,parentEditor.getPatrol().getUuid());
-					
+					Patrol patrol = session.getReference(parentEditor.getPatrol());
+	
 					HashMap<LocalDate, List<PatrolLegDay>> legsbyday = new HashMap<>();
-					
+	
 					for (PatrolLeg leg : patrol.getLegs()) {
-						//order leg days by time of first waypoint
+						// order leg days by time of first waypoint
 						leg.getType().getName();
-						if (leg.getMandate() != null) leg.getMandate().getName();
-						for (PatrolLegDay legday : leg.getPatrolLegDays()) {				
+						if (leg.getMandate() != null)
+							leg.getMandate().getName();
+						for (PatrolLegDay legday : leg.getPatrolLegDays()) {
 							List<PatrolLegDay> temp = legsbyday.get(legday.getDate());
 							if (temp == null) {
 								temp = new ArrayList<>();
@@ -1129,42 +1130,45 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 						}
 					}
 					for (Entry<LocalDate, List<PatrolLegDay>> key : legsbyday.entrySet()) {
-							
+	
 						List<Object> pdaydata = pdata.get(key.getKey());
 						if (pdaydata == null) {
 							pdaydata = new ArrayList<>();
 							pdata.put(key.getKey(), pdaydata);
 						}
-							
+	
 						final List<Object> fpdaydata = pdaydata;
-							
+	
 						List<PatrolLegDay> legs = key.getValue();
-						legs.sort((a,b)->a.getStartTime().compareTo(b.getStartTime()));
-						
+						legs.sort((a, b) -> a.getStartTime().compareTo(b.getStartTime()));
+	
 						for (PatrolLegDay legday : legs) {
 							if (patrol.getLegs().size() > 1) {
 								pdaydata.add(legday.getPatrolLeg());
 							}
-							
-							legday.getWaypoints()
-								.stream()
-								.sorted((a,b)->a.getWaypoint().getDateTime().compareTo(b.getWaypoint().getDateTime()))
-								.forEach(pw->{
-									pw.getWaypoint().getAttachments().size();
-									if (pw.getWaypoint().getAllObservations().isEmpty()) {
-										fpdaydata.add(pw.getWaypoint());
-									}else {
-										pw.getWaypoint().getAllObservations().forEach(wp->wp.getCategory().getFullCategoryName());
-										List<WaypointObservation> obs = pw.getWaypoint().getAllObservations();
-										obs.forEach(oo->oo.getAttributes().forEach(a->{a.getAttribute().getName(); a.getAttributeValueAsString(Locale.getDefault());}));
-										obs.forEach(oo->oo.getAttachments().size());
-										FirstWaypointObservation first = new FirstWaypointObservation(obs.get(0));
-										fpdaydata.add(first);
-										for (int i = 1; i < obs.size(); i ++) fpdaydata.add(obs.get(i));
-										
-										
-									}							
-								});
+	
+							legday.getWaypoints().stream().sorted(
+									(a, b) -> a.getWaypoint().getDateTime().compareTo(b.getWaypoint().getDateTime()))
+									.forEach(pw -> {
+										pw.getWaypoint().getAttachments().size();
+										if (pw.getWaypoint().getAllObservations().isEmpty()) {
+											fpdaydata.add(pw.getWaypoint());
+										} else {
+											pw.getWaypoint().getAllObservations()
+													.forEach(wp -> wp.getCategory().getFullCategoryName());
+											List<WaypointObservation> obs = pw.getWaypoint().getAllObservations();
+											obs.forEach(oo -> oo.getAttributes().forEach(a -> {
+												a.getAttribute().getName();
+												a.getAttributeValueAsString(Locale.getDefault());
+											}));
+											obs.forEach(oo -> oo.getAttachments().size());
+											FirstWaypointObservation first = new FirstWaypointObservation(obs.get(0));
+											fpdaydata.add(first);
+											for (int i = 1; i < obs.size(); i++)
+												fpdaydata.add(obs.get(i));
+	
+										}
+									});
 						}
 					}
 				}

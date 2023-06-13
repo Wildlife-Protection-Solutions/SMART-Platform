@@ -184,7 +184,7 @@ public class SurveyDesignFromXmlConverter {
 				}
 				
 			
-				session.save(sua);
+				session.persist(sua);
 				sdsua.setSamplingUnitAttribute(sua);
 			}else{
 				sdsua.setSamplingUnitAttribute(existingSua);

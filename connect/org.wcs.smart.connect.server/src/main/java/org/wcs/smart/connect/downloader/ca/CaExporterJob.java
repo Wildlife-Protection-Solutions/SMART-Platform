@@ -114,24 +114,25 @@ public class CaExporterJob implements Runnable {
 					
 					item.setStatus(Status.COMPLETE);
 					item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					s.saveOrUpdate(item);
+					s.merge(item);
 					s.getTransaction().commit();
 				}else{
 					try{
 						export(s, info.getUuid(), destFile);
 						item.setStatus(Status.COMPLETE);
 						item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						s.saveOrUpdate(item);
+						s.merge(item);
 						s.getTransaction().commit();
 					}catch (Exception ex){
 						logger.log(Level.SEVERE, "Error exporting Conservation Area data. " + ex.getMessage(), ex); //$NON-NLS-1$
 						
 						//open a new transaction to update db state
 						s.getTransaction().rollback();
+						
 						s.beginTransaction();
-						s.saveOrUpdate(item);
 						item.setStatus(Status.ERROR);
 						item.setMessage("{\"error\": \"" + MessageFormat.format(Messages.getString("CaExporterJob.caExportError", item.getLocale()), ex.getMessage()) + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						s.merge(item);
 						s.getTransaction().commit();
 					}
 				}

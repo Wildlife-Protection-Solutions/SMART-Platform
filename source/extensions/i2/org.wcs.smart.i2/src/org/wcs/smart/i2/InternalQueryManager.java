@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -89,11 +89,11 @@ public enum InternalQueryManager {
 				
 				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 				
-				Query<?> wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
+				MutationQuery wsQuery = s.createMutationQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
 				wsQuery.setParameter("query", removed.getUuid()); //$NON-NLS-1$
 				wsQuery.executeUpdate();
 				
-				s.delete(removed);
+				s.remove(removed);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

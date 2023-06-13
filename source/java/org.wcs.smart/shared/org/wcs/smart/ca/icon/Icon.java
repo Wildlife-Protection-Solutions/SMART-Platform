@@ -23,17 +23,18 @@ package org.wcs.smart.ca.icon;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Represents an icon - icons can have multiple representations, one
@@ -43,7 +44,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  *
  */
 @Entity
-@Table(name="smart.icon")
+@Table(name="icon", schema="smart")
 public class Icon extends NamedKeyItem{
 
 	private static final long serialVersionUID = 1L;
@@ -79,6 +80,11 @@ public class Icon extends NamedKeyItem{
 			if (f.getIconSet().equals(set)) return f;
 		}
 		return null;
+	}
+	
+	@Transient
+	public void computeFileLocations(Session session) {
+		for (IconFile f : getFiles()) f.computeFileLocation(session);
 	}
 	
 	

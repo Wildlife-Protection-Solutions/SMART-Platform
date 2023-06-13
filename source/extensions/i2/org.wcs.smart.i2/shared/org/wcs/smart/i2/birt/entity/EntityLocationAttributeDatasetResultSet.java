@@ -90,14 +90,14 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		}
 		
 		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
-		Query<?> q = connection.getSession().createQuery(cnt);
+		Query<Long> q = connection.getSession().createQuery(cnt, Long.class);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY)); //$NON-NLS-1$
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$
 		}
-		m_maxRows = (Long)q.uniqueResult();
+		m_maxRows = q.uniqueResult();
 		
 		
 		q = connection.getSession().createQuery(hql);

@@ -24,12 +24,7 @@ package org.wcs.smart.connect.internal.server.replication;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -37,6 +32,10 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Tools for managing the sync history table.
@@ -56,7 +55,7 @@ public enum SyncHistoryManager {
 	 */
 	public void deleteAll(Session s, ConservationArea ca){
 		String hsql = "DELETE FROM ConnectSyncHistoryRecord WHERE conservationArea = :ca"; //$NON-NLS-1$
-		s.createQuery(hsql).setParameter("ca", ca).executeUpdate(); //$NON-NLS-1$
+		s.createMutationQuery(hsql).setParameter("ca", ca).executeUpdate(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -70,11 +69,11 @@ public enum SyncHistoryManager {
 	 * @param endDate
 	 */
 	public void deleteRecords(Session s, ConservationArea ca, Type type, LocalDateTime endDate){
-		Query<?> query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime"); //$NON-NLS-1$
-		query.setParameter("ca", ca); //$NON-NLS-1$
-		query.setParameter("type", type); //$NON-NLS-1$
-		query.setParameter("datetime", endDate); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createMutationQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.setParameter("type", type) //$NON-NLS-1$
+			.setParameter("datetime", endDate) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	/**
@@ -88,8 +87,8 @@ public enum SyncHistoryManager {
 			s.beginTransaction();
 			try {
 				for (ConnectSyncHistoryRecord r : items){
+					r = s.getReference(r);
 					r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-					s.saveOrUpdate(r);
 				}
 				s.getTransaction().commit();
 			}catch (Exception ex) {
@@ -111,8 +110,8 @@ public enum SyncHistoryManager {
 			s.beginTransaction();
 			try {
 				for (ConnectSyncHistoryRecord r : items){
+					r = s.getReference(r);
 					r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-					s.saveOrUpdate(r);
 				}
 				s.getTransaction().commit();
 			}catch (Exception ex) {
@@ -145,7 +144,7 @@ public enum SyncHistoryManager {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.save(record);
+				s.persist(record);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();

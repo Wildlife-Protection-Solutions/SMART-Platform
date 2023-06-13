@@ -84,7 +84,7 @@ public class MissionSpatialShiftEngine implements IDataEngine{
 							Coordinate c = adjustPoint(missionwp.getWaypoint().getX(), missionwp.getWaypoint().getY());
 							missionwp.getWaypoint().setRawX(c.x);
 							missionwp.getWaypoint().setRawY(c.y);
-							session.saveOrUpdate(missionwp.getWaypoint());
+							
 						}
 							
 						//tracks
@@ -101,10 +101,8 @@ public class MissionSpatialShiftEngine implements IDataEngine{
 								LineString newTrack = GeometryFactoryProvider.getFactory().createLineString(newc.toArray(new Coordinate[newc.size()]));
 								track.setLineString(newTrack);
 							}
-						}
-						
+						}	
 					}
-					session.saveOrUpdate(mission);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

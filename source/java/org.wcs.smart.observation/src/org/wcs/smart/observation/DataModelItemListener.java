@@ -64,7 +64,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		sql.append( " WHERE attribute_uuid = :att "); //$NON-NLS-1$
 		sql.append(" AND uuid is not null and list_element_uuid is not null "); //$NON-NLS-1$
 		
-		currentSession.createNativeQuery(sql.toString())
+		currentSession.createNativeMutationQuery(sql.toString())
 			.setParameter("att", attribute.getUuid()) //$NON-NLS-1$
 			.executeUpdate();
 		
@@ -73,7 +73,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		sql.append(" SET attributeListItem = null "); //$NON-NLS-1$
 		sql.append( " WHERE attribute = :att "); //$NON-NLS-1$
 		
-		currentSession.createQuery(sql.toString())
+		currentSession.createMutationQuery(sql.toString())
 			.setParameter("att", attribute) //$NON-NLS-1$
 			.executeUpdate();
 	}

@@ -123,7 +123,7 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 			ConfigurableModelCtPropertiesProfile ctProfile = new ConfigurableModelCtPropertiesProfile();
 			ctProfile.setModel(cm);
 			ctProfile.setProfile(profile);
-			session.saveOrUpdate(ctProfile);
+			session.persist(ctProfile);
 		}
 		return true;
 	}

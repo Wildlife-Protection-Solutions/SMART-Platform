@@ -168,11 +168,13 @@ public class PatrolTrackEditDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				
 				if (patrolLegDay.getTrack().getGeom() == null) {
-					session.delete(patrolLegDay.getTrack());
+					session.remove(patrolLegDay.getTrack());
 					patrolLegDay.setTrack(null);
 				}
-				session.saveOrUpdate(patrolLegDay);
+				
+				HibernateManager.saveOrMerge(session,  patrolLegDay);
 				session.getTransaction().commit();
 				
 			} catch (Exception ex) {

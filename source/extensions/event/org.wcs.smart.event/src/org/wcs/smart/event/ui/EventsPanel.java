@@ -255,7 +255,7 @@ public class EventsPanel extends Composite {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					session.saveOrUpdate(evt);
+					HibernateManager.saveOrMerge(session, evt);
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
@@ -444,7 +444,7 @@ public class EventsPanel extends Composite {
 			session.beginTransaction();
 			try {
 				for(EActionEvent event : toDelete) {
-					session.delete(event);
+					HibernateManager.saveOrMerge(session, event);
 				}
 				session.getTransaction().commit();
 				((List<?>)tblEvents.getInput()).removeAll(toDelete);
@@ -518,7 +518,7 @@ public class EventsPanel extends Composite {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					session.saveOrUpdate(newEvent);
+					HibernateManager.saveOrMerge(session, newEvent);
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();

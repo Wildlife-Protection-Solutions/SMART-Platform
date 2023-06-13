@@ -70,6 +70,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.MissionFilteredComboViewer;
 import org.wcs.smart.er.ui.SurveyFilteredComboViewer;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
@@ -259,7 +260,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			link.getWaypointLinks().add(l);
 		}
 		newMissionLink.getWaypointLinks().clear();
-		session.save(link);
+		session.persist(link);
 	}
 	
 	private Mission createNewMission(UUID ctUuid, CtMissionLink mission, Survey survey) throws Exception{
@@ -281,7 +282,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		newMission.setEndDate(endDate);
 		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
 		
-		session.saveOrUpdate(newMission.getSurvey());
+		HibernateManager.saveOrMerge(session, newMission.getSurvey());
 		SurveyHibernateManager.saveMission(newMission, session, true);
 		
 		CtMissionLink link = new CtMissionLink();
@@ -297,7 +298,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			link.getWaypointLinks().add(l);
 		}
 		mission.getWaypointLinks().clear();
-		session.save(link);
+		session.persist(link);
 		
 		return newMission;
 	}

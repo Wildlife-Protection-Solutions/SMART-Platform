@@ -35,6 +35,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.QueryFactory;
 
+import jakarta.persistence.Tuple;
+
 
 /**
  * Merges multiple datamodels, returning a data model that only
@@ -257,10 +259,10 @@ public class DataModelMerger {
 	 */
 	private boolean canKeep(Category c, ConservationArea[] ca, Session session){
 		String hql = "SELECT count(*) FROM Category WHERE hkey = :key AND conservationArea in (:ca)";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<Long> q = session.createQuery(hql, Long.class);
 		q.setParameter("key", c.getHkey());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
-		Long cnt = (Long) q.list().get(0);
+		Long cnt = q.list().get(0);
 		if (cnt == ca.length){
 			//this category exists in each conservation area so we keep it
 			return true;
@@ -272,22 +274,22 @@ public class DataModelMerger {
 		if (c.getIcon() != null) return c.getIcon().getKeyId();
 		
 		String hql = "SELECT distinct icon.keyId FROM Category WHERE hkey = :key AND conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<String> q = session.createQuery(hql, String.class);
 		q.setParameter("key", c.getHkey());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 
-		return (String)q.uniqueResult();
+		return q.uniqueResult();
 	}
 	
 	private String findIconKey (Attribute a, ConservationArea[] ca, Session session){
 		if (a.getIcon() != null) return a.getIcon().getKeyId();
 		
 		String hql = "SELECT distinct icon.keyId FROM Attribute WHERE keyId = :key AND conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
+		Query<String> q = session.createQuery(hql, String.class);
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 		
-		return (String)q.uniqueResult();
+		return q.uniqueResult();
 	}
 	
 	/**
@@ -302,7 +304,7 @@ public class DataModelMerger {
 	private boolean canKeep(CategoryAttribute c, ConservationArea[] ca, Session session){
 		String hql = "SELECT distinct a.conservationArea.uuid, a.keyId FROM CategoryAttribute ca join  ca.id.attribute a join ca.id.category c WHERE c.hkey = :ckey AND a.keyId = :akey and a.conservationArea in (:ca)";//$NON-NLS-1$
 		
-		Query<?> q = session.createQuery(hql);
+		Query<Tuple> q = session.createQuery(hql, Tuple.class);
 		q.setParameter("ckey", c.getCategory().getHkey());//$NON-NLS-1$
 		q.setParameter("akey", c.getAttribute().getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca); //$NON-NLS-1$

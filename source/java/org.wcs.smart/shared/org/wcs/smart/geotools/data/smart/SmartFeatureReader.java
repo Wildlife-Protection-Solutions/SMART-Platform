@@ -25,15 +25,11 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.Area;
@@ -51,7 +47,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	private SimpleFeatureType ftype;
 	private IDatabaseConnectionProvider provider = null;
 	private Session session = null;
-	private ScrollableResults itemCursor = null;
+	private ScrollableResults<Area> itemCursor = null;
 	private UUID ca;
 	private boolean createTransaction = false;
 	private AreaType atype;
@@ -103,19 +99,14 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 				createTransaction = true;
 			}
 			
-			CriteriaQuery<Area> c = session.getCriteriaBuilder().createQuery(Area.class);
-			Root<Area> root = c.from(Area.class);
-			c.where(session.getCriteriaBuilder().and(
-					session.getCriteriaBuilder().equal(root.get("conservationArea").get("uuid"), ca), //$NON-NLS-1$ //$NON-NLS-2$
-					session.getCriteriaBuilder().equal(root.get("type"), atype) //$NON-NLS-1$
-					));
-			
-			Query<Area> query = session.createQuery(c);
-			query.setCacheable(false);
-			query.setReadOnly(true);
-			itemCursor = query.scroll(ScrollMode.FORWARD_ONLY); 
-			
+			itemCursor = session.createQuery("FROM Area WHERE conservationArea.uuid = :ca AND type = :type", Area.class) //$NON-NLS-1$
+					.setParameter("ca", ca) //$NON-NLS-1$
+					.setParameter("type", atype) //$NON-NLS-1$
+					.setCacheable(false)
+					.setReadOnly(true)
+					.scroll(ScrollMode.FORWARD_ONLY);
 		}
+		
 		return itemCursor.next();
 	}
 
@@ -126,7 +117,8 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
 		//String spec = "geom:MultiPolygon:srid=4326,uuid:String,id:String,key:String";
-		Area a = (Area)itemCursor.get(0);
+		
+		Area a = (Area)itemCursor.get();
 		String fid = ftype.getTypeName() + "." + a.getKeyId(); //$NON-NLS-1$
 		Object values[] = new Object[5];
 		values[0] = a.getGeometry();

@@ -72,7 +72,7 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 				clone.setType(a.getType());
 				clone.setLevel(a.getLevel());
 
-				engine.getSession().save(clone);
+				engine.getSession().persist(clone);
 			}
 			engine.getSession().flush();
 		}
@@ -88,7 +88,7 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 				clone.setPingFrequency(p.getPingFrequency());
 				clone.setDataFrequency(p.getDataFrequency());
 				clone.setPingType(p.getPingType());
-				engine.getSession().save(clone);
+				engine.getSession().persist(clone);
 			}
 			engine.getSession().flush();
 		}

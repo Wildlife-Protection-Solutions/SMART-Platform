@@ -46,8 +46,11 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 
@@ -125,6 +128,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 		}
 		
 		List<IPatrolEditorContribution> parts = findContributions();
+	
 		for (IPatrolEditorContribution part : parts){
 			final Section sec = toolkit.createSection(main.getBody(), Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
 			sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -142,6 +146,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 			sec.setText(part.getName());
 			Composite info = part.createControl(toolkit, sec, editor.canEdit()==null);
 			sec.setClient(info);
+
 			part.setPatrol(editor.getPatrol());
 		}
 	}

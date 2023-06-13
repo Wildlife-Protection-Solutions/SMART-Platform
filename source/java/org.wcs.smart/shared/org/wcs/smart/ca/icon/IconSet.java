@@ -21,16 +21,16 @@
  */
 package org.wcs.smart.ca.icon;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Represents a set of icons in SMART
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  *
  */
 @Entity
-@Table(name="smart.iconset")
+@Table(name="iconset", schema="smart")
 public class IconSet extends NamedKeyItem{
 
 	private static final long serialVersionUID = 1L;

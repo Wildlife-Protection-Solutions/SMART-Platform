@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.type.PostgresUUIDType;
 import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -212,7 +211,6 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 		throw new UnsupportedOperationException("Loading data in chunks is not supported for Connect queries"); //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String getSelectQuery(Session session){
 		if (sortColumn == null || sortDirection == null) {
@@ -300,10 +298,10 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 					
 					session.beginTransaction();
 					try {
-						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+						session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						List<UUID> items = session.createNativeQuery(s3.toString())
-								.addScalar("element_uuid", PostgresUUIDType.INSTANCE) //$NON-NLS-1$
+						List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
+								.addScalar("element_uuid")//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 								.list();
 						for (UUID item : items) {
 							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, item);
@@ -318,7 +316,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
-							session.createNativeQuery(s2.toString())
+							session.createNativeMutationQuery(s2.toString())
 								.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
 								.setParameter("value", li.getName()) //$NON-NLS-1$
 								.executeUpdate();
@@ -344,10 +342,10 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 					
 					session.beginTransaction();
 					try {
-						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+						session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						List<UUID> items = session.createNativeQuery(s3.toString())
-								.addScalar("element_uuid", PostgresUUIDType.INSTANCE) //$NON-NLS-1$
+						List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
+								.addScalar("element_uuid")//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 								.list();
 						for (UUID item : items) {
 							Employee e = session.get(Employee.class, item);
@@ -362,7 +360,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
-							session.createNativeQuery(s2.toString())
+							session.createNativeMutationQuery(s2.toString())
 								.setParameter("uuid", e.getUuid()) //$NON-NLS-1$
 								.setParameter("value", SmartLabelProvider.getFullName(e, l)) //$NON-NLS-1$
 								.executeUpdate();
@@ -389,10 +387,10 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 				
 				session.beginTransaction();
 				try {
-					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					List<UUID> items = session.createNativeQuery(s3.toString())
-							.addScalar("element_uuid", PostgresUUIDType.INSTANCE) //$NON-NLS-1$
+					List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
+							.addScalar("element_uuid")//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 							.list();
 					for (UUID item : items) {
 						IntelEntity li = session.get(IntelEntity.class, item);
@@ -409,7 +407,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 						s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 						
-						session.createNativeQuery(s2.toString())
+						session.createNativeMutationQuery(s2.toString())
 							.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
 							.setParameter("value", li.getIdAttributeAsText()) //$NON-NLS-1$
 							.executeUpdate();
@@ -451,7 +449,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
 		resultsTable = null;
 		SqlGenerator.logString(sql);
-		session.createNativeQuery(sql).executeUpdate();
+		session.createNativeMutationQuery(sql).executeUpdate();
 	}
 
 	@Override

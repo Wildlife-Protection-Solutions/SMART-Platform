@@ -23,18 +23,18 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
+import org.hibernate.generator.EventType;
 import org.wcs.smart.ca.ConservationArea;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * Simple Connect conservation area info object.
@@ -43,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Entity
-@Table(name = "connect.ca_info")
+@Table(name = "ca_info", schema="connect")
 public class ConservationAreaInfo {
 
 	public static final UUID CCAA_UUID = ConservationArea.MULTIPLE_CA;
@@ -111,7 +111,7 @@ public class ConservationAreaInfo {
 	 * @return the key used to lock the conservation area
 	 */
 	@Column(name="lock_key")
-	@Generated(GenerationTime.INSERT)
+	@Generated(event= {EventType.INSERT})
 	@JsonIgnore
 	public int getLockKey(){
 		return this.lockKey;

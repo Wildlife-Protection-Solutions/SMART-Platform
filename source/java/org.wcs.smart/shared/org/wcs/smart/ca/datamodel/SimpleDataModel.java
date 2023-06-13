@@ -30,10 +30,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
@@ -194,15 +190,10 @@ public class SimpleDataModel {
 	}
 	
 	public static SimpleDataModel loadDataModel(ConservationArea ca, Session session) throws Exception{
-		CriteriaBuilder cb = session.getCriteriaBuilder();
-		CriteriaQuery<Category> c = cb.createQuery(Category.class);
-		Root<Category> root = c.from(Category.class);
-		c.where(cb.and(
-				cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
-				cb.isNull(root.get("parent")) //$NON-NLS-1$
-				));
-		c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
-		List<Category> rootCategories = session.createQuery(c).getResultList();
+
+		List<Category> rootCategories = session.createQuery("FROM Category WHERE conservationArea = :ca and parent is null ORDER BY categoryOrder", Category.class) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.getResultList();
 					
 		List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
 			new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$

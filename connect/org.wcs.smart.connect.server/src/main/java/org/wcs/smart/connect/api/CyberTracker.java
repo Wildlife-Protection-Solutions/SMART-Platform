@@ -257,7 +257,7 @@ public class CyberTracker extends HttpServlet{
 			
 			WorkItem wi = s.get(WorkItem.class, p.getWorkItem());
 			if (wi != null) {
-				s.delete(wi);
+				s.remove(wi);
 			}
 			
 			//TODO: clean up these files in the clean up code
@@ -266,7 +266,7 @@ public class CyberTracker extends HttpServlet{
 					.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(p.getFilename());
 			Files.delete(toDelete);
 			
-			s.delete(p);
+			s.remove(p);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex) {
 			s.getTransaction().rollback();
@@ -311,7 +311,7 @@ public class CyberTracker extends HttpServlet{
 			
 			WorkItem wi = s.get(WorkItem.class, p.getWorkItem());
 			if (wi != null) {
-				s.delete(wi);
+				s.remove(wi);
 			}
 			
 			//TODO: clean up these files in the clean up code
@@ -325,7 +325,7 @@ public class CyberTracker extends HttpServlet{
 			}
 				
 			
-			s.delete(p);
+			s.remove(p);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex) {
 			s.getTransaction().rollback();
@@ -585,6 +585,8 @@ public class CyberTracker extends HttpServlet{
 				ctpackage = new CyberTrackerPackage();
 				ctpackage.setConservationArea(cainfo);
 				ctpackage.setCtPackageUuid(packageUuid);
+				
+				s.persist(ctpackage);
 			}else {
 				if (ctpackage.getStatus() == Status.UPLOADING) {
 					throw new SmartConnectException(Response.Status.CONFLICT, Messages.getString("CyberTracker.PackageUploadingError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -609,7 +611,7 @@ public class CyberTracker extends HttpServlet{
 			sb.append(ctpackage.getVersion());
 			sb.append(".zip"); //$NON-NLS-1$
 			ctpackage.setFilename(sb.toString());
-			s.saveOrUpdate(ctpackage);
+			
 			
 			//delete file
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
@@ -626,7 +628,7 @@ public class CyberTracker extends HttpServlet{
 			up.setType(Type.UP_CTPACKAGE);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(ctpackage.getFilename()); 
-			s.save(up);
+			s.persist(up);
 			
 			ctpackage.setWorkItem(up.getUuid());
 
@@ -636,8 +638,6 @@ public class CyberTracker extends HttpServlet{
 			java.nio.file.Path upFile = DataStoreManager.INSTANCE.getRootDirectory().resolve(up.getLocalFilename());
 			if (Files.exists(upFile)) Files.delete(upFile);
 			
-			s.saveOrUpdate(ctpackage);
-			s.saveOrUpdate(up);
 			
 			//we have a file to upload and we expect more
 			
@@ -724,6 +724,7 @@ public class CyberTracker extends HttpServlet{
 				ctpackage = new CyberTrackerNavigationLayer();
 				ctpackage.setConservationArea(cainfo);
 				ctpackage.setUuid(navUuid);
+				s.persist(ctpackage);
 			}else {
 				if (ctpackage.getStatus() == org.wcs.smart.connect.model.CyberTrackerNavigationLayer.Status.UPLOADING) {
 					throw new SmartConnectException(Response.Status.CONFLICT, Messages.getString("CyberTracker.PackageUploadingError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -747,7 +748,6 @@ public class CyberTracker extends HttpServlet{
 			sb.append(UuidUtils.uuidToString(ctpackage.getUuid()));
 			sb.append(".zip"); //$NON-NLS-1$
 			ctpackage.setFilename(sb.toString());
-			s.saveOrUpdate(ctpackage);
 			
 			//delete any existing file
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
@@ -764,15 +764,13 @@ public class CyberTracker extends HttpServlet{
 			up.setType(Type.UP_NAVIGATION);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(ctpackage.getFilename()); 
-			s.save(up);
+			s.persist(up);
 			
 			ctpackage.setWorkItem(up.getUuid());
 
 			java.nio.file.Path p = Paths.get(CT_NAVIGATION_DATASTORE_LOCATION);
 			up.setLocalFilename(p.resolve(ctpackage.getFilename()).toString()); 
 			
-			s.saveOrUpdate(ctpackage);
-			s.saveOrUpdate(up);
 			
 			//we have a file to upload and we expect more
 			
@@ -859,7 +857,7 @@ public class CyberTracker extends HttpServlet{
 						key.setType(keytype);
 						//TODO: hash this key
 						key.setApiKey( UUID.randomUUID().toString() );
-						s.saveOrUpdate(key);
+						s.persist(key);
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
@@ -945,7 +943,7 @@ public class CyberTracker extends HttpServlet{
 			key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class,
 					new Object[] {"id.conservationArea", ca}, //$NON-NLS-1$
 					new Object[] {"id.type", keytype}).uniqueResult(); //$NON-NLS-1$
-			if (key != null) s.delete(key);
+			if (key != null) s.remove(key);
 			s.getTransaction().commit();
 		}catch(SmartConnectException ex) {
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();

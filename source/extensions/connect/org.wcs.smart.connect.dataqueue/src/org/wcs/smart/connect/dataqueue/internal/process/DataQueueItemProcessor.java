@@ -240,7 +240,7 @@ public class DataQueueItemProcessor extends Job {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				s.saveOrUpdate(item);
+				HibernateManager.saveOrMerge(s, item);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();

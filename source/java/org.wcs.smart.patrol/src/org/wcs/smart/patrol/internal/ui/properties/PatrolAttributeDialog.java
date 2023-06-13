@@ -233,11 +233,11 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			session.beginTransaction();
 			try {
 				if (DeleteManager.canDelete(ma, session)){
-					session.createQuery("DELETE FROM PatrolAttributeValue WHERE id.patrolAttribute = :attribute") //$NON-NLS-1$
+					session.createMutationQuery("DELETE FROM PatrolAttributeValue WHERE id.patrolAttribute = :attribute") //$NON-NLS-1$
 						.setParameter("attribute", ma) //$NON-NLS-1$
 						.executeUpdate();
 					
-					session.delete(ma);
+					session.remove(ma);
 					session.flush();
 				}
 				session.getTransaction().commit();
@@ -311,7 +311,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			session.beginTransaction();
 			try {
 				ps.setIsActive( !ps.getIsActive() );
-				session.saveOrUpdate(ps);
+				HibernateManager.saveOrMerge(session, ps);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				try {

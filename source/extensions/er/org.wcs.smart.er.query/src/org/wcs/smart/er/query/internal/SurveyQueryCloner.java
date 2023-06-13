@@ -114,7 +114,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setSurveyDesign(query.getSurveyDesign());
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -145,7 +145,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setQuery(cloneSummaryQueryDefinition(query.getQuery(), engine));
 			clone.setSurveyDesign(query.getSurveyDesign());
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -179,7 +179,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setSurveyDesign(query.getSurveyDesign());
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -213,7 +213,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setSurveyDesign(query.getSurveyDesign());
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -247,7 +247,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setSurveyDesign(query.getSurveyDesign());
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -281,7 +281,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setSurveyDesign(query.getSurveyDesign());
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();

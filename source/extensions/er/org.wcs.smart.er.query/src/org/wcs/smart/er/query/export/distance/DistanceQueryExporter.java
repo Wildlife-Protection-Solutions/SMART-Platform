@@ -155,7 +155,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 			if (helpers != null) {
 				try (Session session = HibernateManager.openSession()){
 					session.beginTransaction();
-					session.createNativeQuery("DROP TABLE " + helpers.getDataTable()).executeUpdate(); //$NON-NLS-1$
+					session.createNativeMutationQuery("DROP TABLE " + helpers.getDataTable()).executeUpdate(); //$NON-NLS-1$
 					session.getTransaction().commit();
 				}catch(Throwable t) {
 					EcologicalRecordsPlugIn.log(t.getMessage(), t);
@@ -233,15 +233,15 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 				if (sd == null) throw new Exception(MessageFormat.format(Messages.DistanceQueryExporter_SurveyDesignNotFound, suquery.getSurveyDesign()));
 				
 				//duplicate the results table so we can add more rows/columns
-				session.createNativeQuery("CREATE TABLE " + helpers.getDataTable() + " AS SELECT * FROM " + helpers.getSrcDataTable() + " WITH NO DATA").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				session.createNativeQuery("INSERT INTO " + helpers.getDataTable() + " SELECT * FROM " + helpers.getSrcDataTable() ).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+				session.createNativeQuery("CREATE TABLE " + helpers.getDataTable() + " AS SELECT * FROM " + helpers.getSrcDataTable() + " WITH NO DATA", Integer.class).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				session.createNativeQuery("INSERT INTO " + helpers.getDataTable() + " SELECT * FROM " + helpers.getSrcDataTable(), Integer.class ).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 				
 
 				//--add missing sampling units to results table--
 				//get sampling units
-				try(ScrollableResults scroll = session.createNativeQuery("SELECT samplingunit_uuid, samplingunit_id FROM " + helpers.getDataTable() ).scroll()){ //$NON-NLS-1$
+				try(ScrollableResults<byte[]> scroll = session.createNativeQuery("SELECT samplingunit_uuid FROM " + helpers.getDataTable(), byte[].class ).scroll()){ //$NON-NLS-1$
 					while(scroll.next()) {
-						foundSu.add(UuidUtils.byteToUUID((byte[])scroll.get()[0]));
+						foundSu.add(UuidUtils.byteToUUID(scroll.get()));
 					}
 				}
 				
@@ -251,7 +251,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 					if (!foundSu.contains(e.getUuid())) {
 						//add this to to data table
 						String sb = "INSERT INTO " + helpers.getDataTable() + " (samplingunit_uuid, samplingunit_id ) VALUES (:suuid, :sid)";  //$NON-NLS-1$//$NON-NLS-2$
-						session.createNativeQuery(sb)
+						session.createNativeMutationQuery(sb)
 							.setParameter("suuid", e.getUuid()) //$NON-NLS-1$
 							.setParameter("sid", e.getId()) //$NON-NLS-1$
 							.executeUpdate();							
@@ -266,7 +266,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 				if (stratumAttributeKey != null) {
 					//add a sort column for this attribute
 					String sql = "ALTER TABLE " + helpers.getDataTable() + " ADD COLUMN " + STRATUM_SORT_COLUMN + " VARCHAR(3200) ";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
-					session.createNativeQuery(sql).executeUpdate();
+					session.createNativeMutationQuery(sql).executeUpdate();
 					
 					for (SamplingUnit e : sunits) {
 						units.put(e.getUuid(), e);
@@ -279,7 +279,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 						};
 						if (stratumvalue != null) {
 							sql = "UPDATE " + helpers.getDataTable() + " SET " + STRATUM_SORT_COLUMN + " = :strvalue WHERE samplingunit_uuid = :uuid "; //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
-							session.createNativeQuery(sql)
+							session.createNativeMutationQuery(sql)
 								.setParameter("strvalue", stratumvalue)  //$NON-NLS-1$
 								.setParameter("uuid", e.getUuid()).executeUpdate();  //$NON-NLS-1$
 						}
@@ -329,7 +329,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 				}
 				
 				//get count for results
-				Integer cnt = (Integer)session.createNativeQuery("SELECT count(*) from " + helpers.getDataTable() ).uniqueResult();  //$NON-NLS-1$
+				Integer cnt = session.createNativeQuery("SELECT count(*) from " + helpers.getDataTable(), Integer.class ).uniqueResult();  //$NON-NLS-1$
 				qresults.setItemCount(cnt.intValue());
 				session.getTransaction().commit();
 			}catch (Exception ex) {

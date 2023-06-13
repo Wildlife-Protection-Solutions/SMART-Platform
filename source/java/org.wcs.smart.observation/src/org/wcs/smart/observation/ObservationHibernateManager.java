@@ -95,7 +95,7 @@ public class ObservationHibernateManager extends HibernateManager{
 		po.setEditTime(null);
 		po.setUuid(ca.getUuid());
 		po.setTrackObserver(false);
-		s.saveOrUpdate(po);
+		s.persist(po);
 		return po;
 	}
 	

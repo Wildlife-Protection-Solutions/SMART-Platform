@@ -135,7 +135,6 @@ public class AttachmentPropertiesDialog {
 		parent.open();
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected void createDialogArea() {
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginHeight = 0;

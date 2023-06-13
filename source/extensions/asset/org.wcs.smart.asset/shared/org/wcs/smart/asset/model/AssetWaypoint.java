@@ -23,21 +23,21 @@ package org.wcs.smart.asset.model;
 
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.observation.model.Waypoint;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 /**
  * Link between a waypoint and the asset waypoint
@@ -46,7 +46,7 @@ import org.wcs.smart.observation.model.Waypoint;
  * 
  */
 @Entity
-@Table(name="smart.asset_waypoint")
+@Table(name="asset_waypoint", schema="smart")
 public class AssetWaypoint extends UuidItem implements IAdaptable{
 	
 	private static final long serialVersionUID = 1L;

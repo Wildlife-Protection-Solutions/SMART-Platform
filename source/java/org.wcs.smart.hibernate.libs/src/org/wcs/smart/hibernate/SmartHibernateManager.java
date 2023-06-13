@@ -39,9 +39,11 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.hql.spi.QueryTranslator;
-import org.hibernate.hql.spi.QueryTranslatorFactory;
+import org.hibernate.query.Query;
+import org.hibernate.query.sqm.internal.QuerySqmImpl;
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.sql.ast.tree.select.SelectStatement;
 
 /**
  * Manage hibernate connections and mappings.
@@ -68,8 +70,13 @@ public class SmartHibernateManager {
 
 	private static final String MAPPING_ID = "org.wcs.smart.hibernate.libs.mapping"; //$NON-NLS-1$
 	
-	private static String userName = "login"; //$NON-NLS-1$
-	private static String passWord = "smrt"; //$NON-NLS-1$
+	//private static String userName = "login"; //$NON-NLS-1$
+	//private static String passWord = "smrt"; //$NON-NLS-1$
+	
+	//TODO: rever this - this was only for testing
+	private static String userName = "smart_admin"; //$NON-NLS-1$
+	private static String passWord = "smart_derby"; //$NON-NLS-1$
+	
 	private static String databaseLocation = ""; //$NON-NLS-1$
 
 	/*
@@ -121,7 +128,6 @@ public class SmartHibernateManager {
 			if (sessionFactory == null){
 				if (hibernateConfiguration == null){
 					hibernateConfiguration = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
-					//add mapping classes
 					for (Class<?> c: getMappings()){
 						hibernateConfiguration.addAnnotatedClass(c);
 					}
@@ -133,12 +139,12 @@ public class SmartHibernateManager {
 				
 				ServiceRegistry service = new StandardServiceRegistryBuilder().applySettings(hibernateConfiguration.getProperties()).build();
 				sessionFactory = hibernateConfiguration.buildSessionFactory(service);
-				
-				
-				if (getCurrentDialect() == null || !getCurrentDialect().supportsSequences()){
+								
+				if (getCurrentDialect() == null ) { //|| !getCurrentDialect().supportsSequences()){
 					//fail
 					throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
 				}
+				
 			}
 		}
 	}
@@ -159,17 +165,28 @@ public class SmartHibernateManager {
 	 * @param hqlQueryText
 	 * @return
 	 */
-	public static String toSql(String hqlQueryText) {
-		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
-			QueryTranslatorFactory translatorFactory = sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-//			Settings settings = ((SessionFactoryImpl) sessionFactory).getSettings();
-//			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl) sessionFactory).getSettings().getQueryTranslatorFactory();
-			final SessionFactoryImplementor factory = (SessionFactoryImplementor) sessionFactory;
-			final QueryTranslator translator = translatorFactory.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory, null);
-			translator.compile(Collections.EMPTY_MAP, false);
-			return translator.getSQLString();
-		}
-		return null;
+	//TODO:
+	public static String toSql(Query<?> query) {
+		QuerySqmImpl<?> sqmquery = (QuerySqmImpl<?>)query;
+		
+		final SessionFactoryImplementor factory = (SessionFactoryImplementor) sessionFactory;
+		
+		SqmSelectStatement<?> ss = (SqmSelectStatement<?>) sqmquery.getSqmStatement();
+		SelectStatement sss = (SelectStatement) 
+				factory.getQueryEngine().getSqmTranslatorFactory()
+				.createSelectTranslator(ss, 
+						sqmquery.getQueryOptions(),
+						sqmquery.getDomainParameterXref(),
+						sqmquery.getParameterBindings(),
+						sqmquery.getLoadQueryInfluencers(),
+						factory, false)
+				.visitSelectStatement(ss);
+		
+		String sql = getCurrentDialect().getSqlAstTranslatorFactory()
+				.buildSelectTranslator(factory, sss)
+				.translate(null,  sqmquery.getQueryOptions()).getSqlString();
+		
+		return sql;
 	}
 	
 	
@@ -280,6 +297,7 @@ public class SmartHibernateManager {
 		}
 
 		//add to session collection with listener to remove when closed
+		
 		openSessions.add(session);
 		session.addEventListeners(new SessionEndListener(session));
 		
@@ -367,6 +385,9 @@ public class SmartHibernateManager {
 		return items;
 	}
 
+	
+	private static HashMap<Class<?>, Object[]> hibernateClassMetadata = null;
+	
 	/**
 	 * For a given hibernate mapped class this returns the 
 	 * the ca_property field of the extension point.
@@ -374,8 +395,7 @@ public class SmartHibernateManager {
 	 * @param clazz the mapped hibernate query
 	 * @return the ca_property 
 	 */
-	private static HashMap<Class<?>, Object[]> hibernateClassMetadata = null;
-	public static final String getHqlExportQuery(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
+	public static final String getCaProperty(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
 		readClassMetadata();
 		Object[] values = hibernateClassMetadata.get(clazz);
 		if (values != null){
@@ -383,11 +403,29 @@ public class SmartHibernateManager {
 		}
 		return null;
 	}
+	
+	/**
+	 * For a given hibernate mapped class this returns the 
+	 * the ca_uuid_property field of the extension point.
+	 * 
+	 * @param clazz the mapped hibernate query
+	 * @return the ca_property 
+	 */
+	public static final String getCaUuidProperty(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
+		readClassMetadata();
+		Object[] values = hibernateClassMetadata.get(clazz);
+		if (values != null){
+			return (String)values[1];
+		}
+		return null;
+	}
+
+	
 	public static final Boolean supportsCcaa(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
 		readClassMetadata();
 		Object[] values = hibernateClassMetadata.get(clazz);
 		if (values != null){
-			return (Boolean)values[1];
+			return (Boolean)values[2];
 		}
 		return null;
 	}
@@ -400,8 +438,9 @@ public class SmartHibernateManager {
 		for (IConfigurationElement e : config) {
 			Class<?> clzz = Class.forName(e.getAttribute("class")); //$NON-NLS-1$
 			String caProp = e.getAttribute("ca_property"); //$NON-NLS-1$
+			String caUuidProp = e.getAttribute("ca_uuid_property"); //$NON-NLS-1$
 			Boolean containsCcaa = Boolean.valueOf(e.getAttribute("supportsCcaa")); //$NON-NLS-1$
-			hibernateClassMetadata.put(clzz, new Object[]{caProp, containsCcaa});
+			hibernateClassMetadata.put(clzz, new Object[]{caProp, caUuidProp, containsCcaa});
 		}
 	}
 	
@@ -417,4 +456,5 @@ public class SmartHibernateManager {
 			openSessions.remove(session);
 		}	
 	};
+	
 }

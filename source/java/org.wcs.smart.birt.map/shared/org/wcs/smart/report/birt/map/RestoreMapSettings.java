@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -57,6 +58,7 @@ import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.map.internal.settings.ColorJsonTypeAdapter;
 import org.wcs.smart.map.internal.settings.LayerRegister;
 import org.wcs.smart.map.internal.settings.MapRegister;
 import org.wcs.smart.map.internal.settings.StyleRegister;
@@ -97,6 +99,7 @@ public class RestoreMapSettings {
 		// get map definition selected
 		String jsonMap = baseMap.getMapDef();
 		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
+		gsonBuilder.registerTypeAdapter(Color.class, new ColorJsonTypeAdapter());
 		Gson gson = gsonBuilder.create();
 		final MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
 					

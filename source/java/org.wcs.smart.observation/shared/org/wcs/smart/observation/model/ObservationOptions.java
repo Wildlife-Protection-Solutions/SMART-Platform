@@ -23,10 +23,10 @@ package org.wcs.smart.observation.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * Class to track patrol
@@ -37,7 +37,7 @@ import javax.persistence.Table;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.observation_options")
+@Table(name="observation_options", schema="smart")
 public class ObservationOptions {
 
 	private boolean trackDistanceDirection;

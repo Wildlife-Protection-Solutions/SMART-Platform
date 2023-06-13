@@ -105,7 +105,7 @@ public class QaDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		for (String s : sql){
 			SmartPlugIn.log(s, null);
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 
 		HibernateManager.setPlugInVersion(QaPlugIn.PLUGIN_ID, QaPlugIn.DB_VERSION_1, session);
@@ -120,7 +120,7 @@ public class QaDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		for (String s : sql){
 			SmartPlugIn.log(s, null);
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 
 		HibernateManager.setPlugInVersion(QaPlugIn.PLUGIN_ID, QaPlugIn.DB_VERSION_2, session);

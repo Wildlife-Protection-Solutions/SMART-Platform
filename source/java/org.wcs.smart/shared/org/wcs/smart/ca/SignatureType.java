@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.ca;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 /**
  * Represent signature types in the system
@@ -34,7 +34,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name="smart.signature_type")
+@Table(name="signature_type", schema="smart")
 public class SignatureType extends NamedKeyItem{
 	
 	/**

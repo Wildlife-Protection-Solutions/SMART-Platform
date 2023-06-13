@@ -107,7 +107,7 @@ public class AssetQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setQuery(cloneSummaryQueryDefinition(query.getQuery(), engine));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -141,7 +141,7 @@ public class AssetQueryTemplateCloner implements
 				clone.setQueryFilter(queryFilter);
 				clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 				
-				engine.getSession().save(clone);
+				engine.getSession().persist(clone);
 				engine.addConservationItemMapping(query, clone);
 			}
 		}
@@ -176,7 +176,7 @@ public class AssetQueryTemplateCloner implements
 				clone.setQueryFilter(queryFilter);
 				clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 				
-				engine.getSession().save(clone);
+				engine.getSession().persist(clone);
 				engine.addConservationItemMapping(query, clone);
 			}
 		}

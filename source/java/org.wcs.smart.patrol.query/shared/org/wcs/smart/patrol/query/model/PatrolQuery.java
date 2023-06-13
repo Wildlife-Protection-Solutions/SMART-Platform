@@ -24,10 +24,6 @@ package org.wcs.smart.patrol.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
@@ -36,28 +32,23 @@ import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * A representation of a patrol query.
  * @author egouge
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.patrol_query")
+@Table(name="patrol_query", schema="smart")
 public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "patrolquery"; //$NON-NLS-1$
-	
-	/**
-	 * Creates a new patrol query with the default
-	 * conservation area filter and no date filter
-	 */
-	protected PatrolQuery(){
-		super();
-	}
-	
-	
+
 	/**
 	 * 
 	 * @see java.lang.Object#clone()

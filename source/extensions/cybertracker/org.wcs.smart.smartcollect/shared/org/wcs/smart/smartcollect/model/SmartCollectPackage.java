@@ -23,19 +23,19 @@ package org.wcs.smart.smartcollect.model;
 
 import java.util.ArrayList;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * SMART Collect package 
@@ -44,7 +44,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  *
  */
 @Entity
-@Table(name="smart.smartcollect_package")
+@Table(name="smartcollect_package", schema="smart")
 public class SmartCollectPackage extends AbstractCtPackage implements ICmProvider {
 
 	private static final long serialVersionUID = 1L;

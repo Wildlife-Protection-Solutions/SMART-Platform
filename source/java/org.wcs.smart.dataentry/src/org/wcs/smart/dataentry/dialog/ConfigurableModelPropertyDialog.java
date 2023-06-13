@@ -68,7 +68,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -308,7 +308,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						monitor.worked(1);
 						if (DeleteManager.canDelete(currentCm, session)){
 
-							Query<?> deleteq = session.createQuery("DELETE FROM CmAttributeConfig WHERE model = :model"); //$NON-NLS-1$
+							MutationQuery deleteq = session.createMutationQuery("DELETE FROM CmAttributeConfig WHERE model = :model"); //$NON-NLS-1$
 							deleteq.setParameter("model", currentCm); //$NON-NLS-1$
 							deleteq.executeUpdate();
 
@@ -321,7 +321,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 								nodes.addAll(node.getChildren());
 							}
 							
-							session.delete(currentCm);
+							session.remove(currentCm);
 							session.getTransaction().commit();
 							//deleting filestore
 							DataentryHibernateManager.deleteFilestore(currentCm);
@@ -447,7 +447,11 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						
 						try(Session session = HibernateManager.openSession()){
 							CmSmartToXml converter = new CmSmartToXml(session);
-							converter.convert(cm, monitor);
+							ConfigurableModel toexport = cm;
+							if (cm.getUuid() != null) {
+								 toexport = session.getReference(cm);
+							}
+							converter.convert(toexport, monitor);
 							org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = converter.getXmlModel();
 						
 							monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
@@ -472,7 +476,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							List<Path> toZip = new ArrayList<>();
 							toZip.add(xmlFile);
 							
-							Path dataFolder = cm.getFileDataStoreLocation();
+							Path dataFolder = toexport.getFileDataStoreLocation();
 							if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
 								try(Stream<Path> stream = Files.list(dataFolder)){
 									stream.forEach(file->toZip.add(file));

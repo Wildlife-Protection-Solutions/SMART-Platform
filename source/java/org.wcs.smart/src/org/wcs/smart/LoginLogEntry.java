@@ -23,11 +23,11 @@ package org.wcs.smart;
 
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 
 /**
@@ -37,7 +37,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name = "smart.login_log")
+@Table(name = "login_log", schema="smart")
 public class LoginLogEntry extends UuidItem{
 	
 	private static final long serialVersionUID = 1L;

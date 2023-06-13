@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: BIRT Map
 Bundle-SymbolicName: org.wcs.smart.birt.map;singleton:=true
 Bundle-Version: 8.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
  org.eclipse.birt.report.engine;bundle-version="4.9.0";visibility:=reexport,
  org.eclipse.birt.data;visibility:=reexport,
@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
  org.eclipse.birt.report.model;visibility:=reexport,
  org.eclipse.emf.ecore,
  org.wcs.smart.birt;bundle-version="[8.0.0,9.0.0)",
- javax.media.jai_imageio;bundle-version="1.1.3"
+ javax.media.jai_imageio;bundle-version="1.1.3",
+ com.google.gson;bundle-version="2.8.9"
 Import-Package: org.locationtech.udig.catalog.rasterings,
  org.wcs.smart.query.common.model
 Export-Package: org.wcs.smart.report.birt.map,

@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
+import org.hibernate.query.MutationQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -183,7 +183,6 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 		return sql;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private String configureSort(Session session){
 		if (sortColumn == null || sortDirection == null) return ""; //$NON-NLS-1$
 		
@@ -213,17 +212,11 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_ID){
 				session.beginTransaction();
 				try {
-					List<Object> entities = session.createNativeQuery("SELECT distinct entity_uuid FROM " + resultsTable + " WHERE entity_id is null").list(); //$NON-NLS-1$ //$NON-NLS-2$
+					List<UUID> entities = session.createNativeQuery("SELECT distinct entity_uuid FROM " + resultsTable + " WHERE entity_id is null", UUID.class).list(); //$NON-NLS-1$ //$NON-NLS-2$
 					String updateQuerystr = "UPDATE " + resultsTable + " SET entity_id = :name WHERE entity_uuid = :uuid"; //$NON-NLS-1$ //$NON-NLS-2$
 					SqlGenerator.logString(updateQuerystr);
-					NativeQuery<?> updateQuery = session.createNativeQuery(updateQuerystr);
-					for (Object e : entities) {
-						UUID entityUuid = null;
-						if (e instanceof UUID) {
-							entityUuid = (UUID)e;
-						}else if (e instanceof byte[]) {
-							entityUuid = UuidUtils.byteToUUID((byte[])e);
-						}
+					MutationQuery updateQuery = session.createNativeMutationQuery(updateQuerystr);
+					for (UUID entityUuid : entities) {
 						IntelEntity ie = session.get(IntelEntity.class, entityUuid);
 						String name = ""; //$NON-NLS-1$
 						if (ie == null) {
@@ -260,50 +253,43 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 				case BOOLEAN:
 				case NUMERIC:
 					String updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = (SELECT a.double_value FROM smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid WHERE a.entity_uuid = " + resultsTable + ".entity_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					SqlGenerator.logString(updateQuery);
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					break;
 				case DATE:
 					updateQuery = "UPDATE " + resultsTable + " SET date_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					updateQuery = "UPDATE " + resultsTable + " SET date_sort = (SELECT date(a.string_value) FROM smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid WHERE a.entity_uuid = " + resultsTable + ".entity_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					SqlGenerator.logString(updateQuery);
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					break;
 				case LIST:		
 					updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					SqlGenerator.logString(updateQuery);
 					String attribute = "SELECT distinct a.list_item_uuid FROM " + resultsTable + " b join smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.entity_uuid = a.entity_uuid and a.list_item_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					List<Object> listitems = session.createNativeQuery(attribute).list();
-					for (Object b : listitems){
-						UUID uuid = null;
-						if (b instanceof UUID){ 
-							uuid = (UUID) b;
-						}else if (b instanceof byte[]){
-							uuid = UuidUtils.byteToUUID((byte[]) b);
-						}
+					List<UUID> listitems = session.createNativeQuery(attribute, UUID.class).list();
+					for (UUID uuid : listitems){
 						IntelAttributeListItem item = (IntelAttributeListItem) session.get(IntelAttributeListItem.class, uuid);
 						if (item != null){
 							updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE entity_uuid in (select entity_uuid FROM smart.i_entity_attribute_value a WHERE " + resultsTable + ".entity_uuid = a.entity_uuid and a.list_item_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							SqlGenerator.logString(updateQuery);
-							NativeQuery<?> q = session.createNativeQuery(updateQuery);
-							q.setParameter("value", item.getName()); //$NON-NLS-1$
-							q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
-							
-							q.executeUpdate();
+							session.createNativeMutationQuery(updateQuery)
+								.setParameter("value", item.getName()) //$NON-NLS-1$
+								.setParameter("listitem", item.getUuid()) //$NON-NLS-1$
+								.executeUpdate();
 						}
 					}
 					break;
 				case TEXT:
 					updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					
 					updateQuery = "UPDATE " + resultsTable + " SET str_sort = (SELECT a.string_value FROM smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid WHERE a.entity_uuid = " + resultsTable + ".entity_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					SqlGenerator.logString(updateQuery);
-					session.createNativeQuery(updateQuery).executeUpdate();
+					session.createNativeMutationQuery(updateQuery).executeUpdate();
 					break;
 				default:
 					break;
@@ -353,7 +339,7 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
 		resultsTable = null;
 		SqlGenerator.logString(sql);
-		session.createNativeQuery(sql).executeUpdate();
+		session.createNativeMutationQuery(sql).executeUpdate();
 	}
 
 	@Override

@@ -63,7 +63,6 @@ import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.util.UuidUtils;
 
 /**

@@ -23,7 +23,6 @@ package org.wcs.smart.patrol;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.patrol.internal.Messages;
@@ -62,45 +61,45 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	}
 
 	private void deleteCustomAttributes(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from PatrolAttributeValue where id.patrolAttribute in (FROM PatrolAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from PatrolAttributeValue where id.patrolAttribute in (FROM PatrolAttribute WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from PatrolAttributeListItem where attribute in (FROM PatrolAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from PatrolAttributeListItem where attribute in (FROM PatrolAttribute WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from PatrolAttribute where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from PatrolAttribute where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deletePatrols(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Patrol where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Patrol where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 	private void deleteMandates(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from PatrolMandate where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from PatrolMandate where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deletePatrolTypes(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from PatrolType where id.conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from PatrolType where id.conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from PatrolTransportType where id.conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from PatrolTransportType where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
 	}
 	
 	private void deletePatrolTeams(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Team where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Team where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 }

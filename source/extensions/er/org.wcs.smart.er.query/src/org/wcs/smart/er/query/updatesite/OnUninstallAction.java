@@ -59,7 +59,7 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			try {
 				for (String table : LABELTABLES) {
 					if (DerbyHibernateExtensions.tableExists(session, table)) {
-						session.createNativeQuery(
+						session.createNativeMutationQuery(
 								"delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")") //$NON-NLS-1$ //$NON-NLS-2$
 								.executeUpdate();
 					}
@@ -67,7 +67,7 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 
 				for (String table : LABELTABLES) {
 					if (DerbyHibernateExtensions.tableExists(session, table)) {
-						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+						session.createNativeMutationQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 					}
 				}
 

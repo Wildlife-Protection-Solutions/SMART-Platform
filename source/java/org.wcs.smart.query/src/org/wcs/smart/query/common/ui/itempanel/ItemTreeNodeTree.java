@@ -131,7 +131,7 @@ public class ItemTreeNodeTree extends Composite {
 		};
 
 		FilteredTree fTree = new FilteredTree(this, SWT.H_SCROLL | SWT.V_SCROLL
-				| SWT.MULTI, patternFilter, true) {
+				| SWT.MULTI, patternFilter, true, true) {
 			
 			
 			protected void createControl(Composite parent, int treeStyle) {

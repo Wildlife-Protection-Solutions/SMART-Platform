@@ -108,7 +108,7 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 			"ALTER TABLE smart.asset_summary_query alter column query_type_key set not null", //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(AssetQueryPlugIn.PLUGIN_ID, AssetQueryPlugIn.DB_VERSION_2, session);
@@ -120,7 +120,7 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE SMART.ASSET_WAYPOINT_QUERY DROP COLUMN SURVEYDESIGN_KEY", //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(AssetQueryPlugIn.PLUGIN_ID, AssetQueryPlugIn.DB_VERSION_3, session);

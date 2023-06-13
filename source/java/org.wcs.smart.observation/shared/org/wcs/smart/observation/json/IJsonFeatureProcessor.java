@@ -40,8 +40,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -66,6 +64,8 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.xml.bind.DatatypeConverter;
 
 
 /**
@@ -762,7 +762,7 @@ public abstract class IJsonFeatureProcessor {
 		
 		WaypointObservationGroup p = session.get(WaypointObservationGroup.class, link.getSmartId());
 		if (p == null) {
-			session.delete(link);
+			session.remove(link);
 			return null;
 		}
 		if (!p.getWaypoint().getConservationArea().equals(ca)) return null;
@@ -793,7 +793,7 @@ public abstract class IJsonFeatureProcessor {
 		
 		WaypointObservation observation = session.get(WaypointObservation.class, link.getSmartId());
 		if (observation == null) {
-			session.delete(link);
+			session.remove(link);
 			return null;
 		}
 		if (!observation.getWaypoint().getConservationArea().equals(ca)) return null;

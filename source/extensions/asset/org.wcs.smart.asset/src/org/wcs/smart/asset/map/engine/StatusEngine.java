@@ -111,30 +111,27 @@ public class StatusEngine {
 		
 		HashMap<T, Set<Long>> data = new HashMap<>();
 		
-		try(ScrollableResults results = query.scroll()){
-			while(results.next()) {
-				AssetDeployment d = (AssetDeployment) results.get(0);
-				
-				LocalDate startDate = d.getStartDate().toLocalDate();
-				LocalDate endDate = LocalDate.now();
-				
-				if (d.getEndDate() != null) {
-					endDate = d.getEndDate().toLocalDate();
-				}
-				
-				T s = (T) getId(d, isStation, session);
-				Set<Long> items = data.get(s);
-				if (items == null) {
-					items = new HashSet<>();
-					data.put(s, items);
-				}
-				LocalDate temp = LocalDate.from(startDate);
-				while(!temp.isAfter(endDate)) {
-					items.add(temp.toEpochDay());
-					temp = temp.plus(1, ChronoUnit.DAYS);
-				}
+		for (AssetDeployment d : query.list()) {
+			LocalDate startDate = d.getStartDate().toLocalDate();
+			LocalDate endDate = LocalDate.now();
+			
+			if (d.getEndDate() != null) {
+				endDate = d.getEndDate().toLocalDate();
+			}
+			
+			T s = (T) getId(d, isStation, session);
+			Set<Long> items = data.get(s);
+			if (items == null) {
+				items = new HashSet<>();
+				data.put(s, items);
+			}
+			LocalDate temp = LocalDate.from(startDate);
+			while(!temp.isAfter(endDate)) {
+				items.add(temp.toEpochDay());
+				temp = temp.plus(1, ChronoUnit.DAYS);
 			}
 		}
+		
 		return data;
 	}
 

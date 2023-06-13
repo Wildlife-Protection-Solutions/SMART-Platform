@@ -23,14 +23,14 @@ package org.wcs.smart.dataentry.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Uuid option for {@link ScreenOption}
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.UuidItem;
  * @since 2.0.0
  */
 @Entity
-@Table(name = "smart.screen_option_uuid")
+@Table(name = "screen_option_uuid", schema="smart")
 public class ScreenOptionUuid extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;

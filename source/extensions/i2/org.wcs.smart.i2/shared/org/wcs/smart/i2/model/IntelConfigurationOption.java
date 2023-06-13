@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.i2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Configuration options for profiles plugin.  Currently only stores the
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name = "smart.i_config_option")
+@Table(name = "i_config_option", schema="smart")
 public class IntelConfigurationOption extends UuidItem {
 
 	private static final long serialVersionUID = 1L;

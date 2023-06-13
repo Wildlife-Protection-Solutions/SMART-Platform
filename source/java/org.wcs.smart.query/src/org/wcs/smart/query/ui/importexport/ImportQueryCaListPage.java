@@ -27,10 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -66,6 +62,11 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.QueryListContentProvider;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Wizard page to select queries from a different Conservation Area
@@ -126,21 +127,21 @@ public class ImportQueryCaListPage extends WizardPage {
 			
 
 				for (IQueryType type : QueryTypeManager.INSTANCE.getSupportedQueryTypes()){
-					Query<?> hquery = session
+					Query<Tuple> hquery = session
 						.createQuery("SELECT a.uuid, a.folder.uuid, a.isShared, a.id " //$NON-NLS-1$
 							+ "FROM " //$NON-NLS-1$
 							+ type.getHibernateClass().getSimpleName()
 							+ " a " //$NON-NLS-1$
 							+ "WHERE a.conservationArea = :ca " //$NON-NLS-1$
-							+ "and a.isShared ='true'"); //$NON-NLS-1$
+							+ "and a.isShared ='true'", Tuple.class); //$NON-NLS-1$
 					hquery.setParameter("ca", currentCa); //$NON-NLS-1$
 
-					List<?> results = hquery.list();
-					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-						Object[] object = (Object[]) iterator.next();
-						UUID uuid = (UUID) object[0];
-						UUID folderuuid = (UUID)object[1];
-						String id = (String) object[3];
+					List<Tuple> results = hquery.list();
+					for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
+						Tuple row = iterator.next();
+						UUID uuid = (UUID) row.get(0);
+						UUID folderuuid = (UUID)row.get(1);
+						String id = (String) row.get(3);
 						String name = findLabel(match, uuid, session);
 					
 						QueryEditorInput proxy = new QueryEditorInput(uuid, name, id, true, type);

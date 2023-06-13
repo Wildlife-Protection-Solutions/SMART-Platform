@@ -23,8 +23,6 @@ package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotFoundException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -34,6 +32,8 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * This contribution adds the status_url and download_url

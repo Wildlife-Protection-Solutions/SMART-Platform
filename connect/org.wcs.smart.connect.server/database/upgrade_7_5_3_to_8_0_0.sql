@@ -43,6 +43,7 @@ ALTER TABLE smart.station ADD CONSTRAINT station_icon_uuid_fk FOREIGN KEY (icon_
 
 --mission metadata icons
 
+-- 5 to 6 upgrade for er
 ALTER TABLE smart.mission_attribute ADD COLUMN icon_uuid uuid;
 ALTER table smart.mission_attribute ADD CONSTRAINT mission_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE smart.mission_attribute_list ADD COLUMN icon_uuid uuid;
@@ -51,7 +52,9 @@ ALTER TABLE smart.sampling_unit_attribute ADD COLUMN icon_uuid uuid;
 ALTER table smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE smart.sampling_unit_attribute_list ADD COLUMN icon_uuid uuid;
 ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE;
-				
+
+-- 4 to 5 upgrade for er
+ALTER TABLE SMART.SURVEY_WAYPOINT ADD CONSTRAINT SURVEY_WAYPOINT_WP_UUID_FK FOREIGN KEY (WP_UUID) REFERENCES SMART.WAYPOINT(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE				
 				
 update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker';
@@ -64,8 +67,8 @@ update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.qa';
 
 
-update connect.connect_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.er';
-update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.er';
+update connect.connect_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.er';
+update connect.ca_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.er';
 
 update connect.connect_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart';

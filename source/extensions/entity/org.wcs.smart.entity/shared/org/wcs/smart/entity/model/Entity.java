@@ -23,20 +23,20 @@ package org.wcs.smart.entity.model;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * An entity object.  This represents a particular
@@ -45,8 +45,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
  * @author Emily
  *
  */
-@javax.persistence.Entity
-@Table(name="smart.entity")
+@jakarta.persistence.Entity
+@Table(name="entity", schema="smart")
 public class Entity extends UuidItem {
 
 	private static final long serialVersionUID = 1L;

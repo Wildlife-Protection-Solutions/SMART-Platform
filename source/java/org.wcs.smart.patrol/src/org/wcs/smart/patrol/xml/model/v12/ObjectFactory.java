@@ -8,9 +8,6 @@
 
 package org.wcs.smart.patrol.xml.model.v12;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
-import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
 import org.wcs.smart.patrol.xml.model.ExtraDataDateKeyType;
@@ -18,6 +15,10 @@ import org.wcs.smart.patrol.xml.model.ExtraDataLabelKeyType;
 import org.wcs.smart.patrol.xml.model.ExtraDataStringKeyType;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
 import org.wcs.smart.patrol.xml.model.LabelType;
+
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.annotation.XmlElementDecl;
+import jakarta.xml.bind.annotation.XmlRegistry;
 
 
 /**

@@ -52,7 +52,7 @@ public class CaCloneDataQueueOptions implements IConservationAreaTemplateCloner 
 			cloneop.setOptionKey(op.getOptionKey());
 			cloneop.setValue(op.getValue());
 				
-			s.save(cloneop);
+			s.persist(cloneop);
 		}
 			
 		s.flush();

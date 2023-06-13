@@ -28,19 +28,19 @@ import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Values for custom patrol attributes
@@ -50,7 +50,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
  *
  */
 @Entity
-@Table(name="smart.patrol_attribute_value")
+@Table(name="patrol_attribute_value", schema="smart")
 public class PatrolAttributeValue {
 
 	private PatrolAttributeValuePk id = new PatrolAttributeValuePk();

@@ -24,24 +24,24 @@ package org.wcs.smart.i2.model;
 import java.io.File;
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Model class of intelligence attachment.
  * 
  */
 @Entity
-@Table(name="smart.i_attachment")
+@Table(name="i_attachment", schema="smart")
 public class IntelAttachment extends ISmartAttachment{
 
 	private static final long serialVersionUID = 1L;

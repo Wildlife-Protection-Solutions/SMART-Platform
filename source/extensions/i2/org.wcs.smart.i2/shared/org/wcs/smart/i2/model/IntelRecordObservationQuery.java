@@ -25,15 +25,15 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.query.observation.parser.ParseException;
 import org.wcs.smart.i2.query.observation.parser.Parser;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class of i_record_query.
@@ -42,7 +42,7 @@ import org.wcs.smart.i2.query.observation.parser.Parser;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_record_obs_query")
+@Table(name="i_record_obs_query", schema="smart")
 public class IntelRecordObservationQuery extends AbstractIntelQuery {
 
 	private static final long serialVersionUID = 1L;

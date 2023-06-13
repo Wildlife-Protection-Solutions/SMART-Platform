@@ -92,6 +92,7 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
@@ -429,7 +430,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			if (c.getAlertItem() != null){
 				alertsList.add(c);
 			}else{
-				dialog.getSession().delete(c);
+				dialog.getSession().remove(c);
 			}
 		}
 		alertTable.setInput(alertsList);
@@ -922,14 +923,14 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			Object del = s.get(ConnectAlert.class, a.getUuid());
 			if (del != null) {
 				//it may be the case that object was removed by constraint in db 
-				s.delete(del);
+				s.remove(del);
 			}
 		}
 		for (ConnectAlert a : alertsList) {
-			s.saveOrUpdate(a);
+			HibernateManager.saveOrMerge(s, a);
 		}
 
-		s.saveOrUpdate(properties);
+		if (properties.getUuid() == null) s.persist(properties);
 	}
 	
 	@Override

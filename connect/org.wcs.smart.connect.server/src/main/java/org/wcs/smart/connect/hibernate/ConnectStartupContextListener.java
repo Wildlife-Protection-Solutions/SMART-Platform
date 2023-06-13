@@ -75,8 +75,6 @@ import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.type.PostgresUUIDType;
-import org.hibernate.type.UUIDBinaryType;
 import org.locationtech.udig.catalog.internal.shp.ShpServiceExtension;
 import org.opengis.referencing.AuthorityFactory;
 import org.wcs.smart.ICoreLabelProvider;
@@ -381,6 +379,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	    //allows a custom url handler that deals with the platform:/plugin
 	    //urls and loads the corresponding image from the jar file
 	    try {
+	    	
 			final Field factoryField = URL.class.getDeclaredField("factory"); //$NON-NLS-1$
 			factoryField.setAccessible(true);
 			final Field lockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
@@ -443,7 +442,6 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartCollectConnectUser.class);
 		config.addAnnotatedClass(BasemapTile.class);
 		config.addAnnotatedClass(BasemapBounds.class);
-
 		try{
 			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
 				config.addAnnotatedClass(c);
@@ -460,6 +458,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		SessionFactory sf = config.buildSessionFactory(service);
 		sce.getServletContext().setAttribute(HibernateManager.CONTEXT_KEY, sf);
+		
+		SmartContext.INSTANCE.setClass(SessionFactory.class, sf);
 		
 		logger.info("Hibernate SessionFactory Configured successfully"); //$NON-NLS-1$
 		
@@ -557,7 +557,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());
 		
-		SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);
+		//SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);
 		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new QueryEngineFactory());		
 		
 		

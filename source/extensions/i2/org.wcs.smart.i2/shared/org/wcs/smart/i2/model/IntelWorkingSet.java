@@ -24,18 +24,18 @@ package org.wcs.smart.i2.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * Model class of i_working_set.
@@ -44,7 +44,7 @@ import org.wcs.smart.ca.NamedItem;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_working_set")
+@Table(name="i_working_set", schema="smart")
 public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
  
 	private static final long serialVersionUID = 1L;

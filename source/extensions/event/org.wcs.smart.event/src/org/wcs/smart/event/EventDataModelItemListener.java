@@ -73,7 +73,7 @@ public enum EventDataModelItemListener implements IDataModelItemListener {
 				if(pp.getFilter() != null) {
 					processFilter(pp.getFilter(), attribute);
 					f.setFilterString( pp.asString() );
-					session.update(f);
+					session.merge(f);
 				}
 			} catch (Exception e) {
 				throw new SQLException(e);

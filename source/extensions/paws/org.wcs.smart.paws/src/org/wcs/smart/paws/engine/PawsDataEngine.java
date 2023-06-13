@@ -96,6 +96,7 @@ import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import jakarta.persistence.Tuple;
 
 /**
  * PAWS Engine for complining data and starting a PAWS analysis
@@ -154,7 +155,8 @@ public class PawsDataEngine {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(run);
+				if (run.getUuid() == null) session.persist(run); else session.merge(run);
+				
 				run.setPackageFile(workingDir.getFileName().toString());
 				run.setStatus(Status.UPLOADING_DATA);
 				run.setRunDate(LocalDateTime.now());
@@ -615,7 +617,7 @@ public class PawsDataEngine {
 				create.deleteCharAt(create.length() - 1);
 				create.append(")"); //$NON-NLS-1$
 				
-				session.createNativeQuery(create.toString()).executeUpdate();
+				session.createNativeQuery(create.toString(), Integer.class).executeUpdate();
 				
 				//create all data table
 				String alldata = createTempTable();
@@ -626,7 +628,7 @@ public class PawsDataEngine {
 				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, "); //$NON-NLS-1$
 				create.append(" wp_datetime timestamp)"); //$NON-NLS-1$
 
-				session.createNativeQuery(create.toString()).executeUpdate();
+				session.createNativeQuery(create.toString(), Integer.class).executeUpdate();
 				
 				//populate all data table
 				create = new StringBuilder();
@@ -645,7 +647,7 @@ public class PawsDataEngine {
 				}else {
 					cas = Collections.singleton(run.getConservationArea());
 				}
-				session.createNativeQuery(create.toString())
+				session.createNativeQuery(create.toString(), Integer.class)
 					.setParameterList("ca", cas) //$NON-NLS-1$
 					.setParameter("start", run.getDataStartDate()) //$NON-NLS-1$
 					.setParameter("end", run.getDataEndDate()) //$NON-NLS-1$
@@ -687,7 +689,7 @@ public class PawsDataEngine {
 				create.append(" FROM "); //$NON-NLS-1$
 				create.append(from);
 				
-				session.createNativeQuery(create.toString()).executeUpdate();
+				session.createNativeQuery(create.toString(), Integer.class).executeUpdate();
 				
 				writeToCsv(session, mastertable, datafile, simple.size() + queries.size());
 				
@@ -695,7 +697,7 @@ public class PawsDataEngine {
 				
 				//drop all temp tables
 				for (String table : tempTables) {
-					session.createNativeQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE " + table, Integer.class).executeUpdate(); //$NON-NLS-1$
 				}
 				for (QueryClassEngine e : engines) e.dispose(session);
 			}finally {
@@ -744,22 +746,23 @@ public class PawsDataEngine {
 			DateTimeFormatter ff = DateTimeFormatter.ofPattern(DATE_FORMAT);
 			DateTimeFormatter timef = DateTimeFormatter.ofPattern(TIME_FORMAT, Locale.ROOT);
 			
-			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
+			try(ScrollableResults<Tuple> results = session.createNativeQuery(select.toString(), Tuple.class).scroll()){
 				while(results.next()) {
 					String[] data = new String[headers.size()];
 					
-					Object[] items = results.get();
+					//TODO: test/fix this
+					Tuple items = results.get();
 					
-					String pid = (String)items[0];
-					LocalDate pstart = ((java.sql.Date)items[1]).toLocalDate();
-					LocalDate pend = ((java.sql.Date)items[2]).toLocalDate();
+					String pid = (String)items.get(0);
+					LocalDate pstart = ((java.sql.Date)items.get(1)).toLocalDate();
+					LocalDate pend = ((java.sql.Date)items.get(2)).toLocalDate();
 					
-					String transport = (String)items[3];
-					String mandate = (String)items[4];
+					String transport = (String)items.get(3);
+					String mandate = (String)items.get(4);
 					
-					double x = (double)items[7];
-					double y = (double)items[8];
-					LocalDateTime datetime = ((java.sql.Timestamp)items[9]).toLocalDateTime();
+					double x = (double)items.get(7);
+					double y = (double)items.get(8);
+					LocalDateTime datetime = ((java.sql.Timestamp)items.get(9)).toLocalDateTime();
 										
 					//Waypoint Date
 					int index = 0;
@@ -786,7 +789,7 @@ public class PawsDataEngine {
 					
 					
 					for (int i = 1; i <= datacols; i ++) {
-						data[index++] = (String)items[9+i];
+						data[index++] = (String)items.get(9+i);
 					}
 					writer.writeNext(data);
 				}

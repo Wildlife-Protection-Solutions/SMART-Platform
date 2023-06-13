@@ -62,6 +62,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
+import org.wcs.smart.connect.dataqueue.DataQueueProcessor;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItemProxy;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
@@ -265,13 +266,17 @@ public class DataQueue {
 				try{
 					validateRead(ca.getUuid(), s);
 					
-					Object[][] filters = new Object[statusFilter != null ? 2 : 1][2];
-					filters[0] = new Object[] {"conservationArea", ca.getUuid()}; //$NON-NLS-1$
-					if (statusFilter != null){
-						filters[1] = new Object[] {"status", statusFilter}; //$NON-NLS-1$
+					List<ServerDataQueueItem> items = null;
+					if(statusFilter == null) {
+						items = s.createQuery("FROM ServerDataQueueItem WHERE conservationArea = :ca ", ServerDataQueueItem.class)
+								.setParameter("ca", ca.getUuid())
+								.list();
+					}else {
+						items = s.createQuery("FROM ServerDataQueueItem WHERE conservationArea = :ca and status in (:status)", ServerDataQueueItem.class)
+								.setParameter("ca", ca.getUuid())
+								.setParameter("status", statusFilter)
+								.list();
 					}
-					List<ServerDataQueueItem> items = QueryFactory.buildQuery(s, ServerDataQueueItem.class, filters).list();
-					
 					for (ServerDataQueueItem item : items){
 						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(
 								item.getUuid(), item.getName(), ca.getUuid(), ca.getLabel(),
@@ -326,14 +331,14 @@ public class DataQueue {
 					logger.log(Level.WARNING, "Data queue file does not exist to delete: " + toDelete.toString()); //$NON-NLS-1$
 				}
 			}
-			s.delete(item);
+			s.remove(item);
 			
 			//also attempt to delete associated work item
 			if (item.getWorkItem() != null){
 				WorkItem i = (WorkItem) s.get(WorkItem.class, item.getWorkItem());
 				if (i != null){
 					//might be null if deleted for some other reason
-					s.delete(i);
+					s.remove(i);
 				}
 			}
 			s.getTransaction().commit();
@@ -401,6 +406,7 @@ public class DataQueue {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			
 			validateUpload(item.getConservationArea(), s);
 			
 			ConservationAreaInfo ca = (ConservationAreaInfo)s.get(ConservationAreaInfo.class, item.getConservationArea());
@@ -424,7 +430,7 @@ public class DataQueue {
 			up.setType(Type.UP_DATAQUEUE);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(""); //$NON-NLS-1$
-			s.save(up);
+			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(FILE_STORE_LOCATION);
 			if (!Files.exists(updir)){
@@ -436,8 +442,7 @@ public class DataQueue {
 			item.setFile(up.getLocalFilename());
 			item.setWorkItem(up.getUuid());
 			
-			s.saveOrUpdate(item);
-			s.saveOrUpdate(up);
+			s.persist(item);
 			
 			//we have a file to upload and we expect more
 			

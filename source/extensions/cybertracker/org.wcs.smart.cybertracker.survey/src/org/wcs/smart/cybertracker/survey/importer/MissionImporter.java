@@ -126,7 +126,7 @@ public class MissionImporter extends AbstractSmartImporter {
 				if (survey == null) {
 					//this mean that user wants a new survey to be created
 					survey = createNewSurvey(ctSurvey, newSurveyId);
-					session.save(survey);
+					session.persist(survey);
 					fireSurveyAdded = true;
 				}
 				if (mission == null) {
@@ -141,7 +141,7 @@ public class MissionImporter extends AbstractSmartImporter {
 						mission.getMissionPropertyValues().add(mpv);
 					}
 				} else {
-					mission = (Mission) session.load(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
+					mission = (Mission) session.getReference(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
 					validateExistingMission(ctSurvey, mission, session);
 				}
 				

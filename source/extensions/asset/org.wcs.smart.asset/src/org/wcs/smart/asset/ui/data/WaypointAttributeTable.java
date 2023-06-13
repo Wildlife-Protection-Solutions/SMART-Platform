@@ -200,11 +200,13 @@ public class WaypointAttributeTable {
 				session.beginTransaction();
 				try {
 					
+					//TODO: test and fix this 
 					for (WaypointObservationGroup g : wo.getWaypoint().getObservationGroups()) {
-						session.saveOrUpdate(g);
-						for (WaypointObservation wwo : g.getObservations()) {
-							session.saveOrUpdate(wwo);
-						}
+						session.merge(g);
+						//session.saveOrUpdate(g);
+						//for (WaypointObservation wwo : g.getObservations()) {
+						//	session.saveOrUpdate(wwo);
+						//}
 					}
 					session.flush();
 					
@@ -218,7 +220,7 @@ public class WaypointAttributeTable {
 					List<WaypointObservationGroup> tod = new ArrayList<>();
 					for (WaypointObservationGroup g : wp.getObservationGroups()) {
 						if (!wo.getWaypoint().getObservationGroups().contains(g)) {
-							session.delete(g);
+							session.remove(g);
 							tod.add(g);
 						}
 					}
@@ -230,7 +232,7 @@ public class WaypointAttributeTable {
 					}
 					for (WaypointObservation wwo : otd) {
 						wwo.getObservationGroup().getObservations().remove(wwo);
-						session.delete(wwo);
+						session.remove(wwo);
 					}
 					
 //					for (WaypointObservationGroup g : wp.getObservationGroups()) {
@@ -254,7 +256,7 @@ public class WaypointAttributeTable {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					session.saveOrUpdate(waypoint);
+					session.merge(waypoint);
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
@@ -281,7 +283,7 @@ public class WaypointAttributeTable {
 						}
 					}
 					g.getObservations().removeAll(remove);
-					remove.forEach(r->session.delete(r));
+					remove.forEach(r->session.remove(r));
 					if (g.getObservations().isEmpty()) empty.add(g);
 				}
 				waypoint.getObservationGroups().removeAll(empty);

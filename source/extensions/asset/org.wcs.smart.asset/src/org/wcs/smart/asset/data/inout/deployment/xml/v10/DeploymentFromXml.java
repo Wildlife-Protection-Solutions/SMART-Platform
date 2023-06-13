@@ -31,11 +31,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -69,6 +64,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -81,6 +77,10 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Imports exported deployment zip file.
@@ -433,11 +433,12 @@ public class DeploymentFromXml {
 			//save 
 			session.beginTransaction();
 			try {
+				
 				for (AssetWaypoint aw : deployment.getAssetWaypoints()) {
-					session.saveOrUpdate(aw.getWaypoint());
+					HibernateManager.saveOrMerge(session, aw.getWaypoint());
 				}
 				session.flush();
-				session.save(deployment);
+				session.persist(deployment);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				try {

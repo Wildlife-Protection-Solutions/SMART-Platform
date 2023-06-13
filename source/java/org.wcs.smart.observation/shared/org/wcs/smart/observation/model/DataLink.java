@@ -3,21 +3,21 @@ package org.wcs.smart.observation.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 
 @Entity
-@Table(name="smart.data_link")
+@Table(name="data_link", schema="smart")
 public class DataLink extends UuidItem{
 
 	/**
@@ -96,7 +96,7 @@ public class DataLink extends UuidItem{
 	 * should be ok.
 	 */
 	public static void cleanUp(Session session) {
-		session.createQuery("DELETE FROM DataLink WHERE lastModified < :date") //$NON-NLS-1$
+		session.createMutationQuery("DELETE FROM DataLink WHERE lastModified < :date") //$NON-NLS-1$
 			.setParameter("date",LocalDateTime.now().minusMonths(6)) //$NON-NLS-1$
 			.executeUpdate();
 	}

@@ -8,9 +8,8 @@
 
 package org.wcs.smart.asset.data.inout.xml;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
-
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for AttributeType.

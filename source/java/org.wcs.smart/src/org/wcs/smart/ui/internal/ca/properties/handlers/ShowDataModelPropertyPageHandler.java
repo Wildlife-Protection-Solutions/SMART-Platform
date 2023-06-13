@@ -136,7 +136,7 @@ public class ShowDataModelPropertyPageHandler {
 					icons.addAll(dm.getAttributes());
 					while(!icons.isEmpty()) {
 						DmObject icon = icons.remove(0);
-						if (icon.getIcon() != null) {
+						if (icon.getIcon() != null) {							
 							icon.getIcon().getName();
 							for (IconFile ff : icon.getIcon().getFiles()) {
 								ff.getIconSet().getName();

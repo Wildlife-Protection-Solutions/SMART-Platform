@@ -25,7 +25,7 @@ import java.text.Collator;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -86,21 +86,21 @@ public enum RelationshipTypeManager {
 	 */
 	public void deleteRelationshipType(IntelRelationshipType type, Session session) throws Exception{
 		//delete all relationship attribute values
-		Query<?> q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.relationship in (FROM IntelEntityRelationship r WHERE  r.relationshipType = :type)"); //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.relationship in (FROM IntelEntityRelationship r WHERE  r.relationshipType = :type)"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		//delete all relationships
-		q = session.createQuery("delete from IntelEntityRelationship ii where ii.relationshipType = :type"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityRelationship ii where ii.relationshipType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();		
 		
 		//delete relationship attributes 
-		q = session.createQuery("delete from IntelRelationshipTypeAttribute ii WHERE ii.id.relationshipType = :type"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRelationshipTypeAttribute ii WHERE ii.id.relationshipType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		session.delete(type);
+		session.remove(type);
 	}
 	
 	/**
@@ -112,11 +112,11 @@ public enum RelationshipTypeManager {
 	 */
 	public void deleteRelationshipGroup(IntelRelationshipGroup group, Session session) throws Exception{
 		//update all references
-		Query<?> q = session.createQuery("update IntelRelationshipType set relationshipGroup = null where relationshipGroup = :group"); //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("update IntelRelationshipType set relationshipGroup = null where relationshipGroup = :group"); //$NON-NLS-1$
 		q.setParameter("group", group); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		//delete group
-		session.delete(group);
+		session.remove(group);
 	}
 }

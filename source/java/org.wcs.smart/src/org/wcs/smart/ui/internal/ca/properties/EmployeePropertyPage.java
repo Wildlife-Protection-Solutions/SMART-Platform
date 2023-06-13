@@ -599,7 +599,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 					m.setEmployee(e);
 					m.setTeam(team);
 					newMembers.add(m);
-					session.save(m);
+					session.persist(m);
 				}
 				session.getTransaction().commit();
 				team.getMembers().addAll(newMembers);
@@ -630,7 +630,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 			session.beginTransaction();
 			try {
 				for (EmployeeTeamMember m : members) {
-					session.delete(m);
+					session.remove(m);
 					team.getMembers().remove(m);
 				}
 				session.getTransaction().commit();
@@ -671,21 +671,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 
 		};
 		if (dialog.open() != Window.OK) return;
-		
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try {
-				session.saveOrUpdate(newTeam);
-				session.getTransaction().commit();
-			}catch (Exception ex) {
-				SmartPlugIn.displayLog(Messages.EmployeePropertyPage_newteamerror + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
-				try {
-					session.getTransaction().rollback();
-				}catch (Exception ex2) {
-					SmartPlugIn.log(ex2.getMessage(), ex2);
-				}
-			}
-		}
+
 		refresh();
 	}
 	
@@ -715,20 +701,6 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				
 		if (dialog.open() != Window.OK) return;
 		
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try {
-				session.update(editTeam);
-				session.getTransaction().commit();
-			}catch (Exception ex) {
-				SmartPlugIn.displayLog(Messages.EmployeePropertyPage_editteamerror + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
-				try {
-					session.getTransaction().rollback();
-				}catch (Exception ex2) {
-					SmartPlugIn.log(ex2.getMessage(), ex2);
-				}
-			}
-		}
 		refresh();
 	}
 	
@@ -744,7 +716,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				for (EmployeeTeam t : teams) session.delete(t);
+				for (EmployeeTeam t : teams) session.remove(t);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.EmployeePropertyPage_deleteerror + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
@@ -870,7 +842,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 										if (del.equals(SmartDB.getCurrentEmployee())){
 											restart[0] = true;
 										}
-										s.delete(del);
+										s.remove(del);
 										employees.remove(del);
 									}
 								}catch (Exception ex){

@@ -36,12 +36,20 @@ public class PostgresqlTableInfo extends TableInfo {
 		super(clazz, tableName);
 	}
 
-	public String caLink;
+	public String caObjectPath;
+	public String caUuidPath;
 	
-	public void setCaLink(String link){
-		this.caLink = link;
+	public void setCaObjectPath(String path){
+		this.caObjectPath = path;
 	}
-	public String getCaLink(){
-		return this.caLink;
+	public String getCaObjectPath(){
+		return this.caObjectPath;
+	}
+	
+	public void setCaUuidPath(String path){
+		this.caUuidPath = path;
+	}
+	public String getCaUuidPath(){
+		return this.caUuidPath;
 	}
 }

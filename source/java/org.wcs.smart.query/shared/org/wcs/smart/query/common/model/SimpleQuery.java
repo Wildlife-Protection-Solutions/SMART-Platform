@@ -26,10 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartContext;
@@ -38,6 +34,10 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 
 /**
  * 

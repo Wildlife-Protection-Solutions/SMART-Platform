@@ -81,7 +81,7 @@ public enum PawsManager {
 		service.setClientId("61619872-cd80-41ec-a799-b7c7fba349ce"); //$NON-NLS-1$
 		service.setOAuthUrl("https://login.microsoftonline.com/af58cf6f-6228-4801-8a20-caa33d81cee2/oauth2"); //$NON-NLS-1$
 		service.setStorageUrl("https://pawsparkstorage.blob.core.windows.net"); //$NON-NLS-1$
-		session.saveOrUpdate(service);
+		
 		return service;
 	}
 	
@@ -101,7 +101,7 @@ public enum PawsManager {
 					c = session.get(PawsConfiguration.class, c.getUuid());
 					if (c != null) {
 						toDelete.add(PawsFileManager.INSTANCE.getDirectory(c));
-						session.delete(c);
+						session.remove(c);
 					}
 				}
 				session.getTransaction().commit();
@@ -163,7 +163,7 @@ public enum PawsManager {
 					c = session.get(PawsRun.class, c.getUuid());
 					if (c != null) {
 						toDelete.add(PawsFileManager.INSTANCE.getDirectory(c));
-						session.delete(c);
+						session.remove(c);
 					}
 				}
 				session.getTransaction().commit();

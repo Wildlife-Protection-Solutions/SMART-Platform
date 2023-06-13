@@ -416,12 +416,13 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 					mdObserver.setVisible(false);
 				}
 				
+				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
 				
-				session.saveOrUpdate(ctpackage);
-				session.flush();
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage);
-				}
+				}				
+				session.merge(ctpackage);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

@@ -24,14 +24,14 @@ package org.wcs.smart.asset.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class of asset attribute values. Provides an attribute value
@@ -40,7 +40,7 @@ import javax.persistence.Transient;
  * @author egouge
  */
 @Entity
-@Table(name="smart.asset_attribute_value")
+@Table(name="asset_attribute_value", schema="smart")
 public class AssetAttributeValue extends AbstractAssetAttributeValue{
 
 	private AssetAttributeValuePk id = new AssetAttributeValuePk();

@@ -21,10 +21,6 @@
  */
 package org.wcs.smart.connect.cybertracker;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.dataentry.ICmItemListener;
@@ -32,6 +28,10 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Configurable Model listener that is connected with correspondent DataModel listener
@@ -56,7 +56,7 @@ public class ConnectCtCmItemListener implements ICmItemListener {
 		CriteriaDelete<ConnectAlert> c = cb.createCriteriaDelete(ConnectAlert.class);
 		Root<ConnectAlert> root = c.from(ConnectAlert.class);
 		c.where(cb.equal(root.get("alertItem"), item)); //$NON-NLS-1$
-		currentSession.createQuery(c).executeUpdate();
+		currentSession.createMutationQuery(c).executeUpdate();
 	}
 
 	private void deleteMatchingCmAttribute(Session currentSession, CmAttribute cmAttr) {
@@ -64,7 +64,7 @@ public class ConnectCtCmItemListener implements ICmItemListener {
 		CriteriaDelete<ConnectAlert> c = cb.createCriteriaDelete(ConnectAlert.class);
 		Root<ConnectAlert> root = c.from(ConnectAlert.class);
 		c.where(cb.equal(root.get("attrubute"), cmAttr)); //$NON-NLS-1$
-		currentSession.createQuery(c).executeUpdate();
+		currentSession.createMutationQuery(c).executeUpdate();
 	}
 
 }

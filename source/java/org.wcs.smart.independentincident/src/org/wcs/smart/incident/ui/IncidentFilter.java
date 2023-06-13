@@ -37,6 +37,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentProvider;
 import org.wcs.smart.incident.IncidentManager;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Filter for the incident view.  Filters
  * have a date filter and 
@@ -153,7 +155,7 @@ public class IncidentFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query<?> buildQuery(Session s){ 
+	public Query<Tuple> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT i.uuid, i.id, i.dateTime, i.sourceId "); //$NON-NLS-1$
@@ -199,7 +201,7 @@ public class IncidentFilter {
 		
 		Set<String> sourcestrings = sourceids.stream().map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
 		
-		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<Tuple> query = s.createQuery(str.toString(), Tuple.class).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		query.setParameterList("source", sourcestrings); //$NON-NLS-1$
 		if (stringComparator != null && incidentIdFilter != null){
 			if (stringComparator == StringComparison.EQUALS){

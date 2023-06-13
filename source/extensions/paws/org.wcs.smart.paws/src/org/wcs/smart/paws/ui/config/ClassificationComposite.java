@@ -130,7 +130,7 @@ public class ClassificationComposite extends Composite{
 				pc.setUuid(null);
 				pc.setConfiguration(config);
 			}
-			session.saveOrUpdate(pc);
+			session.merge(pc);
 		}
 		
 		//need to delete missing items
@@ -140,7 +140,7 @@ public class ClassificationComposite extends Composite{
 		
 		
 		for (AbstractPawsClass pc : currentItems) {
-			if (!allItems.contains(pc)) session.delete(pc);
+			if (!allItems.contains(pc)) session.remove(pc);
 		}
 	}
 	

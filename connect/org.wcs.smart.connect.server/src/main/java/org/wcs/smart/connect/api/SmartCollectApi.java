@@ -169,7 +169,7 @@ public class SmartCollectApi {
 					user.setDeviceId(deviceId);
 					user.setState(SmartCollectUser.State.NEW);
 					
-					s.save(user);
+					s.persist(user);
 				}
 				s.getTransaction().commit();
 			}catch (Exception ex) {
@@ -217,7 +217,7 @@ public class SmartCollectApi {
 		try{
 			s.beginTransaction();
 			SmartCollectConnectUser cu = s.get(SmartCollectConnectUser.class, userid);
-			if (cu != null) s.delete(cu);
+			if (cu != null) s.remove(cu);
 			s.getTransaction().commit();
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_RemoveUserError", request.getLocale())); //$NON-NLS-1$

@@ -16,7 +16,7 @@
             supportsCcaa="true">
       </class>
       <class
-            ca_property=".uuid"
+            ca_uuid_property=".uuid"
             class="org.wcs.smart.connect.model.ConnectServerStatus"
             supportsCcaa="true">
       </class>
@@ -25,7 +25,7 @@
             supportsCcaa="true">
       </class>
       <class
-            ca_property=".conservationArea"
+            ca_uuid_property=".conservationArea"
             class="org.wcs.smart.connect.model.ChangeLogItem"
             supportsCcaa="true">
       </class>

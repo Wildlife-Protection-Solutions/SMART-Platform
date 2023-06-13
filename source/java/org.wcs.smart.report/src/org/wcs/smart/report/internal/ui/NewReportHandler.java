@@ -142,8 +142,7 @@ public class NewReportHandler {
 						//save report object o database
 						report.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), hsession));
 						report.setFilename(ReportManager.generateFilename(report));
-					
-						hsession.save(report);
+						HibernateManager.saveOrMerge(hsession, report);
 						hsession.getTransaction().commit();
 					}catch (Exception ex){
 						hsession.getTransaction().rollback();						

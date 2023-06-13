@@ -120,7 +120,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setKey(option.getKey());
 			clone.setValue(option.getValue());
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}
@@ -147,7 +147,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				}
 			}
 			engine.addConservationItemMapping(ia, clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 		}	
 	}
@@ -176,7 +176,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			}
 			
 			if (ia.getDmAttribute() != null) {
-				Attribute dmAttribute = (Attribute)engine.getSession().createQuery("From Attribute WHERE conservationArea = :ca and keyId = :keyId") //$NON-NLS-1$
+				Attribute dmAttribute = engine.getSession().createQuery("From Attribute WHERE conservationArea = :ca and keyId = :keyId", Attribute.class) //$NON-NLS-1$
 						.setParameter("ca", engine.getNewCa()) //$NON-NLS-1$
 						.setParameter("keyId", ia.getDmAttribute().getKeyId()) //$NON-NLS-1$
 						.uniqueResult();
@@ -189,12 +189,12 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 						li.setAttribute(null);
 					}
 					dmAttribute.getAttributeList().clear();
-					engine.getSession().save(dmAttribute);
+					engine.getSession().persist(dmAttribute);
 				}
 				clone.setActiveFilter(ia.getActiveFilter());
 			}
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			
 			if (ia.getAttributes() != null){
 				clone.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
@@ -212,7 +212,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 							group.setOrder(i.getAttributeGroup().getOrder());
 							engine.copyLabels(i.getAttributeGroup(), group);
 							groups.put(i.getAttributeGroup().getUuid(), group);
-							engine.getSession().save(group);
+							engine.getSession().persist(group);
 						}
 						iclone.setAttributeGroup(group);
 					}
@@ -249,7 +249,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setKeyId(g.getKeyId());
 			engine.addConservationItemMapping(g, clone);
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 		}
 	}
@@ -280,7 +280,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 					group.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
 				}
 				group.getRelationshipTypes().add(clone);
-				engine.getSession().save(group);	
+				engine.getSession().persist(group);	
 			}
 			
 			if (g.getAttributes() != null){
@@ -295,7 +295,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				}
 			}
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 
 			engine.addConservationItemMapping(g, clone);
@@ -342,7 +342,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				clone.getProfiles().add(newmap);
 				newp.getRecordSources().add(newmap);
 			}
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 		}
 		
@@ -357,23 +357,23 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			engine.copyLabels(s, clone);
 			clone.setConservationArea(engine.getNewCa());
 			clone.setDefault(s.isDefault());
-			clone.setOptions(s.getOptions());
+			clone.setOptionValues(s.getOptionValues());
 			for (RelationshipDiagramEntityTypeStyle ets : s.getEntityTypeStyles().values()) {
 				RelationshipDiagramEntityTypeStyle etsClone = new RelationshipDiagramEntityTypeStyle();
 				etsClone.setEntityType((IntelEntityType)engine.getNewConservationItem(ets.getEntityType()));
 				etsClone.setStyle(clone);
-				etsClone.setOptions(ets.getOptions());
+				etsClone.setOptionValues(ets.getOptionValues());
 				clone.getEntityTypeStyles().put(etsClone.getEntityType(), etsClone);
 			}
 			for (RelationshipDiagramRelationshipTypeStyle rts : s.getRelationshipTypeStyles().values()) {
 				RelationshipDiagramRelationshipTypeStyle rtsClone = new RelationshipDiagramRelationshipTypeStyle();
 				rtsClone.setRelationshipType((IntelRelationshipType)engine.getNewConservationItem(rts.getRelationshipType()));
 				rtsClone.setStyle(clone);
-				rtsClone.setOptions(rts.getOptions());
+				rtsClone.setOptionValues(rts.getOptionValues());
 				clone.getRelationshipTypeStyles().put(rtsClone.getRelationshipType(), rtsClone);
 			}
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 		}
 
@@ -393,7 +393,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			engine.copyLabels(source, target);
 			
-			engine.getSession().save(target);
+			engine.getSession().persist(target);
 			engine.getSession().flush();
 			
 			engine.addConservationItemMapping(source, target);

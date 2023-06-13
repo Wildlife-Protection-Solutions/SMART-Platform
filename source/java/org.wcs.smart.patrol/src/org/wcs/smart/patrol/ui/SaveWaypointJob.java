@@ -33,6 +33,9 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -75,13 +78,28 @@ public class SaveWaypointJob extends Job {
 			saveSession.beginTransaction();
 			try{
 				for (PatrolWaypoint wp : pnts) {
-					wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-					wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-					saveSession.saveOrUpdate(wp.getWaypoint());
-					saveSession.saveOrUpdate(wp);
+					if (wp.getWaypoint().getAttachments() != null) wp.getWaypoint().setAttachments(new ArrayList<>(wp.getWaypoint().getAttachments()));
+					
+					Waypoint pnt = wp.getWaypoint();
+					
+					pnt.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+					pnt.setConservationArea(SmartDB.getCurrentConservationArea());
+					
+					//merge here messed up attachments ("copy from location" doesn't get merged) 
+					//so need to save attachments before merge
+					pnt.saveNewAttachments(saveSession);
+					saveSession.flush();
+					
+					if (pnt.getUuid() == null) {
+						saveSession.persist(pnt);
+						saveSession.persist(wp);
+					}else {
+						pnt = saveSession.merge(pnt);
+						saveSession.merge(wp);
+					}
 					
 					// remove observations with no data
-					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+					for (WaypointObservation wo : pnt.getAllObservations()) {
 						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
 						for (WaypointObservationAttribute att : wo.getAttributes()) {
 							if (!att.hasValue()) {
@@ -93,13 +111,13 @@ public class SaveWaypointJob extends Job {
 					
 					//remove groups with no data
 					List<WaypointObservationGroup> gdelete = new ArrayList<>();
-					if (wp.getWaypoint().getObservationGroups() == null) wp.getWaypoint().setObservationGroups(new ArrayList<>());
-					for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()) {
+					if (pnt.getObservationGroups() == null) pnt.setObservationGroups(new ArrayList<>());
+					for (WaypointObservationGroup g : pnt.getObservationGroups()) {
 						if (g.getObservations() == null || g.getObservations().isEmpty()) gdelete.add(g);
 					}
-					wp.getWaypoint().getObservationGroups().removeAll(gdelete);
+					pnt.getObservationGroups().removeAll(gdelete);
 					
-					ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
+//					ObservationHibernateManager.computeAttachmentLocations(pnt, saveSession);
 				}
 				saveSession.getTransaction().commit();
 			

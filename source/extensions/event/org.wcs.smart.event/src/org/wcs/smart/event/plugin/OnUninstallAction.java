@@ -74,13 +74,13 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 		//drop tables
 		for (String table : LABELTABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
-				session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+				session.createNativeMutationQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 			
 		for (String table : TABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
-				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 			}
 		}		
 

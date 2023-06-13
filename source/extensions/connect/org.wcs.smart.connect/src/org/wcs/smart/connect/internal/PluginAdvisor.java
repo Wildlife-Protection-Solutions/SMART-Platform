@@ -23,12 +23,12 @@ package org.wcs.smart.connect.internal;
 
 import java.util.List;
 
-import javax.persistence.PersistenceException;
-
 import org.hibernate.Session;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.IPluginAdvisor;
+
+import jakarta.persistence.PersistenceException;
 
 /**
  * Disabling uninstalling plugins when connect is installed

@@ -35,8 +35,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.GC;
@@ -106,12 +104,6 @@ public class TreeViewerCellEditor extends CellEditor {
 				applyEditorValueAndDeactivate();
 			}
 		});
-		treeViewer.getFilteredTree().getFilterControl().addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				TreeViewerCellEditor.this.focusLost();
-			}
-		});
 		
 		Tree tree = treeViewer.getTreeViewer().getTree();
 		tree.setFont(parent.getFont());
@@ -124,7 +116,7 @@ public class TreeViewerCellEditor extends CellEditor {
 			}
 		});
 		
-
+		treeViewer.getFilteredTree().setFocus();
 		return treeViewer.getComposite();
 	}
 

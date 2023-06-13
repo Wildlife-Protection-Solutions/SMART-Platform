@@ -92,6 +92,8 @@ import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.util.GeometryUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Panel for gathering spatial shift data. (new center point
  * and shift scale).
@@ -462,7 +464,7 @@ public class SpatialShiftComposite  extends Composite{
 			Envelope env = null;
 			try(Session s = HibernateManager.openSession()){
 				
-				Object[] data = (Object[]) s.createQuery("SELECT min(rawX), min(rawY), max(rawX), max(rawY) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca") //$NON-NLS-1$
+				Tuple data = s.createQuery("SELECT min(rawX), min(rawY), max(rawX), max(rawY) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca", Tuple.class) //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.setParameter("source", PatrolWaypointSource.PATROL_WP_SOURCE_ID)  //$NON-NLS-1$
 					.uniqueResult();
@@ -472,11 +474,11 @@ public class SpatialShiftComposite  extends Composite{
 				double maxx = 0;
 				double maxy = 0;
 				
-				if (data[0] != null) {
-					minx = (double) data[0];
-					miny = (double) data[1];
-					maxx = (double) data[2];
-					maxy = (double) data[3];	
+				if (data.get(0) != null) {
+					minx = (double) data.get(0);
+					miny = (double) data.get(1);
+					maxx = (double) data.get(2);
+					maxy = (double) data.get(3);	
 				}
 				
 				

@@ -153,8 +153,8 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 						String old = toUpdate.getSmartUserId();
 						s.beginTransaction();
 						try {
-							s.update(toUpdate);
 							toUpdate.setSmartUserId(newUserName);
+							s.merge(toUpdate);
 							s.getTransaction().commit();
 						} catch (Exception ex) {
 							toUpdate.setSmartUserId(old);
@@ -307,8 +307,9 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try {
-						s.update(toUpdate);
 						toUpdate.setSmartPassword(HibernateManager.generatePassword(txtPassword1.getText()));
+						
+						s.merge(toUpdate);
 						s.getTransaction().commit();
 						
 						MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Updated_DialogTitle, Messages.ChangeUserPasswordDialog_Updated_DialogMessage);

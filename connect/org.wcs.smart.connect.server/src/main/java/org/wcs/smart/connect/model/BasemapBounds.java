@@ -23,10 +23,10 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * Basemap bounds cache record 
@@ -35,7 +35,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name="connect.tile_cache_bounds")
+@Table(name="tile_cache_bounds", schema="connect")
 public class BasemapBounds {
 
 	private UUID mapUuid;

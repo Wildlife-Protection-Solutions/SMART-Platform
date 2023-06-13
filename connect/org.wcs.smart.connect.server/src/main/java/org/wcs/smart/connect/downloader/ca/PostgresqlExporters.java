@@ -25,15 +25,15 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.apache.commons.io.FileUtils;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -44,6 +44,8 @@ import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.EntityManager;
 
 public class PostgresqlExporters {
 
@@ -82,9 +84,8 @@ public class PostgresqlExporters {
 				String[] columns = exportEngine.getTableColumns(in.getTableName());
 				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
 				exportEngine.exportTableData(in.getTableName(), in.getClazz().getSimpleName(), columns, in.getCaPropertyName());
-			} else {
-				
-				String hqlQuery = in.getCaLink();
+			} else if (in.getCaObjectPath() != null){
+				String hqlQuery = in.getCaObjectPath();
 				if (hqlQuery == null || hqlQuery.trim().length() == 0){
 					//skip this table as we can't figure out what conservation area data it is associated with
 					continue;
@@ -92,7 +93,17 @@ public class PostgresqlExporters {
 				
 				String[] columns = exportEngine.getTableColumns(in.getTableName());
 				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
-				exportEngine.writeHibernateQuery(in.getTableName(), in.getClazz().getSimpleName(), columns, hqlQuery);				
+				exportEngine.writeHibernateQuery(in, columns,  hqlQuery, null);				
+			}else if (in.getCaUuidPath() != null) {
+				String hqlQuery = in.getCaUuidPath();
+				if (hqlQuery == null || hqlQuery.trim().length() == 0){
+					//skip this table as we can't figure out what conservation area data it is associated with
+					continue;
+				}
+				
+				String[] columns = exportEngine.getTableColumns(in.getTableName());
+				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
+				exportEngine.writeHibernateQuery(in, columns,  null, hqlQuery);				
 			}
 		}
 	}
@@ -137,14 +148,7 @@ public class PostgresqlExporters {
 		query.append(" FROM "); //$NON-NLS-1$
 		query.append(tableName + " a join "); //$NON-NLS-1$
 		
-		String attributeTableName = null;
-		
-		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory) exportEngine.getSession().getSessionFactory()).getMetamodel();
-		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(Attribute.class));
-		ClassMetadata m = info.getClassMetadata();
-		if (m instanceof Joinable){
-			attributeTableName = ((Joinable)m).getTableName();
-		}
+		String attributeTableName = getTableName(exportEngine.getSession(), Attribute.class);
 		
 		query.append(attributeTableName);
 		query.append(" b on a.attribute_uuid = b.uuid "); //$NON-NLS-1$
@@ -187,9 +191,9 @@ public class PostgresqlExporters {
 	  */
 	private void exportConservationAreaInfo(ICaDataExportEngine exportEngine) throws IOException{
 		
-		String version = (String)exportEngine
+		String version = exportEngine
 			.getSession()
-			.createNativeQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.createNativeQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'", String.class) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			.uniqueResult();
 		
 		Path file = exportEngine.getExportLocation().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
@@ -209,33 +213,75 @@ public class PostgresqlExporters {
 	/* helper function */
 	private List<PostgresqlTableInfo> getTableInformation(ICaDataExportEngine engine){
 		List<PostgresqlTableInfo> tables = new ArrayList<PostgresqlTableInfo>();
-		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory) engine.getSession().getSessionFactory()).getMetamodel();
 		for (SmartTable st : SmartTable.values()){
-			
-			AbstractEntityPersister entityinfo = ((AbstractEntityPersister)mi.entityPersister(st.hibernateClass));
-			ClassMetadata metadata = entityinfo.getClassMetadata();
-			if (metadata == null || metadata.hasSubclasses()){
-				//this is not mapped to a db table
-				//System.out.println("NOT MAPPED:" + st.hibernateClass.getName()); //$NON-NLS-1$
-				continue;
-			}
-			String tableName = ((AbstractEntityPersister)metadata).getTableName();
+			String tableName = getTableName(engine.getSession(), st.hibernateClass);
+			if (tableName == null) continue;
 			
 			PostgresqlTableInfo info = new PostgresqlTableInfo(st.hibernateClass, tableName);
 			
-			if (st.caProperty == null){
-				for (int k = 0; k < metadata.getPropertyTypes().length; k ++){
-					if (metadata.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
-						info.setCaPropertyName(((AbstractEntityPersister)metadata).getPropertyColumnNames(k)[0]);
-					}
-				}
+			if (st.caObjectPath == null && st.caUuidPath == null){
+				info.setCaPropertyName(findConservationAreaProperty(engine.getSession(), st.hibernateClass));
 			}else{
-				info.setCaLink(st.caProperty);
+				info.setCaObjectPath(st.caObjectPath);
+				info.setCaUuidPath(st.caUuidPath);
+				
 			}
 			tables.add(info);
 		}
 		
 		return tables;
 		
+	}
+	
+	public static String getTableName(Session session, Class<?> hibernateClass){
+		
+		try (EntityManager em = session.getSessionFactory().createEntityManager()){
+			Object entityExample = null;
+			try {
+				entityExample = hibernateClass.getConstructor().newInstance();
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(e);
+			}
+			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);			
+			if (p instanceof AbstractEntityPersister) {
+				AbstractEntityPersister info = (AbstractEntityPersister) p;
+				return info.getRootTableName();
+				
+			}
+		}
+		return null;
+
+	}
+	
+	public static String findConservationAreaProperty(Session session, Class<?> hibernateClass){
+		
+		try (EntityManager em = session.getSessionFactory().createEntityManager()){
+			Object entityExample = null;
+			try {
+				entityExample = hibernateClass.getConstructor().newInstance();
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(e);
+			}
+			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);			
+			if (p instanceof AbstractEntityPersister) {
+				AbstractEntityPersister info = (AbstractEntityPersister) p;
+			
+				if (info instanceof Joinable) {
+					Joinable j = (Joinable)info;
+					if (info.getRootTableName().equals(j.getTableName())){
+						//find conservation area property if available
+						for (int k = 0; k < info.getPropertyTypes().length; k ++){
+							if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
+								return (((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
+							}
+						}
+					}
+				}
+			}else {
+				throw new RuntimeException(MessageFormat.format("Cannot determine entity details for type {0}.", hibernateClass.toString())); //$NON-NLS-1$
+			}
+		}
+		return null;
+
 	}
 }

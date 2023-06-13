@@ -23,18 +23,21 @@
 package org.wcs.smart.ca;
 
 import java.text.Collator;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
+import org.wcs.smart.util.I18nUtil;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Transient;
 
 /**
  * Super class for items with names.  
@@ -51,20 +54,20 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 
 	private static final long serialVersionUID = 1L;
 	
-	private Set<Label> names;
+	private Set<Label> names ;
 	private String name;
-
+	
 	/**
 	 * Creates a new simple list
 	 */
 	public NamedItem(){}
 
-	
 	/**
 	 * 
 	 * @return the names associated with the list element
 	 */
-	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY, mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
+	@OneToMany(targetEntity = Label.class, fetch = FetchType.EAGER,
+			mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
 	public Set<Label> getNames() {
 		if (names == null){
 			names = new HashSet<Label>();
@@ -81,11 +84,46 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 * @return the names associated with the list element in the
 	 * language the platform is running in.
 	 */
-	@Type(type="org.wcs.smart.ca.LabelUserType")
-	@Column(name="uuid", insertable=false, updatable=false)
+	
+//	@Column(name="uuid", insertable=false, updatable=false)
+//	@Type(LabelUserType.class)
+	@Transient
 	public String getName() {
-		return name;
+		return this.name;
 	}
+	
+	@PostLoad
+	public void loadName() {
+		
+		Object ltemp = I18nUtil.getLocale();
+		if (ltemp instanceof UUID) {
+			UUID lang = (UUID)ltemp;		
+			
+			for (Label l : getNames()) {
+				if (l.getLanguage().getUuid().equals(lang)) {
+					this.name = l.getValue();
+					return;
+				}else if (l.getLanguage().isDefault()) {
+					this.name = l.getValue();
+				}
+			}
+		}else if (ltemp instanceof Locale) {
+			this.name = findName(getNames(), (Locale) ltemp);
+		}
+		
+		if (this.name == null) {
+			for (Label l : getNames()) {
+				this.name = l.getValue();
+				if (l.getLanguage().isDefault()) {
+					return;
+				}			
+			}
+		}
+
+	}
+	
+	
+	
 	/**
 	 * Do not use to set the name.<br>
 	 * This will only set the name for
@@ -96,6 +134,7 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 *  
 	 * @param name
 	 */
+	@Transient
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -120,6 +159,7 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 * @param lang
 	 * @return the name for the language or an empty string
 	 */
+	@Transient
 	public String findName(Language lang){
 		String x = findNameNull(lang);
 		if (x != null){
@@ -134,6 +174,7 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 * @param lang
 	 * @return the name for the language or null if not found
 	 */
+	@Transient
 	public String findNameNull(Language lang){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
@@ -150,11 +191,13 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 * @param lang
 	 * @param newName
 	 */
+	@Transient
 	public void updateName(Language lang, String newName){
 		if (lang == null) return;
 		if (getNames() == null){
-			names = new HashSet<Label>();
+			names = new HashSet<>();
 		}
+		
 		Label found = null;
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
@@ -180,7 +223,6 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 		getNames().add(createLabel(lang, newName));		
 	}
 	
-	
 	private Label createLabel(Language lang, String newName){
 		//create a new label
 		Label lbl = new Label();
@@ -192,11 +234,29 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	
 	@Override
 	public int compareTo(NamedItem o) {
-		String s1 = getName().toLowerCase();
-		String s2 = o.getName().toLowerCase();
-		if (s1 != null && s2 != null) return Collator.getInstance().compare(getName(), o.getName());
+		String s1 = getName();
+		String s2 = o.getName();
+		if (s1 != null && s2 != null) return Collator.getInstance().compare(getName().toLowerCase(), o.getName().toLowerCase());
 		if (s1 == null && s2 == null) return 0;
 		if (s1 == null && s2 != null) return -1;
 		return 1;
+	}
+	
+	@Transient
+	public static String findName(Collection<Label> names, Locale searchLocale) {
+		Locale lc = (Locale) searchLocale;
+		String c1 = lc.getLanguage();
+		String c2 = lc.getLanguage()  + "_" + lc.getCountry();  //$NON-NLS-1$
+		String name = null;
+		for (Label l : names) {
+			if (l.getLanguage().getCode().equalsIgnoreCase(c2)) {
+				return l.getValue();
+			}else if (l.getLanguage().getCode().equalsIgnoreCase(c1)) {
+				name = l.getValue();
+			}else if (name == null && l.getLanguage().isDefault()) {
+				name = l.getValue();
+			}
+		}
+		return name;
 	}
 }

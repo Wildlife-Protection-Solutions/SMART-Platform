@@ -21,14 +21,15 @@
  */
 package org.wcs.smart.hibernate;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Utility functions for using Hibernate 5 criteria queries
@@ -57,7 +58,7 @@ public class QueryFactory {
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<T> c = cb.createQuery(clazz);
 		Root<T> root = c.from(clazz);
-		if (parameters != null) {
+		if (parameters != null && parameters.length != 0) {
 			if (parameters.length == 1) {
 				if (parameters[0][1]==null) {
 					c.where(cb.isNull(getRoot(root,((String)parameters[0][0]))));
@@ -101,7 +102,7 @@ public class QueryFactory {
 		CriteriaQuery<Long> c = cb.createQuery(Long.class);
 		Root<T> root = c.from(clazz);
 		c.select(cb.count(root));
-		if (parameters != null) {
+		if (parameters != null && parameters.length > 0) {
 			if (parameters.length == 1) {
 				if (parameters[0][1] == null) {
 					c.where(cb.isNull(getRoot(root, ((String)parameters[0][0]))));

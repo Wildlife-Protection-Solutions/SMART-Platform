@@ -64,7 +64,7 @@ public class CybertrackerTemplateCloner implements
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(p, clone);
 			clone.setDefault(p.isDefault());
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 			engine.addConservationItemMapping(p, clone);
 			
@@ -76,7 +76,7 @@ public class CybertrackerTemplateCloner implements
 				newOption.setIntegerValue(templateOption.getIntegerValue());
 				newOption.setStringValue(templateOption.getStringValue());
 
-				engine.getSession().save(newOption);
+				engine.getSession().persist(newOption);
 				engine.getSession().flush();
 			}
 			
@@ -99,7 +99,7 @@ public class CybertrackerTemplateCloner implements
 			newOption.setIntegerValue(templateOption.getIntegerValue());
 			newOption.setStringValue(templateOption.getStringValue());
 
-			engine.getSession().save(newOption);
+			engine.getSession().persist(newOption);
 			engine.getSession().flush();
 			sub.worked(1);
 		}
@@ -113,7 +113,7 @@ public class CybertrackerTemplateCloner implements
 			ConfigurableModelCtPropertiesProfile clone = new ConfigurableModelCtPropertiesProfile();
 			clone.setModel((ConfigurableModel)engine.getNewConservationItem(cmctp.getModel()));
 			clone.setProfile(clonedProfile);
-			engine.getSession().saveOrUpdate(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}

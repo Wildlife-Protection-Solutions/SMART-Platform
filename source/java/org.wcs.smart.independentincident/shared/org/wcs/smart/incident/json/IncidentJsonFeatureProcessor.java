@@ -178,7 +178,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			wp.getObservationGroups().forEach(g->{
 				if (g.getUuid() != null) {
 					//clear any old link
-					session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
+					session.createMutationQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 						.setParameter("uuid", g.getUuid()) //$NON-NLS-1$
 						.setParameter("datatype", LinkDataType.OBSERVATION_GROUP.getKey()) //$NON-NLS-1$
 						.executeUpdate();
@@ -190,7 +190,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			for (WaypointObservation wo : wp.getAllObservations()) {
 				if (wo.getUuid() != null) {
 					//clear any old link
-					session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
+					session.createMutationQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 						.setParameter("uuid", wo.getUuid()) //$NON-NLS-1$
 						.setParameter("datatype", LinkDataType.OBSERVATION.getKey()) //$NON-NLS-1$
 						.executeUpdate();
@@ -199,7 +199,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 				}
 			}
 	
-			session.saveOrUpdate(wp);
+			if (wp.getUuid() == null) session.persist(wp);
+			
 			if (srcUuid != null) {
 				session.flush();
 				DataLink dl = new DataLink();
@@ -207,7 +208,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dl.setProviderId(srcUuid);
 				dl.setSmartId(wp.getUuid());
 				dl.setDataType(INCIDENT_DATATYPE);
-				session.save(dl);
+				session.persist(dl);
 			}else {
 				links.clear();
 			}
@@ -250,10 +251,11 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 				addTo.getObservationGroups().add(g);
 				g.setWaypoint(addTo);
 			}
+			if (addTo.getUuid() == null) session.persist(addTo);
 			
-				
-			session.saveOrUpdate(addTo);
-			for (WaypointObservationGroup g : addTo.getObservationGroups()) session.saveOrUpdate(g);
+			for (WaypointObservationGroup g : addTo.getObservationGroups()) {
+				if (g.getUuid() == null) session.persist(g);
+			}
 
 		}
 		
@@ -264,7 +266,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dl.setProviderId(lnk.getKey());
 			dl.setSmartId(lnk.getValue().getUuid());
 			dl.setDataType( LinkDataType.OBSERVATION_GROUP.getKey() );
-			session.save(dl);
+			session.persist(dl);
 		}
 		for (Entry<UUID,WaypointObservation> lnk : observationlinks.entrySet()) {
 			DataLink dl = new DataLink();
@@ -272,7 +274,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dl.setProviderId(lnk.getKey());
 			dl.setSmartId(lnk.getValue().getUuid());
 			dl.setDataType( LinkDataType.OBSERVATION.getKey() );
-			session.save(dl);
+			session.persist(dl);
 		}
 		logFeature(wp);
 	}
@@ -316,7 +318,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		Waypoint waypoint = session.get(Waypoint.class, link.getSmartId());
 		if (waypoint == null) {
-			session.delete(link);
+			session.remove(link);
 			return null;
 		}
 		if (!waypoint.getConservationArea().equals(ca)) {
@@ -367,7 +369,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			toUpdate.getAttachments().add(newattachment);
 		}
 		
-		session.save(toUpdate);
+		session.persist(toUpdate);
 		session.flush();
 
 		logFeature(toUpdate);
@@ -401,7 +403,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 				toUpdate.getAttributes().add(a);
 			}
 		}
-		session.save(toUpdate);
+		session.persist(toUpdate);
 		session.flush();
 		
 		//attachments

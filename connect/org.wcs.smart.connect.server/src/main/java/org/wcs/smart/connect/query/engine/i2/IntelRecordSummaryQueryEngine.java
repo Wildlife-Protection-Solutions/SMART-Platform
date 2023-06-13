@@ -63,6 +63,8 @@ import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Entity summary query engine.
  * 
@@ -160,7 +162,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			//drop table
 			try {
 				if (dataTable != null)
-					session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
+					session.createNativeMutationQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			}catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -188,7 +190,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(" (entity_uuid char(16) for bit data, keyid varchar(128)) "); //$NON-NLS-1$
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 
 			sb = new StringBuilder();
 			sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -208,7 +210,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(" AND b.ca_uuid in (:cas)"); //$NON-NLS-1$
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString())
+			session.createNativeMutationQuery(sb.toString())
 				.setParameter("attributeKey",  groupBy.getAttributeKey()) //$NON-NLS-1$
 				.setParameter("areaType",  groupBy.getAreaType().name()) //$NON-NLS-1$
 				.setParameterList("cas", cas) //$NON-NLS-1$
@@ -227,13 +229,13 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 */
 	private LocalDate[] computeDateRange(String queryTable, Session session) {
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
-		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		Tuple items = session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable, Tuple.class).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		LocalDate l1 = LocalDate.now();
 		LocalDate l2 = LocalDate.now();
 		
-		if (items[0] != null) l1 = ((java.sql.Date)items[0]).toLocalDate();
-		if (items[1] != null) l2 = ((java.sql.Date)items[1]).toLocalDate();
+		if (items.get(0) != null) l1 = ((java.sql.Date)items.get(0)).toLocalDate();
+		if (items.get(1) != null) l2 = ((java.sql.Date)items.get(1)).toLocalDate();
 		
 		return new LocalDate[] {l1, l2};
 	}
@@ -354,13 +356,14 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
 		
-		NativeQuery<?> query = session.createNativeQuery(sb.toString());
-		List<?> dataItems = query.list();
-		for (Object item : dataItems) {
-			if (item instanceof Number) {
-				item = new Object[] {item};
-			}
-			Object[] rowdata = (Object[])item;
+		NativeQuery<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
+		List<Tuple> dataItems = query.list();
+		for (Tuple rowdata: dataItems) {
+			//TODO: test this
+//			if (item instanceof Number) {
+//				item = new Object[] {item};
+//			}
+//			Object[] rowdata = (Object[])item;
 			
 			//now what?
 			int column = 0;
@@ -369,7 +372,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			int index = 0;
 			for (GroupByItem groupBy : groupByItems) {
 				String colkey = EntitySummaryQueryHeaderEngine.INSTANCE.computeColumnKey(groupBy);
-				Object value = rowdata[column++];
+				Object value = rowdata.get(column++);
 				
 				if (groupBy.getAttributeType() != null && groupBy.getAttributeType() == AttributeType.EMPLOYEE && value != null) {
 					value = UuidUtils.uuidToString( UuidUtils.byteToUUID((byte[])value) );
@@ -387,7 +390,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			
 			SummaryResultKey temp = new SummaryResultKey(definition.getValuePart().getValueOption().getKey(), groupBys);
 			//last column is value
-			Number value = (Number) rowdata[column++];
+			Number value = (Number) rowdata.get(column++);
 			data.put(temp, value.doubleValue());
 		}
 		results.setData(data);
@@ -464,7 +467,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( getColumnType(type));
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
 			sb.append("UPDATE "); //$NON-NLS-1$
@@ -479,7 +482,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			
 			logme(sb);
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeMutationQuery(sb.toString())
 				.setParameter("keyid", attributeKey) //$NON-NLS-1$
 				.setParameter("source", recordSource) //$NON-NLS-1$
 				.executeUpdate();
@@ -492,7 +495,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( dataTable.tableName );
 			sb.append(" WITH NO DATA"); //$NON-NLS-1$
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 			sb = new StringBuilder();
 			sb.append("ALTER TABLE "); //$NON-NLS-1$
 			sb.append(temp);
@@ -502,7 +505,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( getColumnType(type));
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
 			sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -516,13 +519,13 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString())
+			session.createNativeMutationQuery(sb.toString())
 				.setParameter("keyid", attributeKey) //$NON-NLS-1$
 				.setParameter("sourceid", recordSource).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}else if (type == AttributeType.EMPLOYEE) {
 			String temp = SqlGenerator.createTempTableName();
@@ -533,7 +536,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( dataTable.tableName );
 			sb.append(" WITH NO DATA"); //$NON-NLS-1$
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 			sb = new StringBuilder();
 			sb.append("ALTER TABLE "); //$NON-NLS-1$
 			sb.append(temp);
@@ -543,7 +546,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( getColumnType(type));
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
 			sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -557,13 +560,13 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString())
+			session.createNativeMutationQuery(sb.toString())
 				.setParameter("keyid", attributeKey) //$NON-NLS-1$
 				.setParameter("sourceid", recordSource).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		

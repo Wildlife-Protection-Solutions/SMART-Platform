@@ -158,7 +158,7 @@ public enum WorkingSetManager {
 	 * @param set
 	 */
 	public void deleteWorkingSet(Session s, IntelWorkingSet set){
-		s.delete(set);
+		s.remove(set);
 	}
 	
 	public void addRecordInputToActiveWorkingSetRecord(Collection<RecordEditorInput> inputs, IEclipseContext context){
@@ -185,7 +185,7 @@ public enum WorkingSetManager {
 							wsrecord.setRecord(record);
 							wsrecord.setIsVisible(true);
 							wsrecord.setWorkingSet(wset);
-							s.save(wsrecord);
+							s.persist(wsrecord);
 							wset.getRecords().add(wsrecord);
 							modified = true;
 						}
@@ -224,7 +224,7 @@ public enum WorkingSetManager {
 							wsrecord.setIsVisible(true);
 							wsrecord.setRecord(record);
 							wsrecord.setWorkingSet(wset);
-							s.save(wsrecord);
+							s.persist(wsrecord);
 							wset.getRecords().add(wsrecord);
 							modified = true;
 						}
@@ -262,7 +262,7 @@ public enum WorkingSetManager {
 							wsrecord.setEntity(entity);
 							wsrecord.setWorkingSet(wset);
 							wsrecord.setIsVisible(true);
-							s.save(wsrecord);
+							s.persist(wsrecord);
 							wset.getEntities().add(wsrecord);
 							modified = true;
 						}
@@ -308,7 +308,7 @@ public enum WorkingSetManager {
 							wsrecord.setQueryType(query.getTypeKey());
 							wsrecord.setWorkingSet(wset);
 							wsrecord.setIsVisible(true);
-							s.save(wsrecord);
+							s.persist(wsrecord);
 							wset.getQueries().add(wsrecord);
 							modified = true;
 						}

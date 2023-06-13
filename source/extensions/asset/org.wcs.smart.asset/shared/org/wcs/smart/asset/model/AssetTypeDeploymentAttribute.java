@@ -24,13 +24,13 @@ package org.wcs.smart.asset.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -41,7 +41,7 @@ import javax.persistence.Transient;
  * @author egouge
  */
 @Entity
-@Table(name="smart.asset_type_deployment_attribute")
+@Table(name="asset_type_deployment_attribute", schema="smart")
 public class AssetTypeDeploymentAttribute extends AbstractAssetTypeAttributeMapping {
 	
 	private AssetTypeDeploymentAttributePk id = new AssetTypeDeploymentAttributePk();	

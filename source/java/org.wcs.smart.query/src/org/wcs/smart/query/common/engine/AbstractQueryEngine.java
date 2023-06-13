@@ -235,7 +235,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	protected String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
-			Employee x = (Employee) session.load(Employee.class, uuid);
+			Employee x = (Employee) session.getReference(Employee.class, uuid);
 			if (x != null) {
 				return SmartLabelProvider.getShortLabel(x);
 			}
@@ -248,7 +248,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			//need find label for the given conservation area
 			return SmartLabelProvider.getDescription(uuid, cauuid, session);	
 		}else{
-			return Label.getDescription(uuid, session);
+			return Label.findLabel(uuid, session);
 		}
 	}
 	

@@ -35,33 +35,19 @@
     		</resource>
     	</resources>
     	 <plugins>
-            <!-- Eclipse project -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.10</version>
-                <configuration>
-                    <!-- Always download and attach dependencies source code -->
-                    <downloadSources>false</downloadSources>
-                    <downloadJavadocs>false</downloadJavadocs>
-                    <!-- Avoid type mvn eclipse:eclipse -Dwtpversion=2.0 -->
-                    <wtpversion>2.0</wtpversion>
-                    <wtpdefaultserver>Apache Tomcat v8.0</wtpdefaultserver>
-                </configuration>
-            </plugin>
             <!-- Set JDK Compiler Level -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.1</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.3.2</version>
                 <configuration>
                     <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                     <!--<warSourceExcludes>**/context.xml</warSourceExcludes><webResources><resource><directory>conf/deploy</directory><targetPath>META-INF</targetPath><includes><include>**/context.xml</include></includes></resource></webResources>
@@ -108,6 +94,15 @@
     </build>
     
     <dependencies>
+    
+    
+      <dependency>
+      <groupId>jakarta.activation</groupId>
+      <artifactId>jakarta.activation-api</artifactId>
+      <version>2.0.1</version>
+  </dependency>
+  
+  
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
@@ -120,7 +115,24 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        
         <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-servlet-initializer</artifactId>
+            <version>${resteasy.version}</version>
+        </dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>		
+		
+		<dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-multipart-provider</artifactId>
             <version>${resteasy.version}</version>
@@ -135,23 +147,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
-       <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-servlet-initializer</artifactId>
-            <version>${resteasy.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson2-provider</artifactId>
-            <version>${resteasy.version}</version>
-        </dependency>
+       
         <!--required until jackson library (via jboss) is updated to 2.13 -->
         <!-- https://github.com/FasterXML/jackson-databind/issues/3091-->
+        
+        <!--
 					<dependency>
 						<groupId>com.fasterxml.jackson.datatype</groupId>
 						<artifactId>jackson-datatype-jsr310</artifactId>
 						<version>2.13.2</version>
 					</dependency>
+					-->
+					
         
         <!--jstl -->
         <!-- when we upgrade to tomcat 10 (when we can upgrade BIRT) this needs to be changed to the following-->
@@ -187,15 +194,16 @@
         </dependency>
         <!-- hibernate -->
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-ehcache</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
+        	<groupId>org.hibernate.orm</groupId>
+        	<artifactId>hibernate-jcache</artifactId>
+        	<version>${hibernate.version}</version>
+        </dependency>	
+        	
         <!-- tomcat provided dependencies -->
         
         <!-- required for BIRT -->

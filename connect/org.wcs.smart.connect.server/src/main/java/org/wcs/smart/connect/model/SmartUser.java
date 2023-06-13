@@ -24,11 +24,6 @@ package org.wcs.smart.connect.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
 import org.wcs.smart.connect.util.LocalDateTimeSerializer;
 
@@ -37,6 +32,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Smart connect user entity.
  * 
@@ -44,7 +44,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  */
 @Entity
-@Table(name="connect.users")
+@Table(name="users", schema="connect")
 public class SmartUser extends ConnectUuidItem {
 
 	public static final int MAX_USERNAME_LENGTH = 256;

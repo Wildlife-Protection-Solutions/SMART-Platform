@@ -71,10 +71,10 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		
 		//try to initialize the design
 		if (parentDesign != null){
-			SurveyDesign surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, parentDesign);
+			SurveyDesign surveyDesign = (SurveyDesign) session.getReference(SurveyDesign.class, parentDesign);
 			newSurvey.setSurveyDesign(surveyDesign);
 		}else if (surveySibling != null){
-			Survey survey = (Survey) session.load(Survey.class, surveySibling);
+			Survey survey = (Survey) session.getReference(Survey.class, surveySibling);
 			newSurvey.setSurveyDesign(survey.getSurveyDesign());
 		}
 	}
@@ -118,7 +118,7 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		session.beginTransaction();
 		try{
 			idPage.updateSurvey(newSurvey, session);
-			session.saveOrUpdate(newSurvey);
+			HibernateManager.saveOrMerge(session, newSurvey);
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(Messages.NewSurveyWizard_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -29,6 +24,11 @@ import org.wcs.smart.event.model.IActionParameter;
 import org.wcs.smart.event.model.IActionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Imports trigger items from xml file and merges them with the existing items in the database
@@ -195,9 +195,9 @@ public class EventsFromXml {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				toSaveOrUpdate.forEach(e->session.saveOrUpdate(e));
-				filtersToSaveOrUpdate.forEach(f->session.saveOrUpdate(f));
-				actionEventsToSaveOrUpdate.forEach(ae->session.saveOrUpdate(ae));
+				toSaveOrUpdate.forEach(e->HibernateManager.saveOrMerge(session, e));
+				filtersToSaveOrUpdate.forEach(f->HibernateManager.saveOrMerge(session, f));
+				actionEventsToSaveOrUpdate.forEach(ae->HibernateManager.saveOrMerge(session, ae));
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {

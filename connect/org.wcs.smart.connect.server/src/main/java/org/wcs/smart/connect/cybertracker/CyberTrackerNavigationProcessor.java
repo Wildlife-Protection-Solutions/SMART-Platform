@@ -61,7 +61,7 @@ public class CyberTrackerNavigationProcessor implements IUploadItemProcessor {
 			ctPackage.setStatus(CyberTrackerNavigationLayer.Status.READY);	
 			item.setStatus(Status.COMPLETE);
 			
-			session.saveOrUpdate(item);
+			session.merge(item);
 			
 			session.getTransaction().commit();
 		}catch (Exception ex){
@@ -71,6 +71,7 @@ public class CyberTrackerNavigationProcessor implements IUploadItemProcessor {
 			session.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
 			item.setMessage("Error uploading SMART Mobile package: " + ex.getMessage()); //$NON-NLS-1$
+			session.merge(item);
 			session.getTransaction().commit();
 		}
 	}

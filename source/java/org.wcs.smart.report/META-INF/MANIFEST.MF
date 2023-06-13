@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Smart Reporting PlugIn
 Bundle-SymbolicName: org.wcs.smart.report;singleton:=true
 Bundle-Version: 8.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.wcs.smart;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.wcs.smart.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.wcs.smart.birt;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,

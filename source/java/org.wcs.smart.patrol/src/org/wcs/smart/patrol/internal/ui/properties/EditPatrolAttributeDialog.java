@@ -72,6 +72,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -411,21 +412,26 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				if (pAttribute.getUuid() == null) session.persist(pAttribute);
+				
 				for (PatrolAttributeListItem delete : deleted) {
 					//remove any references to this item
-					session.createQuery("DELETE FROM PatrolAttributeValue WHERE attributeListItem = :item") //$NON-NLS-1$
+					session.createMutationQuery("DELETE FROM PatrolAttributeValue WHERE attributeListItem = :item") //$NON-NLS-1$
 						.setParameter("item", delete) //$NON-NLS-1$
 						.executeUpdate();
+					session.flush();
 				}
-				if (pAttribute.getIcon() != null) session.saveOrUpdate(pAttribute.getIcon());
+				if (pAttribute.getIcon() != null) HibernateManager.saveOrMerge(session, pAttribute.getIcon());
 				if (pAttribute.getAttributeList() != null) {
 					for (PatrolAttributeListItem item : pAttribute.getAttributeList()) {
-						if (item.getIcon() != null) session.saveOrUpdate(item.getIcon());
+						if (item.getUuid() == null) session.persist(item);
+						HibernateManager.saveOrMerge(session, item.getIcon());
 					}
 				}
+				session.merge(pAttribute);
 				
-				session.saveOrUpdate(pAttribute);
 				session.getTransaction().commit();
+				session.evict(pAttribute);
 				isDirty = false;
 			}catch (Exception ex) {
 				try {
@@ -577,6 +583,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		protected IStatus run(IProgressMonitor monitor) {
 			if (pAttribute.getUuid() != null) {
 				try(Session session = HibernateManager.openSession()){
+					session.get(ConservationArea.class, pAttribute.getConservationArea().getUuid()).getLanguages();
 					pAttribute = session.get(PatrolAttribute.class, pAttribute.getUuid());
 					pAttribute.getNames().forEach(e->e.getValue());
 

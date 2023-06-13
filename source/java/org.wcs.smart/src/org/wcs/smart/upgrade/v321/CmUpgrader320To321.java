@@ -25,15 +25,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.jdbc.Work;
-import org.hibernate.type.BinaryType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Performs upgrade for configurable model from version 3.2.0 to 3.2.1
@@ -44,11 +41,9 @@ import org.hibernate.type.BinaryType;
 public class CmUpgrader320To321 {
 	
 	private Session session;
-	private UUIDGenerator uuidGenerator;
 	
 	public void upgrade(Session s) {
 		this.session = s;
-		uuidGenerator = null;
 		
 		s.doWork(new Work() {
 			@Override
@@ -118,16 +113,18 @@ public class CmUpgrader320To321 {
 	}
 
 	private byte[] getNewUuid(Object object) {
-		if (uuidGenerator == null) {
-			uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
-			Properties prop = new Properties();
-			prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
-			prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
-			uuidGenerator.configure(new BinaryType(), prop, null);
-		}
-
-		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, object);
-		return uuid;
+		UUID uuid = UuidUtils.generateUuid((SessionImplementor) session);
+		return UuidUtils.uuidToByte(uuid);
+//		if (uuidGenerator == null) {
+//			uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+//			Properties prop = new Properties();
+//			prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
+//			prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
+//			uuidGenerator.configure(new BinaryType(), prop, null);
+//		}
+//
+//		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, object);
+//		return uuid;
 	}
 
 }

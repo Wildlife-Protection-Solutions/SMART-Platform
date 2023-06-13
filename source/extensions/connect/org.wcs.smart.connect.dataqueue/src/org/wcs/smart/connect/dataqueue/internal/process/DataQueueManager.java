@@ -32,15 +32,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.transaction.Synchronization;
-import javax.ws.rs.WebApplicationException;
-
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
@@ -54,6 +46,13 @@ import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.transaction.Synchronization;
+import jakarta.ws.rs.WebApplicationException;
 
 /**
  * Manager for the local data queue.  Provides an interface for adding, removing
@@ -125,7 +124,7 @@ public enum DataQueueManager {
 				local.setType(item.getType());
 				local.setOrder(getNextQueueOrder(s));
 				
-				s.save(local);
+				s.persist(local);
 				
 				s.getTransaction().commit();
 				
@@ -246,7 +245,7 @@ public enum DataQueueManager {
 								.relativize(copy).toString());
 						
 					}
-					s.save(clone);
+					s.persist(clone);
 				}
 				s.getTransaction().commit();
 			}catch(Exception ex){
@@ -346,7 +345,7 @@ public enum DataQueueManager {
 				
 				for (LocalDataQueueItem i : toDelete){
 					i = s.get(LocalDataQueueItem.class, i.getUuid());
-					s.delete(i);
+					s.remove(i);
 					if (i.getFile() != null){
 						filesToDelete.add(i.getFullFilePath());
 					}
@@ -403,7 +402,7 @@ public enum DataQueueManager {
 				final List<Path> filesToDelete = new ArrayList<Path>();
 				
 				for (LocalDataQueueItem i : toDelete){
-					s.delete(i);
+					s.remove(i);
 					if (i.getFile() != null){
 						filesToDelete.add(i.getFullFilePath());
 					}
@@ -439,10 +438,9 @@ public enum DataQueueManager {
 	 */
 	public void deleteDataQueueOptions(ConservationArea ca, Session session) {
 		// delete all data queue items
-		Query<?> q = session
-				.createQuery("DELETE FROM DataQueueProcessingOption WHERE id.conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM DataQueueProcessingOption WHERE id.conservationArea = :ca") //$NON-NLS-1$
+				.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+				.executeUpdate();
 	}
 	
 	/**
@@ -454,10 +452,9 @@ public enum DataQueueManager {
 	 */
 	public void deleteDataQueue(ConservationArea ca, Session session) {
 		// delete all data queue items
-		Query<?> q = session
-				.createQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 
 		// delete associated files
 		session.getTransaction().registerSynchronization(new Synchronization() {

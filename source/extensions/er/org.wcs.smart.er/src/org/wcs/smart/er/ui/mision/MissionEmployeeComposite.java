@@ -186,9 +186,9 @@ public class MissionEmployeeComposite extends MissionComposite {
 		//find all observers
 		observers = new HashSet<Employee>();
 		if (mission.getUuid() != null){
-			Query<?> q = session.createQuery("SELECT distinct wpo.observer from WaypointObservation wpo, SurveyWaypoint sw WHERE wpo.observationGroup.waypoint = sw.id.waypoint and sw.missionDay.mission = :mission"); //$NON-NLS-1$
+			Query<Employee> q = session.createQuery("SELECT distinct wpo.observer from WaypointObservation wpo, SurveyWaypoint sw WHERE wpo.observationGroup.waypoint = sw.id.waypoint and sw.missionDay.mission = :mission", Employee.class); //$NON-NLS-1$
 			q.setParameter("mission", mission); //$NON-NLS-1$
-			for (Object x : q.list()) observers.add((Employee)x);
+			for (Employee x : q.list()) observers.add(x);
 		}else{
 			if (warnComp != null){
 				warnComp.dispose();

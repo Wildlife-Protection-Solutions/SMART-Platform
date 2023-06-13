@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.wcs.smart.hibernate.libs" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
+      <appInfo>
          <meta.schema plugin="org.wcs.smart.hibernate.libs" id="org.wcs.smart.hibernate.mapping" name="Hibernate Entity Class"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          An extension point that allows plugins to register Hibernate objects.  The java class should be annotated with the required Hibernate annotations.
 
@@ -14,9 +14,9 @@ All extensions will be registered with Hibernate.
 
    <element name="extension">
       <annotation>
-         <appinfo>
+         <appInfo>
             <meta.element />
-         </appinfo>
+         </appInfo>
       </annotation>
       <complexType>
          <sequence minOccurs="0" maxOccurs="unbounded">
@@ -41,9 +41,9 @@ All extensions will be registered with Hibernate.
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute translatable="true"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -63,9 +63,9 @@ All extensions will be registered with Hibernate.
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="ca_property" type="string">
@@ -73,14 +73,24 @@ All extensions will be registered with Hibernate.
                <documentation>
                   Only required if the table does not have a conservationArea attribute.
 
-Represents a hql string the links the current table to the table that has the conservation area attribute.
+Represents a hql string the links the current table to the table that has the conservation area object attribute.  If the table links directly to the UUID of the conservation area you should use the ca_uuid_property field instead.
 
 For example for the AttributeTreeNode class (smart.dm_attribute_tree) table the string should be
 &quot;.attribute.conservationArea&quot;.
 String should always start with a .
 
-If this is not provided and the table does not have a conservation area field then this class will not be automatically included in the conservation area exports and the data from this table will have
-to be exported manually using a datamodel export listener.
+If this and the ca_uuid_property fields are not provided and the table does not have a conservation area field then this class will not be automatically included in the conservation area exports and the data from this table will have to be exported manually using a datamodel export listener.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="ca_uuid_property" type="string">
+            <annotation>
+               <documentation>
+                  Only required if the table does not have a conservationArea attribute and the table has a link to the conservation area uuid (not the conservation area object).
+
+For Example the ConservationArea class only has a UUID so we populated this field for that class. 
+
+If this and the ca_uuid_property fields are not provided and the table does not have a conservation area field then this class will not be automatically included in the conservation area exports and the data from this table will have to be exported manually using a datamodel export listener.
                </documentation>
             </annotation>
          </attribute>
@@ -95,36 +105,36 @@ to be exported manually using a datamodel export listener.
    </element>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          1.0.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="examples"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter extension point usage example here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="apiinfo"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter API information here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="implementation"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter information about supplied implementation of this extension point.]
       </documentation>

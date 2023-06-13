@@ -134,20 +134,20 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
         session.beginTransaction();
 		try{
 			if (newDesign.getMissionProperties() != null) {
-				newDesign.getMissionProperties().forEach(m->session.saveOrUpdate(m.getAttribute()));
+				newDesign.getMissionProperties().forEach(m->HibernateManager.saveOrMerge(session, m.getAttribute()));
 			}
 			
 			if (newDesign.getSamplingUnitAttributes() != null) {
-				newDesign.getSamplingUnitAttributes().forEach(m->session.saveOrUpdate(m.getSamplingUnitAttribute()));
+				newDesign.getSamplingUnitAttributes().forEach(m->HibernateManager.saveOrMerge(session, m.getSamplingUnitAttribute()));
 			}
 			
-			session.save(newDesign);
+			session.persist(newDesign);
 			
 			if (templatePage != null){
 				if (templatePage.getClonedSamplingUnits() != null){
 					for (SamplingUnit s : templatePage.getClonedSamplingUnits()){
 						s.setSurveyDesign(newDesign);
-						session.save(s);
+						session.persist(s);
 					}
 				}
 			}

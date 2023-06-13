@@ -138,8 +138,8 @@ public class ConnectServerWizard extends Wizard {
 				user.setServer(server);
 
 		
-				s.save(server);
-				s.save(user);
+				s.persist(server);
+				s.persist(user);
 				s.getTransaction().commit();
 			}catch (Exception ex){			
 				ConnectPlugIn.displayLog(Messages.ConnectServerWizard_SaveError + ex.getMessage(), ex);

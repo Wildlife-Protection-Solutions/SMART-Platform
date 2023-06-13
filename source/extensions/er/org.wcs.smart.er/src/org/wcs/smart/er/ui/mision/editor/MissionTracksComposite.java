@@ -198,26 +198,9 @@ public class MissionTracksComposite extends TracksComposite {
 		if (!confirmChanges()) return;
 		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMissionDay(), GPSDataImport.ImportType.TRACK);
 		wizard.setDateOption(dialog.getMissionDay().getDate());
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
-					WizardDialog dialog = new SmartWizardDialog(getShell(), wizard);
-
-					if (dialog != null) {
-						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
-						dialog.open();
-						
-						refresh(false);
-					}
-				}
-			});
-		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionDayComposite_ImportWizardError + ex.getLocalizedMessage(), ex);
-		}
+		WizardDialog dialog = new SmartWizardDialog(getShell(), wizard);
+		dialog.open();
+		refresh(false);		
 	}
 	
 	protected void mergeTrack() {

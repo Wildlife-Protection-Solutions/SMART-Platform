@@ -543,7 +543,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try {
-						s.saveOrUpdate(toSave);
+						s.merge(toSave);
 						s.getTransaction().commit();
 					} catch (Exception ex1) {
 						ex = ex1;
@@ -757,7 +757,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 					s.beginTransaction();
 					try{
 						for (SmartStyle style : toDelete){
-							s.delete(style);
+							s.remove(style);
 						}
 						s.getTransaction().commit();
 						

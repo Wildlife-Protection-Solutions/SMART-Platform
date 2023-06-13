@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -276,7 +274,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	 */
 	protected String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
-			Employee x = (Employee) session.load(Employee.class, uuid);
+			Employee x = (Employee) session.getReference(Employee.class, uuid);
 			if (x != null) {
 				return SmartLabelProvider.getShortLabel(x);
 			}

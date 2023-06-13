@@ -174,6 +174,8 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 			attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"isActive", true}).list(); //$NON-NLS-1$	
+			
+			attributes.forEach(a->HibernateManager.load(a.getAttributeList()));
 		}
 		for (NewPatrolWizardPage p : thisitems) {
 			if (!p.getName().equals(PatrolAttributeWizardPage.ID)) continue;

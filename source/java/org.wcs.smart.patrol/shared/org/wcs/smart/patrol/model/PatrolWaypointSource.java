@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.Query;
-
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.wcs.smart.SmartContext;
@@ -103,9 +101,10 @@ public class PatrolWaypointSource implements IWaypointSource {
 				sql.append(" JOIN pld.waypoints wp "); //$NON-NLS-1$
 				sql.append(" WHERE wp.id.waypoint = :wp "); //$NON-NLS-1$
 				
-				Query q = temp.createQuery(sql.toString());
-				q.setParameter("wp", wp); //$NON-NLS-1$
-				List<?> pws = q.getResultList();
+				List<UUID> pws = temp.createQuery(sql.toString(), UUID.class)
+					.setParameter("wp", wp) //$NON-NLS-1$
+					.list();
+
 				if (pws.size() > 0){
 					UUID uuid = (UUID) pws.get(0);
 					patrolDir = UuidUtils.getDirectoryPath(uuid);
@@ -133,9 +132,9 @@ public class PatrolWaypointSource implements IWaypointSource {
 		Waypoint wp = (Waypoint) source;
 		String pid = ""; //$NON-NLS-1$
 		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
-			Query q = temp.createQuery("SELECT p.id from Patrol p join p.legs pl join pl.patrolLegDays pld join pld.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
-			q.setParameter("wp", wp); //$NON-NLS-1$
-			List<?> pws = q.getResultList();
+			List<String> pws = temp.createQuery("SELECT p.id from Patrol p join p.legs pl join pl.patrolLegDays pld join pld.waypoints wp where wp.id.waypoint = :wp ", String.class) //$NON-NLS-1$
+					.setParameter("wp", wp) //$NON-NLS-1$
+					.list();
 			if (pws.size() > 0){
 				pid = (String)pws.get(0);
 			}

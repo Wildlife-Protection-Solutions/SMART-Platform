@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.Query;
-
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.wcs.smart.SmartContext;
@@ -78,14 +76,12 @@ public class SurveyWaypointSource implements IWaypointSource{
 		String missionDir = null;
 		
 		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
-			Query q = temp.createQuery("SELECT m.uuid from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
-			q.setParameter("wp", wp); //$NON-NLS-1$
+			List<UUID> pws = temp.createQuery("SELECT m.uuid from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp ", UUID.class) //$NON-NLS-1$
+				.setParameter("wp", wp) //$NON-NLS-1$
+				.list();
 	
-			List<?> pws = q.getResultList();
-		
 			if (pws.size() > 0){
-				UUID uuid = (UUID) pws.get(0);
-				missionDir = UuidUtils.getDirectoryPath(uuid);
+				missionDir = UuidUtils.getDirectoryPath(pws.get(0));
 			}else{
 				throw new Exception("Could not determine attached location for survey waypoint attachment. " + wp.getUuid().toString()); //$NON-NLS-1$
 			}
@@ -120,12 +116,10 @@ public class SurveyWaypointSource implements IWaypointSource{
 		String mid = ""; //$NON-NLS-1$
 		
 		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
-			Query q = temp.createQuery("SELECT m.id from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
-			q.setParameter("wp", wp); //$NON-NLS-1$
-			List<?> pws = q. getResultList();
-			if (pws.size() > 0){
-				mid = (String) pws.get(0);
-			}
+			List<String> pws = temp.createQuery("SELECT m.id from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp ", String.class) //$NON-NLS-1$
+				.setParameter("wp", wp) //$NON-NLS-1$
+				.list();
+			if (pws.size() > 0) mid = (String) pws.get(0);
 		}
 		
 		StringBuilder sb = new StringBuilder();

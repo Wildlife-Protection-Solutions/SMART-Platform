@@ -27,22 +27,21 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.query.Query;
 import org.wcs.smart.util.I18nUtil;
+
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * 
@@ -52,7 +51,7 @@ import org.wcs.smart.util.I18nUtil;
  * @since 1.0.0
  */
 @Entity 
-@Table (name="smart.i18n_label")
+@Table (name="i18n_label", schema="smart")
 
 @AssociationOverrides({
 	@AssociationOverride(name = "id.language", 
@@ -120,7 +119,7 @@ public class Label implements Serializable {
 		private UuidItem element;
 
 		
-		@ManyToOne(fetch = FetchType.LAZY)
+		@ManyToOne(fetch = FetchType.EAGER)
 		@JoinColumn(name="language_uuid", referencedColumnName="uuid")
 		public Language getLanguage() {
 			return language;
@@ -155,87 +154,119 @@ public class Label implements Serializable {
 		  }
 	}
 	
-	public static synchronized String searchAll(Locale lang, UUID element, Session session){
-		if (lang == null) return ""; //$NON-NLS-1$
-		Query<?> query = session.createQuery("SELECT id.language.code, value, id.language.default FROM Label WHERE id.element.uuid = :element"); //$NON-NLS-1$
-		query.setParameter("element", element); //$NON-NLS-1$
-		List<?> options = query.list();
-			
-		if (options.size() == 1){
-			return (String)((Object[])options.get(0))[1];
-		}
-			
-		String langmatch = null;
-		String defaultvalue = null;
-		for (Object obj : options){
-			String label = (String)((Object[])obj)[1];
-			String code = (String)((Object[])obj)[0];
-			Locale test = null;
-			if (code.contains("_")){ //$NON-NLS-1$
-				String[] bits = code.split("_"); //$NON-NLS-1$
-				test = new Locale(bits[0], bits[1]);
-			}else{
-				test = new Locale(code);
-			}
-			if (test.equals(lang)){
-				return label;
-			}else if (test.getLanguage().equals(lang.getLanguage())){
-				langmatch = label;
-			}
-			if ((Boolean)((Object[])obj)[2]){
-				defaultvalue = label;
-			}
-		}
-		if (langmatch != null) return langmatch;
-		if (defaultvalue != null) return defaultvalue;
-		return null;
-	}
-	
+//	public static synchronized String searchAll(Locale lang, UUID element, Session session){
+//		if (lang == null) return ""; //$NON-NLS-1$
+//		List<Label> labels = session.createQuery("FROM Label WHERE id.element.uuid = :element", Label.class)
+//			.setParameter("element", element).list();
+//		
+////		Query<Tuple> query = session.createQuery("SELECT id.language.code, value, id.language.default FROM Label WHERE id.element.uuid = :element", Tuple.class); //$NON-NLS-1$
+////		query.setParameter("element", element); //$NON-NLS-1$
+////		List<Tuple> options = query.list();
+////			
+//		if (labels.size() == 1){
+//			return labels.get(0).getValue();
+//		}
+//			
+//		return "test";
+////		String langmatch = null;
+////		String defaultvalue = null;
+////		for (Tuple obj : options){
+////			String label = (String)obj.get(1);
+////			String code = (String)obj.get(0);
+////			Locale test = null;
+////			if (code.contains("_")){ //$NON-NLS-1$
+////				String[] bits = code.split("_"); //$NON-NLS-1$
+////				test = new Locale(bits[0], bits[1]);
+////			}else{
+////				test = new Locale(code);
+////			}
+////			if (test.equals(lang)){
+////				return label;
+////			}else if (test.getLanguage().equals(lang.getLanguage())){
+////				langmatch = label;
+////			}
+////			if ((Boolean)obj.get(2)){
+////				defaultvalue = label;
+////			}
+////		}
+////		if (langmatch != null) return langmatch;
+////		if (defaultvalue != null) return defaultvalue;
+////		return null;
+//	}
+//	
+//	@Transient
+//	//public static synchronized String getDescription(
+//	public static String getDescription(
+//			NamedItem item,
+//			Session session) {
+//		
+//		Object ltemp = I18nUtil.getLocale();
+//		if (ltemp instanceof UUID) {
+//			UUID lang = (UUID)ltemp;		
+//			UUID ca = I18nUtil.getCa();
+//			
+//			if (lang != null && ca != null) {
+//				Label.LabelItemPK id = new Label.LabelItemPK();
+//				id.setElement(new UuidItem(item.getUuid()));
+//				Language ltmp = (Language) session.getReference(Language.class, lang);
+//				id.setLanguage(ltmp);
+//
+//				Label lbl = (Label) session.get(Label.class, id);
+//				if (lbl != null) return lbl.getValue();
+//				
+//				// try for the default language
+//				ConservationArea localca = (ConservationArea) session.get(ConservationArea.class, ca);
+//				id.setLanguage(localca.getDefaultLanguage());
+//				lbl = (Label) session.get(Label.class, id);
+//				if (lbl != null) return lbl.getValue();
+//			}
+//		}
+//		
+//		//TODO: if ltemp is a locale try to match that
+//		item = session.getReference(item);
+//		for (Label l : item.getNames()) {
+//			if(l.getLanguage().isDefault()) return l.getValue();
+//		}
+//		
+//		return "ERROR";
+//	
+//	}
+//	
 	@Transient
-	public static synchronized String getDescription(
-			UUID elementuuid,
-			Session session) {
+	public static String findLabel(UUID elementuuid, Session session) {
+		if (elementuuid == null) return "";
 		
 		Object ltemp = I18nUtil.getLocale();
-		if (ltemp instanceof Locale){
-			return searchAll((Locale)ltemp, elementuuid, session);			
-		}
 		
-		UUID lang = (UUID)ltemp;
-		UUID ca = I18nUtil.getCa();
-		if (lang == null || ca == null){
-			return searchAll(Locale.getDefault(), elementuuid, session);
-		}
+		if (ltemp instanceof UUID) {
+			UUID lang = (UUID)ltemp;		
+			UUID ca = I18nUtil.getCa();
+			if (lang != null || ca != null){
+				Label.LabelItemPK id = new Label.LabelItemPK();
+				id.setElement(new UuidItem(elementuuid));
+				Language ltmp = (Language) session.getReference(Language.class, lang);
+				id.setLanguage(ltmp);
 
-		if (elementuuid == null || ca == null){
-			return ""; //$NON-NLS-1$
-		}
-		
-		Label.LabelItemPK id = new Label.LabelItemPK();
-		id.setElement(new UuidItem(elementuuid));
-		Language ltmp = (Language) session.get(Language.class, lang);
-		id.setLanguage(ltmp);
-
-		Label lbl = (Label) session.get(Label.class, id);
-		if (lbl != null) return lbl.getValue();
-		
-		// try for the default language
-		ConservationArea localca = (ConservationArea) session.load(ConservationArea.class, ca);
-		id.setLanguage(localca.getDefaultLanguage());
-		lbl = (Label) session.get(Label.class, id);
-		if (lbl != null) return lbl.getValue();
-		
-		//search for any label in one of the current ca languages
-		for(Language l : localca.getLanguages()){
-			id.setLanguage(l);
-			lbl = (Label)session.get(Label.class, id);
-			if (lbl != null){
-				return lbl.getValue();
+				Label lbl = (Label) session.get(Label.class, id);
+				if (lbl != null) return lbl.getValue();
+				
+				// try for the default language
+				ConservationArea localca = (ConservationArea) session.get(ConservationArea.class, ca);
+				id.setLanguage(localca.getDefaultLanguage());
+				lbl = (Label) session.get(Label.class, id);
+				if (lbl != null) return lbl.getValue();
 			}
+			
+		}
+		Locale l = Locale.getDefault();
+		if (ltemp instanceof Locale){
+			l = (Locale) ltemp;
 		}
 		
-		//at this point search for anything
-		return searchAll(Locale.getDefault(), elementuuid, session);
+		List<Label> labels = session.createQuery("FROM Label WHERE id.element.uuid = :element", Label.class) //$NON-NLS-1$
+				.setParameter("element", elementuuid).list(); //$NON-NLS-1$
+		return NamedItem.findName(labels, l);		
+		
 	}
 }
 

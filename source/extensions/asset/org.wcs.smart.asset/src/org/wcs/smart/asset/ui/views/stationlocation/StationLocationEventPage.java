@@ -241,7 +241,7 @@ public class StationLocationEventPage {
 		try (Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(record);
+				session.merge(record);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -269,7 +269,7 @@ public class StationLocationEventPage {
 			try {
 				toEdit.setDate(dialog.getSelectedDateTime());
 				toEdit.setComment(dialog.getComment());
-				session.saveOrUpdate(toEdit);
+				session.merge(toEdit);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -299,7 +299,7 @@ public class StationLocationEventPage {
 			session.beginTransaction();
 			try {
 				toDelete.forEach(x->{
-					session.delete(x);
+					session.remove(x);
 				});
 				session.getTransaction().commit();
 			}catch (Exception ex) {

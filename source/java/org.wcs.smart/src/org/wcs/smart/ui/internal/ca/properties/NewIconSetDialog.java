@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.icon.FixedIconSet;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -104,7 +103,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 	private void createCustomIconSet() {
 		
 		keyComp.updateFields(newSet);
-		session.saveOrUpdate(newSet);
+		session.persist(newSet);
 		
 		if (templateSet != null && templateSet instanceof IconSet) {
 			for (Icon icon : icons) {
@@ -137,7 +136,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 					}catch (Exception ex) {
 						SmartPlugIn.displayLog(MessageFormat.format(Messages.IconPreferencePage_CopyError,  icon.getName()), ex);
 					}
-					session.saveOrUpdate(icon);
+					//session.saveOrUpdate(icon);
 				}
 			}
 		}
@@ -160,7 +159,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 		newSet.setName(defaultSet.name);
 		newSet.updateName(SmartDB.getCurrentLanguage(), defaultSet.name);
 		newSet.updateName(newSet.getConservationArea().getDefaultLanguage(), defaultSet.name);
-		session.saveOrUpdate(newSet);
+		//session.saveOrUpdate(newSet);
 		
 		return true;
 	}

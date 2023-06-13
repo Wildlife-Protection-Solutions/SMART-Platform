@@ -28,16 +28,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Mission/Survey ID Generator

@@ -33,6 +33,8 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Hibernate utility functions to support 
  * Query module.
@@ -100,12 +102,11 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 * @throws Exception
 	 */
 	private ListItem getListItem(Session session, String clazz, String value) throws Exception{
-		Query<?> q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		Query<Tuple> q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid", Tuple.class); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("uuid", UuidUtils.stringToUuid(value)); //$NON-NLS-1$
-		List<?> results = q.list();
+		List<Tuple> results = q.list();
 		if (results.size() == 1){
-			return new ListItem( (UUID)((Object[])results.get(0))[0], 
-					(String)((Object[])results.get(0))[1]);
+			return new ListItem( (UUID)results.get(0).get(0), (String)results.get(0).get(1));
 		}else{
 			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadError, new Object[]{clazz, value}), null);
 			return null;
@@ -120,13 +121,13 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 * @throws Exception
 	 */
 	public ListItem getEmployee(Session session, String value) throws Exception{
-		Query<?> q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid and conservationArea = :ca"); //$NON-NLS-1$		
+		Query<Tuple> q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid and conservationArea = :ca", Tuple.class); //$NON-NLS-1$		
 		q.setParameter("uuid", UuidUtils.stringToUuid(value)); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		List<?> results = q.list();
+		List<Tuple> results = q.list();
 		if (results.size() == 1){
-			Object[] d = (Object[]) results.get(0);
-			return new ListItem( (UUID)d[0], (String) d[1] + " " + (String)d[2] + " [" + (String)d[3] + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Tuple d = results.get(0);
+			return new ListItem( (UUID)d.get(0), (String) d.get(1) + " " + (String)d.get(2) + " [" + (String)d.get(3) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else{
 			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadEmployeeError, new Object[]{value}), null);
 			return null;

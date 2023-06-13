@@ -330,7 +330,7 @@ public class SharedLinkApi extends HttpServlet{
 			//set is_user_token
 			newLink.setUserToken(false);
 			
-			s.save(newLink);
+			s.persist(newLink);
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -344,7 +344,7 @@ public class SharedLinkApi extends HttpServlet{
 	private void deleteExpiredLinks(Session s) {
 		//clean up any old, expired links. Seems like a vaguely reasonable place to do it: 
 		//the more you create, the more often the clean-up occurs.
-		s.createNativeQuery("DELETE FROM connect.shared_links WHERE expires_at < now()").executeUpdate(); //$NON-NLS-1$
+		s.createNativeMutationQuery("DELETE FROM connect.shared_links WHERE expires_at < now()").executeUpdate(); //$NON-NLS-1$
 	}
 	
 	
@@ -413,7 +413,7 @@ public class SharedLinkApi extends HttpServlet{
 			//set is_user_token
 			newLink.setUserToken(true);
 			
-			s.save(newLink);
+			s.persist(newLink);
 			
 			//clean up any old, expired links. Seems like a vaguely reasonable place to do it: 
 			//the more you create, the more often the clean-up occurs.
@@ -458,7 +458,7 @@ public class SharedLinkApi extends HttpServlet{
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 	    	
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){

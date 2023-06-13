@@ -23,18 +23,18 @@ package org.wcs.smart.event.model;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Action to perform.  Action is of a specified type and has a collection of paramater attribute values
@@ -42,7 +42,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name = "smart.e_action")
+@Table(name = "e_action", schema="smart")
 public class EAction extends UuidItem{
 	
 	private static final long serialVersionUID = 1L;

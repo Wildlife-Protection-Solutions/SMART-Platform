@@ -63,4 +63,6 @@ public class DialogConstants {
 	public static final String ZIP_XML_FILES = Messages.DialogConstants_xmorzipfiles;
 	
 	public static final String ICON_TEXT = Messages.DialogConstants_IconText;
+	
+	public static final String CLEAR_IMAGE_TEXT = "Clear Image";
 }

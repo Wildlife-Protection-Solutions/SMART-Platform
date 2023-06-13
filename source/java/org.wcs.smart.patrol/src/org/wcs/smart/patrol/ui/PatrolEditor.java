@@ -31,11 +31,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,6 +55,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.LayersView;
@@ -71,13 +69,14 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -94,6 +93,10 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * The patrol editor.
@@ -127,11 +130,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private IPatrolEventListener attributeModifiedListener = (att, source)->{
-			patrol = null;
-			getPatrol();
-			try(Session session = HibernateManager.openSession()){
-				summaryEditor.configureAttributes(session);
-			}
+		this.patrol = null;
+		try(Session session = HibernateManager.openSession()){
+			summaryEditor.configureAttributes(session);
+		}
 	};
 	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
@@ -143,23 +145,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}else if (source instanceof Patrol){
 				p = (Patrol)source;
 			}
-			if (p != null && p.equals(patrol)){
+			if (p != null && p.getUuid().equals(getPatrolUuid())){
 				if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG){
 					//reload patrol & update summary and day pages
 					Job j = new Job("load patrol"){ //$NON-NLS-1$
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							patrol = null;
-							getPatrol();
-							try(Session s = HibernateManager.openSession()){
-								s.beginTransaction();
-								try{
-									s.update(patrol);
-									updateSummaryPage();
-								}finally {
-									s.getTransaction().rollback();
-								}
-							}
 							getSite().getShell().getDisplay().syncExec(new Runnable(){
 								@Override
 								public void run() {
@@ -184,13 +175,31 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private IPatrolEventListener patrolDeleteListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
-			if ( ((Patrol)source ).equals(PatrolEditor.this.patrol)  ){
+			if ( ((Patrol)source ).getUuid().equals(PatrolEditor.this.getPatrolUuid())  ){
 				//close this editor
 				getSite().getShell().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						PatrolEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(PatrolEditor.this, false);					
 					}});
+			}
+		}
+	};
+	
+	private IPatrolEventListener modifyListener = new IPatrolEventListener(){
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			UUID puuid = null;
+			if (source instanceof Patrol ) {
+				puuid = ((Patrol)source).getUuid();
+			}else if (source instanceof PatrolLegDay){
+				puuid = ((PatrolLegDay)source).getPatrolLeg().getPatrol().getUuid();
+			}
+			if (puuid != null && puuid.equals(getPatrolUuid())) {
+				PatrolEditor.this.patrol = null;
+				((PatrolEditorInput)getEditorInput()).setId(getPatrol().getId());
+				updatePartName();
+				updateTabStyling();
 			}
 		}
 	};
@@ -232,7 +241,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolDeleteListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
-		
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, modifyListener);
+
 		
 		addPageChangedListener(e->{
 			Object x = getSelectedPage();
@@ -265,6 +275,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, modifyListener);
+
 		this.saveListener = null;
 		this.patrolDeleteListener = null;
 		super.dispose();
@@ -283,57 +295,87 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * @return null if the patrol can be editted, otherwise a string
 	 * that described reason why can't be edited.
 	 */
+	
 	public String canEdit(){
-		return PatrolManager.getInstance().canEdit(patrol, ops);
+		return PatrolManager.getInstance().canEdit(getPatrol(), ops);
+						
 	}
 	
-	public Patrol getPatrol(){
-		if (this.patrol == null){
-			
-			UUID puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
-			try(Session session = HibernateManager.openSession()){
-				session.beginTransaction();
-			
-				try{
-					//load patrol items so don't have lazy loading issues later.
-					
-					this.patrol = (Patrol) session.load(Patrol.class, puuid);
-					this.patrol.getPatrolDatastorePath();
-					List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-					this.projections = tmp.toArray(new Projection[tmp.size()]);
-					
-					try{
-						for (PatrolLeg pl : patrol.getLegs()){
-							for (PatrolLegDay pld : pl.getPatrolLegDays()){
-								for (PatrolWaypoint pw : pld.getWaypoints()){
-									ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
-								}
-							}
-						}
-					} catch (Exception e) {
-						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
-					}
-					
-					if (this.patrol.getCustomAttributes() == null) this.patrol.setCustomAttributes(new ArrayList<>());
-					this.patrol.getCustomAttributes().forEach(a->{
-						a.getAttributeValue();	
-					});
-					
-					session.getTransaction().commit();
-					if (ops == null){
-						ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-					}
-				}catch (Exception ex){
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
-					}
-					throw ex;
-				}
-			}
-			
-		}
+	public Patrol getPatrol() {
+		if (this.patrol != null) return this.patrol;
+		getPatrolInternal();
 		return this.patrol;
 	}
+	
+	public UUID getPatrolUuid() {
+		return ((PatrolEditorInput) getEditorInput()).getUuid();
+	}
+	
+	private synchronized void getPatrolInternal(){
+		if (this.patrol != null) return ;
+		
+		UUID puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+		
+			try{
+				//load patrol items so don't have lazy loading issues later.
+				
+				this.patrol = (Patrol) session.getReference(Patrol.class, puuid);
+				
+				Hibernate.initialize(this.patrol.getStation());
+				Hibernate.initialize(this.patrol.getTeam());
+				//this.patrol.getStation().getName();
+				//this.patrol.getTeam().getName();
+				this.patrol.getPatrolType().getDefaultMaxSpeed();
+				
+				this.patrol.getPatrolDatastorePath();
+				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+				this.projections = tmp.toArray(new Projection[tmp.size()]);
+				
+				try{
+					for (PatrolLeg pl : patrol.getLegs()){
+						if (pl.getType() != null) pl.getType().getName();
+						if (pl.getMandate() != null)pl.getMandate().getName();
+						if (pl.getLeader() != null) pl.getLeader().getMember().getFamilyName();
+						if (pl.getPilot() != null) pl.getPilot().getMember().getFamilyName();
+						
+						pl.getMembers().forEach(m->m.getMember().getFamilyName());
+						for (PatrolLegDay pld : pl.getPatrolLegDays()){
+							pld.getTracks().forEach(t->t.getDistance());
+							for (PatrolWaypoint pw : pld.getWaypoints()){
+								
+								ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+								pw.getWaypoint().getObservationsAsString();
+								if (pw.getWaypoint().getLastModifiedBy() != null) pw.getWaypoint().getLastModifiedBy().getFamilyName();
+							}
+						}
+					}
+				} catch (Exception e) {
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+				}
+				
+				if (this.patrol.getCustomAttributes() == null) this.patrol.setCustomAttributes(new ArrayList<>());
+				this.patrol.getCustomAttributes().forEach(a->{
+					a.getAttributeValueAsString(Locale.getDefault());
+					//a.getAttributeValue();	
+				});
+				
+				session.getTransaction().commit();
+				if (ops == null){
+					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				}
+			}catch (Exception ex){
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
+				}
+				throw ex;
+			}
+		}
+	}
+	
+
 
 	public void updatePartName(){
 		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + getPatrol().getId());
@@ -400,7 +442,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	protected void createPages() {
 		showBusy(true);
 		try {
-			getPatrol();
+//			getPatrol();
 			
 			summaryEditor = new PatrolSummaryEditor(this);
 			int i = addPage(summaryEditor, getEditorInput());
@@ -424,20 +466,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			setPageText(presentationIndex, PatrolPresentationPart.TAB_NAME);
 			
 			getSite().setSelectionProvider(selectionProvider);
-			
-//			addPageChangedListener(new IPageChangedListener() {
-//				
-//				@Override
-//				public void pageChanged(PageChangedEvent event) {
-//					if (event.getSelectedPage() == presentationPage) {
-//						//maximize editor
-//						getActiveEditor().getSite().getPage().setPartState(
-//								getActiveEditor().getSite().getPage().getActivePartReference(), 
-//								IWorkbenchPage.STATE_MAXIMIZED);
-//					}
-//					
-//				}
-//			});
+
 		} catch (final Throwable t) {
 			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
@@ -510,6 +539,11 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				noDataFont = new Font(getSite().getShell().getDisplay(), fd);
 			}
 			
+			
+			LocalDate start = getPatrol().getStartDate();
+			LocalDate end = getPatrol().getEndDate();
+			
+				
 			int i = 0;
 			while( i < getPageCount()){
 				if (getEditor(i) instanceof PatrolDayEditor){
@@ -518,10 +552,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					i++;
 				}
 			}
-			LocalDate legdate = LocalDate.from(getPatrol().getStartDate());
 			int insertindex = 1;
-			
-			while (legdate.isBefore(getPatrol().getEndDate()) || legdate.isEqual(getPatrol().getEndDate())) {
+			LocalDate legdate = start;
+			while (legdate.isBefore(end) || legdate.isEqual(end)) {
 				//is there data in any of the legs for this day
 				PatrolDayEditorInput input = new PatrolDayEditorInput(legdate);
 				PatrolDayEditor editor = new PatrolDayEditor(this);
@@ -532,6 +565,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				legdate = ChronoUnit.DAYS.addTo(legdate, 1);
 			}
 			updateTabStyling();
+			
 
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_ErrorCreatingDayPages, ex);
@@ -576,7 +610,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							//doing it this way ensure no "new observation" hibernate events
 							//are created which we don't want.
 							//ticket: #2990
-							saveSession.createQuery("DELETE FROM PatrolWaypoint where id.waypoint.uuid = :wpuuid and id.patrolLegDay.uuid = :leguuid") //$NON-NLS-1$
+							saveSession.createMutationQuery("DELETE FROM PatrolWaypoint where id.waypoint.uuid = :wpuuid and id.patrolLegDay.uuid = :leguuid") //$NON-NLS-1$
 								.setParameter("wpuuid", wp.getWaypoint().getUuid()) //$NON-NLS-1$
 								.setParameter("leguuid", wp.getPatrolLegDay().getUuid()) //$NON-NLS-1$
 								.executeUpdate();
@@ -611,12 +645,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								}
 							}
 							
-							saveSession.saveOrUpdate(wp.getWaypoint());
-							saveSession.saveOrUpdate(wp);
+							Waypoint tmp = saveSession.merge(wp.getWaypoint());
+							saveSession.merge(wp);
 							
 							
 							// remove observations with no data
-							for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+							for (WaypointObservation wo : tmp.getAllObservations()){
 								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
 								for (WaypointObservationAttribute att : wo.getAttributes()) {
 									if (!att.hasValue()) {
@@ -717,8 +751,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					saveSession.beginTransaction();
 					try{
 						for (PatrolWaypoint wp : waypoints) {
-							saveSession.delete(wp);
-							saveSession.delete(wp.getWaypoint());					
+							saveSession.remove(wp);
+							saveSession.remove(wp.getWaypoint());					
 						}
 						saveSession.getTransaction().commit();
 					}catch (Exception ex){
@@ -762,28 +796,29 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 
-		//update all the patrol values
-		for (int i = 0; i < getPageCount(); i ++){
-			getEditor(i).doSave(monitor);
-		}
-		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-				try{
-					if (PatrolHibernateManager.savePatrolInTransaction(patrol, saveSession, false)){
-						//saved okay
-						PatrolEventManager.getInstance().patrolSaved(patrol, false);
-					}
-				}finally{
-					if (saveSession.isOpen()){
-						saveSession.close();
-					}
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		saveJob.schedule();
+//		//update all the patrol values
+//		for (int i = 0; i < getPageCount(); i ++){
+//			getEditor(i).doSave(monitor);
+//		}
+//		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+//				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+//				
+//				try{
+//					if (PatrolHibernateManager.savePatrolInTransaction(patrol, saveSession, false)){
+//						//saved okay
+//						PatrolEventManager.getInstance().patrolSaved(patrol, false);
+//					}
+//				}finally{
+//					if (saveSession.isOpen()){
+//						saveSession.close();
+//					}
+//				}
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		saveJob.schedule();
 				
 	}
 

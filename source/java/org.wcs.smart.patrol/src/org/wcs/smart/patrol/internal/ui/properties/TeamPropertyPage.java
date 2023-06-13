@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.collections.comparators.NullComparator;
@@ -79,10 +78,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconCache;
@@ -105,6 +100,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Property page for managing patrol teams.
@@ -130,8 +126,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private IconCache iconCache;
 	
 	private int editIndex = -1;
-	
-	private UUIDGenerator uuidGenerator; //for generating uuids for description field
 	
 	/*
 	 * columns in the station table
@@ -163,6 +157,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		/* get mandates */
 		List<PatrolMandate> ms =  null;
 		try(Session s = HibernateManager.openSession()){
+			s.get(ConservationArea.class, currentCa.getUuid()).getLanguages().size();
 			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, s));
 			Collections.sort(teams);
 			teams.forEach(t -> t.getNames().size());
@@ -178,14 +173,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		ms.add(0, null);
 		mandates = ms.toArray(new PatrolMandate[ms.size()]);
 
-		uuidGenerator = UUIDGenerator
-				.buildSessionFactoryUniqueIdentifierGenerator();
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
-				StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
-				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+//		uuidGenerator = UUIDGenerator
+//				.buildSessionFactoryUniqueIdentifierGenerator();
+//		Properties prop = new Properties();
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
+//				StandardRandomStrategy.INSTANCE);
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
+//				UUIDGenerationStrategy.class.getName());
+//		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 	
 	@Override
@@ -445,7 +440,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			s.beginTransaction();
 			try {
 				for (Team t : toDelete){
-					s.delete(t);
+					s.remove(t);
 				}
 				s.flush();
 				
@@ -454,25 +449,27 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 				for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
 					Team team = (Team) iterator.next();
-					if (team.getIcon() != null) s.saveOrUpdate(team.getIcon());
+					if (team.getIcon() != null) HibernateManager.saveOrMerge(s,  team.getIcon());
 					siblings.remove(team);
 					String error = DataModelManager.INSTANCE.validateKey(team.getKeyId(), siblings);
 					siblings.add(team);
 					if (error != null){
 						throw new Exception(error);
 					}
-					s.saveOrUpdate(team);
+					HibernateManager.saveOrMerge(s,  team);
 					
 					for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions(s)) {
 						if (lbl.getElementuuid() == null) {
 							if (team.getDescUuid() == null) {
-								UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) s, lbl);
+//								UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) s, lbl);
+								UUID uuid = UuidUtils.generateUuid((SessionImplementor) s);
 								team.setDescUuid(uuid);
-								s.saveOrUpdate(team);
+								s.merge(team);
 							}
 							lbl.setElement(team.getDescUuid());
 						}
-						s.saveOrUpdate(lbl);
+						s.merge(lbl);
+						
 					}
 					
 				}

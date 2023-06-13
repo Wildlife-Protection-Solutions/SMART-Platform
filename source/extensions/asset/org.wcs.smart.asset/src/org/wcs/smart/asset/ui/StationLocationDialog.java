@@ -141,7 +141,7 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(toUpdate);
+				HibernateManager.saveOrMerge(s, toUpdate);
 				s.getTransaction().commit();
 				
 			}catch(Exception ex) {

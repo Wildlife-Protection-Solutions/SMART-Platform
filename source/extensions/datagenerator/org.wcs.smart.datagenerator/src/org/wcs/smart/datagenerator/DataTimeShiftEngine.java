@@ -86,7 +86,6 @@ public class DataTimeShiftEngine implements IDataEngine{
 							//waypoints
 							for (PatrolWaypoint pw : pld.getWaypoints()) {
 								pw.getWaypoint().setDateTime(adjustDateTime(pw.getWaypoint().getDateTime()));
-								session.saveOrUpdate(pw.getWaypoint());
 							}
 							
 							//tracks
@@ -102,7 +101,6 @@ public class DataTimeShiftEngine implements IDataEngine{
 							}
 						}
 					}
-					session.saveOrUpdate(p);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

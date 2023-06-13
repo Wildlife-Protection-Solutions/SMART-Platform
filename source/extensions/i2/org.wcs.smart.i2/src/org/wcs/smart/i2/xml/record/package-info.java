@@ -5,5 +5,8 @@
 // Generated on: 2020.12.09 at 09:16:11 AM PST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.i2.xml.record;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

@@ -123,29 +123,29 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 				//location attributes
 				for (AssetStationLocationAttribute toDelete : deletedLocationAttributes) {
 					String deleteQuery = "DELETE FROM AssetStationLocationAttributeValue WHERE id.attribute = :attribute"; //$NON-NLS-1$
-					Query<?> q = session.createQuery(deleteQuery);
-					q.setParameter("attribute", toDelete.getAttribute()); //$NON-NLS-1$
-					q.executeUpdate();
-					session.delete(toDelete);
+					session.createMutationQuery(deleteQuery)
+						.setParameter("attribute", toDelete.getAttribute()) //$NON-NLS-1$
+						.executeUpdate();
+					session.remove(toDelete);
 				}
 				int index = 0;
 				for (AssetStationLocationAttribute toUpdate : locationAttributes) {
 					toUpdate.setOrder(index++);
-					session.saveOrUpdate(toUpdate);
+					if (session.getReference(toUpdate) == null) session.persist(toUpdate);
 				}
 				
 				//station attributes
 				for (AssetStationAttribute toDelete : deletedStationAttributes) {
 					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute"; //$NON-NLS-1$
-					Query<?> q = session.createQuery(deleteQuery);
-					q.setParameter("attribute", toDelete.getAttribute()); //$NON-NLS-1$
-					q.executeUpdate();
-					session.delete(toDelete);
+					session.createMutationQuery(deleteQuery)
+						.setParameter("attribute", toDelete.getAttribute()) //$NON-NLS-1$
+						.executeUpdate();
+					session.remove(toDelete);
 				}
 				index = 0;
 				for (AssetStationAttribute toUpdate : stationAttributes) {
 					toUpdate.setOrder(index++);
-					session.saveOrUpdate(toUpdate);
+					if (session.getReference(toUpdate) == null) session.persist(toUpdate);
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex) {

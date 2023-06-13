@@ -195,7 +195,7 @@ public class DeleteSurveyElementHandler {
 			if (error != null){
 				throw new Exception(error);
 			}
-			SurveyDesign design = (SurveyDesign) session.load(SurveyDesign.class, uuid);
+			SurveyDesign design = (SurveyDesign) session.getReference(SurveyDesign.class, uuid);
 			if (design == null){
 				session.getTransaction().rollback();
 				return false;
@@ -212,21 +212,21 @@ public class DeleteSurveyElementHandler {
 							for (MissionDay md : m.getMissionDays()){
 								if (md.getWaypoints() != null){
 									for (SurveyWaypoint sw : md.getWaypoints()){
-										session.delete(sw.getWaypoint());
+										session.remove(sw.getWaypoint());
 									}
 								}
 							}
 						}
 					}
-					session.delete(survey);
+					session.remove(survey);
 				}
 				//delete sampling unit
 				List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, "surveyDesign", design).getResultList(); //$NON-NLS-1$
 				for (SamplingUnit unit:  units){
-					session.delete(unit);
+					session.remove(unit);
 				}
 				
-				session.delete(design);
+				session.remove(design);
 				session.getTransaction().commit();
 				
 				for (Path f : dirsToDelete){
@@ -273,7 +273,7 @@ public class DeleteSurveyElementHandler {
 		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
-			Survey survey = (Survey) session.load(Survey.class, uuid);
+			Survey survey = (Survey) session.getReference(Survey.class, uuid);
 			if (survey == null){
 				session.getTransaction().rollback();
 				return false;
@@ -289,14 +289,14 @@ public class DeleteSurveyElementHandler {
 						for (MissionDay md : m.getMissionDays()){
 							if (md.getWaypoints() != null){
 								for (SurveyWaypoint sw : md.getWaypoints()){
-									session.delete(sw.getWaypoint());
+									session.remove(sw.getWaypoint());
 								}
 							}
 						}
 					}
 				}
 				//delete surveys
-				session.delete(survey);
+				session.remove(survey);
 				session.getTransaction().commit();
 
 				//delete filestore dir
@@ -346,7 +346,7 @@ public class DeleteSurveyElementHandler {
 		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
-			Mission mission = (Mission) session.load(Mission.class, uuid);
+			Mission mission = (Mission) session.getReference(Mission.class, uuid);
 			if (mission == null){
 				session.getTransaction().rollback();
 				return false;
@@ -367,12 +367,12 @@ public class DeleteSurveyElementHandler {
 				for (MissionDay md : mission.getMissionDays()){
 					if (md.getWaypoints() != null){
 						for (SurveyWaypoint w : md.getWaypoints()){
-							session.delete(w.getWaypoint());
+							session.remove(w.getWaypoint());
 						}
 					}
 				}
 				//delete mission
-				session.delete(mission);
+				session.remove(mission);
 				session.getTransaction().commit();
 				
 				//delete filestore

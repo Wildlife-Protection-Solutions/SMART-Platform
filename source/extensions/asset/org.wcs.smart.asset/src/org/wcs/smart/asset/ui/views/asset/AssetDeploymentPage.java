@@ -579,7 +579,7 @@ public class AssetDeploymentPage {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(newDeployment);
+				HibernateManager.saveOrMerge(session, newDeployment);
 				parentEditor.getAsset().computeStatus(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -773,20 +773,20 @@ public class AssetDeploymentPage {
 					d.getAssetWaypoints().clear();
 					
 					for (AssetWaypoint aw : dd) {
-						session.delete(aw);
+						session.remove(aw);
 					}
 					session.flush();
 					
 					//delete any waypoints not associated with asset waypoint
-					try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
+					try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 						while(scroll.next()) {
-							Waypoint wp = (Waypoint)scroll.get(0);
-							session.delete(wp);
+							Waypoint wp = scroll.get();
+							session.remove(wp);
 						}
 					}
 					
 					session.flush();
-					session.delete(d);
+					session.remove(d);
 				}
 				parentEditor.getAsset().computeStatus(session);
 				session.getTransaction().commit();
@@ -816,7 +816,7 @@ public class AssetDeploymentPage {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(toUpdate);
+				HibernateManager.saveOrMerge(session, toUpdate);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -857,7 +857,7 @@ public class AssetDeploymentPage {
 			session.beginTransaction();
 			try {
 				if (!toUpdate.getDisruptions().contains(disruption)) toUpdate.getDisruptions().add(disruption);
-				session.saveOrUpdate(toUpdate);
+				HibernateManager.saveOrMerge(session, toUpdate);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -881,7 +881,7 @@ public class AssetDeploymentPage {
 			session.beginTransaction();
 			try {
 				deployment.getDisruptions().remove(disruption);
-				session.saveOrUpdate(deployment);
+				HibernateManager.saveOrMerge(session, deployment);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

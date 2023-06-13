@@ -53,7 +53,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -68,6 +67,7 @@ import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.ui.AttributeTypeLabelProvider;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -125,39 +125,41 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 				s.beginTransaction();
 				for (AssetAttributeListItem i : allItems){
 					if(!attribute.getAttributeList().contains(i)){
+
 						//delete all reference to attribute list item
 						
 						List<AssetAttributeValue> items = QueryFactory.buildQuery(s, AssetAttributeValue.class, "attributeListItem", i).getResultList();  //$NON-NLS-1$
 						for (AssetAttributeValue item : items){
 							modifiedAssets.add(item.getAsset());
-							s.delete(item);
+							s.remove(item);
 						}
 						
 						List<AssetDeploymentAttributeValue> items2 = QueryFactory.buildQuery(s, AssetDeploymentAttributeValue.class, "attributeListItem", i).getResultList();  //$NON-NLS-1$
 						for (AssetDeploymentAttributeValue item : items2){
 							modifiedDeployments.add(item.getAssetDeployment());
-							s.delete(item);
+							s.remove(item);
 						}
 						
 						List<AssetStationAttributeValue> items3 = QueryFactory.buildQuery(s, AssetStationAttributeValue.class, "attributeListItem", i).getResultList();  //$NON-NLS-1$
 						for (AssetStationAttributeValue item : items3){
 							modifiedStations.add(item.getStation());
-							s.delete(item);
+							s.remove(item);
 						}
 						
-						Query<?> q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid"); //$NON-NLS-1$
-						q.setParameter("uuid", i.getUuid()); //$NON-NLS-1$
-						q.executeUpdate();
+						s.createMutationQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid") //$NON-NLS-1$
+							.setParameter("uuid", i.getUuid()) //$NON-NLS-1$
+							.executeUpdate();
+						
+						i.setAttribute(null);
 					}
 				}
 				s.flush();
-				s.clear();
 				
-				s.saveOrUpdate(attribute);
+				HibernateManager.save(s,  attribute.getAttributeList());
+				this.attribute = HibernateManager.saveOrMerge(s,  attribute);
 				
-				this.allItems = new ArrayList<AssetAttributeListItem>();
-				this.allItems.addAll(attribute.getAttributeList());
 				s.getTransaction().commit();
+
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
 				AssetPlugIn.displayLog(Messages.AttributeDialog_SaveError + ex.getMessage(), ex);
@@ -264,6 +266,8 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 				try(Session s = HibernateManager.openSession()){
+					s.get(ConservationArea.class, attribute.getConservationArea().getUuid()).getLanguages();
+					
 					if (attribute.getUuid() != null){
 						attribute = (AssetAttribute) s.get(AssetAttribute.class, attribute.getUuid());
 						attribute.getNames().size();

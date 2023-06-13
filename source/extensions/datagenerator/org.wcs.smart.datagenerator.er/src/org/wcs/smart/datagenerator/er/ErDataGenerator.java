@@ -227,7 +227,7 @@ public class ErDataGenerator implements IDataEngine{
 		survey.setId(getSurveyId());
 		survey.setMissions(new ArrayList<>());
 		
-		session.saveOrUpdate(survey);
+		session.persist(survey);
 		
 		for (int i = 0; i < config.getNumberOfMissionsPerSurvey(); i ++) {
 			sub.subTask(MessageFormat.format(Messages.ErDataGenerator_Progress2, i , config.getNumberOfMissionsPerSurvey(), survey.getId()));
@@ -236,11 +236,11 @@ public class ErDataGenerator implements IDataEngine{
 			survey.getMissions().add(mission);
 			mission.setSurvey(survey);
 			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(mission, session));
-			session.saveOrUpdate(mission);
+			session.persist(mission);
 			mission.getMissionDays().forEach(m->{
 				m.getWaypoints().forEach(wp->{
-					session.saveOrUpdate(wp);
-					session.saveOrUpdate(wp.getWaypoint());
+					session.persist(wp);
+					session.persist(wp.getWaypoint());
 				});
 			});
 		}
@@ -456,7 +456,7 @@ public class ErDataGenerator implements IDataEngine{
 				if (design.getTrackObserver()) {
 					observer = mission.getMembers().get(random.nextInt(mission.getMembers().size())).getMember();
 				}
-				session.save(wp);
+				session.merge(wp);
 				
 				SurveyWaypoint pw = new SurveyWaypoint();
 				pw.setSamplingUnit(unit);

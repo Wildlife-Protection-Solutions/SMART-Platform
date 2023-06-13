@@ -156,6 +156,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		iconCache = new IconCache(parent);
 		
 		try(Session s = HibernateManager.openSession()){
+			s.get(ConservationArea.class, currentCa.getUuid()).getLanguages().size();
 			transportTypes = new ArrayList<>();
 			patrolTypes = new ArrayList<>(PatrolHibernateManager.getPatrolTypes(currentCa, s));		
 			//ensure all types are lazily loaded
@@ -1175,19 +1176,18 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			s.beginTransaction();
 			try{
-				for (PatrolTransportType t : toDelete){
-					if (t.getUuid() != null) s.delete(t);
-				}
-				s.flush();
-				
 				for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
 					PatrolType type = (PatrolType) iterator.next();
-					s.saveOrUpdate(type.getConservationArea());	
-					s.saveOrUpdate(type);
+					s.merge(type);
 				}
+				
+				for (PatrolTransportType t : toDelete){
+					if (t.getUuid() != null) s.remove(s.getReference(t));
+				}
+				
 				for (PatrolTransportType tt : transportTypes){
-					if (tt.getIcon() != null && tt.getIcon().getUuid() == null) s.saveOrUpdate(tt.getIcon());
-					s.saveOrUpdate(tt);
+					HibernateManager.saveOrMerge(s,  tt.getIcon());
+					HibernateManager.saveOrMerge(s, tt);
 				}
 				s.getTransaction().commit();
 				toDelete.clear();

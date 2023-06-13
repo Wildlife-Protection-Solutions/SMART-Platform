@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.query.internal.Messages;
@@ -60,20 +59,20 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 
 	
 	private void deleteQueries(IQueryType queryType, ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from " + queryType.getHibernateClass().getSimpleName() + " where conservationArea = :ca"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from " + queryType.getHibernateClass().getSimpleName() + " where conservationArea = :ca") //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteQueryFolders(ConservationArea ca, Session session) throws Exception{
 		//first update parent folders to null; otherwise derby throws and error
-		Query<?> q = session.createQuery("update QueryFolder set parentFolder = null WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("update QueryFolder set parentFolder = null WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from QueryFolder where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from QueryFolder where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 }

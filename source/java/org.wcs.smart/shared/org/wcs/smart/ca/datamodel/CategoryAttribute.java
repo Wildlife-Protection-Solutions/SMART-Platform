@@ -23,21 +23,21 @@ package org.wcs.smart.ca.datamodel;
 
 import java.io.Serializable;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -47,7 +47,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.dm_cat_att_map")
+@Table(name = "dm_cat_att_map", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.attribute", 
 		joinColumns = @JoinColumn(name = "attribute_uuid")),

@@ -25,8 +25,6 @@ import java.net.MalformedURLException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.ca.ConservationArea;
@@ -35,6 +33,8 @@ import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.model.ConnectServerOption;
+
+import jakarta.ws.rs.WebApplicationException;
 
 /**
  * Interface for interacting with the SMART Connect Server data queue.

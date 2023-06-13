@@ -24,11 +24,11 @@ package org.wcs.smart.connect.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  * Basemap tile cache record 
@@ -37,7 +37,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name="connect.tile_cache")
+@Table(name="tile_cache", schema="connect")
 public class BasemapTile extends UuidItem{
 
 	private static final long serialVersionUID = 1L;

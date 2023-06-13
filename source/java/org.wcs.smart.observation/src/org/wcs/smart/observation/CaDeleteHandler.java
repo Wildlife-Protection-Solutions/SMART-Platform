@@ -23,7 +23,6 @@ package org.wcs.smart.observation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.observation.internal.Messages;
@@ -49,14 +48,14 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 	}
 	
 	private void deleteWaypoints(ConservationArea ca, Session session){
-		Query<?> q = session.createQuery("delete from Waypoint where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Waypoint where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 	private void deleteDataLinks(ConservationArea ca, Session session){
-		Query<?> q = session.createQuery("delete from DataLink where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from DataLink where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 }

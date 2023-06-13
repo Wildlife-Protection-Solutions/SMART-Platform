@@ -304,17 +304,17 @@ public class DataImportPage {
 								p.getStation().setId(generateStationId(session));
 								if (p.getStation().getX() == null) p.getStation().setX(p.getX());
 								if (p.getStation().getY() == null) p.getStation().setY(p.getY());
-								session.save(p.getStation());
+								session.persist(p.getStation());
 								session.flush();
 							}
 							
 							if (isNewLocation) {
-								session.save(p.getStationLocation());
+								session.persist(p.getStationLocation());
 								
 								p.getStationLocation().setId(generateLocationId(p.getStation(), session));
 								if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
 								if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
-								session.save(p.getStationLocation());
+								session.persist(p.getStationLocation());
 								session.flush();
 							}
 							
@@ -399,7 +399,7 @@ public class DataImportPage {
 							
 							int incidentLength =  (int) Math.ceil( ChronoUnit.MILLIS.between( minDate, maxDate) / 1000.0);
 							
-							session.save(wp);
+							session.persist(wp);
 							session.flush();
 							
 							for (Entry<Asset, AssetStationLocation> entry : assets.entrySet()) {
@@ -410,7 +410,7 @@ public class DataImportPage {
 										entry.getValue(), session, Locale.getDefault());
 								
 								if (d.getUuid() == null) {
-									session.save(d);
+									session.persist(d);
 									session.flush();
 								}
 								int wpcnt = d.getAssetWaypoints().size() + 1;
@@ -430,7 +430,7 @@ public class DataImportPage {
 								aw.setAttachments(new HashSet<>());
 								if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
 								d.getAssetWaypoints().add(aw);
-								session.save(aw);
+								session.persist(aw);
 								
 								//link files to deployment
 								List<WaypointAttachment> files = assetAttachmentLink.get(asset);
@@ -478,7 +478,7 @@ public class DataImportPage {
 		while(true) {
 			String id = Messages.DataImportPage_StationIdPrefix + cnt;
 			String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = LOWER(:id) AND conservationArea = :ca "; //$NON-NLS-1$
-			Long stncnt = (Long) session.createQuery(query)
+			Long stncnt = (Long) session.createQuery(query, Long.class)
 				.setParameter("id",  id) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.uniqueResult();
@@ -493,7 +493,7 @@ public class DataImportPage {
 		while(true) {
 			String id = station.getId() + " - " + cnt; //$NON-NLS-1$
 			String query =  "SELECT count(*) FROM AssetStationLocation where LOWER(id) = LOWER(:id) AND station.conservationArea = :ca "; //$NON-NLS-1$
-			Long stncnt = (Long) session.createQuery(query)
+			Long stncnt = session.createQuery(query, Long.class)
 				.setParameter("id",  id) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.uniqueResult();

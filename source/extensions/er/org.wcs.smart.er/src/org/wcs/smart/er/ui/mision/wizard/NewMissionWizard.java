@@ -185,7 +185,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 				working = ChronoUnit.DAYS.addTo(working, 1);
 			}
 			
-			session.save(newMission);
+			session.persist(newMission);
 			session.getTransaction().commit();
 			
 			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_ADDED, newMission);

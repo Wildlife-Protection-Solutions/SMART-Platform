@@ -340,10 +340,10 @@ public class GenerateSmartThemeDialog extends SmartStyledDialog {
 					dmItems.sort((a,b)->Collator.getInstance().compare(((Attribute)a).getName(), ((Attribute)b).getName()));
 
 					String query = "SELECT cast(max(smart.hkeyLength(hkey)) as int) FROM Category WHERE conservationArea = :ca "; //$NON-NLS-1$
-					Query<?> q = session.createQuery(query)
+					Query<Integer> q = session.createQuery(query, Integer.class)
 						.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
-					Integer maxInt = (Integer) q.uniqueResult();
+					Integer maxInt = q.uniqueResult();
 					if (maxInt != null) {
 						for (int i = 0; i <= maxInt; i ++) {
 							dmItems.add(i, i);

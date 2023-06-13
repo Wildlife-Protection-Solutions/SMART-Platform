@@ -91,6 +91,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -472,7 +473,7 @@ public class MissionDayComposite {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(missionDay);
+				session.merge(missionDay);
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				session.getTransaction().rollback();
@@ -589,10 +590,10 @@ public class MissionDayComposite {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.update(editor.getMissionEditor().getMission());
-	
+				Mission mission = session.getReference(editor.getMissionEditor().getMission());
+				
 				//find mission day
-				missionDay = findMissionDay(editor.getMissionEditor().getMission());
+				missionDay = findMissionDay(mission);
 				if (missionDay == null){
 					throw new IllegalStateException(MessageFormat.format(Messages.MissionDayComposite_DayNotFound,
 							new Object[]{editor.getDay().toString()}));
@@ -629,11 +630,10 @@ public class MissionDayComposite {
 				//load waypoints and attach to session; for performance reasons
 				//waypoints are not cascaded (otherwise saves are cascaded too)
 				for (SurveyWaypoint wp : missionDay.getWaypoints()) {
-					session.update(wp.getWaypoint());
-					if (wp.getSamplingUnit() != null){
-						session.update(wp.getSamplingUnit());
-						wp.getSamplingUnit().getId();
-					}
+					Hibernate.initialize(wp);
+					Hibernate.initialize(wp.getWaypoint());
+					Hibernate.initialize(wp.getSamplingUnit());
+					
 					//lazy load
 					wp.getWaypoint().getAllObservations();	
 					if (wp.getWaypoint().getAttachments() != null) {
@@ -733,7 +733,7 @@ public class MissionDayComposite {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				MissionDay md = (MissionDay)session.merge(missionDay);
+				MissionDay md = (MissionDay)session.getReference(missionDay);
 	
 				for (Iterator<SurveyWaypoint> iterator = md.getWaypoints().iterator(); iterator.hasNext();) {
 					SurveyWaypoint e = iterator.next();
@@ -766,24 +766,8 @@ public class MissionDayComposite {
 	protected void showImportWaypointWizard() {
 		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(missionDay, GPSDataImport.ImportType.WAYPOINT);
 		wizard.setDateOption(editor.getDay());
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
-					WizardDialog dialog = new SmartWizardDialog(editor.getSite().getShell(), wizard);
-
-					if (dialog != null) {
-						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
-						dialog.open();
-					}
-				}
-			});
-		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionDayComposite_ImportWizardError + ex.getLocalizedMessage(), ex);
-		}
+		WizardDialog dialog = new SmartWizardDialog(editor.getSite().getShell(), wizard);
+		dialog.open();
 	}
 
 	protected void updateTotalHours() {
@@ -1174,25 +1158,26 @@ public class MissionDayComposite {
 			case COMMENT:		return commentEditor;
 			case OBSERVATION:
 				//setup employees here incase they have changed
+				List<Employee> emps = null;
 				if (editor.getMissionEditor().trackObserver()){
-					List<Employee> emps = new ArrayList<Employee>();
-					for (MissionMember mm : missionDay.getMission().getMembers()){
-						emps.add(mm.getMember());
-						SmartLabelProvider.getFullLabel(mm.getMember());
-					}
-					//sort
-					Collections.sort(emps, new Comparator<Employee>() {
-						@Override
-						public int compare(Employee arg0, Employee arg1) {
-							return Collator.getInstance().compare(
-									SmartLabelProvider.getFullLabel(arg0).toUpperCase(), 
-									SmartLabelProvider.getFullLabel(arg1).toUpperCase());
+					try(Session session = HibernateManager.openSession()){
+						emps = new ArrayList<Employee>();
+						for (MissionMember mm : session.getReference(missionDay).getMission().getMembers()){
+							emps.add(mm.getMember());
+							SmartLabelProvider.getFullLabel(mm.getMember());
 						}
-					});
-					observationEditor.setObservers(emps);
-				}else{
-					observationEditor.setObservers(null);
+						//sort
+						Collections.sort(emps, new Comparator<Employee>() {
+							@Override
+							public int compare(Employee arg0, Employee arg1) {
+								return Collator.getInstance().compare(
+										SmartLabelProvider.getFullLabel(arg0).toUpperCase(), 
+										SmartLabelProvider.getFullLabel(arg1).toUpperCase());
+							}
+						});
+					}
 				}
+				observationEditor.setObservers(emps);
 				
 				return observationEditor;
 			case SAMPLING_UNIT: return samplingUnitEditor;

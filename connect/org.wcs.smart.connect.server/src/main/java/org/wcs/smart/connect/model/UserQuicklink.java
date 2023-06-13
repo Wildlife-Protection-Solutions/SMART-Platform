@@ -24,11 +24,11 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * A UserQuicklink entity. Keeps a link specific to a single user, all of these are shown on their homepage. "order" is the order users want the links (Ascending) displayed.  
@@ -36,7 +36,7 @@ import javax.persistence.Table;
  * @Author Jeff
  */
 @Entity
-@Table(name = "connect.user_quicklinks")
+@Table(name = "user_quicklinks", schema="connect")
 public class UserQuicklink extends ConnectUuidItem{
 	private UUID userUuid; 
 	private Quicklink quicklink;

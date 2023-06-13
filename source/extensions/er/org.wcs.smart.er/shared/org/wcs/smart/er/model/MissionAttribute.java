@@ -24,17 +24,6 @@ package org.wcs.smart.er.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
@@ -42,6 +31,17 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * Mission attribute model object.  These are owned by a conservation
@@ -51,7 +51,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
  *
  */
 @Entity
-@Table(name="smart.mission_attribute")
+@Table(name="mission_attribute", schema="smart")
 public class MissionAttribute extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;

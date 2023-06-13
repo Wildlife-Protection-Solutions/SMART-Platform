@@ -24,14 +24,14 @@ package org.wcs.smart.i2.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -42,7 +42,7 @@ import javax.persistence.Transient;
  *
  */
 @Entity
-@Table(name="smart.i_profile_record_source")
+@Table(name="i_profile_record_source", schema="smart")
 public class IntelProfileRecordSource {
 	
 	private IProfileRecordPk id = new IProfileRecordPk();

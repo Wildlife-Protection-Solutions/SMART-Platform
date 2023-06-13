@@ -59,7 +59,7 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 
 	@Override
 	public void processFile(final Session session) throws Exception{
-		session.createNativeQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
+		session.createNativeMutationQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
 		super.processFile(session);
 	}
 	

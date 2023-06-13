@@ -87,7 +87,7 @@ public class ConnectUserAccountDialog extends SmartStyledTitleDialog{
 			try{
 				if (toUpdate != null){
 					for (ConnectUser cu : toUpdate){
-						s.saveOrUpdate(cu);
+						cu = s.getReference(cu);
 						cu.setConnectUsername(username);
 					}
 				}else{
@@ -97,7 +97,7 @@ public class ConnectUserAccountDialog extends SmartStyledTitleDialog{
 						user.setConnectUsername(username);
 						user.setSmartUser((Employee)e);
 						user.setServer(server);
-						s.save(user);
+						s.persist(user);
 					}
 				}
 				s.getTransaction().commit();

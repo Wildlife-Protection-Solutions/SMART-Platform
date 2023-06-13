@@ -25,11 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
@@ -41,6 +36,11 @@ import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Mission id group by element.
@@ -65,7 +65,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		if (items != null && items.length > 0){
 			for (String it : items){
 				try{
-					Mission m = session.load(Mission.class, UuidUtils.stringToUuid(it));
+					Mission m = session.getReference(Mission.class, UuidUtils.stringToUuid(it));
 					if (m != null){
 						allItems.add(new ListItem(m.getUuid(), m.getId()));
 					}

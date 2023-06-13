@@ -90,7 +90,7 @@ public class CaChangeLogPackageJob implements Runnable {
 			item.setStatus(Status.COMPLETE);
 			item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			item.setLocalFilename(file.toString());
-			s.saveOrUpdate(item);
+			s.merge(item);
 			s.getTransaction().commit();
 			
 		}catch (Exception ex){
@@ -102,7 +102,7 @@ public class CaChangeLogPackageJob implements Runnable {
 				s.beginTransaction();
 				item.setStatus(Status.ERROR);
 				item.setMessage("{\"error\": \"" + MessageFormat.format(Messages.getString("CaChangeLogPackageJob.ChangeLogError", item.getLocale()), ex.getMessage()) + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				s.saveOrUpdate(item);
+				s.merge(item);
 				s.getTransaction().commit();
 			}catch (Exception ex2){
 				logger.log(Level.SEVERE, "Error updating change log status. " + ex2.getMessage(), ex2); //$NON-NLS-1$

@@ -76,7 +76,6 @@ import org.wcs.smart.query.QueryPlugIn;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class NewQueryDropDownHandler {
 
 	private static final String SOURCE_ID = "org.wcs.smart.query.source"; //$NON-NLS-1$

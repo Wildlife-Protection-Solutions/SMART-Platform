@@ -36,8 +36,8 @@ import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.StringType;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
@@ -231,27 +231,27 @@ public class UpdateableResultSet {
 				WaypointObservation wo = (WaypointObservation) s.get(WaypointObservation.class, observationUuid);
 				if (wo == null) return false;
 				wp = wo.getWaypoint();
-				s.delete(wo);
+				s.remove(wo);
 
 				//delete empty observation groups
 				wo.getObservationGroup().getObservations().remove(wo);
 				if (wo.getObservationGroup().getObservations().isEmpty()) {
-					s.delete(wo.getObservationGroup());
+					s.remove(wo.getObservationGroup());
 					wo.getObservationGroup().getWaypoint().getObservationGroups().remove(wo.getObservationGroup());
 				}
 				
 				//update category names in query results table
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT count(*) FROM " + engine.getQueryDataTable() + " WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
+				NativeQuery<Integer> queryUpdate = s.createNativeQuery(sql.toString(), Integer.class);
 				queryUpdate.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 				Integer cnt = (Integer)queryUpdate.uniqueResult();
 				if (cnt > 1){
 					sql = new StringBuilder();
 					sql.append(" DELETE FROM " +  engine.getQueryDataTable() + " WHERE ob_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-					queryUpdate = s.createNativeQuery(sql.toString());
-					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
-					queryUpdate.executeUpdate();
+					s.createNativeMutationQuery(sql.toString())
+						.setParameter("uuid", observationUuid) //$NON-NLS-1$
+						.executeUpdate();
 					
 					((AssetObservationEngine) engine).updateResultCount(s, results);
 				}else{
@@ -263,9 +263,9 @@ public class UpdateableResultSet {
 					sql.deleteCharAt(sql.length() - 1);
 					sql.deleteCharAt(sql.length() - 1);
 					sql.append(" WHERE ob_uuid = :uuid "); //$NON-NLS-1$
-					queryUpdate = s.createNativeQuery(sql.toString());
-					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
-					queryUpdate.executeUpdate();
+					s.createNativeMutationQuery(sql.toString())
+						.setParameter("uuid", observationUuid) //$NON-NLS-1$
+						.executeUpdate();
 				}
 				s.flush();
 				updateLastModified(wp, s);
@@ -301,7 +301,7 @@ public class UpdateableResultSet {
 						g.setObservations(new ArrayList<>());
 						g.setWaypoint(wp);
 						wp.getObservationGroups().add(g);
-						s.save(g);
+						s.persist(g);
 						item.setObservationGroupUuid(g.getUuid());
 					}
 					//add to first group
@@ -309,14 +309,14 @@ public class UpdateableResultSet {
 					wo = newOb;
 					wo.setObservationGroup(first);
 					first.getObservations().add(wo);
-					s.save(wo);
+					s.persist(wo);
 					
 				}else{
 					wo = (WaypointObservation) s.get(WaypointObservation.class, newOb.getUuid());
 					if (wo == null) return false;
 					if (wo.getAttributes() != null){
 						for (WaypointObservationAttribute a : wo.getAttributes()){
-							s.delete(a);
+							s.remove(a);
 						}
 						wo.getAttributes().clear();
 						s.flush();
@@ -370,7 +370,7 @@ public class UpdateableResultSet {
 					params.put("uuid", wo.getUuid()); //$NON-NLS-1$
 				}
 				
-				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
+				MutationQuery queryUpdate = s.createNativeMutationQuery(sql.toString());
 				for (Entry<String,Object> e : params.entrySet()){
 					queryUpdate.setParameter(e.getKey(), e.getValue());
 				}
@@ -505,31 +505,31 @@ public class UpdateableResultSet {
 	}
 	
 	protected void updateLastModified(Waypoint wp, Session s) {
-		NativeQuery<?> q = s.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_lastmodified = :lastmodified, wp_lastmodifiedbyname = :lastmodifiedby WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("lastmodified", wp.getLastModified()); //$NON-NLS-1$
-		q.setParameter("lastmodifiedby", SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee())); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
+		s.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_lastmodified = :lastmodified, wp_lastmodifiedbyname = :lastmodifiedby WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("lastmodified", wp.getLastModified()) //$NON-NLS-1$
+			.setParameter("lastmodifiedby", SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee())) //$NON-NLS-1$
+			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void updateWaypointPosition(Waypoint wp, double newX, double newY, Session session){
 		wp.setRawX(newX);
 		wp.setRawY(newY);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("x", newX); //$NON-NLS-1$
-		q.setParameter("y", newY); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("x", newX) //$NON-NLS-1$
+			.setParameter("y", newY) //$NON-NLS-1$
+			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 		
 	}
 	private void updateWaypointId(Waypoint wp, String newId, Session session){
 		wp.setId(newId);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_id = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", newId); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_id = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("id", newId) //$NON-NLS-1$
+			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void updateWaypointTime(Waypoint wp, LocalTime newTime, Session session){
@@ -537,20 +537,19 @@ public class UpdateableResultSet {
 		LocalDateTime ldt = LocalDateTime.of(wp.getDateTime().toLocalDate(), newTime);
 		wp.setDateTime(ldt);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_time = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", wp.getDateTime()); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_time = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("id", wp.getDateTime()) //$NON-NLS-1$
+			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void updateWaypointComment(Waypoint wp, String newComment, Session session){
 		wp.setComment(newComment);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + engine.getQueryDataTable() + " SET wp_comment = :cmt WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("cmt", newComment,  StringType.INSTANCE); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		
-		q.executeUpdate();
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_comment = :cmt WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("cmt", newComment) //$NON-NLS-1$
+			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	protected IEventBroker getEventBroker() {
@@ -572,20 +571,20 @@ public class UpdateableResultSet {
 				List<AssetWaypoint> assetWaypoints =  QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint", wo}).list(); //$NON-NLS-1$
 				for (AssetWaypoint aw : assetWaypoints) {
 					for (AssetWaypointAttachment attlink : aw.getAttachments()) {
-						s.delete(attlink);
+						s.remove(attlink);
 					}
-					s.delete(aw);
+					s.remove(aw);
 				}
 				//delete waypoint
-				s.delete(wo);
+				s.remove(wo);
 				s.flush();
 				
 				//update category names in query results table
 				StringBuilder sql = new StringBuilder();
 				sql.append(" DELETE FROM " + engine.getQueryDataTable() + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
-				queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
-				queryUpdate.executeUpdate();
+				s.createNativeMutationQuery(sql.toString())
+					.setParameter("uuid", waypointUuid) //$NON-NLS-1$
+					.executeUpdate();
 					
 				if (engine instanceof IDerbyWaypointEngine) {
 					((IDerbyWaypointEngine) engine).updateResultCount(s, results);

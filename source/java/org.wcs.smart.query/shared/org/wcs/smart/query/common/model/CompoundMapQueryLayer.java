@@ -23,13 +23,13 @@ package org.wcs.smart.query.common.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Compound query layer 
@@ -38,7 +38,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name="smart.compound_query_layer")
+@Table(name="compound_query_layer", schema="smart")
 public class CompoundMapQueryLayer extends UuidItem{
 
 	private static final long serialVersionUID = 1L;

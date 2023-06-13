@@ -29,32 +29,31 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * @author elitvin
  * @since 2.0.0
  */
 @Entity
-@Table(name = "smart.cm_node")
+@Table(name = "cm_node", schema="smart")
 public class CmNode extends NamedItem implements IImageAssociatedObject {
 
 	private static final String SIGNATURE_SPACER = ","; //$NON-NLS-1$
@@ -310,8 +309,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	 * language the platform is running in.
 	 */
 	@Override
-	@Type(type="org.wcs.smart.ca.LabelUserType")
-	@Column(name="uuid", insertable=false, updatable=false)
+	@Transient
 	public String getName() {
 		String n = super.getName();
 		if (n == null || n.length() == 0){
@@ -335,7 +333,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 		
 		if (getCategory() != null) return getCategory().findName(defaultl);
 		
-		return "";	
+		return "";	 //$NON-NLS-1$
 		
 	}
 }

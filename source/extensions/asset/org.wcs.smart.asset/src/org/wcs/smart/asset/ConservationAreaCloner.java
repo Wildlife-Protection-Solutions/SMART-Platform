@@ -126,7 +126,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setMetadataType(mapping.getMetadataType());
 			clone.setSearchOrder(mapping.getSearchOrder());
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 	
 		}
 		engine.getSession().flush();
@@ -143,7 +143,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			if (a == null) throw new Exception(Messages.ConservationAreaCloner_StationAttributeNotFound);
 			clone.setAttribute(a);
 			clone.setOrder(setting.getOrder());
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 	
 		}
 		engine.getSession().flush();
@@ -160,7 +160,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			if (a == null) throw new Exception(Messages.ConservationAreaCloner_StationLocationAttributeNotFound);
 			clone.setAttribute(a);
 			clone.setOrder(setting.getOrder());
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 	
 		}
 		engine.getSession().flush();
@@ -174,7 +174,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKeyId(setting.getKeyId());
 			clone.setValue(setting.getValue());
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 	
 		}
 		engine.getSession().flush();
@@ -187,7 +187,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setConservationArea(engine.getNewCa());
 			clone.setName(style.getName());
 			clone.setStyleString(style.getStyleString());
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}
@@ -213,7 +213,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				}
 			}
 			engine.addConservationItemMapping(ia, clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.getSession().flush();
 		}	
 	}
@@ -256,7 +256,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				clone.getAssetDeploymentAttributes().add(cloneAttribute);
 			}
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(asset, clone);
 		}	
 		engine.getSession().flush();

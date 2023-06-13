@@ -116,7 +116,7 @@ public class FileStoreWatcher implements Runnable {
     	}catch (Exception ex){
     		//not in a ca directory so we do not replicate 
     		//System.out.println("FileStoreWatcher: Process Event: Error cannot determine CA from '" + relativePath.getName(0).toString() + "', directory not being watched"); //$NON-NLS-1$ //$NON-NLS-2$
-    		logger.log(Level.INFO, "FileStoreWatcher: Process Event: Error cannot determine CA from '" + dir.toString() + "', directory not being watched"); //$NON-NLS-1$
+    		logger.log(Level.INFO, "FileStoreWatcher: Process Event: Error cannot determine CA from '" + dir.toString() + "', directory not being watched"); //$NON-NLS-1$ //$NON-NLS-2$
     		return true; //we do want to check sub-directories
     	}
     	//logger.log(Level.SEVERE, "Watching directory: " + dir.toString());

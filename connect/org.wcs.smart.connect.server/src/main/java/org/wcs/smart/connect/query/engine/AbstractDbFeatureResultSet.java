@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.query.engine;
 
-import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -296,8 +295,8 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 //		}
 		if (!hasSortColumns) {
 			// add the sort columns
-			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			session.createNativeMutationQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			hasSortColumns = true;
 		}
 
@@ -313,7 +312,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET sortKeyTxt = " + sortColumn); //$NON-NLS-1$
-			session.createNativeQuery(sql.toString()).executeUpdate();
+			session.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 		}else{
 			
@@ -332,7 +331,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createNativeQuery(sql.toString()).executeUpdate();
+				session.createNativeMutationQuery(sql.toString()).executeUpdate();
 				break;
 			case TEXT:
 			case DATE:
@@ -348,7 +347,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createNativeQuery(sql.toString()).executeUpdate();
+				session.createNativeMutationQuery(sql.toString()).executeUpdate();
 				break;
 			case LIST:
 				if (labelTable == null) throw new UnsupportedOperationException(MessageFormat.format("Cannot sort by column with key {0} for this query type.", key)); //$NON-NLS-1$
@@ -366,7 +365,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createNativeQuery(sql.toString()).executeUpdate();
+				session.createNativeMutationQuery(sql.toString()).executeUpdate();
 				break;
 			case TREE:
 				if (labelTable == null) throw new UnsupportedOperationException(MessageFormat.format("Cannot sort by column with key {0} for this query type.", key)); //$NON-NLS-1$
@@ -382,7 +381,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createNativeQuery(sql.toString()).executeUpdate();
+				session.createNativeMutationQuery(sql.toString()).executeUpdate();
 				break;
 			case MLIST:
 				throw new UnsupportedOperationException("Sorting by MULIT LIST attributes is not supported."); //$NON-NLS-1$
@@ -441,7 +440,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		sb.append("(attach_uuid uuid, "); //$NON-NLS-1$
 		sb.append("wp_uuid uuid, "); //$NON-NLS-1$
 		sb.append("ob_uuid uuid)"); //$NON-NLS-1$
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -460,13 +459,13 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
 		sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
 
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
 		sb.append(imageTempTable);
 		
-		int imageDataCnt = ((BigInteger) session.createNativeQuery(sb.toString()).uniqueResult()).intValue();
+		int imageDataCnt = session.createNativeQuery(sb.toString(), Long.class).uniqueResult().intValue();
 		return imageDataCnt;
 		
 	}
@@ -477,7 +476,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(imageTempTable);
 		sb.append("(attach_uuid uuid, wp_uuid uuid)"); //$NON-NLS-1$
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -495,13 +494,13 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		sb.append("on a.wp_uuid = e.wp_uuid"); //$NON-NLS-1$
 		sb.append(" ORDER BY a.wp_time desc, a.wp_id ) z "); //$NON-NLS-1$
 
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
 		sb.append(imageTempTable);
 		
-		int imageDataCnt = ((BigInteger) session.createNativeQuery(sb.toString()).uniqueResult()).intValue();		
+		int imageDataCnt = session.createNativeQuery(sb.toString(), Long.class).uniqueResult().intValue();		
 		return imageDataCnt;
 		
 	}

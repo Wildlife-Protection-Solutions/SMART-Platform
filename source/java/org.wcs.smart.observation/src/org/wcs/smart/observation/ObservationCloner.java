@@ -60,7 +60,7 @@ public class ObservationCloner implements IConservationAreaTemplateCloner {
 			newOp.setTrackDistanceDirection(ops.getTrackDistanceDirection());
 			newOp.setTrackObserver(ops.getTrackObserver());
 		}
-		engine.getSession().save(newOp);
+		engine.getSession().persist(newOp);
 		engine.getSession().flush();
 	}
 

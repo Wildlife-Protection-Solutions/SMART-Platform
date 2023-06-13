@@ -110,6 +110,8 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Query engine shared functionality.
  * 
@@ -300,7 +302,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	public void dropTable(Session s, String tableName) throws SQLException  {
 		String sql = "DROP TABLE IF EXISTS " + tableName; //$NON-NLS-1$
 		logger.finest(sql);
-		s.createNativeQuery(sql).executeUpdate();
+		s.createNativeMutationQuery(sql).executeUpdate();
 	}
 
 	public void dropTable(Connection c, String tableName) throws SQLException  {
@@ -342,7 +344,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return
 	 */
 	protected String[] getCategoryLabels(UUID uuid, Locale l, Session session){
-		Category category = (Category) session.load(Category.class, uuid);
+		Category category = (Category) session.getReference(Category.class, uuid);
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(category.getName());
 		Category parent = category.getParent();
@@ -365,7 +367,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	public String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
-			Employee x = (Employee) session.load(Employee.class, uuid);
+			Employee x = (Employee) session.getReference(Employee.class, uuid);
 			if (x != null) {
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(x, locale);
 			}
@@ -595,14 +597,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 				String auth = crsid.split(":")[0]; //$NON-NLS-1$
 				int code = Integer.parseInt(crsid.split(":")[1]); //$NON-NLS-1$
 				
-				org.hibernate.query.NativeQuery<?> q = session.createNativeQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid"); //$NON-NLS-1$ //$NON-NLS-2$
+				org.hibernate.query.NativeQuery<Tuple> q = session.createNativeQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid", Tuple.class); //$NON-NLS-1$ //$NON-NLS-2$
 				q.setParameter("auth", auth); //$NON-NLS-1$
 				q.setParameter("srid", code); //$NON-NLS-1$
-				Object[] data = (Object[]) q.uniqueResult();
+				Tuple data =  q.uniqueResult();
 				if (data != null){
-					CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
+					CoordinateReferenceSystem c = CRS.parseWKT((String)data.get(1));
 					if (CRS.equalsIgnoreMetadata(crs, c)){
-						return (Integer)data[0];
+						return (Integer)data.get(0);
 					}
 				}
 			}
@@ -610,13 +612,12 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			logger.log(Level.FINEST, ex.getMessage(), ex);
 		}
 		//if above fails, lets search entire list for match
-		@SuppressWarnings("unchecked")
-		List<Object[]> choices = session.createNativeQuery("SELECT srid, srtext from " + spatialRefSys).list(); //$NON-NLS-1$
-		for (Object[] data : choices){
+		List<Tuple> choices = session.createNativeQuery("SELECT srid, srtext from " + spatialRefSys, Tuple.class).list(); //$NON-NLS-1$
+		for (Tuple data : choices){
 			try{
-				CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
+				CoordinateReferenceSystem c = CRS.parseWKT((String)data.get(1));
 				if (CRS.equalsIgnoreMetadata(crs, c)){
-					return (Integer)data[0];
+					return (Integer)data.get(0);
 				}
 			}catch (Exception ex){
 				logger.log(Level.FINEST, ex.getMessage(), ex);
@@ -632,7 +633,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sql.append( "CREATE TABLE "); //$NON-NLS-1$
 		sql.append( labelTable );
 		sql.append("(uuid uuid, value varchar(1024))"); //$NON-NLS-1$
-		session.createNativeQuery(sql.toString()).executeUpdate();
+		session.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	/**
 	 * Populates the observation label table with all the list elements
@@ -674,7 +675,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sql.append(tablePrefix(WaypointObservationAttribute.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservationAttributeList.class) + ".observation_attribute_uuid"); //$NON-NLS-1$
 		
-		session.createNativeQuery(sql.toString()).executeUpdate();
+		session.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		session.doWork(new Work() {
 

@@ -53,9 +53,9 @@ public class TimeInFieldAssetSummary implements IAssetSummary {
 	public String getSummaryValue(Asset asset, Session session) {
 		double totalHours = 0;
 		if (asset.getUuid() != null) {
-			try(ScrollableResults results = QueryFactory.buildQuery(session, AssetDeployment.class, "asset", asset).scroll()){ //$NON-NLS-1$
+			try(ScrollableResults<AssetDeployment> results = QueryFactory.buildQuery(session, AssetDeployment.class, "asset", asset).scroll()){ //$NON-NLS-1$
 				while(results.next()) {
-					AssetDeployment as = (AssetDeployment) results.get(0);
+					AssetDeployment as = results.get();
 					totalHours += as.getTimeOutInSeconds();
 				}
 			}

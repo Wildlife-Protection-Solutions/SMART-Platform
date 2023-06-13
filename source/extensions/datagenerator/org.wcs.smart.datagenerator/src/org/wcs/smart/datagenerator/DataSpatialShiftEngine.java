@@ -86,7 +86,6 @@ public class DataSpatialShiftEngine implements IDataEngine{
 								Coordinate c = adjustPoint(pw.getWaypoint().getX(), pw.getWaypoint().getY());
 								pw.getWaypoint().setRawX(c.x);
 								pw.getWaypoint().setRawY(c.y);
-								session.saveOrUpdate(pw.getWaypoint());
 							}
 							
 							//tracks
@@ -107,7 +106,6 @@ public class DataSpatialShiftEngine implements IDataEngine{
 							}
 						}
 					}
-					session.saveOrUpdate(p);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

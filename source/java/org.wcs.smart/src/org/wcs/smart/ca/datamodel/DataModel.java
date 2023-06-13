@@ -32,9 +32,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -51,6 +48,9 @@ import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 
 /**
@@ -408,21 +408,21 @@ public class DataModel extends SimpleDataModel {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
 		try {
 			for (Attribute att : attributes) {
-				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.save(att.getIcon());
+				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.persist(att.getIcon());
 				if (att.getAttributeList() != null) att.getAttributeList().forEach(e->{
-					if (e.getIcon() != null && e.getIcon().getUuid() == null) session.save(e.getIcon());
+					if (e.getIcon() != null && e.getIcon().getUuid() == null) session.persist(e.getIcon());
 				});
 				
 				if (att.getTree() != null) {
 					processAttributeTree(att, (node)->{
 						if (node.getIcon() != null && node.getIcon().getUuid() == null) {
 							node.getIcon().setConservationArea(node.getAttribute().getConservationArea());
-							session.save(node.getIcon());
+							session.persist(node.getIcon());
 						}
 					});
 				}
 				progress.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
-				session.save(att);
+				session.persist(att);
 				session.flush();
 				session.clear();
 				progress.worked(1);
@@ -431,7 +431,7 @@ public class DataModel extends SimpleDataModel {
 			processCategories(this, (node)->{
 				if (node.getIcon() != null && node.getIcon().getUuid() == null) {
 					node.getIcon().setConservationArea(node.getConservationArea());
-					session.saveOrUpdate(node.getIcon());
+					HibernateManager.saveOrMerge(session,  node.getIcon());
 					session.flush();
 				}
 			});
@@ -439,7 +439,7 @@ public class DataModel extends SimpleDataModel {
 			
 			for (Category c : categories) {
 				progress.subTask(Messages.DataModel_Progress_SaveCategory + c.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
-				session.save(c);
+				session.persist(c);
 				session.flush();
 				session.clear();
 				progress.worked(1);

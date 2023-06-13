@@ -636,11 +636,11 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 			public void setImageFile(Path file) {
 				if (cmNode != null) {
 					cmNode.setImageFile(file);
-					if (cmNode.getUuid() != null) {
-						//need this logic to correctly trigger intercepter
-						session.evict(cmNode);
-						session.saveOrUpdate(cmNode);
-					}
+//					if (cmNode.getUuid() != null) {
+//						//need this logic to correctly trigger intercepter
+//						session.evict(cmNode);
+//						HibernateManager.saveOrMerge(session, cmNode);
+//					}
 					itemViewer.refresh();
 					imageControl.updateImage();
 				}

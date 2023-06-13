@@ -5,5 +5,8 @@
 // Generated on: 2019.09.27 at 02:16:43 PM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/2.1/independentincident", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/2.1/independentincident", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.incident.xml.model.v21;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

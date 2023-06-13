@@ -65,7 +65,8 @@ public class SmartDB {
 	 *
 	 */
 	public enum DbUser{
-		LOGIN("login", "smrt"),  //$NON-NLS-1$//$NON-NLS-2$
+//		LOGIN("login", "smrt"),  //$NON-NLS-1$//$NON-NLS-2$
+		LOGIN("smart_admin", "smart_derby"),//TODO: remove this
 		ANALYST("analyst", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
 		MANAGER("manager", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
 		DATAENTRY("data_entry", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$

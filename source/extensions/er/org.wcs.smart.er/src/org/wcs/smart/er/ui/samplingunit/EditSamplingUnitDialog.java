@@ -194,7 +194,7 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 				}
 				su.getAttributes().removeAll(toDelete);
 				su.getAttributes().addAll(toAdd);
-				session.saveOrUpdate(su);
+				session.merge(su);
 				session.getTransaction().commit();
 			
 			}catch (Exception ex){
@@ -216,7 +216,7 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 		parent = (Composite) super.createDialogArea(parent);
 		
 		try(Session session = HibernateManager.openSession()){
-			this.su = (SamplingUnit) session.load(SamplingUnit.class, su.getUuid());
+			this.su = (SamplingUnit) session.getReference(SamplingUnit.class, su.getUuid());
 	
 			ScrolledComposite sc = new ScrolledComposite(parent, SWT.V_SCROLL);
 			sc.setExpandHorizontal(true);

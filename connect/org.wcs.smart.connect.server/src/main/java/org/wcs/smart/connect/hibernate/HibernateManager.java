@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
 
 import org.hibernate.Interceptor;
@@ -51,6 +47,11 @@ import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.I18nUtil;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Hibernate manager for SMART Connect application.

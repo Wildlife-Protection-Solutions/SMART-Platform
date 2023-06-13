@@ -271,7 +271,7 @@ public class UserInfoPanel implements IServerOptionsPanel{
 			s.beginTransaction();
 			try{
 				for (ConnectUser c : users){
-					s.delete(c);
+					s.remove(c);
 				}
 				s.getTransaction().commit();
 			}catch (Exception ex){

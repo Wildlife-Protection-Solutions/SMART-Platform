@@ -136,7 +136,7 @@ public class FileProcessor {
 				sb.append(" WHERE c.conservationArea = :ca AND "); //$NON-NLS-1$
 				sb.append(" b.filename = :filename "); //$NON-NLS-1$
 				
-				Long fileCnt = (Long)session.createQuery(sb.toString())
+				Long fileCnt = session.createQuery(sb.toString(), Long.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameter("filename", proxy.getFilename()) //$NON-NLS-1$
 				.uniqueResult();
@@ -838,7 +838,7 @@ public class FileProcessor {
 	private void findAsset(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
 		String hql = "FROM Asset WHERE conservationArea = :ca and lower(id) = lower(:id)"; //$NON-NLS-1$
-		Asset asset = (Asset) session.createQuery(hql)
+		Asset asset = session.createQuery(hql, Asset.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameter("id", id) //$NON-NLS-1$
 				.uniqueResult();
@@ -854,7 +854,7 @@ public class FileProcessor {
 	private void findLocation(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
 		String hql = "FROM AssetStationLocation WHERE station.conservationArea = :ca and lower(id) = lower(:id)"; //$NON-NLS-1$
-		AssetStationLocation location = (AssetStationLocation) session.createQuery(hql)
+		AssetStationLocation location = session.createQuery(hql, AssetStationLocation.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameter("id", id) //$NON-NLS-1$
 				.uniqueResult();
@@ -873,7 +873,7 @@ public class FileProcessor {
 		//search the database for the given asset id
 		
 		String hql = "FROM AssetStation WHERE conservationArea = :ca and lower(id) = lower(:id)"; //$NON-NLS-1$
-		AssetStation station = (AssetStation) session.createQuery(hql)
+		AssetStation station = session.createQuery(hql, AssetStation.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameter("id", id) //$NON-NLS-1$
 				.uniqueResult();

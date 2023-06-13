@@ -76,6 +76,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class SummaryDataModelContentProvider implements ITreeContentProvider{
 
 	//data model 

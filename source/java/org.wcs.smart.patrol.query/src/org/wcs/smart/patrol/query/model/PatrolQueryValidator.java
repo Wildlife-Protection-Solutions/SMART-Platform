@@ -30,10 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
@@ -62,6 +58,10 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Tools for patrol query validation.

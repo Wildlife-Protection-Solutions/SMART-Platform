@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -55,7 +55,7 @@ import org.wcs.smart.connect.i18n.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public class AttachmentInterceptor extends EmptyInterceptor {
+public class AttachmentInterceptor implements Interceptor, Serializable {
 
 	private static final long serialVersionUID = 2710377589619179841L;
 

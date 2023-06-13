@@ -240,7 +240,8 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 		try{
 			session.beginTransaction();
 			for (Employee e : employees){
-				session.saveOrUpdate(e);
+				if (e.getUuid() == null) session.persist(e);
+				else session.merge(e);
 			}
 			session.getTransaction().commit();
 		}catch (Exception ex){

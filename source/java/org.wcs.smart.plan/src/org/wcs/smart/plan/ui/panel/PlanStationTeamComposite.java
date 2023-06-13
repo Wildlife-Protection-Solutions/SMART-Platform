@@ -66,7 +66,7 @@ public class PlanStationTeamComposite extends PlanComposite {
 	        	
 		stationList = new StationComposite();
 		Composite compStations = stationList.createComponent(this,  SWT.NONE);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.widthHint = 250;
 		compStations.setLayoutData(gd);
 		stationList.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
@@ -78,7 +78,7 @@ public class PlanStationTeamComposite extends PlanComposite {
 		
 		teamList = new TeamComposite();
 		Composite teamComp = teamList.createComponent(this, SWT.NONE);
-		GridData gd2 = new GridData(SWT.FILL, SWT.FILL, true, false);
+		GridData gd2 = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd2.widthHint = 250;
 		teamComp.setLayoutData(gd2);
 		
@@ -89,9 +89,6 @@ public class PlanStationTeamComposite extends PlanComposite {
 			}
 		});
 		
-		
-		
-		        
 	}
 	
 	@Override

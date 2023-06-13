@@ -87,7 +87,8 @@ public enum QueryDataModelItemListener implements IDataModelItemListener {
 				}else if (q instanceof GriddedQuery) {
 					processGridQuery((GriddedQuery) q,attribute);
 				}
-				session.update(q);
+				
+				session.merge(q);
 			}
 		}
 		

@@ -26,10 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,6 +35,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolFolder;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Job that performs delete operation for {@link PatrolFolder} objects.
@@ -71,7 +71,7 @@ public class DeletePatrolFoldersJob extends Job {
 				affectedParents.add(parent);
 				List<PatrolFolder> list = parent != null ? parent.getChildFolders() : roots;
 				list.remove(f);
-				s.delete(f);
+				s.remove(f);
 			}
 			affectedParents.removeAll(foldersToDel);
 			
@@ -80,7 +80,7 @@ public class DeletePatrolFoldersJob extends Job {
 				for (int i = 0; i < list.size(); i++) {
 					PatrolFolder f = list.get(i);
 					f.setFolderOrder(i);
-					s.update(f);
+					s.merge(f);
 				}
 			}
 
@@ -88,7 +88,7 @@ public class DeletePatrolFoldersJob extends Job {
 			CriteriaUpdate<Patrol> c = cb.createCriteriaUpdate(Patrol.class);
 			Root<Patrol> r = c.from(Patrol.class);
 			c.set("parentFolder", null).where(r.get("parentFolder").in(foldersToDel)); //$NON-NLS-1$ //$NON-NLS-2$
-			s.createQuery(c).executeUpdate();
+			s.createMutationQuery(c).executeUpdate();
 			
 			s.getTransaction().commit();
 		}

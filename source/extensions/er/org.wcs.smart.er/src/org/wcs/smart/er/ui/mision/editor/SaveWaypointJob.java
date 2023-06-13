@@ -36,8 +36,8 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -64,39 +64,63 @@ public class SaveWaypointJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		//if (true) return Status.OK_STATUS;
 		ArrayList<SurveyWaypoint> pnts = new ArrayList<SurveyWaypoint>();
 		synchronized (this) {
 			pnts.addAll(waypoints);
 		}
+		ArrayList<Waypoint> updated = new ArrayList<>();
 		try(Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			
 			try {
 				saveSession.beginTransaction();
 				for (SurveyWaypoint wp : pnts) {
-					//update source id and conservation area
-					wp.getWaypoint().setSourceId(SurveyWaypointSource.KEY);
-					wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-	
-					saveSession.saveOrUpdate(wp.getWaypoint());
-					saveSession.saveOrUpdate(wp);
+					if (wp.getWaypoint().getAttachments() != null) wp.getWaypoint().setAttachments(new ArrayList<>(wp.getWaypoint().getAttachments()));
 					
+					Waypoint pnt = wp.getWaypoint();
+					
+					pnt.setSourceId(SurveyWaypointSource.KEY);
+					pnt.setConservationArea(SmartDB.getCurrentConservationArea());
+					
+					//merge here messed up attachments ("copy from location" doesn't get merged) 
+					//so need to save attachments before merge
+					pnt.saveNewAttachments(saveSession);
+					saveSession.flush();
+					
+					
+					if (pnt.getUuid() == null) {
+						saveSession.persist(pnt);
+						saveSession.persist(wp);
+					}else {
+						pnt = saveSession.merge(pnt);
+						//required to prevent duplicate loading of survey waypoint object
+						saveSession.getReference(wp).getMissionDay().getUuid();
+						saveSession.merge(wp);
+					}
+					updated.add(pnt);
+					
+								
 					// remove observations with no data
-					if (wp.getWaypoint().getObservationGroups() != null) {
-						for (WaypointObservationGroup group : wp.getWaypoint().getObservationGroups()) {
-							for (WaypointObservation wo : group.getObservations()) {
-								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-								for (WaypointObservationAttribute att : wo
-										.getAttributes()) {
-									if (!att.hasValue()) {
-										toDelete.add(att);
-									}
-								}
-								wo.getAttributes().removeAll(toDelete);
+					for (WaypointObservation wo : pnt.getAllObservations()) {
+						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+						for (WaypointObservationAttribute att : wo.getAttributes()) {
+							if (!att.hasValue()) {
+								toDelete.add(att);
 							}
 						}
+						wo.getAttributes().removeAll(toDelete);
 					}
-					ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
+					//remove groups with no data
+					List<WaypointObservationGroup> gdelete = new ArrayList<>();
+					if (pnt.getObservationGroups() == null) pnt.setObservationGroups(new ArrayList<>());
+					for (WaypointObservationGroup g : pnt.getObservationGroups()) {
+						if (g.getObservations() == null || g.getObservations().isEmpty()) gdelete.add(g);
+					}
+					pnt.getObservationGroups().removeAll(gdelete);
+					
 				}
 				saveSession.getTransaction().commit();
+				
 			} catch (Exception ex) {
 				if (saveSession.getTransaction().isActive()) {
 					saveSession.getTransaction().rollback();
@@ -104,9 +128,9 @@ public class SaveWaypointJob extends Job {
 				EcologicalRecordsPlugIn.displayLog(Messages.SaveWaypointJob_Error + ex.getLocalizedMessage(), ex);
 			}
 		}
-		for (SurveyWaypoint wp : waypoints) {
+		for (Waypoint wp : updated) {
 			try{
-				WaypointEventManager.getInstance().waypointModified(wp.getWaypoint());
+				WaypointEventManager.getInstance().waypointModified(wp);
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
 			}

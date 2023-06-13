@@ -53,7 +53,7 @@ public class MissionJsonPostProcessor implements IJsonPostProcessor {
 				.list();
 					
 		for (CtMissionLink l : links) {
-			session.delete(l);
+			session.remove(l);
 		}
 		
 	}

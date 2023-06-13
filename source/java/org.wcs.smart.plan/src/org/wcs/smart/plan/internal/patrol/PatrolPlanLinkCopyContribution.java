@@ -43,7 +43,7 @@ public class PatrolPlanLinkCopyContribution implements IPatrolEditContribution {
 			PatrolPlan newPp = new PatrolPlan();
 			newPp.setPatrol(newPatrol);
 			newPp.setPlan(pp.getPlan());
-			s.saveOrUpdate(newPp);
+			s.persist(newPp);
 		}
 	}
 

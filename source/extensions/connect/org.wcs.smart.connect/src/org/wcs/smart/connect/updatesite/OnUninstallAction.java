@@ -68,12 +68,12 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 				//drop all tables
 				for (int i = 0; i < TABLES.length; i ++){
 					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+						session.createNativeMutationQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 					}
 				}
-				session.createNativeQuery("DROP FUNCTION smart.uuid").executeUpdate(); //$NON-NLS-1$
-				session.createNativeQuery("DROP FUNCTION smart.next_revision_id").executeUpdate(); //$NON-NLS-1$
-				session.createNativeQuery("DROP FUNCTION smart.is_replication_enabled_ca").executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP FUNCTION smart.uuid").executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP FUNCTION smart.next_revision_id").executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP FUNCTION smart.is_replication_enabled_ca").executeUpdate(); //$NON-NLS-1$
 				
 				//clear version
 				HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, null, session);

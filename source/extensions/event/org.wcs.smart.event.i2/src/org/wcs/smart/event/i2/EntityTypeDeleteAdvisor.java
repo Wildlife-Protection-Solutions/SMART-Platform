@@ -51,7 +51,7 @@ public class EntityTypeDeleteAdvisor implements IDeleteAdvisor {
 		sb.append("WHERE ea.actionTypeKey = :actionid AND p.id.parameterKey = :pkey "); //$NON-NLS-1$
 		sb.append("AND p.parameterValue = :value AND ea.conservationArea = :ca"); //$NON-NLS-1$
 		
-		Long used = (Long)session.createQuery(sb.toString())
+		Long used = session.createQuery(sb.toString(), Long.class)
 		.setParameter("actionid", CreateEntityActionType.KEY) //$NON-NLS-1$
 		.setParameter("pkey", EntityTypeParameter.INSTANCE.getKey()) //$NON-NLS-1$
 		.setParameter("value", entityType.getKeyId()) //$NON-NLS-1$

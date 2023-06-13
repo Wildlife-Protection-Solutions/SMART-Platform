@@ -65,6 +65,8 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Content provider for the all table entity part of the
  * entity list view.
@@ -98,7 +100,6 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 * sorting of all entity table
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public EntityTableData generateData() {
 		synchronized (TEMP_TABLE_LOCK) {
 			
@@ -110,7 +111,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE " + DB_NAME_NAME, Integer.class).executeUpdate(); //$NON-NLS-1$
 					session.getTransaction().commit();
 				}catch(Exception ex) {
 					session.getTransaction().rollback();
@@ -120,7 +121,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				try {
 					//find all attributes
 					List<IntelEntityTypeAttribute> etattributes = session
-							.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca") //$NON-NLS-1$
+							.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca", IntelEntityTypeAttribute.class) //$NON-NLS-1$
 							.setParameter("ca", ca) //$NON-NLS-1$
 							.list();
 							
@@ -141,7 +142,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					sb.append(COL_ENTITY_TYPE_NAME);
 					sb.append(" varchar(1024) "); //$NON-NLS-1$
 					sb.append(")"); //$NON-NLS-1$
-					session.createNativeQuery(sb.toString()).executeUpdate();
+					session.createNativeQuery(sb.toString(), Integer.class).executeUpdate();
 					
 					
 					//now we need to populate this table
@@ -153,20 +154,20 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						sb.append(" (entity_uuid, entity_type_uuid, profile_uuid, i_primary_id, filter)"); //$NON-NLS-1$
 						sb.append(" SELECT e.uuid, t.uuid, e.profile_uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
 						sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
-						session.createNativeQuery(sb.toString())
+						session.createNativeQuery(sb.toString(), Integer.class)
 							.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
 							.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
 							.executeUpdate();
 						sb = new StringBuilder();
 						sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(sb.toString()).executeUpdate();
+						session.createNativeQuery(sb.toString(), Integer.class).executeUpdate();
 						
 						//entity type names
 						sb = new StringBuilder();
 						sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME); //$NON-NLS-1$
-						List<?> entityTypes = session.createNativeQuery(sb.toString()).list();
-						for (Object x : entityTypes) {
-							UUID entityTypeUuid = UuidUtils.byteToUUID( (byte[]) x );
+						List<byte[]> entityTypes = session.createNativeQuery(sb.toString(), byte[].class).list();
+						for (byte[] x : entityTypes) {
+							UUID entityTypeUuid = UuidUtils.byteToUUID( x );
 							IntelEntityType type = session.get(IntelEntityType.class, entityTypeUuid);
 						
 							sb = new StringBuilder();
@@ -176,7 +177,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 							sb.append(COL_ENTITY_TYPE_NAME);
 							sb.append(" = :name WHERE entity_type_uuid = :uuid"); //$NON-NLS-1$
 							
-							session.createNativeQuery(sb.toString())
+							session.createNativeQuery(sb.toString(), Integer.class)
 								.setParameter("name", type.getName()) //$NON-NLS-1$
 								.setParameter("uuid", entityTypeUuid) //$NON-NLS-1$
 								.executeUpdate();
@@ -184,7 +185,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						}
 					}
 					
-					Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult(); //$NON-NLS-1$
+					Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME, Long.class).uniqueResult().intValue(); //$NON-NLS-1$
 	
 					session.getTransaction().commit();
 					
@@ -332,7 +333,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		case EMPLOYEE:
 			sb.append("_uuid char(16) for bit data"); //$NON-NLS-1$
 		}
-		session.createNativeQuery(sb.toString())
+		session.createNativeQuery(sb.toString(), Integer.class)
 			.executeUpdate();
 		
 		if (sortAttribute.getType() == AttributeType.LIST || sortAttribute.getType() == AttributeType.EMPLOYEE) {
@@ -342,7 +343,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append(sortAttribute.getKeyId());
 			sb.append(" varchar(1024)"); //$NON-NLS-1$
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeQuery(sb.toString(), Integer.class)
 				.executeUpdate();
 		}
 		
@@ -360,7 +361,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append( DB_NAME_NAME );
 			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeQuery(sb.toString(), Integer.class)
 			.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 			.executeUpdate();
 		}else if (sortAttribute.getType() == AttributeType.TEXT) {
@@ -374,7 +375,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append( DB_NAME_NAME );
 			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeQuery(sb.toString(), Integer.class)
 				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 			
@@ -389,7 +390,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append( DB_NAME_NAME );
 			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeQuery(sb.toString(), Integer.class)
 				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 			
@@ -404,7 +405,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append( DB_NAME_NAME );
 			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeQuery(sb.toString(), Integer.class)
 				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 			
@@ -415,7 +416,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sb.append(DB_NAME_NAME);
 				sb.append(" SET " + sortAttribute.getKeyId() + " = :name WHERE " + sortAttribute.getKeyId() + "_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
-				session.createNativeQuery(sb.toString())
+				session.createNativeQuery(sb.toString(), Integer.class)
 					.setParameter("name", item.getName().toLowerCase()) //$NON-NLS-1$
 					.setParameter("uuid", item.getUuid()) //$NON-NLS-1$
 					.executeUpdate();
@@ -432,7 +433,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append( DB_NAME_NAME );
 			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeQuery(sb.toString(), Integer.class)
 				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 		
@@ -441,7 +442,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			sb.append(DB_NAME_NAME);
 			sb.append(" WHERE " + sortAttribute.getKeyId() + "_uuid is not null"); //$NON-NLS-1$ //$NON-NLS-2$
 			
-			List<?> employees = session.createNativeQuery(sb.toString()).list();
+			List<?> employees = session.createNativeQuery(sb.toString(), Integer.class).list();
 			
 			for (Object x : employees) {
 				UUID uuid = UuidUtils.byteToUUID((byte[])x);
@@ -452,7 +453,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sb.append(DB_NAME_NAME);
 				sb.append(" SET " + sortAttribute.getKeyId() + " = :name WHERE " + sortAttribute.getKeyId() + "_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
-				session.createNativeQuery(sb.toString())
+				session.createNativeQuery(sb.toString(), Integer.class)
 					.setParameter("name", SmartLabelProvider.getShortLabel(e).toLowerCase()) //$NON-NLS-1$
 					.setParameter("uuid", uuid) //$NON-NLS-1$
 					.executeUpdate();
@@ -471,7 +472,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					sb.append("UPDATE "); //$NON-NLS-1$
 					sb.append( DB_NAME_NAME);
 					sb.append(" SET filter = true");  //$NON-NLS-1$
-					session.createNativeQuery(sb.toString()).executeUpdate();
+					session.createNativeQuery(sb.toString(), Integer.class).executeUpdate();
 				} catch (Exception e) {
 					Intelligence2PlugIn.displayLog(e.getMessage(), e);
 				}
@@ -513,7 +514,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					
 					StringBuilder sb = new StringBuilder();
 					sb.append("UPDATE " + DB_NAME_NAME + " SET filter = false"); //$NON-NLS-1$ //$NON-NLS-2$
-					session.createNativeQuery(sb.toString()).executeUpdate();
+					session.createNativeQuery(sb.toString(), Integer.class).executeUpdate();
 					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					
@@ -523,13 +524,13 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					sb.append(" SET filter = true WHERE entity_uuid in (select entity_uuid from "); //$NON-NLS-1$
 					sb.append( search.getResultsTable());
 					sb.append(")"); //$NON-NLS-1$
-					session.createNativeQuery(sb.toString()).executeUpdate();
+					session.createNativeQuery(sb.toString(), Integer.class).executeUpdate();
 					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					
 					sb = new StringBuilder();
 					sb.append(" SELECT count(*) FROM "+ DB_NAME_NAME + " WHERE filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
-					newCount = (Integer)session.createNativeQuery(sb.toString()).uniqueResult();
+					newCount = session.createNativeQuery(sb.toString(), Long.class).uniqueResult().intValue();
 					
 					session.getTransaction().commit();	
 				} catch (Exception e) {
@@ -596,9 +597,9 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		
 		List<UUID> allUuids = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			List<?> items = session.createNativeQuery(sb.toString()).list();
-			for (Object x : items) {
-				allUuids.add(  UuidUtils.byteToUUID((byte[])x));
+			List<byte[]> items = session.createNativeQuery(sb.toString(), byte[].class).list();
+			for (byte[] x : items) {
+				allUuids.add(  UuidUtils.byteToUUID(x));
 			}
 		}
 		return allUuids;
@@ -614,9 +615,9 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		
 		List<Object> items = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			List<?> rows = session.createNativeQuery(sb.toString()).list();
-			for (Object x : rows) {
-				UUID i = UuidUtils.byteToUUID((byte[])x);
+			List<byte[]> rows = session.createNativeQuery(sb.toString(), byte[].class).list();
+			for (byte[] x : rows) {
+				UUID i = UuidUtils.byteToUUID(x);
 				IntelEntity entity = session.get(IntelEntity.class, i);
 				if (entity == null) continue;
 				entity.getIdAttributeAsText();
@@ -734,16 +735,16 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				
 				synchronized (TEMP_TABLE_LOCK) {
 				
-					NativeQuery<?> query = session.createNativeQuery(sb.toString());
-					ScrollableResults results = query.scroll();
+					NativeQuery<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
+					ScrollableResults<Tuple> results = query.scroll();
 					if (!results.first()) return Status.OK_STATUS;
 					results.scroll(startIndex);
 	
 					int cnt = 0;
 					while(cnt < pageSize) {
-						Object[] data = results.get();
+						Tuple data = results.get();
 						if (data == null) break;
-						EntityTableRowItem item = asRowItem(data, session);
+						EntityTableRowItem item = asRowItem(new Object[] {data.get(0), data.get(1), data.get(2), data.get(3), data.get(4)}, session);
 						final int index = startIndex + cnt;
 						if (monitor.isCanceled() || index >= this.data.currentCount) return Status.CANCEL_STATUS;
 						//input has changed; cancel job

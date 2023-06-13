@@ -36,8 +36,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.i18n.Messages;
@@ -117,7 +117,7 @@ public class ObservationFilterProcessor {
 		sql.append(tableColumns);
 		sql.append(")"); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + obsTable); //$NON-NLS-1$
@@ -143,7 +143,7 @@ public class ObservationFilterProcessor {
 			logString(UuidUtils.uuidToString(uuid));
 		}
 		logString(sql.toString());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameterList("cas", caUuids); //$NON-NLS-1$
 		query.setParameterList("profiles", profileUuids); //$NON-NLS-1$
 		query.executeUpdate();
@@ -152,12 +152,12 @@ public class ObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName(obsTable) + " on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName(obsTable) + " on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		
 		//for each filter add a column for that filter
@@ -180,7 +180,7 @@ public class ObservationFilterProcessor {
 					sql.append (")"); //$NON-NLS-1$
 					
 					logString(sql.toString());
-					s.createNativeQuery(sql.toString()).executeUpdate();
+					s.createNativeMutationQuery(sql.toString()).executeUpdate();
 					
 					filterToColumnName.put(filter, columnName);
 					return columnName;
@@ -236,7 +236,7 @@ public class ObservationFilterProcessor {
 			sql.append(tableColumns);
 			sql.append(")"); //$NON-NLS-1$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();	
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();	
 			
 			final StringBuilder deleteSql = new StringBuilder();
 			deleteSql.append("INSERT INTO " + tempTable ); //$NON-NLS-1$
@@ -277,7 +277,7 @@ public class ObservationFilterProcessor {
 			if (visitorException != null) throw visitorException;
 			
 			logString(deleteSql.toString());
-			s.createNativeQuery(deleteSql.toString()).executeUpdate();
+			s.createNativeMutationQuery(deleteSql.toString()).executeUpdate();
 			
 			SqlGenerator.switchTables(tempTable, obsTable, true, true, s);
 		}
@@ -291,7 +291,7 @@ public class ObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(observation_uuid uuid) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		if (filter.getAttributeKey() == null){
 			//only a category filter
@@ -306,7 +306,7 @@ public class ObservationFilterProcessor {
 			
 			logString(hkey1);
 			
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
 			logString(sql.toString());
 			query.executeUpdate();
@@ -314,20 +314,20 @@ public class ObservationFilterProcessor {
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("observation_uuid_tmp") + " on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 			sql.append(" SELECT a.*, CASE WHEN b.observation_uuid is null then null else true end "); //$NON-NLS-1$
 			sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.observation_uuid = b.observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
-			query = s.createNativeQuery(sql.toString());
+			query = s.createNativeMutationQuery(sql.toString());
 			query.executeUpdate();
 			
 			sql = new StringBuilder();
 			sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			return;
 			
@@ -407,7 +407,7 @@ public class ObservationFilterProcessor {
 			
 		}
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		for (Entry<String,Object> p : params.entrySet()) {
 			logString(p.getKey() + " - " + p.getValue().toString()); //$NON-NLS-1$
 			query.setParameter(p.getKey(),p.getValue());
@@ -420,20 +420,20 @@ public class ObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("observation_uuid_tmp") + " on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.observation_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.observation_uuid = b.observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	//select * from table where (column name is not null) OR NOT (columnname is not null)
@@ -444,7 +444,7 @@ public class ObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid uuid) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -454,27 +454,27 @@ public class ObservationFilterProcessor {
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(filter.getEntityUuid()));
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("uuid", filter.getEntityUuid()); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(EntityTypeFilter filter, String obsTable, String tempTable, String columnName){
@@ -485,7 +485,7 @@ public class ObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid uuid) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -497,27 +497,26 @@ public class ObservationFilterProcessor {
 				
 		logString(sql.toString());
 		logString(filter.getTypeKey());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("typeKey",  filter.getTypeKey()); //$NON-NLS-1$
 		query.executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
@@ -556,7 +555,7 @@ public class ObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid uuid) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		
 		sql = new StringBuilder();
@@ -618,7 +617,7 @@ public class ObservationFilterProcessor {
 		sql.append(" ELSE FALSE END "); //$NON-NLS-1$
 		logString(sql.toString());
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		if (filter.getEntityTypeKey() != null){
 			logString(filter.getEntityTypeKey());
@@ -662,20 +661,19 @@ public class ObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 	}
 	
@@ -686,7 +684,7 @@ private void addFilterColumn(AreaFilter filter, String obsTable, String tempTabl
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid uuid) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("SELECT uuid  FROM smart.area_geometries WHERE ca_uuid = :ca AND keyId = :keyid AND area_type = :type"); //$NON-NLS-1$
@@ -696,22 +694,15 @@ private void addFilterColumn(AreaFilter filter, String obsTable, String tempTabl
 		logString(filter.getType().name());
 		logString(UuidUtils.uuidToString(itemProvider.getQueryConservationArea().getUuid()));
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.addScalar("uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		NativeQuery<UUID> query = s.createNativeQuery(sql.toString(), UUID.class);
+		query.addScalar("uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid());//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		query.setParameter("keyid", filter.getKey()); //$NON-NLS-1$
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
 		
-		Object x = query.uniqueResult();
-		if (x == null) throw new Exception(MessageFormat.format(Messages.getString("ObservationFilterProcessor.AreaNotFound", l), filter.getKey())) ; //$NON-NLS-1$
-		UUID areaUuid = null;
-		if (x instanceof UUID){
-			areaUuid = (UUID) x;
-		}else if (x instanceof byte[]){
-			areaUuid = UuidUtils.byteToUUID((byte[])x);
-		}else if (x instanceof String) {
-			areaUuid = UUID.fromString((String)x);
-		}
+		UUID areaUuid = query.uniqueResult();
+		if (areaUuid == null) throw new Exception(MessageFormat.format(Messages.getString("ObservationFilterProcessor.AreaNotFound", l), filter.getKey())) ; //$NON-NLS-1$
+		
 		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -724,27 +715,26 @@ private void addFilterColumn(AreaFilter filter, String obsTable, String tempTabl
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(areaUuid));
-		query = s.createNativeQuery(sql.toString());
-		query.setParameter("areauuid", areaUuid); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.setParameter("areauuid", areaUuid) //$NON-NLS-1$
+			.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void logString(String string){
@@ -758,7 +748,7 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid uuid) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		
 		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
@@ -778,7 +768,7 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
 			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
@@ -808,7 +798,7 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
 			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
@@ -823,19 +813,18 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 }

@@ -25,17 +25,17 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
 import org.wcs.smart.connect.i18n.Messages;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * An Alert entity
@@ -43,7 +43,7 @@ import org.wcs.smart.connect.i18n.Messages;
  * @Author Jeff
  */
 @Entity
-@Table(name = "connect.alerts")
+@Table(name = "alerts", schema="connect")
 public class Alert extends ConnectUuidItem{
 	
 	public enum AlertStatusEnum {
@@ -128,7 +128,7 @@ public class Alert extends ConnectUuidItem{
 	}
 	
 	@Column(name="status")
-	@Type(type="org.wcs.smart.connect.model.AlertStatusType")
+	@Type(AlertStatusType.class)
 	public AlertStatusEnum getStatus() {
 		return status;
 	}

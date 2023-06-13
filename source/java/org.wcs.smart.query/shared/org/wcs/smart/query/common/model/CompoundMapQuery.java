@@ -24,16 +24,16 @@ package org.wcs.smart.query.common.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Compound query entity
@@ -42,7 +42,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
  *
  */
 @Entity
-@Table(name="smart.compound_query")
+@Table(name="compound_query", schema="smart")
 public class CompoundMapQuery extends Query{
 
 	private static final long serialVersionUID = 1L;

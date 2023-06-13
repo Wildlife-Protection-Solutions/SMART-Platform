@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.asset.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 
 /***
  * Abstract class for mapping a list of attributes

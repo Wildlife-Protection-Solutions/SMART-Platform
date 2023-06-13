@@ -24,9 +24,9 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  * A dashboard entity. A dashboard has two associated reports and default parameters for each of them. 
@@ -34,7 +34,7 @@ import javax.persistence.Table;
  * @Author Jeff
  */
 @Entity
-@Table(name = "connect.dashboards")
+@Table(name = "dashboards", schema="connect")
 public class Dashboard extends ConnectUuidItem{
 	private String label;
 	private UUID reportUuid1;

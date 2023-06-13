@@ -98,6 +98,7 @@ public class LoginHandler implements ILoginHandler {
 			try{
 				int order = 0;
 				for (LocalDataQueueItem i : itemsToReset){
+					i = s.getReference(i);
 					if (i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
 						//downloading was not complete so clear file
 						if (i.getFullFilePath() != null){
@@ -110,7 +111,6 @@ public class LoginHandler implements ILoginHandler {
 						i.setStatus(LocalDataQueueItem.Status.REQUEUED);
 					}
 					i.setOrder(order++);
-					s.saveOrUpdate(i);
 				}
 				s.getTransaction().commit();
 			}catch (Exception ex){
@@ -200,9 +200,9 @@ public class LoginHandler implements ILoginHandler {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				Query<?> q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null"); //$NON-NLS-1$
+				Query<String> q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null", String.class); //$NON-NLS-1$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
-				for(Object x : q.list()) files.add((String)x);
+				for(String x : q.list()) files.add(x);
 				
 			}finally{
 				s.getTransaction().rollback();

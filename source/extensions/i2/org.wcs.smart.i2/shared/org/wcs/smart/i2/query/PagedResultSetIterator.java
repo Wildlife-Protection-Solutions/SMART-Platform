@@ -24,6 +24,8 @@ package org.wcs.smart.i2.query;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Query result set iterator
  * 
@@ -35,7 +37,7 @@ public class PagedResultSetIterator {
 	protected IPagedQueryResultSet results;
 	protected Session session;
 	
-	private ScrollableResults resultSet;
+	private ScrollableResults<Tuple> resultSet;
 	
 	/**
 	 * results can be null if results not computed yest
@@ -48,7 +50,7 @@ public class PagedResultSetIterator {
 	}
 	
 	protected void createResultSet() {
-		this.resultSet = session.createNativeQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
+		this.resultSet = session.createNativeQuery("SELECT * FROM " + results.getQueryDataTable(), Tuple.class).scroll(); //$NON-NLS-1$
 	}
 	
 	public boolean hasNext(){
@@ -58,8 +60,12 @@ public class PagedResultSetIterator {
 	}
 	
 	public IResultItem next(){
-		Object[] data = resultSet.get();
-		return results.asResultItem(data, session);
+		Tuple data = resultSet.get();
+		Object[] row = new Object[data.getElements().size()];
+		for (int i = 0; i < row.length; i++) {
+			row[i] = data.get(i);
+		}
+		return results.asResultItem(row, session);
 	}
 	
 	public void close() {

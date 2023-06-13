@@ -21,14 +21,14 @@
  */
 package org.wcs.smart.ca;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.icon.Icon;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 
 /**
@@ -38,7 +38,7 @@ import org.wcs.smart.ca.icon.Icon;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.station")
+@Table(name = "station", schema="smart")
 public class Station extends NamedDescriptionItem implements IconItem{
 
 	private static final long serialVersionUID = 1L;

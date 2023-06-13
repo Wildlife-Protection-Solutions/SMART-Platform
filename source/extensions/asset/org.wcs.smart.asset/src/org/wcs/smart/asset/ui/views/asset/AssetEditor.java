@@ -184,13 +184,13 @@ public class AssetEditor extends EditorPart implements MapPart {
 				if (!isNew) {
 					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
-				Query<?> q = s.createQuery(query)
+				Query<Long> q = s.createQuery(query, Long.class)
 				.setParameter("id", asset.getId()) //$NON-NLS-1$
 				.setParameter("ca", asset.getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
 					q.setParameter("uuid", asset.getUuid()); //$NON-NLS-1$
 				}
-				Long cnt = (Long) q.uniqueResult();
+				Long cnt = q.uniqueResult();
 				if (cnt > 0) {
 					MessageDialog.openError(getSite().getShell(), Messages.AssetEditor_SaveTitle, 
 						MessageFormat.format(Messages.AssetEditor_DuplicateIdError, asset.getId())
@@ -199,7 +199,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 				}
 				
 				s.beginTransaction();
-				s.saveOrUpdate(asset);
+				HibernateManager.saveOrMerge(s, asset);
 				s.getTransaction().commit();
 				
 				((AssetEditorInput)getEditorInput()).setAssetUuid(asset.getUuid());
@@ -701,7 +701,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(record);
+				HibernateManager.saveOrMerge(session, record);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -730,11 +730,10 @@ public class AssetEditor extends EditorPart implements MapPart {
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			try {
-				
+			try {			
 				toEdit.setDate(dialog.getSelectedDateTime());
 				toEdit.setComment(dialog.getComment());
-				session.saveOrUpdate(toEdit);
+				HibernateManager.saveOrMerge(session, toEdit);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -764,7 +763,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				toDelete.forEach(e->s.delete(e));
+				toDelete.forEach(e->s.remove(e));
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();

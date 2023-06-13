@@ -322,7 +322,7 @@ public class DataModelMergeAndUpdater {
 	private void setIcon(DmObject source, Icon target) {
 		if (target == null) return;
 		if (target.getUuid() == null) {
-			session.save(target);
+			session.persist(target);
 		}
 		source.setIcon(target);
 	}

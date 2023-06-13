@@ -24,16 +24,16 @@ package org.wcs.smart.er.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A class to represent a summary query.
@@ -42,7 +42,7 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.survey_summary_query")
+@Table(name="survey_summary_query", schema="smart")
 public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 
 	private static final long serialVersionUID = 1L;

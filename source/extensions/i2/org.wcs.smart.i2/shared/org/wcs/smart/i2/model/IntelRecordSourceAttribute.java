@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.i2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Link between intelligence source and valid
@@ -39,7 +39,7 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
  *
  */
 @Entity
-@Table(name="smart.i_recordsource_attribute")
+@Table(name="i_recordsource_attribute", schema="smart")
 public class IntelRecordSourceAttribute extends NamedKeyItem{
 
 	private static final long serialVersionUID = 1L;

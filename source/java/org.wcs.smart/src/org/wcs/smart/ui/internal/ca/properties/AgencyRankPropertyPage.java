@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -411,17 +409,11 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 
 	private void resetAgencyList() {
 		try(Session s = HibernateManager.openSession()){
-			List<Agency> lst = HibernateManager.getAgencies(currentCa,s );
-			Collections.sort(lst, new Comparator<Agency>(){
+			s.get(ConservationArea.class, currentCa.getUuid()).getLanguages().size();
 
-				@Override
-				public int compare(Agency o1, Agency o2) {
-					String a = o1.getName();
-					if (a != null) a = a.toLowerCase();
-					String b = o2.getName();
-					if (b != null) b = b.toLowerCase();
-					return Collator.getInstance().compare(a, b);
-				}});
+			List<Agency> lst = HibernateManager.getAgencies(currentCa, s );
+			Collections.sort(lst);
+			
 			lst.forEach(l -> {
 				l.getNames().size();
 				if (l.getRanks() != null){
@@ -691,15 +683,19 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				for (Iterator<Agency> iterator = toDelete.iterator(); iterator.hasNext();) {
-					Agency agt = (Agency) iterator.next();
-					if(agt.getUuid() != null){
-						s.delete(agt);
+				
+				for(Agency agt : toDelete) {
+					if(agt.getUuid() != null) s.remove(agt);
+				}
+				s.flush();
+				
+				for (Agency c : agencies) {
+					if (c.getUuid() == null) {
+						s.persist(c);
+					}else {
+						for (Rank r : c.getRanks()) if (r.getUuid() == null) s.persist(r); 
+						s.merge(c);
 					}
-				}				
-				for(Iterator<?> iterator = agencies.iterator(); iterator.hasNext();){
-					Agency agt = (Agency) iterator.next();
-					s.saveOrUpdate(agt);
 				}
 			
 				s.getTransaction().commit();

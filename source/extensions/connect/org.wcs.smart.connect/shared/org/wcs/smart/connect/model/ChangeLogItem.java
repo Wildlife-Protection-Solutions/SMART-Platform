@@ -27,13 +27,13 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 
 /**
  * Change log item.
@@ -42,7 +42,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name="smart.connect_change_log")
+@Table(name="connect_change_log", schema="smart")
 public class ChangeLogItem extends UuidItem implements Externalizable{
 
 	public static final String TABLENAME="smart.connect_change_log"; //$NON-NLS-1$

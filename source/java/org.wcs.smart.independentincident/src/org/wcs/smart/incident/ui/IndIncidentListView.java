@@ -81,6 +81,8 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Incident list view.
  * @author Emily
@@ -127,13 +129,14 @@ public class IndIncidentListView implements IIncidentFilteringView {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					Query<?> query = filter.buildQuery(s);
-					List<?> results  = query.list();
+					Query<Tuple> query = filter.buildQuery(s);
+					List<Tuple> results  = query.list();
 					final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
 					int i = 0;
-					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new IncidentEditorInput((UUID)data[0], (String)data[1], (LocalDateTime)data[2], (String)data[3]);
+					for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
+						Tuple data = iterator.next();					
+						input[i++] = new IncidentEditorInput((UUID)data.get(0), (String)data.get(1), 
+								(LocalDateTime)data.get(2), (String)data.get(3));
 					}
 					
 					monitor.internalWorked(0.5);

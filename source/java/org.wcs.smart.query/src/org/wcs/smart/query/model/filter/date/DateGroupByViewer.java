@@ -109,13 +109,13 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
-				Query<?> q = session.createQuery(hql);
+				Query<LocalDateTime> q = session.createQuery(hql, LocalDateTime.class);
 				q.setParameterList(
 						"ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 
-				List<?> data = q.list();
-				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
+				LocalDateTime ld = q.uniqueResult();
+				if (ld != null) {
+					startdate = ld.toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -150,15 +150,13 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		} else {
 			if (dateFilter.getDates() == null) {
 				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
-				Query<?> q = session.createQuery(hql);
-				q.setParameterList(
-						"ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-
-				List<?> data = q.list();
-				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
-				}
+				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea IN (:ca)"; //$NON-NLS-1$
+				LocalDateTime ld = session.createQuery(hql, LocalDateTime.class)
+					.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
+					.uniqueResult();
+				
+				if (ld != null) startdate = ld.toLocalDate();
+				
 			} else {
 				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {
@@ -198,14 +196,10 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
-				Query<?> q = session.createQuery(hql);
-				q.setParameterList(
-						"ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-
-				List<?> data = q.list();
-				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
-				}
+				LocalDateTime ld = session.createQuery(hql, LocalDateTime.class)
+					.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
+					.uniqueResult();
+				if (ld != null) startdate = ld.toLocalDate();
 			} else {
 				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {

@@ -107,6 +107,7 @@ public class SettingsPreferencePage extends PreferencePage implements IWorkbench
 				if (service == null) {
 					service = new PawsService();
 					service.setConservationArea(SmartDB.getCurrentConservationArea());
+					session.persist(service);
 				}
 				service.setApiKey(txtServiceKey.getText());
 				service.setPawsApiUrl(txtServiceHeatmapApi.getText());
@@ -114,8 +115,6 @@ public class SettingsPreferencePage extends PreferencePage implements IWorkbench
 				service.setClientId(txtWorkspaceClientId.getText());
 				service.setOAuthUrl(txtWorkspaceLoginURL.getText());
 				service.setStorageUrl(txtWorkspaceStorageUrl.getText());
-				
-				session.saveOrUpdate(service);
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {

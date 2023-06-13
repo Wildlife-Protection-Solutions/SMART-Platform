@@ -76,7 +76,8 @@ public class CreateEditNamedItemDialog extends SmartStyledTitleDialog {
 			protected IStatus run(IProgressMonitor monitor) {
 				try(Session s = HibernateManager.openSession()) {
 					result[0] = s.get(i.getClass(), i.getUuid());
-					result[0].getNames().size(); //load lazy items
+					//load lazy items
+					result[0].getNames().forEach(n->n.getLanguage().getCode());
 				}
 				return Status.OK_STATUS;
 			}

@@ -86,7 +86,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 					//will need to be redefined by user
 				}
 			}
-			session.save(clone);
+			session.persist(clone);
 			
 			List<PawsSimpleClass> simpleMappings = QueryFactory.buildQuery(session, PawsSimpleClass.class,
 					new Object[]{"configuration", c}).getResultList(); //$NON-NLS-1$
@@ -98,7 +98,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 				pwclone.setAttributeTreeNodeHkey(pw.getAttributeTreeNodeHkey());
 				pwclone.setClassification(pw.getClassification());
 				pwclone.setConfiguration(clone);
-				session.save(pwclone);
+				session.persist(pwclone);
 			}
 			
 			List<PawsQueryClass> queryMappings = QueryFactory.buildQuery(session, PawsQueryClass.class,
@@ -111,7 +111,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 				pwclone.setQueryUuid(quuid);
 				pwclone.setClassification(pw.getClassification());
 				pwclone.setConfiguration(clone);
-				session.save(pwclone);
+				session.persist(pwclone);
 			}
 		}
 	}

@@ -35,6 +35,8 @@ import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.hibernate.SmartDB;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Metadata packager which accompanies all upload and downloads from the server.
  * 
@@ -48,7 +50,7 @@ public enum DerbyMetadataPackager {
 	public void generateMetadata(Session session, ConnectServer server, 
 			Path file, long revision) throws Exception{
 		
-		ConservationArea ca = (ConservationArea) session.load(ConservationArea.class, server.getConservationArea().getUuid());
+		ConservationArea ca = session.getReference(server.getConservationArea());
 		
 		ConnectServerStatus status = (ConnectServerStatus) session.get(ConnectServerStatus.class, ca.getUuid());
 		if (status == null){
@@ -69,11 +71,10 @@ public enum DerbyMetadataPackager {
 	
 	public HashMap<String, String> getLocalPluginVersions(Session session){
 		HashMap<String, String> plugins = new HashMap<String, String>();
-		NativeQuery<?> q = session.createNativeQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
-		List<?> plugin = q.list();
-		for (Object dversion : plugin){
-			Object[] version = (Object[])dversion;
-			plugins.put((String)version[1], (String)version[0]);
+		NativeQuery<Tuple> q = session.createNativeQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL, Tuple.class); //$NON-NLS-1$
+		List<Tuple> plugin = q.list();
+		for (Tuple dversion : plugin){
+			plugins.put((String)dversion.get(1), (String)dversion.get(0));
 		}
 		return plugins;
 	}

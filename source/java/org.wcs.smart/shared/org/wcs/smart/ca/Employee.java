@@ -29,21 +29,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -53,14 +50,14 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 @Entity
-@Table(name = "smart.employee")
+@Table(name="employee", schema="smart")
 /*
  * If this class extends UuidItem then a hibernate error occurs when trying
  * to load cross conservation area (conservation area) reports:
  * org.hibernate.PropertyAccessException: IllegalArgumentException occurred while calling setter of org.wcs.smart.ca.Employee.conservationArea
  * So this class is not extending UuidItem for now.
  */
-public class Employee implements Serializable {
+public class Employee extends UuidItem implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -108,8 +105,6 @@ public class Employee implements Serializable {
 	 * Max number of chars for the staff id
 	 */
 	public static final int MAX_ID_LENGTH = 32;
-
-	private UUID uuid;
 	
 	private String id;
 	private String givenName;
@@ -134,16 +129,6 @@ public class Employee implements Serializable {
 	
 	public Employee(){
 		this.dateCreated = LocalDate.now();
-	}
-
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public UUID getUuid() {
-		return uuid;
-	}
-	public void setUuid(UUID uuid) {
-		this.uuid = uuid;
 	}
 	
 	@Column(name="id")

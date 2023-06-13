@@ -84,7 +84,6 @@ public class MissionTimeShiftEngine implements IDataEngine{
 						//waypoints
 						for (SurveyWaypoint wp : missionDay.getWaypoints()) {
 							wp.getWaypoint().setDateTime(adjustDateTime(wp.getWaypoint().getDateTime()));
-							session.saveOrUpdate(wp.getWaypoint());
 						}
 						
 						if (missionDay.getTracks() != null) {
@@ -98,7 +97,6 @@ public class MissionTimeShiftEngine implements IDataEngine{
 							}
 						}
 					}
-					session.saveOrUpdate(mission);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

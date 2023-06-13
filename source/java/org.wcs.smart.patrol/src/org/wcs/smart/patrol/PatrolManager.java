@@ -125,7 +125,7 @@ public class PatrolManager {
 		
 		Patrol patrol = null;
 		try(Session session = HibernateManager.openSession()){
-			patrol = (Patrol)session.load(Patrol.class, patrolUuid);
+			patrol = (Patrol)session.getReference(Patrol.class, patrolUuid);
 			progress.subTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol == null ? patrolUuid.toString() : patrol.getId()}));
 			
 			// ensure can edit patrol 
@@ -148,12 +148,12 @@ public class PatrolManager {
 					for (PatrolLeg pl : patrol.getLegs()){
 						for (PatrolLegDay pld : pl.getPatrolLegDays()){
 							for (PatrolWaypoint pw : pld.getWaypoints()){
-								session.delete(pw.getWaypoint());
+								session.remove(pw.getWaypoint());
 							}
 						}
 					}
 				}
-				session.delete(patrol);
+				session.remove(patrol);
 				session.getTransaction().commit();
 				progress.worked(1);
 			

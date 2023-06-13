@@ -290,7 +290,7 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 				sb.append("CREATE TABLE "); //$NON-NLS-1$
 				sb.append(imageTempTable);
 				sb.append("(attach_uuid char(16) for bit data, wp_uuid char(16) for bit data, ob_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
-				s.createNativeQuery(sb.toString()).executeUpdate();
+				s.createNativeMutationQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -320,13 +320,13 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
 				sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
-				s.createNativeQuery(sb.toString()).executeUpdate();
+				s.createNativeMutationQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();
 				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
 				sb.append(imageTempTable);
 				
-				int imageDataCnt = (int) s.createNativeQuery(sb.toString()).uniqueResult();
+				int imageDataCnt = (int) s.createNativeQuery(sb.toString(), Integer.class).uniqueResult();
 				
 				imageResults.setResults(imageTempTable, imageDataCnt);
 				s.getTransaction().commit();

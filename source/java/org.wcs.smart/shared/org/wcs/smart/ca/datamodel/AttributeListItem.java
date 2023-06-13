@@ -23,14 +23,14 @@ package org.wcs.smart.ca.datamodel;
 
 import java.util.Collection;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Attribute list item for attributes of type list.
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.icon.Icon;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.dm_attribute_list")
+@Table(name = "dm_attribute_list", schema="smart")
 public class AttributeListItem extends DmObject{
 
 	private static final long serialVersionUID = 1L;

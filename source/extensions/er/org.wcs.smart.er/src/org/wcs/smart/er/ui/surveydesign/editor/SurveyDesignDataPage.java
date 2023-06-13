@@ -74,6 +74,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -532,12 +533,13 @@ public class SurveyDesignDataPage extends EditorPart {
 				s.beginTransaction();
 				try{
 					SurveyFilter sf =  SurveyFilter.newInstance();
+					sf.setMissionDateFilter(DateFilter.ALL, null, null);
 					sf.setSurveyState(null);
 					sf.setSurveyDesignKeyFilters(new String[]{parentEditor.getSurveyDesign().getKeyId()});
 	
 					List<SurveyMissionProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
 					for(SurveyMissionProxy in : surveys){
-						Survey ss = (Survey) s.load(Survey.class, in.getUuid());
+						Survey ss = (Survey) s.getReference(Survey.class, in.getUuid());
 						TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), null, null, TreeNode.Type.SURVEY);					
 						for (Mission m : ss.getMissions()){
 							TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);

@@ -69,7 +69,7 @@ public class SmartCollectIncidentProvider implements IIncidentProvider {
 		SmartCollectWaypoint cm = new SmartCollectWaypoint();
 		cm.setSource(SmartDB.getCurrentEmployee().getSmartUserId() + " [SMART]"); //$NON-NLS-1$
 		cm.setWaypoint(wp);
-		session.save(cm);
+		session.persist(cm);
 	}
 
 	@Override

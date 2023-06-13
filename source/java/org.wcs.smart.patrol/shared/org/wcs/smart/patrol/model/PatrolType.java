@@ -26,24 +26,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Call to represent the patrol type.
@@ -52,7 +52,7 @@ import org.wcs.smart.ca.ConservationArea;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.patrol_type")
+@Table(name = "patrol_type", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.conservationArea", 
 		joinColumns = @JoinColumn(name = "ca_uuid")),

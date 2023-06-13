@@ -24,15 +24,17 @@ package org.wcs.smart.ca;
 import java.io.Serializable;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+
 
 /**
  * A object class which represents the i18n_label table.
@@ -52,7 +54,7 @@ import javax.persistence.Transient;
  */
 
 @Entity 
-@Table (name="smart.i18n_label")
+@Table (name="i18n_label", schema="smart")
 public class DescriptionLabel implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -51,6 +51,8 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Data page for asset editor.
  * 
@@ -138,20 +140,20 @@ public class AssetDataPage {
 				
 				List<UUID> waypointUuids = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
-					String query = "SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset "; //$NON-NLS-1$
+					String query = "SELECT distinct wp.uuid, wp.dateTime FROM AssetWaypoint join waypoint wp WHERE assetDeployment.asset = :asset "; //$NON-NLS-1$
 					if (startDate != null) {
-						query += " and id.waypoint.dateTime >= :startDate "; //$NON-NLS-1$
+						query += " and wp.dateTime >= :startDate "; //$NON-NLS-1$
 					}
 					if (endDate != null) {
-						query += " and id.waypoint.dateTime <= :endDate "; //$NON-NLS-1$
+						query += " and wp.dateTime <= :endDate "; //$NON-NLS-1$
 					}
-					query += " ORDER BY id.waypoint.dateTime desc "; //$NON-NLS-1$
-					Query<?> q = session.createQuery(query);
+					query += " ORDER BY wp.dateTime desc "; //$NON-NLS-1$
+					Query<Tuple> q = session.createQuery(query, Tuple.class);
 					if (startDate != null) q.setParameter("startDate",  startDate.atStartOfDay()); //$NON-NLS-1$
 					if (endDate != null) q.setParameter("endDate", endDate.atTime(LocalTime.MAX)); //$NON-NLS-1$
 					q.setParameter("asset", parentEditor.getAsset()); //$NON-NLS-1$
-					for (Object x : q.list()) {
-						waypointUuids.add( (UUID)((Object[])x)[0]);  
+					for (Tuple x : q.list()) {
+						waypointUuids.add( (UUID) x.get(0));  
 					}
 				}
 				dataPanel.setWaypoints(waypointUuids);

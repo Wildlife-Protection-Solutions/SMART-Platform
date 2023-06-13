@@ -22,7 +22,6 @@
 package org.wcs.smart.qa;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.qa.model.QaError;
 
@@ -42,9 +41,9 @@ public enum QaErrorCleaner {
 	 * @param session the active session
 	 */
 	public void cleanItems(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("DELETE FROM QaError WHERE conservationArea = :ca and status != :status"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.setParameter("status", QaError.Status.NEW); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM QaError WHERE conservationArea = :ca and status != :status") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.setParameter("status", QaError.Status.NEW) //$NON-NLS-1$
+			.executeUpdate();
 	}
 }

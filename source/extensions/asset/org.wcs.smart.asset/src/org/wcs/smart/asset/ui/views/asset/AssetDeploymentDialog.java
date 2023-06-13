@@ -111,12 +111,13 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 		
 		if (toUpdate.getUuid() != null) {
 			try(Session s = HibernateManager.openSession()){
-				s.saveOrUpdate(toUpdate);
+				
 				toUpdate.getAssetWaypoints().forEach(w->{
 					LocalDateTime dt = w.getWaypoint().getDateTime();
 					if (minWaypointDate == null || dt.isBefore(minWaypointDate)) minWaypointDate = dt;
 					if (maxWaypointDate == null || dt.isAfter(maxWaypointDate)) maxWaypointDate = dt;
 				});
+				HibernateManager.saveOrMerge(s, toUpdate);
 			}
 		}
 	}

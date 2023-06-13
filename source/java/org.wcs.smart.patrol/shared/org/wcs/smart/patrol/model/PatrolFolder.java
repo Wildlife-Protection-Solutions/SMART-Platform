@@ -24,15 +24,6 @@ package org.wcs.smart.patrol.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.eclipse.core.runtime.Assert;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -41,6 +32,15 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolder;
 import org.wcs.smart.ca.NamedItem;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
 /**
  * Folder for {@link Patrol} objects.
  *
@@ -48,7 +48,7 @@ import org.wcs.smart.ca.NamedItem;
  * @since 6.0.0
  */
 @Entity
-@Table(name="smart.patrol_folder")
+@Table(name="patrol_folder", schema="smart")
 public class PatrolFolder extends NamedItem implements IFolder {
 	
 	private static final long serialVersionUID = 1L;

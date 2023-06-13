@@ -60,6 +60,8 @@ import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Special Parameter component for SMART report start and end dates.
  * 
@@ -249,17 +251,18 @@ public class SmartDateParameterComponent implements IBirtParameterComponent {
 						session.beginTransaction();
 	
 						String hql = "SELECT min(dateTime), max(dateTime) FROM Waypoint WHERE conservationArea = :ca"; //$NON-NLS-1$
-						Query<?> q = session.createQuery(hql);
+						Query<Tuple> q = session.createQuery(hql, Tuple.class);
 						q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-						List<?> data = q.list();
+						List<Tuple> data = q.list();
 						
 						if (data != null && data.size() >= 1) {
-							LocalDateTime startdate = (LocalDateTime) ((Object[])data.get(0))[0];
+							Tuple first = data.get(0);
+							LocalDateTime startdate = (LocalDateTime) first.get(0);
 							if (startdate != null) {
 								start = ChronoUnit.DAYS.addTo(startdate.toLocalDate(), -1); //subtract one day to ensure we get everything
 							}
 							
-							LocalDateTime enddate = (LocalDateTime) ((Object[])data.get(0))[1];
+							LocalDateTime enddate = (LocalDateTime) first.get(1);
 							if (enddate != null) {
 								if (enddate.toLocalDate().isAfter( end )) {
 									end = ChronoUnit.DAYS.addTo(enddate.toLocalDate(),1);  // last date plus 1 day to ensure we get everything

@@ -127,7 +127,7 @@ public class SurveyDesignExportHandler {
 					final boolean[] overwriteall = new boolean[]{false};
 					try(Session s = HibernateManager.openSession()) {
 						for (SurveyDesignEditorInput sdei : types){
-							SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdei.getUuid());
+							SurveyDesign sd = (SurveyDesign) s.getReference(SurveyDesign.class, sdei.getUuid());
 							progress.subTask(MessageFormat.format(Messages.SurveyDesignExportHandler_Progress2, new Object[]{sd.getName()}));
 							final Path exportFile = exportDir.resolve(URLUtils.cleanFilename(sd.getName()) + ".xml"); //$NON-NLS-1$
 							

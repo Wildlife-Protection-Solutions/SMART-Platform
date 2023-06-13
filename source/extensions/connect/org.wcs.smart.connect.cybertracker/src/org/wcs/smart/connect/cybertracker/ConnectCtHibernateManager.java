@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
@@ -65,13 +63,12 @@ public class ConnectCtHibernateManager {
 			//should never happen!!!
 			SmartPlugIn.displayLog(Messages.ConnectCtHibernateManager_Error_MultipleConnectCtProperties, null);
 			for (int i = 1; i < items.size(); i++) {
-				s.delete(items.get(i));
+				s.remove(items.get(i));
 			}
 			return items.get(0);
 		}
 	}
 
-	@Transient
 	public static ConnectCtProperties createDefaultProperties(ConfigurableModel cm) {
 		ConnectCtProperties p = new ConnectCtProperties();
 		p.setModel(cm);

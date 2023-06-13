@@ -173,9 +173,9 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 			try{
 				for (QaError i : items){
 					for (QaError link : i.getLinks()){
-						s.saveOrUpdate(link);
+						HibernateManager.saveOrMerge(s, link);
 					}
-					s.saveOrUpdate(i);
+					HibernateManager.saveOrMerge(s, i);
 				}
 				s.getTransaction().commit();
 				isModified = true;

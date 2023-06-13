@@ -48,6 +48,8 @@ import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Intelligence observation query results
  * 
@@ -209,17 +211,22 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		String sql = getSql(session);
 		SqlGenerator.logString(sql);
 			
-		try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
+		try(ScrollableResults<Tuple> sc = session.createNativeQuery(sql, Tuple.class).scroll()){
 			if (!sc.setRowNumber(offset)) return items;
 			for (int i = 0; i <= pageSize; i ++){
-				items.add(asResultItem(sc.get(), session));
+				Tuple t = sc.get();
+				Object[] data = new Object[t.getElements().size()];
+				for (int j = 0; j < data.length; j ++) {
+					data[j] = t.get(j);
+				}
+				
+				items.add(asResultItem(data, session));
 				if (!sc.next()) break; //nothing else to get
 			}
 		}
 		return items;
 	}
 
-	@SuppressWarnings("unchecked")
 	private String getSql(Session session){
 		if (sortColumn == null || sortDirection == null) {
 			StringBuilder sb = new StringBuilder();
@@ -306,9 +313,9 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					
 					session.beginTransaction();
 					try {
-						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null", Integer.class).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						List<byte[]> items = session.createNativeQuery(s3.toString()).list();
+						List<byte[]> items = session.createNativeQuery(s3.toString(), byte[].class).list();
 						for (byte[] item : items) {
 							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, UuidUtils.byteToUUID(item));
 							
@@ -322,7 +329,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
-							session.createNativeQuery(s2.toString())
+							session.createNativeQuery(s2.toString(), Integer.class)
 								.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
 								.setParameter("value", li.getName()) //$NON-NLS-1$
 								.executeUpdate();
@@ -348,9 +355,9 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					
 					session.beginTransaction();
 					try {
-						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null", Integer.class).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						List<byte[]> items = session.createNativeQuery(s3.toString()).list();
+						List<byte[]> items = session.createNativeQuery(s3.toString(), byte[].class).list();
 						for (byte[] item : items) {
 							Employee e = session.get(Employee.class, UuidUtils.byteToUUID(item));
 							
@@ -364,7 +371,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
-							session.createNativeQuery(s2.toString())
+							session.createNativeQuery(s2.toString(), Integer.class)
 								.setParameter("uuid", e.getUuid()) //$NON-NLS-1$
 								.setParameter("value", SmartLabelProvider.getShortLabel(e)) //$NON-NLS-1$
 								.executeUpdate();
@@ -391,9 +398,9 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 				
 				session.beginTransaction();
 				try {
-					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null", Integer.class).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					List<byte[]> items = session.createNativeQuery(s3.toString()).list();
+					List<byte[]> items = session.createNativeQuery(s3.toString(), byte[].class).list();
 					for (byte[] item : items) {
 						IntelEntity li = session.get(IntelEntity.class, UuidUtils.byteToUUID(item));
 						
@@ -409,7 +416,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 						s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 						
-						session.createNativeQuery(s2.toString())
+						session.createNativeQuery(s2.toString(), Integer.class)
 							.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
 							.setParameter("value", li.getIdAttributeAsText()) //$NON-NLS-1$
 							.executeUpdate();
@@ -451,7 +458,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
 		resultsTable = null;
 		SqlGenerator.logString(sql);
-		session.createNativeQuery(sql).executeUpdate();
+		session.createNativeQuery(sql, Integer.class).executeUpdate();
 	}
 
 	@Override

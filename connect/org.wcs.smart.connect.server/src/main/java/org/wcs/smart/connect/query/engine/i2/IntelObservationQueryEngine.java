@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
-import java.math.BigInteger;
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,7 +39,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.query.NativeQuery;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.Messages;
@@ -151,7 +150,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 						
 						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
 						SqlGenerator.logString(sql);
-						session.createNativeQuery(sql).executeUpdate();
+						session.createNativeMutationQuery(sql).executeUpdate();
 						computeQueryColumns(session, fItemProvider, flocale, (IntelRecordObservationQuery) query);
 						connection.commit();
 						return queryResults;
@@ -168,7 +167,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 						
 						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
 						SqlGenerator.logString(sql);
-						session.createNativeQuery(sql).executeUpdate();
+						session.createNativeMutationQuery(sql).executeUpdate();
 						computeQueryColumns(session, fItemProvider, flocale, (IntelRecordObservationQuery) query);
 						computeCount(session);
 //						computeBounds(session);
@@ -189,14 +188,14 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 	}
 	
 	private void computeCount(Session session){
-		BigInteger obs = (BigInteger) session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
+		Long obs = session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable(), Long.class).uniqueResult(); //$NON-NLS-1$
 		queryResults.setRowCount(obs.intValue());
 	}
 
 	/*
 	 * Configures the query columns; removing non populated attribute columns
 	 */
-	@SuppressWarnings("unchecked")
+	
 	private void computeQueryColumns(Session session, IQueryItemProvider itemProvider,  Locale locale, IntelRecordObservationQuery query) throws Exception{
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, locale, session);
 		//remove unused attribute columns
@@ -204,7 +203,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		sb.append("SELECT distinct a.keyid FROM "); //$NON-NLS-1$
 		sb.append(" smart.dm_attribute a join smart.i_observation_attribute b ON a.uuid = b.attribute_uuid "); //$NON-NLS-1$
 		sb.append(" join " + queryResults.getQueryDataTable() + " c on c.observation_uuid = b.observation_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-		List<String> populatedAttributes = session.createNativeQuery(sb.toString()).list();
+		List<String> populatedAttributes = session.createNativeQuery(sb.toString(), String.class).list();
 		for (Iterator<IQueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			IQueryColumn column = (IQueryColumn) iterator.next();
 			if (column instanceof DataModelColumn ){
@@ -264,7 +263,6 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 	/*
 	 * create the results table from the data table add necessary results columns
 	 */
-	@SuppressWarnings("unchecked")
 	private void configureTableContents(String observationTable, HashMap<IQueryFilter, String> filterToColumn, boolean obsFilter, Session session){
 		
 		HashMap<String, Integer> columnNameToIndex = new HashMap<>();
@@ -321,7 +319,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		sb.append(")"); //$NON-NLS-1$
 		
 		SqlGenerator.logString(sb.toString());
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		
 		sb = new StringBuilder();
@@ -339,14 +337,14 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 			sb.append(" AND o.uuid = a.observation_uuid "); //$NON-NLS-1$
 		}
 		SqlGenerator.logString(sb.toString());
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		
 		//add category details
 		sb = new StringBuilder();
 		sb.append("SELECT distinct cast(category_uuid as varchar) FROM " + newTable + " WHERE category_uuid is not null "); //$NON-NLS-1$ //$NON-NLS-2$
 
-		List<String> categories = session.createNativeQuery(sb.toString()).list();
+		List<String> categories = session.createNativeQuery(sb.toString(), String.class).list();
 		HashMap<Category, List<String>> categoryItems = new HashMap<>();
 		int maxCategoryLength = 0;
 		for (String c : categories){
@@ -359,7 +357,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		
 		if (maxCategoryLength >= 0){
 			for (int i = 0; i < maxCategoryLength; i ++){
-				session.createNativeQuery("ALTER TABLE " + newTable + " ADD column category_" + i + " varchar(1024) ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				session.createNativeMutationQuery("ALTER TABLE " + newTable + " ADD column category_" + i + " varchar(1024) ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				columnNameToIndex.put("category_" + i, columnIndex++); //$NON-NLS-1$
 			}
 			for (Entry<Category, List<String>> update : categoryItems.entrySet()){
@@ -374,7 +372,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 					sb.append("category_" + i + " = :c" + i); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sb.append(" WHERE category_uuid = :uuid"); //$NON-NLS-1$
-				NativeQuery<?> query = session.createNativeQuery(sb.toString());
+				MutationQuery query = session.createNativeMutationQuery(sb.toString());
 				query.setParameter("uuid", update.getKey().getUuid()); //$NON-NLS-1$
 				
 				for (int i = 0; i < update.getValue().size(); i ++){

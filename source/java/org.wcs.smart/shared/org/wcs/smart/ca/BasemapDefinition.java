@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.ca;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 
 /**
@@ -36,7 +36,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "smart.saved_maps")
+@Table(name = "saved_maps", schema="smart")
 public class BasemapDefinition extends NamedItem{
 		
 	private static final long serialVersionUID = 1L;
@@ -49,7 +49,7 @@ public class BasemapDefinition extends NamedItem{
 	public BasemapDefinition(){
 		super();
 	}
-
+	
 	/**
 	 * @return the conservationArea
 	 */

@@ -23,7 +23,6 @@ package org.wcs.smart.qa.handler;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -46,16 +45,16 @@ public class CaDeleteHandler implements ICaDeleteHandler{
 		//labels are dealt with by core Conservation Area delete engine 
 		monitor.subTask(Messages.CaDeleteHandler_TaskName);
 		
-		Query<?> q = session.createQuery("DELETE from QaError where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE from QaError where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from QaRoutineParameter rp where rp.qaRoutine in (FROM QaRoutine a WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from QaRoutineParameter rp where rp.qaRoutine in (FROM QaRoutine a WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("DELETE from QaRoutine where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE from QaRoutine where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 }

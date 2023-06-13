@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKBReader;
@@ -272,7 +271,6 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 		return item;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public String configureSort(Session session){
 		if (sortColumn == null || sortDirection == null) return " ORDER BY loc_datetime DESC "; //$NON-NLS-1$
 		
@@ -320,68 +318,62 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 					case BOOLEAN:
 					case NUMERIC:
 						String updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						
 						updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = (SELECT a.double_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						break;
 					case DATE:
 						updateQuery = "UPDATE " + resultsTable + " SET date_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						
 						updateQuery = "UPDATE " + resultsTable + " SET date_sort = (SELECT date(a.string_value) FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						break;
 					case LIST:		
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						
 						String attribute = "SELECT distinct a.list_element_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.list_element_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						List<?> listitems = session.createNativeQuery(attribute).list();
-						for (Object b : listitems){
-							UUID uuid = null;
-							if (b instanceof UUID){ 
-								uuid = (UUID) b;
-							}else if (b instanceof byte[]){
-								uuid = UuidUtils.byteToUUID((byte[]) b);
-							}
+						List<UUID> listitems = session.createNativeQuery(attribute, UUID.class).list();
+						for (UUID uuid : listitems){
 							AttributeListItem item = (AttributeListItem) session.get(AttributeListItem.class, uuid);
 							if (item != null){
 								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.list_element_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								
-								NativeQuery<?> q = session.createNativeQuery(updateQuery);
-								q.setParameter("value", item.getName()); //$NON-NLS-1$
-								q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
-								q.executeUpdate();
+								session.createNativeMutationQuery(updateQuery)
+									.setParameter("value", item.getName()) //$NON-NLS-1$
+									.setParameter("listitem", item.getUuid()) //$NON-NLS-1$
+									.executeUpdate();
 							}
 						}
 						break;
 					case TEXT:
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = (SELECT a.string_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						break;
 					case TREE:
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(updateQuery).executeUpdate();
+						session.createNativeMutationQuery(updateQuery).executeUpdate();
 						
 						attribute = "SELECT distinct a.tree_node_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.tree_node_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						List<byte[]> treenodes = session.createNativeQuery(attribute).list();
-						for (byte[] b : treenodes){
-							AttributeTreeNode item = (AttributeTreeNode) session.get(AttributeTreeNode.class, UuidUtils.byteToUUID(b));
+						List<UUID> treenodes = session.createNativeQuery(attribute, UUID.class).list();
+						for (UUID b : treenodes){
+							AttributeTreeNode item = (AttributeTreeNode) session.get(AttributeTreeNode.class, b);
 							if (item != null){
 								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.tree_node_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								
-								NativeQuery<?> q = session.createNativeQuery(updateQuery);
-								q.setParameter("value", item.getName()); //$NON-NLS-1$
-								q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
-								q.executeUpdate();
-							}
+								session.createNativeMutationQuery(updateQuery)
+									.setParameter("value", item.getName()) //$NON-NLS-1$
+									.setParameter("listitem", item.getUuid()) //$NON-NLS-1$
+									.executeUpdate();
+							}	
 						}
 						break;
 					default:
@@ -438,7 +430,7 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
 		resultsTable = null;
 		SqlGenerator.logString(sql);
-		session.createNativeQuery(sql).executeUpdate();
+		session.createNativeMutationQuery(sql).executeUpdate();
 	}
 
 	@Override

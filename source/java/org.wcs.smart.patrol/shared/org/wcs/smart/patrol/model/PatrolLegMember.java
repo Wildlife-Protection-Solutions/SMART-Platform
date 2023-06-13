@@ -24,19 +24,19 @@ package org.wcs.smart.patrol.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
+
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Patrol leg member
@@ -45,7 +45,7 @@ import org.wcs.smart.ca.Employee;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.patrol_leg_members")
+@Table(name="patrol_leg_members", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.member", 
 		joinColumns = @JoinColumn(name = "employee_uuid")),

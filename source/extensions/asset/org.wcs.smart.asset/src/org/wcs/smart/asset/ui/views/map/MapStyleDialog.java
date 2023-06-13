@@ -92,13 +92,12 @@ public class MapStyleDialog extends SmartStyledTitleDialog {
 					style.setName(txtName.getText().trim());
 					style.setConservationArea(SmartDB.getCurrentConservationArea());
 					style.setStyleString(StyleManager.INSTANCE.asString(toSave));
-					session.save(style);
+					session.persist(style);
 					updatedStyle = style;
 				}else {
 					AssetMapStyle style = (AssetMapStyle) cmbExisting.getStructuredSelection().getFirstElement();
 					style.setStyleString(StyleManager.INSTANCE.asString(toSave));
-					session.saveOrUpdate(style);
-					updatedStyle = style;
+					updatedStyle = session.merge(style);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

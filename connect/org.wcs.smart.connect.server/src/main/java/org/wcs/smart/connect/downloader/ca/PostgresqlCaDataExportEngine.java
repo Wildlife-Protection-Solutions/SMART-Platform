@@ -31,7 +31,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -40,15 +39,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.hql.spi.QueryTranslator;
-import org.hibernate.hql.spi.QueryTranslatorFactory;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
 import org.postgresql.PGConnection;
 import org.postgresql.copy.CopyManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
+import org.wcs.smart.ca.export.TableInfo;
 
 /**
  * Derby implementation of a ICaDataExportEngine
@@ -83,7 +80,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 				" column_default not like 'nextval(%::regclass)')) " + //$NON-NLS-1$
 				" ORDER BY ordinal_position";  //$NON-NLS-1$
 		
-		List<?> data = getSession().createNativeQuery(sql).list();
+		List<String> data = getSession().createNativeQuery(sql, String.class).list();
 		if (data.size() == 0){
 			throw new IllegalStateException("Could not determine table columns for table " + tableName); //$NON-NLS-1$
 		}
@@ -146,20 +143,33 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	 */
 	@Override
 	public void writeHibernateQuery( 
-			String tableName,
-			String hibernateClass,
+			TableInfo info,
 			String[] columns,
-			String caPropertyQuery) throws Exception {
+			String caPropertyFilter,
+			String caUuidPropertyFilter) throws Exception {
 		
+		StringBuilder sb = new StringBuilder();
+		sb.append("FROM "); //$NON-NLS-1$
+		sb.append(info.getClazz().getSimpleName());
+		sb.append(" a WHERE a"); //$NON-NLS-1$
+		if (caUuidPropertyFilter != null && !caUuidPropertyFilter.isBlank()) {
+			sb.append(caUuidPropertyFilter);
+		}else {
+			sb.append(caPropertyFilter);
+		}
+		sb.append(" = :ca "); //$NON-NLS-1$
 		
-		Query<?> q = getSession().createQuery("from " //$NON-NLS-1$
-				+ hibernateClass + " a where a" //$NON-NLS-1$
-				+ caPropertyQuery + " = :ca"); //$NON-NLS-1$
+		Query<?> q = getSession().createQuery(sb.toString(), info.getClazz());
+		
+		if (caUuidPropertyFilter != null && !caUuidPropertyFilter.isBlank()) {
+			q.setParameter("ca", getConservationArea().getUuid()); //$NON-NLS-1$
+		}else {
+			q.setParameter("ca", getConservationArea());	 //$NON-NLS-1$
+		}
 		
 		//convert hql to sql
 		String sql = toSql(q.getQueryString());
-		//sql = sql.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		//set sql parameter
 		sql = sql.replace("?", "  '" + getConservationArea().getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -187,7 +197,8 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 
 	
 		/* export data to file */
-		writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
+		writeQuery(info.getTableName() + "." + info.getClazz().getSimpleName(), query.toString()); //$NON-NLS-1$
+
 	}
 
 	/**
@@ -277,12 +288,13 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	public String toSql(String hqlQueryText) {
 		
 		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
-			final QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-			final QueryTranslator translator = translatorFactory
-					.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory, null);
-			translator.compile(Collections.EMPTY_MAP, false);
-			return translator.getSQLString();
+			//TODO:
+//			final QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
+//			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
+//			final QueryTranslator translator = translatorFactory
+//					.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory, null);
+//			translator.compile(Collections.EMPTY_MAP, false);
+//			return translator.getSQLString();
 		}
 		return null;
 	}

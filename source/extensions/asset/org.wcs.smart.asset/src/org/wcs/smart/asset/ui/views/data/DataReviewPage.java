@@ -44,6 +44,8 @@ import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Page for reviewing results
  * 
@@ -132,13 +134,13 @@ public class DataReviewPage {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<UUID> waypointUuids  = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				List<?> aw = session.createQuery("SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime") //$NON-NLS-1$
+				List<Tuple> aw = session.createQuery("SELECT distinct waypoint.uuid, waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND waypoint.conservationArea = :ca ORDER BY waypoint.dateTime", Tuple.class) //$NON-NLS-1$
 				.setParameter("state", AssetWaypoint.State.DIRTY) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.list();
 				
-				for (Object o : aw) {
-					waypointUuids.add((UUID)((Object[])o)[0]);
+				for (Tuple o : aw) {
+					waypointUuids.add((UUID) o.get(0));
 				}				
 			}
 			panel.setWaypoints(waypointUuids);

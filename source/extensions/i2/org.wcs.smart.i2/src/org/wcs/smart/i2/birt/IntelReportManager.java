@@ -314,7 +314,7 @@ public enum IntelReportManager {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					s.saveOrUpdate(entityType);
+					if (entityType.getUuid() == null) s.persist(entityType); else s.merge(entityType);
 					s.getTransaction().commit();
 				}catch (Exception ex) {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError,  entityType.getName(), ex.getMessage()), ex);

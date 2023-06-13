@@ -23,7 +23,6 @@ package org.wcs.smart.event;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -42,21 +41,21 @@ public class ConservationAreaDeleteHandler implements ICaDeleteHandler {
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.ConservationAreaDeleteHandler_TaskName);
 		
-		Query<?> q = session.createQuery("delete from EActionEvent av where av in (SELECT av FROM EActionEvent av WHERE av.action.conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from EActionEvent av where av in (SELECT av FROM EActionEvent av WHERE av.action.conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from EActionParameterValue av where av.id.action in (FROM EAction WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from EActionParameterValue av where av.id.action in (FROM EAction WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from EAction WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from EAction WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from EFilter WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from EFilter WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 }

@@ -110,13 +110,12 @@ public class AssetStationCsvImporter {
 		this.projection =  projection;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean processFile() throws Exception {
 		warnings = new ArrayList<>();
 		stationIds = new HashSet<>();
 		
 		try(Session session = HibernateManager.openSession()){
-			stationIds.addAll(session.createQuery("SELECT LOWER(id) FROM AssetStation WHERE conservationArea = :ca").setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
+			stationIds.addAll(session.createQuery("SELECT LOWER(id) FROM AssetStation WHERE conservationArea = :ca", String.class).setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		CoordinateReferenceSystem fromCrs = ReprojectUtils.stringToCrs(projection.getDefinition());
@@ -163,7 +162,7 @@ public class AssetStationCsvImporter {
 			session.beginTransaction();
 			try {
 				for (AssetStation a : newStations) {
-					session.save(a);
+					session.persist(a);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

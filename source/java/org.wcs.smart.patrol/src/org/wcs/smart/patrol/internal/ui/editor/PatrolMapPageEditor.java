@@ -186,7 +186,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 			}else if (source instanceof PatrolLegDay){
 				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
 			}
-			if (p != null && p.equals(parentEditor.getPatrol()) && (
+			if (p != null && p.getUuid().equals(parentEditor.getPatrolUuid()) && (
 					attributeChanged == PatrolEventManager.PATROL_DATES_LEG ||
 					attributeChanged == PatrolEventManager.PATROL_TRACKS ||
 					attributeChanged == PatrolEventManager.PATROL_WAYPOINTS)){
@@ -351,7 +351,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 						pw.getWaypoint().setDirection(newdirection);
 						pw.getWaypoint().setDistance(newdistance);
 						
-						s.update(pw.getWaypoint());
+						s.merge(pw.getWaypoint());
 						s.getTransaction().commit();
 						modified = true;
 					}catch (Exception ex){
@@ -444,7 +444,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 						pw.getWaypoint().setRawY(y);
 						pw.getWaypoint().setDirection(direction);
 						pw.getWaypoint().setDistance(distance);
-						s.update(pw.getWaypoint());
+						s.merge(pw.getWaypoint());
 						s.getTransaction().commit();
 						
 						Display.getDefault().syncExec(()->{

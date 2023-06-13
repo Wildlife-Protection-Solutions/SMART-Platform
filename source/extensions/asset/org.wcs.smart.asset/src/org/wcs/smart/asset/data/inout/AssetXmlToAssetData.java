@@ -31,11 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -67,6 +62,11 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 
 
@@ -169,13 +169,13 @@ public class AssetXmlToAssetData {
 		progress.subTask(Messages.AssetXmlToAssetData_SavingTask);
 		session.beginTransaction();
 		try {
-			attributes.forEach(a->session.saveOrUpdate(a));
-			assetTypes.forEach(a->session.saveOrUpdate(a));
-			metadataMappings.forEach(a->session.saveOrUpdate(a));
+			attributes.forEach(a->HibernateManager.saveOrMerge(session, a));
+			assetTypes.forEach(a->HibernateManager.saveOrMerge(session, a));
+			metadataMappings.forEach(a->HibernateManager.saveOrMerge(session, a));
 			
-			settings.forEach(a->session.saveOrUpdate(a));
-			stations.forEach(a->session.saveOrUpdate(a));
-			locations.forEach(a->session.saveOrUpdate(a));
+			settings.forEach(a->HibernateManager.saveOrMerge(session, a));
+			stations.forEach(a->session.merge(a));
+			locations.forEach(a->session.merge(a));
 			
 			session.getTransaction().commit();
 		}catch (Exception ex) {

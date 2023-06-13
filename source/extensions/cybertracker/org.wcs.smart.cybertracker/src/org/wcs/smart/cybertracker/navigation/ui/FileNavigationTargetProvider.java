@@ -30,10 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.graphics.Image;
@@ -56,6 +52,10 @@ import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.map.GeometryFactoryProvider;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * File navigation layer target provider for reading shapefiles and gpx files

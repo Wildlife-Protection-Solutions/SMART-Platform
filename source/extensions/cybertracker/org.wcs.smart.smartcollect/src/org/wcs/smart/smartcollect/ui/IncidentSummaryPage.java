@@ -190,7 +190,7 @@ public class IncidentSummaryPage extends EditorPart {
 		
 		Waypoint incident = cmincident.getWaypoint();
 		try(Session session = HibernateManager.openSession()){
-			session.saveOrUpdate(incident);
+			incident = session.getReference(incident);
 			if (incident.getComment() == null){
 				txtComments.setText(""); //$NON-NLS-1$
 			}else{

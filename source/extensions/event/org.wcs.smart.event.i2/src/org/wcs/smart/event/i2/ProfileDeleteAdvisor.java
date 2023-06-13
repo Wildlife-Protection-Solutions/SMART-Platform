@@ -44,7 +44,7 @@ public class ProfileDeleteAdvisor implements IDeleteAdvisor {
 		sb.append("WHERE ea.actionTypeKey IN (:actionids) AND p.id.parameterKey = :pkey "); //$NON-NLS-1$
 		sb.append("AND p.parameterValue = :value AND ea.conservationArea = :ca"); //$NON-NLS-1$
 		
-		Long used = (Long)session.createQuery(sb.toString())
+		Long used = session.createQuery(sb.toString(), Long.class)
 		.setParameterList("actionids", new Object[] {CreateRecordActionType.KEY, CreateEntityActionType.KEY}) //$NON-NLS-1$
 		.setParameter("pkey", ProfileParameter.INSTANCE.getKey()) //$NON-NLS-1$
 		.setParameter("value", profile.getKeyId()) //$NON-NLS-1$

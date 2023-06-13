@@ -650,12 +650,11 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				}
 				privatemd.setBooleanValue(btnPrivate.getSelection());
 				
-				session.saveOrUpdate(ctpackage);
-				session.flush();
+				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage);
-				}
-				session.getTransaction().commit();
+				}				
+				session.merge(ctpackage);
 				
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

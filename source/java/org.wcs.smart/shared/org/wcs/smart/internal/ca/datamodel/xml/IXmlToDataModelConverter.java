@@ -27,11 +27,11 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Locale;
 
-import javax.xml.bind.JAXBException;
-
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
+
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Converts an xml file into a data model representation 

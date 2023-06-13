@@ -147,7 +147,7 @@ public class NewFilterDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(toUpdate);
+				HibernateManager.saveOrMerge(session, toUpdate);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

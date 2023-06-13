@@ -23,17 +23,17 @@ package org.wcs.smart.connect.cybertracker.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Smart connect alert for configurable model.
@@ -42,7 +42,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  * @since 4.0.0
  */
 @Entity
-@Table(name="smart.connect_alert")
+@Table(name="connect_alert", schema="smart")
 public class ConnectAlert extends UuidItem {
 
 	private static final long serialVersionUID = 1L;

@@ -68,7 +68,7 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 			UUID toEdit) {
 		super(parentShell);
 		this.session = HibernateManager.openSession();
-		this.toEdit = (Survey) session.load(Survey.class, toEdit);
+		this.toEdit = (Survey) session.getReference(Survey.class, toEdit);
 	}
 	
 	@Override
@@ -151,7 +151,7 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		
 		session.beginTransaction();
 		try{
-			session.save(toEdit);
+			session.persist(toEdit);
 			session.getTransaction().commit();
 			
 			//close session

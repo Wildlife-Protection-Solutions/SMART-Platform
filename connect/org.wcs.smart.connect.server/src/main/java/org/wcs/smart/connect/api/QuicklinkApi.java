@@ -29,9 +29,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +57,11 @@ import org.wcs.smart.connect.model.UserQuicklink;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 
 /**
@@ -194,7 +196,6 @@ public class QuicklinkApi extends HttpServlet {
 			if(Quicklink.getUrl() != null){
 				toUpdate.setUrl(Quicklink.getUrl());
 			}
-			s.saveOrUpdate(toUpdate);
 			
 			s.flush();
 			s.getTransaction().commit();
@@ -233,7 +234,7 @@ public class QuicklinkApi extends HttpServlet {
 			if (toDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "QuickLink Not Found.");  //$NON-NLS-1$
 			}
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -296,12 +297,11 @@ public class QuicklinkApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			Query<?> query = s.createQuery("Select q.url, u.labelOverride, u.order, u.uuid from UserQuicklink u join u.quicklink q where u.userUuid = :uuid order by u.order"); //$NON-NLS-1$
+			Query<Tuple> query = s.createQuery("Select q.url, u.labelOverride, u.order, u.uuid from UserQuicklink u join u.quicklink q where u.userUuid = :uuid order by u.order", Tuple.class); //$NON-NLS-1$
 			query.setParameter("uuid", uuid); //$NON-NLS-1$
-			List<?> results = query.list();
-			for (Object rowd : results) {
-				Object[] row = (Object[])rowd;
-				list.add(new QuicklinkWrapper((String)row[0], (String)row[1], (int)row[2], (UUID)row[3]));
+			List<Tuple> results = query.list();
+			for (Tuple row : results) {
+				list.add(new QuicklinkWrapper((String)row.get(0), (String)row.get(1), (int)row.get(2), (UUID)row.get(3)));
 			}
 		}catch(Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -354,7 +354,7 @@ public class QuicklinkApi extends HttpServlet {
 		s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			s.save(q);
+			s.persist(q);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -411,7 +411,7 @@ public class QuicklinkApi extends HttpServlet {
 			listEntry.setOrder(100);
 			listEntry.setQuicklink(quicklink);
 			listEntry.setUserUuid(uuid);
-			s.save(listEntry);
+			s.persist(listEntry);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -449,7 +449,7 @@ public class QuicklinkApi extends HttpServlet {
 			if (toDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "User's QuickLink Not Found.");  //$NON-NLS-1$
 			}
-			s.delete(toDelete);
+			s.remove(toDelete);
 			
 			// if no one else is using this quicklink and the user is the creator, remove it as well. Quickly clean up user-created links that no one else needs 
 			List<UserQuicklink> othersLeft = QueryFactory.buildQuery(s, UserQuicklink.class, "quicklink.uuid", toDelete.getQuicklink().getUuid()).list(); //$NON-NLS-1$
@@ -458,7 +458,7 @@ public class QuicklinkApi extends HttpServlet {
 						new Object[] {"uuid", toDelete.getQuicklink().getUuid()}, //$NON-NLS-1$
 						new Object[] {"createdBy", user.getUuid()}).uniqueResult(); //$NON-NLS-1$
 				if(ql != null){
-					s.delete(ql);
+					s.remove(ql);
 				}
 			}
 			s.flush();
@@ -510,7 +510,6 @@ public class QuicklinkApi extends HttpServlet {
 			if(userQuicklink.getOrder() > -10000){
 				toUpdate.setOrder(userQuicklink.getOrder());
 			}
-			s.saveOrUpdate(toUpdate);
 			
 			s.flush();
 			s.getTransaction().commit();
@@ -567,7 +566,7 @@ public class QuicklinkApi extends HttpServlet {
 		s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			s.save(q);
+			s.persist(q);
 			
 			ArrayList<SmartUser> users = (ArrayList<SmartUser>) QueryFactory.buildQuery(s, SmartUser.class).list();
 			for(SmartUser u : users){
@@ -576,7 +575,7 @@ public class QuicklinkApi extends HttpServlet {
 				ql.setLabelOverride(quicklink.getLabel());
 				ql.setQuicklink(q);
 				ql.setUserUuid(u.getUuid());
-				s.save(ql);
+				s.persist(ql);
 			}
 			s.getTransaction().commit();
 			

@@ -25,18 +25,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.jdbc.Work;
-import org.hibernate.type.BinaryType;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Performs upgrade for CyberTracker from plugin version 3.0 to 4.0
@@ -46,10 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class CtDatabaseUpgrader30To40 {
 	
-	private UUIDGenerator uuidGenerator;
-	
 	public void upgrade(Session session){
-		uuidGenerator = null;
 		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 			"ALTER TABLE SMART.CT_PROPERTIES_OPTION DROP CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK",
@@ -78,7 +72,7 @@ public class CtDatabaseUpgrader30To40 {
 			"GRANT SELECT ON smart.cm_ct_properties_profile to login"
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		populateProfiles(session);
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_4_0, session);
@@ -131,16 +125,18 @@ public class CtDatabaseUpgrader30To40 {
 	}
 	
 	private byte[] getNewUuid(Session session, Object object) {
-		if (uuidGenerator == null) {
-			uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
-			Properties prop = new Properties();
-			prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
-			prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
-			uuidGenerator.configure(new BinaryType(), prop, null);
-		}
-
-		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, object);
-		return uuid;
+//		if (uuidGenerator == null) {
+//			uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+//			Properties prop = new Properties();
+//			prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
+//			prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
+//			uuidGenerator.configure(new BinaryType(), prop, null);
+//		}
+//
+//		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, object);
+//		return uuid;
+		UUID uuid = UuidUtils.generateUuid((SessionImplementor)session);
+		return UuidUtils.uuidToByte(uuid);
 	}
 	
 }

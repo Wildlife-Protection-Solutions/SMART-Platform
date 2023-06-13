@@ -125,7 +125,7 @@ public class ReportDefintionExporter implements IReportExporter {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(report);
+				report = HibernateManager.saveOrMerge(s, report);
 				Properties prop = new Properties();
 				for (Label l : report.getNames()) {
 					prop.setProperty(

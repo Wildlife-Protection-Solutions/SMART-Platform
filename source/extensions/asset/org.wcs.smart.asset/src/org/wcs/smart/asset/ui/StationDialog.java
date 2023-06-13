@@ -152,7 +152,7 @@ public class StationDialog extends SmartStyledTitleDialog{
 					}
 				}
 				
-				s.saveOrUpdate(toUpdate);
+				HibernateManager.saveOrMerge(s, toUpdate);
 				s.getTransaction().commit();
 				
 			}catch(Exception ex) {

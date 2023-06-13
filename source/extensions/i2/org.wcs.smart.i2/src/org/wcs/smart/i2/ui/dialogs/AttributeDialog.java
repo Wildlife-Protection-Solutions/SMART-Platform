@@ -53,7 +53,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -124,19 +123,19 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 						List<IntelEntityAttributeValue> items = QueryFactory.buildQuery(s, IntelEntityAttributeValue.class, "attributeListItem", i).getResultList();  //$NON-NLS-1$
 						for (IntelEntityAttributeValue item : items){
 							modifiedEntities.add(item.getEntity());
-							s.delete(item);
+							s.remove(item);
 						}
 						
 						List<IntelEntityRelationshipAttributeValue> items2 = QueryFactory.buildQuery(s, IntelEntityRelationshipAttributeValue.class, "attributeListItem", i).getResultList(); //$NON-NLS-1$
 						for (IntelEntityRelationshipAttributeValue item : items2){
 							modifiedEntities.add(item.getRelationship().getSourceEntity());
 							modifiedEntities.add(item.getRelationship().getTargetEntity());
-							s.delete(item);
+							s.remove(item);
 						}
 						
-						Query<?> q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid"); //$NON-NLS-1$
-						q.setParameter("uuid", i.getUuid()); //$NON-NLS-1$
-						q.executeUpdate();
+						s.createMutationQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid") //$NON-NLS-1$
+							.setParameter("uuid", i.getUuid()) //$NON-NLS-1$
+							.executeUpdate();
 					}
 				}
 				s.flush();
@@ -147,7 +146,7 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 						li.setOrder(i++);
 					}
 				}
-				s.saveOrUpdate(attribute);
+				HibernateManager.saveOrMerge(s,  attribute);
 				
 				this.allItems = new ArrayList<IntelAttributeListItem>();
 				this.allItems.addAll(attribute.getAttributeList());

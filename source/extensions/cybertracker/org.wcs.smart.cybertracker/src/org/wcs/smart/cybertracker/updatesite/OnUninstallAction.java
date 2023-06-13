@@ -66,14 +66,14 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			try {
 				// delete labels
 				if (DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_PROFILE")) { //$NON-NLS-1$
-					session.createNativeQuery(
+					session.createNativeMutationQuery(
 							"delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.CT_PROPERTIES_PROFILE)") //$NON-NLS-1$
 							.executeUpdate();
 				}
 				// delete tables
 				for (String table : tables) {
 					if (DerbyHibernateExtensions.tableExists(session, table)) {
-						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+						session.createNativeMutationQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 					}
 				}
 				// clean filestore

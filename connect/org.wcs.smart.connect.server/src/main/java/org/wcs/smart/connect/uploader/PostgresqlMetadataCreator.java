@@ -27,12 +27,13 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
+
+import jakarta.persistence.Tuple;
 
 /**
  * Metadata packager for postgresql.
@@ -55,7 +56,7 @@ public class PostgresqlMetadataCreator {
 	public static void generateMetadata(Session session, 
 			UUID caUuid, Path file, long revision, WorkItem item) throws Exception{
 		
-		ConservationAreaInfo ca = (ConservationAreaInfo) session.load(ConservationAreaInfo.class, caUuid);
+		ConservationAreaInfo ca = (ConservationAreaInfo) session.getReference(ConservationAreaInfo.class, caUuid);
 		if (ca == null){
 			throw new Exception(Messages.getString("PostgresqlMetadataCreator.CaNotFound", item.getLocale())); //$NON-NLS-1$
 		}
@@ -67,12 +68,11 @@ public class PostgresqlMetadataCreator {
 		metadata.setServerRevision(revision);
 		
 		//plugin versions
-		NativeQuery<?> q = session.createNativeQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca "); //$NON-NLS-1$
-		q.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		List<?> plugins = q.list();
-		for (Object versionRow : plugins){
-			Object[] version = (Object[])versionRow;
-			metadata.setPluginVersion((String)version[1], (String)version[0]);
+		NativeQuery<Tuple> q = session.createNativeQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca ", Tuple.class); //$NON-NLS-1$
+		q.setParameter("ca", ca.getUuid()); //, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		List<Tuple> plugins = q.list();
+		for (Tuple version : plugins){
+			metadata.setPluginVersion((String)version.get(1), (String)version.get(0));
 		}
 		
 		MetadataPackager.INSTANCE.writeMetadata(file, metadata);

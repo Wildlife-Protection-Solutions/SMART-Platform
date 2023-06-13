@@ -26,11 +26,6 @@ import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.engine.ISurveyQueryMissionResult;
@@ -40,6 +35,11 @@ import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Survey observation query.
  * 
@@ -47,7 +47,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
  *
  */
 @Entity
-@Table(name="smart.survey_observation_query")
+@Table(name="survey_observation_query", schema="smart")
 public class SurveyObservationQuery extends ObservationQuery implements ISurveyQuery{
 
 	private static final long serialVersionUID = 1L;

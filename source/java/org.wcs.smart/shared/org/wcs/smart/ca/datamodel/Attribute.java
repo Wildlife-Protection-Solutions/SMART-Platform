@@ -29,26 +29,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Conservation area data model attribute object
@@ -57,7 +57,7 @@ import org.wcs.smart.ca.icon.Icon;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.dm_attribute")
+@Table(name = "dm_attribute", schema="smart")
 public class Attribute extends DmObject{
 	
 	private static final long serialVersionUID = 1L;
@@ -271,7 +271,7 @@ public class Attribute extends DmObject{
 	 * @return the set of aggregations that are valid for the attribute
 	 */
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name="smart.dm_att_agg_map", 
+	@JoinTable(name="dm_att_agg_map", schema="smart", 
 	 joinColumns = {@JoinColumn(name="attribute_uuid")},
 	 inverseJoinColumns = {@JoinColumn(name="agg_name")}
 	)

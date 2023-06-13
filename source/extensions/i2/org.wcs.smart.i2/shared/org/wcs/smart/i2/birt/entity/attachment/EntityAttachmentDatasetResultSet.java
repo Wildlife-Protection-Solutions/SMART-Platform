@@ -106,8 +106,8 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 			}
 		}
 		
-		Query<?> query1 = connection.getSession().createQuery(q1);
-		Query<?> query2 = connection.getSession().createQuery(q2);
+		Query<Long> query1 = connection.getSession().createQuery(q1, Long.class);
+		Query<Long> query2 = connection.getSession().createQuery(q2, Long.class);
 		query1.setParameterList("profiles", profiles); //$NON-NLS-1$
 		query2.setParameterList("profiles", profiles); //$NON-NLS-1$
 		for (Entry<String,Object> e : values.entrySet()){

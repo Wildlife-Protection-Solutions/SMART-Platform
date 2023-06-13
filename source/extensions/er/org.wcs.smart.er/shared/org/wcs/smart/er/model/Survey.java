@@ -23,16 +23,16 @@ package org.wcs.smart.er.model;
 
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 
 /**
  * Survey model object.  A survey belongs to a 
@@ -43,7 +43,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name="smart.survey")
+@Table(name="survey", schema="smart")
 public class Survey extends UuidItem {
 
 	private static final long serialVersionUID = 1L;

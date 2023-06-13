@@ -94,7 +94,7 @@ public class DeletePatrolTrackAction implements IQaAction {
 						
 						t.getPatrolLegDay().setTrack(null);
 						t.setPatrolLegDay(null);
-						s.delete(t);
+						s.remove(t);
 					}
 				}
 				s.getTransaction().commit();

@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.connect.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 
 /*
  * An MapLayer entity
@@ -37,7 +37,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "connect.map_layers")
+@Table(name = "map_layers", schema="connect")
 public class MapLayer extends ConnectUuidItem{
 	
 	public enum MapLayerType{

@@ -162,8 +162,11 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		iconCache = new IconCache(parent);
 		
 		try(Session s = HibernateManager.openSession()){
+			s.get(ConservationArea.class, currentCa.getUuid()).getLanguages().size();
 			mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, s));
 			Collections.sort(mandates);
+			
+
 			mandates.forEach(m ->m.getNames().size());
 		}
 		Composite container = new Composite(parent, SWT.NONE);
@@ -382,20 +385,21 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			s.beginTransaction();
 			try {
 				for (PatrolMandate m : toDelete){
-					s.delete(m);
+					s.remove(m);
 				}
 				s.flush();
 				siblings = new ArrayList<PatrolMandate>();
 				for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 					PatrolMandate pm = (PatrolMandate) iterator.next();
-					if (pm.getIcon() != null) s.saveOrUpdate(pm.getIcon());
+					if (pm.getIcon() != null) HibernateManager.saveOrMerge(s, pm.getIcon());
 					siblings.remove(pm);
 					String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
 					siblings.add(pm);
 					if (error != null){
 						throw new Exception(error);
 					}
-					s.saveOrUpdate(pm);
+					 HibernateManager.saveOrMerge(s, pm);
+					
 				}
 				s.getTransaction().commit();
 				toDelete.clear();

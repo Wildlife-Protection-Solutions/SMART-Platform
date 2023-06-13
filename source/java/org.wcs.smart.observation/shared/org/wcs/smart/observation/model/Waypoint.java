@@ -30,16 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.locationtech.jts.geom.Coordinate;
@@ -49,13 +39,23 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.util.GeometryUtils;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Waypoint object
  * @author Emily
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.waypoint")
+@Table(name="waypoint", schema="smart")
 public class Waypoint extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;
@@ -386,5 +386,20 @@ public class Waypoint extends UuidItem {
 	 */
 	public static Float[] computeDistanceBearing(Coordinate c1, Coordinate c2) {
 		return GeometryUtils.computeDistanceBearing(c1, c2);
+	}
+	
+	@Transient
+	public void saveNewAttachments(Session session) {
+		if (getAttachments() != null) {
+			getAttachments().forEach(wa->{
+				if (wa.getUuid() == null) session.persist(wa);
+			});
+		}
+		for (WaypointObservation wo : getAllObservations()) {
+			if (wo.getAttachments() == null) continue;
+			wo.getAttachments().forEach(a->{
+				if (a.getUuid() == null) session.persist(wo);
+			});
+		}
 	}
 }

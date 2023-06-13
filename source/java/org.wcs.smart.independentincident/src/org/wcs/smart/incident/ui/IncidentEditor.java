@@ -183,7 +183,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				try{
 					//load incident 
 					session.beginTransaction();
-					this.incident = (Waypoint) session.load(Waypoint.class, uuid);
+					this.incident = (Waypoint) session.getReference(Waypoint.class, uuid);
 					this.incident.getId();
 					
 					try{

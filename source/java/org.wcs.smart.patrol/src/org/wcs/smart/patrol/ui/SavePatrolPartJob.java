@@ -72,7 +72,7 @@ public class SavePatrolPartJob extends Job {
 					}
 				}
 			
-				saveSession.saveOrUpdate(patrolPart);
+				saveSession.merge(patrolPart);
 				saveSession.getTransaction().commit();
 			}catch (Exception ex){
 				if (saveSession.getTransaction().isActive()){

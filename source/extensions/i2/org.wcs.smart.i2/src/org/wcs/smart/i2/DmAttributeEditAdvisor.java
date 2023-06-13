@@ -47,9 +47,9 @@ public class DmAttributeEditAdvisor implements IDmEditAdvisor {
 	@Override
 	public String canEdit(Attribute attribute, Session session) {
 		//find all entity types associated with attribute
-		Query<?> q = session.createQuery("FROM IntelEntityType where dmAttribute = :att"); //$NON-NLS-1$
+		Query<IntelEntityType> q = session.createQuery("FROM IntelEntityType where dmAttribute = :att", IntelEntityType.class); //$NON-NLS-1$
 		q.setParameter("att", attribute); //$NON-NLS-1$
-		List<?> items = q.list();
+		List<IntelEntityType> items = q.list();
 		if (items.size()  > 0){
 			IntelEntityType et = (IntelEntityType)items.get(0);
 			String msg = Messages.DmAttributeEditAdvisor_ManagedAttributeMsg;

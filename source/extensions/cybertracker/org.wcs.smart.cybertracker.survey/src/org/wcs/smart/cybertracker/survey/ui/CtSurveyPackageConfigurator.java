@@ -284,12 +284,11 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
 				
-				session.saveOrUpdate(ctpackage);
-				
+				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage);
-				}
-				
+				}				
+				session.merge(ctpackage);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

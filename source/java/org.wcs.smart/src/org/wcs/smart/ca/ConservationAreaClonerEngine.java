@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,16 +41,14 @@ import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Engine for manging the creation of a conservation area using another conservation
@@ -72,7 +69,7 @@ public class ConservationAreaClonerEngine {
 	private HashMap<UuidItem, UuidItem> templateToNewObjectMap;
 	
 	private Session session;
-	private UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+//	private UuidGenerator uuidGenerator;// = UuidGenerator.buildSessionFactoryUniqueIdentifierGenerator();
 	
 	/**
 	 * Creates a new cloner engine
@@ -85,12 +82,15 @@ public class ConservationAreaClonerEngine {
 		templateToNewObjectMap = new HashMap<UuidItem, UuidItem>();
 		createLanguageMap();
 		
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
-				StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
-				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+		
+//		UuidGenerator uuidGenerator = new UuidGenerator();
+//		uuidGenerator = new UuidG 
+//		Properties prop = new Properties();
+//		prop.put(UuidGenerator.UUID_GEN_STRATEGY,
+//				StandardRandomStrategy.INSTANCE);
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
+//				UUIDGenerationStrategy.class.getName());
+//		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 	
 	/*
@@ -122,6 +122,11 @@ public class ConservationAreaClonerEngine {
 	 * @param copyTo object to copy names to
 	 */
 	public void copyLabels(NamedItem copyFrom, NamedItem copyTo){
+		
+		if (copyFrom instanceof IconItem && copyTo instanceof IconItem) {
+			((IconItem)copyTo).setIcon(  (Icon) templateToNewObjectMap.get(((IconItem)copyFrom).getIcon())  );
+		}
+		
 		for (Label l : copyFrom.getNames()){
 			Label clone = new Label();
 			Language lang = (Language) templateToNewObjectMap.get(l.getLanguage());
@@ -142,7 +147,7 @@ public class ConservationAreaClonerEngine {
 	 * @param copyTo item to copy descriptions to
 	 */
 	public void copyDescriptions(NamedDescriptionItem copyFrom, NamedDescriptionItem copyTo){
-		UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) session, copyTo);
+		UUID uuid = UuidUtils.generateUuid((SessionImplementor)session);
 		copyTo.setDescUuid(uuid);
 		for (DescriptionLabel l : copyFrom.getDescriptions(session)){
 			Language lang = (Language) templateToNewObjectMap.get(l.getLanguage());
@@ -152,8 +157,7 @@ public class ConservationAreaClonerEngine {
 				clone.setLanguage(lang);
 				clone.setValue(l.getValue());
 				clone.setElement(uuid);
-				getSession().save(clone);
-				getSession().saveOrUpdate(copyTo);
+				getSession().persist(clone);
 				copyTo.getDescriptions(session).add(clone);
 			}
 		}
@@ -167,7 +171,7 @@ public class ConservationAreaClonerEngine {
 	 * @param copyTo item to copy descriptions to
 	 */
 	public void copyDescriptions(NamedDescriptionKeyItem copyFrom, NamedDescriptionKeyItem copyTo){
-		UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) session, copyTo);
+		UUID uuid = UuidUtils.generateUuid((SessionImplementor)session);
 		copyTo.setDescUuid(uuid);
 		for (DescriptionLabel l : copyFrom.getDescriptions(session)){
 			Language lang = (Language) templateToNewObjectMap.get(l.getLanguage());
@@ -177,8 +181,7 @@ public class ConservationAreaClonerEngine {
 				clone.setLanguage(lang);
 				clone.setValue(l.getValue());
 				clone.setElement(uuid);
-				getSession().save(clone);
-				getSession().saveOrUpdate(copyTo);
+				getSession().persist(clone);
 				copyTo.getDescriptions(session).add(clone);
 			}
 		}
@@ -284,10 +287,10 @@ public class ConservationAreaClonerEngine {
 		session = HibernateManager.openSession(interceptor);
 		Transaction t = session.beginTransaction();
 		try{
-			session.save(newCa);
+			session.persist(newCa);
 			for(Employee e : newCa.getEmployees()){
 				HibernateManager.generateEmployeeId(e, getSession());
-				session.save(e);
+				session.persist(e);
 			}
 			session.flush();
 			

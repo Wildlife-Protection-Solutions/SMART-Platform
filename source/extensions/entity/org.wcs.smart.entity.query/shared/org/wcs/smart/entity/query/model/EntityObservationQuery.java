@@ -3,10 +3,6 @@ package org.wcs.smart.entity.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
@@ -16,8 +12,12 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 @Entity
-@Table(name="smart.entity_observation_query")
+@Table(name="entity_observation_query", schema="smart")
 public class EntityObservationQuery extends ObservationQuery {
 	
 	private static final long serialVersionUID = 1L;

@@ -237,7 +237,7 @@ public class DashboardBetaApi extends HttpServlet {
 			d.setReportUuid1(dashboard.getReportUuid1());
 			d.setReportUuid2(dashboard.getReportUuid2());
 		
-			s.save(d);
+			s.persist(d);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -275,7 +275,7 @@ public class DashboardBetaApi extends HttpServlet {
 		s.beginTransaction();
 		try{
 			Dashboard toDelete = s.get(Dashboard.class, uuid);
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.getTransaction().commit();
 			return toDelete;
 		}finally{
@@ -334,7 +334,6 @@ public class DashboardBetaApi extends HttpServlet {
 				d.setDateRange2(userDefault.getDateRange2());
 			}
 		
-			s.saveOrUpdate(d);
 
 			//override the user-customizable portions of the dashboard then return to the user Dashboard object.
 			dashboard = (Dashboard)s.get(Dashboard.class, d.getDashboardUuid());
@@ -395,6 +394,7 @@ public class DashboardBetaApi extends HttpServlet {
 			if(d == null){
 				d = new UsersDefaultDashboard();
 				d.setUserUuid(user.getUuid());
+				s.persist(d);
 			}
 
 			d.setDashboardUuid(dashboard.getUuid());
@@ -404,8 +404,7 @@ public class DashboardBetaApi extends HttpServlet {
 			d.setCustomDate2To(dashboard.getCustomDate2To());
 			d.setDateRange1(dashboard.getDateRange1());
 			d.setDateRange2(dashboard.getDateRange2());
-		
-			s.saveOrUpdate(d);
+		;
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();

@@ -24,8 +24,6 @@ package org.wcs.smart.connect.ui.startup;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.NotAuthorizedException;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,6 +43,8 @@ import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy.Status;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
+
+import jakarta.ws.rs.NotAuthorizedException;
 
 /**
  * Lists conservation area from a smart connect server.

@@ -24,18 +24,18 @@ package org.wcs.smart.i2.model;
 import java.awt.Color;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class for profile 
@@ -43,7 +43,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  *
  */
 @Entity
-@Table(name="smart.i_profile_config")
+@Table(name="i_profile_config", schema="smart")
 public class IntelProfile extends NamedKeyItem {
 
 	private static final long serialVersionUID = 1L;

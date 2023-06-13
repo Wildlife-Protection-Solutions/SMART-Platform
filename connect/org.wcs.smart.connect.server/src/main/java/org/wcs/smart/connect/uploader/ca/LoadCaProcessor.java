@@ -59,6 +59,8 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 		session.beginTransaction();
 		
 		try{
+			item = session.getReference(item);
+			
 			ChangeLogManager.INSTANCE.disableChangeTracking(item.getConservationAreaInfo(), session);
 		
 			ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
@@ -105,10 +107,9 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				//ca exists but data doesn't, so lets update the status to reference that
 				ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 				info.setStatus(ConservationAreaInfo.Status.NODATA);
-				
-				session.update(item);
 				item.setStatus(Status.ERROR);
 				item.setMessage(MessageFormat.format(Messages.getString("LoadCaProcessor.DataExtractionError", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
+				session.merge(item);
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				logger.log(Level.SEVERE, ex2.getMessage(), ex2);

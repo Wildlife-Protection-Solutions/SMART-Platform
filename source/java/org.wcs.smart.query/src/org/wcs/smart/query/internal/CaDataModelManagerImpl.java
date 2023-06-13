@@ -163,7 +163,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	}
 	
 	private Attribute loadFullTreeAttribute(Attribute attribute, Session session) {
-		Attribute a = (Attribute) session.load(Attribute.class, attribute.getUuid());
+		Attribute a = (Attribute) session.get(Attribute.class, attribute.getUuid());
 		if (a.getActiveTreeNodes() != null) {
 			for (AttributeTreeNode node : a.getActiveTreeNodes()){
 				visitTreeNode(node);
@@ -197,7 +197,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public Attribute getAttribute(Session session, String attributeKey){
-		Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key", Attribute.class); //$NON-NLS-1$
+		Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyId = :key", Attribute.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea.getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeKey); //$NON-NLS-1$
 		q.setCacheable(true);
@@ -361,7 +361,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public String[] getFullCategoryLabel(Session session, UUID categoryUuid){
-		Category category = (Category) session.load(Category.class, categoryUuid);
+		Category category = (Category) session.get(Category.class, categoryUuid);
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(category.getName());
 		Category parent = category.getParent();
@@ -397,7 +397,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 * @return
 	 */
 	private String getName(UUID uuid, Session session){
-		return Label.getDescription(uuid, session);
+		return Label.findLabel(uuid, session);
 	}
 	
 

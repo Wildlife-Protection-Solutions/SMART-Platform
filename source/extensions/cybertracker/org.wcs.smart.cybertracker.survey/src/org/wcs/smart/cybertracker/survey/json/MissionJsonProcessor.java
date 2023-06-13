@@ -902,8 +902,9 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 				}
 			}
+			//TODO: fix this
 			session.saveOrUpdate(wp);
-			session.save(pw);
+			session.persist(pw);
 			session.saveOrUpdate(addToD.getMission());
 		}
 	}

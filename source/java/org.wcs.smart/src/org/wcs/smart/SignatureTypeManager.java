@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -66,9 +67,9 @@ public enum SignatureTypeManager {
 		}
 		
 		String sql = "UPDATE WaypointAttachment SET signatureType = null WHERE signatureType = :type";  //$NON-NLS-1$
-		session.createQuery(sql).setParameter("type", type).executeUpdate(); //$NON-NLS-1$
+		session.createMutationQuery(sql).setParameter("type", type).executeUpdate(); //$NON-NLS-1$
 		
-		session.delete(type);
+		session.remove(type);
 	}
 	
 	/**
@@ -93,7 +94,7 @@ public enum SignatureTypeManager {
 	 * @param session
 	 */
 	public void saveType(SignatureType type, Session session) {
-		session.saveOrUpdate(type);
+		HibernateManager.saveOrMerge(session, type);
 	}
 	
 	/**

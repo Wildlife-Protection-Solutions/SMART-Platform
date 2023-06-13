@@ -133,7 +133,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 			}else {
 				cas = Collections.singletonList(SmartDB.getCurrentConservationArea());
 			}
-			Integer startyear = (Integer) session.createQuery("SELECT min(year(dateTime)) FROM Waypoint WHERE conservationArea IN (:cas)") //$NON-NLS-1$
+			Integer startyear = session.createQuery("SELECT min(year(dateTime)) FROM Waypoint WHERE conservationArea IN (:cas)", Integer.class) //$NON-NLS-1$
 					.setParameterList("cas",  cas) //$NON-NLS-1$
 					.uniqueResult();
 			if (startyear != null) smartDataStartYear = startyear;

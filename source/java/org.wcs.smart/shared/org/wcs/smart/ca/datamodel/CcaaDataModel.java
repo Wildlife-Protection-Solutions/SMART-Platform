@@ -99,28 +99,27 @@ public abstract class CcaaDataModel {
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings({"unchecked" })
 	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session){
 		//we need to only include items that are shared across all conservation areas
 		String query = "SELECT a.keyId FROM AttributeListItem a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea IN (:cas) group by a.keyId having count(*) = :cnt"; //$NON-NLS-1$
-		Query<?> q = session.createQuery(query);
-		q.setParameterList("cas", cas); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", Long.valueOf(cas.length)); //$NON-NLS-1$
+		Query<String> q = session.createQuery(query, String.class)
+			.setParameterList("cas", cas) //$NON-NLS-1$
+			.setParameter("attributeKey", attribute.getKeyId()) //$NON-NLS-1$
+			.setParameter("cnt", Long.valueOf(cas.length)); //$NON-NLS-1$
 		
-		List<?> keys = q.list();
+		List<String> keys = q.list();
 		if (keys.size() == 0){
 			//return empty list
 			return new ArrayList<AttributeListItem>();
 		}
 		query = "FROM AttributeListItem a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca AND a.keyId IN (:keys)"; //$NON-NLS-1$
-		q = session.createQuery(query);
-		q.setParameter("ca", core); //$NON-NLS-1$
-		q.setParameterList("keys", keys); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		
+		List<AttributeListItem> items = session.createQuery(query, AttributeListItem.class)
+			.setParameter("ca", core) //$NON-NLS-1$
+			.setParameterList("keys", keys) //$NON-NLS-1$
+			.setParameter("attributeKey", attribute.getKeyId()) //$NON-NLS-1$
+			.list();
 		//update icons
-		List<AttributeListItem> items = (List<AttributeListItem>) q.list();
 		for (AttributeListItem li : items) {
 			li.setIcon( DataModelMerger.findIcon(session, findIconKey(li, session)) );
 		}
@@ -162,27 +161,25 @@ public abstract class CcaaDataModel {
 	 * @param session
 	 * @return list of root attribute tree nodes
 	 */
-	@SuppressWarnings({"unchecked" })
 	public List<AttributeTreeNode> getAttributeTreeNodes(Attribute attribute, Session session){
 		//we need to only include items that are shared across all conservation areas
 		String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea in (:cas) group by a.hkey having count(*) = :cnt"; //$NON-NLS-1$
-		Query<?> q = session.createQuery(query);
-		q.setParameterList("cas", cas); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", Long.valueOf(cas.length)); //$NON-NLS-1$
 		
-		List<String> hkeys = (List<String>) q.list();
+		List<String> hkeys = session.createQuery(query, String.class)
+			.setParameterList("cas", cas) //$NON-NLS-1$
+			.setParameter("attributeKey", attribute.getKeyId()) //$NON-NLS-1$
+			.setParameter("cnt", Long.valueOf(cas.length)) //$NON-NLS-1$
+			.list();
 		if (hkeys.size() == 0){
 			return new ArrayList<AttributeTreeNode>();
 		}
-		query = "FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
-		q = session.createQuery(query);
-		q.setParameter("ca", core); //$NON-NLS-1$
-		q.setParameterList("keys", hkeys); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-			
-		List<AttributeTreeNode> roots = (List<AttributeTreeNode>) q.list();
 		
+		query = "FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
+		List<AttributeTreeNode> roots = session.createQuery(query, AttributeTreeNode.class)
+			.setParameter("ca", core) //$NON-NLS-1$
+			.setParameterList("keys", hkeys) //$NON-NLS-1$
+			.setParameter("attributeKey", attribute.getKeyId()) //$NON-NLS-1$
+			.list();
 		//load all kids
 		for (AttributeTreeNode node:roots){
 			loadChildren(node);

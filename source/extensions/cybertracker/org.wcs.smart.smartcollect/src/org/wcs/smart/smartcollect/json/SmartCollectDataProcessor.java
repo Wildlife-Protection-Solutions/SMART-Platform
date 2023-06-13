@@ -32,8 +32,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Point;
@@ -70,6 +68,8 @@ import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 import org.wcs.smart.smartcollect.pkg.SmartCollectPackageManager;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * JSON processor for SMARTCollect data.  Assumes all data for an individual
@@ -284,8 +284,9 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 						wo.setObservationGroup(group);
 					}
 				}
-				session.saveOrUpdate(currentWaypoint.getWaypoint());
-				session.saveOrUpdate(currentWaypoint);
+				//TODO: test this
+				//session.saveOrUpdate(currentWaypoint.getWaypoint());
+				//session.saveOrUpdate(currentWaypoint);
 				waypoints.add(currentWaypoint.getWaypoint());
 				
 			}catch (Exception ex) {

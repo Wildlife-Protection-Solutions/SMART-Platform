@@ -95,7 +95,7 @@ public class SaveAsReportHandler {
 				report.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), session));
 				report.setFilename(ReportManager.generateFilename(report));
 				
-				session.save(report);
+				session.persist(report);
 				
 				Files.copy(tocopy.getFullPath(), report.getFullPath());
 				

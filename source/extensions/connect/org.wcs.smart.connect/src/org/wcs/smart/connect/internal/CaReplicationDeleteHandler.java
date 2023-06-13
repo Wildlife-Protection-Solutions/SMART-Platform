@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.internal;
 
 import javax.transaction.Status;
-import javax.transaction.Synchronization;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,6 +34,8 @@ import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
+
+import jakarta.transaction.Synchronization;
 
 /**
  * Delete handler that turns off replication.  Should be run before any

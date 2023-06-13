@@ -27,8 +27,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.transaction.Synchronization;
-
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -42,6 +40,8 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.xml.PlanFromXml;
+
+import jakarta.transaction.Synchronization;
 
 /**
  * Wrapper for plan extra-data conversion (from XML) result.
@@ -131,7 +131,7 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 			PatrolPlan pp = new PatrolPlan();
 			pp.setPatrol(patrol);
 			pp.setPlan(plan);
-			session.saveOrUpdate(pp);
+			session.persist(pp);
 		}
 		return true;
 	}

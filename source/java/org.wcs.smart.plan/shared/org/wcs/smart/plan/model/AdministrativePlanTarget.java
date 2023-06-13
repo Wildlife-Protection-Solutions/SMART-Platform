@@ -26,12 +26,12 @@ package org.wcs.smart.plan.model;
 import java.text.MessageFormat;
 import java.util.Locale;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.plan.IPlanLabelProvider;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 
 /**

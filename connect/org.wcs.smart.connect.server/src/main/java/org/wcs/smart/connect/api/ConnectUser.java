@@ -330,7 +330,7 @@ public class ConnectUser extends HttpServlet {
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), suser.getUsername())); //$NON-NLS-1$
 			}
 			
-			s.save(suser);
+			s.persist(suser);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -452,7 +452,7 @@ public class ConnectUser extends HttpServlet {
 					toUpdate.setHomeCaUuid(newUser.getHomeCaUuid());
 				}
 			}
-			s.update(toUpdate);
+			
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -496,7 +496,7 @@ public class ConnectUser extends HttpServlet {
 			role.setUsername(username);
 			role.setRole(HibernateManager.getSmartRole(s));
 			
-			s.save(role);
+			s.persist(role);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -537,7 +537,7 @@ public class ConnectUser extends HttpServlet {
 			user = QueryFactory.buildQuery(s, SmartUser.class, "username", username).uniqueResult(); //$NON-NLS-1$
 			List<SmartUserRole> roles = HibernateManager.getUserRoles(s, user.getUsername());
 			for(SmartUserRole role: roles){
-				s.delete(role);
+				s.remove(role);
 				s.flush();
 			}
 			
@@ -580,7 +580,7 @@ public class ConnectUser extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotFound", SmartUtils.getRequestLocale(request)), username)); //$NON-NLS-1$
 			}
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			//cannot delete the last administrator user
 			SecurityManager.INSTANCE.validateSingleAdminUser(s, SmartUtils.getRequestLocale(request));

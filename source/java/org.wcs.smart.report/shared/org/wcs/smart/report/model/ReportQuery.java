@@ -24,17 +24,17 @@ package org.wcs.smart.report.model;
 import java.io.Serializable;
 import java.util.UUID;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Mapping between reports and queries for tracking
@@ -44,7 +44,7 @@ import javax.persistence.Transient;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.report_query")
+@Table(name="report_query", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.report", 
 		joinColumns = @JoinColumn(name = "report_uuid")),

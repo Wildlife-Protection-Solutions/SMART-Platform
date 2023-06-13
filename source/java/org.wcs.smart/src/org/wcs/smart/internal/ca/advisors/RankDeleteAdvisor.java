@@ -23,15 +23,15 @@ package org.wcs.smart.internal.ca.advisors;
 
 import java.text.MessageFormat;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.internal.Messages;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Ranks can be deleted if they are not associated with any employees.

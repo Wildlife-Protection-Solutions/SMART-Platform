@@ -23,16 +23,16 @@ package org.wcs.smart.observation.model;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.BatchSize;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * Waypoint observation group
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.UuidItem;
  * @since 7.0.0
  */
 @Entity
-@Table(name="smart.wp_observation_group")
+@Table(name="wp_observation_group", schema="smart")
 public class WaypointObservationGroup extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
@@ -60,7 +60,8 @@ public class WaypointObservationGroup extends UuidItem {
 		this.waypoint = waypoint;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="observationGroup", orphanRemoval=false, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="observationGroup", orphanRemoval=false, 
+			cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE})
 	@BatchSize(size=500)
 	public List<WaypointObservation> getObservations(){
 		return this.observations;

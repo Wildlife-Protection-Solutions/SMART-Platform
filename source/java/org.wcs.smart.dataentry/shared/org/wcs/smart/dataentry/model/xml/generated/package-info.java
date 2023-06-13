@@ -5,5 +5,8 @@
 // Generated on: 2021.05.21 at 12:37:52 PM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/dataentry", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/dataentry", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.dataentry.model.xml.generated;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

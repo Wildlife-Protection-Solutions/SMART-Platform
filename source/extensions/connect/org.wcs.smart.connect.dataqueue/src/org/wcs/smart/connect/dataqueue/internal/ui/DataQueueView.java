@@ -31,8 +31,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.transaction.Synchronization;
-import javax.ws.rs.NotAuthorizedException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -87,6 +85,9 @@ import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import jakarta.transaction.Synchronization;
+import jakarta.ws.rs.NotAuthorizedException;
 
 /**
  * View for displaying data queue processing information and allowing users to manually
@@ -268,10 +269,14 @@ public class DataQueueView{
 				
 				if (serverItems == null) {
 					getConnect();
-				}
-				if (connect == null) return Status.OK_STATUS;
 				
-				serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
+					if (connect == null) return Status.OK_STATUS;
+				
+					serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
+					if (serverItems == null) {
+						throw new Exception("Cannot load data queue items from Connect.");
+					}
+				}
 				
 				monitor.worked(1);
 				monitor.subTask(Messages.DataQueueView_ServerRefreshTask3);

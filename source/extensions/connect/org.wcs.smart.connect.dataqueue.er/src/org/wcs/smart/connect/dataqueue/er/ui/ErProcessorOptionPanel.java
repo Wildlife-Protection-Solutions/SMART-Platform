@@ -78,10 +78,9 @@ public class ErProcessorOptionPanel implements IProcessingOptionPanel {
 			op = new DataQueueProcessingOption();
 			op.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
 			op.setOptionKey(((ErDataQueueProcessorOption)btnIds.getData()).name());
+			session.persist(op);
 		}
-		op.setValue(String.valueOf(btnIds.getSelection()));
-		session.saveOrUpdate(op);
-		
+		op.setValue(String.valueOf(btnIds.getSelection()));	
 	}
 
 	@Override

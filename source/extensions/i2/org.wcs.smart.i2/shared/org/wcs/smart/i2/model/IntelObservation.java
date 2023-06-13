@@ -23,16 +23,16 @@ package org.wcs.smart.i2.model;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Category;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * Model class of i_observation.
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.datamodel.Category;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_observation")
+@Table(name="i_observation", schema="smart")
 public class IntelObservation extends UuidItem{
 
 	private static final long serialVersionUID = 1L;

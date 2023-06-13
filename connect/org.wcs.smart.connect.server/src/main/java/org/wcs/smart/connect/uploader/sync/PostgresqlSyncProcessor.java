@@ -43,6 +43,8 @@ import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.connect.uploader.ca.CaProcessorUtils;
 import org.wcs.smart.util.ZipUtilCommon;
 
+import jakarta.persistence.Tuple;
+
 
 /**
  * A postgresql specific processor for processing a change
@@ -117,12 +119,11 @@ public class PostgresqlSyncProcessor {
 			
 			
 			//check plugin version
-			NativeQuery<?> q = session.createNativeQuery("SELECT plugin_id, version FROM connect.connect_plugin_version"); //$NON-NLS-1$
-			List<?> plugins = q.list();
+			NativeQuery<Tuple> q = session.createNativeQuery("SELECT plugin_id, version FROM connect.connect_plugin_version", Tuple.class); //$NON-NLS-1$
+			List<Tuple> plugins = q.list();
 			HashMap<String, String> dbVersions = new HashMap<String, String>();
-			for (Object pluginRow : plugins){
-				Object[] plugin = (Object[]) pluginRow;
-				dbVersions.put((String)plugin[0], (String)plugin[1]);
+			for (Tuple plugin : plugins){
+				dbVersions.put((String)plugin.get(0), (String)plugin.get(1));
 			}
 			
 			for(String pluginid : metadata.getPluginVersions().keySet()){

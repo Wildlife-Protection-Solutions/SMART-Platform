@@ -615,7 +615,7 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 	}
 	
 	public DropItem[] createDropItems(ObserverFilter filter, Session session) throws Exception {
-		Employee e = (Employee) session.load(Employee.class, UuidUtils.stringToUuid(filter.getValue()));
+		Employee e = (Employee) session.getReference(Employee.class, UuidUtils.stringToUuid(filter.getValue()));
 		DropItem di;
 		if (e == null){
 			di = new ErrorDropItem(MessageFormat.format(Messages.ObserverFilter_EmployeeNotFound, new Object[]{filter.getValue()}));

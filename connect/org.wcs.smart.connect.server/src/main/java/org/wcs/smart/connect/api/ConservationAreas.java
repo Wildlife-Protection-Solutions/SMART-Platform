@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -66,7 +65,6 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.PostgresUUIDType;
 import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
@@ -259,11 +257,11 @@ public class ConservationAreas extends HttpServlet{
 						sb.append(" LIMIT 1"); //$NON-NLS-1$
 						
 						
-						NativeQuery<?> query = s.createNativeQuery(sb.toString());
+						NativeQuery<Long> query = s.createNativeQuery(sb.toString(), Long.class);
 						query.setParameter("json", caJsonFilter); //$NON-NLS-1$
-						query.setParameter("ca", smartca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+						query.setParameter("ca", smartca.getUuid());//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 						query.setParameter("area", AreaType.CA.name()); //$NON-NLS-1$
-						Boolean result = ((BigInteger)query.uniqueResult()).intValue() > 0;
+						Boolean result = query.uniqueResult() > 0;
 						
 						if(result != null && result == true){
 							passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
@@ -324,10 +322,10 @@ public class ConservationAreas extends HttpServlet{
 				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
 				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
 				
-				NativeQuery<?> query = session.createNativeQuery(sb.toString());
-				query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+				NativeQuery<String> query = session.createNativeQuery(sb.toString(), String.class);
+				query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 				query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
-				proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
+				proxy.setAdministrativeAreasJson( query.uniqueResult() );
 				
 				query.setParameter("type", AreaType.CA.name()); //$NON-NLS-1$
 				proxy.setCaBoundaryJson((String)query.uniqueResult() );
@@ -662,7 +660,7 @@ public class ConservationAreas extends HttpServlet{
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_CA);
 			
-			s.save(item);
+			s.persist(item);
 
 			s.getTransaction().commit();
 		}catch(SmartConnectException ex){
@@ -745,7 +743,7 @@ public class ConservationAreas extends HttpServlet{
 			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_SYNC);
-			s.save(item);
+			s.persist(item);
 
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -818,22 +816,22 @@ public class ConservationAreas extends HttpServlet{
 				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
 				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
 				
-				NativeQuery<?> query = s.createNativeQuery(sb.toString());
-				query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+				NativeQuery<String> query = s.createNativeQuery(sb.toString(), String.class);
+				query.setParameter("ca", ca.getUuid());//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 				query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
-				proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
+				proxy.setAdministrativeAreasJson(query.uniqueResult() );
 				
 				query.setParameter("type", AreaType.CA.name()); //$NON-NLS-1$
-				proxy.setCaBoundaryJson((String)query.uniqueResult() );
+				proxy.setCaBoundaryJson(query.uniqueResult() );
 				
 				query.setParameter("type", AreaType.BA.name()); //$NON-NLS-1$
-				proxy.setBufferedManagementAreaJson((String)query.uniqueResult() );
+				proxy.setBufferedManagementAreaJson(query.uniqueResult() );
 				
 				query.setParameter("type", AreaType.MNGT.name()); //$NON-NLS-1$
-				proxy.setManagementSectorsJson((String)query.uniqueResult() );
+				proxy.setManagementSectorsJson(query.uniqueResult() );
 				
 				query.setParameter("type", AreaType.PATRL.name()); //$NON-NLS-1$
-				proxy.setPatrolSectorsJson((String)query.uniqueResult() );
+				proxy.setPatrolSectorsJson(query.uniqueResult() );
 			}
 			
 			proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid()));
@@ -987,7 +985,7 @@ public class ConservationAreas extends HttpServlet{
 			ca.setVersion(null);
 			ca.setStatus(Status.NODATA);
 					
-			s.save(ca);
+			s.persist(ca);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -1045,7 +1043,7 @@ public class ConservationAreas extends HttpServlet{
 				ca.setStatus(Status.UPLOADING);
 				ca.setLabel(Messages.getString("ConservationAreas.UnknownLbl", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				ca.setVersion(version);
-				s.save(ca);
+				s.persist(ca);
 				
 				//configure default permissions for user
 				SmartUser user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
@@ -1055,19 +1053,19 @@ public class ConservationAreas extends HttpServlet{
 					newaction.setAction(CaAction.DELETECA_KEY);
 					newaction.setUsername(user.getUsername());
 					newaction.setResource(ca.getUuid());
-					s.save(newaction);
+					s.persist(newaction);
 					//view
 					newaction = new SmartUserAction();
 					newaction.setAction(CaAction.VIEWCA_KEY);
 					newaction.setUsername(user.getUsername());
 					newaction.setResource(ca.getUuid());
-					s.save(newaction);
+					s.persist(newaction);
 					//update
 					newaction = new SmartUserAction();
 					newaction.setAction(CaAction.UPDATECA_KEY);
 					newaction.setUsername(user.getUsername());
 					newaction.setResource(ca.getUuid());
-					s.save(newaction);
+					s.persist(newaction);
 				}
 				
 			}else{
@@ -1076,7 +1074,7 @@ public class ConservationAreas extends HttpServlet{
 					//we can upload data
 					ca.setVersion(version);
 					ca.setStatus(Status.UPLOADING);
-					s.saveOrUpdate(ca);
+					ca = s.merge(ca);
 				}else{
 					//otherwise ca already exists
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaExists", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -1091,7 +1089,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setType(Type.UP_CA);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(""); //$NON-NLS-1$
-			s.save(up);
+			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
 			if (!Files.exists(updir)){
@@ -1100,7 +1098,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
 					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip")); //$NON-NLS-1$
 			
-			s.save(up);
+			s.persist(up);
 			
 			//we have a file to upload and we expect more
 			
@@ -1165,7 +1163,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setType(Type.UP_SYNC);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(""); //$NON-NLS-1$
-			s.save(up);
+			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
 			if (!Files.exists(updir)){
@@ -1174,7 +1172,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
 					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip")); //$NON-NLS-1$
 		
-			s.saveOrUpdate(up);
+			//s.saveOrUpdate(up);
 			
 			//we have a file to upload and we expect more
 			String uploadURL = request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$

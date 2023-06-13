@@ -27,8 +27,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-import org.hibernate.type.UUIDBinaryType;
-
 /**
  * Class for storing context about the SMART instance.
  * 
@@ -47,7 +45,7 @@ public enum SmartContext {
 	private java.util.HashMap<String, String> pairs = new HashMap<String, String>();
 	
 	private SmartContext() {
-		map.put(UUIDBinaryType.class, UUIDBinaryType.INSTANCE);
+		//map.put(UUIDBinaryType.class, UUIDBinaryType.INSTANCE);
 	}
 	
 	public void setClass(Class<?> clazz, Object object){

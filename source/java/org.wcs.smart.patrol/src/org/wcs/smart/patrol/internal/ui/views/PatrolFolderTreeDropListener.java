@@ -86,7 +86,7 @@ public class PatrolFolderTreeDropListener extends FolderTreeDropListener {
 					Patrol p = (Patrol) s.get(Patrol.class, obj.getUuid());
 					p.setParentFolder(targetFolder);
 					s.beginTransaction();
-					s.save(p);
+					s.persist(p);
 					s.getTransaction().commit();
 				}
 				return Status.OK_STATUS;

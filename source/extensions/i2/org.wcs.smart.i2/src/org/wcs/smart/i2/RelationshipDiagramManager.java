@@ -112,7 +112,11 @@ public enum RelationshipDiagramManager {
 					try(Session session = HibernateManager.openSession()){
 						session.beginTransaction();
 						try {
-							session.saveOrUpdate(style);
+							if (style.getUuid() == null) {
+								session.persist(style);
+							}else {
+								session.merge(style);
+							}
 							session.getTransaction().commit();
 							isOk[0] = true;
 							styleList.addAll(getStyles(session));
@@ -152,7 +156,7 @@ public enum RelationshipDiagramManager {
 					try(Session session = HibernateManager.openSession()){
 						session.beginTransaction();
 						try {
-							session.delete(style);
+							session.remove(style);
 							session.getTransaction().commit();
 							styleList.addAll(getStyles(session));
 						}catch (Exception ex){
@@ -189,7 +193,7 @@ public enum RelationshipDiagramManager {
 		    	try(Session s = HibernateManager.openSession()){
 		    		try {
 		    			s.beginTransaction();
-		    			s.save(defaultStyle);
+		    			s.persist(defaultStyle);
 		    			s.getTransaction().commit();
 		    		} catch (Exception e) {
 		    			SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_DefaultStyleSaveError, e);

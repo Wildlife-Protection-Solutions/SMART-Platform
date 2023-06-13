@@ -23,20 +23,20 @@ package org.wcs.smart.er.model;
 
 import java.io.Serializable;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -47,7 +47,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
  *
  */
 @Entity
-@Table(name="smart.sampling_unit_attribute_value")
+@Table(name="sampling_unit_attribute_value", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.samplingUnit", 
 		joinColumns = @JoinColumn(name = "su_uuid")),

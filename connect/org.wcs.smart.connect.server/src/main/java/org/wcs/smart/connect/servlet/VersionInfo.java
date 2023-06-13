@@ -45,6 +45,8 @@ import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Connect VersionInfo servlet. Provide current version information to users.
  * 
@@ -90,10 +92,10 @@ public class VersionInfo extends HttpServlet{
 			areas = QueryFactory.buildQuery(session, ConservationAreaInfo.class).list();
 			plugins = QueryFactory.buildQuery(session, ConnectPluginVersion.class).list(); 
 			
-			Object[] data = (Object[]) session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
-			connectVersion = data[0].toString();
-			connectUpdated = data[1].toString();
-			filestoreVersion = data[2].toString();
+			Tuple data = session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version", Tuple.class).uniqueResult(); //$NON-NLS-1$
+			connectVersion = data.get(0).toString();
+			connectUpdated = data.get(1).toString();
+			filestoreVersion = data.get(2).toString();
 			 
 			
 		}finally{

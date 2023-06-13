@@ -5,5 +5,7 @@
 // Generated on: 2021.04.15 at 10:05:23 AM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.2/mission")
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.2/mission")
 package org.wcs.smart.er.xml.model.missions.v12;
+
+import jakarta.xml.bind.annotation.XmlSchema;

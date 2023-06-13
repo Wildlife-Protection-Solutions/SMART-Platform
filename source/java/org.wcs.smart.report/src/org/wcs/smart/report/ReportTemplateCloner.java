@@ -132,7 +132,7 @@ public class ReportTemplateCloner implements
 		clone.setParentFolder(newParent);
 		clone.setChildren(new ArrayList<ReportFolder>());
 		
-		engine.getSession().save(clone);
+		engine.getSession().persist(clone);
 		engine.addConservationItemMapping(templateFolder, clone);
 		
 		for (ReportFolder kid : templateFolder.getChildren()){
@@ -180,7 +180,7 @@ public class ReportTemplateCloner implements
 			}
 			
 			if (save){
-				engine.getSession().save(clone);
+				engine.getSession().persist(clone);
 				engine.addConservationItemMapping(r, clone);
 				
 				List<ReportQuery> queries = QueryFactory.buildQuery(engine.getSession(), ReportQuery.class, "id.report", r).getResultList(); //$NON-NLS-1$
@@ -188,7 +188,7 @@ public class ReportTemplateCloner implements
 					UuidItem item = engine.getNewConservationItem(rq.getQueryUuid());
 					if (item != null){
 						ReportQuery rqclone = new ReportQuery(clone, item.getUuid());
-						engine.getSession().save(rqclone);
+						engine.getSession().persist(rqclone);
 					}
 				}
 			}

@@ -69,7 +69,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.waypoint.conservationArea"
+            ca_property=".waypoint.conservationArea"
             class="org.wcs.smart.asset.model.AssetWaypoint"
             supportsCcaa="false">
       </class>

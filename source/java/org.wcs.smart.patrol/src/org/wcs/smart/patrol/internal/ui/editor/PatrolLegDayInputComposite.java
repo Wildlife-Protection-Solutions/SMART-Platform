@@ -143,7 +143,6 @@ public class PatrolLegDayInputComposite {
 
 	private TableViewer observationTable;
 	
-	private WizardDialog dialog = null;
 	private PatrolDayEditor editor;
 	private PatrolLegDay patrolLegDate;
 	
@@ -193,6 +192,7 @@ public class PatrolLegDayInputComposite {
 				PatrolLegDay pld = patrolLegDate;
 				try(Session session = HibernateManager.openSession()){
 					pld = session.get(PatrolLegDay.class, patrolLegDate.getUuid());
+					pld.getPatrolLeg().getPatrol().getLegs().forEach(e->e.getPatrolLegDays().forEach(d->d.getWaypoints().size()));
 					pld.getTracks().forEach(t->t.getDistance());
 					pld.getWaypoints().forEach(pw->{
 						try {
@@ -214,14 +214,15 @@ public class PatrolLegDayInputComposite {
 					});
 					setData(pld);
 					
-				}
-				//link it back into the main patrol editor object
-				for (PatrolLeg pl : editor.getPatrolEditor().getPatrol().getLegs()) {
-					int index = pl.getPatrolLegDays().indexOf(pld); 
-					if (index < 0) continue;
-					pld.setPatrolLeg(pl);
-					pl.getPatrolLegDays().set(index, pld);
-					
+				
+					//link it back into the main patrol editor object
+					for (PatrolLeg pl : pld.getPatrolLeg().getPatrol().getLegs()) {
+						int index = pl.getPatrolLegDays().indexOf(pld); 
+						if (index < 0) continue;
+						pld.setPatrolLeg(pl);
+						pl.getPatrolLegDays().set(index, pld);
+						
+					}
 				}
 				PatrolLegDayInputComposite.this.patrolLegDate = pld;
 				refreshObservationTable();
@@ -908,22 +909,9 @@ public class PatrolLegDayInputComposite {
 	private void showImportTrackWizard(){
 		//Show Create Patrol Wizard
 		final PatrolImportGpsDataWizard wizard = new PatrolImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.TRACK);		
-
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
-					dialog = new SmartStyledWizardDialog(editor.getSite().getShell(), wizard);
-					dialog.open();
-				}
-			});
-		} catch (Exception ex) {
-			dialog = null;
-			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportTracksWizard
-					+ ex.getLocalizedMessage(), ex);
+		SmartStyledWizardDialog dialog = new SmartStyledWizardDialog(editor.getSite().getShell(), wizard);
+		if (dialog.open() == Window.OK) {
+			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, this.patrolLegDate);
 		}
 	}
 	
@@ -931,25 +919,11 @@ public class PatrolLegDayInputComposite {
 	private void showImportWaypointWizard(){
 		//Show Create Patrol Wizard
 		final PatrolImportGpsDataWizard wizard = new PatrolImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.WAYPOINT);		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
-					dialog = new SmartStyledWizardDialog(editor.getSite().getShell(), wizard);
-					monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
-					if (dialog.open() == Window.OK) {
-						updateTimeWithWpData();
-					}
-				}
-			});
-		} catch (Exception ex) {
-			dialog = null;
-			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportWaypointWizard
-					+ ex.getLocalizedMessage(), ex);
-				}
+		SmartStyledWizardDialog dialog = new SmartStyledWizardDialog(editor.getSite().getShell(), wizard);
+		if (dialog.open() == Window.OK) {
+			updateTimeWithWpData();
+		}
+		
 		
 	}
 

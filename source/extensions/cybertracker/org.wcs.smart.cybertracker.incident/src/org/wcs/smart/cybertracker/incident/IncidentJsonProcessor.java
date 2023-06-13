@@ -228,9 +228,10 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				}
 				warnings.addAll(parser.getWarnings());
 			
-				session.saveOrUpdate(currentLink.getWaypoint());
-				session.saveOrUpdate(currentLink);
-				if (rootLink != null) session.saveOrUpdate(rootLink);
+				//TODO: test & fixes this
+				//session.saveOrUpdate(currentLink.getWaypoint());
+				//session.saveOrUpdate(currentLink);
+				//if (rootLink != null) session.saveOrUpdate(rootLink);
 				
 				processedFeatures.add(feature);
 				
@@ -252,41 +253,40 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 		return UuidUtils.stringToUuid(uuid);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private CtIncidentLink findWaypointMapping(UUID incidentGroupId, Session session) {
 		for (CtIncidentLink l : groupMappings) {
 			if (l.getRootId() == null && l.getIncidentGroupId() != null && l.getIncidentGroupId().equals(incidentGroupId)) {
 				return l;
 			}
 		}
-		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid and rootId is null") //$NON-NLS-1$
+		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid and rootId is null", CtIncidentLink.class) //$NON-NLS-1$
 				.setParameter("groupid",  incidentGroupId) //$NON-NLS-1$
 				.list();
 		if (links.isEmpty()) return null;
 		return links.get(0);
 	}
-	@SuppressWarnings("unchecked")
+	
 	private CtIncidentLink findWaypointMapping(UUID incidentGroupId, UUID rootId, Session session) {
 		for (CtIncidentLink l : groupMappings) {
 			if (l.getIncidentGroupId()!= null && l.getIncidentGroupId().equals(incidentGroupId) && l.getRootId() != null && l.getRootId().equals(rootId)) {
 				return l;
 			}
 		}
-		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid and rootId = :rootid ") //$NON-NLS-1$
+		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid and rootId = :rootid ", CtIncidentLink.class) //$NON-NLS-1$
 				.setParameter("groupid",  incidentGroupId) //$NON-NLS-1$
 				.setParameter("rootid",  rootId) //$NON-NLS-1$
 				.list();
 		if (links.isEmpty()) return null;
 		return links.get(0);
 	}
-	@SuppressWarnings("unchecked")
+	
 	private CtIncidentLink findRootWaypointMapping(UUID rootId, Session session) {
 		for (CtIncidentLink l : groupMappings) {
 			if (l.getIncidentGroupId() == null && l.getRootId() != null &&  l.getRootId().equals(rootId)) {
 				return l;
 			}
 		}
-		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE  rootId = :rootid and incidentGroupId is null ") //$NON-NLS-1$
+		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE  rootId = :rootid and incidentGroupId is null ", CtIncidentLink.class) //$NON-NLS-1$
 				.setParameter("rootid",  rootId) //$NON-NLS-1$
 				.list();
 		if (links.isEmpty()) return null;

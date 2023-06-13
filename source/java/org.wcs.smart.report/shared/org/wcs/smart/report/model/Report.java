@@ -24,17 +24,17 @@ package org.wcs.smart.report.model;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A report object.
@@ -43,7 +43,7 @@ import org.wcs.smart.ca.NamedItem;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.report")
+@Table(name="report", schema="smart")
 public class Report extends NamedItem {
 
 	private static final long serialVersionUID = 1L;

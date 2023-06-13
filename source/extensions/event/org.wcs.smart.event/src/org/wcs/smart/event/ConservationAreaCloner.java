@@ -65,7 +65,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 			clone.setFilterString(filter.getFilterString());
 		
 			oldToCloneFilter.put(filter.getUuid(), clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		progress.worked(1);
 		
@@ -91,7 +91,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 			}
 			
 			oldToCloneAction.put(action.getUuid(), clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		progress.worked(1);
 		
@@ -104,7 +104,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 			clone.setAction(oldToCloneAction.get(event.getAction().getUuid()));
 			clone.setFilter(oldToCloneFilter.get(event.getFilter().getUuid()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		progress.worked(1);
 		

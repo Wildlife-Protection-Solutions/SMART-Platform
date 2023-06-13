@@ -64,11 +64,11 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			try {
 				cas = HibernateManager.getConservationAreas(session);
 				if (DerbyHibernateExtensions.tableExists(session, "plan")){ //$NON-NLS-1$
-					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)").executeUpdate(); //$NON-NLS-1$
+					session.createNativeMutationQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)").executeUpdate(); //$NON-NLS-1$
 				}
 				for (String table : TABLES){
 					if (DerbyHibernateExtensions.tableExists(session, table)){
-						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+						session.createNativeMutationQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 					}
 				}		
 				HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);

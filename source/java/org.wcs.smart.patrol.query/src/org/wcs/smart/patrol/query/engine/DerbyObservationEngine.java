@@ -222,10 +222,10 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		//setting result size
 		DerbyPagedObservationResult results = (DerbyPagedObservationResult)result;
 		
-		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable, Integer.class).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 		
-		Integer wcount = (Integer) s.createNativeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+		Integer wcount = (Integer) s.createNativeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp", Integer.class).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 		results.setWpCount(wcount);
 	}
 	
@@ -486,14 +486,15 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 	private void addLabel(Session s, DmObject item) {
 		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + getObservationLabelTable() + " WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
-		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-		if ((Integer)q.uniqueResult() == 0){
+		NativeQuery<Integer> q = s.createNativeQuery(sql, Integer.class)
+			.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
+		
+		if (q.uniqueResult() == 0){
 			sql = " INSERT INTO " + getObservationLabelTable() + " (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createNativeQuery(sql);
-			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-			q.setParameter("label",  item.getName()); //$NON-NLS-1$
-			q.executeUpdate();
+			s.createNativeMutationQuery(sql)
+				.setParameter("uuid", item.getUuid()) //$NON-NLS-1$
+				.setParameter("label",  item.getName()) //$NON-NLS-1$
+				.executeUpdate();
 		}
 	}
 	

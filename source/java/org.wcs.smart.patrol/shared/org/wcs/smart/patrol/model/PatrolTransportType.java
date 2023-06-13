@@ -21,17 +21,17 @@
  */
 package org.wcs.smart.patrol.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyIconItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Class to represent a sub-transportation 
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.NamedKeyIconItem;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.patrol_transport")
+@Table(name = "patrol_transport", schema="smart")
 public class PatrolTransportType extends NamedKeyIconItem{
 	
 	private static final long serialVersionUID = 1L;

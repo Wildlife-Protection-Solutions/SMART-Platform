@@ -167,7 +167,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements WaypointQue
 		AssetPagedWaypointResult results = (AssetPagedWaypointResult)result;
 		
 		//setting result size
-		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = s.createNativeQuery("select count(*) from " + queryDataTable, Integer.class).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 	}
 
@@ -220,7 +220,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements WaypointQue
 		sb.append(queryDataTable);
 		sb.append(".wp_uuid)"); //$NON-NLS-1$
 		QueryPlugIn.logSql(sb.toString());
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createMutationQuery(sb.toString()).executeUpdate();
 		
 		progress.subTask(Messages.AssetWaypointEngine_AssetDetailsSubTask); 
 		progress.split(3);

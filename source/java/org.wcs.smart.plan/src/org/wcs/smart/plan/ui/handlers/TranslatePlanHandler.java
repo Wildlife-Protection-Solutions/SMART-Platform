@@ -32,6 +32,7 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanEventManager;
@@ -64,7 +65,9 @@ public class TranslatePlanHandler extends TranslateNamesHandler {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try{
-					plan = (Plan) session.load(Plan.class, uuid);
+					plan = (Plan) session.getReference(Plan.class, uuid);
+					plan = (Plan) Hibernate.unproxy(plan);
+					
 				}finally{
 					session.getTransaction().rollback();
 				}

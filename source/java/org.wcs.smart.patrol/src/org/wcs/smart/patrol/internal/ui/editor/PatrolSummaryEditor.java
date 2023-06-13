@@ -189,10 +189,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
 			initValues();
-			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-			input.setId(editor.getPatrol().getId());
-			editor.updatePartName();
-			editor.updateTabStyling();
+
 		}
 	};
 
@@ -225,6 +222,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		boolean isMultiLeg = editor.getPatrol().getLegs().size() > 1;
+		
 		toolkit = new FormToolkit(parent.getDisplay());
 		iconCache = new IconCache(parent, 16);
 		
@@ -308,7 +307,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		editLinkTransportType = createEditLink(toolkit, left, new PatrolTransportComposite());
 		editLinkTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
-		if (editor.getPatrol().getLegs().size() > 1 ){
+		if (isMultiLeg){
 			//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
 			txtTransport.setVisible(false);
 			transportTypelbl.setVisible(false);
@@ -337,7 +336,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		editLinkMandate = createEditLink(toolkit, left, new PatrolMandateComposite());
 		editLinkMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		if (editor.getPatrol().getLegs().size() > 1 ){
+		if (isMultiLeg){
 			//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
 			txtMandate.setVisible(false);
 			mandateLbl.setVisible(false);
@@ -489,7 +488,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		multiLegTextlbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)multiLegTextlbl.getLayoutData()).widthHint = 200;
 
-		if (editor.getPatrol().getLegs().size() <=1 ){
+		if (!isMultiLeg){
 			isMulti = false;
 			multiLegTextlbl.setVisible(false);
 			((GridData)multiLegTextlbl.getLayoutData()).exclude = true;
@@ -633,7 +632,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		int ret = -1;
 		try{
-			final EditPatrolItemDialog editDialog = new EditPatrolItemDialog(getEditorSite().getShell(), comp, editor.getPatrol());
+			final EditPatrolItemDialog editDialog = 
+					new EditPatrolItemDialog(getEditorSite().getShell(), comp, editor.getPatrol());
 			ret = editDialog.open();
 		}finally{
 		}
@@ -666,15 +666,14 @@ public class PatrolSummaryEditor extends EditorPart {
 			session.beginTransaction();
 			try {
 				Patrol patrol = editor.getPatrol();
-				session.update(patrol);
 				for (PatrolLeg leg : patrol.getLegs()) {
 					for (PatrolLegDay pld : leg.getPatrolLegDays()) {
 						LocalDateTime[] dates = pld.computeMinMaxDate();
 						if (dates != null) {
 							pld.setStartTime(dates[0].toLocalTime());
 							pld.setEndTime(dates[1].toLocalTime());
-							session.saveOrUpdate(pld);
 							updatedLegDays.add(pld);
+							session.merge(pld);
 						}
 					}
 				}
@@ -709,13 +708,6 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		if (!attributes.isEmpty()) {
 			Collections.sort(attributes);
-//			for (PatrolAttribute pa : attributes) {
-//				HibernateManager.loadIcon(pa.getIcon(), session);
-//				if(pa.getAttributeList() != null) {
-//					pa.getAttributeList().forEach(li->HibernateManager.loadIcon(li.getIcon(), session));;
-//				}
-//			}
-//			
 		
 			Section dataSection = toolkit.createSection(customAttributes, Section.TITLE_BAR | Section.EXPANDED );
 			dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -789,8 +781,8 @@ public class PatrolSummaryEditor extends EditorPart {
 			session.beginTransaction();
 			try {
 				Patrol patrol = editor.getPatrol();
-				session.update(patrol);
-				frmPatrolSummary.setText(editor.getPatrol().getId());
+				
+				frmPatrolSummary.setText(patrol.getId());
 				
 				txtPatrolId.setText(patrol.getId(), false, false);
 				txtPatrolType.setValue(patrol.getPatrolType().getGuiName(Locale.getDefault()), UiPatrolUtils.getImage(patrol.getPatrolType()));
@@ -816,7 +808,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				Set<Employee> leaders = new HashSet<Employee>();
 				Set<Employee> pilots = new HashSet<Employee>();
 				for (PatrolLeg leg : patrol.getLegs()) {
-					session.update(leg);
+					
 					List<PatrolLegMember> members = leg.getMembers();
 					for (PatrolLegMember mem : members) {
 						allEmployee.add(mem.getMember());
@@ -846,7 +838,7 @@ public class PatrolSummaryEditor extends EditorPart {
 					}});
 				employeeList.setInput(employeeArray);
 	
-				updateDateTable();
+				updateDateTable(patrol);
 				if (!isMulti){
 					txtTransport.setValue(patrol.getFirstLeg().getType());
 					txtMandate.setValue(patrol.getFirstLeg().getMandate());
@@ -860,8 +852,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		frmPatrolSummary.layout(true);
 	}
 	
-	private void updateDateTable(){
-		final Patrol patrol = editor.getPatrol();
+	private void updateDateTable(Patrol patrol){
+		
 		final List<PatrolLegDay> input = new ArrayList<PatrolLegDay>();
 		if (!isMulti){
 			//multi leg patrol
@@ -905,16 +897,16 @@ public class PatrolSummaryEditor extends EditorPart {
 				
 				
 				tblPatrolData.setInput(input);
-				updateTableLayout();
+				updateTableLayout(patrol);
 
 				tblPatrolData.refresh();
 			}});
 			
-		updateOverallStatistics();
+		updateOverallStatistics(patrol);
 
 	}
 	
-	private void updateTableLayout(){
+	private void updateTableLayout(Patrol patrol){
 		if (!isMulti){
 			//hide all multi columns
 			TableColumnLayout collayout = (TableColumnLayout) tblPatrolData.getTable().getParent().getLayout();
@@ -934,7 +926,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			}
 			//multi patrol; show pilot if applicable
-			if (!editor.getPatrol().hasPilot()) {
+			if (!patrol.hasPilot()) {
 				TableViewerColumn tcolumn = tableColumns.get(PatrolLegDayColumn.PILOT);
 				collayout.setColumnData(tcolumn.getColumn(),new ColumnWeightData(0, 0, false));
 			}
@@ -944,8 +936,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		tblPatrolData.getTable().getParent().layout(true,true);
 	}
 
-	private void updateOverallStatistics() {
-		final Patrol patrol = editor.getPatrol();
+	private void updateOverallStatistics(Patrol patrol) {
 		float distance = 0;
 		double totalTime = 0;
 		double activeTime = 0;
@@ -959,7 +950,9 @@ public class PatrolSummaryEditor extends EditorPart {
 				activeTime += pld.getFieldHoursWorked();
 			}
 		}
-		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics, PatrolEditor.formatDistance(distance), PatrolEditor.formatTimeRange(totalTime), PatrolEditor.formatTimeRange(activeTime));
+		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics,
+				PatrolEditor.formatDistance(distance), PatrolEditor.formatTimeRange(totalTime),
+				PatrolEditor.formatTimeRange(activeTime));
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -969,6 +962,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			}
 		});
+
 	}
 
 	/**
@@ -978,7 +972,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	public void refreshPatrolSummaryTable(){
 		if (!tblPatrolData.getTable().isDisposed()){
 			isMulti = editor.getPatrol().getLegs().size() > 1;
-			updateDateTable();
+			updateDateTable(editor.getPatrol());
 		}
 	}
 	
@@ -1007,35 +1001,38 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 	
 	private void recheckForMultiPatrol(){
-		refreshPatrolSummaryTable();
-		
 		Patrol patrol = editor.getPatrol();
-		Control[] cs = new Control[]{txtTransport, transportTypelbl, editLinkTransportType, editLinkMandate, txtMandate, mandateLbl, editLinkMandate};
-		
-		if (patrol.getLegs().size() <= 1){
-			for (Control c: cs){
+
+		refreshPatrolSummaryTable();
+
+		Control[] cs = new Control[] { txtTransport, transportTypelbl, editLinkTransportType, editLinkMandate,
+				txtMandate, mandateLbl, editLinkMandate };
+
+		if (patrol.getLegs().size() <= 1) {
+			for (Control c : cs) {
 				c.setVisible(true);
-				((GridData)c.getLayoutData()).exclude = false;
+				((GridData) c.getLayoutData()).exclude = false;
 			}
 			cs[0].getParent().layout(true, true);
-			
+
 			txtTransport.setValue(patrol.getFirstLeg().getType());
 			txtMandate.setValue(patrol.getFirstLeg().getMandate());
-			
+
 			editEmployee.setVisible(true);
 			multiLegTextlbl.setVisible(false);
-			((GridData)multiLegTextlbl.getLayoutData()).exclude = true;
-		}else{
-			for (Control c: cs){
+			((GridData) multiLegTextlbl.getLayoutData()).exclude = true;
+		} else {
+			for (Control c : cs) {
 				c.setVisible(false);
-				((GridData)c.getLayoutData()).exclude = true;
+				((GridData) c.getLayoutData()).exclude = true;
 			}
 			editEmployee.setVisible(false);
 			multiLegTextlbl.setVisible(true);
-			((GridData)multiLegTextlbl.getLayoutData()).exclude = false;
+			((GridData) multiLegTextlbl.getLayoutData()).exclude = false;
 			multiLegTextlbl.getParent().layout(true);
 			cs[0].getParent().layout(true, true);
 		}
+		
 	}
 
 

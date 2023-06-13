@@ -114,12 +114,12 @@
    <extension
          point="org.wcs.smart.hibernate.libs.mapping">
       <class
-            ca_property=".conservationArea"
+            ca_uuid_property=".conservationArea"
             class="org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem"
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.conservationArea"
+            ca_uuid_property=".id.conservationArea"
             class="org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption"
             supportsCcaa="false">
       </class>

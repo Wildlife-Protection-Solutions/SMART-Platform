@@ -23,11 +23,11 @@ package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.MessageFormat;
 
-import javax.persistence.Query;
-
 import org.hibernate.Session;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
+
+import jakarta.persistence.Query;
 
 /**
  * Asset summary computation that computes the total number of incidents
@@ -53,8 +53,8 @@ public class IncidentAssetSummary implements IAssetSummary {
 	public String getSummaryValue(Asset asset, Session session) {
 		Long cnt = 0l;
 		if (asset.getUuid() != null) {
-			String queryString = "SELECT count(*) FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset"; //$NON-NLS-1$
-			Query query = session.createQuery(queryString);
+			String queryString = "SELECT count(*) FROM AssetWaypoint WHERE assetDeployment.asset = :asset"; //$NON-NLS-1$
+			Query query = session.createQuery(queryString, Long.class);
 			query.setParameter("asset", asset); //$NON-NLS-1$
 			cnt = (Long) query.getSingleResult();
 		}

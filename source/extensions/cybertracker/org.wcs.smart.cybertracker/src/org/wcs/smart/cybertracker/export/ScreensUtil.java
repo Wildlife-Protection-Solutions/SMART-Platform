@@ -25,10 +25,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.NamedItem;
@@ -48,6 +44,10 @@ import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 /**
  * Util for creating screens based on metadata for CyberTracker.

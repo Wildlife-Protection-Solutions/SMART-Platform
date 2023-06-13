@@ -132,7 +132,6 @@ public class IntelQueryColumnProvider {
 		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey()); //$NON-NLS-1$
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<IQueryColumn> getQueryColumns (IntelRecordQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		List<IQueryColumn> columns = new ArrayList<>();
@@ -166,7 +165,7 @@ public class IntelQueryColumnProvider {
 		Set<String> profiles = AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter());
 		Set<UUID> uuids = new HashSet<>();
 		
-		uuids.addAll(session.createQuery("SELECT uuid FROM IntelProfile WHERE keyId IN (:keys) and conservationArea in (:cas)") //$NON-NLS-1$
+		uuids.addAll(session.createQuery("SELECT uuid FROM IntelProfile WHERE keyId IN (:keys) and conservationArea in (:cas)", UUID.class) //$NON-NLS-1$
 		.setParameterList("keys", profiles) //$NON-NLS-1$
 		.setParameterList("cas", itemProvider.getConservationAreas()).list()); //$NON-NLS-1$
 		
@@ -255,10 +254,12 @@ public class IntelQueryColumnProvider {
 		}
 		
 		//attributes - keep only active attributes
-		List<?> q = session.createQuery("SELECT distinct id.attribute.keyId FROM CategoryAttribute a WHERE a.id.attribute.conservationArea in ( :cas ) and a.isActive = 'true'") //$NON-NLS-1$
-				.setParameterList("cas", itemProvider.getConservationAreas()).list(); //$NON-NLS-1$
-		Set<String> attributeKeys = new HashSet<>();
-		q.forEach(e->attributeKeys.add((String)e));
+		List<String> q = session.createQuery("SELECT distinct id.attribute.keyId FROM CategoryAttribute WHERE id.attribute.conservationArea in ( :cas ) and isActive = true ",String.class) //$NON-NLS-1$
+				.setParameterList("cas", itemProvider.getConservationAreas()) //$NON-NLS-1$
+				.list(); 
+		
+		Set<String> attributeKeys = new HashSet<>(q);
+		
 			
 		List<Attribute> attributes = new ArrayList<>(itemProvider.getDmAttributes(session));
 		for (Iterator<Attribute> iterator = attributes.iterator(); iterator.hasNext();) {

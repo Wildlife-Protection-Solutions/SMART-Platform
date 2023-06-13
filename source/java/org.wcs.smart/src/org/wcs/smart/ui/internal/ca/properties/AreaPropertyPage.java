@@ -56,7 +56,6 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.util.factory.Hints;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -292,10 +291,10 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			try{
 				// remove existing areas
 				String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
-				Query<?> q = session.createQuery(query);
-				q.setParameter("ca", currentCa); //$NON-NLS-1$
-				q.setParameter("type", areatype); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createMutationQuery(query)
+					.setParameter("ca", currentCa) //$NON-NLS-1$
+					.setParameter("type", areatype) //$NON-NLS-1$
+					.executeUpdate();
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				session.getTransaction().rollback();
@@ -431,10 +430,10 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						try {
 							//remove existing areas
 							String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
-							Query<?> q =s.createQuery(query);
-							q.setParameter("ca", currentCa); //$NON-NLS-1$
-							q.setParameter("type", areatype); //$NON-NLS-1$
-							q.executeUpdate();
+							s.createMutationQuery(query)
+								.setParameter("ca", currentCa) //$NON-NLS-1$
+								.setParameter("type", areatype) //$NON-NLS-1$
+								.executeUpdate();
 	
 							MathTransform transform = CRS.findMathTransform(collection.getSchema().getCoordinateReferenceSystem(), Area.AREA_CRS);
 							//find feature store
@@ -486,7 +485,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 									currentKeys.add(key);
 									
 									//save
-									s.save(area);
+									s.persist(area);
 								}
 	
 								s.getTransaction().commit();

@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
@@ -39,6 +35,11 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Security manager for smart connect.
@@ -73,17 +74,15 @@ public enum SecurityManager {
 		}
 		queryString += "  )"; //$NON-NLS-1$
 
-		Query<?> query = s.createQuery(queryString);
+		Query<Long> query = s.createQuery(queryString, Long.class);
 		query.setParameter("username",  username); //$NON-NLS-1$
 		query.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
 		query.setParameter("action", action); //$NON-NLS-1$
 		if (resource != null){
 			query.setParameter("resource", resource); //$NON-NLS-1$
 		}
-		Long cnt = (Long)query.uniqueResult();
-		if (cnt >  0){
-			return true;
-		}
+		Long cnt = query.uniqueResult();
+		if (cnt >  0) return true;
 		
 		//check actions for permission
 		CriteriaBuilder cb = s.getCriteriaBuilder();
@@ -166,19 +165,19 @@ public enum SecurityManager {
 		//check if they have permission from a role
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 		queryString += "WHERE a.role = role AND a.action = :adminAction AND r.id.username = :username"; //$NON-NLS-1$
-		Query<?> q= s.createQuery(queryString);
+		Query<Long> q= s.createQuery(queryString, Long.class);
 		q.setParameter("adminAction", action); //$NON-NLS-1$
 		q.setParameter("username", username); //$NON-NLS-1$
-		Long roleCnt = (Long) q.uniqueResult();
+		Long roleCnt = q.uniqueResult();
 		
 		Long adminCnt = (long) 0;
 		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){ //if we are asking specifically about admin or caAdmin users (probably the menu filter) don't add this, or else it will return true for admin and caAdmin regardless
 			String queryString2 = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 			queryString2 += "WHERE a.role = role AND a.action = :adminAction AND r.id.username = :username"; //$NON-NLS-1$
-			Query<?> q2= s.createQuery(queryString2);
+			Query<Long> q2= s.createQuery(queryString2, Long.class);
 			q2.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
 			q2.setParameter("username", username); //$NON-NLS-1$
-			adminCnt = (Long) q2.uniqueResult();
+			adminCnt = q2.uniqueResult();
 		}
 		
 		if (cnt == 0 && roleCnt == 0 && adminCnt == 0){
@@ -205,13 +204,11 @@ public enum SecurityManager {
 		//check roles for permission
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 		queryString += "WHERE a.role = role AND a.action = :adminAction "; //$NON-NLS-1$
-		Query<?> q= s.createQuery(queryString);
+		Query<Long> q= s.createQuery(queryString, Long.class);
 		q.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
-		Long adminRoleCnt = (Long) q.uniqueResult();
-		if (adminRoleCnt > 0){
-			return;
-		}		
-		
+		Long adminRoleCnt = q.uniqueResult();
+		if (adminRoleCnt > 0) return;
+			
 		throw new SmartConnectException(
 				Response.Status.BAD_REQUEST,
 				Messages.getString("ConnectUserAction.AdminError", l)); //$NON-NLS-1$

@@ -3,10 +3,10 @@ package org.wcs.smart.ca;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-
 import org.wcs.smart.ca.datamodel.DmObject;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 
 
 /**

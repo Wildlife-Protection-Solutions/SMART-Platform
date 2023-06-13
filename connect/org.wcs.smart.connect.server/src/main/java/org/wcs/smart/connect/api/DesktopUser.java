@@ -342,7 +342,7 @@ public class DesktopUser extends HttpServlet {
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), e.getSmartUserId())); //$NON-NLS-1$
 			}
 			
-			s.save(e);
+			s.persist(e);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -449,7 +449,6 @@ public class DesktopUser extends HttpServlet {
 //			level.add(new SmartUserLevel(newUser.getUserLevelKey()));
 //			toUpdate.setSmartUserLevel(level);
 			
-			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -511,7 +510,7 @@ public class DesktopUser extends HttpServlet {
 			toDelete.getSmartUserId();
 			
 			toDelete.setEndEmploymentDate(LocalDate.now()); //setting an end date deactivates the user.
-			s.save(toDelete);
+			s.persist(toDelete);
 			s.flush();
 
 			//check for deleting the last administrator user

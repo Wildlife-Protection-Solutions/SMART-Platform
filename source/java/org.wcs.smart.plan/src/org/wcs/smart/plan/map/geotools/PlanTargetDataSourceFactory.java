@@ -127,7 +127,7 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try (Session session = HibernateManager.openSession()){
-					Plan temp = (Plan)session.load(Plan.class, UuidUtils.stringToUuid(planUuid));
+					Plan temp = (Plan)session.getReference(Plan.class, UuidUtils.stringToUuid(planUuid));
 					if (temp == null ){
 						throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
 					}

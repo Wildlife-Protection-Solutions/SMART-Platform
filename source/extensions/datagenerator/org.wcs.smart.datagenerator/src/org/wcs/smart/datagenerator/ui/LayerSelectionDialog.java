@@ -178,8 +178,7 @@ public class LayerSelectionDialog extends SmartStyledTitleDialog {
 			HashMap<Area.AreaType, Envelope> area = new HashMap<>();
 			
 			try(Session session = HibernateManager.openSession()){
-				@SuppressWarnings("unchecked")
-				List<Area> types = session.createQuery("FROM Area WHERE conservationArea = :ca") //$NON-NLS-1$
+				List<Area> types = session.createQuery("FROM Area WHERE conservationArea = :ca", Area.class) //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.list();
 				for (Area a : types) {

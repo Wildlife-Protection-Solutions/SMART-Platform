@@ -256,8 +256,6 @@ public class ConnectAlert extends HttpServlet {
 			}
 			toUpdate.setSpin(newAlertType.getSpin());
 			
-			
-			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -315,7 +313,7 @@ public class ConnectAlert extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			s.save(a);
+			s.persist(a);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -359,7 +357,7 @@ public class ConnectAlert extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertTypeNotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
 			}
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -688,7 +686,7 @@ public class ConnectAlert extends HttpServlet {
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 	    	
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -753,7 +751,7 @@ public class ConnectAlert extends HttpServlet {
 		s.beginTransaction();
 		try{
 			newAlert.setCa((ConservationAreaInfo)s.get(ConservationAreaInfo.class, caUuid));
-			s.save(newAlert);
+			s.persist(newAlert);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
@@ -926,6 +924,8 @@ public class ConnectAlert extends HttpServlet {
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try{
+			existingAlert = s.getReference(existingAlert);
+			
 			//update the user generated id 
 			if (newAlert.getUserGeneratedId() != null) {
 				existingAlert.setUserGeneratedId(newAlert.getUserGeneratedId());
@@ -970,7 +970,6 @@ public class ConnectAlert extends HttpServlet {
 				existingAlert.setY(newAlert.getY());
 			}
 			
-			s.update(existingAlert);
 			s.getTransaction().commit();
 		}catch (Exception ex) {
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();

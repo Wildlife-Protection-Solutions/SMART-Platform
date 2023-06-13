@@ -77,8 +77,8 @@ public class TempDirCleanUpJob extends Job{
 		try(Session session = HibernateManager.openSession()){
 			try{
 				session.beginTransaction();
-				NativeQuery<?> q = session.createNativeQuery("CALL smart.cleanUpTempData()"); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createNativeMutationQuery("CALL smart.cleanUpTempData()") //$NON-NLS-1$
+					.executeUpdate(); 
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				SmartPlugIn.log("Could not cleanup query temporary tables.", ex); //$NON-NLS-1$

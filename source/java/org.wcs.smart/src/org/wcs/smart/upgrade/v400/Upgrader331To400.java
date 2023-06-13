@@ -28,17 +28,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.jdbc.Work;
-import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -514,11 +509,11 @@ public class Upgrader331To400 extends AbstractInteralDatabaseUpgrader {
 	
 	private static void upgradeCCAAQueryUser(String tableName, String employeeName, Session session, Connection c,HashMap<String, UUID> ccaaUsers) throws SQLException{
 		
-		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+//		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+//		Properties prop = new Properties();
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
+//		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 		
 		String sql = "SELECT distinct " + employeeName + " FROM " + tableName + " WHERE ca_uuid = ? AND " + employeeName + " != ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		
@@ -565,7 +560,9 @@ public class Upgrader331To400 extends AbstractInteralDatabaseUpgrader {
 						newe.setId(newe.getSmartUserId());
 						newe.setSmartUserLevelKeys( UserLevelManager.ADMIN.getKey() );
 						
-						newuuid = (UUID)uuidGenerator.generate((SessionImplementor) session, newe);
+//						newuuid = (UUID)uuidGenerator.generate((SessionImplementor) session, newe);
+						newuuid = UuidUtils.generateUuid((SessionImplementor) session);
+						
 						newe.setUuid(newuuid);
 						ccaaUsers.put(newe.getSmartUserId(), newe.getUuid());
 						

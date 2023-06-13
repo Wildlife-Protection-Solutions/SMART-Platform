@@ -19,11 +19,12 @@
 		<smart.version>8.0.0-SNAPSHOT</smart.version>
 		<birt.version>4.9.0</birt.version>
 		<geotools.version>26.4</geotools.version>
-		<jts.version>1.18.2</jts.version>
-		<hibernate.version>5.6.7.Final</hibernate.version>
+		<jts.version>1.19.0</jts.version>
+		<hibernate.version>6.2.3.Final</hibernate.version>
 		<openpdf.version>1.3.26</openpdf.version>
 		<!-- can't upgrade to 6 until upgrading to jakarate (tomcat/birt ect)-->
-		<resteasy.version>5.0.3.Final</resteasy.version>
+		<!--<resteasy.version>6.2.2.Final</resteasy.version>-->
+		<resteasy.version>5.0.4.Final</resteasy.version>
 		
 		<udig.version>3.1.0-SNAPSHOT</udig.version>
 		<postgresql.version>42.3.5</postgresql.version>
@@ -32,16 +33,28 @@
 		<commons-io.version>2.9.0</commons-io.version>
 		<commons-compress.version>1.21</commons-compress.version>
 		
-		<org.eclipse.jface.version>3.25.0</org.eclipse.jface.version>
-		<org.eclipse.ui.workbench.version>3.125.0</org.eclipse.ui.workbench.version>
+		<org.eclipse.jface.version>3.27.0</org.eclipse.jface.version>
+		<org.eclipse.ui.workbench.version>3.126.0</org.eclipse.ui.workbench.version>
 		
 	</properties>
 	
 	<repositories>
 		<repository>
-			<id>osgeo</id>
-			<name>Open Source Geospatial Foundation Repository</name>
-			<url>https://repo.osgeo.org/repository/release/</url>
-		</repository>
+           	<id>boundless</id>
+            <name>Boundless Maven Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+		
+				<!-- required due to disabling of http repos-->
+		<!-- https://maven.apache.org/docs/3.8.1/release-notes.html-->
+		<repository>
+           	<id>maven.java.net</id>
+            <name>Maven.Java.Net</name>
+            <url>https://maven.java.net</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
     </repositories>   	
 </project>

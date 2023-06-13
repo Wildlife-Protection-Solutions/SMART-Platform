@@ -23,18 +23,18 @@ package org.wcs.smart.connect.model;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.smartcollect.model.SmartCollectUser;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+
 
 @Entity
-@Table(name="connect.smartcollect_user")
+@Table(name="smartcollect_user", schema="connect")
 public class SmartCollectConnectUser extends UuidItem{
 	
 	private static final long serialVersionUID = 1L;

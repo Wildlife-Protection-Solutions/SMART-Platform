@@ -5,5 +5,7 @@
 // Generated on: 2014.10.15 at 01:42:59 PM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.example.org/Mission/")
+@XmlSchema(namespace = "http://www.example.org/Mission/")
 package org.wcs.smart.er.xml.model.missions.v10;
+
+import jakarta.xml.bind.annotation.XmlSchema;

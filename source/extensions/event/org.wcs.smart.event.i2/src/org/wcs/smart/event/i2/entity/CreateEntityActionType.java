@@ -399,7 +399,7 @@ public class CreateEntityActionType implements IActionType {
 				while(loop < 5000) {
 					id = baseName + (loop > 0 ? " " + loop : ""); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					Long cnt = (Long) session.createQuery("SELECT count(*) FROM IntelEntityAttributeValue where stringValue = :it and id.attribute = :attribute and id.entity.entityType = :type and id.entity.conservationArea = :ca") //$NON-NLS-1$
+					Long cnt = session.createQuery("SELECT count(*) FROM IntelEntityAttributeValue where stringValue = :it and id.attribute = :attribute and id.entity.entityType = :type and id.entity.conservationArea = :ca", Long.class) //$NON-NLS-1$
 						.setParameter("attribute", newEntity.getEntityType().getIdAttribute()) //$NON-NLS-1$
 						.setParameter("it", id) //$NON-NLS-1$
 						.setParameter("type", newEntity.getEntityType()) //$NON-NLS-1$
@@ -418,9 +418,9 @@ public class CreateEntityActionType implements IActionType {
 			try{
 				session.beginTransaction();
 				for (IntelEntityAttachment a : newEntity.getEntityAttachments()) {
-					session.saveOrUpdate( a.getAttachment() );
+					HibernateManager.saveOrMerge(session, a.getAttachment());
 				}
-				session.saveOrUpdate(newEntity);
+				HibernateManager.saveOrMerge(session, newEntity);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				EventPlugIn.log(ex.getMessage(), ex);

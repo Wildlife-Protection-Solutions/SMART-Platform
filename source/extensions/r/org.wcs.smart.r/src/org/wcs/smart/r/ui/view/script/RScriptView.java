@@ -327,7 +327,7 @@ public class RScriptView {
 				for (UUID uuid : toDelete) {
 					RQuery q = session.get(RQuery.class, uuid);
 					if (q != null) {
-						session.delete(q);
+						session.remove(q);
 						deleted.add(q);
 					}
 				}

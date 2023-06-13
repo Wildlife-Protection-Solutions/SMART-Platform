@@ -76,7 +76,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends SmartStyledTitleDia
 	public SurveyDesignSamplingUnitAttributeDialog(Shell parentShell, SurveyDesign design) {
 		super(parentShell);
 		session = HibernateManager.openSession();
-		this.design = (SurveyDesign) session.load(SurveyDesign.class, design.getUuid());
+		this.design = (SurveyDesign) session.getReference(SurveyDesign.class, design.getUuid());
 	}
 	
 	public boolean close(){
@@ -136,11 +136,11 @@ public class SurveyDesignSamplingUnitAttributeDialog extends SmartStyledTitleDia
 
 					List<SamplingUnitAttributeValue> values = q.list();
 					for (SamplingUnitAttributeValue v : values){
-						session.delete(v);
+						session.remove(v);
 					}
 					
 					this.design.getSamplingUnitAttributes().remove(a);
-					session.delete(a);
+					session.remove(a);
 				}
 			}
 		
@@ -218,21 +218,10 @@ public class SurveyDesignSamplingUnitAttributeDialog extends SmartStyledTitleDia
 				List<SamplingUnitAttribute> siblings = 
 						QueryFactory.buildQuery(session, SamplingUnitAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		
-				EditSamplingUnitAttributeDialog d = new EditSamplingUnitAttributeDialog(
-						getShell(), sua, siblings, session);
-				
-				if (d.open() == EditSamplingUnitAttributeDialog.OK){
-				
-					session.beginTransaction();
-					try{
-						session.save(sua);
-						session.getTransaction().commit();
-					}catch (Exception ex){
-						session.getTransaction().rollback();
-						EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignSamplingUnitAttributeDialog_ErrorCreatingNew + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-					}
-					initValues(true);
-				}		
+				EditSamplingUnitAttributeDialog d = new EditSamplingUnitAttributeDialog(getShell(), sua, siblings);
+				d.open();
+				initValues(true);
+		
 			}
 		});
 		

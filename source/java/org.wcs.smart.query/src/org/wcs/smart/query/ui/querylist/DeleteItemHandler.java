@@ -114,7 +114,7 @@ public class DeleteItemHandler {
 					s.getTransaction().rollback();
 					return;
 				}
-				s.delete(query);
+				s.remove(query);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
@@ -149,9 +149,9 @@ public class DeleteItemHandler {
 			s.beginTransaction();
 			try{
 				if (parent == null){
-					s.delete(folder);
+					s.remove(folder);
 				}else{
-					s.update(folder);
+					parent = s.getReference(parent);
 					parent.getChildren().remove(folder);
 					folder.setParentFolder(null);
 				}

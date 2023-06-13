@@ -117,7 +117,7 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(SurveyCyberTrackerPlugIn.PLUGIN_ID, SurveyCyberTrackerPlugIn.DB_VERSION_2, session);
 	}

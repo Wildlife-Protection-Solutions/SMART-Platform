@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -52,6 +50,8 @@ import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
+
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Converts a SMART XML data model to the database

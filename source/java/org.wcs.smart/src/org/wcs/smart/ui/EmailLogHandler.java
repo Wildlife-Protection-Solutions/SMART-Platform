@@ -52,6 +52,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SharedUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Handler for creating a email with part of the log
  * file included in the message body
@@ -83,10 +85,9 @@ public class EmailLogHandler {
 		sb.append("Database PlugIn Versions"); //$NON-NLS-1$
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		try (Session s = HibernateManager.openSession()) {
-			List<?> data = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
-			for (Object x : data) {
-				Object[] z = (Object[]) x;
-				sb.append("  " + ((String) z[0]).substring("org.wcs.".length()) + ": " + (String) z[1]); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			List<Tuple> data = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL, Tuple.class).list(); //$NON-NLS-1$
+			for (Tuple z : data) {
+				sb.append("  " + ((String) z.get(0)).substring("org.wcs.".length()) + ": " + (String) z.get(1)); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 		} catch (Exception ex) {

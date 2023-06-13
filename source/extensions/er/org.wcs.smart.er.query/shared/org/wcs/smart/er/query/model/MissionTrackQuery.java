@@ -24,11 +24,6 @@ package org.wcs.smart.er.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.parser.Parser;
@@ -38,6 +33,11 @@ import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Mission track query object.
  * 
@@ -45,7 +45,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
  *
  */
 @Entity
-@Table(name="smart.survey_mission_track_query")
+@Table(name="survey_mission_track_query", schema="smart")
 public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurveyQuery{
 
 	private static final long serialVersionUID = 1L;
@@ -53,14 +53,6 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 	protected String surveyDesignKey;
 	
 	public static final String KEY = "surveymissiontrack"; //$NON-NLS-1$
-	
-	/**
-	 * Creates a new patrol query with the default
-	 * conservation area filter and no date filter
-	 */
-	protected MissionTrackQuery(){
-		super();
-	}
 	
 
 	/**

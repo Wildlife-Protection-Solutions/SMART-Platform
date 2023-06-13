@@ -24,16 +24,15 @@ package org.wcs.smart.asset;
 import java.text.Collator;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Tools for managing asset types
@@ -88,42 +87,42 @@ public enum AssetTypeManager {
 	public void deleteAssetType(AssetType type, Session session) throws Exception{
 		
 		//delete all asset attribute values
-		Query<?> q = session.createQuery("delete from AssetAttributeValue ieav where ieav.id.asset in (FROM Asset WHERE assetType = :type)"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from AssetAttributeValue ieav where ieav.id.asset in (FROM Asset WHERE assetType = :type)") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete all asset waypoints
-		q = session.createQuery("delete from AssetWaypoint ieav where id.assetDeployment in (FROM AssetDeployment ad WHERE ad.asset.assetType = :type)"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from AssetWaypoint ieav where id.assetDeployment in (FROM AssetDeployment ad WHERE ad.asset.assetType = :type)") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete all asset deployment attributes
-		q = session.createQuery("delete from AssetDeploymentAttributeValue ieav where id.assetDeployment in (SELECT ad FROM AssetDeployment ad WHERE ad.asset.assetType = :type)"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from AssetDeploymentAttributeValue ieav where id.assetDeployment in (SELECT ad FROM AssetDeployment ad WHERE ad.asset.assetType = :type)") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete all asset deployments
-		q = session.createQuery("delete from AssetDeployment ieav where id.asset in (FROM Asset WHERE assetType = :type)"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from AssetDeployment ieav where id.asset in (FROM Asset WHERE assetType = :type)") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete all asset type attributes
-		q = session.createQuery("delete from AssetTypeAttribute WHERE id.assetType = :type"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from AssetTypeAttribute WHERE id.assetType = :type") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete all asset type deployment attributes
-		q = session.createQuery("delete from AssetTypeDeploymentAttribute WHERE id.assetType = :type"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from AssetTypeDeploymentAttribute WHERE id.assetType = :type") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete all assets
-		q = session.createQuery("delete from Asset WHERE assetType = :type"); //$NON-NLS-1$
-		q.setParameter("type", type); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Asset WHERE assetType = :type") //$NON-NLS-1$
+		.setParameter("type", type) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//delete asset type
-		session.delete(type);
+		session.remove(type);
 
 	}
 

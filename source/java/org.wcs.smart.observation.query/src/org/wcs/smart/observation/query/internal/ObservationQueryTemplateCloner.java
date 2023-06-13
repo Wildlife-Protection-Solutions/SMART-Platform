@@ -104,7 +104,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setQuery(cloneGriddedQueryDefinition(query.getQuery(), engine));
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -134,7 +134,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setQuery(cloneSummaryQueryDefinition(query.getQuery(), engine));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -167,7 +167,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();
@@ -200,7 +200,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
 		}
 		engine.getSession().flush();

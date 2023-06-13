@@ -160,18 +160,18 @@ public class ConnectAlertFilterDefault extends HttpServlet {
     public AlertFilterDefault updateAlertFilterDefault(@PathParam("uuid") UUID uuid, AlertFilterDefault newDefault) {
     	validateUser(AdminAccountAction.KEY);
     	
-    	AlertFilterDefault toUpdate = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toUpdate = s.get(AlertFilterDefault.class, uuid);			
+			AlertFilterDefault toUpdate = s.get(AlertFilterDefault.class, uuid);			
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertFilterDefaultsFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
 			}
 			
-			setDefaultValues(newDefault, toUpdate, s);
+			setDefaultValues(newDefault, toUpdate);
 			s.getTransaction().commit();
+			return toUpdate;
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
@@ -180,9 +180,8 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
-		}finally{
 		}
-		return toUpdate;
+		
     }
 
 	
@@ -217,10 +216,14 @@ public class ConnectAlertFilterDefault extends HttpServlet {
     	validateUser(AdminAccountAction.KEY);
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
-		AlertFilterDefault toUpdate = new AlertFilterDefault();
+		
 		try{
-			setDefaultValues(newDefault, toUpdate, s);
+			AlertFilterDefault toUpdate = new AlertFilterDefault();
+			setDefaultValues(newDefault, toUpdate);
+			s.persist(toUpdate);
 			s.getTransaction().commit();
+			
+			return toUpdate;
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
@@ -229,12 +232,11 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
-		}finally{
 		}
-		return toUpdate;
+		
 	}
 	
-	private void setDefaultValues(AlertFilterDefault newDefault, AlertFilterDefault toUpdate, Session s) {
+	private void setDefaultValues(AlertFilterDefault newDefault, AlertFilterDefault toUpdate) {
 		if (newDefault.getDefaultCaUuids()!= null){
 			toUpdate.setDefaultCaUuids(newDefault.getDefaultCaUuids());
 		}
@@ -265,7 +267,6 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 		toUpdate.setStartingLong(newDefault.getStartingLong());
 		toUpdate.setStartingLat(newDefault.getStartingLat());  
 		
-		s.saveOrUpdate(toUpdate);
 	}
 	
 }

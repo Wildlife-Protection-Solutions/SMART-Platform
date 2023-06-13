@@ -5,5 +5,8 @@
 // Generated on: 2018.06.05 at 01:12:53 PM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://smartconservationtools.org/xml/1.0/EventActions", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://smartconservationtools.org/xml/1.0/EventActions", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.event.xml.model;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

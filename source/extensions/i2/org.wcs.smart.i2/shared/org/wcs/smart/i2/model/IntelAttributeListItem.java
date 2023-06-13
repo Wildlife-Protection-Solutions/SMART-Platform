@@ -21,20 +21,20 @@
  */
 package org.wcs.smart.i2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.NamedKeyItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Model class of attribute list item for intelligence attributes.
  * 
  */
 @Entity
-@Table(name="smart.i_attribute_list_item")
+@Table(name="i_attribute_list_item", schema="smart")
 public class IntelAttributeListItem extends NamedKeyItem {
 
 	private static final long serialVersionUID = 1L;

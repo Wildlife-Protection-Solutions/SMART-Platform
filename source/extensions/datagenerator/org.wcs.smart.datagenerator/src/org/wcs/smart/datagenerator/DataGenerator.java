@@ -125,8 +125,8 @@ public class DataGenerator implements IDataEngine{
 				
 				for (int i = 0; i < config.getNumberOfPatrols(); i ++) {
 					Patrol p = generatePatrol(session, progress.split(1));
-					session.save(p);
-					p.getLegs().forEach(leg->leg.getPatrolLegDays().forEach(pld->pld.getWaypoints().forEach(pw->{session.save(pw.getWaypoint());session.save(pw);})));
+					session.persist(p);
+					p.getLegs().forEach(leg->leg.getPatrolLegDays().forEach(pld->pld.getWaypoints().forEach(pw->{session.persist(pw.getWaypoint());session.persist(pw);})));
 					newPatrols.add(p);
 					session.flush();
 					progress.checkCanceled();
@@ -342,7 +342,7 @@ public class DataGenerator implements IDataEngine{
 				wp.setId(String.valueOf(i+1));
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setObservationGroups(new ArrayList<>());
-				session.save(wp);
+				session.persist(wp);
 				
 				PatrolWaypoint pw = new PatrolWaypoint();
 				pw.setPatrolLegDay(pld);

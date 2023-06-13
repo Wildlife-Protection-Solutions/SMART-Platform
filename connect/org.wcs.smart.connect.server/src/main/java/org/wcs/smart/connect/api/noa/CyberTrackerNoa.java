@@ -503,7 +503,7 @@ public class CyberTrackerNoa {
 			item.setUploadedDate(ZonedDateTime.now());
 			item.setWorkItem(null);
 		
-			s.save(item);
+			s.persist(item);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			try{
@@ -554,9 +554,9 @@ public class CyberTrackerNoa {
 		s.beginTransaction();
 		try{
 			if (deleteItem) {
-				s.delete(item);
+				s.remove(item);
 			}else {
-				s.saveOrUpdate(item);
+				s.merge(item);
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){

@@ -46,7 +46,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
@@ -195,8 +194,10 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 					s.beginTransaction();
 					try{
 						String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol"; //$NON-NLS-1$
-						Query<?> q = s.createQuery(hql).setParameter("patrol", currentPatrol); //$NON-NLS-1$
-						q.executeUpdate();
+						s.createMutationQuery(hql)
+							.setParameter("patrol", currentPatrol) //$NON-NLS-1$
+							.executeUpdate();
+						
 						UUID planuuid = ((PatrolPlanComposite)content).getSelection();
 						if (planuuid != null){
 							PatrolPlan pp = new PatrolPlan();
@@ -207,7 +208,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 								parent = parent.getParent();
 							}
 							pp.setPlan(newPlan);
-							s.save(pp);
+							s.persist(pp);
 						}
 						s.getTransaction().commit();
 						currentPlan = newPlan;

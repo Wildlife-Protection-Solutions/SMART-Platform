@@ -156,7 +156,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					IQueryExporter def = null;
 					
 					try(Session s = HibernateManager.openSession()){
-						query = (Query) s.load(qi.getType().getHibernateClass(), qi.getUuid());
+						query = (Query) s.getReference(qi.getType().getHibernateClass(), qi.getUuid());
 		
 						List<IQueryExporter> exporter = QueryExportEngine.getQueryExports(query);
 						for (IQueryExporter export : exporter){
@@ -308,8 +308,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				//generate id
 				for (Query query : queries){
 					query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-					
-					session.saveOrUpdate(query);
+					HibernateManager.saveOrMerge(session, query);
 				}
 				session.flush();
 				importer.beforeCommit();

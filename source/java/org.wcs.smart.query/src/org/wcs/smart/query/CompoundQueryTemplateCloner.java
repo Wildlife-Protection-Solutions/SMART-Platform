@@ -89,7 +89,7 @@ public class CompoundQueryTemplateCloner implements
 			}
 			
 			engine.addConservationItemMapping(toclone, clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}

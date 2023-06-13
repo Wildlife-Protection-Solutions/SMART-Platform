@@ -21,14 +21,14 @@
  */
 package org.wcs.smart.event.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Action events to perform on new waypoint observations
@@ -37,7 +37,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name = "smart.e_event_action")
+@Table(name = "e_event_action", schema="smart")
 public class EActionEvent extends UuidItem {
 
 	private static final long serialVersionUID = 1L;

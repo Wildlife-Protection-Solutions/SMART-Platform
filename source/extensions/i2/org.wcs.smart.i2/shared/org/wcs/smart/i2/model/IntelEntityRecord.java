@@ -23,14 +23,14 @@ package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -40,7 +40,7 @@ import javax.persistence.Transient;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_entity_record")
+@Table(name="i_entity_record", schema="smart")
 public class IntelEntityRecord {
 
 	private IEntityRecordPk id = new IEntityRecordPk();

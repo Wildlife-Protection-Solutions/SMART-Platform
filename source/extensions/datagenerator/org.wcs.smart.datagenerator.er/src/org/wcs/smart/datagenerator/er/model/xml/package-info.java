@@ -5,5 +5,7 @@
 // Generated on: 2021.03.19 at 01:48:48 PM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/datageneratorconfiguration")
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/datageneratorconfiguration")
 package org.wcs.smart.datagenerator.er.model.xml;
+
+import jakarta.xml.bind.annotation.XmlSchema;

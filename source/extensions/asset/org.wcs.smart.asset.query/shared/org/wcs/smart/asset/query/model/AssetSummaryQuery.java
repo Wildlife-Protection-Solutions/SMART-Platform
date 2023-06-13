@@ -25,11 +25,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.Locale;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Employee;
@@ -38,6 +33,11 @@ import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * A class to represent a summary query.
  * 
@@ -45,7 +45,7 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.asset_summary_query")
+@Table(name="asset_summary_query", schema="smart")
 public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 
 	private static final long serialVersionUID = 1L;

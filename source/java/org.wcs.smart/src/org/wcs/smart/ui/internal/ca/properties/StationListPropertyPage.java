@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.collections.comparators.NullComparator;
@@ -79,10 +78,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -107,6 +102,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -129,11 +125,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private Button btnDisable, btnDelete;
 	private MenuItem miDisable, miDelete, miEdit, miClearIcon;
 	
-	
 	private static NullComparator nullStringComparator = new NullComparator();
-	
-	private UUIDGenerator uuidGenerator = null;
-	
+
 	private int editIndex = -1;
 	private IconCache iconCache;
 	
@@ -161,14 +154,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	public StationListPropertyPage(Shell parent) {
 		super(parent, Messages.StationListPropertyPage_Dialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
-		uuidGenerator = UUIDGenerator
-				.buildSessionFactoryUniqueIdentifierGenerator();
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
-				StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
-				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 
 	
@@ -186,6 +171,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,s));
 			Collections.sort(stations);
 			stations.forEach(station ->station.getNames().size());
+			s.get(ConservationArea.class, currentCa.getUuid()).getLanguages().size();
 		}
 		
 		Composite container = new Composite(parent, SWT.NONE);
@@ -269,7 +255,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		
 		miClearIcon = new MenuItem(mnu, SWT.PUSH);
-		miClearIcon.setText("Clear Image");
+		miClearIcon.setText(DialogConstants.CLEAR_IMAGE_TEXT);
 		miClearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		miClearIcon.addListener(SWT.Selection, e->{
 			Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
@@ -655,27 +641,27 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			Transaction tx = s.beginTransaction();
 			try {
 				for(Station station : toDelete){
-					s.delete(station);
+					s.remove(station);
 				}
 				// add/update stations
 				for (int i = 0; i < stations.size(); i++) {
 					Station stn = (Station) stations.get(i);
-					if (stn.getIcon() != null && stn.getIcon().getUuid() == null) s.saveOrUpdate(stn.getIcon());
-					s.saveOrUpdate(stn);
-	
+					
 					for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(s)) {
 						if (lbl.getElementuuid() == null) {
 							if (stn.getDescUuid() == null) {
-								UUID uuid = (UUID) uuidGenerator.generate(
-										(SessionImplementor) s, lbl);
+								UUID uuid = UuidUtils.generateUuid((SessionImplementor) s);
 								stn.setDescUuid(uuid);
-								s.saveOrUpdate(stn);
 							}
 							lbl.setElement(stn.getDescUuid());
-						}
-						s.saveOrUpdate(lbl);
+							s.persist(lbl);
+						}else {
+							s.merge(lbl);	
+						}						
 					}
-	
+					
+					HibernateManager.saveOrMerge(s, stn.getIcon());			
+					stn = HibernateManager.saveOrMerge(s, stn);	
 				}
 	
 				tx.commit();

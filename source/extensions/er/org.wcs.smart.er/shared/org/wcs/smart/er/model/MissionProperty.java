@@ -23,16 +23,16 @@ package org.wcs.smart.er.model;
 
 import java.io.Serializable;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Link between a survey and the associated mission 
@@ -42,7 +42,7 @@ import javax.persistence.Transient;
  *
  */
 @Entity
-@Table(name="smart.mission_property")
+@Table(name="mission_property", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.surveyDesign", 
 		joinColumns = @JoinColumn(name = "survey_design_uuid")),

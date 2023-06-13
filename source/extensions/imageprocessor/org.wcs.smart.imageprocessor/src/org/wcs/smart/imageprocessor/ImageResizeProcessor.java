@@ -107,13 +107,13 @@ public class ImageResizeProcessor extends Job{
 			List<String> srcKeys = sources.stream().map(src->src.getKey()).collect(Collectors.toList());
 			try(Session session = HibernateManager.openSession()){
 				
-				try(ScrollableResults results = session.createQuery("FROM WaypointAttachment WHERE waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
+				try(ScrollableResults<WaypointAttachment> results = session.createQuery("FROM WaypointAttachment WHERE waypoint in (FROM Waypoint WHERE conservationArea = :ca and sourceId in (:srcs))", WaypointAttachment.class) //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.setParameter("srcs", srcKeys) //$NON-NLS-1$
 					.scroll()){
 				
 					while(results.next()) {
-						WaypointAttachment wp = (WaypointAttachment) results.get(0);
+						WaypointAttachment wp = results.get();
 						try {
 							wp.computeFileLocation(session);
 							if (processFile(wp)) items.add(new ProcessingItem(wp));
@@ -123,13 +123,13 @@ public class ImageResizeProcessor extends Job{
 					}
 				}
 				
-				try(ScrollableResults results = session.createQuery("FROM ObservationAttachment WHERE observation.observationGroup.waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
+				try(ScrollableResults<ObservationAttachment> results = session.createQuery("FROM ObservationAttachment WHERE observation.observationGroup.waypoint in (FROM Waypoint WHERE conservationArea = :ca and sourceId in (:srcs))", ObservationAttachment.class) //$NON-NLS-1$
 						.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.setParameter("srcs", srcKeys) //$NON-NLS-1$
 						.scroll()){
 					
 					while(results.next()) {
-						ObservationAttachment wp = (ObservationAttachment) results.get(0);
+						ObservationAttachment wp = results.get();
 						try {
 							wp.computeFileLocation(session);
 							if (processFile(wp)) items.add(new ProcessingItem(wp));

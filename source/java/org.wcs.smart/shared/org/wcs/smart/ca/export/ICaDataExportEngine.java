@@ -103,14 +103,13 @@ public interface ICaDataExportEngine {
 	 * @param tableName the schema qualified database table name to export
 	 * @param hibernateClass the hibernate class representing the database table
 	 * @param columns the columns in the database table
-	 * @param caPropertyQuery the hql query that links the table with 
+	 * @param caPropertyFilter the hql query that links the table with 
 	 * a conservationarea property (ie for AttributeTreeNode .attribute.conservationArea)
+	 * @param caUuidPropertyFilter the hql query that links the table with 
+	 * a conservationarea uuid property only one of caPropertyFilter of caUuidPropertyFiler should be specified.
 	 * @throws Exception
 	 */
-	void writeHibernateQuery(String tableName,
-			String hibernateClass,
-			String[] columns,
-			String caPropertyQuery) throws Exception;
+	void writeHibernateQuery(TableInfo info, String[] columns, String caPropertyFilter , String caUuidPropertyFilter) throws Exception;
 	
 	
 	/**

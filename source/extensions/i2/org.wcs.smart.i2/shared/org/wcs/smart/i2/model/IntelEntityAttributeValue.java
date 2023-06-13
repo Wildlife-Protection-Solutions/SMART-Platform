@@ -24,18 +24,18 @@ package org.wcs.smart.i2.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.search.DerbyFuzzyFunctions;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class of i_entity_attribute_value.
@@ -44,7 +44,7 @@ import org.wcs.smart.i2.search.DerbyFuzzyFunctions;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_entity_attribute_value")
+@Table(name="i_entity_attribute_value", schema="smart")
 public class IntelEntityAttributeValue extends IntelValueItem{
 
 	private EntityAttributeValuePk id = new EntityAttributeValuePk();

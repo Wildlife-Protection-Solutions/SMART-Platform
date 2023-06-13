@@ -123,7 +123,7 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 		for (String s : sql) {
 			ERQueryPlugIn.log(s, null);
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID,
 				ERQueryPlugIn.DB_VERSION_2, session);
@@ -172,7 +172,7 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 		for (String s : sql) {
 			ERQueryPlugIn.log(s, null);
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		session.doWork(new Work() {
 			@Override
@@ -204,7 +204,7 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 		for (String s : sql) {
 			ERQueryPlugIn.log(s, null);
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_4, session);
 	}

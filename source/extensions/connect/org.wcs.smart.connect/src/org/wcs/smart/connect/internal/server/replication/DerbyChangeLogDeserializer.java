@@ -34,11 +34,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -55,6 +50,11 @@ import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 import org.wcs.smart.connect.replication.changelog.ConflictException;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Derserialize and apply the change log file.
@@ -92,7 +92,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	 */
 	@Override
 	public void processFile(final Session session) throws Exception{
-		session.createNativeQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
+		session.createNativeMutationQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
 		
 		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, ca, Type.UPLOAD);
 		lastUploadRevision = lastUpload == null ? -1 : lastUpload.getEndRevision();

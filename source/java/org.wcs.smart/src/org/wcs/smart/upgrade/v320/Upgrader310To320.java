@@ -33,10 +33,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -176,9 +173,8 @@ public class Upgrader310To320 extends AbstractInteralDatabaseUpgrader {
 		monitor.done();
 	}
 	public static void cleanUpSpecies(Session session, IProgressMonitor monitor){
-		List<?> data = session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("keyId", "species")) //$NON-NLS-1$ //$NON-NLS-2$
-				.list();
+		
+		List<Attribute> data = session.createQuery("FROM Attribute WHERE keyId = 'species'", Attribute.class).list(); //$NON-NLS-1$
 		
 		//no species
 		if (data.size() == 0) return;
@@ -187,20 +183,18 @@ public class Upgrader310To320 extends AbstractInteralDatabaseUpgrader {
 		
 		//for each species attribute
 		for (int i = 0; i < data.size(); i ++){
-			final Attribute species = (Attribute) data.get(i);
+			final Attribute species = data.get(i);
 		
 			//	i) More than 50 species in the database AND
 			//	ii) More than 30% of the species are unused
 			
-			Long numSpecies = (Long)session.createCriteria(AttributeTreeNode.class)
-					.add(Restrictions.eq("attribute", species)) //$NON-NLS-1$
-					.setProjection(Projections.rowCount())
-					.uniqueResult();
-		
-			Query<?> q = session.createQuery(
-				"SELECT count(distinct poa.attributeTreeNode) FROM WaypointObservationAttribute poa WHERE poa.attributeTreeNode.attribute = :attribute "); //$NON-NLS-1$
-			q.setParameter("attribute", species); //$NON-NLS-1$
-			Long numSpeciesUsed = (Long)q.uniqueResult();
+			Long numSpecies = session.createQuery("SELECT count(*) From AttributeTreeNode WHERE attribute = :attribute ", Long.class) //$NON-NLS-1$
+				.setParameter("attribute", species) //$NON-NLS-1$
+				.uniqueResult();
+			
+			Long numSpeciesUsed = session.createQuery("SELECT count(distinct poa.attributeTreeNode) FROM WaypointObservationAttribute poa WHERE poa.attributeTreeNode.attribute = :attribute ", Long.class) //$NON-NLS-1$
+					.setParameter("attribute", species) //$NON-NLS-1$
+			 		.uniqueResult();
 			
 			if (numSpecies < 50 || ((numSpecies - numSpeciesUsed) / ((float)numSpecies)) < .3){
 				//skip this species attribute and try the next one
@@ -276,9 +270,9 @@ public class Upgrader310To320 extends AbstractInteralDatabaseUpgrader {
 		if (!canDelete) return false;
 		
 		//remove any configurable model lablel (cm nodes will deleted through cascade) 
-		Query<?> q= session.createQuery("DELETE FROM Label WHERE id.element IN (SELECT uuid FROM CmAttributeTreeNode WHERE dmTreeNode = :node)"); //$NON-NLS-1$
-		q.setParameter("node", node); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM Label WHERE id.element IN (SELECT uuid FROM CmAttributeTreeNode WHERE dmTreeNode = :node)") //$NON-NLS-1$
+			.setParameter("node", node) //$NON-NLS-1$
+			.executeUpdate();
 		
 		//delete me
 		if (node.getParent() != null){
@@ -290,12 +284,12 @@ public class Upgrader310To320 extends AbstractInteralDatabaseUpgrader {
 		node.setParent(null);
 		//delete labels
 		for (Label l : node.getNames()){
-			session.delete(l);
+			session.remove(l);
 		}
 		node.getNames().clear();
 		
 		
-		session.delete(node);
+		session.remove(node);
 		session.flush();
 		return true;
 	}

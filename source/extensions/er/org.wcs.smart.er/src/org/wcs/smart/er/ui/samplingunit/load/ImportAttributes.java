@@ -214,7 +214,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 										}else{
 											//remove me
 											unit.getAttributes().remove(toUpdate);
-											session.delete(toUpdate);
+											session.remove(toUpdate);
 										}
 									}
 									changes = true;

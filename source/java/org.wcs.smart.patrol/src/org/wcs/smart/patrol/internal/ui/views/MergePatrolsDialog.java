@@ -246,7 +246,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 					
 					session.beginTransaction();
 					
-					session.save(newPatrol);
+					session.persist(newPatrol);
 					session.flush();
 					
 					for (Patrol p : patrolsToMerge) {
@@ -265,7 +265,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 										
 										//reuse waypoints so we don't fire new events
 										//#2990
-										session.createQuery("DELETE FROM PatrolWaypoint WHERE id.waypoint.uuid = :wpuuid and id.patrolLegDay.uuid = :leguuid") //$NON-NLS-1$
+										session.createMutationQuery("DELETE FROM PatrolWaypoint WHERE id.waypoint.uuid = :wpuuid and id.patrolLegDay.uuid = :leguuid") //$NON-NLS-1$
 											.setParameter("wpuuid", pw.getWaypoint().getUuid()) //$NON-NLS-1$
 											.setParameter("leguuid", pw.getPatrolLegDay().getUuid()) //$NON-NLS-1$
 											.executeUpdate();

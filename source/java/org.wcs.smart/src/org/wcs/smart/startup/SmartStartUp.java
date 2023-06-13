@@ -35,10 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.apache.derby.shared.common.error.StandardException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,6 +47,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
 import org.osgi.framework.Bundle;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.LoginLogEntry;
@@ -68,6 +65,10 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
 import org.wcs.smart.upgrade.UpgradeEngine;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * This class contains some of the basic functions required
@@ -90,6 +91,8 @@ public class SmartStartUp {
 		
 		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		
+		Geometry x = null;
+		System.out.println(x == null);
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			throw new Exception (MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
@@ -190,6 +193,8 @@ public class SmartStartUp {
 	 */
 	public static List<Object> getConservationAreas(boolean includeCcaa){
 		try(Session session = HibernateManager.openSession()){
+			
+			//List<BasemapDefinition> items = session.createQuery("FROM BasemapDefinition", BasemapDefinition.class).list(); //$NON-NLS-1$
 			
 			session.beginTransaction();
 			try{
@@ -460,7 +465,7 @@ public class SmartStartUp {
 			try(Session session = HibernateManager.openSession()){
 				
 				session.beginTransaction();
-				for (Object o : objectsToSave) session.save(o);
+				for (Object o : objectsToSave) session.persist(o);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + Messages.SmartStartUp_LoginHandlerError, ca.getName(), "create objects", ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -481,7 +486,7 @@ public class SmartStartUp {
 				l.setCaName(ca.getName());
 				l.setSmartUserId(e.getSmartUserId());
 				l.setUserLevels(e.getSmartUserLevelKeys());
-				s.save(l);
+				s.persist(l);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				SmartPlugIn.log(ex.getMessage(),  ex);

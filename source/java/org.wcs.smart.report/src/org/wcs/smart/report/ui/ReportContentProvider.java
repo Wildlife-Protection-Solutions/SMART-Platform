@@ -64,6 +64,7 @@ public class ReportContentProvider implements ITreeContentProvider{
 	public void dispose() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput == null){

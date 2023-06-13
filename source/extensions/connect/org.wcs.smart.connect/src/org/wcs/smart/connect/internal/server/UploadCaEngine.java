@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,10 +37,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectDatastore;
@@ -144,12 +139,12 @@ public class UploadCaEngine {
 							(serverInfo != null && serverInfo.getStatus() == ConservationAreaProxy.Status.NODATA)){
 						//update ca to server (new ca will be created if required; otherwise we update existing)
 						if (localStatus != null){
-							s.delete(localStatus);
+							s.remove(localStatus);
 							localStatus = null;
 						}
 						localStatus = createNewLocalStatus(server, s);
 						localStatus.setLocalFile(getExportFilename(server.getConservationArea()));
-						s.save(localStatus);
+						s.persist(localStatus);
 						
 						//clean up change log and upload table
 						ChangeLogTableManager.INSTANCE.deleteAll(s, server.getConservationArea());
@@ -175,7 +170,11 @@ public class UploadCaEngine {
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try {
-							s.saveOrUpdate(localStatus);
+							if (localStatus.getUuid() == null) {
+								s.persist(localStatus);
+							}else {
+								s.merge(localStatus);
+							}
 							s.getTransaction().commit();
 						}catch (Exception ex) {
 							s.getTransaction().rollback();
@@ -192,7 +191,7 @@ public class UploadCaEngine {
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try {
-							s.saveOrUpdate(localStatus);
+							s.merge(localStatus);
 							s.getTransaction().commit();
 						}catch (Exception ex) {
 							s.getTransaction().rollback();
@@ -289,15 +288,15 @@ public class UploadCaEngine {
 	 */
 	private ConnectServerStatus createNewLocalStatus(ConnectServer server, Session s){
 
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
-		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+//		Properties prop = new Properties();
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
+//		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+//		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 		
 		ConnectServerStatus status = new ConnectServerStatus();
 	
-		UUID version = (UUID) uuidGenerator.generate((SessionImplementor) s, status);
+		UUID version = (UUID) UuidUtils.generateUuid((SessionImplementor) s);
 		status.setVersion(version);
 	
 		status.setServerRevision(-1l);

@@ -24,9 +24,8 @@ package org.wcs.smart.asset.model;
 import java.io.File;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.List;
 import java.util.Locale;
-
-import javax.persistence.Query;
 
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
@@ -83,9 +82,10 @@ public class AssetWaypointSource implements IWaypointSource{
 			sb.append("join d.asset a join d.assetWaypoints aw "); //$NON-NLS-1$
 			sb.append(" WHERE aw.waypoint = :wp"); //$NON-NLS-1$
 			
-			Query q = temp.createQuery( sb.toString() );
-			q.setParameter("wp", wp); //$NON-NLS-1$
-			for (Object aw : q.getResultList()) {
+			List<String> results = temp.createQuery( sb.toString(), String.class )
+					.setParameter("wp", wp) //$NON-NLS-1$
+					.list();
+			for (String aw : results) {
 				if (!pid.isEmpty()) pid += ", "; //$NON-NLS-1$
 				pid += (String)aw;
 			}

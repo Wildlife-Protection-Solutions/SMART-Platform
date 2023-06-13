@@ -23,10 +23,9 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /*
  * An AlertType entity
@@ -38,7 +37,7 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table(name = "connect.alert_types")
+@Table(name = "alert_types", schema="connect")
 public class AlertType extends ConnectUuidItem{
 	
 	public static final UUID NULL_TYPE = UUID.fromString("00000000-0000-0000-0000-000000000000"); //$NON-NLS-1$

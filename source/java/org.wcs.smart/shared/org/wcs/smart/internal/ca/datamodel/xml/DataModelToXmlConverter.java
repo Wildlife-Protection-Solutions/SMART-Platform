@@ -29,10 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -57,6 +53,10 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.ListNode;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.MinMaxType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.NameType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.TreeNodeType;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 
 /**

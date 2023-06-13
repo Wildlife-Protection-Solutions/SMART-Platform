@@ -23,7 +23,6 @@ package org.wcs.smart.paws.plugin;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -53,29 +52,29 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 		
 		monitor.subTask("removing PAWS plugin data"); //$NON-NLS-1$
 		
-		Query<?> q = session.createQuery("DELETE FROM PawsService WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();		
+		session.createMutationQuery("DELETE FROM PawsService WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();		
 		
-		q = session.createQuery("DELETE FROM PawsRun WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM PawsRun WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("DELETE FROM PawsQueryClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM PawsQueryClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 				
-		q = session.createQuery("DELETE FROM PawsSimpleClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM PawsSimpleClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("DELETE FROM PawsParameter WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM PawsParameter WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("DELETE FROM PawsConfiguration WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE FROM PawsConfiguration WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 }

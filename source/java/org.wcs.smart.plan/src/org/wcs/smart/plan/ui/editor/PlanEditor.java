@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,12 +48,10 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanEventManager;
@@ -312,38 +309,12 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	 * Will always get a new object.
 	 */
 	public Plan loadPlan(){
-		Plan p = null;
-		UUID puuid = ((PlanEditorInput) getEditorInput()).getUuid();
-		try(Session session = HibernateManager.openSession()){
-			//load parent plan so don't have lazy loading issues later.
-			session.beginTransaction();
-			try{
+		if (prjProvider == null) {
+			try(Session session = HibernateManager.openSession()){
 				prjProvider = ProjectionUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea());
-				
-				p = (Plan) session.load(Plan.class, puuid);
-				if (p.getParent() != null) {
-					p.getParent().getId();
-				}
-				if(p.getTargets() != null){
-					p.getTargets().size();
-				}
-				Station st = p.getStation();
-				if(st != null){
-					st.getName();
-				}
-				p.getTeam();
-				Team t = p.getTeam();
-				if(t != null){
-					t.getName();
-				}
-				for (org.wcs.smart.ca.Label name : p.getNames()) {
-					name.getLanguage().getCode();
-				}
-			}finally{
-				session.getTransaction().rollback();
 			}
 		}
-		return p;
+		return PlanHibernateManager.loadPlan(((PlanEditorInput) getEditorInput()).getUuid());
 	}
 	
 	

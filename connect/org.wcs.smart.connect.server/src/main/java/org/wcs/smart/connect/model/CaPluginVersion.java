@@ -24,15 +24,15 @@ package org.wcs.smart.connect.model;
 import java.io.Serializable;
 import java.util.UUID;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Represents the valid plugins for each conservation area and their
@@ -41,7 +41,7 @@ import javax.persistence.Transient;
  *
  */
 @Entity
-@Table(name="connect.ca_plugin_version")
+@Table(name="ca_plugin_version", schema="connect")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.conservationAreaUuid", 
 		joinColumns = @JoinColumn(name = "ca_uuid")),

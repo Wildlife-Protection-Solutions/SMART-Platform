@@ -150,7 +150,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try{
-					surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
+					surveyDesign = (SurveyDesign) session.getReference(SurveyDesign.class, puuid);
 					surveyDesign.getName();
 					if (surveyDesign.getConfigurableModel() != null) {
 						surveyDesign.getConfigurableModel().getNames().size();

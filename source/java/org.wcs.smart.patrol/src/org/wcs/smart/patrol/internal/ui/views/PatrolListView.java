@@ -104,6 +104,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * A viewer where users can view all patrols by a specified filter.
  *   
@@ -149,14 +151,14 @@ public class PatrolListView implements IPatrolFilteringView {
 			try(Session s = PatrolHibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					Query<?> query = filter.buildQuery(s);
-					List<?> results = query.list();
+					Query<Tuple> query = filter.buildQuery(s);
+					List<Tuple> results = query.list();
 					final PatrolEditorInput[] input = new PatrolEditorInput[results.size()];
 					int i = 0;
-					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new PatrolEditorInput((UUID)data[0], (String)data[1], 
-								(PatrolType.Type)data[2], (LocalDate)data[3], (LocalDate)data[4]);
+					for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
+						Tuple data = iterator.next();					
+						input[i++] = new PatrolEditorInput((UUID)data.get(0), (String)data.get(1), 
+								(PatrolType.Type)data.get(2), (LocalDate)data.get(3), (LocalDate)data.get(4));
 					}
 					
 					monitor.internalWorked(0.5);

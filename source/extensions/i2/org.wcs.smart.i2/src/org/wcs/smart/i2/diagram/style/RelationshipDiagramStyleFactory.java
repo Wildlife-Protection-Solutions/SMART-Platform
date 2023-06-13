@@ -85,13 +85,13 @@ public class RelationshipDiagramStyleFactory {
 		RelationshipDiagramStyle clone = createUsingDefaults(name);
 		try {
 			//NOTE: we are not coping isDefault and names
-			clone.setOptions(style.getOptions());
+			clone.setOptionValues(style.getOptionValues());
 			
 			for (RelationshipDiagramEntityTypeStyle etStyle : style.getEntityTypeStyles().values()) {
 				RelationshipDiagramEntityTypeStyle ets = new RelationshipDiagramEntityTypeStyle();
 				ets.setStyle(clone);
 				ets.setEntityType(etStyle.getEntityType());
-				ets.setOptions(etStyle.getOptions());
+				ets.setOptionValues(etStyle.getOptionValues());
 				clone.getEntityTypeStyles().put(ets.getEntityType(), ets);
 				progress.checkCanceled();
 			}
@@ -100,7 +100,7 @@ public class RelationshipDiagramStyleFactory {
 				RelationshipDiagramRelationshipTypeStyle rts = new RelationshipDiagramRelationshipTypeStyle();
 				rts.setStyle(clone);
 				rts.setRelationshipType(rtStyle.getRelationshipType());
-				rts.setOptions(rtStyle.getOptions());
+				rts.setOptionValues(rtStyle.getOptionValues());
 				clone.getRelationshipTypeStyles().put(rts.getRelationshipType(), rts);
 				progress.checkCanceled();
 			}

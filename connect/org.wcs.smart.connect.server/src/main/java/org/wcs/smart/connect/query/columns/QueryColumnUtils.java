@@ -51,6 +51,8 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Provides data model columns for a given conservation 
  * area. 
@@ -133,7 +135,6 @@ public class QueryColumnUtils {
 	 * @return
 	 * @throws SQLException
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, ConservationAreaFilter caFilter) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
@@ -159,42 +160,42 @@ public class QueryColumnUtils {
 		//attributes
 		//I want all attributes that are shared across all conservationAreas
 		String query = "SELECT keyId, type, max(regex)  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc"; //$NON-NLS-1$
-		org.hibernate.query.Query<?> attquery = session.createQuery(query);
+		org.hibernate.query.Query<Tuple> attquery = session.createQuery(query, Tuple.class);
 		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 
 		// this gets the attribute name based on the requested locale name query
 		String nameQueryHql = "SELECT c.keyId, a.value, case when upper(a.id.language.code) = :code1 then 1 when upper(a.id.language.code) = :code2 then 2 when a.id.language.default = true then 3 else 4 end as lorder " //$NON-NLS-1$
 				+ "FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) " //$NON-NLS-1$
-				+ "AND a.id.element = c.uuid ORDER BY c.keyId, lorder, c.conservationArea.uuid ";  //$NON-NLS-1$
+				+ "AND a.id.element.uuid = c.uuid ORDER BY c.keyId, lorder, c.conservationArea.uuid ";  //$NON-NLS-1$
 
 		String allLocal = l.toString().toUpperCase();
 		String local = l.getLanguage().toUpperCase();
 
-		List<Object[]> labels = session.createQuery(nameQueryHql).setParameter("code1", allLocal) //$NON-NLS-1$
+		List<Tuple> labels = session.createQuery(nameQueryHql, Tuple.class)
+				.setParameter("code1", allLocal) //$NON-NLS-1$
 				.setParameter("code2", local) //$NON-NLS-1$
 				.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
 				.list();
 
 		HashMap<String, String> attribute2name = new HashMap<>();
-		for (Object[] x : labels) {
-			String keyid = (String) x[0];
-			String name = (String) x[1];
+		for (Tuple x : labels) {
+			String keyid = (String) x.get(0);
+			String name = (String) x.get(1);
 			if (!attribute2name.containsKey(keyid)) {
 				attribute2name.put(keyid, name);
 			}
 		}
 
-		List<?> attributes = attquery.list();
+		List<Tuple> attributes = attquery.list();
 		List<QueryColumn> attributeColumns = new ArrayList<QueryColumn>();
-		for (Object attributeRow : attributes) {
-			Object[] attribute = (Object[]) attributeRow;
-			String keyid = (String) attribute[0];
+		for (Tuple attribute : attributes) {
+			String keyid = (String) attribute.get(0);
 			
 			String formatstring = null;
-			AttributeType atype = (AttributeType) attribute[1];
+			AttributeType atype = (AttributeType) attribute.get(1);
 			if (atype == AttributeType.NUMERIC) {
-				formatstring = (String)attribute[2];
+				formatstring = (String)attribute.get(2);
 			}
 			String name = attribute2name.get(keyid);
 

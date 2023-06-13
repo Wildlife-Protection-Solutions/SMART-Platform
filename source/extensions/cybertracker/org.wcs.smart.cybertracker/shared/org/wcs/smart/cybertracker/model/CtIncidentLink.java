@@ -2,16 +2,16 @@ package org.wcs.smart.cybertracker.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Links cybertracker incident ids to waypoint uuids;
@@ -20,7 +20,7 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
  *
  */
 @Entity
-@Table(name = "smart.ct_incident_link")
+@Table(name = "ct_incident_link", schema="smart")
 public class CtIncidentLink extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;

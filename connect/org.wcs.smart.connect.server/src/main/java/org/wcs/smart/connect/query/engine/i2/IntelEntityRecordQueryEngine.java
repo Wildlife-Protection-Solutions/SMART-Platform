@@ -36,7 +36,7 @@ import java.util.Set;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.query.NativeQuery;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.CcaaDataModelConnect;
@@ -165,14 +165,13 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 	}
 	
 	private void computeCount(Session session){
-		Integer obs = ((Number) session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult()).intValue(); //$NON-NLS-1$
-		queryResults.setResultCount(obs);
+		Long obs = session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable(), Long.class).uniqueResult(); //$NON-NLS-1$
+		queryResults.setResultCount(obs.intValue());
 	}
 	
 	/*
 	 * Configures the query columns; removing non populated attribute columns
 	 */
-	@SuppressWarnings("unchecked")
 	private void computeQueryColumns(Session session, Locale locale, IntelEntityRecordQuery query, IQueryItemProvider fItemProvider) throws Exception{
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, fItemProvider, locale, session);
 		
@@ -182,10 +181,9 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		sb.append("SELECT DISTINCT entity_type_key FROM "); //$NON-NLS-1$
 		sb.append(queryResults.getQueryDataTable());
 		
-		List<Object> typeKeys = session.createNativeQuery(sb.toString()).list();
+		List<String> typeKeys = session.createNativeQuery(sb.toString(), String.class).list();
 		Set<String> attributeKeys = new HashSet<>();
-		for (Object t : typeKeys) {
-			String entityTypeKey = (String)t;
+		for (String entityTypeKey : typeKeys) {
 			IntelEntityType type = fItemProvider.getEntityType(entityTypeKey, session);
 			
 			for (IntelEntityTypeAttribute aa : fItemProvider.getEntityTypeAttributes(type, session)) {
@@ -274,7 +272,6 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 	/*
 	 * create the results table from the data table add necessary results columns
 	 */
-	@SuppressWarnings("unchecked")
 	private void configureTableContents(String observationTable, List<Object[]> filterToColumn, boolean obsFilter, IQueryItemProvider fItemProvider, Session session){
 			
 		String[][] sortColumns = new String[][]{
@@ -289,7 +286,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		sb.append(observationTable);
 		sb.append(" add column entity_type varchar(1024)"); //$NON-NLS-1$
 		SqlGenerator.logString(sb.toString());
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		for (String[] items : sortColumns) {
 			sb = new StringBuilder();
@@ -301,16 +298,15 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			sb.append(items[1]);
 			
 			SqlGenerator.logString(sb.toString());
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		}
 		
 		sb = new StringBuilder();
 		sb.append("SELECT DISTINCT entity_type_key FROM "); //$NON-NLS-1$
 		sb.append(observationTable);
 		
-		List<Object> typeKeys = session.createNativeQuery(sb.toString()).list();
-		for (Object t : typeKeys) {
-			String entityTypeKey = (String)t;
+		List<String> typeKeys = session.createNativeQuery(sb.toString(), String.class).list();
+		for (String entityTypeKey : typeKeys) {
 			IntelEntityType type = fItemProvider.getEntityType(entityTypeKey, session);
 			
 			sb = new StringBuilder();
@@ -319,7 +315,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			sb.append(" set entity_type = :name "); //$NON-NLS-1$
 			sb.append(" WHERE entity_type_key = :key "); //$NON-NLS-1$
 				
-			NativeQuery<?> update = session.createNativeQuery(sb.toString());
+			MutationQuery update = session.createNativeMutationQuery(sb.toString());
 			update.setParameter("key", entityTypeKey); //$NON-NLS-1$
 			if(type == null) {
 				update.setParameter("name", entityTypeKey); //$NON-NLS-1$

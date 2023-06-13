@@ -52,7 +52,7 @@ public class SaveMissionJob extends Job {
 			session.beginTransaction();
 			try {
 				//save a name
-				session.saveOrUpdate(mission);
+				session.merge(mission);
 				session.getTransaction().commit();
 	        	return Status.OK_STATUS;
 			} catch (Exception ex) {

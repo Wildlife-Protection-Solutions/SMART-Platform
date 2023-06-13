@@ -30,21 +30,21 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Patrol Leg object
@@ -53,7 +53,7 @@ import org.wcs.smart.ca.UuidItem;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.patrol_leg")
+@Table(name="patrol_leg", schema="smart")
 public class PatrolLeg extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;
@@ -93,7 +93,7 @@ public class PatrolLeg extends UuidItem {
 		this.endDate = endDate;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="transport_uuid", referencedColumnName="uuid")
 	public PatrolTransportType getType() {
 		return type;
@@ -102,7 +102,7 @@ public class PatrolLeg extends UuidItem {
 		this.type = type;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="mandate_uuid", referencedColumnName="uuid")
 	public PatrolMandate getMandate() {
 		return mandate;
@@ -285,7 +285,7 @@ public class PatrolLeg extends UuidItem {
 			//we need to make sure we delete all waypoints here
 			if (day.getWaypoints() != null){
 				for (PatrolWaypoint pw : day.getWaypoints()){
-					session.delete(pw.getWaypoint());
+					session.remove(pw.getWaypoint());
 				}
 				//session.flush();
 			}

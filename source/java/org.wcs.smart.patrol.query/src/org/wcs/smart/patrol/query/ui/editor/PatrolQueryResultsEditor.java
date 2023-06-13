@@ -201,7 +201,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				session.beginTransaction();
 				try{
 					
-					Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
+					Query tquery = (PatrolQuery) session.getReference(PatrolQuery.class, input.getUuid());
 					query = new QueryProxy(tquery);
 					query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 					

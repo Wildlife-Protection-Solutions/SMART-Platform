@@ -66,7 +66,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".uuid"
+            ca_uuid_property=".uuid"
             class="org.wcs.smart.observation.model.ObservationOptions"
             supportsCcaa="false">
       </class>

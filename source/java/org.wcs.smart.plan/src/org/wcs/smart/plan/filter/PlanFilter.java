@@ -22,6 +22,12 @@
 package org.wcs.smart.plan.filter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -31,6 +37,7 @@ import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 
 /**
  * Filter for filtering
@@ -156,18 +163,16 @@ public class PlanFilter {
 	}
 	
 	/**
-	 * Builds a query that returns the following patrol fields:
-	 * patrol uuid, patrol id, patrol type, start date, end date
 	 * 
 	 * @param s
 	 * @return
 	 */
-	public Query<?> buildQuery(Session s){ 
+	public List<PlanEditorInput> getResultsAsTree(Session s){ 
 		StringBuilder str = new StringBuilder();
 
 		//NOTE: if select order is changed also change sorting in PlanHibernateManager.getRootPlans
 		//as in assumes that id goes 2nd and name 3rd
-		str.append("SELECT p.uuid, p.id, p.name, p.type, p.parent.uuid "); //$NON-NLS-1$
+		str.append("SELECT p "); //$NON-NLS-1$
 		str.append("FROM Plan p "); //$NON-NLS-1$
 		if (stringComparator != null && planIdFilter != null && searchField == PLAN_NAME_FILTER) {
 			str.append(", Label lbl "); //$NON-NLS-1$
@@ -215,7 +220,8 @@ public class PlanFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<Plan> query = s.createQuery(str.toString(), Plan.class)
+				.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){
 			query.setParameterList("pt", this.types); //$NON-NLS-1$
 		}
@@ -241,6 +247,38 @@ public class PlanFilter {
 			query.setParameter("date1", start); //$NON-NLS-1$
 			query.setParameter("date2", end); //$NON-NLS-1$
 		}
-		return query;
+		
+		//map results to tree structure
+		Map<UUID, PlanEditorInput> map = new HashMap<>();
+		Map<UUID, UUID> kidToParent = new HashMap<>();
+		List<PlanEditorInput> items = new ArrayList<>();
+		for (Plan p : query.list()) {
+			PlanEditorInput in = new PlanEditorInput(p.getUuid(), Plan.generateLabel(p.getId(), p.getName()), p.getType());
+			items.add(in);
+			map.put(in.getUuid(), in);
+			if (p.getParent() != null) kidToParent.put(p.getUuid(), p.getParent().getUuid());
+		}
+		
+		for (Iterator<PlanEditorInput> iterator = items.iterator(); iterator.hasNext();) {
+			PlanEditorInput planEditorInput = (PlanEditorInput) iterator.next();
+			
+			if (kidToParent.containsKey(planEditorInput.getUuid()) &&
+					map.containsKey(kidToParent.get(planEditorInput.getUuid()) )){
+				
+				map.get(kidToParent.get(planEditorInput.getUuid())).addKid(planEditorInput);
+				iterator.remove();
+			}			
+		}
+
+		//sort by name
+		items.sort((a,b)->a.getName().compareTo(b.getName()));		
+		List<PlanEditorInput> toSort = new ArrayList<>(items);
+		while(!toSort.isEmpty()) {
+			PlanEditorInput in = toSort.remove(0);
+			if (in.getChildren() == null || in.getChildren().isEmpty()) continue;
+			in.getChildren().sort((a,b)->a.getName().compareTo(b.getName()));
+			toSort.addAll(in.getChildren());
+		}
+		return items;
 	}
 }

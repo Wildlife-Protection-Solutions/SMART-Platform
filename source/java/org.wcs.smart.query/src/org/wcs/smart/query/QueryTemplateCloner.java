@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.locationtech.udig.project.internal.StyleBlackboard;
@@ -40,6 +36,10 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.udig.style.SmartLayerStyle;
 import org.wcs.smart.udig.style.StyleManager;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Template cloner that copies query data 
@@ -92,7 +92,7 @@ public class QueryTemplateCloner implements
 		clone.setEmployee(null);
 		clone.setParentFolder(newParent);
 		clone.setRootFolder(false);
-		engine.getSession().save(clone);
+		engine.getSession().persist(clone);
 		engine.addConservationItemMapping(templateFolder, clone);
 			
 		for (QueryFolder kid : templateFolder.getChildren()){

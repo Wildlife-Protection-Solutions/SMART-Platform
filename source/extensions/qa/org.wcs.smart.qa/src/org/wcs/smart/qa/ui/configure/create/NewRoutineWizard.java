@@ -89,7 +89,7 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				s.save(routine);
+				s.persist(routine);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

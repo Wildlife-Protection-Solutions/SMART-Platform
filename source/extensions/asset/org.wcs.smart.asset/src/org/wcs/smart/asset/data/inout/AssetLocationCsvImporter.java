@@ -113,14 +113,13 @@ public class AssetLocationCsvImporter {
 		this.stationIdField = stationField;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean processFile() throws Exception {
 		warnings = new ArrayList<>();
 		locationIds = new HashSet<>();
 		
 		stations = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			locationIds.addAll(session.createQuery("SELECT LOWER(id) FROM AssetStationLocation WHERE station.conservationArea = :ca").setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
+			locationIds.addAll(session.createQuery("SELECT LOWER(id) FROM AssetStationLocation WHERE station.conservationArea = :ca", String.class).setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			stations.addAll(session.createQuery("FROM AssetStation WHERE conservationArea = :ca", AssetStation.class).setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
 			stations.forEach(s->s.getId());
@@ -168,7 +167,7 @@ public class AssetLocationCsvImporter {
 			session.beginTransaction();
 			try {
 				for (AssetStationLocation a : newLocations) {
-					session.save(a);
+					session.persist(a);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

@@ -90,7 +90,7 @@ public class DeleteIncidentAction implements IQaAction {
 						item.setStatus(QaError.Status.DELETED);
 						item.setFixMessage(Messages.DeleteIncidentAction_DeleteErrorWpNotFound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
 					}else{
-						s.delete(pw);
+						s.remove(pw);
 						deleted.add(item);
 						wpDeleted.add(pw);
 					}

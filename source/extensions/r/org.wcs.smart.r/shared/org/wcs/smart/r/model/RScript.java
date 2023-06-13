@@ -23,17 +23,17 @@ package org.wcs.smart.r.model;
 
 import java.nio.file.Path;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * R Script object 
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.NamedItem;
  *
  */
 @Entity
-@Table(name="smart.r_script")
+@Table(name="r_script", schema="smart")
 public class RScript extends NamedItem {
 
 	private static final long serialVersionUID = 1L;

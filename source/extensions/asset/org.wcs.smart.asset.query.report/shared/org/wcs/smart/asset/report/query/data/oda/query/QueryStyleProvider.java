@@ -27,7 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
@@ -58,13 +57,12 @@ public class QueryStyleProvider  extends AbstractQueryStyleProvider{
 			return null;
 		}
 		
-		Query<?> query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
-		List<?> results = query.list();
+		List<String> results = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid", String.class) //$NON-NLS-1$ //$NON-NLS-2$
+				.setParameter("uuid", queryUuid) //$NON-NLS-1$
+				.list();
+		
 		if (results.size() == 0 ) return null;
-		
 		String stylemap = (String)results.get(0);
-		
 		try {
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
 		} catch (Exception e) {

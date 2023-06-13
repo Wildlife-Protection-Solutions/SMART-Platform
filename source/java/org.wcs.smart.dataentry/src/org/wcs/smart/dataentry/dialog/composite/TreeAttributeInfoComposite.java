@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -41,7 +40,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.CmAttributeConfigUtil;
@@ -108,7 +106,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (option != null && option.getUuidValue() != null){
-					AttributeTreeNode defaultNode = (AttributeTreeNode) dialog.getSession().load(AttributeTreeNode.class, option.getUuidValue());
+					AttributeTreeNode defaultNode = (AttributeTreeNode) dialog.getSession().getReference(AttributeTreeNode.class, option.getUuidValue());
 					defaultValueTreeField.setSelectedValue(defaultNode);
 				}
 				
@@ -116,7 +114,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				cmTreeLabelProvider.setLanguage(language);
 				if (getSourceObject() != lastSelection){
 					//tree viewer
-					preLoadTree(getSourceObject());
+//					preLoadTree(getSourceObject());
 					attributeTreeViewer.setInput(getSourceObject());
 					attributeTreeViewer.expandToLevel(2);
 				}
@@ -128,14 +126,14 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		});
 	}
 
-	private void preLoadTree(final CmAttribute cmAttribute) {
-		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
-		try {
-			pmdDialog.run(true, false, new TreePreLoadRunnable(cmAttribute));
-		} catch (InvocationTargetException | InterruptedException e) {
-			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_TreePreLoad_Error + e.getLocalizedMessage(), e);
-		}
-	}
+//	private void preLoadTree(final CmAttribute cmAttribute) {
+//		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
+//		try {
+//			pmdDialog.run(true, false, new TreePreLoadRunnable(cmAttribute));
+//		} catch (InvocationTargetException | InterruptedException e) {
+//			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_TreePreLoad_Error + e.getLocalizedMessage(), e);
+//		}
+//	}
 
 	private void createDefaultControl(Composite container) {
 		Label label = new Label(container, SWT.NONE);

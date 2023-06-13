@@ -167,7 +167,7 @@ public class AssetMapColumnConfiguration {
 			savedMap.setValue(columns.toJSONString());
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(savedMap);
+				HibernateManager.saveOrMerge(session, savedMap);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				AssetPlugIn.displayLog(Messages.AssetMapColumnConfiguration_SaveError + ex.getMessage(), ex);

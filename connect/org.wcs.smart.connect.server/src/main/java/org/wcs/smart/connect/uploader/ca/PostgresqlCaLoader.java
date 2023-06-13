@@ -62,6 +62,7 @@ import org.wcs.smart.util.ZipUtilCommon;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import jakarta.persistence.Tuple;
 
 /**
  * Loads a conservation area export into the postgresql
@@ -221,7 +222,7 @@ public class PostgresqlCaLoader {
 				v.setPluginId(data[0]);
 				v.setVersion(data[1]);
 				
-				session.save(v);
+				session.persist(v);
 			}
 		}	
 	}
@@ -408,11 +409,11 @@ public class PostgresqlCaLoader {
 		
 		HashMap<String, HashSet<String>> results = new HashMap<String, HashSet<String>>();
 		
-		List<?> data = session.createNativeQuery(sql.toString()).list();
-		for (Object dRow : data){
-			Object[] d = (Object[])dRow;
-			String source = ((String) d[0]).toUpperCase(Locale.ROOT);
-			String req = ((String)d[1]).toUpperCase(Locale.ROOT);
+		List<Tuple> data = session.createNativeQuery(sql.toString(), Tuple.class).list();
+		for (Tuple d : data){
+			
+			String source = ((String) d.get(0)).toUpperCase(Locale.ROOT);
+			String req = ((String)d.get(1)).toUpperCase(Locale.ROOT);
 			if (source.equals(req)) continue;
 			HashSet<String> requires = results.get(source);
 			if (requires == null){

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 /**
  * Class for queries which can be styled.

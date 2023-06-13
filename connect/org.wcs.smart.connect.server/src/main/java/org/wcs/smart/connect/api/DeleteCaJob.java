@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.i18n.Messages;
@@ -94,11 +93,11 @@ public class DeleteCaJob implements Runnable {
 						// delete query actions associated with any query from the CA being deleted
 						QueryManager.INSTANCE.removeAccessToQueriesFromCa(serverDelete.getUuid(), session);
 						
-						ConservationArea ca = session.get(ConservationArea.class, serverDelete.getUuid());
+						//ConservationArea ca = session.get(ConservationArea.class, serverDelete.getUuid());
 
 						//package files 
 						List<CyberTrackerNavigationLayer> navlayers = QueryFactory.buildQuery(session, CyberTrackerNavigationLayer.class, 
-								new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+								new Object[] {"conservationArea", serverDelete}).list(); //$NON-NLS-1$
 						for (CyberTrackerNavigationLayer layer : navlayers) {
 							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 									.resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
@@ -106,7 +105,7 @@ public class DeleteCaJob implements Runnable {
 						}
 						
 						List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(session, CyberTrackerPackage.class, 
-								new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+								new Object[] {"conservationArea", serverDelete}).list(); //$NON-NLS-1$
 						for (CyberTrackerPackage layer : ctpackages) {
 							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 									.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(layer.getFilename());
@@ -130,12 +129,12 @@ public class DeleteCaJob implements Runnable {
 				
 					//delete desktop data
 					String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
-					session.createNativeQuery(query)
-						.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE) //$NON-NLS-1$
+					session.createNativeMutationQuery(query)
+						.setParameter("uuid", serverDelete.getUuid())//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 						.executeUpdate();
 			
 					//delete plugin data
-					session.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca") //$NON-NLS-1$
+					session.createMutationQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca") //$NON-NLS-1$
 								.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
 								.executeUpdate();
 			
@@ -145,12 +144,12 @@ public class DeleteCaJob implements Runnable {
 					if (deleteAll){
 							
 						//delete actions associated with resource
-						session.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca") //$NON-NLS-1$
+						session.createMutationQuery("DELETE FROM SmartUserAction WHERE resource = :ca") //$NON-NLS-1$
 							.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
 							.executeUpdate();
 						
 						//delete server only data
-						session.delete(serverDelete);
+						session.remove(serverDelete);
 					}else{
 						serverDelete.setStatus(ConservationAreaInfo.Status.NODATA);
 						serverDelete.setVersion(null);
@@ -181,7 +180,7 @@ public class DeleteCaJob implements Runnable {
 					try {
 						session.beginTransaction();
 						serverDelete.setStatus(ConservationAreaInfo.Status.ERROR);
-						session.saveOrUpdate(serverDelete);
+						session.merge(serverDelete);
 						session.getTransaction().commit();
 					} catch (Exception ex2) {
 						logger.log(Level.SEVERE, "Error occurred while deleting Conservation Area: " + serverDelete.getLabel() + "; " + ex2.getMessage(), ex2); //$NON-NLS-1$ //$NON-NLS-2$

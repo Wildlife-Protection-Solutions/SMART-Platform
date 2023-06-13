@@ -5,5 +5,8 @@
 // Generated on: 2012.02.10 at 11:24:21 AM PST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.topografix.com/GPX/1/1", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.topografix.com/GPX/1/1", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.gpx.xml;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

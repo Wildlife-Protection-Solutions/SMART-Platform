@@ -23,19 +23,19 @@ package org.wcs.smart.observation.model;
 
 import java.io.File;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Link between a way point and associated
@@ -45,7 +45,7 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.wp_attachments")
+@Table(name="wp_attachments", schema="smart")
 public class WaypointAttachment extends ISmartAttachment implements ISignatureAttachment {
 
 	private static final long serialVersionUID = 1L;
@@ -91,7 +91,7 @@ public class WaypointAttachment extends ISmartAttachment implements ISignatureAt
 				IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(getWaypoint().getSourceId());
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append(getWaypoint().getConservationArea().getFileDataStoreLocation());
+				sb.append(session.getReference(getWaypoint().getConservationArea()).getFileDataStoreLocation());
 				sb.append(File.separator);
 				sb.append(src.getDatastoreFileLocation(getWaypoint(), session));
 				return sb.toString();

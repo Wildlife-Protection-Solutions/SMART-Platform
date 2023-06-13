@@ -69,7 +69,6 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconManager;
@@ -155,7 +154,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		super(parent, Messages.DataModelPropertyPage_Dialog_Title);		
 		//attach aggregations to current session
 		for (Aggregation agg : DataModel.getAggregations()){
-			getSession().update(agg);
+			getSession().merge(agg);
 		}
 		deleteOnClose = new ArrayList<>();
 	}
@@ -638,23 +637,22 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							//add any new objects that are not saved via relationships
 							for (Attribute a : sourceDm.getAttributes()){
 								
-								if (a.getIcon() != null && a.getIcon().getUuid() == null) session.save(a.getIcon());
+								HibernateManager.saveOrMerge(session,  a.getIcon());
+								
 								if (a.getAttributeList() != null) {
-									a.getAttributeList().forEach(e->{
-										if (e.getIcon() != null && e.getIcon().getUuid() == null) session.save(e.getIcon());
-									});
+									a.getAttributeList().forEach(e-> HibernateManager.saveOrMerge(session,  e.getIcon()));
 								}
 								if (a.getTree() != null) {
 									a.getTree().forEach(node->{
 										node.accept(n->{
-											if (n.getIcon() != null && n.getIcon().getUuid() == null) session.save(n.getIcon());
+											HibernateManager.saveOrMerge(session,  n.getIcon());
 											return true;
 										});
 									});
 								}
 								
 								if (a.getUuid() == null){
-									session.save(a);
+									session.persist(a);
 									if (a.getIcon() != null) a.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
 									
 									if (a.getAttributeList() != null) {
@@ -678,11 +676,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 							for (Category c : sourceDm.getCategories()){
 								c.accept(category->{
-									if (category.getIcon() != null && category.getIcon().getUuid() == null) session.save(category.getIcon());
+									HibernateManager.saveOrMerge(session,  category.getIcon());
 									if (category.getIcon() != null) category.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
 									return true;
 								});
-								if (c.getUuid() == null) session.save(c);
+								if (c.getUuid() == null) session.persist(c);
 							}
 						}
 						session.flush();
@@ -848,7 +846,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}else{
 								((DataModel) viewer.getInput()).getCategories().remove(cat);
 								if (cat.getUuid() != null){
-									getSession().delete(cat);
+									getSession().remove(cat);
 								}
 								getSession().flush();
 								getSession().evict(cat);
@@ -884,7 +882,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								getSession().evict(catAtt);
 								getSession().flush();
 							}else{
-								getSession().delete(catAtt);
+								getSession().remove(catAtt);
 								getSession().flush();
 								getSession().evict(catAtt);
 							}
@@ -927,13 +925,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 											//the following caused a hibernate error; so we use delete statements directly
 											//getSession().delete(catAtt.getAttribute());
 											
-											Query<?> deleteq = session.createQuery("DELETE FROM AttributeTreeNode WHERE attribute = :attribute"); //$NON-NLS-1$
-											deleteq.setParameter("attribute", catAtt.getAttribute()); //$NON-NLS-1$
-											deleteq.executeUpdate();
+											session.createMutationQuery("DELETE FROM AttributeTreeNode WHERE attribute = :attribute") //$NON-NLS-1$
+												.setParameter("attribute", catAtt.getAttribute()) //$NON-NLS-1$
+												.executeUpdate();
 											
-											deleteq = session.createQuery("DELETE FROM Attribute WHERE uuid = :attribute"); //$NON-NLS-1$
-											deleteq.setParameter("attribute", catAtt.getAttribute().getUuid()); //$NON-NLS-1$
-											deleteq.executeUpdate();
+											session.createMutationQuery("DELETE FROM Attribute WHERE uuid = :attribute") //$NON-NLS-1$
+												.setParameter("attribute", catAtt.getAttribute().getUuid()) //$NON-NLS-1$
+												.executeUpdate();
 											
 											getSession().flush();
 										}
@@ -986,13 +984,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		if (ret == Window.CANCEL){
 			return;
 		}
-		if (newCat.getIcon() != null && newCat.getIcon().getUuid() == null) session.save(newCat.getIcon());
+		HibernateManager.saveOrMerge(getSession(),  newCat.getIcon());
+		
 		if (o instanceof DataModelContentProvider.RootNode){
 			DataModel dm = (DataModel)viewer.getInput();
 			newCat.setParent(null);
 			newCat.setCategoryOrder(dm.getCategories().size());
 			dm.getCategories().add(newCat);
-			getSession().saveOrUpdate(newCat);
+			getSession().persist(newCat);
 		}else if (o instanceof Category){
 			Category parentCat = (Category)o;
 			if (parentCat.getChildren() == null){
@@ -1044,13 +1043,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			if (ret == Window.CANCEL){
 				return;
 			}
-			if (cat.getIcon() != null) {
-				if (cat.getIcon().getUuid() == null) {
-					session.save(cat.getIcon());
-				}else {
-					cat.setIcon((Icon)session.merge(cat.getIcon()));
-				}
-			}
+			HibernateManager.saveOrMerge(getSession(), cat.getIcon());
 			session.flush();
 			refreshTree();
 		}else if (o instanceof CategoryAttribute){
@@ -1144,23 +1137,24 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				DataModelManager.INSTANCE.fireAddListener(session, att);
 				
 				//process any potentially  new custom attributes
-				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.save(att.getIcon());
+				HibernateManager.saveOrMerge(session,  att.getIcon());
+				
 				if (att.getAttributeList() != null) {
 					att.getAttributeList().forEach(a->{
-						if (a.getIcon() != null && a.getIcon().getUuid() == null) session.save(a.getIcon());
+						HibernateManager.saveOrMerge(session,  a.getIcon());
 					});
 				}
 				if (att.getTree() != null) {
 					att.getTree().forEach(node->{
-						if (node.getIcon() != null && node.getIcon() == null) session.save(node.getIcon());
+						HibernateManager.saveOrMerge(session,  node.getIcon());
 						node.accept(kid->{
-							if (kid.getIcon() != null && kid.getIcon() == null) session.save(kid.getIcon());
+							HibernateManager.saveOrMerge(session,  kid.getIcon());
 							return true;
 						});
 					});				}
 				
 				
-				session.saveOrUpdate(att);
+				session.persist(att);
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(ex.getMessage(), ex);
 			}

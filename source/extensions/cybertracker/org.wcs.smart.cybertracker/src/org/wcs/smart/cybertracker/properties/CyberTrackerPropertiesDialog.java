@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
@@ -54,6 +55,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.HibernateUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
@@ -92,8 +94,9 @@ public class CyberTrackerPropertiesDialog extends SmartStyledTitleDialog {
 							s.beginTransaction();
 							try {
 								ctProperties = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profile.getUuid());
-								ctProperties.getNames().size();
-								ctProperties.getOptions().size();
+								Hibernate.initialize(ctProperties);
+								ctProperties.getNames().forEach(n->Hibernate.initialize(n.getLanguage()));
+								Hibernate.initialize(ctProperties.getOptions());
 							} catch (Exception ex) {
 								SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
 							} finally {
@@ -244,7 +247,7 @@ public class CyberTrackerPropertiesDialog extends SmartStyledTitleDialog {
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try {
-							s.saveOrUpdate(ctProperties);
+							HibernateManager.saveOrMerge(s,  ctProperties);
 							s.getTransaction().commit();
 							isOk[0] = true;
 						} catch (Exception ex) {

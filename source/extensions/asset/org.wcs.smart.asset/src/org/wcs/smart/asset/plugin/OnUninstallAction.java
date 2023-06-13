@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetWaypointSource;
@@ -115,19 +114,19 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 		//drop labels and tables
 		for (String table : LABELTABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
-				session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+				session.createNativeMutationQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		for (String table : TABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
-				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 			}
 		}		
 
 		//delete all waypoints associated with type SURVEY
-		Query<?> q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
-		q.setParameter("src", AssetWaypointSource.KEY); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE Waypoint WHERE source = :src") //$NON-NLS-1$
+			.setParameter("src", AssetWaypointSource.KEY) //$NON-NLS-1$
+			.executeUpdate();
 		
 		//remove from plugin table
 		HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, null, session);

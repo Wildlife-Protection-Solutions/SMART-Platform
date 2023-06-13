@@ -68,7 +68,6 @@ public class EditPlanItemDialog extends AbstractPropertyJHeaderDialog {
 	public EditPlanItemDialog(Shell parent, PanelType panelType, Plan plan) {
 		super(parent, PlanCompositeFactory.getInstance().getTitle(panelType));
 		this.panelType = panelType;
-		//this.plan = (Plan) getSession().load(Plan.class, plan.getUuid());
 		this.plan = plan;
 	}
 

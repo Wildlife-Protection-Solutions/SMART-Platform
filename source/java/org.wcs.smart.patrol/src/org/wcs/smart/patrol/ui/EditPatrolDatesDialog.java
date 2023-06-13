@@ -245,10 +245,10 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 						//delete waypoints 
 						if (pld.getWaypoints() != null) {
 							for (PatrolWaypoint pw : pld.getWaypoints()){
-								session.delete(pw.getWaypoint());
+								session.remove(pw.getWaypoint());
 							}
 						}
-						session.delete(pld);
+						session.remove(pld);
 						
 					}
 				}
@@ -266,14 +266,14 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 						for (PatrolLegDay pld : pl.getPatrolLegDays()){
 							if (pld.getWaypoints() != null){
 								for (PatrolWaypoint pw : pld.getWaypoints()){
-									session.delete(pw.getWaypoint());
+									session.remove(pw.getWaypoint());
 								}
 							}
 						}
 					}
 					pl.getPatrol().getLegs().remove(pl);
 					pl.setPatrol(null);
-					session.delete(pl);
+					session.remove(pl);
 				}
 				
 				if (patrol.getLegs().size() == 1){

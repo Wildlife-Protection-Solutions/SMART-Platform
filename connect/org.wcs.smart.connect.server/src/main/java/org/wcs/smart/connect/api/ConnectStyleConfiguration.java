@@ -200,7 +200,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			s.save(newStyle);
+			s.persist(newStyle);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -240,17 +240,6 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		String footer_text= ""; //$NON-NLS-1$
 		String server_name =""; //$NON-NLS-1$
 		
-		StyleConfiguration style;
-		Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
-		try{
-			style = HibernateManager.getStyleConfiguration(s);
-		}catch (Exception e){
-			throw e;
-		}finally{
-			s.getTransaction().commit();
-		}
-		
 		String strClearBackground;
 		String strClearLogin;
 		String strClearHeader;
@@ -276,36 +265,39 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	    }catch (Exception ex){
 	    	throw new SmartConnectException(ex.getMessage(), ex);
 		}
-
-		if(header_image.length > 0){
-			style.setHeaderImage(header_image);
-		}else if (strClearHeader.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
-			style.setHeaderImage(null);
-		}
-		if(bg_image.length > 0){
-			style.setBackgroundImage(bg_image);
-		}else if (strClearBackground.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
-			style.setBackgroundImage(null);
-		}
-		if(login_image.length > 0){
-			style.setLoginImage(login_image);
-		}else if (strClearLogin.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
-			style.setLoginImage(null);
-		}
-
-		style.setBodyStyle(body_style);
-		style.setHeaderStyle(header_style);
-		style.setFooterText(footer_text);
-		style.setServerName(server_name);
+		
+		Session s = HibernateManager.getSession(context);
+		try {
+			s.beginTransaction();
+			StyleConfiguration style = HibernateManager.getStyleConfiguration(s);
+		
+			if(header_image.length > 0){
+				style.setHeaderImage(header_image);
+			}else if (strClearHeader.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
+				style.setHeaderImage(null);
+			}
+			if(bg_image.length > 0){
+				style.setBackgroundImage(bg_image);
+			}else if (strClearBackground.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
+				style.setBackgroundImage(null);
+			}
+			if(login_image.length > 0){
+				style.setLoginImage(login_image);
+			}else if (strClearLogin.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
+				style.setLoginImage(null);
+			}
+	
+			style.setBodyStyle(body_style);
+			style.setHeaderStyle(header_style);
+			style.setFooterText(footer_text);
+			style.setServerName(server_name);
 
 		
-		s = HibernateManager.getSession(context);
-		s.beginTransaction();
-		try{
-			s.update(style);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
+			
+			return style;
 
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -315,11 +307,9 @@ public class ConnectStyleConfiguration extends HttpServlet {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
-		}finally{
-			
 		}
 		
-		return style;
+		
 	}
 	
 	/**
@@ -341,7 +331,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 			if (toDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, ""); //$NON-NLS-1$
 			}
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){

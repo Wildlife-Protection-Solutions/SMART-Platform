@@ -44,6 +44,8 @@ import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Engine for computing the values for fixed columns.
  * 
@@ -141,9 +143,9 @@ public class FixedColumnEngine implements IColumnEngine {
 		HashMap<AssetStation, HashSet<Long>> daysPerStation = new HashMap<>();
 		HashMap<UUID, Object> daysCnt = new HashMap<>();
 
-		try(ScrollableResults results = query.scroll()){
+		try(ScrollableResults<AssetDeployment> results = query.scroll()){
 			while(results.next()) {
-				AssetDeployment d = (AssetDeployment) results.get(0);
+				AssetDeployment d = results.get();
 				
 				LocalDate startDate = d.getStartDate().toLocalDate();
 				LocalDate endDate = LocalDate.now();
@@ -231,9 +233,9 @@ public class FixedColumnEngine implements IColumnEngine {
 		HashMap<AssetStationLocation, HashSet<Long>> daysPerStation = new HashMap<>();
 		HashMap<UUID, Object> daysCnt = new HashMap<>();
 
-		try(ScrollableResults results = query.scroll()){
+		try(ScrollableResults<AssetDeployment> results = query.scroll()){
 			while(results.next()) {
-				AssetDeployment d = (AssetDeployment) results.get(0);
+				AssetDeployment d = results.get();
 				
 				LocalDate startDate = d.getStartDate().toLocalDate();
 				LocalDate endDate = LocalDate.now();
@@ -316,16 +318,16 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append(") as foo "); //$NON-NLS-1$
 		sb.append(" GROUP BY uuid"); //$NON-NLS-1$
 		
-		Query<?> query = session.createNativeQuery(sb.toString());
-		query.setParameter("ca", ca); //$NON-NLS-1$
+		Query<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
+		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		if (dFilter != null) {
 				query.setParameter("startDate", dFilter[0].atStartOfDay()) //$NON-NLS-1$
 				.setParameter("endDate", dFilter[1].atTime(LocalTime.MAX)); //$NON-NLS-1$
 		}
-		List<?> qresults = query.list();
-		for (Object result : qresults) {
-			UUID stationUuid = UuidUtils.byteToUUID( (byte[])((Object[])result)[0] );
-			Integer cnt = (Integer) ((Object[])result)[1];
+		List<Tuple> qresults = query.list();
+		for (Tuple result : qresults) {
+			UUID stationUuid = UuidUtils.byteToUUID( (byte[])result.get(0) );
+			Integer cnt = (Integer) result.get(1);
 			results.put(stationUuid, cnt);
 			
 		}
@@ -353,16 +355,16 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append(") as foo "); //$NON-NLS-1$
 		sb.append(" GROUP BY uuid"); //$NON-NLS-1$
 		
-		Query<?> query = session.createNativeQuery(sb.toString());
+		Query<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		if (dFilter != null) {
 				query.setParameter("startDate", dFilter[0]) //$NON-NLS-1$
 				.setParameter("endDate", dFilter[1]); //$NON-NLS-1$
 		}
-		List<?> qresults = query.list();
-		for (Object result : qresults) {
-			UUID locationUuid = UuidUtils.byteToUUID( (byte[])((Object[])result)[0] );
-			Integer cnt = (Integer) ((Object[])result)[1];
+		List<Tuple> qresults = query.list();
+		for (Tuple result : qresults) {
+			UUID locationUuid = UuidUtils.byteToUUID( (byte[])result.get(0) );
+			Integer cnt = (Integer) result.get(1);
 			results.put(locationUuid, cnt);
 		}
 		return results;

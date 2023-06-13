@@ -3,8 +3,6 @@ package org.wcs.smart.er.query.model;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.Transient;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -56,7 +54,6 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	 * @return the query filter in the filter format.  Will
 	 * attempt to parse the query if it has not been parsed
 	 */
-	@Transient
 	public SurveyDesign getSurveyDesignAsObject(final String surveyDesignKey){
 		if (surveyDesignKey == null) return null;
 		final SurveyDesign[] surveyDesign = new SurveyDesign[1];

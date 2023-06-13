@@ -67,6 +67,8 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Upgrade servlet for performing non-database upgrades.
  * 
@@ -103,20 +105,20 @@ public class UpgradeServlet extends HttpServlet {
 			try{
 				s.beginTransaction();
 				String query = "SELECT version, filestore_version FROM connect.connect_version"; //$NON-NLS-1$
-				Object[] data = (Object[])s.createNativeQuery(query).uniqueResult();
+				Tuple data = s.createNativeQuery(query, Tuple.class).uniqueResult();
 				if (data == null) {
 					request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.DbVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
 					request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
 					return;
 				}
 				
-				String version = (String) data[0];
+				String version = (String) data.get(0);
 				if (!version.equals(HibernateManager.DATABASE_VERSION)) {
 					request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
 					request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
 					return;
 				}
-				String filestoreVersion = (String) data[1];
+				String filestoreVersion = (String) data.get(1);
 				if (filestoreVersion.equals(HibernateManager.FILESTORE_VERSION)) {
 					//we are up to date; there is nothing to do here
 					request.setAttribute("org.wcs.smart.upgrade", "NOACTION");  //$NON-NLS-1$//$NON-NLS-2$
@@ -166,7 +168,7 @@ public class UpgradeServlet extends HttpServlet {
 				
 				//update filestore version
 				String sql = "UPDATE connect.connect_version set filestore_version = :version"; //$NON-NLS-1$
-				s.createNativeQuery(sql)
+				s.createNativeMutationQuery(sql)
 					.setParameter("version",  HibernateManager.FILESTORE_VERSION) //$NON-NLS-1$
 					.executeUpdate();
 				s.getTransaction().commit();

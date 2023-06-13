@@ -101,7 +101,7 @@ public class MissionExportHandler{
 							try(Session s = HibernateManager.openSession()){
 								s.beginTransaction();
 								try {
-									m = (Mission) s.load(Mission.class, puuid);
+									m = (Mission) s.getReference(Mission.class, puuid);
 									id = m.getId();
 								} catch (Exception ex) {
 									EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{UuidUtils.uuidToString(puuid)}), ex);

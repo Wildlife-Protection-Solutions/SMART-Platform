@@ -130,7 +130,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_5_0, session);
@@ -152,7 +152,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_6_0, session);
@@ -190,7 +190,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_7_0, session);
@@ -202,7 +202,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_8_0, session);
@@ -224,7 +224,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		if (tables[0]) {
 			//old table present, need to drop it
 			String dropSql = "DROP TABLE smart.cybertracker_properties"; //$NON-NLS-1$
-			session.createNativeQuery(dropSql).executeUpdate();
+			session.createNativeMutationQuery(dropSql).executeUpdate();
 		}
 								
 		if (!tables[1]) {
@@ -241,14 +241,14 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 					"REFERENCES smart.conservation_area(UUID) "+ //$NON-NLS-1$
 					"ON UPDATE RESTRICT "+ //$NON-NLS-1$
 					"ON DELETE CASCADE"; //$NON-NLS-1$
-			session.createNativeQuery(createSql).executeUpdate();
-			session.createNativeQuery(alterSql).executeUpdate();
+			session.createNativeMutationQuery(createSql).executeUpdate();
+			session.createNativeMutationQuery(alterSql).executeUpdate();
 				
 						
-			session.createNativeQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry").executeUpdate(); //$NON-NLS-1$
-			session.createNativeQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager").executeUpdate(); //$NON-NLS-1$
-			session.createNativeQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
-			session.createNativeQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry").executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager").executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
 		}
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_3_0, session);
 	}

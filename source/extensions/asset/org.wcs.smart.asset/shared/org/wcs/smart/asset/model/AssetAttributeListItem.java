@@ -21,19 +21,19 @@
  */
 package org.wcs.smart.asset.model;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.NamedKeyItem;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Model class of attribute list item for asset attributes.
  * 
  */
 @Entity
-@Table(name="smart.asset_attribute_list_item")
+@Table(name="asset_attribute_list_item", schema="smart")
 public class AssetAttributeListItem extends NamedKeyItem {
 
 	private static final long serialVersionUID = 1L;

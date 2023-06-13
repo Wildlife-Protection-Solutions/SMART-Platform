@@ -235,8 +235,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				projectionsToDelete.forEach(p -> s.delete(p));
-				projections.forEach(p -> s.saveOrUpdate(p));
+				projectionsToDelete.forEach(p -> s.remove(p));
+				projections.forEach(p -> s.merge(p));
 				s.getTransaction().commit();
 				projectionsToDelete.clear();
 			}catch (Exception ex){

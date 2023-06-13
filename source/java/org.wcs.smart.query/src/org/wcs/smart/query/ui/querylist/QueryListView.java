@@ -208,7 +208,7 @@ public class QueryListView {
 			}
 			
 		};
-		final FilteredTree tree = new FilteredTree(main, SWT.MULTI, patternFilter, true){
+		final FilteredTree tree = new FilteredTree(main, SWT.MULTI, patternFilter, true, true){
 			@Override
 		    protected void updateToolbar(boolean visible) {
 		        super.updateToolbar(visible);

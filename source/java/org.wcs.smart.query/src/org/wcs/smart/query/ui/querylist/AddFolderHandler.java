@@ -94,8 +94,8 @@ public class AddFolderHandler {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				s.save(newFolder);
-				s.save(lbl);
+				s.persist(newFolder);
+				s.persist(lbl);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.AddFolderHandler_CouldNotAddFolderError + ex.getLocalizedMessage(), ex);

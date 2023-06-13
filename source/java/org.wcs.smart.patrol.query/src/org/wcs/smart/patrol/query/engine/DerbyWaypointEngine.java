@@ -168,7 +168,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		DerbyPagedWaypointResult results = (DerbyPagedWaypointResult)result;
 		
 		//setting result size
-		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable, Integer.class).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 	}
 

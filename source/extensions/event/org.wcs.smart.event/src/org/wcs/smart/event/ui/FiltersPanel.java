@@ -217,8 +217,8 @@ public class FiltersPanel extends Composite {
 			try {
 				for (EFilter e : toDelete) {
 					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"filter", e}).list(); //$NON-NLS-1$
-					events.forEach(ae->session.delete(ae));
-					session.delete(e);
+					events.forEach(ae->session.remove(ae));
+					session.remove(e);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

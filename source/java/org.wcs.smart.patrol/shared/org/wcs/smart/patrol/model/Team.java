@@ -21,17 +21,17 @@
  */
 package org.wcs.smart.patrol.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.NamedDescriptionKeyItem;
 import org.wcs.smart.ca.icon.Icon;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Team object.
@@ -40,7 +40,7 @@ import org.wcs.smart.ca.icon.Icon;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.team")
+@Table(name="team", schema="smart")
 public class Team extends NamedDescriptionKeyItem implements IconItem {
 
 	private static final long serialVersionUID = 1L;

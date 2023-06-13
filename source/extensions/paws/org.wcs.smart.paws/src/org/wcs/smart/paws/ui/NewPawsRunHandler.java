@@ -171,7 +171,7 @@ public class NewPawsRunHandler {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.save(rr);
+				session.persist(rr);
 				
 				LocalDateTime now = LocalDateTime.now();
 				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")); //$NON-NLS-1$

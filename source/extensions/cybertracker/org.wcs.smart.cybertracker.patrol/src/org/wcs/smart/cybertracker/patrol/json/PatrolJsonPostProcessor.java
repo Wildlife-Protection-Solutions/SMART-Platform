@@ -53,7 +53,7 @@ public class PatrolJsonPostProcessor implements IJsonPostProcessor {
 				.list();
 					
 		for (CtPatrolLink l : links) {
-			session.delete(l);
+			session.remove(l);
 		}
 		
 	}

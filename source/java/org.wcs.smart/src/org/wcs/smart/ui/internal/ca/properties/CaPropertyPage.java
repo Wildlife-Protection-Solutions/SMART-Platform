@@ -297,14 +297,16 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			try{
 				Path iconFile = caComposite.updateConservationArea(ca);
 				
-				Language def= ca.getDefaultLanguage();
-				ca.getLanguages().clear();
-				ca.getLanguages().add(def);
-				ca.getLanguages().addAll(languages);
-				session.saveOrUpdate(ca);
+				ca = session.merge(ca);
 				
-				session.flush();
-				
+				List<Language> toremove = new ArrayList<>();
+				for (Language l : ca.getLanguages()) {
+					if (!l.isDefault() && !languages.contains(l)) toremove.add(l);
+				}
+				for (Language l : languages) {
+					if (!ca.getLanguages().contains(l)) ca.getLanguages().add(l);
+				}
+				ca.getLanguages().removeAll(toremove);			
 				ca.setLogo(iconFile);
 				
 				tx.commit();

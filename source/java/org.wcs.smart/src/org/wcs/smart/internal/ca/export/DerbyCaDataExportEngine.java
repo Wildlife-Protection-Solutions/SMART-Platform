@@ -30,10 +30,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
+import org.wcs.smart.ca.export.TableInfo;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -73,8 +75,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 				"order by a.columnnumber"; //$NON-NLS-1$
 		
 		
-		@SuppressWarnings("unchecked")
-		List<String> data = getSession().createNativeQuery(sql).list();
+		List<String> data = getSession().createNativeQuery(sql, String.class).list();
 		if (data.size() == 0){
 			throw new IllegalStateException("Could not determine table columns for table " + tableName); //$NON-NLS-1$
 		}
@@ -132,23 +133,32 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.internal.ca.export.CaDataExporter#exportQueryData(java.io.File, java.lang.String, java.lang.String, org.hibernate.Session)
+	/* 
 	 */
 	@Override
-	public void writeHibernateQuery( 
-			String tableName,
-			String hibernateClass,
-			String[] columns,
-			String caPropertyQuery) throws Exception {
+	public void writeHibernateQuery(TableInfo info, String[] columns, String caPropertyFilter, String caUuidPropertyFilter) throws Exception{
 		
+		StringBuilder sb = new StringBuilder();
+		sb.append("FROM "); //$NON-NLS-1$
+		sb.append(info.getClazz().getSimpleName());
+		sb.append(" a WHERE a"); //$NON-NLS-1$
+		if (caUuidPropertyFilter != null && !caUuidPropertyFilter.isBlank()) {
+			sb.append(caUuidPropertyFilter);
+		}else {
+			sb.append(caPropertyFilter);
+		}
+		sb.append(" = :ca "); //$NON-NLS-1$
 		
-		Query<?> q = getSession().createQuery("from " //$NON-NLS-1$
-				+ hibernateClass + " a where a" //$NON-NLS-1$
-				+ caPropertyQuery + " = :ca"); //$NON-NLS-1$
+		Query<?> q = getSession().createQuery(sb.toString(), info.getClazz());
+		
+		if (caUuidPropertyFilter != null && !caUuidPropertyFilter.isBlank()) {
+			q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
+		}else {
+			q.setParameter("ca", SmartDB.getCurrentConservationArea());	 //$NON-NLS-1$
+		}
 		
 		//convert hql to sql
-		String sql = SmartHibernateManager.toSql(q.getQueryString());
+		String sql = SmartHibernateManager.toSql(q);
 		sql = sql.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//set sql parameter
@@ -178,7 +188,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 
 	
 		/* export data to file */
-		writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
+		writeQuery(info.getTableName() + "." + info.getClazz().getSimpleName(), query.toString()); //$NON-NLS-1$
 	}
 
 	/**
@@ -186,7 +196,8 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	 */
 	@Override
 	public void writeQuery(String fileName, String query){
-		NativeQuery<?> sqlQuery = getSession().createNativeQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
+		MutationQuery sqlQuery = getSession().createNativeMutationQuery(
+				"CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
 				createFileName(getExportLocation(), fileName + ".dat"). //$NON-NLS-1$
 				normalize().toAbsolutePath().toString() + "', null, null, 'utf-8')" ); //$NON-NLS-1$
 		sqlQuery.executeUpdate();

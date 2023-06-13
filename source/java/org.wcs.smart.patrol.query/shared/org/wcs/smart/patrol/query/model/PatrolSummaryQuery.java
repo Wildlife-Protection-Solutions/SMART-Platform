@@ -24,10 +24,6 @@ package org.wcs.smart.patrol.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
@@ -36,6 +32,10 @@ import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * A class to represent a summary query.
  * 
@@ -43,7 +43,7 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.summary_query")
+@Table(name="summary_query", schema="smart")
 public class PatrolSummaryQuery extends SummaryQuery {
 
 	private static final long serialVersionUID = 1L;

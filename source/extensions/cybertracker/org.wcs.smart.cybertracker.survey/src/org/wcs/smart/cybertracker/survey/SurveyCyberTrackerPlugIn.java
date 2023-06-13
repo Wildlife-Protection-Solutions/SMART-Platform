@@ -24,7 +24,6 @@ package org.wcs.smart.cybertracker.survey;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -64,9 +63,9 @@ public class SurveyCyberTrackerPlugIn extends AbstractUIPlugin {
 		ICaDeleteHandler deleteHandler = new ICaDeleteHandler() {
 			@Override
 			public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
-				Query<?> q = session.createQuery("delete from SurveyCtPackage where conservationArea = :ca"); //$NON-NLS-1$
-				q.setParameter("ca", ca); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createMutationQuery("delete from SurveyCtPackage where conservationArea = :ca") //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.executeUpdate();
 			}
 		};
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, 1);

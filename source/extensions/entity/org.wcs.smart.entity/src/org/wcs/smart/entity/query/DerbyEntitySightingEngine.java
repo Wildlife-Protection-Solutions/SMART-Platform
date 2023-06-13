@@ -509,7 +509,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				try(ResultSet rs = ps.executeQuery()){
 					while(rs.next()){
 						byte[] uuid = rs.getBytes(1);
-						String key = Label.getDescription(UuidUtils.byteToUUID(uuid), session);
+						String key = Label.findLabel(UuidUtils.byteToUUID(uuid), session);
 					
 						sql.append(" when "); //$NON-NLS-1$
 						sql.append(tablePrefix(EntityAttributeValue.class));

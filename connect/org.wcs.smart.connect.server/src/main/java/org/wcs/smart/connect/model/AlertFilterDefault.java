@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.connect.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /*
  * An AlertFilterDefault entity
@@ -34,7 +34,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "connect.alert_filter_defaults")
+@Table(name = "alert_filter_defaults", schema="connect")
 public class AlertFilterDefault extends ConnectUuidItem{
 
 	private int defaultPastHours; 

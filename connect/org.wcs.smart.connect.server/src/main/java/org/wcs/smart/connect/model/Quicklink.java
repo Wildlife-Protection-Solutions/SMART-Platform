@@ -25,9 +25,9 @@ package org.wcs.smart.connect.model;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 
 /**
@@ -36,7 +36,7 @@ import javax.persistence.Table;
  * @Author Jeff
  */
 @Entity
-@Table(name = "connect.quicklinks")
+@Table(name = "quicklinks", schema="connect")
 public class Quicklink extends ConnectUuidItem{
 	
 	private UUID createdBy;

@@ -23,7 +23,6 @@ package org.wcs.smart.report;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.report.internal.Messages;
@@ -55,20 +54,20 @@ public class ReportCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteReports(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Report where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Report where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 	private void deleteReportFolders(ConservationArea ca, Session session) throws Exception{
 		//first update parent folders to null; otherwise derby throws and error
-		Query<?> q = session.createQuery("update ReportFolder set parentFolder = null WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("update ReportFolder set parentFolder = null WHERE conservationArea = :ca") //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
-		q = session.createQuery("delete from ReportFolder where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from ReportFolder where conservationArea = :ca") //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 }
 

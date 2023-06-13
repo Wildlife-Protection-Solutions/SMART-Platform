@@ -22,17 +22,16 @@
 package org.wcs.smart.ca;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
-import org.hibernate.annotations.Type;
+import org.wcs.smart.util.I18nUtil;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 
 /**
  * Extensions of a simple list item that also tracks a description 
@@ -48,18 +47,15 @@ import org.hibernate.annotations.Type;
  * @author Emily
  * @since 1.0.0
  */
-//@Entity
-//@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 @MappedSuperclass
 public class NamedDescriptionItem extends NamedItem {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private UUID descuuid;
+	private Set<DescriptionLabel> descriptions;
 	
 	private String description;
-
-	private Set<DescriptionLabel> descriptions;
 
 	public NamedDescriptionItem() {
 		super();
@@ -75,35 +71,36 @@ public class NamedDescriptionItem extends NamedItem {
 		this.descuuid = uuid;
 	}
 
-	@Type(type = "org.wcs.smart.ca.LabelUserType")
-	@Column(name = "desc_uuid", insertable = false, updatable = false)
+	@Transient
 	public String getDescription() {
 		return description;
 	}
-
+	@Transient
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
-//	// TODO: There must be a better way to do this
-//	// This fails;
-//	 @OneToMany(fetch = FetchType.LAZY)
-//	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
-	@Transient
+	// TODO: There must be a better way to do this
+	// This fails;
+	//@OneToMany(fetch = FetchType.LAZY)
+	//@JoinColumn(name = "element_uuid", referencedColumnName = "desc_uuid")
 	/**
-	 * If not previously loaded, this runs a database
-	 * query using the current active session and
-	 * associated transaction 
+	 * If not previously loaded, this runs a database query using the current active
+	 * session and associated transaction
+	 * 
 	 * @return
 	 */
+	@Transient
 	public Set<DescriptionLabel> getDescriptions(Session session) {
+
 		if (this.descriptions == null) {
-			this.descriptions = new HashSet<DescriptionLabel>();	
-			
-			CriteriaQuery<DescriptionLabel> c = session.getCriteriaBuilder().createQuery(DescriptionLabel.class);
-			Root<DescriptionLabel> root = c.from(DescriptionLabel.class); 
-			c.where(session.getCriteriaBuilder().equal(root.get("id").get("element"), descuuid)); //$NON-NLS-1$ //$NON-NLS-2$
-			descriptions.addAll(session.createQuery(c).getResultList());
+			this.descriptions = new HashSet<DescriptionLabel>();
+
+			descriptions.addAll(
+					session.createQuery("FROM DescriptionLabel WHERE id.element = :uuid", DescriptionLabel.class) //$NON-NLS-1$
+							.setParameter("uuid", descuuid) //$NON-NLS-1$
+							.list());
+			computeDescription();
 		}
 		return this.descriptions;
 	}
@@ -114,8 +111,50 @@ public class NamedDescriptionItem extends NamedItem {
 		} else {
 			this.descriptions = descriptions;
 		}
+		computeDescription();
 	}
 
+	
+	@Transient
+	private void computeDescription() {
+		Object ltemp = I18nUtil.getLocale();
+		if (ltemp instanceof UUID) {
+			UUID lang = (UUID)ltemp;		
+			
+			for (DescriptionLabel l : this.descriptions) {
+				if (l.getLanguage().getUuid().equals(lang)) {
+					this.description = l.getValue();
+					return;
+				}else if (l.getLanguage().isDefault()) {
+					this.description = l.getValue();
+				}
+			}
+		}else if (ltemp instanceof Locale) {
+			Locale lc = (Locale) ltemp;
+			String c1 = lc.getLanguage();
+			String c2 = lc.getLanguage()  + "_" + lc.getCountry();  //$NON-NLS-1$
+			for (DescriptionLabel l :this.descriptions) {
+				if (l.getLanguage().getCode().equalsIgnoreCase(c2)) {
+					this.description = l.getValue();
+					return;
+				}else if (l.getLanguage().getCode().equalsIgnoreCase(c1)) {
+					this.description = l.getValue();
+				}else if (this.description == null && l.getLanguage().isDefault()) {
+					this.description = l.getValue();
+				}
+			}
+			
+		}
+		
+		if (this.description == null) {
+			for (DescriptionLabel l :this.descriptions) {
+				this.description = l.getValue();
+				if (l.getLanguage().isDefault()) {
+					return;
+				}			
+			}
+		}
+	}
 	/**
 	 * Finds the description with the associated language.  Returns null if
 	 * no description found.
@@ -123,6 +162,7 @@ public class NamedDescriptionItem extends NamedItem {
 	 * @param lang
 	 * @return the description associated with the language; null if string not found
 	 */
+	@Transient
 	public String findDescriptionNull(Session session, Language lang) {
 		DescriptionLabel x = findValue(getDescriptions(session), lang);
 		if (x == null) {
@@ -141,6 +181,7 @@ public class NamedDescriptionItem extends NamedItem {
 	 * @param description
 	 *            new description
 	 */
+	@Transient
 	public void updateDescription(Session session, Language lang, String description) {
 		DescriptionLabel lbl = findValue(getDescriptions(session), lang);
 		if (lbl == null) {
@@ -153,7 +194,7 @@ public class NamedDescriptionItem extends NamedItem {
 		lbl.setValue(description);
 
 	}
-
+	
 	private DescriptionLabel findValue(Set<DescriptionLabel> list, Language lang) {
 		if(list == null){
 			return null;

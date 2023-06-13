@@ -35,11 +35,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
  */
 public class EventHibernateListener implements PostCommitInsertEventListener{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
 	@Override
 	public void onPostInsert(PostInsertEvent event) {	
 		if (event.getEntity() instanceof WaypointObservation) {
@@ -49,7 +44,7 @@ public class EventHibernateListener implements PostCommitInsertEventListener{
 	}
 
 	@Override
-	public boolean requiresPostCommitHanding(EntityPersister persister) {
+	public boolean requiresPostCommitHandling(EntityPersister persister) {
 		return true;
 	}
 

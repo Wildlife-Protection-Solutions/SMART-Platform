@@ -24,16 +24,16 @@ package org.wcs.smart.entity.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A class to represent a summary query.
@@ -42,7 +42,7 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.entity_gridded_query")
+@Table(name="entity_gridded_query", schema="smart")
 public class EntityGriddedQuery extends GriddedQuery {
 
 	private static final long serialVersionUID = 1L;

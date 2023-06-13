@@ -25,17 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -44,6 +33,17 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.IEntityLabelProvider;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Entity type object.  These objects
  * describe entity schemas.
@@ -51,8 +51,8 @@ import org.wcs.smart.entity.IEntityLabelProvider;
  * @author Emily
  *
  */
-@javax.persistence.Entity
-@Table(name="smart.entity_type")
+@jakarta.persistence.Entity
+@Table(name="entity_type", schema="smart")
 public class EntityType extends NamedKeyItem{
 	
 	private static final long serialVersionUID = 1L;

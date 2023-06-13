@@ -25,8 +25,6 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Area.AreaType;
@@ -195,7 +193,6 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	 *            the uuid the element is associated with
 	 * @return
 	 */
-	@Transient
 	public static synchronized String getDescription(UUID elementuuid,
 			UUID cauuid, Session session) {
 		String description = ""; //$NON-NLS-1$

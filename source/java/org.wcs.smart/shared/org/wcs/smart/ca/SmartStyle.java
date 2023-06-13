@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.ca;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * For saved smart styles.  Saves a single style blackboard
@@ -37,7 +37,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name ="smart.map_styles")
+@Table(name ="map_styles", schema="smart")
 public class SmartStyle extends NamedItem{
 	
 	private static final long serialVersionUID = 1L;

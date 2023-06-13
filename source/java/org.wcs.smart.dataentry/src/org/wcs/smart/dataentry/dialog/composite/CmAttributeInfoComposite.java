@@ -154,11 +154,14 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				public void setImageFile(Path file) {
 					CmAttribute cmNode = getSourceObject();
 					cmNode.setImageFile(file);
-					if (cmNode.getUuid() != null) {
-						//need this logic to correctly trigger intercepter
-						session.evict(cmNode);
-						session.saveOrUpdate(cmNode);
-					}
+					
+//					if (cmNode.getUuid() != null) {
+//						//TOOD: this won't work
+//						//need this logic to correctly trigger intercepter
+//						session.evict(cmNode);
+//						HibernateManager.saveOrMerge(session, cmNode);
+//					}
+					
 					fireModelChanged();
 				}
 				
@@ -367,7 +370,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		try {
 			fireChanged = false;
 			//load icon files as necessary
-			
+
 			Set<Icon> toload = new HashSet<>();
 			toload.add(attribute.getAttribute().getIcon());
 			
@@ -376,11 +379,13 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 					if (li.getListItem().getIcon() != null) toload.add(li.getListItem().getIcon());
 				}
 			}
+			
 			if (attribute.getAttribute().getAttributeList() != null) {
 				for (AttributeListItem li : attribute.getAttribute().getAttributeList()) {
 					if (li.getIcon() != null) toload.add(li.getIcon());
 				}
 			}
+			
 			if (attribute.getCurrentTree() != null) {
 				List<CmAttributeTreeNode> nodes = new ArrayList<>();
 				nodes.addAll(attribute.getCurrentTree());
@@ -401,7 +406,6 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				});
 			}
 			toload.forEach(icon->loadFiles(icon, session));
-			
 			imageSelection.updateImage();
 			fireSourceObjectChanged(attribute, language);
 		}finally {

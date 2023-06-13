@@ -22,6 +22,7 @@
 package org.wcs.smart.observation;
 
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
@@ -38,11 +39,16 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 public class WaypointHibernateIntegrator implements Integrator {
 
 	//http://in.relation.to/2012/01/09/event-listener-registration/
+	
 	@Override
-	public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+	public void integrate( Metadata metadata, BootstrapContext bootstrapContext, SessionFactoryImplementor sessionFactory) {
+		
+		
+	//public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
 		// As you might expect, an EventListenerRegistry is the place with which event listeners are registered  It is a service
         // so we look it up using the service registry
-        final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService( EventListenerRegistry.class );
+        //final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService( EventListenerRegistry.class );
+		final EventListenerRegistry eventListenerRegistry = sessionFactory.getServiceRegistry().getService(EventListenerRegistry.class);
 
         //2) This form adds the specified listener(s) to the beginning of the listener chain
         WaypointHibernateListener listener = new WaypointHibernateListener();

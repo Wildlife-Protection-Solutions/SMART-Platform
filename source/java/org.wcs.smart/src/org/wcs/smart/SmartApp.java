@@ -21,6 +21,7 @@
  */
 package org.wcs.smart;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.swt.widgets.Display;
@@ -40,6 +41,7 @@ public class SmartApp implements IApplication {
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {	
+		PropertyConfigurator.configure("log4j.properties"); //$NON-NLS-1$
 		WorkbenchAdvisor workbenchAdvisor = new SmartWorkbenchAdvisor();
 		Display display = PlatformUI.createDisplay();
 	

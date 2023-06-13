@@ -29,9 +29,8 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.query.Query;
-import org.hibernate.type.TextType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -57,9 +56,9 @@ public enum ChangeLogTableManager {
 	 * @param ca
 	 */
 	public void deleteAll(Session s, ConservationArea ca){
-		Query<?> query = s.createQuery("DELETE FROM ChangeLogItem WHERE conservationArea = :ca"); //$NON-NLS-1$
-		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createMutationQuery("DELETE FROM ChangeLogItem WHERE conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 	/**
@@ -72,10 +71,10 @@ public enum ChangeLogTableManager {
 	 * @param maxRevision
 	 */
 	public void deleteRecords(Session s, ConservationArea ca, long maxRevision){
-		Query<?> query = s.createQuery("DELETE FROM ChangeLogItem WHERE conservationArea = :ca and revision <= :maxRevision"); //$NON-NLS-1$
-		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
-		query.setParameter("maxRevision", maxRevision); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createMutationQuery("DELETE FROM ChangeLogItem WHERE conservationArea = :ca and revision <= :maxRevision") //$NON-NLS-1$
+			.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+			.setParameter("maxRevision", maxRevision) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	/**
@@ -108,7 +107,7 @@ public enum ChangeLogTableManager {
 		while(doAgain) {
 			s.beginTransaction();
 			try {
-				s.createNativeQuery("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE") //$NON-NLS-1$ //$NON-NLS-2$
+				s.createNativeMutationQuery("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE") //$NON-NLS-1$ //$NON-NLS-2$
 					.executeUpdate();
 				doAgain = false;
 				
@@ -124,20 +123,20 @@ public enum ChangeLogTableManager {
 		sb.append(" (revision, uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid, source)"); //$NON-NLS-1$
 		sb.append(" VALUES (smart.next_revision_id(:cauuid), :uuid, :action, :filename, :tablename, :cauuid2, :key1field, :key1, :key2field, :key2str, :key2uuid, :source)"); //$NON-NLS-1$
 		
-		NativeQuery<?> query = s.createNativeQuery(sb.toString());
+		MutationQuery query = s.createNativeMutationQuery(sb.toString());
 		if (item.getUuid() == null){
 			item.setUuid( UuidUtils.byteToUUID(DerbyUtils.createUuid()));
 		}
 		query.setParameter("cauuid", UuidUtils.uuidToByte(item.getConservationArea())); //$NON-NLS-1$
 		query.setParameter("uuid", UuidUtils.uuidToByte(item.getUuid())); //$NON-NLS-1$
-		query.setParameter("action", item.getAction().name(), TextType.INSTANCE); //$NON-NLS-1$
-		query.setParameter("filename", item.getFileName(), TextType.INSTANCE); //$NON-NLS-1$
-		query.setParameter("tablename", item.getTableName(), TextType.INSTANCE); //$NON-NLS-1$
+		query.setParameter("action", item.getAction().name()); //$NON-NLS-1$
+		query.setParameter("filename", item.getFileName()); //$NON-NLS-1$
+		query.setParameter("tablename", item.getTableName()); //$NON-NLS-1$
 		query.setParameter("cauuid2", UuidUtils.uuidToByte(item.getConservationArea())); //$NON-NLS-1$
-		query.setParameter("key1field", item.getFieldName1(), TextType.INSTANCE);  //$NON-NLS-1$
+		query.setParameter("key1field", item.getFieldName1());  //$NON-NLS-1$
 		query.setParameter("key1", item.getKey1() == null ? null : UuidUtils.uuidToByte(item.getKey1())); //$NON-NLS-1$
-		query.setParameter("key2field", item.getFieldName2(), TextType.INSTANCE); //$NON-NLS-1$
-		query.setParameter("key2str", item.getKey2String(), TextType.INSTANCE); //$NON-NLS-1$
+		query.setParameter("key2field", item.getFieldName2()); //$NON-NLS-1$
+		query.setParameter("key2str", item.getKey2String()); //$NON-NLS-1$
 		query.setParameter("key2uuid", item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2())); //$NON-NLS-1$
 		query.setParameter("source", item.getSource().name()); //$NON-NLS-1$
 		query.executeUpdate();

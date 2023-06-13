@@ -25,21 +25,21 @@ package org.wcs.smart.plan.model;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Represents a PlanTarget object, implemented by various types of targets: Numeric, Spatial and Administrative
@@ -48,7 +48,7 @@ import org.hibernate.annotations.GenericGenerator;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.plan_target")
+@Table(name="plan_target", schema="smart")
 @Inheritance(strategy= InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="Category" , discriminatorType=DiscriminatorType.STRING)
 public abstract class PlanTarget{

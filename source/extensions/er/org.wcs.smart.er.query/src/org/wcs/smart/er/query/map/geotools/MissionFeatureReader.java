@@ -134,7 +134,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		if (isWaypointMissionTrack){
 			byte[] next = (byte[]) this.fIterator.next();
-			Mission mission = (Mission) getSession().load(Mission.class, UuidUtils.byteToUUID(next));
+			Mission mission = (Mission) getSession().getReference(Mission.class, UuidUtils.byteToUUID(next));
 			SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
 			return f;
 		}else{

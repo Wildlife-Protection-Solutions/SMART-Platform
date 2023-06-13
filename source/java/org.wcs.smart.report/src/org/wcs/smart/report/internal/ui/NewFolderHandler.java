@@ -100,7 +100,7 @@ public class NewFolderHandler {
 						try(Session s = HibernateManager.openSession()){
 							try{
 								s.beginTransaction();
-								s.saveOrUpdate(newFolder);
+								newFolder = HibernateManager.saveOrMerge(s,  newFolder);
 								s.getTransaction().commit();
 							}catch (Exception ex){
 								ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getLocalizedMessage(), ex);

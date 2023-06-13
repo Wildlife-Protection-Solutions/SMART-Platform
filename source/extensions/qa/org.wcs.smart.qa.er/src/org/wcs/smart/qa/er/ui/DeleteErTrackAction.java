@@ -96,7 +96,7 @@ public class DeleteErTrackAction implements IQaAction {
 						
 						t.getMissionDay().getTracks().remove(t);
 						t.setMissionDay(null);
-						s.delete(t);
+						s.remove(t);
 					}
 				}
 				s.getTransaction().commit();

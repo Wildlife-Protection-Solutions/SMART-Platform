@@ -68,7 +68,7 @@ public class SettingsServlet extends HttpServlet{
 			styles = HibernateManager.getStyleConfigurations(session);
 			cas = HibernateManager.getConservationAreaInfos(session);
 			alertTypes = HibernateManager.getAlertTypes(session);			
-			connectVersion = (String) session.createNativeQuery("SELECT version FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$			
+			connectVersion = session.createNativeQuery("SELECT version FROM connect.connect_version", String.class).uniqueResult(); //$NON-NLS-1$			
 		}finally{
 			session.getTransaction().rollback();
 		}

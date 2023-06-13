@@ -61,7 +61,7 @@ public class DeleteMissionTracksJob extends Job {
 			session.beginTransaction();
 			try {
 				for (MissionTrack t : tracks) {
-					session.delete(t);
+					session.remove(t);
 				}
 				session.getTransaction().commit();
 	        	return Status.OK_STATUS;

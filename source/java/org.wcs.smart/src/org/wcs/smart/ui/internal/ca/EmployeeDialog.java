@@ -221,7 +221,7 @@ public class EmployeeDialog extends SmartStyledDialog {
 						}
 					}
 					//save results to database
-					session.saveOrUpdate(toUpdate);
+					HibernateManager.saveOrMerge(session, toUpdate);
 					session.getTransaction().commit();
 					return true;
 				}catch (RuntimeException ex){

@@ -310,8 +310,8 @@ public class IncidentImporter implements IIncidentXmlImporter{
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
-				session.save(imported.getWaypoint());
-				session.save(imported);
+				session.persist(imported.getWaypoint());
+				session.persist(imported);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();

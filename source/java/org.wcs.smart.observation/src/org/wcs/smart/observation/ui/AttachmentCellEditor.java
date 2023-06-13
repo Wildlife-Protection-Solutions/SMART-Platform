@@ -74,8 +74,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 	protected Object openDialogBox(Control cellEditorWindow) {
 		Waypoint wp = (Waypoint)super.getValue();
 		
-		AttachmentDialog attd = new AttachmentDialog(cellEditorWindow.getShell(), wp);
-		
+		AttachmentDialog attd = new AttachmentDialog(cellEditorWindow.getShell(), wp);		
 		if (attd.open() == Window.CANCEL){
 			setValue(null);
 			if (!attd.hasMoved()) return Boolean.FALSE;
@@ -122,6 +121,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		for (Iterator<WaypointAttachment> iterator = wp.getAttachments().iterator(); iterator.hasNext();) {
 			WaypointAttachment att = iterator.next();
 			if (!attachments.remove(att)){
+				att.setWaypoint(null);
 				iterator.remove();
 			}
 		}

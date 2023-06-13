@@ -99,6 +99,7 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
+
 		parent = (Composite) super.createDialogArea(parent);
 		
 		final Composite main = new Composite(parent, SWT.NONE);

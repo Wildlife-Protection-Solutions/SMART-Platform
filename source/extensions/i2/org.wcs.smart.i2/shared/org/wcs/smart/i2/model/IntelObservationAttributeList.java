@@ -23,16 +23,16 @@ package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -41,8 +41,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.i_observation_attribute_list")
-
+@Table(name="i_observation_attribute_list", schema="smart")
 public class IntelObservationAttributeList {
 
 	private WaypointObservationAttributeListPk id = new WaypointObservationAttributeListPk();

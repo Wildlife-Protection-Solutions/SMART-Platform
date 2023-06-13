@@ -91,10 +91,10 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 			session.beginTransaction();
 			try {
 				mappingsToDelete.forEach(m->{
-					if (m.getUuid() != null) session.delete(m);
+					if (m.getUuid() != null) session.remove(m);
 				});
 				for (int i = 0; i < mappings.size(); i ++) mappings.get(i).setSearchOrder(i);
-				mappings.forEach(m->session.saveOrUpdate(m));
+				mappings.forEach(m->HibernateManager.saveOrMerge(session, m));
 				session.getTransaction().commit();
 				
 			}catch (Exception ex) {

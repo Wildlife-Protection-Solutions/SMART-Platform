@@ -25,22 +25,22 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * @author elitvin
  * @since 2.0.0
  */
 @Entity
-@Table(name = "smart.cm_attribute_option")
+@Table(name = "cm_attribute_option", schema="smart")
 public class CmAttributeOption extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
@@ -90,7 +90,7 @@ public class CmAttributeOption extends UuidItem {
 	private Double doubleValue;
 	private UUID uuidValue;
 	
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_attribute_uuid", referencedColumnName="uuid")
 	public CmAttribute getCmAttribute() {
 		return cmAttribute;

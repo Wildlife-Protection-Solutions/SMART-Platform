@@ -405,11 +405,11 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					}
 				}
 				
-				session.saveOrUpdate(ctpackage);
-				session.flush();
+				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage);
-				}
+				}				
+				session.merge(ctpackage);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

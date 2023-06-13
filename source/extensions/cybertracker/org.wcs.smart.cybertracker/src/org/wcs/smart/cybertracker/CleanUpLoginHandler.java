@@ -62,7 +62,7 @@ public class CleanUpLoginHandler implements ILoginHandler {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.createQuery(hql)
+				session.createMutationQuery(hql)
 					.setParameter("lastModified", oneYearAgo) //$NON-NLS-1$
 					.executeUpdate();
 				session.getTransaction().commit();

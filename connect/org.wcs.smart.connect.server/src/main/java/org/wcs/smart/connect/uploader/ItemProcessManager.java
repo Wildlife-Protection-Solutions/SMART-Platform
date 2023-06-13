@@ -64,9 +64,9 @@ public enum ItemProcessManager {
 	 */
 	public void processItem(WorkItem item, Session session) throws Exception{
 		//update status
-		session.beginTransaction();
-		session.update(item);
+		session.beginTransaction();		
 		item.setStatus(Status.PROCESSING);
+		session.merge(item);
 		session.getTransaction().commit();
 			
 		//process item
@@ -75,6 +75,7 @@ public enum ItemProcessManager {
 			session.beginTransaction();
 			item.setStatus(Status.ERROR);
 			item.setMessage(MessageFormat.format(Messages.getString("ItemProcessManager.ProcessorNotFound", item.getLocale()), item.getType().toString())); //$NON-NLS-1$
+			session.merge(item);
 			session.getTransaction().commit();
 			return;
 		}else{

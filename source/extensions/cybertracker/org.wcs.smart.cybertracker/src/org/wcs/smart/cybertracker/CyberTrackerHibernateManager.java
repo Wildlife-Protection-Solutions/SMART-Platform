@@ -108,7 +108,7 @@ public class CyberTrackerHibernateManager {
 		try {
 			for (CyberTrackerPropertiesOption option : properties.getOptions().values()) {
 				option.setConservationArea(ca);
-				session.saveOrUpdate(option);
+				session.merge(option);
 			}
 			session.getTransaction().commit();
 			return true;
@@ -143,9 +143,9 @@ public class CyberTrackerHibernateManager {
 		List<ConfigurableModelCtPropertiesProfile>  usedProfiles =
 				QueryFactory.buildQuery(session, ConfigurableModelCtPropertiesProfile.class,"profile", profile).getResultList(); //$NON-NLS-1$
 		for (ConfigurableModelCtPropertiesProfile ct : usedProfiles){
-			session.delete(ct);
+			session.remove(ct);
 		}
-		session.delete(profile);
+		session.remove(profile);
 	}
 	
 	/**
@@ -203,7 +203,7 @@ public class CyberTrackerHibernateManager {
 		    	try(Session s = HibernateManager.openSession()){
 		    		try {
 		    			s.beginTransaction();
-		    			s.save(defaultProfile);
+		    			s.persist(defaultProfile);
 		    			s.getTransaction().commit();
 		    		} catch (Exception e) {
 		    			SmartPlugIn.displayLog(Messages.CyberTrackerHibernateManager_CreateDefaultProfile_Error, e);

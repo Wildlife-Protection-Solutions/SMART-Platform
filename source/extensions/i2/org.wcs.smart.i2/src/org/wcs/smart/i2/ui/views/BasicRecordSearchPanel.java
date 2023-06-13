@@ -73,13 +73,14 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.query.ResultListTransformer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.DistinctResultListTransformer;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -485,7 +486,7 @@ public class BasicRecordSearchPanel extends Composite {
 					srcs.addAll( session.createQuery("SELECT src FROM IntelRecordSource src join src.profiles p join p.id.profile pp WHERE src.conservationArea = :ca AND pp IN (:profiles)", IntelRecordSource.class) //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.setParameter("profiles",profiles) //$NON-NLS-1$
-					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+					.setResultListTransformer(new DistinctResultListTransformer<IntelRecordSource>())
 					.list() );
 					
 					srcs.forEach(e->((IntelRecordSource)e).getName());

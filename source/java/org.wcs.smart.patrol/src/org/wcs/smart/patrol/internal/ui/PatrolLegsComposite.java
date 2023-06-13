@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -624,7 +625,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					if (pld.getWaypoints() != null){
 						for (PatrolWaypoint pw : pld.getWaypoints()){
 							if(!movedPoints.contains(pw.getWaypoint().getUuid())){ //only delete the waypoints if they didn't get moved into a new leg.
-								session.delete(pw.getWaypoint());
+								session.remove(pw.getWaypoint());
 							}
 						}
 					}
@@ -641,12 +642,12 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		if (session.getTransaction().isActive()) session.flush();
 		
 		if (!isNew){
-			session.update(p);
+			session.merge(p);
 			for(PatrolLeg l : p.getLegs()){
 				for(PatrolLegDay d : l.getPatrolLegDays()){
 					if(d.getWaypoints() != null){
 						for(PatrolWaypoint w : d.getWaypoints()){
-							session.saveOrUpdate(w);
+							session.merge(w);
 						}
 					}
 				}
@@ -657,14 +658,15 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			//if we made brand new patrols, save them and copy any plan and intel links there were
 			for(Patrol p2 : newPatrols){
 				p2.createLegDays(session);
-				session.saveOrUpdate(p2);
+				HibernateManager.saveOrMerge(session, p2);
+				
 				//save the waypoints, they are not cascaded like everything else.
 				for(PatrolLeg pl : p2.getLegs()){
 					for(PatrolLegDay pld : pl.getPatrolLegDays()) {
 						if (pld.getWaypoints() != null) {
 							for(PatrolWaypoint pwp : pld.getWaypoints()) {
 								//pwp.setPatrolLegDay(pld);
-								session.saveOrUpdate(pwp);
+								session.merge(pwp);
 							}
 						}
 					}

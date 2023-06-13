@@ -27,15 +27,6 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.api.noa.CyberTrackerNoa;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
@@ -48,6 +39,15 @@ import org.wcs.smart.util.UuidUtils;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 /**
  * Database cybertracker package table
  * 
@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  */
 @Entity
-@Table(name = "connect.ct_package")
+@Table(name = "ct_package", schema="connect")
 public class CyberTrackerPackage extends UuidItem{
 
 	private static final long serialVersionUID = 1L;

@@ -92,43 +92,43 @@ public enum AssetManager {
 		//due to circular links in database this 
 		//has been implemented by deleting one attachment at a time - I can forsee this being really slow
 		//TODO: investigate performance
-		try(ScrollableResults scroll = session.createQuery("FROM AssetWaypointAttachment a WHERE a.id.assetWaypoint.assetDeployment.asset = :asset", AssetWaypointAttachment.class).setParameter("asset",  asset).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
+		try(ScrollableResults<AssetWaypointAttachment> scroll = session.createQuery("FROM AssetWaypointAttachment a WHERE a.id.assetWaypoint.assetDeployment.asset = :asset", AssetWaypointAttachment.class).setParameter("asset",  asset).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
-				AssetWaypointAttachment attachment = (AssetWaypointAttachment)scroll.get(0);
+				AssetWaypointAttachment attachment = scroll.get();
 				
-				session.delete(attachment);
+				session.remove(attachment);
 				attachment.getWaypointAttachment().getWaypoint().getAttachments().remove(attachment.getWaypointAttachment());
-				session.delete(attachment.getWaypointAttachment());
+				session.remove(attachment.getWaypointAttachment());
 				session.flush();
 			}
 		}
 		
 		
 		String hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE asset = :asset ) "; //$NON-NLS-1$
-		session.createQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
+		session.createMutationQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete any waypoints not associated with asset waypoint
-		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
+		try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
-				Waypoint wp = (Waypoint)scroll.get(0);
-				session.delete(wp);
+				Waypoint wp = scroll.get();
+				session.remove(wp);
 			}
 		}
 		session.flush();
 		
 		
 		hql = "DELETE FROM AssetDeployment WHERE asset = :asset"; //$NON-NLS-1$
-		session.createQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
+		session.createMutationQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete history records
 		hql = "DELETE FROM AssetHistoryRecord WHERE asset = :asset"; //$NON-NLS-1$
-		session.createQuery(hql).setParameter("asset", asset).executeUpdate(); //$NON-NLS-1$
+		session.createMutationQuery(hql).setParameter("asset", asset).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete the asset
-		session.delete(asset);
+		session.remove(asset);
 	}
 	
 	public boolean overlaps(AssetDeployment toValidate, Collection<AssetDeployment> allDeployments) {

@@ -279,7 +279,7 @@ public enum SmartTable {
 	CONNECTUSER(ConnectUser.class, ".server.conservationArea"),
 	COMPOUNDMAPQUERY(CompoundMapQuery.class, null),
 	COMPOUNDMAPQUERYLAYER(CompoundMapQueryLayer.class, ".mapQuery.conservationArea"),
-	CONSERVATIONAREA(ConservationArea.class,".uuid"),
+	CONSERVATIONAREA(ConservationArea.class,null,".uuid"),
 	CYBERTRACKERPROPERTIESOPTION(CyberTrackerPropertiesOption.class, null),
 	CYBERTRACKERPROPERTIESPROFILE(CyberTrackerPropertiesProfile.class, null),
 	CYBERTRACKERPROPERTIESPROFILEOPTION(CyberTrackerPropertiesProfileOption.class, ".profile.conservationArea"),
@@ -323,7 +323,7 @@ public enum SmartTable {
 	NUMERICPLANTARGET(NumericPlanTarget.class,".plan.conservationArea"),
 	OBSERVATIONATTACHMENT(ObservationAttachment.class,".observation.observationGroup.waypoint.conservationArea"),
 	OBSERVATIONGRIDDEDQUERY(ObservationGriddedQuery.class,null),
-	OBSERVATIONOPTIONS(ObservationOptions.class,".uuid"),
+	OBSERVATIONOPTIONS(ObservationOptions.class,null,".uuid"),
 	OBSERVATIONSUMMARYQUERY(ObservationSummaryQuery.class,null),
 	OBSERVATIONWAYPOINTQUERY(ObservationWaypointQuery.class,null),
 	OBSOBSERVATIONQUERY(ObsObservationQuery.class,null),
@@ -500,10 +500,16 @@ public enum SmartTable {
 	;
 	
 	public Class<?> hibernateClass;
-	public String caProperty;
+	public String caObjectPath;
+	public String caUuidPath;
 	
-	SmartTable(Class<?> clazz, String caLink){
+	SmartTable(Class<?> clazz, String caObjectPath){
+		this(clazz, caObjectPath, null);	
+	}
+	
+	SmartTable(Class<?> clazz, String caObjectPath, String caUuidPath){
 		this.hibernateClass = clazz;
-		this.caProperty = caLink;
+		this.caObjectPath = caObjectPath;
+		this.caUuidPath = caUuidPath;
 	}
 }

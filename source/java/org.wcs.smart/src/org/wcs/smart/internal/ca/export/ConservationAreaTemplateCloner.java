@@ -28,10 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -55,6 +51,10 @@ import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.Messages;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Template cloner that copies conservation
@@ -84,6 +84,11 @@ public class ConservationAreaTemplateCloner implements
 		//attribute tree items, attribute aggregations
 		//and all associated labels
 		
+		
+		progress.subTask(Messages.ConservationAreaTemplateCloner_CloningIcons);
+		Collection<Icon> icons = cloneIconSets(engine);
+		progress.worked(1);
+	
 		//DO NOT CLONE: employees, saved maps, area geometries
 		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyAgencyRank);
 		cloneAgenciesRank(engine);
@@ -96,10 +101,7 @@ public class ConservationAreaTemplateCloner implements
 		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyProjection);
 		cloneProjections(engine);
 		progress.worked(1);
-			
-		progress.subTask(Messages.ConservationAreaTemplateCloner_CloningIcons);
-		Collection<Icon> icons = cloneIconSets(engine);
-		progress.worked(1);
+
 		
 		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyDataModel);
 		cloneDataModel(engine, icons, progress.split(1));
@@ -147,7 +149,7 @@ public class ConservationAreaTemplateCloner implements
 			newSet.setIsDefault(s.getIsDefault());
 			newSet.setKeyId(s.getKeyId());
 			
-			session.save(newSet);
+			session.persist(newSet);
 			
 			engine.addConservationItemMapping(s, newSet);
 		}
@@ -185,7 +187,7 @@ public class ConservationAreaTemplateCloner implements
 				}
 			}
 			
-			session.save(newIcon);
+			session.persist(newIcon);
 			engine.addConservationItemMapping(icon, newIcon);
 			cloned.add(newIcon);
 		}
@@ -210,7 +212,7 @@ public class ConservationAreaTemplateCloner implements
 			clone.setConservationArea(engine.getNewCa());
 			clone.setStyleString(style.getStyleString());
 			engine.copyLabels(style, clone);
-			session.save(clone);
+			session.persist(clone);
 			engine.addConservationItemMapping(style, clone);
 		}
 		session.flush();
@@ -229,7 +231,7 @@ public class ConservationAreaTemplateCloner implements
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKey(item.getKey());
 			clone.setValue(item.getValue());
-			session.save(clone);
+			session.persist(clone);
 		}
 		session.flush();
 	}
@@ -244,12 +246,12 @@ public class ConservationAreaTemplateCloner implements
 		
 		
 		for (Attribute att : clonedDm.getAttributes()) {
-			session.save(att);
+			session.persist(att);
 			session.flush();
 		}
 
 		for (Category c : clonedDm.getCategories()) {
-			session.save(c);
+			session.persist(c);
 			session.flush();
 		}
 	}
@@ -267,7 +269,7 @@ public class ConservationAreaTemplateCloner implements
 			clone.setIsDefault(p.getIsDefault());
 			clone.setName(p.getName());
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(p, clone);
 		}
 		engine.getSession().flush();
@@ -285,7 +287,7 @@ public class ConservationAreaTemplateCloner implements
 			engine.copyLabels(s, clone);
 			engine.copyDescriptions(s, clone);
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(s, clone);
 		}
 		engine.getSession().flush();
@@ -309,7 +311,7 @@ public class ConservationAreaTemplateCloner implements
 				clone.getRanks().add(rclone);
 			}
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}

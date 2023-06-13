@@ -75,7 +75,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -88,6 +88,7 @@ import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
 import org.wcs.smart.asset.ui.AttributeLabelProvider;
 import org.wcs.smart.asset.ui.SelectAttributeDialog;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.IconComposite;
 import org.wcs.smart.common.control.WarningDialog;
@@ -164,7 +165,7 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(type);
+				HibernateManager.saveOrMerge(s, type);
 				
 				for (AbstractAssetTypeAttributeMapping a : assetAttributeList){
 					if (!type.getAssetAttributes().contains(a)) type.getAssetAttributes().add((AssetTypeAttribute)a);
@@ -177,7 +178,7 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 				for (AssetTypeAttribute a : type.getAssetAttributes()){
 					if (!assetAttributeList.contains(a)){
 						//delete any asset attribute value associations
-						Query<?> qDelete = s.createQuery("DELETE FROM AssetAttributeValue WHERE id.attribute = :att AND id.asset IN ( FROM Asset e WHERE e.assetType = :assetType ) "); //$NON-NLS-1$
+						MutationQuery qDelete = s.createMutationQuery("DELETE FROM AssetAttributeValue WHERE id.attribute = :att AND id.asset IN ( FROM Asset e WHERE e.assetType = :assetType ) "); //$NON-NLS-1$
 						qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
 						qDelete.setParameter("assetType", type); //$NON-NLS-1$
 						qDelete.executeUpdate();
@@ -193,7 +194,7 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 				for (AssetTypeDeploymentAttribute a : type.getAssetDeploymentAttributes()){
 					if (!assetDeploymentList.contains(a)){
 						//delete any asset deployment attribute value associations
-						Query<?> qDelete = s.createQuery("DELETE FROM AssetDeploymentAttributeValue WHERE id.attribute = :att AND id.assetDeployment IN ( FROM AssetDeployment e WHERE e.asset.assetType = :assetType ) "); //$NON-NLS-1$
+						MutationQuery qDelete = s.createMutationQuery("DELETE FROM AssetDeploymentAttributeValue WHERE id.attribute = :att AND id.assetDeployment IN ( FROM AssetDeployment e WHERE e.asset.assetType = :assetType ) "); //$NON-NLS-1$
 						qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
 						qDelete.setParameter("assetType", type); //$NON-NLS-1$
 						qDelete.executeUpdate();
@@ -689,7 +690,7 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 				
 				monitor.worked(1);
 				try(Session s = HibernateManager.openSession()){
-
+					s.get(ConservationArea.class, type.getConservationArea().getUuid()).getLanguages();
 					if (type.getUuid() != null){
 						type = (AssetType) s.get(AssetType.class, type.getUuid());
 						type.getNames().size();

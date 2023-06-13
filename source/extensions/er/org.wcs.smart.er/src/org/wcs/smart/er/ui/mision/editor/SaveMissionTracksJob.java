@@ -61,7 +61,7 @@ public class SaveMissionTracksJob extends Job {
 			session.beginTransaction();
 			try {
 				for (MissionTrack t : tracks) {
-					session.saveOrUpdate(t);
+					session.merge(t);
 				}
 				session.getTransaction().commit();
 	        	return Status.OK_STATUS;

@@ -252,8 +252,8 @@ public class Uploader extends HttpServlet {
 			s = HibernateManager.getSession(context);
 			s.beginTransaction();
 			try{
-				s.update(item);
 				item.setStatus(Status.PROCESSING);
+				s.merge(item);				
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
@@ -267,9 +267,10 @@ public class Uploader extends HttpServlet {
 			s = HibernateManager.getSession(context);
 			s.beginTransaction();
 			try{
-				s.update(item);
+
 				item.setStatus(Status.ERROR);
 				item.setMessage(Messages.getString("Uploader.InvalidSize", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
+				s.merge(item);
 				s.getTransaction().commit();
 				
 			}catch (Exception ex){

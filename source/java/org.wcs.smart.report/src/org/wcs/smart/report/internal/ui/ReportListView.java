@@ -434,7 +434,7 @@ public class ReportListView {
 									Report r = null;
 									boolean isChanged = false;
 									
-									r = (Report) s.load(Report.class, ((Report)select).getUuid());
+									r = (Report) s.getReference(Report.class, ((Report)select).getUuid());
 									ReportFolder targetFolder = null;
 									boolean isShared = false;
 									if (currentTarget instanceof ReportFolder){

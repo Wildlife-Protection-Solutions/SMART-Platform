@@ -94,7 +94,7 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 				op.setConservationArea(SmartDB.getCurrentConservationArea());
 				op.setBooleanValue(Boolean.FALSE);
 				op.setOptionId(FilestoreWatcherConfigurator.EXCLUDE_CTX_DIR_OPTION);
-				session.save(op);
+				session.persist(op);
 				requiresRestart = true;
 			}
 		}else {

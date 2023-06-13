@@ -23,17 +23,17 @@ package org.wcs.smart.dataentry.model;
 
 import java.nio.file.Path;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * List Attributes items configuration data.
@@ -42,7 +42,7 @@ import org.wcs.smart.util.UuidUtils;
  * @since 2.0.0
  */
 @Entity
-@Table(name = "smart.cm_attribute_list")
+@Table(name = "cm_attribute_list", schema="smart")
 public class CmAttributeListItem extends NamedItem implements IImageAssociatedObject {
 
 	private static final long serialVersionUID = 1L;

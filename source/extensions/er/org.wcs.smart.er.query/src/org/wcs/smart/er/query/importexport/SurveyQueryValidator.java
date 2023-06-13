@@ -338,7 +338,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		
 		String sql = "SELECT c FROM SamplingUnit c WHERE id = :keyId and c.surveyDesign.conservationArea = :ca "; //$NON-NLS-1$ 
 		
-		org.hibernate.query.Query<?> query = session.createQuery(sql);
+		org.hibernate.query.Query<?> query = session.createQuery(sql, SamplingUnit.class);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
@@ -363,13 +363,13 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		if (key.equals(AttributeFilter.ANY_OPTION_KEY)){
 			return ;
 		}
-		String sql = "SELECT c FROM " + MissionAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM MissionAttributeListItem c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$
 		
-		org.hibernate.query.Query<?> query = session.createQuery(sql);
-		query.setParameter("keyId", key); //$NON-NLS-1$
-		query.setParameter("ca", ca); //$NON-NLS-1$
+		org.hibernate.query.Query<MissionAttributeListItem> query = session.createQuery(sql, MissionAttributeListItem.class)
+			.setParameter("keyId", key) //$NON-NLS-1$
+			.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<MissionAttributeListItem> results = query.list();
 		if (results.size() == 0 || results.size() > 1){
 			throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionListItemNotFound, new Object[]{key, attributeKey}));
 		}
@@ -386,9 +386,9 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		if (key.equals(AttributeFilter.ANY_OPTION_KEY)){
 			return ;
 		}
-		String sql = "SELECT c FROM " + SamplingUnitAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM SamplingUnitAttributeListItem c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ 
 		
-		org.hibernate.query.Query<?> query = session.createQuery(sql);
+		org.hibernate.query.Query<SamplingUnitAttributeListItem> query = session.createQuery(sql, SamplingUnitAttributeListItem.class);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		

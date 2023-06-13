@@ -353,7 +353,7 @@ public class ApplyChangeLogJob extends Job {
 				//update server revision
 				monitor.subTask(Messages.ApplyChangeLogJob_savingresultsprogress);
 				serverInfo.setServerRevision(metadata.getServerRevision());
-				session.saveOrUpdate(serverInfo);
+				session.merge(serverInfo);
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				try {

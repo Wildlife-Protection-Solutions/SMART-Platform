@@ -108,7 +108,7 @@ public class NameCellEditor implements ICellModifier {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						Query thisquery = (Query) session.load(query.getType().getHibernateClass(), query.getUuid());
+						Query thisquery = (Query) session.getReference(query.getType().getHibernateClass(), query.getUuid());
 						thisquery.updateName(SmartDB.getCurrentLanguage(), newName);
 						thisquery.setName(newName);
 						query.setQueryName(newName);
@@ -144,14 +144,17 @@ public class NameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				QueryFolder toupdate = null;
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						session.saveOrUpdate(folder);
-						folder.updateName(SmartDB.getCurrentLanguage(), newName);
+						toupdate = session.getReference(folder);
+						toupdate.updateName(SmartDB.getCurrentLanguage(), newName);
+						toupdate.setName(newName);
 						folder.setName(newName);
+						folder.updateName(SmartDB.getCurrentLanguage(), newName);
 						session.getTransaction().commit();
-						fireFolderNameChangeListener(folder);
+						
 					} catch (Exception ex) {
 						if (session.getTransaction().isActive()){
 							session.getTransaction().rollback();
@@ -161,6 +164,7 @@ public class NameCellEditor implements ICellModifier {
 										+ ex.getLocalizedMessage(), ex);
 					}
 				}
+				fireFolderNameChangeListener(toupdate);
 
 				return Status.OK_STATUS;
 			}

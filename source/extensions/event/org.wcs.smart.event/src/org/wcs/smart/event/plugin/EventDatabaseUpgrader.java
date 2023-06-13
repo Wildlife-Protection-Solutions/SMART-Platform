@@ -97,7 +97,7 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 		sb.append("select uuid, 'org.wcs.smart.profile.common.profile', 'profile1'"); //$NON-NLS-1$
 		sb.append(" FROM smart.e_action where type_key in ('org.wcs.smart.profile.newrecord', 'org.wcs.smart.profile.i2.newentity')"); //$NON-NLS-1$
 		
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		HibernateManager.setPlugInVersion(EventPlugIn.PLUGIN_ID, EventPlugIn.DB_VERSION_2, session);
 	}

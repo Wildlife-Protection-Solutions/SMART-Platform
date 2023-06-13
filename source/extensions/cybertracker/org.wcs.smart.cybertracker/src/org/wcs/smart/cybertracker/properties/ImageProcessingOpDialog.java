@@ -24,10 +24,6 @@ package org.wcs.smart.cybertracker.properties;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -58,6 +54,10 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Properties dialog for collection image processing options.
@@ -242,30 +242,33 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 					resizeOp = new CyberTrackerPropertiesOption();
 					resizeOp.setOptionId(OptionID.RESIZE_IMAGE.name());
 					resizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
+					s.persist(resizeOp);
 				}
 				if (!btnDoResize.getSelection()){
 					resizeOp.setStringValue(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name());
 					if (sizeOp != null){
-						s.delete(sizeOp);
+						s.remove(sizeOp);
 					}
 				}else{
 					if (maxSize == null){
 						maxSize = new CyberTrackerPropertiesOption();
 						maxSize.setOptionId(OptionID.MAX_IMAGE_SIZE.name());
 						maxSize.setConservationArea(SmartDB.getCurrentConservationArea());
+						s.persist(maxSize);
 					}
 					maxSize.setDoubleValue(Double.parseDouble(txtMaxSize.getText()));
-					s.saveOrUpdate(maxSize);
+					
 					
 					if (btnPrompt.getSelection()){
 						resizeOp.setStringValue(ImageResizeOption.MANUAL.name());
-						if (sizeOp != null) s.delete(sizeOp);
+						if (sizeOp != null) s.remove(sizeOp);
 					}else{
 						resizeOp.setStringValue(ImageResizeOption.AUTO.name());
 						if (sizeOp == null){
 							sizeOp = new CyberTrackerPropertiesOption();
 							sizeOp.setOptionId(OptionID.IMAGE_SIZE.name());
 							sizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
+							s.persist(sizeOp);
 						}
 						ImageSizeOption selectedSizeOp = resizeComp.getResizeOption();
 						if(selectedSizeOp.equals(ImageSizeOption.CUSTOM)){
@@ -273,10 +276,9 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 						}else{
 							sizeOp.setStringValue(selectedSizeOp.name());
 						}
-						s.saveOrUpdate(sizeOp);
 					}
 				}
-				s.saveOrUpdate(resizeOp);
+				
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

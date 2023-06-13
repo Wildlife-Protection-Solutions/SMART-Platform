@@ -215,7 +215,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		parent.addListener(SWT.Dispose, e->{
-			imagecache.values().forEach(img->img.dispose());
+			imagecache.values().forEach(img->{if (img != null) img.dispose();});
 			imagecache.clear();
 		});
 		
@@ -456,7 +456,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), toEdit, sets);
 		if (dialog.open() != Window.OK) return;
-		session.saveOrUpdate(toEdit);
+		session.merge(toEdit);
 		
 		for (IconFile file : toEdit.getFiles()) imagecache.remove(file);
 		
@@ -472,7 +472,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		Icon icon = dialog.getSelectedIcon();
 		
 		if (icon == null) return;
-		session.saveOrUpdate(icon);
+		session.merge(icon);
 		setDirty(true);
 		caicons.add(icon);
 		sortIcons();
@@ -575,7 +575,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 					}
 				}
 				
-				importer.getIcons().forEach(i->session.saveOrUpdate(i));
+				importer.getIcons().forEach(i->session.merge(i));
 				session.flush();
 				setDirty(true);
 				//add any new icons
@@ -631,10 +631,10 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 							//this only appears to be a problem for Attribute icons
 							//so we specifically delete them here.
 							//re: #3401
-							session.createQuery("UPDATE Attribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
+							session.createMutationQuery("UPDATE Attribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
 								.setParameter("icon", e) //$NON-NLS-1$
 								.executeUpdate();
-							session.delete(e);
+							session.remove(e);
 							session.flush();
 							monitor.worked(1);
 						});
@@ -750,11 +750,11 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			if (e.equals(item)) {
 				if (!e.getIsDefault()) {
 					e.setIsDefault(true);
-					session.saveOrUpdate(e);
+					session.merge(e);
 				}
 			}else if (e.getIsDefault()) {
 				e.setIsDefault(false);
-				session.saveOrUpdate(e);
+				session.merge(e);
 			}
 			setDirty(true);
 		});
@@ -811,11 +811,11 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			IconFile f = i.getIconFile(set);
 			if (f != null) {
 				i.getFiles().remove(f);
-				session.delete(f);
+				session.remove(f);
 			}
 		}
 		session.flush();
-		session.delete(set);
+		session.remove(set);
 		session.flush();
 		setDirty(true);
 		
@@ -846,7 +846,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		};
 		
 		if (dialog.open() != Window.OK) return;
-		session.saveOrUpdate(toEdit);
+		session.merge(toEdit);
 		setDirty(true);
 		lstIconsets.refresh();
 		createIconTable(sets, caicons);

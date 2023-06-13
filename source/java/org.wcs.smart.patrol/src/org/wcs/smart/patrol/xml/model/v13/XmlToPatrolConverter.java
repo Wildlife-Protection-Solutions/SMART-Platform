@@ -37,11 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SignatureTypeManager;
@@ -88,6 +83,11 @@ import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.in.IXmlToPatrolConverter;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Converts an xml patrol file to a
@@ -745,7 +745,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	}
 	private Attribute findAttribute(String key, Category category){
 		if (key != null) {
-			String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
+			String sql = "FROM Attribute WHERE conservationArea = :ca and keyId = :key"; //$NON-NLS-1$
 			Query<Attribute> query = session.createQuery(sql, Attribute.class);
 			query.setParameter("key", key); //$NON-NLS-1$
 			query.setParameter("ca", ca); //$NON-NLS-1$
@@ -787,7 +787,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	
 	private Category findCategory(String key){
 		String[] bits = key.split("\\."); //$NON-NLS-1$
-		String sql = "FROM Category WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
+		String sql = "FROM Category WHERE conservationArea = :ca and keyId = :key"; //$NON-NLS-1$
 		Query<Category> query = session.createQuery(sql, Category.class);
 		query.setParameter("key", bits[bits.length - 1]); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -846,7 +846,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			sql += " and c.patrolType = :patrolType"; //$NON-NLS-1$"
 		}
 				
-		Query<?> query = session.createQuery(sql);
+		Query<PatrolTransportType> query = session.createQuery(sql, PatrolTransportType.class);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -854,7 +854,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			query.setParameter("patrolType", type); //$NON-NLS-1$
 		}
 		
-		List<?> results = query.list();
+		List<PatrolTransportType> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){

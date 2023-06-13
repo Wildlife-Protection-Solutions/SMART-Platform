@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -92,7 +93,7 @@ public enum EntityManager {
 			if (currentEntity != null){
 				query += " AND e.uuid != :entity "; //$NON-NLS-1$
 			}
-			Query<?> hql = session.createQuery(query);
+			Query<Long> hql = session.createQuery(query, Long.class);
 			hql.setParameter("attribute", attribute); //$NON-NLS-1$
 			hql.setParameter("ca", ca); //$NON-NLS-1$
 			hql.setParameter("type", type); //$NON-NLS-1$
@@ -115,7 +116,7 @@ public enum EntityManager {
 				hql.setParameter("entity",  currentEntity); //$NON-NLS-1$
 			}
 	
-			long cnt = (Long) hql.uniqueResult();
+			long cnt = hql.uniqueResult();
 			if (cnt > 0) return true;
 		}
 		return false;
@@ -139,40 +140,40 @@ public enum EntityManager {
 				throw new Exception("Cannot delete linked data model list item: " + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
-			session.delete(entity.getDmAttributeListItem());
+			session.remove(entity.getDmAttributeListItem());
 		}
 		
 		//delete all record attribute links 
-		Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid");  //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid");  //$NON-NLS-1$
 		q.setParameter("entityUuid", entity.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 
 				
 		//delete all entity relationships attributes
-		q = session.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))");  //$NON-NLS-1$
+		q = session.createMutationQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))");  //$NON-NLS-1$
 		q.setParameter("srcentity", entity); //$NON-NLS-1$
 		q.setParameter("trgentity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 
 		
 		//delete all entity relationships 
-		q = session.createQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)"); //$NON-NLS-1$
+		q = session.createMutationQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)"); //$NON-NLS-1$
 		q.setParameter("srcentity", entity); //$NON-NLS-1$
 		q.setParameter("trgentity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 
 		//delete all working set links 
-		q = session.createQuery("DELETE FROM IntelWorkingSetEntity where id.entity = :entity"); //$NON-NLS-1$
+		q = session.createMutationQuery("DELETE FROM IntelWorkingSetEntity where id.entity = :entity"); //$NON-NLS-1$
 		q.setParameter("entity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		//delete entity
-		session.delete(entity);
+		session.remove(entity);
 		
 		if (entity.getEntityAttachments() != null){
 			for (IntelEntityAttachment attachment : entity.getEntityAttachments()){
 				if (AttachmentManager.INSTANCE.canDelete(attachment.getAttachment(), session)){
-					session.delete(attachment.getAttachment());
+					session.remove(attachment.getAttachment());
 				}
 			}
 		}

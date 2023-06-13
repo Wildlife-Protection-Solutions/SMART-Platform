@@ -24,10 +24,6 @@ package org.wcs.smart.patrol;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -41,6 +37,10 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Template cloner than copies patrol information from the
@@ -103,7 +103,7 @@ public class PatrolTemplateCloner implements
 				}
 			}
 			engine.copyLabels(a, clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}
@@ -120,7 +120,7 @@ public class PatrolTemplateCloner implements
 			clone.setKeyId(m.getKeyId());
 			engine.copyLabels(m, clone);
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(m,clone);
 		}
 		engine.getSession().flush();
@@ -142,7 +142,7 @@ public class PatrolTemplateCloner implements
 			engine.copyLabels(team, clone);
 			engine.copyDescriptions(team, clone);
 			engine.addConservationItemMapping(team, clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
 	}
@@ -169,7 +169,7 @@ public class PatrolTemplateCloner implements
 			newt.setType(t.getType());
 			newt.setTransportTypes(new ArrayList<PatrolTransportType>());
 			
-			engine.getSession().save(newt);
+			engine.getSession().persist(newt);
 			engine.getSession().flush();
 			
 			for (PatrolTransportType pt : t.getTransportTypes()){
@@ -181,7 +181,7 @@ public class PatrolTemplateCloner implements
 				engine.copyLabels(pt, clone);				
 				newt.getTransportTypes().add(clone);
 				
-				engine.getSession().save(clone);					
+				engine.getSession().persist(clone);					
 				engine.addConservationItemMapping(pt, clone);
 			}
 			

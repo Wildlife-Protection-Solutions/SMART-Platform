@@ -392,7 +392,7 @@ public abstract class AbstractInfoComposite extends Composite {
 				}
 			});
 		}catch (Exception ex){
-			SmartPlugIn.displayError(Messages.AbstractInfoComposite_CategoryError + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(Messages.AbstractInfoComposite_CategoryError + ex.getMessage(), ex);
 		}
 		return cachedDataModel;
 		

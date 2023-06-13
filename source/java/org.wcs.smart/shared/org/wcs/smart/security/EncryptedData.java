@@ -24,7 +24,7 @@ package org.wcs.smart.security;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 /**
  * Class represents encrypted data that can be serialised.

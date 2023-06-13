@@ -229,9 +229,9 @@ public class PawsRunJob extends Job{
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(run);
 				run.setStatus(PawsRun.Status.ERROR);
 				run.setStatusMessage(msg + ex.getMessage());
+				session.merge(run);
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				PawsPlugIn.log(ex2.getMessage(), ex2);

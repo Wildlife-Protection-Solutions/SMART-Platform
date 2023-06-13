@@ -23,14 +23,14 @@ package org.wcs.smart.asset.model;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Model class for asset history record
@@ -38,7 +38,7 @@ import org.wcs.smart.ca.UuidItem;
  * @author egouge
  */
 @Entity
-@Table(name="smart.asset_history_record")
+@Table(name="asset_history_record", schema="smart")
 public class AssetHistoryRecord extends UuidItem{
 
 	private static final long serialVersionUID = 1L;

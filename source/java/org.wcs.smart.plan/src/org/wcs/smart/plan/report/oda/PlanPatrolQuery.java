@@ -112,9 +112,9 @@ public class PlanPatrolQuery extends SmartQuery {
 		//set query dates
 		//this is necessary to run the query that is created for this patrol
 		String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
-		org.hibernate.query.Query<?> q = connection.getSession().createQuery(hql);
+		org.hibernate.query.Query<LocalDate> q = connection.getSession().createQuery(hql, LocalDate.class);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		List<?> data = q.list();
+		List<LocalDate> data = q.list();
 		LocalDate startdate = null;
 		if (data != null && data.size() >= 1 && data.get(0) != null) {
 			startdate = (LocalDate) data.get(0);

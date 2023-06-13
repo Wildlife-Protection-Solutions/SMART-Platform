@@ -25,20 +25,20 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Class responsible for representing CyberTracker Properties
@@ -47,7 +47,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.Prof
  * @since 4.0.0
  */
 @Entity
-@Table(name = "smart.ct_properties_profile")
+@Table(name = "ct_properties_profile", schema="smart")
 public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	private static final long serialVersionUID = 1L;

@@ -52,6 +52,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -96,6 +97,17 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 			this.model = cm;
 			if (cm.getIconSet() != null) {
 				cm.setIconSet((IconSet)session.merge(cm.getIconSet()));
+			}
+			//attach categories/attributes
+			List<CmNode> toProcess = new ArrayList<>();
+			toProcess.addAll(this.model.getNodes());
+			while(!toProcess.isEmpty()) {
+				CmNode n = toProcess.remove(0);
+				toProcess.addAll(n.getChildren());
+				if (n.getCategory() != null) {
+					n.setCategory(session.getReference(n.getCategory()));
+					n.getCmAttributes().forEach(a->a.setAttribute(session.getReference(a.getAttribute())));
+				}
 			}
 		}
 		this.clonedFrom = clonedFrom;

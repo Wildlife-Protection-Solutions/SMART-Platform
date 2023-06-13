@@ -168,11 +168,11 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void setImageFile(Path file) {
 				CmNode cmNode = getSourceObject();
 				cmNode.setImageFile(file);
-				if (cmNode.getUuid() != null) {
-					//need this logic to correctly trigger intercepter
-					session.evict(cmNode);
-					session.saveOrUpdate(cmNode);
-				}
+//				if (cmNode.getUuid() != null) {
+//					//need this logic to correctly trigger intercepter
+//					session.evict(cmNode);
+//					HibernateManager.saveOrMerge(session, cmNode);
+//				}
 				fireModelChanged();
 			}
 			@Override
@@ -406,7 +406,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				}
 			});
 			
-			this.session.delete(cfg);
+			this.session.remove(cfg);
 			this.deletedConfigs.add(cfg);
 
 			//for hibernate

@@ -72,17 +72,15 @@ public class SurveyDesignFilter {
 	}
 	
 	/**
-	 * Builds a query that returns the following survey design
-	 * fields: {uuid, name, state} for any survey design
+	 * Builds a query that returns any survey design
 	 * in the current conservation area.
 	 * 
 	 * @param s
 	 * @return
 	 */
-	public Query<?> buildQuery(Session s){ 
+	public Query<SurveyDesign> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT s.uuid, s.name, s.state, s.keyId "); //$NON-NLS-1$
 		str.append("FROM SurveyDesign s "); //$NON-NLS-1$
 		str.append("WHERE s.conservationArea = :ca " ); //$NON-NLS-1$
 
@@ -95,9 +93,8 @@ public class SurveyDesignFilter {
 			str.append(" s.state IN (:states) "); //$NON-NLS-1$
 		}
 		str.append(" ) "); //$NON-NLS-1$
-		str.append("ORDER BY s.name asc"); //$NON-NLS-1$
 		
-		Query<?> query = s.createQuery(str.toString())
+		Query<SurveyDesign> query = s.createQuery(str.toString(), SurveyDesign.class)
 				.setParameter("ca", ca); //$NON-NLS-1$
 
 		

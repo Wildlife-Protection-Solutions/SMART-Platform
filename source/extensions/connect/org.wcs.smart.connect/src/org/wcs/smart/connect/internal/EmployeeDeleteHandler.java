@@ -40,7 +40,7 @@ public class EmployeeDeleteHandler implements IEmployeeListener {
 	public void beforeDelete(Employee e, Session s) {
 		ConnectUser cu = ConnectHibernateManager.getConnectUser(e, s);
 		if (cu != null){
-			s.delete(cu);
+			s.remove(cu);
 		}
 	}
 

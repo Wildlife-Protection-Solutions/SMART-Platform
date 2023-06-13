@@ -24,16 +24,16 @@ package org.wcs.smart.observation.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProvider;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A class to represent a summary query.
@@ -42,7 +42,7 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.obs_gridded_query")
+@Table(name="obs_gridded_query", schema="smart")
 public class ObservationGriddedQuery extends GriddedQuery {
 	
 	private static final long serialVersionUID = 1L;

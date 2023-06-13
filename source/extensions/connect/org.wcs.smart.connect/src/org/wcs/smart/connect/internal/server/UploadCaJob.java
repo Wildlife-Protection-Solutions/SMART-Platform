@@ -93,7 +93,11 @@ public class UploadCaJob extends FileUploaderJob {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				s.saveOrUpdate(status);
+				if (status.getUuid() == null) {
+					s.persist(status);
+				}else {
+					s.merge(status);
+				}
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(),ex);

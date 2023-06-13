@@ -23,7 +23,6 @@ package org.wcs.smart.er.internal;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.observation.CaDeleteHandler;
@@ -66,122 +65,122 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 	private void deleteMissions(ConservationArea ca, Session session) throws Exception{
 		
 		//mission property values
-		Query<?> q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE MissionPropertyValue mp WHERE mp.id.missionAttribute IN " + //$NON-NLS-1$
-				"(SELECT ma FROM MissionAttribute ma WHERE ma.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT ma FROM MissionAttribute ma WHERE ma.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//survey waypoints
-		q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE SurveyWaypoint sw WHERE sw.id.waypoint IN " + //$NON-NLS-1$
-				"(SELECT wp FROM Waypoint wp WHERE wp.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();		
+				"(SELECT wp FROM Waypoint wp WHERE wp.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();		
 
 		//mission members 
-		q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE MissionMember mp WHERE mp.id.mission IN " + //$NON-NLS-1$
-				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 
 		//mission tracks 
-		q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE MissionTrack mt WHERE mt.missionDay IN (SELECT md FROM MissionDay md WHERE md.mission IN " + //$NON-NLS-1$
-				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea))"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea))") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 
 		//mission days
-		q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE MissionDay md WHERE md.mission IN " + //$NON-NLS-1$
-				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//mission
-		q = session.createQuery(
+		session.createMutationQuery(
 				"delete Mission m where m.survey IN " + //$NON-NLS-1$
-				"(SELECT s FROM Survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT s FROM Survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 	
 	private void deleteSurveys(ConservationArea ca, Session session) throws Exception{
 		//entity attribute values
-		Query<?> q = session.createQuery(
+		session.createMutationQuery(
 				"delete Survey s where s IN " + //$NON-NLS-1$
-				"(SELECT s FROM Survey s WHERE s.surveyDesign.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT s FROM Survey s WHERE s.surveyDesign.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 
 	private void deleteSurveyDesign(ConservationArea ca, Session session) throws Exception{
 		//sampling unit attribue values
-		Query<?> q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE SamplingUnitAttributeValue s where s.id.samplingUnit IN " + //$NON-NLS-1$
-				"(SELECT su FROM SamplingUnit su join su.surveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT su FROM SamplingUnit su join su.surveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//sampling units
-		q = session.createQuery(
+		session.createMutationQuery(
 				"delete SamplingUnit s where s.surveyDesign IN " + //$NON-NLS-1$
-				"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//sampling unit attribute to survey design links
-		q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE SurveyDesignSamplingUnitAttribute s where s.id.surveyDesign IN " + //$NON-NLS-1$
-				"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
 		// mission properties
-		q = session.createQuery("DELETE MissionProperty mp where mp.id.surveyDesign IN " + //$NON-NLS-1$
-			"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE MissionProperty mp where mp.id.surveyDesign IN " + //$NON-NLS-1$
+			"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 				
 		//survey design properties
-		q = session.createQuery("DELETE SurveyDesignProperty p where p.surveyDesign IN " + //$NON-NLS-1$
-				"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("DELETE SurveyDesignProperty p where p.surveyDesign IN " + //$NON-NLS-1$
+				"(SELECT sd FROM SurveyDesign sd WHERE sd.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 				
 		//survey design			.
-		q = session.createQuery(
-				"delete FROM SurveyDesign where conservationArea = :conservationArea"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery(
+				"delete FROM SurveyDesign where conservationArea = :conservationArea")//$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 	
 	private void deleteMissionAttributes(ConservationArea ca, Session session) throws Exception{
 		
-		Query<?> q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE MissionAttributeListItem li WHERE li.attribute IN " +//$NON-NLS-1$
-				"(SELECT ma FROM MissionAttribute ma WHERE ma.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT ma FROM MissionAttribute ma WHERE ma.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
-		q = session.createQuery(
-				"DELETE FROM MissionAttribute WHERE conservationArea = :conservationArea"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery(
+				"DELETE FROM MissionAttribute WHERE conservationArea = :conservationArea") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 	
 	private void deleteSamplingUnitAttributes(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery(
+		session.createMutationQuery(
 				"DELETE SamplingUnitAttributeListItem li WHERE li.attribute IN " +//$NON-NLS-1$
-				"(SELECT sa FROM SamplingUnitAttribute sa WHERE sa.conservationArea = :conservationArea)"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+				"(SELECT sa FROM SamplingUnitAttribute sa WHERE sa.conservationArea = :conservationArea)") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
-		q = session.createQuery(
-				"DELETE FROM SamplingUnitAttribute WHERE conservationArea = :conservationArea"); //$NON-NLS-1$
-		q.setParameter("conservationArea", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery(
+				"DELETE FROM SamplingUnitAttribute WHERE conservationArea = :conservationArea") //$NON-NLS-1$
+		.setParameter("conservationArea", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 }

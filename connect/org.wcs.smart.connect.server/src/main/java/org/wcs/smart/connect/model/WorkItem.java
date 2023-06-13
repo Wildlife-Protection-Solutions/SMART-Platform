@@ -26,18 +26,21 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.servlet.http.HttpServletRequest;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.Uploader;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Smart connect upload item entity.
@@ -45,7 +48,7 @@ import org.wcs.smart.connect.api.Uploader;
  *
  */
 @Entity
-@Table(name="connect.work_item")
+@Table(name="work_item", schema="connect")
 public class WorkItem extends ConnectUuidItem {
 
 	public enum Type {
@@ -90,6 +93,7 @@ public class WorkItem extends ConnectUuidItem {
 		this.caInfo = info;
 	}
 	
+	@JsonIgnore
 	@Column(name="start_datetime")
 	public LocalDateTime getStartTime(){
 		return this.startTime;
@@ -168,6 +172,24 @@ public class WorkItem extends ConnectUuidItem {
 				+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
 				+ Uploader.PATH + "/" //$NON-NLS-1$
 				+ URLEncoder.encode(getUuid().toString(), ConnectRESTApplication.UTF8);
+	}
+	
+	private int percentComplete;
+	private String statusMessage;
+	
+	@Transient
+	public int getPercentComplete() {
+		return this.percentComplete;
+	}
+	public void setPercentComplete(int percentComplete) {
+		this.percentComplete = percentComplete;
+	}
+	public void setStatusMessage(String statusMessage) {
+		this.statusMessage = statusMessage;
+	}
+	@Transient
+	public String getStatusMessage() {
+		return this.statusMessage;
 	}
 }
 

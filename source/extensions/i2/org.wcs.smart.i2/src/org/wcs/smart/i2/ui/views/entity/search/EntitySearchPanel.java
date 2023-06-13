@@ -61,7 +61,6 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -524,14 +523,13 @@ public abstract class EntitySearchPanel extends Composite {
 				}else{
 					attributeTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingAttributeJobName){
-						@SuppressWarnings("deprecation")
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try(Session s = HibernateManager.openSession()){
-								List<IntelAttribute> ats = s.createQuery(" SELECT a FROM IntelAttribute a WHERE a IN (SELECT iea.id.attribute FROM IntelEntityTypeAttribute iea JOIN iea.id.entityType t JOIN t.profiles f join f.id.profile p WHERE t.conservationArea = :ca  and p in (:profiles))", IntelAttribute.class) //$NON-NLS-1$
+								List<IntelAttribute> ats = s.createQuery(" SELECT DISTINCT a FROM IntelAttribute a WHERE a IN (SELECT iea.id.attribute FROM IntelEntityTypeAttribute iea JOIN iea.id.entityType t JOIN t.profiles f join f.id.profile p WHERE t.conservationArea = :ca  and p in (:profiles))", IntelAttribute.class) //$NON-NLS-1$
 								.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 								.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles()) //$NON-NLS-1$
-								.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+//								.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 								.list();
 								
 								ats.forEach(a->{

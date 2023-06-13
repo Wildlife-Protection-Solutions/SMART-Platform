@@ -27,11 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -84,6 +79,7 @@ import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
+
 
 /**
  * Creates a panel for entering/editing
@@ -611,8 +607,6 @@ public class EntityEditPanelComposite extends Composite{
 		 * 
 		 * @return the conservation area associated with the attribute
 		 */
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 		public ConservationArea getConservationArea() {
 			return wrapped.getDmAttribute().getConservationArea();
 		}
@@ -628,7 +622,6 @@ public class EntityEditPanelComposite extends Composite{
 		 * Only valid for numeric attributes.
 		 * @return the minimum value of the attribute
 		 */
-		@Column(name="min_value")
 		public Double getMinValue() {
 			return wrapped.getDmAttribute().getMinValue();
 		}
@@ -646,7 +639,6 @@ public class EntityEditPanelComposite extends Composite{
 		 * Only valid for numeric attributes.
 		 * @return the maximum value of the attribute
 		 */
-		@Column(name="max_value")
 		public Double getMaxValue() {
 			return wrapped.getDmAttribute().getMaxValue();
 		}

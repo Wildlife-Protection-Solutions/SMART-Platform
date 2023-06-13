@@ -23,16 +23,16 @@ package org.wcs.smart.plan.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ISmartPoint;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Point for {@link SpatialPlanTarget}
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.ISmartPoint;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.plan_target_point")
+@Table(name = "plan_target_point", schema="smart")
 public class SpatialPlanTargetPoint implements ISmartPoint {
 
 	private UUID uuid;

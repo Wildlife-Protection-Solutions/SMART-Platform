@@ -164,7 +164,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 	public boolean updateSurvey(Survey survey, Session session) {
 		Object x = ((StructuredSelection)cmbViewer.getSelection()).getFirstElement();
 		if (x instanceof SurveyDesignProxy){
-			SurveyDesign sd = (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignProxy) x).getUuid());
+			SurveyDesign sd = (SurveyDesign) session.getReference(SurveyDesign.class, ((SurveyDesignProxy) x).getUuid());
 			survey.setSurveyDesign(sd);
 			return true;
 		}

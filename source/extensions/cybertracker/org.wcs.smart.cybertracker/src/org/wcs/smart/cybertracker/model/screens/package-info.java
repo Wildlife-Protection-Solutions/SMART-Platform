@@ -5,5 +5,8 @@
 // Generated on: 2016.09.20 at 08:38:15 AM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/cybertracker", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/cybertracker", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.cybertracker.model.screens;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

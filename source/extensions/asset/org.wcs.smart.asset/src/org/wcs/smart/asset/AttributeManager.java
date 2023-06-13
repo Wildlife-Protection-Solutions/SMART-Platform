@@ -56,6 +56,6 @@ public enum AttributeManager {
 	 */
 	public void deleteAttribute(AssetAttribute type, Session session) throws Exception{
 		canDelete(type, session);
-		session.delete(type);
+		session.remove(type);
 	}
 }

@@ -24,12 +24,32 @@
 	
 	
 	<repositories>
+		<!-- required due to disabling of http repos-->
+		<!-- https://maven.apache.org/docs/3.8.1/release-notes.html-->
 		<repository>
-			<id>opengeo</id>
-			<name>OpenGeo Maven Repository</name>
-			<url>https://repo.boundlessgeo.com/main/</url>
-			<snapshots><enabled>false</enabled></snapshots>
-    		</repository>    	
+           		<id>maven.java.net</id>
+            		<name>Maven.Java.Net</name>
+            		<url>https://maven.java.net</url>
+                    		<releases>
+                		<enabled>true</enabled>
+            		</releases>
+            		<snapshots>
+               			<enabled>true</enabled>
+            		</snapshots>
+        	</repository>
+	
+		<repository>
+           		<id>boundless</id>
+            		<name>Boundless Maven Repository</name>
+            		<url>https://repo.osgeo.org/repository/release/</url>
+            		<releases>
+                		<enabled>true</enabled>
+            		</releases>
+            		<snapshots>
+               			<enabled>true</enabled>
+            		</snapshots>
+        	</repository>
+        	
 	</repositories>
 	
 	<build>
@@ -59,7 +79,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.3</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
@@ -68,7 +88,6 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<overWrite>true</overWrite>
 							<outputDirectory>${basedir}/lib</outputDirectory>
 							<overWriteReleases>true</overWriteReleases>
 							<overWriteSnapshots>true</overWriteSnapshots>

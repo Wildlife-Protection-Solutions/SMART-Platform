@@ -186,7 +186,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_2, session);
 	}
@@ -209,7 +209,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_3, session);
 	}
@@ -229,11 +229,11 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			
 					String[] bits = name.split("\\."); //$NON-NLS-1$
 					
-					Number cnt = (Number)session.createNativeQuery("select count(*) from sys.systriggers a, sys.sysschemas b WHERE a.schemaid = b.schemaid  AND  a.triggername = '" + bits[1].toUpperCase() + "' and b.schemaname ='" + bits[0].toUpperCase() + "'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					Number cnt = session.createNativeQuery("select count(*) from sys.systriggers a, sys.sysschemas b WHERE a.schemaid = b.schemaid  AND  a.triggername = '" + bits[1].toUpperCase() + "' and b.schemaname ='" + bits[0].toUpperCase() + "'", Number.class) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							.uniqueResult();
 					if (cnt.intValue() > 0) {
-						session.createNativeQuery("DROP trigger " + name).executeUpdate(); //$NON-NLS-1$
-						session.createNativeQuery(triggers[1]).executeUpdate();
+						session.createNativeMutationQuery("DROP trigger " + name).executeUpdate(); //$NON-NLS-1$
+						session.createNativeMutationQuery(triggers[1]).executeUpdate();
 					}
 				}
 			}
@@ -375,7 +375,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE SMART.SURVEY_WAYPOINT ADD CONSTRAINT SURVEY_WAYPOINT_WP_UUID_FK FOREIGN KEY (WP_UUID) REFERENCES SMART.WAYPOINT(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_5, session);
 	}
@@ -393,7 +393,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_6, session);
 	}

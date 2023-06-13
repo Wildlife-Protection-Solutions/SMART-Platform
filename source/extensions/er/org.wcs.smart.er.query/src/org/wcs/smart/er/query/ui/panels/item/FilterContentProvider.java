@@ -29,10 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -64,6 +60,10 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNode;
 import org.wcs.smart.query.model.IQueryType;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Content provider for the survey filter items tree node.
@@ -98,7 +98,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 				try{
 					s.beginTransaction();
 					if (design != null){
-						s.update(design);
+						design = s.merge(design);
 						for (MissionProperty p : design.getMissionProperties()){
 							p.getAttribute().getName();
 						}

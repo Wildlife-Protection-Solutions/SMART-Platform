@@ -80,7 +80,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
-						SurveyDesign sds = (SurveyDesign) s.load(SurveyDesign.class, uuid);
+						SurveyDesign sds = (SurveyDesign) s.getReference(SurveyDesign.class, uuid);
 						sds.getName();
 						sd[0] = sds;
 					}

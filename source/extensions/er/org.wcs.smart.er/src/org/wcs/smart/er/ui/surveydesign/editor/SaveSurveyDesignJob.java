@@ -59,7 +59,7 @@ public class SaveSurveyDesignJob extends Job {
 				
 				//we need to merge mission properties; for some reason the cascade doesn't work in
 				//this case; probably a many to many problem;
-				SurveyDesign db = (SurveyDesign) session.load(SurveyDesign.class, design.getUuid());
+				SurveyDesign db = (SurveyDesign) session.getReference(SurveyDesign.class, design.getUuid());
 				List<MissionProperty> toRemove = new ArrayList<MissionProperty>();
 				for (MissionProperty mp : db.getMissionProperties()){
 					if (!design.getMissionProperties().contains(mp)){
@@ -72,19 +72,19 @@ public class SaveSurveyDesignJob extends Job {
 						query.setParameter("sd", db); //$NON-NLS-1$
 						List<MissionPropertyValue> toDelete = query.list();
 						for (MissionPropertyValue v: toDelete){
-							session.delete(v);
+							session.remove(v);
 						}
 					}
 				}
 				for (MissionProperty mp : toRemove){
-					session.delete(mp);
+					session.remove(mp);
 				}
 				db.getMissionProperties().removeAll(toRemove);
 				session.flush();
 				session.clear();
 				
 				// save original design
-				session.saveOrUpdate(design);
+				session.merge(design);
 				session.getTransaction().commit();
 				
 	        	return Status.OK_STATUS;

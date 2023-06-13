@@ -43,6 +43,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SharedUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * SMART installation info page.
  * 
@@ -114,10 +116,9 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		
 		try(Session s = HibernateManager.openSession()){
-			List<?> data = s.createNativeQuery("SELECT plugin_id, version FROM " +SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
-			for (Object x : data){
-				Object[] z = (Object[])x;
-				sb.append("  " + (String)z[0] + ": " + (String)z[1]);  //$NON-NLS-1$//$NON-NLS-2$
+			List<Tuple> data = s.createNativeQuery("SELECT plugin_id, version FROM " +SmartDB.PLUGIN_VERSION_TBL, Tuple.class).list(); //$NON-NLS-1$
+			for (Tuple z : data){
+				sb.append("  " + (String)z.get(0) + ": " + (String)z.get(1));  //$NON-NLS-1$//$NON-NLS-2$
 				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 		}catch (Exception ex){

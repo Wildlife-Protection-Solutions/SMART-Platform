@@ -61,12 +61,12 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 			return null;
 		}
 		
-		Query<?> query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		Query<String> query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid", String.class); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
-		List<?> results = query.list();
+		List<String> results = query.list();
 		if (results.size() == 0 ) return null;
 		
-		String stylemap = (String)results.get(0);
+		String stylemap = results.get(0);
 		
 		try {
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);

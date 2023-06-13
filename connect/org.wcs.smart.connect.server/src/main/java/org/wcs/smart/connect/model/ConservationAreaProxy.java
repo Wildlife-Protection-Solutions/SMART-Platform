@@ -23,8 +23,8 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  * Simple Connect conservation area info object.
@@ -33,7 +33,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "connect.ca_info")
+@Table(name = "ca_info", schema="connect")
 public class ConservationAreaProxy {
 
 	private UUID caUuid;

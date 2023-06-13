@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -117,8 +118,11 @@ public class DataentryHibernateManager extends HibernateManager {
 			return;
 		for (CmNode cmNode : nodes) {
 			cmNode.getNames().size();
-			if (cmNode.getCategory() != null) cmNode.getCategory().getNames().size();
+			Hibernate.initialize(cmNode.getNames());
+			if (cmNode.getCategory() != null) Hibernate.initialize(cmNode.getCategory().getNames());
 			cmNode.getCmAttributes().size();
+			Hibernate.initialize(cmNode.getCmAttributes());
+			cmNode.getCmAttributes().forEach(a->Hibernate.initialize(a.getCmAttributeOptions()));
 			fetchNodesData(cmNode.getChildren());
 		}
 	}
@@ -127,6 +131,7 @@ public class DataentryHibernateManager extends HibernateManager {
 		if (cm.getUuid() == null) {
 			return new ArrayList<>();
 		}
+		
 		return QueryFactory.buildQuery(session, CmAttributeConfig.class,
 				new Object[] {"attribute", attribute}, //$NON-NLS-1$
 				new Object[] {"model", cm}).list(); //$NON-NLS-1$

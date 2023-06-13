@@ -51,11 +51,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -79,8 +76,6 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	
 	private List<MissionAttribute> attributes;
 	
-	private Session session;
-	
 	public MissionAttributeDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -88,49 +83,11 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
-	@Override
-	protected void okPressed() {
-		if (saveChanges()){
-			session.getTransaction().begin();
-		};
-		
-	}
-	
-	private boolean saveChanges(){
-		try{
-			//commit changes
-			session.getTransaction().commit();			
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			return true;
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionAttributeDialog_SaveError + " \n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			return false;
-		}
-	}
-	
-	public boolean close(){
-		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), Messages.MissionAttributeDialog_CloseDialogTitle, Messages.MissionAttributeDialog_CloseMsg)){
-				if (!saveChanges()){
-					return false;
-				}
-			}
-		}
-		if (session.getTransaction().isActive()){
-			session.getTransaction().rollback();
-		}
-		session.close();
-		return super.close();
-	}
 	
 	protected Control createDialogArea(Composite parent) {
-		session = HibernateManager.openSession(new AttachmentInterceptor());
-		session.beginTransaction();
 		
 		Composite main = new Composite((Composite)super.createDialogArea(parent), SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
@@ -222,16 +179,9 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 		ma.setType(AttributeType.LIST);
 		ma.setConservationArea(SmartDB.getCurrentConservationArea());
 		
-		EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(
-				getShell(), ma, attributes, session);
-		if (dialog.open() == OK){
-			attributes.add(ma);
-			saveIcon(ma);
-			session.save(ma);
-			
-			lstAttributes.refresh();
-			getButton(IDialogConstants.OK_ID).setEnabled(true);
-		}
+		EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes);
+		dialog.open();
+		initData();			
 	}
 
 	
@@ -245,13 +195,24 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 			//do not delete
 			return;
 		}
-		try{
+		try(Session session = HibernateManager.openSession()){
 			if (DeleteManager.canDelete(ma, session)){
-				attributes.remove(ma);
-				session.delete(ma);
-				session.flush();
-				lstAttributes.refresh();
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				session.beginTransaction();
+				try {
+					session.remove(ma);
+					session.getTransaction().commit();
+				}catch(Exception ex){
+					session.getTransaction().rollback();
+					throw ex;
+				}
+
+
+				attributes = QueryFactory.buildQuery(session, 
+						MissionAttribute.class, 
+						"conservationArea", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+						.getResultList(); 
+					
+				lstAttributes.setInput(attributes);
 			}
 		}catch (Exception ex){
 			MessageDialog.openError(getShell(), Messages.MissionAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.MissionAttributeDialog_DeleteError, new Object[]{ma.getName()}) + " " + ex.getMessage()); //$NON-NLS-1$
@@ -261,19 +222,11 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	private void editAttribute(){
 		MissionAttribute ma = (MissionAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma != null){
-			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes, session);
-			if (dialog.open() == EditMissionAttributeDialog.OK){
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
-				saveIcon(ma);
-				((AttributeLabelProvider)lstAttributes.getLabelProvider()).clearCachedImages();
-			}
-			lstAttributes.refresh();
+			EditMissionAttributeDialog dialog = new EditMissionAttributeDialog(getShell(), ma, attributes);
+			dialog.open();
+			initData();
+			
 		}
-	}
-	
-	private void saveIcon(MissionAttribute ma) {
-		if (ma.getIcon() != null && ma.getIcon().getUuid() == null) session.saveOrUpdate(ma.getIcon());
-		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null && e.getIcon().getUuid() == null).forEach(li->session.saveOrUpdate(li.getIcon()));
 	}
 	
 	private void enableButtons(){
@@ -288,22 +241,17 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 	
 	
 	private void initData(){
-		attributes = QueryFactory.buildQuery(session, 
+		try(Session session = HibernateManager.openSession()){
+			attributes = QueryFactory.buildQuery(session, 
 				MissionAttribute.class, 
 				"conservationArea", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.getResultList(); 
-		lstAttributes.setInput(attributes);
-		
-		attributes.forEach(a->{
-			if (a.getIcon() != null) {
-				a.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
-			}
 			
-			for (MissionAttributeListItem li : a.getAttributeList()) {
-				if (li.getIcon() == null) continue;
-				li.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
-			}
-		});
+			lstAttributes.setInput(attributes);
+			
+			((AttributeLabelProvider)lstAttributes.getLabelProvider()).clearCachedImages();			
+			lstAttributes.refresh();
+		}
 	}
 	
 	@Override

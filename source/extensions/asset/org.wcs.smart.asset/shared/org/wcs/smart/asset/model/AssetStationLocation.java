@@ -24,19 +24,19 @@ package org.wcs.smart.asset.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset.Status;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class for asset station location. An asset station location with a station
@@ -46,7 +46,7 @@ import org.wcs.smart.ca.UuidItem;
  * @author egouge
  */
 @Entity
-@Table(name="smart.asset_station_location")
+@Table(name="asset_station_location", schema="smart")
 public class AssetStationLocation extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
@@ -226,7 +226,7 @@ public class AssetStationLocation extends UuidItem {
 		}
 		LocalDateTime now = LocalDateTime.now();
 		String query = "SELECT count(*) FROM AssetDeployment WHERE stationLocation = :location and startDate <= :now1 and (endDate is null or endDate >= :now2)"; //$NON-NLS-1$
-		Long activeDeployments = (Long) session.createQuery(query)
+		Long activeDeployments = session.createQuery(query, Long.class)
 				.setParameter("now1",  now) //$NON-NLS-1$
 				.setParameter("now2",  now) //$NON-NLS-1$
 				.setParameter("location",  this).uniqueResult(); //$NON-NLS-1$

@@ -41,7 +41,7 @@ public enum DerbyTriggerManager {
      * @return true if trigger exists, false otherwise
      */
 	public boolean triggerExists(String name, Session s){
-		NativeQuery<?> q = s.createNativeQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = UPPER(:triggerName)"); //$NON-NLS-1$
+		NativeQuery<Integer> q = s.createNativeQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = UPPER(:triggerName)", Integer.class); //$NON-NLS-1$
 		q.setParameter("triggerName", name); //$NON-NLS-1$
 		Integer cnt = (Integer)q.uniqueResult();
 		if (cnt.longValue() == 0) return false;
@@ -59,7 +59,7 @@ public enum DerbyTriggerManager {
 	public boolean createTriggerIfNotExists(String name, String sql, Session s){
 		if (triggerExists(name, s)) return false;
 		try {
-			s.createNativeQuery(sql).executeUpdate();
+			s.createNativeMutationQuery(sql).executeUpdate();
 		}catch (Throwable t) {
 			t.printStackTrace();
 			throw t;
@@ -77,7 +77,7 @@ public enum DerbyTriggerManager {
 	 */
 	public boolean dropIfExists(final String name, Session s){
 		if (!triggerExists(name, s)) return false;
-		s.createNativeQuery("DROP TRIGGER " + name).executeUpdate(); //$NON-NLS-1$
+		s.createNativeMutationQuery("DROP TRIGGER " + name).executeUpdate(); //$NON-NLS-1$
 		return true;
 	}
 }

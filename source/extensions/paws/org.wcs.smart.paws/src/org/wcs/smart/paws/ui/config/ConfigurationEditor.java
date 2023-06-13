@@ -22,6 +22,7 @@
 package org.wcs.smart.paws.ui.config;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,7 +80,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.geotools.referencing.CRS;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -87,8 +88,8 @@ import org.opengis.referencing.FactoryException;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -203,13 +204,12 @@ public class ConfigurationEditor extends EditorPart {
 						pw.setName(compHeader.getText());
 					}
 					isNew = true;
+					s.persist(pw);
 				}else {
 					pw = s.get(PawsConfiguration.class, pw.getUuid());
 					pw.setName(compHeader.getText());
 				}
-				
-				s.saveOrUpdate(pw);
-	
+					
 				fileNames.add(PawsFileManager.INSTANCE.getDirectory(pw).toString());
 				
 				//update boundary
@@ -1200,7 +1200,7 @@ public class ConfigurationEditor extends EditorPart {
 		}
 	};
 		
-	class CopyFilesInterceptor extends EmptyInterceptor{
+	class CopyFilesInterceptor implements Interceptor, Serializable{
 		private static final long serialVersionUID = 1L;
 
 		private List<Path[]> filesToCopy;

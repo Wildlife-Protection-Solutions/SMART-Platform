@@ -48,6 +48,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
@@ -236,7 +237,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try{
-					this.mission = (Mission) session.load(Mission.class, muuid);
+					this.mission = (Mission) session.getReference(Mission.class, muuid);				
+					Hibernate.initialize(this.mission);
+					Hibernate.initialize(this.mission.getMissionPropertyValues());
+					Hibernate.initialize(this.mission.getMembers());
 					missionDates = new LocalDate[]{mission.getStartDate(), mission.getEndDate()};
 
 					//load mission items so don't have lazy loading issues later.
@@ -245,6 +249,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 						try{
 							for (SurveyWaypoint wp : md.getWaypoints()){
 								ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+								wp.getWaypoint().getObservationsAsString();
+								Hibernate.initialize(wp.getWaypoint());
 							}
 						}catch (Exception ex){
 							EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
@@ -265,11 +271,12 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 					for (SamplingUnit s : sUnits){
 						s.getId();
 					}
-					session.getTransaction().commit();
 				}catch (Exception ex) {
-					session.getTransaction().rollback();
 					throw ex;
+				}finally {
+					session.getTransaction().rollback();
 				}
+				
 			}
 		}
 		return this.mission;

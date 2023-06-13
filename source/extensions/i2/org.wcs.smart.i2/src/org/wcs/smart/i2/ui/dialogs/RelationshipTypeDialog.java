@@ -81,7 +81,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.IconComposite;
@@ -201,7 +201,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(type);
+				if (type.getUuid() == null) s.persist(type); else s.merge(type);
 				
 				for (IntelRelationshipTypeAttribute a : attributeList){
 					if (!type.getAttributes().contains(a)){
@@ -213,7 +213,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 				for (IntelRelationshipTypeAttribute a : type.getAttributes()){
 					if (!attributeList.contains(a)){					
 						//delete any entity attribute value associations
-						Query<?> qDelete = s.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att AND id.relationship IN (FROM IntelEntityRelationship r WHERE r.relationshipType = :relationshipType ) "); //$NON-NLS-1$
+						MutationQuery qDelete = s.createMutationQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att AND id.relationship IN (FROM IntelEntityRelationship r WHERE r.relationshipType = :relationshipType ) "); //$NON-NLS-1$
 						qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
 						qDelete.setParameter("relationshipType", type); //$NON-NLS-1$
 						qDelete.executeUpdate();
@@ -880,6 +880,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 					}
 					entityTypeSiblings = RelationshipTypeManager.INSTANCE.getRelationshipTypes(s, SmartDB.getCurrentConservationArea());
 					entityTypeSiblings.remove(type);
+					entityTypeSiblings.forEach(e->e.getNames().size());
 					groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
 				}
 

@@ -90,7 +90,7 @@ public class MergePatrolsHandler {
 			session.beginTransaction();
 			try{
 				for(PatrolEditorInput pei : toMerge){
-					patrols.add((Patrol)session.load(Patrol.class, pei.getUuid()));
+					patrols.add((Patrol)session.getReference(Patrol.class, pei.getUuid()));
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex){

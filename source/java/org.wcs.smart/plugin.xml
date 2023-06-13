@@ -1232,7 +1232,7 @@
    <extension
          point="org.wcs.smart.hibernate.libs.mapping">
       <class
-            ca_property=".uuid"
+            ca_uuid_property=".uuid"
             class="org.wcs.smart.ca.ConservationArea"
             supportsCcaa="true">
       </class>

@@ -134,12 +134,12 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.source.conservationArea"
+            ca_property=".source.conservationArea"
             class="org.wcs.smart.i2.model.IntelRecordSourceAttribute"
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.record.conservationArea"
+            ca_property=".record.conservationArea"
             class="org.wcs.smart.i2.model.IntelRecordAttributeValue"
             supportsCcaa="false">
       </class>

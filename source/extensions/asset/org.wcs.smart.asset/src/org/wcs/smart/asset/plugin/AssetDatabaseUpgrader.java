@@ -133,7 +133,7 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, AssetPlugIn.DB_VERSION_2, session);

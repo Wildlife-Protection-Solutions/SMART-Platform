@@ -186,7 +186,7 @@ public class ConnectMapLayers extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			s.save(m);
+			s.persist(m);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
@@ -236,7 +236,7 @@ public class ConnectMapLayers extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
     	s.beginTransaction();
 		try{
-			toUpdate =s.get(MapLayer.class, oldUuid);
+			toUpdate = s.get(MapLayer.class, oldUuid);
 			
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConnectMapLayers.MapLayerNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -264,7 +264,6 @@ public class ConnectMapLayers extends HttpServlet {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.LayerNameTooLong", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
-			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -301,7 +300,7 @@ public class ConnectMapLayers extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("MapLayer.LayerNotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
 			}
-			s.delete(toDelete);
+			s.remove(toDelete);
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){

@@ -77,10 +77,10 @@ import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -203,7 +203,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							oldLink.setLastObservationCnt(-1);
 							oldLink.setGroupStartTime(null);
 							oldLink.setWaypointLinks(new ArrayList<>());
-							session.save(oldLink);
+							session.persist(oldLink);
 							
 						}
 						link.setPatrolLeg(newLeg);	
@@ -513,7 +513,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							}
 						}
 						
-						if (link.getPatrolLeg().getPatrol().getUuid() != null) session.save(newGroup);
+						if (link.getPatrolLeg().getPatrol().getUuid() != null) session.persist(newGroup);
 						
 						//update patrol links
 						CtPatrolWpLink wplink = new CtPatrolWpLink();
@@ -895,7 +895,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			
 			session.saveOrUpdate(wp);
 			session.saveOrUpdate(addToD);
-			session.save(pw);
+			session.persist(pw);
 			session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
 			session.flush();
 		}

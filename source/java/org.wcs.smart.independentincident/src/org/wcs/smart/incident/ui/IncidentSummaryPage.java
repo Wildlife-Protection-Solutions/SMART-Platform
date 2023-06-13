@@ -49,6 +49,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -59,6 +60,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
@@ -385,8 +387,29 @@ public class IncidentSummaryPage extends EditorPart {
 					l = toolkit.createLabel(attributes,Messages.IncidentSummaryPage_AttachmentsLabel);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 				
-					l = toolkit.createLabel(attributes, MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					
+					Composite links = toolkit.createComposite(attributes);
+					links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					links.setLayout(new RowLayout());
+					((RowLayout)links.getLayout()).wrap = true;
+					((RowLayout)links.getLayout()).marginTop = 0;
+					((RowLayout)links.getLayout()).marginLeft = 0;
+					((RowLayout)links.getLayout()).marginRight = 0;
+					((RowLayout)links.getLayout()).marginBottom = 0;
+					
+					for (ObservationAttachment attach : wo.getAttachments()) {
+						Hyperlink lnk = toolkit.createHyperlink(links, attach.getFilename(), SWT.NONE);
+						//lnk.setText("<a>" + attach.getFilename() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+						lnk.addHyperlinkListener(new HyperlinkAdapter() {
+							@Override
+							public void linkActivated(HyperlinkEvent e) {
+								AttachmentUtil.openAttachment(attach);
+							}
+						});
+					}
+					
+					//l = toolkit.createLabel(attributes, MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
+					links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 					if (i < g.getObservations().size() - 1) {
 						l = toolkit.createLabel(group, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$

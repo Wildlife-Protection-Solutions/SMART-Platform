@@ -132,7 +132,7 @@ public class ExportPatrolHandler {
 							try(Session s = HibernateManager.openSession()){
 								s.beginTransaction();
 								try {
-									p = (Patrol) s.load(Patrol.class, puuid);
+									p = (Patrol) s.getReference(Patrol.class, puuid);
 									id = p.getId();
 								} catch (Exception ex) {
 									SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{UuidUtils.uuidToString(puuid)}), ex);

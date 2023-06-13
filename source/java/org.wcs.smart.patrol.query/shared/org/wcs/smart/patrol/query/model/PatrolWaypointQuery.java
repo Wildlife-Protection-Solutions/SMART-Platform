@@ -24,16 +24,16 @@ package org.wcs.smart.patrol.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A class to represent an waypoint query.
@@ -44,7 +44,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.waypoint_query")
+@Table(name="waypoint_query", schema="smart")
 public class PatrolWaypointQuery extends WaypointQuery{
 
 	private static final long serialVersionUID = 1L;

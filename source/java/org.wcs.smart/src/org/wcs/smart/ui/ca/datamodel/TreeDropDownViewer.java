@@ -30,6 +30,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -65,6 +67,8 @@ public class TreeDropDownViewer {
 	private PatternFilter patternFilter;
 	private LocalFilteredTree fTree;
 	
+	
+	private boolean hasFocus = false;
 	
 	/**
 	 * Creates a new tree drop down viewer inside a separate shell.
@@ -124,7 +128,32 @@ public class TreeDropDownViewer {
 		gl.marginHeight = 0;
 		main.setLayout(gl);
 		createComposite(main);
+		
+		FocusListener fl = new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				TreeDropDownViewer.this.hasFocus = false;
+				Display.getDefault().asyncExec(()->checkFocus());
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				TreeDropDownViewer.this.hasFocus = true;
+				Display.getDefault().asyncExec(()->checkFocus());
+			}
+			
+			private void checkFocus() {
+				if (!TreeDropDownViewer.this.hasFocus) {
+					TreeDropDownViewer.this.hide();
+				}
+			}
+		};
+		getTreeViewer().getTree().addFocusListener(fl);
+		getFilteredTree().getFilterControl().addFocusListener(fl);
 	}
+	
+	
+	
 	
 	/**
 	 * 

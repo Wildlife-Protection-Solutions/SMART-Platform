@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.query.common.model;
 
-import javax.persistence.MappedSuperclass;
-
 import org.wcs.smart.query.model.IPagedQuery;
+
+import jakarta.persistence.MappedSuperclass;
 
 /**
  * A class to represent an waypoint query.

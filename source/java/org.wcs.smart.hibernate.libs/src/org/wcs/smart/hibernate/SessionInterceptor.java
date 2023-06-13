@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.hibernate;
 
-import org.hibernate.EmptyInterceptor;
+import java.io.Serializable;
+
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 
 /**
@@ -31,7 +33,7 @@ import org.hibernate.Session;
  * @author Emily
  *
  */
-public class SessionInterceptor extends EmptyInterceptor {
+public class SessionInterceptor implements Interceptor, Serializable {
 
 	private static final long serialVersionUID = 1L;
 

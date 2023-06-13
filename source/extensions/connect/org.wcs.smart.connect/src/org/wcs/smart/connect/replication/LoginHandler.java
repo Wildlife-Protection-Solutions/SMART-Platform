@@ -149,8 +149,8 @@ public class LoginHandler implements ILoginHandler {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					s.saveOrUpdate(status);
-					status.setStatus(Status.ERROR);
+					ConnectServerStatus upstatus = s.getReference(status);
+					upstatus.setStatus(Status.ERROR);
 					s.getTransaction().commit();
 					return;
 				}catch (Exception ex) {
@@ -186,8 +186,8 @@ public class LoginHandler implements ILoginHandler {
 				
 					s.beginTransaction();
 					try {
-						status.setStatus(Status.ERROR);
-						s.saveOrUpdate(status);
+						ConnectServerStatus upstatus = s.getReference(status);
+						upstatus.setStatus(Status.ERROR);
 						s.getTransaction().commit();
 						return;
 					}catch (Exception ex) {
@@ -299,7 +299,7 @@ public class LoginHandler implements ILoginHandler {
 				for (ConnectSyncHistoryRecord r : allActive){
 					if (!r.equals(record)){
 						r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-						s.saveOrUpdate(r);
+						s.merge(r);
 					}
 				}
 				s.getTransaction().commit();
@@ -323,7 +323,7 @@ public class LoginHandler implements ILoginHandler {
 						s.beginTransaction();
 						try{
 							record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-							s.saveOrUpdate(record);
+							s.merge(record);
 							s.getTransaction().commit();
 						}catch (Exception ex) {
 							s.getTransaction().rollback();
@@ -345,7 +345,7 @@ public class LoginHandler implements ILoginHandler {
 								s.beginTransaction();
 								try{
 									record.setStatus(ConnectSyncHistoryRecord.Status.NODATA);
-									s.saveOrUpdate(record);
+									s.merge(record);
 									s.getTransaction().commit();
 								}catch (Exception ex2) {
 									s.getTransaction().rollback();
@@ -358,7 +358,7 @@ public class LoginHandler implements ILoginHandler {
 							s.beginTransaction();
 							try {
 								record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-								s.saveOrUpdate(record);
+								s.merge(record);
 								s.getTransaction().commit();
 							}catch (Exception ex) {
 								s.getTransaction().rollback();

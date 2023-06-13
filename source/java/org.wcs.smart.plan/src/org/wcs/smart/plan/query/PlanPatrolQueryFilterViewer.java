@@ -102,12 +102,12 @@ public class PlanPatrolQueryFilterViewer implements IExtensionFilterViewer {
 	 */
 	private static List<UUID> listChildPlanIds(UUID planUuid, Session session) {
 		List<UUID> ids = new ArrayList<UUID>();
-		Query<?> query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid"); //$NON-NLS-1$
+		Query<UUID> query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid", UUID.class); //$NON-NLS-1$
 		query.setParameter("uuid", planUuid); //$NON-NLS-1$
-		List<?> list = query.list();
-		for(Object x : list) {
-			ids.add((UUID)x);
-			ids.addAll(listChildPlanIds((UUID)x, session));
+		List<UUID> list = query.list();
+		for(UUID x : list) {
+			ids.add(x);
+			ids.addAll(listChildPlanIds(x, session));
 		}
 		return ids;
 	}

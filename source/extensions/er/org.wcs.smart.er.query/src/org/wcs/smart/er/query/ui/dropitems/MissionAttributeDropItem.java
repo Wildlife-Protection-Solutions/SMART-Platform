@@ -105,7 +105,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					MissionAttribute attribute = (MissionAttribute) s.load(MissionAttribute.class, ma.getUuid());
+					MissionAttribute attribute = (MissionAttribute) s.getReference(MissionAttribute.class, ma.getUuid());
 					for (MissionAttributeListItem i : attribute.getAttributeList()){
 						items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
 					}

@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.i2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Specific styles configuration related to {@link IntelEntityType}
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.UuidItem;
  *
  */
 @Entity
-@Table(name = "smart.i_diagram_entity_type_style")
+@Table(name = "i_diagram_entity_type_style", schema="smart")
 public class RelationshipDiagramEntityTypeStyle extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;
@@ -67,24 +67,26 @@ public class RelationshipDiagramEntityTypeStyle extends UuidItem {
 		this.entityType = entityType;
 	}
 	
+	//note: using getOptions and setOptions here causes hibernate failure
 	@Column(name="options")
-	public String getOptions() {
+	public String getOptionValues() {
 		return options;
 	}
-	public void setOptions(String options) {
+	public void setOptionValues(String options) {
 		this.options = options;
 	}
 
 	@Transient
 	public RelationshipDiagramNodeStyleOptions getStyleOptions() {
-		return getOptions() != null ? new RelationshipDiagramNodeStyleOptions(getOptions()) : null;
+		return getOptionValues() != null ? new RelationshipDiagramNodeStyleOptions(getOptionValues()) : null;
 	}
+	@Transient
 	public void setStyleOptions(RelationshipDiagramNodeStyleOptions styleOptions) {
 		if (styleOptions != null) {
-			setOptions(styleOptions.getJson().toString());
+			setOptionValues(styleOptions.getJson().toString());
 		} else {
-			setOptions(null);
-		}
+			setOptionValues(null);
+		}		
 	}
 
 }

@@ -89,12 +89,13 @@ public enum IncidentIdGenerator {
 				new Object[] {"key", PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
 		if (prop == null || prop.getValue() == null || prop.getValue().trim().isBlank()) {
 			
-			Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
-			q.setParameterList("source", incidentsources); //$NON-NLS-1$
-			q.setParameter("ca", ca); //$NON-NLS-1$
-			List<?> maxIs = q.list();
+			Query<Long> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca", Long.class) //$NON-NLS-1$
+				.setParameterList("source", incidentsources) //$NON-NLS-1$
+				.setParameter("ca", ca); //$NON-NLS-1$
+			
+			List<Long> maxIs = q.list();
 			long id = 1;
-			if (maxIs.size() > 0 && maxIs.get(0) != null ) id = (Long) maxIs.get(0);
+			if (maxIs.size() > 0 && maxIs.get(0) != null ) id = maxIs.get(0);
 			nextId = String.valueOf(id);
 		}else {
 			//find observer
@@ -116,11 +117,12 @@ public enum IncidentIdGenerator {
 		}
 		
 		while(true) {
-			Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca AND id = :id"); //$NON-NLS-1$
-			q.setParameterList("source", incidentsources); //$NON-NLS-1$
-			q.setParameter("ca", ca); //$NON-NLS-1$
-			q.setParameter("id", id); //$NON-NLS-1$
-			Long number = (Long) q.uniqueResult();
+			Long number = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca AND id = :id",Long.class) //$NON-NLS-1$
+				.setParameterList("source", incidentsources) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("id", id) //$NON-NLS-1$
+				.uniqueResult();
+			
 			if (number == 0) return id;
 			
 			cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);

@@ -100,7 +100,7 @@ public class EntityDatasetResultSet implements IResultSet {
 		}
 		
 		if (euuid == null) {
-			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql) //$NON-NLS-1$
+			m_maxRows = connection.getSession().createQuery("SELECT count(*) " + hql, Long.class) //$NON-NLS-1$
 					.setParameter("type", type) //$NON-NLS-1$
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.uniqueResult();
@@ -109,7 +109,7 @@ public class EntityDatasetResultSet implements IResultSet {
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		}else {
-			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql + " AND uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			m_maxRows = connection.getSession().createQuery("SELECT count(*) " + hql + " AND uuid = :uuid", Long.class) //$NON-NLS-1$ //$NON-NLS-2$
 					.setParameter("type", type) //$NON-NLS-1$
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.setParameter("uuid", euuid) //$NON-NLS-1$

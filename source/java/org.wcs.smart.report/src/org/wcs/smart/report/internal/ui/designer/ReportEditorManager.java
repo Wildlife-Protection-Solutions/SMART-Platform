@@ -30,7 +30,6 @@ import java.util.List;
 import org.eclipse.birt.report.designer.internal.ui.editors.IRelatedFileChangeResolve;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.views.ElementAdapterManager;
-import org.eclipse.birt.report.model.adapter.oda.model.DataSetParameters;
 import org.eclipse.birt.report.model.adapter.oda.model.DesignValues;
 import org.eclipse.birt.report.model.adapter.oda.model.util.SerializerImpl;
 import org.eclipse.birt.report.model.api.CellHandle;
@@ -342,7 +341,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 							copy.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), s));
 						
 							copy.setFilename(ReportManager.generateFilename(copy));
-							s.save(copy);
+							s.persist(copy);
 							
 							ReportManager.updateReportQueries(s, (ReportDesignHandle)editor.getModel(), copy);
 							s.getTransaction().commit();

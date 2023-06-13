@@ -195,6 +195,7 @@ public class NewProfileDialog extends SmartStyledTitleDialog {
 						}
 						
 						String xml = null;
+						
 						try(ZipFile archiveFile = new ZipFile(new SeekableInMemoryByteChannel(data)) ){
 							Enumeration<ZipArchiveEntry> entries = archiveFile.getEntries();
 							while (entries.hasMoreElements()) {

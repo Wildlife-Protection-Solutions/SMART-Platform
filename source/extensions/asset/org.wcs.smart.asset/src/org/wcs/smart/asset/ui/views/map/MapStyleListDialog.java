@@ -82,10 +82,10 @@ public class MapStyleListDialog extends SmartStyledTitleDialog {
 			session.beginTransaction();
 			try {
 				for (AssetMapStyle d : deletedStyles) {
-					session.delete(d);
+					session.remove(d);
 				}
 				for (AssetMapStyle s : mapStyles) {
-					session.saveOrUpdate(s);
+					HibernateManager.saveOrMerge(session, s);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

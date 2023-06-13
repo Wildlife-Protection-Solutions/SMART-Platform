@@ -39,7 +39,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
@@ -89,7 +89,7 @@ public class DeleteIncidentHandler{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				Query<?> q = s.createQuery("delete Waypoint w where w.uuid = :wp"); //$NON-NLS-1$
+				MutationQuery q = s.createMutationQuery("delete Waypoint w where w.uuid = :wp"); //$NON-NLS-1$
 				for (IncidentEditorInput w : toDelete){
 					q.setParameter("wp", w.getUuid()); //$NON-NLS-1$
 					q.executeUpdate();

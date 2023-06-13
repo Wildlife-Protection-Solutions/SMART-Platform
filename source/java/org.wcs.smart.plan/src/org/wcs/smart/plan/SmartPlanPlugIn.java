@@ -35,7 +35,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -118,8 +117,9 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		@Override
 		public boolean beforeDelete(Patrol patrol, Session session,
 				IProgressMonitor monitor) throws Exception {
-			Query<?> q = session.createQuery("DELETE FROM PatrolPlan where id.patrol = :patrol").setParameter("patrol", patrol);  //$NON-NLS-1$//$NON-NLS-2$
-			q.executeUpdate();
+			session.createMutationQuery("DELETE FROM PatrolPlan where id.patrol = :patrol") //$NON-NLS-1$
+					.setParameter("patrol", patrol)  //$NON-NLS-1$
+					.executeUpdate();
 			return true;
 		}
 		

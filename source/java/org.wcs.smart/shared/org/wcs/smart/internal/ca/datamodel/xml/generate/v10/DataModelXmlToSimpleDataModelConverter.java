@@ -32,10 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Language;
@@ -51,6 +47,10 @@ import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.internal.ca.datamodel.xml.IXmlToDataModelConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelValidator;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Converts a SMART XML data model to the database

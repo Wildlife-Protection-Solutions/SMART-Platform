@@ -114,6 +114,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+import jakarta.persistence.Tuple;
 
 /**
  * SMART Connect Report REST API
@@ -498,26 +499,26 @@ public class ReportApi extends HttpServlet{
 		HashMap<ReportProxy, String> query2names = new HashMap<>();
 
 		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code, r.folder.uuid " //$NON-NLS-1$
-				+ " FROM Report as r JOIN Label as l on l.id.element = r.uuid JOIN l.id.language as z " //$NON-NLS-1$
-				+ " WHERE l.id.element = r.uuid and (z.default = true or z.code in (:langs)) "; //$NON-NLS-1$
+				+ " FROM Report as r JOIN Label as l on l.id.element.uuid = r.uuid JOIN l.id.language as z " //$NON-NLS-1$
+				+ " WHERE l.id.element.uuid = r.uuid and (z.default = true or z.code in (:langs)) "; //$NON-NLS-1$
 		
-		List<?> results = session.createQuery(querypart)
+		List<Tuple> results = session.createQuery(querypart, Tuple.class)
 				.setParameterList("langs",  langs) //$NON-NLS-1$
 				.list();
 		
-		for (Object i : results) {
-			Object[] data = (Object[])i;
+		for (Tuple data : results) {
 			
-			UUID ruuid = (UUID) data[0];
-			String rid = (String)data[1];
-			boolean isShared = (boolean)data[2];
 			
-			UUID cauuid = (UUID)data[3];
-			String caid = (String)data[4];
+			UUID ruuid = (UUID) data.get(0);
+			String rid = (String)data.get(1);
+			boolean isShared = (boolean)data.get(2);
 			
-			String value = (String)data[5];
-			String code = (String)data[6];
-			UUID folderuuid = (UUID)data[7];
+			UUID cauuid = (UUID)data.get(3);
+			String caid = (String)data.get(4);
+			
+			String value = (String)data.get(5);
+			String code = (String)data.get(6);
+			UUID folderuuid = (UUID)data.get(7);
 
 			if (isShared || includeMyQueries) {
 				ReportProxy rp = new ReportProxy(ruuid, value, caid, rid, isShared, cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA), folderuuid);

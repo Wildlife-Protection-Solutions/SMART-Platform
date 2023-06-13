@@ -28,13 +28,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -43,6 +38,10 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Merges entity types across Conservation Areas.
@@ -75,10 +74,10 @@ public class EntityTypeMerger {
 		
 		//entity types must have the same keyid, dm attribute keyid and type
 		String hql = "SELECT count(*), e.keyId, e.type, a.keyId FROM EntityType e, Attribute a WHERE e.dmAttribute.uuid = a.uuid and e.conservationArea in (:ca) GROUP BY e.keyId, e.type, a.keyId";//$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
-		q.setParameterList("ca", cas);//$NON-NLS-1$
+		List<Object[]> data = session.createQuery(hql, Object[].class)
+							.setParameterList("ca", cas)//$NON-NLS-1$
+							.list();
 		
-		List<?> data = q.list();
 		List<String> keys = new ArrayList<String>();
 		for (Object d : data){
 			Object[] bits = (Object[])d;
@@ -163,12 +162,13 @@ public class EntityTypeMerger {
 			+ "WHERE e.dmAttribute.uuid = a.uuid and e.entityType.keyId = :entityType and e.entityType.conservationArea in (:cas) "  //$NON-NLS-1$
 			+ " GROUP BY e.keyId, a.keyId";//$NON-NLS-1$
 		
-		Query<?> q = session.createQuery(hql);
-		q.setParameter("entityType", entityType);//$NON-NLS-1$
-		q.setParameterList("cas", cas); //$NON-NLS-1$
+		List<Object[]> data = session.createQuery(hql, Object[].class)
+			.setParameter("entityType", entityType)//$NON-NLS-1$
+			.setParameterList("cas", cas) //$NON-NLS-1$
+			.list();
 		
 		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-		List<?> data = q.list();
+		
 		for (Object d : data ){
 			Object[] bits = (Object[])d;
 			Long cnt = (Long)bits[0];
@@ -181,18 +181,20 @@ public class EntityTypeMerger {
 				attributes.add(ea);
 				
 				//set the name
-				q = session.createQuery("FROM EntityAttribute e WHERE e.entityType.conservationArea = :ca and e.keyId = :key"); //$NON-NLS-1$
-				q.setParameter("ca", defaultCa); //$NON-NLS-1$
-				q.setParameter("key", ea.getKeyId()); //$NON-NLS-1$
-				EntityAttribute defaultAtt = (EntityAttribute) q.list().get(0);
+				EntityAttribute defaultAtt = session.createQuery("FROM EntityAttribute e WHERE e.entityType.conservationArea = :ca and e.keyId = :key", EntityAttribute.class) //$NON-NLS-1$
+					.setParameter("ca", defaultCa) //$NON-NLS-1$
+					.setParameter("key", ea.getKeyId()) //$NON-NLS-1$
+					.list().get(0);
+				
 				ea.setName(defaultAtt.getName());
 
 				//is primary
-				q = session.createQuery("FROM EntityAttribute e WHERE e.entityType.conservationArea in (:ca) and e.keyId = :key and is_primary = :primary"); //$NON-NLS-1$
-				q.setParameterList("ca", cas); //$NON-NLS-1$
-				q.setParameter("key", ea.getKeyId()); //$NON-NLS-1$
-				q.setParameter("primary", Boolean.TRUE); //$NON-NLS-1$
-				if (q.list().size() > 0){
+				List<EntityAttribute> items = session.createQuery("FROM EntityAttribute e WHERE e.entityType.conservationArea in (:ca) and e.keyId = :key and is_primary = :primary", EntityAttribute.class) //$NON-NLS-1$
+						.setParameterList("ca", cas) //$NON-NLS-1$
+						.setParameter("key", ea.getKeyId()) //$NON-NLS-1$
+						.setParameter("primary", Boolean.TRUE) //$NON-NLS-1$
+						.list();
+				if (items.size() > 0){
 					ea.setIsPrimary(true);
 				}
 				

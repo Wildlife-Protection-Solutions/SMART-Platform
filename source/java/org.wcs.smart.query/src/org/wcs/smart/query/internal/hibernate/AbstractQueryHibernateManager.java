@@ -26,12 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.hibernate.Session;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
-import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -63,11 +58,19 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	public abstract boolean canModifyCaQueries();
 	
 	
-	public ClassMetadata getClassMetadata(Class<?> queryClass, Session session) {
-		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)session.getSessionFactory()).getMetamodel();		
-		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(queryClass));
-		return info.getClassMetadata();
+	public boolean isMapped(Class<?> queryClass, Session session) {
+		try {
+			session.getSessionFactory().getMetamodel().entity(queryClass);
+			return true;
+		}catch(IllegalArgumentException ex) {
+			return false;
+		}
 	}
+	//public ClassMetadata getClassMetadata(Class<?> queryClass, Session session) {
+	//	MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)session.getSessionFactory()).getMetamodel();		
+	//	AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(queryClass));
+	//	return info.getClassMetadata();
+	//}
 	
 	/**
 	 * Generates a query id from the database 
@@ -80,15 +83,15 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		
 		int id = 0;
 		for (IQueryType type : types){
-			if (getClassMetadata(type.getHibernateClass(), session) == null){
+			if (!isMapped(type.getHibernateClass(), session)){
 				//query is not mapped to hibernate class so skip it
 				continue;
 			}
-			Query<?> a = session.createQuery("select max(id) from " + type.getHibernateClass().getSimpleName() + " where conservationArea = :ca"); //$NON-NLS-1$ //$NON-NLS-2$
+			Query<String> a = session.createQuery("select max(id) from " + type.getHibernateClass().getSimpleName() + " where conservationArea = :ca", String.class); //$NON-NLS-1$ //$NON-NLS-2$
 			a.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			List<?> dataa = a.list();
-			if( dataa != null && dataa.size() >= 1 && dataa.get(0) != null){
-				int temp = Integer.parseInt( (String)dataa.get(0) );
+			String value = a.uniqueResult();
+			if (value != null) {
+				int temp = Integer.parseInt( value );
 				if (temp > id){
 					id = temp;
 				}
@@ -170,17 +173,19 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 			}
 		}
 		
+
+		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
 				if (newQuery){
 					query.setId(generateQueryId(s));
 					//page1.setQuery();
+					s.persist(query);
+				}else {
+					query = s.merge(query);
 				}
-				if (proxy != null){
-					QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getDropItemFactory().generateDropItems(proxy, s);
-				}
-				s.saveOrUpdate(query);
+				
 				query.updateName(SmartDB.getCurrentLanguage(), query.getName());
 				if (SmartDB.getCurrentConservationArea().getDefaultLanguage() != null){
 					if (query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
@@ -188,6 +193,10 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 						query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
 					}
 				}
+				if (proxy != null){
+					QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getDropItemFactory().generateDropItems(proxy, s);
+				}
+				
 				s.getTransaction().commit();
 	
 			}catch (Exception ex){
@@ -242,7 +251,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 		String hsql = "SELECT q FROM " + queryType.getHibernateClass().getSimpleName() + " q, Label l WHERE l.id.element = q.uuid and q.conservationArea = :ca " +  //$NON-NLS-1$//$NON-NLS-2$
 				"and l.value = :name and (q.isShared = 'true' or (q.isShared = 'false' and q.owner = :employee))"; //$NON-NLS-1$ 
-		Query<?> query = session.createQuery(hsql); 
+		Query<?> query = session.createQuery(hsql, queryType.getHibernateClass()); 
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("employee", search); //$NON-NLS-1$
 		query.setParameter("name", queryName); //$NON-NLS-1$

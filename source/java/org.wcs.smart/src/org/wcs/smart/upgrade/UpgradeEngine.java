@@ -62,6 +62,8 @@ import org.wcs.smart.upgrade.v700.Upgrader750To751;
 import org.wcs.smart.upgrade.v700.Upgrader751To753;
 import org.wcs.smart.upgrade.v800.Upgrader753To800;
 
+import jakarta.persistence.Tuple;
+
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -326,11 +328,11 @@ public class UpgradeEngine {
 	public static Map<String, String> getVersions(Session s) throws Exception{
 		Map<String, String> versions = null; 
 		try {
-			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			List<Tuple> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL, Tuple.class).list(); //$NON-NLS-1$
 			versions = new HashMap<String, String>();
-			for (Object x : tmpversions){
-				String pluginid = (String) ((Object[])x)[0];
-				String version = (String) ((Object[])x)[1];
+			for (Tuple x : tmpversions){
+				String pluginid = (String)x.get(0);
+				String version = (String)x.get(1);
 				versions.put(pluginid, version);
 			}
 		} catch (Exception e) {

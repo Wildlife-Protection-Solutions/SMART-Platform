@@ -37,15 +37,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.ReportApi;
@@ -59,6 +55,10 @@ import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Remove items from filestore.
@@ -172,7 +172,7 @@ public class CleanUpJob implements Runnable {
 	private void cleanUpTileImageCache(Session session) {
 		session.beginTransaction();
 		LocalDateTime deleteData = LocalDate.now().minusMonths(2).atStartOfDay();
-		session.createQuery("DELETE FROM BasemapTile WHERE lastAccessed < :date") //$NON-NLS-1$
+		session.createMutationQuery("DELETE FROM BasemapTile WHERE lastAccessed < :date") //$NON-NLS-1$
 			.setParameter("date", deleteData) //$NON-NLS-1$
 			.executeUpdate();
 		session.getTransaction().commit();
@@ -224,10 +224,9 @@ public class CleanUpJob implements Runnable {
 		
 		s.beginTransaction();
 		try{
-			Query<?> q = s.createQuery("DELETE FROM WorkItem where startTime < :starttime"); //$NON-NLS-1$
-			
-			q.setParameter("starttime", LocalDateTime.now().minusDays(days)); //$NON-NLS-1$
-			q.executeUpdate();
+			s.createMutationQuery("DELETE FROM WorkItem where startTime < :starttime") //$NON-NLS-1$
+				.setParameter("starttime", LocalDateTime.now().minusDays(days)) //$NON-NLS-1$
+				.executeUpdate();
 			
 			s.getTransaction().commit();
 		}catch (Exception ex){
@@ -377,7 +376,7 @@ public class CleanUpJob implements Runnable {
 				for (ServerDataQueueItem delete : toDelete){
 					Path fToDelete = DataStoreManager.INSTANCE.getFile(delete.getFile());
 					filesToDelete.add(fToDelete);
-					s.delete(delete);
+					s.remove(delete);
 				}
 		
 				s.getTransaction().commit();
@@ -400,8 +399,8 @@ public class CleanUpJob implements Runnable {
 		Set<String> allFiles = new HashSet<String>();
 		s.beginTransaction();
 		try{
-			List<?> files = s.createQuery("SELECT file FROM ServerDataQueueItem").list(); //$NON-NLS-1$
-			for (Object x : files) allFiles.add((String)x);
+			List<String> files = s.createQuery("SELECT file FROM ServerDataQueueItem", String.class).list(); //$NON-NLS-1$
+			allFiles.addAll(files);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -437,11 +436,10 @@ public class CleanUpJob implements Runnable {
 		
 		s.beginTransaction();
 		try{
-			@SuppressWarnings("unchecked")
-			List<String> tablesToDrop = s.createNativeQuery(query).list();
+			List<String> tablesToDrop = s.createNativeQuery(query, String.class).list();
 			for (String table : tablesToDrop){
 				try{
-					s.createNativeQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
+					s.createNativeMutationQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
 				}catch (Exception ex){
 					logger.log(Level.WARNING, "Unable to drop temporary query table : " + table); //$NON-NLS-1$
 				}

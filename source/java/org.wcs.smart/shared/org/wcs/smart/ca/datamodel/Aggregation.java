@@ -24,15 +24,15 @@ package org.wcs.smart.ca.datamodel;
 import java.io.Serializable;
 import java.util.Locale;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.util.I18nUtil;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 
 /**
@@ -42,7 +42,7 @@ import org.wcs.smart.util.I18nUtil;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "smart.dm_aggregation")
+@Table(name = "dm_aggregation", schema="smart")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Aggregation implements Serializable {

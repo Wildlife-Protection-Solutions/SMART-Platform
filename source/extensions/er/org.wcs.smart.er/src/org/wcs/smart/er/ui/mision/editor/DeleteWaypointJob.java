@@ -66,8 +66,8 @@ public class DeleteWaypointJob extends Job {
 			try{
 				session.beginTransaction();
 				for (SurveyWaypoint wp : pnts) {
-					session.delete(wp);
-					session.delete(wp.getWaypoint());
+					session.remove(wp);
+					session.remove(wp.getWaypoint());
 				}
 				session.getTransaction().commit();
 			} catch (Exception ex) {

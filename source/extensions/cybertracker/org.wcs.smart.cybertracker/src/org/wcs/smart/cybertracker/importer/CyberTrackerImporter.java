@@ -34,10 +34,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -56,6 +52,10 @@ import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartFileUtils;
 import org.wcs.smart.util.SmartUtils;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Importer for CyberTracker application data. 

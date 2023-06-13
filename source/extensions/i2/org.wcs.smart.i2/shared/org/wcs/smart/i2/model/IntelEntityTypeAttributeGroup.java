@@ -21,16 +21,16 @@
  */
 package org.wcs.smart.i2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.NamedItem;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name="smart.i_entity_type_attribute_group")
+@Table(name="i_entity_type_attribute_group", schema="smart")
 public class IntelEntityTypeAttributeGroup extends NamedItem {
 
 	private static final long serialVersionUID = 1L;

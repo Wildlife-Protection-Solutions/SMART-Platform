@@ -175,6 +175,7 @@ public class QueryEditorUtils {
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
 				
+				@SuppressWarnings("restriction")
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {

@@ -23,8 +23,6 @@ package org.wcs.smart.r.engine;
 
 import java.util.List;
 
-import javax.persistence.Transient;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.query.importexport.IQueryExporter;
@@ -71,7 +69,6 @@ public class QueryConfiguration {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	@Transient
 	public static String toConfigurationString(String param, List<QueryConfiguration> queries) {
 		JSONObject items = new JSONObject();
 		items.put(RQuery.PARAM_JSONKEY, param);

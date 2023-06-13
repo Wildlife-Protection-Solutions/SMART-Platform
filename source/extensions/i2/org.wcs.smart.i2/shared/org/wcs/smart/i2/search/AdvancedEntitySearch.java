@@ -35,10 +35,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -128,7 +124,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	
 	public void dropResultsTable(Session session) {
 		try {
-			session.createNativeQuery("DROP TABLE " + resultsTable).executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + resultsTable).executeUpdate(); //$NON-NLS-1$
 		}catch (Exception ex) {}
 	}
 	
@@ -142,18 +138,16 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
 			
-			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
-			Root<IntelEntity> from = c.from(IntelEntity.class);
-			c.where(cb.and(
-					from.get("conservationArea").in(cas), //$NON-NLS-1$
-					from.get("profile").in(profiles) //$NON-NLS-1$
-					)); 
-			Query<IntelEntity> q = session.createQuery(c);
+			
+			Query<IntelEntity> q = session.createQuery("FROM IntelEntity WHERE conservationArea IN  (:cas) AND profile IN (:profiles)", IntelEntity.class) //$NON-NLS-1$
+					.setParameterList("cas", cas) //$NON-NLS-1$
+					.setParameterList("profiles", profiles); //$NON-NLS-1$
+			
+			
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
-			try(ScrollableResults scroll = q.scroll()){
+			try(ScrollableResults<IntelEntity> scroll = q.scroll()){
 				while(scroll.next()) {
-					IntelEntity entity = (IntelEntity) scroll.get()[0];
+					IntelEntity entity = scroll.get();
 					items.add(new IntelSearchResultItem(entity.getUuid(), 1));		
 				}
 			}
@@ -206,18 +200,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		sb.append(" WHERE "); //$NON-NLS-1$
 		sb.append(where);
 
-		
 		//query results
-		List<?> items = session.createNativeQuery(sb.toString()).list();
-		List<UUID> entities = new ArrayList<>();
-		for (Object x : items) {
-			byte[] bb = (byte[])x;
-			UUID eUuid = UuidUtils.byteToUUID(bb);
-			entities.add(eUuid);
-		}
-		
-		dropResultsTable(session);
-		
+		List<UUID> entities = session.createNativeQuery(sb.toString(), UUID.class).list();
+		dropResultsTable(session);	
 		return entities;
 		
 	}
@@ -239,7 +224,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		sb.append(" CREATE TABLE "); //$NON-NLS-1$
 		sb.append(resultsTable);
 		sb.append(" (entity_uuid char(16) for bit data, entity_type_key varchar(128) )"); //$NON-NLS-1$
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		
 		sb = new StringBuilder();
@@ -252,7 +237,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		
 		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList());
 		 
-		session.createNativeQuery(sb.toString())
+		session.createNativeMutationQuery(sb.toString())
 			.setParameterList("cauuids", uuids)	 //$NON-NLS-1$
 			.setParameterList("profiles", profiles.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList())) //$NON-NLS-1$
 			.executeUpdate();
@@ -279,7 +264,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(columnName);
 				sb.append(" boolean default false");  //$NON-NLS-1$
 					
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 				
 				String column = ""; //$NON-NLS-1$
 				switch (attribute) {
@@ -294,7 +279,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				
 				sb = new StringBuilder();
 				sb.append("CREATE TABLE qt_temp2 (entity_uuid char(16) for bit data)");  //$NON-NLS-1$
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 					
 				sb = new StringBuilder();
 				sb.append("INSERT INTO qt_temp2 (entity_uuid) " );  //$NON-NLS-1$
@@ -317,7 +302,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				LocalDate d1 = LocalDate.parse(bits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 				LocalDate d2 = LocalDate.parse(bits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 				
-				session.createNativeQuery(sb.toString())
+				session.createNativeMutationQuery(sb.toString())
 					.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
 					.setParameter("date2", d2.atTime(LocalTime.MAX)) //$NON-NLS-1$
 					.executeUpdate();
@@ -329,9 +314,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(columnName);
 				sb.append(" = true where entity_uuid in (select entity_uuid from qt_temp2)");  //$NON-NLS-1$
 					
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 				
-				session.createNativeQuery("DROP TABLE qt_temp2").executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP TABLE qt_temp2").executeUpdate(); //$NON-NLS-1$
 				
 				
 				where.append(" " + columnName +" ");  //$NON-NLS-1$//$NON-NLS-2$
@@ -349,7 +334,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(columnName);
 				sb.append(" boolean default false");  //$NON-NLS-1$
 					
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 					
 				sb = new StringBuilder();
 				sb.append("UPDATE "); //$NON-NLS-1$
@@ -358,7 +343,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(columnName);
 				sb.append(" = true WHERE entity_type_key = :key"); //$NON-NLS-1$
 				
-				session.createNativeQuery(sb.toString())
+				session.createNativeMutationQuery(sb.toString())
 					.setParameter("key", entityTypeKey)  //$NON-NLS-1$
 					.executeUpdate();
 				
@@ -378,12 +363,12 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(columnName);
 				sb.append(" boolean default false");  //$NON-NLS-1$
 					
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();
 				sb.append("CREATE TABLE qt_temp2 (entity_uuid char(16) for bit data)");  //$NON-NLS-1$
 					 
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 					
 				sb = new StringBuilder();
 				sb.append("INSERT INTO qt_temp2 (entity_uuid) " );  //$NON-NLS-1$
@@ -402,7 +387,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					sb.append(" WHERE v.double_value > 0.5 ");  //$NON-NLS-1$
 					
 						
-					session.createNativeQuery(sb.toString())
+					session.createNativeMutationQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
 						.executeUpdate();
 						
@@ -428,7 +413,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					}
 					sb.append(" LOWER(:value) "); //$NON-NLS-1$
 				
-					session.createNativeQuery(sb.toString())
+					session.createNativeMutationQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
 						.setParameter("value", value)  //$NON-NLS-1$
 						.executeUpdate();
@@ -444,7 +429,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					sb.append(" :value ");  //$NON-NLS-1$
 					
 						
-					session.createNativeQuery(sb.toString())
+					session.createNativeMutationQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
 						.setParameter("value", Double.parseDouble(qbits[2]))  //$NON-NLS-1$
 						.executeUpdate(); 
@@ -471,7 +456,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					LocalDate d1 = LocalDate.parse(qbits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 					LocalDate d2 = LocalDate.parse(qbits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 						
-					session.createNativeQuery(sb.toString())
+					session.createNativeMutationQuery(sb.toString())
 						.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
 						.setParameter("date2", d2.atTime(LocalTime.MAX)) //$NON-NLS-1$
 						.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
@@ -488,7 +473,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					
 
 					String listKey = qbits[2];
-					session.createNativeQuery(sb.toString())
+					session.createNativeMutationQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
 						.setParameter("keyId", listKey) //$NON-NLS-1$
 						.executeUpdate();
@@ -503,9 +488,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(" set ");  //$NON-NLS-1$
 				sb.append(columnName);
 				sb.append(" = true where entity_uuid in (select entity_uuid from qt_temp2)");  //$NON-NLS-1$
-				session.createNativeQuery(sb.toString()).executeUpdate();
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
 				
-				session.createNativeQuery("DROP TABLE qt_temp2").executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP TABLE qt_temp2").executeUpdate(); //$NON-NLS-1$
 				
 			}else if (t.equalsIgnoreCase(Operator.AND.getKey())){
 				where.append(" AND "); //$NON-NLS-1$

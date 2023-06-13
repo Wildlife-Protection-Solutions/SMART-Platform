@@ -23,15 +23,15 @@ package org.wcs.smart.paws.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.query.model.Query;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 @Entity
-@Table(name="smart.paws_query_class")
+@Table(name="paws_query_class", schema="smart")
 public class PawsQueryClass extends AbstractPawsClass{
 
 	private static final long serialVersionUID = 1L;

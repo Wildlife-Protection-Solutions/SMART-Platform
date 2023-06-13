@@ -49,6 +49,8 @@ import org.wcs.smart.datagenerator.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Composite for collecting time shift details
  * 
@@ -185,17 +187,17 @@ public class TimeShiftComposite extends Composite{
 			
 			try(Session s = HibernateManager.openSession()){
 				
-				Object[] data = (Object[]) s.createQuery("SELECT min(startDate), max(endDate) FROM Patrol WHERE conservationArea = :ca") //$NON-NLS-1$
+				Tuple data = s.createQuery("SELECT min(startDate), max(endDate) FROM Patrol WHERE conservationArea = :ca", Tuple.class) //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.uniqueResult();
 				
-				if (data[0] != null) {
-					minDate = (LocalDate)data[0];
+				if (data.get(0) != null) {
+					minDate = (LocalDate)data.get(0);
 				}else {
 					minDate = LocalDate.now();
 				}
-				if (data[1] != null) {
-					maxDate = (LocalDate)data[1];
+				if (data.get(1) != null) {
+					maxDate = (LocalDate)data.get(1);
 				}else {
 					maxDate = LocalDate.now();
 				}

@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
@@ -105,7 +106,10 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		try(Session s = HibernateManager.openSession()){
 			patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
 			types = SignatureTypeManager.INSTANCE.getTypes(s, SmartDB.getCurrentConservationArea());
-			types.forEach(t->t.getNames().size());
+			types.forEach(t->{
+				Hibernate.initialize(t);
+				t.getNames().forEach(n->Hibernate.initialize(n.getLanguage()));
+			});
 		}
 		deleteTypes = new ArrayList<>();
 	}
@@ -496,7 +500,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				s.saveOrUpdate(patrolOption);
+				
+				this.patrolOption = s.merge(patrolOption);
 				
 				for (SignatureType t : deleteTypes) {
 					SignatureTypeManager.INSTANCE.deleteType(t, s);

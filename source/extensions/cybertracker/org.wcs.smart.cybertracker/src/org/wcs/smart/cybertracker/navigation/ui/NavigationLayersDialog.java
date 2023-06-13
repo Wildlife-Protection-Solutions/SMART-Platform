@@ -409,7 +409,7 @@ public class NavigationLayersDialog extends SmartStyledTitleDialog {
 			session.beginTransaction();
 			try {
 				for (NavigationLayer p : items) {
-					session.delete(p);
+					session.remove(p);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

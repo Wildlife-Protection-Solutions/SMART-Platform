@@ -115,30 +115,32 @@ public class ReportManager {
 	 */
 	public static void deleteReportFolder(ReportFolder folder) throws Exception{
 		try(Session session = HibernateManager.openSession()){
-			session.load(folder, folder.getUuid());
+			
 			//report folders can only be removed if they don't have any children
 			session.beginTransaction();
-				try {
-				Query<?> q = session.createQuery("SELECT count(*) FROM ReportFolder WHERE parentFolder = :parent"); //$NON-NLS-1$
+			try {
+				session.load(folder, folder.getUuid());
+				
+				Query<Long> q = session.createQuery("SELECT count(*) FROM ReportFolder WHERE parentFolder = :parent", Long.class); //$NON-NLS-1$
 				q.setParameter("parent", folder); //$NON-NLS-1$
-				Long cnt = (Long) q.list().get(0);
+				Long cnt = q.uniqueResult();
 				if (cnt > 0){
 					throw new Exception(Messages.ReportManager_Error_ChildFoldersExist);
 				}
-				q = session.createQuery("SELECT count(*) FROM Report WHERE folder = :parent"); //$NON-NLS-1$
+				q = session.createQuery("SELECT count(*) FROM Report WHERE folder = :parent", Long.class); //$NON-NLS-1$
 				q.setParameter("parent", folder); //$NON-NLS-1$
-				cnt = (Long) q.list().get(0);
+				cnt = q.uniqueResult();
 				if (cnt > 0){
 					throw new Exception(Messages.ReportManager_Error_ChildReportsExist);
 				}
 				
 				folder.setDeletedParent(folder.getParentFolder());
 				if (folder.getParentFolder() != null){
-					session.update(folder.getParentFolder());
+					//session.merge(folder.getParentFolder());
 					folder.getParentFolder().getChildren().remove(folder);
 					folder.setParentFolder(null);
 				}else{
-					session.delete(folder);
+					session.remove(folder);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex){
@@ -158,7 +160,7 @@ public class ReportManager {
 		try(Session session = HibernateManager.openSession()){
 			try{
 				session.beginTransaction();
-				session.delete(report);
+				session.remove(report);
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				session.getTransaction().rollback();
@@ -188,7 +190,7 @@ public class ReportManager {
 	 */
 	public static String generateReportId(ConservationArea ca, Session session) throws Exception{
 		String newId = "000001"; //$NON-NLS-1$
-		Query<?> q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca"); //$NON-NLS-1$
+		Query<Long> q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca", Long.class); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		Object maxid = q.list().get(0);
 		if (maxid != null){
@@ -360,12 +362,12 @@ public class ReportManager {
 				}
 			}
 		}
-		Query<?> q = s.createQuery("delete ReportQuery where id.report=:report"); //$NON-NLS-1$
-		q.setParameter("report", r); //$NON-NLS-1$
-		q.executeUpdate();
+		s.createMutationQuery("DELETE ReportQuery WHERE id.report=:report") //$NON-NLS-1$
+			.setParameter("report", r) //$NON-NLS-1$
+			.executeUpdate();
 		
 		for (ReportQuery rq: reportQueries){
-			s.saveOrUpdate(rq);
+			s.merge(rq);
 		}
 	}
 	

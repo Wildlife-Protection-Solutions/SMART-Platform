@@ -197,7 +197,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IWOEngine<A
 		sb.append(queryDataTable);
 		sb.append(".wp_uuid)"); //$NON-NLS-1$
 		logger.finest(sb.toString());
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("SELECT DISTINCT tmp.wp_uuid, "); //$NON-NLS-1$

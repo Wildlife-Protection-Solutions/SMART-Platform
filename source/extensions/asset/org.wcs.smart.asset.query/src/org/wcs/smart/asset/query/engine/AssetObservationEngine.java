@@ -212,10 +212,10 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 		//setting result size
 		AssetPagedObservationResult results = (AssetPagedObservationResult)result;
 		
-		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = s.createNativeQuery("select count(*) from " + queryDataTable, Integer.class).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 		
-		Integer wcount = (Integer) s.createNativeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+		Integer wcount = s.createNativeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp", Integer.class).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 		results.setWpCount(wcount);
 	}
 	
@@ -322,7 +322,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 		sb.append(queryDataTable);
 		sb.append(".wp_uuid)"); //$NON-NLS-1$
 		QueryPlugIn.logSql(sb.toString());
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		progress.subTask(Messages.AssetObservationEngine_AssetDetailsSubTask); 
 		progress.split(3);
@@ -471,14 +471,14 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 			
 		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + getObservationLabelTable() + " WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
+		NativeQuery<Integer> q = s.createNativeQuery(sql, Integer.class);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-		if ((Integer)q.uniqueResult() == 0){
+		if (q.uniqueResult() == 0){
 			sql = " INSERT INTO " + getObservationLabelTable() + " (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createNativeQuery(sql);
-			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-			q.setParameter("label",  item.getName()); //$NON-NLS-1$
-			q.executeUpdate();
+			s.createNativeMutationQuery(sql)
+				.setParameter("uuid", item.getUuid()) //$NON-NLS-1$
+				.setParameter("label",  item.getName()) //$NON-NLS-1$
+				.executeUpdate();
 		}
 	}
 	

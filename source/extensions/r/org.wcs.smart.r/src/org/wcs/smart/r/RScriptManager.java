@@ -158,7 +158,7 @@ public enum RScriptManager {
 							
 							s.beginTransaction();
 							try{
-								s.delete(t);
+								s.remove(t);
 								s.getTransaction().commit();
 								deleted.add(t);
 							}catch(Exception ex){

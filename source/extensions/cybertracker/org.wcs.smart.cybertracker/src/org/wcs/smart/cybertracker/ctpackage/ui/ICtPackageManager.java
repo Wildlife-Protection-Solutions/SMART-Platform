@@ -98,7 +98,7 @@ public interface ICtPackageManager {
 	 */
 	public default void deletePackage(ICtPackage ctpackage, Session session) {
 		//delete package
-		session.delete(ctpackage);
+		session.remove(ctpackage);
 
 		//delete local file
 		if (ctpackage instanceof AbstractCtPackage) {

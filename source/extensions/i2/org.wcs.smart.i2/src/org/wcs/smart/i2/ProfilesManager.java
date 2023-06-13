@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -206,130 +206,130 @@ public enum ProfilesManager {
 		session.getTransaction().begin();
 		try {
 			// delete from working sets
-			Query<?> q = session.createQuery("delete from IntelWorkingSetEntity where id.entity in (FROM IntelEntity where profile = :profile)"); //$NON-NLS-1$
+			MutationQuery q = session.createMutationQuery("delete from IntelWorkingSetEntity where id.entity in (FROM IntelEntity where profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
-			q = session.createQuery("delete from IntelWorkingSetRecord where id.record in (FROM IntelRecord where profile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelWorkingSetRecord where id.record in (FROM IntelRecord where profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			// delete all entity attribute values
-			q = session.createQuery("delete from IntelEntityAttributeValue ieav where ieav.id.entity in (FROM IntelEntity WHERE profile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelEntityAttributeValue ieav where ieav.id.entity in (FROM IntelEntity WHERE profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all relationship attribute values
-			q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.relationship in (FROM IntelEntityRelationship r WHERE  r.sourceEntity in (FROM IntelEntity WHERE profile = :profile) or r.targetEntity in (FROM IntelEntity WHERE profile = :profile2))"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.relationship in (FROM IntelEntityRelationship r WHERE  r.sourceEntity in (FROM IntelEntity WHERE profile = :profile) or r.targetEntity in (FROM IntelEntity WHERE profile = :profile2))"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.setParameter("profile2", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all relationships
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelEntityRelationship ii where ii.sourceEntity in (FROM IntelEntity WHERE profile = :profile) or ii.targetEntity in (FROM IntelEntity WHERE profile = :profile2)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.setParameter("profile2", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all entity attachments
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelEntityAttachment ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all entity records
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelEntityRecord ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelEntityRecord ii where ii.id.record in (FROM IntelRecord WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			// delete all locations
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelEntityLocation ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelEntityLocation ii where ii.id.location in (FROM IntelLocation a WHERE a.record.profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			// delete all links to working sets
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelWorkingSetEntity ii where ii.id.entity in (FROM IntelEntity WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all entity
-			q = session.createQuery("delete from IntelEntity WHERE profile = :profile"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelEntity WHERE profile = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all record source attribute values
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT ii FROM IntelRecordAttributeValue ii join ii.record r where r.profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"delete from IntelRecordAttributeValue ii where ii.record in ( FROM IntelRecord where profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// delete all record attachments
-			q = session.createQuery("delete from IntelRecordAttachment ii where ii.id.record in (FROM IntelRecord WHERE profile = :profile) "); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelRecordAttachment ii where ii.id.record in (FROM IntelRecord WHERE profile = :profile) "); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			
 			//locations
-			q = session.createQuery("delete from IntelObservationAttributeList where id.observationAttribute in (FROM IntelObservationAttribute WHERE observation.location.record.profile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelObservationAttributeList where id.observationAttribute in (FROM IntelObservationAttribute WHERE observation.location.record.profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
-			q = session.createQuery("delete from IntelObservationAttribute where observation in (FROM IntelObservation WHERE location.record.profile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelObservationAttribute where observation in (FROM IntelObservation WHERE location.record.profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
-			q = session.createQuery("delete from IntelObservation where location in (FROM IntelLocation WHERE record.profile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelObservation where location in (FROM IntelLocation WHERE record.profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
-			q = session.createQuery("delete from IntelLocation where record in (FROM IntelRecord WHERE profile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelLocation where record in (FROM IntelRecord WHERE profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
-			q = session.createQuery("delete from IntelRecord where profile = :profile"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelRecord where profile = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			//relationship types where source or target matches profile
-			q = session.createQuery("delete from IntelRelationshipTypeAttribute where id.relationshipType in (FROM IntelRelationshipType WHERE sourceProfile = :profile or targetProfile = :profile)"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelRelationshipTypeAttribute where id.relationshipType in (FROM IntelRelationshipType WHERE sourceProfile = :profile or targetProfile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
-			q = session.createQuery("delete from IntelRelationshipType where sourceProfile = :profile or targetProfile = :profile"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelRelationshipType where sourceProfile = :profile or targetProfile = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
-			q = session.createQuery("delete from IntelProfileRecordSource where id.profile = :profile"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelProfileRecordSource where id.profile = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
 			// update relationships references to null
-			q = session.createQuery(
+			q = session.createMutationQuery(
 					"DELETE FROM IntelRelationshipType WHERE sourceProfile = :profile OR targetProfile = :profile2"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.setParameter("profile2", profile); //$NON-NLS-1$
 			q.executeUpdate();
 	
-			q = session.createQuery("delete from IntelProfile where uuid = :profile"); //$NON-NLS-1$
+			q = session.createMutationQuery("delete from IntelProfile where uuid = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile.getUuid()); //$NON-NLS-1$
 			q.executeUpdate();
 	
@@ -347,7 +347,7 @@ public enum ProfilesManager {
 						Set<String> filters = AbstractIntelQuery.convertFromProfileFilter(item.getProfileFilter());
 						filters.remove(profile.getKeyId());
 						if (filters.isEmpty()) {
-							session.delete(item);
+							session.remove(item);
 						} else {
 							item.setProfileFilter(AbstractIntelQuery.convertKeysToProfileFilter(filters));
 						}

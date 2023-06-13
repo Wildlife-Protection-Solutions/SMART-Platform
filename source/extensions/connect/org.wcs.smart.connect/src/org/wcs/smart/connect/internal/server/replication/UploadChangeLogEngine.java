@@ -122,7 +122,7 @@ public class UploadChangeLogEngine {
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try {
-						s.saveOrUpdate(record);
+						s.merge(record);
 						s.getTransaction().commit();
 					}catch (Exception ex) {
 						s.getTransaction().rollback();
@@ -232,7 +232,7 @@ public class UploadChangeLogEngine {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				s.saveOrUpdate(current);
+				s.merge(current);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();

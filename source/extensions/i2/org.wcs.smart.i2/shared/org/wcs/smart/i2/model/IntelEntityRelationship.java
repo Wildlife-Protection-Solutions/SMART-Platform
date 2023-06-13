@@ -24,19 +24,19 @@ package org.wcs.smart.i2.model;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class of i_entity_relationship.
@@ -45,7 +45,7 @@ import org.wcs.smart.ca.UuidItem;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_entity_relationship")
+@Table(name="i_entity_relationship", schema="smart")
 public class IntelEntityRelationship extends UuidItem{
 
 	private static final long serialVersionUID = 1L;

@@ -23,7 +23,7 @@ package org.wcs.smart.connect.internal;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -51,7 +51,7 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		monitor.subTask(Messages.CaConnectDeleteHandler_TaskName);
 		
 		//SMART Connect Users
-		Query<?> q = session.createQuery("delete from ConnectUser cu where cu in (SELECT cu2.uuid FROM ConnectUser cu2 where cu2.server.conservationArea = :ca)"); //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("delete from ConnectUser cu where cu in (SELECT cu2 FROM ConnectUser cu2 where cu2.server.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 
@@ -59,7 +59,7 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		ChangeLogTableManager.INSTANCE.deleteAll(session, ca);
 
 		//SMART Server Status
-		q = session.createQuery("delete from ConnectServerStatus where uuid = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from ConnectServerStatus where uuid = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -67,12 +67,12 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		SyncHistoryManager.INSTANCE.deleteAll(session, ca);
 		
 		//ConnectServerOptions
-		q = session.createQuery("delete from ConnectServerOption op where op.id.server in (SELECT op2.id.server FROM ConnectServerOption op2 WHERE op2.id.server.conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from ConnectServerOption op where op.id.server in (SELECT op2.id.server FROM ConnectServerOption op2 WHERE op2.id.server.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 				
 		//ConnectServer
-		q = session.createQuery("delete from ConnectServer where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from ConnectServer where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	

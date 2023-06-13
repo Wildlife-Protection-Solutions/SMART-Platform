@@ -23,19 +23,19 @@ package org.wcs.smart.qa.model;
 
 import java.util.Collection;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.qa.RoutineExtensionManager;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A QA routine created by the user. 
@@ -44,7 +44,7 @@ import org.wcs.smart.qa.RoutineExtensionManager;
  *
  */
 @Entity
-@Table(name="smart.qa_routine")
+@Table(name="qa_routine", schema="smart")
 public class QaRoutine extends NamedItem{
 
 	private static final long serialVersionUID = 1L;

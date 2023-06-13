@@ -51,25 +51,23 @@ public class I18nUtil
     }
     
     /**
-     * Set the locale for the current thread.
+     * Set the cauuid for the current thread.
      * 
-     * @param locale    the locale
+     * @param cauuid    the cauuid
      */
-    public static void setCa(UUID locale)
+    public static void setCa(UUID cauuid)
     {
-    	caLocale.set(locale);
+    	caLocale.set(cauuid);
     }
 
     /**
-     * Get the general local for the current thread, will revert to the default locale if none 
-     * specified for this thread.
+     * Get the cauuid for the current thread
      * 
-     * @return  the general locale
+     * @return  the cauuid
      */
     public static UUID getCa()
     {
-    	UUID locale = caLocale.get(); 
-        return locale;
+    	return caLocale.get(); 
     }
    
 	/**

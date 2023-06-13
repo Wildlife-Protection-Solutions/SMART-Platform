@@ -107,7 +107,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 	public void dispose(Session session) {
 		if (waypointFilterTable == null) return;
 		try {
-			session.createNativeQuery("DROP TABLE " + waypointFilterTable).executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + waypointFilterTable).executeUpdate(); //$NON-NLS-1$
 		}catch (Exception ex) {
 			AssetPlugIn.log(ex.getMessage(), ex);
 		}

@@ -315,7 +315,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 						pw.getWaypoint().setRawY(newy);
 						pw.getWaypoint().setDirection(newdirection);
 						pw.getWaypoint().setDistance(newdistance);
-						s.update(pw.getWaypoint());
+						s.merge(pw.getWaypoint());
 						s.getTransaction().commit();
 						modified = true;
 					}catch (Exception ex){
@@ -404,7 +404,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 						pw.getWaypoint().setRawY(y);
 						pw.getWaypoint().setDirection(direction);
 						pw.getWaypoint().setDistance(distance);
-						s.update(pw.getWaypoint());
+						s.merge(pw.getWaypoint());
 						s.getTransaction().commit();
 						
 						Display.getDefault().syncExec(()->{

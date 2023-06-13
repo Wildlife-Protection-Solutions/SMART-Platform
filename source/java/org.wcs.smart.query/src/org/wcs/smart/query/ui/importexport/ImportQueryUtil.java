@@ -24,10 +24,6 @@ package org.wcs.smart.query.ui.importexport;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -43,6 +39,10 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SharedUtils;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Utilities for importing queries.
@@ -145,7 +145,7 @@ public class ImportQueryUtil {
 				for (Query query : queries){
 					//generate id
 					query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-					session.save(query);
+					session.persist(query);
 				}
 				session.flush();
 				importer.beforeCommit();

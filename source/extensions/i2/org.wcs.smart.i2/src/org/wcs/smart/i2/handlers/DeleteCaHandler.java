@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
@@ -51,194 +52,194 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		monitor.subTask(Messages.DeleteCaHandler_SubTaskName);
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelObservationAttribute")); //$NON-NLS-1$
-		Query<?> q = session.createQuery("delete from IntelObservationAttribute ioa where ioa.id.attribute in (select a from Attribute a where conservationArea = :ca)"); //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("delete from IntelObservationAttribute ioa where ioa.attribute in (select a from Attribute a where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelObservation")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelObservation io where io.location in (from IntelLocation where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelObservation io where io.location in (from IntelLocation where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityLocation")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityLocation iel where iel.id.location in (from IntelLocation where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityLocation iel where iel.id.location in (from IntelLocation where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 				
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelLocation")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelLocation where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelLocation where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntitySearch")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntitySearch where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntitySearch where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityAttributeValue")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityAttributeValue ieav where ieav.id.attribute in (FROM IntelAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityAttributeValue ieav where ieav.id.attribute in (FROM IntelAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRelationshipTypeAttribute")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRelationshipTypeAttribute ii where ii.id.attribute in (from IntelAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRelationshipTypeAttribute ii where ii.id.attribute in (from IntelAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityTypeAttribute")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityTypeAttribute ii where ii.id.attribute in (from IntelAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityTypeAttribute ii where ii.id.attribute in (from IntelAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();	
 
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityTypeAttributeGroup")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityTypeAttributeGroup g where g.entityType in (FROM IntelEntityType WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityTypeAttributeGroup g where g.entityType in (FROM IntelEntityType WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityRecord")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityRecord ii where ii.id.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityRecord ii where ii.id.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordAttachment")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordAttachment ii where ii.id.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordAttachment ii where ii.id.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelWorkingSetRecord")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelWorkingSetRecord ii where ii.id.workingSet in (from IntelWorkingSet where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelWorkingSetRecord ii where ii.id.workingSet in (from IntelWorkingSet where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelWorkingSetQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelWorkingSetQuery ii where ii.id.workingSet in (from IntelWorkingSet where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelWorkingSetQuery ii where ii.id.workingSet in (from IntelWorkingSet where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelWorkingSetEntity")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelWorkingSetEntity ii where ii.id.workingSet in (from IntelWorkingSet where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelWorkingSetEntity ii where ii.id.workingSet in (from IntelWorkingSet where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelWorkingSet")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelWorkingSet where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelWorkingSet where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityRelationshipAttributeValue")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityRelationship")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityRelationship ii where ii.relationshipType in (from IntelRelationshipType where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityRelationship ii where ii.relationshipType in (from IntelRelationshipType where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRelationshipType")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRelationshipType where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRelationshipType where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRelationshipGroup")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRelationshipGroup where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRelationshipGroup where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityAttachment")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityAttachment ii where ii.id.attachment in (from IntelAttachment where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityAttachment ii where ii.id.attachment in (from IntelAttachment where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttachment")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelAttachment where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelAttachment where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttributeListItem")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelAttributeListItem ii where ii.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelAttributeListItem ii where ii.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntity")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntity ii where ii.entityType in (from IntelEntityType where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntity ii where ii.entityType in (from IntelEntityType where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordAttributeValueList")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT v FROM IntelRecordAttributeValue v join v.record r where r.conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT v FROM IntelRecordAttributeValue v join v.record r where r.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordAttributeValue")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordAttributeValue ii where ii.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordAttributeValue ii where ii.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecord")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecord where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecord where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordObservationQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordObservationQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordObservationQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntitySummaryQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntitySummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntitySummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityRecordQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityRecordQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityRecordQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSummaryQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordSummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordSummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSummaryQuery")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordSummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordSummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSourceAttribute")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordSourceAttribute ii where ii.source in (from IntelRecordSource where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordSourceAttribute ii where ii.source in (from IntelRecordSource where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSource")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelRecordSource where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelRecordSource where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelEntityType")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelEntityType where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelEntityType where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttribute")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelProfile")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelConfigurationOption")); //$NON-NLS-1$
-		q = session.createQuery("delete from IntelConfigurationOption where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelConfigurationOption where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	

@@ -24,10 +24,6 @@ package org.wcs.smart.data.oda.smart.query.common;
 import java.text.MessageFormat;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Hibernate;
@@ -41,6 +37,10 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.model.ReportQuery;
 import org.wcs.smart.ui.SmartLabelProvider;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 
 /**
@@ -71,7 +71,7 @@ public class PatrolReportQueryListener extends QueryListenerAdapter {
 			if (queries.size() == 0) {
 				return true;
 			}else{
-				Query savedQuery = (Query) session.load(Hibernate.getClass(query), query.getUuid());
+				Query savedQuery = (Query) session.getReference(Hibernate.getClass(query), query.getUuid());
 				boolean confirmSave = true;
 				if (savedQuery != null && savedQuery instanceof SimpleQuery){
 					//simple queries only cause problems with visible columns change

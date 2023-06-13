@@ -33,8 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.Operator;
@@ -78,7 +77,7 @@ public class RecordFilterProcessor {
 		Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session);
 		String tempTable2 = filterDataTable(session, tempTable, filter,filterColumns);
 		
-		session.createNativeQuery("DROP TABLE " + tempTable).executeUpdate(); //$NON-NLS-1$
+		session.createNativeMutationQuery("DROP TABLE " + tempTable).executeUpdate(); //$NON-NLS-1$
 		
 		return tempTable2;
 	}
@@ -105,7 +104,7 @@ public class RecordFilterProcessor {
 		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("INSERT INTO "); //$NON-NLS-1$
@@ -130,7 +129,7 @@ public class RecordFilterProcessor {
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
 		
 		logme(sb);
-		NativeQuery<?> q = session.createNativeQuery(sb.toString())
+		MutationQuery q = session.createNativeMutationQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
 			.setParameterList("profiles",  profiles); //$NON-NLS-1$
 		if (dates[0] != null) {
@@ -190,7 +189,7 @@ public class RecordFilterProcessor {
 		sb.append( columnName );
 		sb.append(" boolean default false "); //$NON-NLS-1$	
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("UPDATE "); //$NON-NLS-1$
@@ -242,7 +241,7 @@ public class RecordFilterProcessor {
 		
 		logme(sb);
 		
-		Query<?> q = session.createNativeQuery(sb.toString())
+		MutationQuery q = session.createNativeMutationQuery(sb.toString())
 			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$
 			.setParameter("sourceid", filter.getRecordSourceKey()); //$NON-NLS-1$
 		
@@ -281,7 +280,7 @@ public class RecordFilterProcessor {
 		sb.append(" boolean default false "); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		
 		sb = new StringBuilder();
@@ -305,7 +304,7 @@ public class RecordFilterProcessor {
 		
 		logme(sb);
 		
-		Query<?> q = session.createNativeQuery(sb.toString())
+		MutationQuery q = session.createNativeMutationQuery(sb.toString())
 			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$;
 			.setParameter("sourceid", filter.getRecordSourceKey()); //$NON-NLS-1$
 		if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
@@ -338,7 +337,7 @@ public class RecordFilterProcessor {
 		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " ); //$NON-NLS-1$
@@ -366,7 +365,7 @@ public class RecordFilterProcessor {
 			querystr = querystr.substring(0, querystr.length() - " WHERE ".length()); //$NON-NLS-1$
 		}
 		
-		NativeQuery<?> query = session.createNativeQuery(querystr);
+		MutationQuery query = session.createNativeMutationQuery(querystr);
 		for (Entry<String,Object> parameter : parameters.entrySet()) {
 			query.setParameter(parameter.getKey(),  parameter.getValue());
 			logme(parameter.getKey() + ":" + parameter.getValue()); //$NON-NLS-1$
@@ -375,7 +374,7 @@ public class RecordFilterProcessor {
 		query.executeUpdate();
 		
 		try {
-			session.createNativeQuery("DROP TABLE " + dataTable); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + dataTable); //$NON-NLS-1$
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		}

@@ -346,7 +346,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 			try {
 				nav.setLastModifiedBy(SmartDB.getCurrentEmployee());
 				nav.setLastModifiedDate(LocalDate.now());
-				session.saveOrUpdate(nav);
+				session.merge(nav);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				try {

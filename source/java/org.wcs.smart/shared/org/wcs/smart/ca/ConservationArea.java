@@ -33,16 +33,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * 
@@ -52,7 +53,7 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 @Entity
-@Table(name="smart.conservation_area")
+@Table(name="conservation_area", schema="smart")
 public class ConservationArea extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;
@@ -188,7 +189,7 @@ public class ConservationArea extends UuidItem {
 		this.agencies = agencies;
 	}
 	
-	@OneToMany(fetch = FetchType.EAGER, cascade={javax.persistence.CascadeType.ALL}, mappedBy="ca", orphanRemoval=true)
+	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="ca", orphanRemoval=true)
 	public Set<Language> getLanguages(){
 		return this.languages;
 	}

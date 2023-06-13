@@ -42,12 +42,6 @@ import org.wcs.smart.qa.routine.WaypointLocationData;
  *
  */
 public class NewPatrolObjectEventListener implements PostCommitInsertEventListener{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5331984461884980437L;
-
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
 		Object x = event.getEntity();
@@ -65,7 +59,7 @@ public class NewPatrolObjectEventListener implements PostCommitInsertEventListen
 	}
 	
 	@Override
-	public boolean requiresPostCommitHanding(EntityPersister persister) {
+	public boolean requiresPostCommitHandling(EntityPersister persister) {
 		return true;
 	}
 

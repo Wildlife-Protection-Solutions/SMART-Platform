@@ -46,10 +46,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
  */
 public class WaypointHibernateListener implements PreInsertEventListener, PreUpdateEventListener{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {

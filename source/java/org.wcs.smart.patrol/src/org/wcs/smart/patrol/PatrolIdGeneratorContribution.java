@@ -40,6 +40,7 @@ import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.IdGeneratorManager;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
@@ -269,7 +270,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		if (validate() != null) return false;
 		ConservationAreaProperty prop = getOrCreateProperty(PatrolIdGenerator.PATTERN_PROPERY_KEY, session);
 		prop.setValue(txtPattern.getText());
-		session.saveOrUpdate(prop);
+		HibernateManager.saveOrMerge(session, prop);
 		
 		prop = getOrCreateProperty(PatrolIdGenerator.UNIQUE_PROPERTY_KEY, session);
 		if (btnUnique.getSelection()) {
@@ -277,11 +278,11 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		}else {
 			prop.setValue(PatrolIdGenerator.NOTUNIQUE_VALUE);
 		}
-		session.saveOrUpdate(prop);
+		HibernateManager.saveOrMerge(session, prop);
 		
 		prop = getOrCreateProperty(PatrolIdGenerator.UNIQUE_PATTERN_PROPERTY_KEY, session);
 		prop.setValue(txtUnqPattern.getText());
-		session.saveOrUpdate(prop);
+		HibernateManager.saveOrMerge(session, prop);
 		
 		return true;
 	}

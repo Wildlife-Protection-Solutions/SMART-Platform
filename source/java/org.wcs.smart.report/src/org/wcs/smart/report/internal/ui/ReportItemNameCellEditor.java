@@ -86,20 +86,22 @@ public class ReportItemNameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				Report toupdate = null;
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						session.saveOrUpdate(report);
-						report.updateName(SmartDB.getCurrentLanguage(),value);
-						report.setName(value);
+						toupdate = HibernateManager.saveOrMerge(session, report);
+						toupdate.updateName(SmartDB.getCurrentLanguage(),value);
+						toupdate.setName(value);
 						session.getTransaction().commit();
-						ReportEventManager.getInstance().fireReportUpdated(report);
+						
 					} catch (Exception ex) {
 						session.getTransaction().rollback();
 						ReportPlugIn.displayLog(
 								Messages.ReportItemNameCellEditor_Error_CouldNotSaveReport
 										+ ex.getLocalizedMessage(), ex);
 					}
+					ReportEventManager.getInstance().fireReportUpdated(toupdate);
 					
 				}
 
@@ -122,12 +124,13 @@ public class ReportItemNameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				ReportFolder toupdate = null;
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						session.saveOrUpdate((ReportFolder) folder);
-						folder.updateName(SmartDB.getCurrentLanguage(), value);
-						folder.setName(value);
+						toupdate = HibernateManager.saveOrMerge(session, folder);
+						toupdate.updateName(SmartDB.getCurrentLanguage(), value);
+						toupdate.setName(value);
 						session.getTransaction().commit();
 					} catch (Exception ex) {
 						if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -136,7 +139,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 										+ ex.getLocalizedMessage(), ex);
 					} 
 				}
-				ReportEventManager.getInstance().fireReportFolderModified(folder);
+				ReportEventManager.getInstance().fireReportFolderModified(toupdate);
 				return Status.OK_STATUS;
 			}
 		};

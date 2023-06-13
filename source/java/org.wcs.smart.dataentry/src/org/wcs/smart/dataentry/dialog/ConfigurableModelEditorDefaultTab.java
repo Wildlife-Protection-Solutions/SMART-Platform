@@ -553,9 +553,12 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	@Override
 	public void performSave(Session s) {
 		s.flush();
-		s.saveOrUpdate(dialog.getModel());
-		addedConfigs.forEach(e->s.saveOrUpdate(e));
-		dialog.getModel().getDefaultConfigs().values().forEach(e->s.saveOrUpdate(e));
+		if (dialog.getModel().getUuid() == null) s.persist(dialog.getModel());
+		addedConfigs.forEach(c->{if (c.getUuid() == null) s.persist(c);});
+		dialog.getModel().getDefaultConfigs().values().forEach(e->{if (e.getUuid() == null) s.persist(e);});
+		//HibernateManager.saveOrMerge(s, dialog.getModel());
+		//addedConfigs.forEach(e->HibernateManager.saveOrMerge(s, e));
+		//dialog.getModel().getDefaultConfigs().values().forEach(e->HibernateManager.saveOrMerge(s, e));
 		deletedConfigs.clear();
 	}
 	

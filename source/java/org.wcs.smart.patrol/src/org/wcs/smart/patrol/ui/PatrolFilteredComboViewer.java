@@ -58,6 +58,8 @@ import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
 import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
 import org.wcs.smart.patrol.model.Patrol;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Composite that contains {@link ComboViewer} and "Filter" button which launches
  * dialog that filters {@link ComboViewer} input content.
@@ -254,16 +256,16 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         private List<Patrol> loadPatrolIds() {
         	
         	try(Session s = PatrolHibernateManager.openSession()) {
-        		Query<?> query = filter.buildQuery(s);
-        		List<?> results = query.list();
+        		Query<Tuple> query = filter.buildQuery(s);
+        		List<Tuple> results = query.list();
         		List<Patrol> patrols = new ArrayList<Patrol>(results.size()+1);
         		boolean defaultPresent = preselectedPatrol == null; //indicated if default patrol id is in filtered list
-        		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-        			Object[] data = (Object[]) iterator.next();
+        		for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
+        			Tuple data =  iterator.next();
         			Patrol p = new Patrol();
-        			p.setUuid((UUID)data[0]);
-        			p.setId((String)data[1]);
-        			p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data[2]);
+        			p.setUuid((UUID)data.get(0));
+        			p.setId((String)data.get(1));
+        			p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data.get(2));
         			defaultPresent = defaultPresent || p.equals(preselectedPatrol);
         			patrols.add(p);
         		}

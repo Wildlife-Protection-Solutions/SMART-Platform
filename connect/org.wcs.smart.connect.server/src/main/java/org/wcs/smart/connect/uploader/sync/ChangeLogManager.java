@@ -26,7 +26,6 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response.Status;
@@ -36,21 +35,20 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.PostgresUUIDType;
-import org.hibernate.type.UUIDBinaryType;
+import org.hibernate.query.Query;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.datastore.FileStoreWatcher;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
-import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.util.UuidUtils;
+
 
 /**
  * Postgresql specific manager for interacting with the
@@ -63,13 +61,10 @@ public enum ChangeLogManager {
 	INSTANCE;
 	
 	private static final String CHANGE_LOG_TABLE = "connect.change_log"; //$NON-NLS-1$
-	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history"; //$NON-NLS-1$
-	
-	
+	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history"; //$NON-NLS-1$	
+
 	private FileStoreWatcher fileWatcher = null;
 	private Thread fileStoreReplication;
-	private UUIDGenerator uuidGenerator = null;
-	
 
 	/**
 	 * Uses Hibernate to generate uuid for an object.
@@ -79,14 +74,7 @@ public enum ChangeLogManager {
 	 * @return
 	 */
 	public UUID generateUuid(Session session, Object object) {
-		if (uuidGenerator != null) return (UUID) uuidGenerator.generate((SessionImplementor)session, object);
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
-		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
-		return (UUID) uuidGenerator.generate((SessionImplementor)session, object);
-		
+		return StandardRandomStrategy.INSTANCE.generateUuid((SessionImplementor)session);
 	}
 	
 	public void watchFilestore(SessionFactory sf)  throws IOException {
@@ -123,7 +111,7 @@ public enum ChangeLogManager {
 	 */
 	//ca.getuuid must be the uuid with -'s removed
 	public void disableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
-		session.createNativeQuery("SET  \"ca.trigger.t" + UuidUtils.uuidToString(ca.getUuid()) + "\" = false ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("SET  \"ca.trigger.t" + UuidUtils.uuidToString(ca.getUuid()) + "\" = false ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		fileWatcher.ignoreCa(ca);
 	}
 	
@@ -135,7 +123,7 @@ public enum ChangeLogManager {
 	 */
 	//ca.getuuid must be the uuid with -'s removed
 	public void enableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
-		session.createNativeQuery("SET  \"ca.trigger.t" +UuidUtils.uuidToString(ca.getUuid()) + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("SET  \"ca.trigger.t" +UuidUtils.uuidToString(ca.getUuid()) + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		fileWatcher.addCa(ca);
 	}
 	
@@ -152,21 +140,21 @@ public enum ChangeLogManager {
 	public void deleteItems(Session s, Long maxRevision, UUID caUuid){
 		if (maxRevision < 0) return;
 		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE revision <= :maxrevision and ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
+		MutationQuery q = s.createNativeMutationQuery(sql);
 		q.setParameter("maxrevision", maxRevision); //$NON-NLS-1$
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		q.setParameter("cauuid", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = s.createNativeQuery("SELECT count(*) FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		Long cnt = ((BigInteger) q.uniqueResult()).longValue();
+		Query<Long> q2 = s.createNativeQuery("SELECT count(*) FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid", Long.class); //$NON-NLS-1$ //$NON-NLS-2$
+		q2.setParameter("cauuid", caUuid); //$NON-NLS-1$
+		Long cnt = q2.uniqueResult();
 		
 		if (cnt == 0){
-			q = s.createNativeQuery("INSERT INTO " + CHANGE_LOG_INFO_TABLE + " (ca_uuid, last_delete_revision) VALUES (:cauuid, :revision)"); //$NON-NLS-1$ //$NON-NLS-2$
+			q = s.createNativeMutationQuery("INSERT INTO " + CHANGE_LOG_INFO_TABLE + " (ca_uuid, last_delete_revision) VALUES (:cauuid, :revision)"); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
-			q = s.createNativeQuery("UPDATE " + CHANGE_LOG_INFO_TABLE + " SET last_delete_revision = :revision WHERE ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
+			q = s.createNativeMutationQuery("UPDATE " + CHANGE_LOG_INFO_TABLE + " SET last_delete_revision = :revision WHERE ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		q.setParameter("cauuid", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.setParameter("revision", maxRevision); //$NON-NLS-1$
 		q.executeUpdate();
 	}
@@ -179,13 +167,13 @@ public enum ChangeLogManager {
 	 * @return
 	 */
 	private Long getLastDeleteRevision(Session s, UUID caUuid){
-		NativeQuery<?> q = s.createNativeQuery("SELECT last_delete_revision FROM " + CHANGE_LOG_INFO_TABLE + " where ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		BigInteger value = (BigInteger)q.uniqueResult();
+		NativeQuery<Long> q = s.createNativeQuery("SELECT last_delete_revision FROM " + CHANGE_LOG_INFO_TABLE + " where ca_uuid = :cauuid", Long.class); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("cauuid", caUuid); //$NON-NLS-1$
+		Long value = q.uniqueResult();
 		if (value == null){
 			return -1l;
 		}
-		return value.longValue();
+		return value;
 	}
 	/**
 	 * Delete all change log items for the given conservation area.  
@@ -196,13 +184,13 @@ public enum ChangeLogManager {
 	 */
 	public void deleteItems(Session s, UUID caUuid){
 		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :cauuid";  //$NON-NLS-1$//$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		MutationQuery q = s.createNativeMutationQuery(sql);
+		q.setParameter("cauuid", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		sql = "DELETE FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
-		q = s.createNativeQuery(sql);
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		q = s.createNativeMutationQuery(sql);
+		q.setParameter("cauuid", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	/**
@@ -215,10 +203,10 @@ public enum ChangeLogManager {
 	 */
 	public long getLastRevision(Session s, LocalDateTime maxDate, UUID caUuid){
 		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE datetime < :maxdate and ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
+		NativeQuery<Long> q = s.createNativeQuery(sql, Long.class);
 		q.setParameter("maxdate", maxDate); //$NON-NLS-1$
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		BigInteger revision = (BigInteger) q.uniqueResult();
+		q.setParameter("cauuid", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		Long revision =  q.uniqueResult();
 		if (revision == null){
 			return -1;
 		}
@@ -227,15 +215,15 @@ public enum ChangeLogManager {
 	
 	public long getLastRevision(Session s, UUID ca){
 		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :ca"; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
-		q.setParameter("ca", ca, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		Object rev = q.uniqueResult();
+		NativeQuery<Long> q = s.createNativeQuery(sql, Long.class);
+		q.setParameter("ca", ca);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		Long rev = q.uniqueResult();
 		if (rev == null){
 			//there is nothing in the change log; check the history
 			//as this will have the last revision item
 			return getLastDeleteRevision(s, ca);
 		}
-		return ((BigInteger)rev).longValueExact();
+		return rev.longValue();
 	}
 	
 	/**
@@ -247,12 +235,12 @@ public enum ChangeLogManager {
 	 * @return <code>true</code> if item exists, <code>false</code> otherwise
 	 */
 	public boolean constains(Session s, ChangeLogItem item){
-		NativeQuery<?> query = s.createNativeQuery("SELECT count(*) from " + CHANGE_LOG_TABLE + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setParameter("uuid", item.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		NativeQuery<Long> query = s.createNativeQuery("SELECT count(*) from " + CHANGE_LOG_TABLE + " WHERE uuid = :uuid", Long.class); //$NON-NLS-1$ //$NON-NLS-2$
+		query.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		
-		List<?> data = query.list();
+		List<Long> data = query.list();
 		if (data.size() != 1){ return false; }
-		if ( ((BigInteger)data.get(0)).longValueExact()  > 0) return true;
+		if ( data.get(0) > 0) return true;
 		return false;
 	}
 	
@@ -268,18 +256,18 @@ public enum ChangeLogManager {
 		sb.append(" (uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid)"); //$NON-NLS-1$
 		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$
 		
-		NativeQuery<?> query = s.createNativeQuery(sb.toString());
+		MutationQuery query = s.createNativeMutationQuery(sb.toString());
 		
-		query.setParameter(1, item.getUuid(),PostgresUUIDType.INSTANCE);
+		query.setParameter(1, item.getUuid());//,PostgresUUIDType.INSTANCE);
 		query.setParameter(2, item.getAction().name());
 		query.setParameter(3, item.getFileName());
 		query.setParameter(4, item.getTableName());
-		query.setParameter(5, item.getConservationArea(),PostgresUUIDType.INSTANCE);
+		query.setParameter(5, item.getConservationArea());//,PostgresUUIDType.INSTANCE);
 		query.setParameter(6, item.getFieldName1());
-		query.setParameter(7, item.getKey1(),PostgresUUIDType.INSTANCE);
+		query.setParameter(7, item.getKey1());//,PostgresUUIDType.INSTANCE);
 		query.setParameter(8, item.getFieldName2());
 		query.setParameter(9, item.getKey2String());
-		query.setParameter(10, item.getKey2(),PostgresUUIDType.INSTANCE);
+		query.setParameter(10, item.getKey2());//,PostgresUUIDType.INSTANCE);
 		query.executeUpdate();
 		
 	}
@@ -329,41 +317,45 @@ public enum ChangeLogManager {
 		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision "); //$NON-NLS-1$
 //		System.out.println(query.toString());
 		
-		NativeQuery<?> hquery = session.createNativeQuery(query.toString());
+		
+		NativeQuery<Object> hquery = session.createNativeQuery(query.toString(), Object.class);
 
-		hquery.setParameter("ca1", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.setParameter("ca1", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.setParameter("revision1", startRevision); //$NON-NLS-1$
-		hquery.setParameter("ca2", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.setParameter("ca2", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.setParameter("revision2", startRevision); //$NON-NLS-1$
 		//TODO: review this
-		hquery.addScalar("uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.addScalar("revision"); //$NON-NLS-1$
 		hquery.addScalar("action"); //$NON-NLS-1$
 		hquery.addScalar("filename"); //$NON-NLS-1$
 		hquery.addScalar("tablename"); //$NON-NLS-1$
 		hquery.addScalar("key1_fieldname"); //$NON-NLS-1$
-		hquery.addScalar("key1", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("key1");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.addScalar("key2_fieldname"); //$NON-NLS-1$
 		hquery.addScalar("key2_str"); //$NON-NLS-1$
-		hquery.addScalar("key2_uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		hquery.addScalar("ca_uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("key2_uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("ca_uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 				
-		ScrollableResults results = hquery.scroll(ScrollMode.FORWARD_ONLY);
+		ScrollableResults<Object> results = hquery.scroll(ScrollMode.FORWARD_ONLY);
 		List<ChangeLogItem> items = new ArrayList<ChangeLogItem>();
 		
 		while(results.next()){
 			int i = 0;
+			
+			Object[] data = (Object[]) results.get();
 			ChangeLogItem ci = new ChangeLogItem();
-			ci.setUuid((UUID)results.get(i++));
-			ci.setRevision( ((BigInteger)results.get(i++)).longValue() );
-			ci.setAction(Action.valueOf((String)results.get(i++)));
-			ci.setFileName((String)results.get(i++));
-			ci.setTableName((String)results.get(i++));
-			ci.setFieldName1((String)results.get(i++));
-			ci.setKey1( (UUID)results.get(i++));
-			ci.setFieldName2((String)results.get(i++));
-			ci.setKey2String((String)results.get(i++));
-			ci.setKey2( (UUID)results.get(i++));
+			
+			ci.setUuid((UUID)data[i++]);
+			ci.setRevision( ((BigInteger)data[i++]).longValue() );
+			ci.setAction(Action.valueOf((String)data[i++]));
+			ci.setFileName((String)data[i++]);
+			ci.setTableName((String)data[i++]);
+			ci.setFieldName1((String)data[i++]);
+			ci.setKey1( (UUID)data[i++]);
+			ci.setFieldName2((String)data[i++]);
+			ci.setKey2String((String)data[i++]);
+			ci.setKey2( (UUID)data[i++]);
 			ci.setConservationArea(caUuid);
 			items.add(ci);
 		}

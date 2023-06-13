@@ -24,10 +24,6 @@ package org.wcs.smart.plan.xml;
 import java.nio.file.Path;
 import java.time.LocalDate;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -43,6 +39,11 @@ import org.wcs.smart.plan.xml.model.XmlPlan;
 import org.wcs.smart.plan.xml.model.XmlPlanTarget;
 import org.wcs.smart.plan.xml.model.XmlPlanTargetPoint;
 import org.wcs.smart.util.SmartUtils;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 /**
  * Converts SMART plan object to xml file.

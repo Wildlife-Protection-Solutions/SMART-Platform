@@ -255,8 +255,8 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public int getMaxDmCategoryDepth(Session session) {
-		Integer cnt = (Integer) session.createNativeQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca") //$NON-NLS-1$
-				.setParameter("ca",  getCa()).uniqueResult(); //$NON-NLS-1$
+		Integer cnt = session.createNativeQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca", Integer.class) //$NON-NLS-1$
+				.setParameter("ca",  getCa().getUuid()).uniqueResult(); //$NON-NLS-1$
 		return cnt.intValue();
 	}
 

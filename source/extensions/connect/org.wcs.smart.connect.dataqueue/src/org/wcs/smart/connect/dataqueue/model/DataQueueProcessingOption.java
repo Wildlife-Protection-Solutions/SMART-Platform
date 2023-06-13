@@ -3,15 +3,15 @@ package org.wcs.smart.connect.dataqueue.model;
 import java.io.Serializable;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
-@Table(name ="smart.connect_data_queue_option")
+@Table(name ="connect_data_queue_option", schema="smart")
 public class DataQueueProcessingOption {
 
 	private String value;

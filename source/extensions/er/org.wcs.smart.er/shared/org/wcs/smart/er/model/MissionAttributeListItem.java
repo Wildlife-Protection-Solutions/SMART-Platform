@@ -23,17 +23,17 @@ package org.wcs.smart.er.model;
 
 import java.util.HashSet;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyIconItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 /**
  * Mission attribute list item model object.
  * 
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.NamedKeyIconItem;
  *
  */
 @Entity
-@Table(name="smart.mission_attribute_list")
+@Table(name="mission_attribute_list", schema="smart")
 public class MissionAttributeListItem extends NamedKeyIconItem {
 
 	private static final long serialVersionUID = 1L;

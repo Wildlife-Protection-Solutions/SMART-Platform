@@ -129,14 +129,12 @@ public class RScriptEditor extends MultiPageEditorPart {
 	public void doSave(IProgressMonitor monitor) {
 		boolean isNew = query.getUuid() == null;
 		
-		
-		
 		page1.updateQuery(query);
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(query);
+				HibernateManager.saveOrMerge(session, query);
 				session.getTransaction().commit();
 				setDirty(false);
 			}catch (Exception ex) {
@@ -163,7 +161,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(query);
+				session.merge(query);
 				session.getTransaction().commit();
 				setDirty(false);
 			}catch (Exception ex) {
@@ -267,7 +265,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try{
-						temp = (RQuery) session.load(RQuery.class, quuid);
+						temp = (RQuery) session.getReference(RQuery.class, quuid);
 						temp.getName();
 						temp.getScript().getName();
 						temp.getNames().size();
@@ -283,7 +281,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try{
-						temp = (RScript) session.load(RScript.class, suuid);
+						temp = (RScript) session.getReference(RScript.class, suuid);
 						temp.getName();
 					}finally {
 						session.getTransaction().rollback();

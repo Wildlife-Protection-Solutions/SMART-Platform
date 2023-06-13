@@ -21,11 +21,8 @@
  */
 package org.wcs.smart.connect.hibernate;
 
-import java.sql.Types;
-
-import org.hibernate.dialect.PostgreSQL95Dialect;
-import org.hibernate.type.descriptor.sql.BinaryTypeDescriptor;
-import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
+import org.hibernate.dialect.DatabaseVersion;
+import org.hibernate.dialect.PostgreSQLDialect;
 
 /**
  * Extension of the postgreSQL dialog to change the way BLOB types
@@ -35,27 +32,29 @@ import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
  * @author Emily
  *
  */
-public class SmartPostgresDialect extends PostgreSQL95Dialect {
+public class SmartPostgresDialect extends PostgreSQLDialect {
 
 	 public SmartPostgresDialect() {
-	        super();
+		 super(DatabaseVersion.make( 9, 5 ));
 
 	        /*
 	         * We use @Lob annotation for byte[] to make apache derby happy.  So
 	         * we need to map this to the bytea type in postgresql, otherwise it is mapped
 	         * to the oid type which doesn't work for us.
-	         */
-	        registerColumnType(Types.BLOB, "bytea"); //$NON-NLS-1$
+	        */
+//	        registerColumnType(Types.BLOB, "bytea"); //$NON-NLS-1$
 	        //registerColumnType(Types.OTHER, "pg_uuid");
-	        registerColumnType(1111, "uuid"); //$NON-NLS-1$
+//	        registerColumnType(1111, "uuid"); //$NON-NLS-1$
+	        
+	        
 	    }
 	 
-	    @Override
-	    public SqlTypeDescriptor remapSqlTypeDescriptor(SqlTypeDescriptor sqlTypeDescriptor) {
-	        if (sqlTypeDescriptor.getSqlType() == java.sql.Types.BLOB) {
-	            return BinaryTypeDescriptor.INSTANCE;
-	        }
-	        return super.remapSqlTypeDescriptor(sqlTypeDescriptor);
-	    }
+//	    @Override
+//	    public SqlTypeDescriptor  remapSqlTypeDescriptor(SqlTypeDescriptor sqlTypeDescriptor) {
+//	        if (sqlTypeDescriptor.getSqlType() == java.sql.Types.BLOB) {
+//	            return BinaryTypeDescriptor.INSTANCE;
+//	        }
+//	        return super.remapSqlTypeDescriptor(sqlTypeDescriptor);
+//	    }
 
 }

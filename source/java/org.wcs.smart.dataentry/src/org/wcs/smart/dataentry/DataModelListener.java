@@ -53,27 +53,27 @@ public class DataModelListener implements IDataModelListener {
 			session.beginTransaction();
 			try{
 				//delete all disabled list items
-				Query<?> q = session.createQuery("DELETE CmAttributeListItem a where a IN (SELECT cma FROM CmAttributeListItem cma WHERE cma.listItem.attribute.conservationArea = :ca and cma.listItem.isActive = 'false')"); //$NON-NLS-1$
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createMutationQuery("DELETE CmAttributeListItem a where a IN (SELECT cma FROM CmAttributeListItem cma WHERE cma.listItem.attribute.conservationArea = :ca and cma.listItem.isActive = 'false')") //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.executeUpdate();
 				session.flush();
 				
 				//delete default attribute option
-				q = session.createQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeListItem it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createMutationQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeListItem it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)") //$NON-NLS-1$ //$NON-NLS-2$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.executeUpdate();
 				session.flush();
 				
 				//delete all disabled tree items
-				q = session.createQuery("DELETE CmAttributeTreeNode a WHERE a IN (SELECT cm FROM CmAttributeTreeNode cm WHERE cm.dmTreeNode.attribute.conservationArea = :ca AND cm.dmTreeNode.isActive = 'false')"); //$NON-NLS-1$
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createMutationQuery("DELETE CmAttributeTreeNode a WHERE a IN (SELECT cm FROM CmAttributeTreeNode cm WHERE cm.dmTreeNode.attribute.conservationArea = :ca AND cm.dmTreeNode.isActive = 'false')") //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.executeUpdate();
 				session.flush();
 				
 				//delete default attribute option
-				q = session.createQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeTreeNode it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.executeUpdate();
+				session.createMutationQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeTreeNode it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)") //$NON-NLS-1$ //$NON-NLS-2$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.executeUpdate();
 				session.flush();
 				
 				//delete all nodes that reference in-active categories
@@ -95,7 +95,7 @@ public class DataModelListener implements IDataModelListener {
 						delete.setParent(null);
 					}else{
 						//part of root
-						session.delete(delete);
+						session.remove(delete);
 						//TODO: re-order root nodes
 					}
 					session.flush();

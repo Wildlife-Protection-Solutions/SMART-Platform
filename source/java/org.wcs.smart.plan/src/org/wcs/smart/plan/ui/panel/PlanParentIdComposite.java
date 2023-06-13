@@ -160,7 +160,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			try(Session session = HibernateManager.openSession()){
 				try{
 					session.beginTransaction();
-					parent = (Plan) session.load(Plan.class, tmp.getUuid());
+					parent = (Plan) session.getReference(Plan.class, tmp.getUuid());
 					if (parent == null){
 						MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanNotFound_Message);
 						return false;
@@ -219,7 +219,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
-						s.update(currentPlan);
+						HibernateManager.saveOrMerge(s,  currentPlan);
 						//new parent cannot be a child of the current plan
 						if (findPlan(currentPlan.getChildren(), in.getUuid())){
 							setErrorMessage(Messages.PlanParentIdComposite_ChildParentError);

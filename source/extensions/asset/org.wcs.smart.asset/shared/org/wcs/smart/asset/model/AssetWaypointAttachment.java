@@ -24,18 +24,18 @@ package org.wcs.smart.asset.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.observation.model.WaypointAttachment;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Link between a waypoint attachment and the asset deployment record. This
@@ -45,7 +45,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
  * 
  */
 @Entity
-@Table(name="smart.asset_waypoint_attachment")
+@Table(name="asset_waypoint_attachment", schema="smart")
 public class AssetWaypointAttachment {
 	
 	private AssetWaypointAttachmentPk id = new AssetWaypointAttachmentPk();

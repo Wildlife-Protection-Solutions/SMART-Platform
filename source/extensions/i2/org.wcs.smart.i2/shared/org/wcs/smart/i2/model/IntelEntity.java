@@ -28,16 +28,6 @@ import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
@@ -55,6 +45,16 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.util.SharedUtils;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Model class of i_entity.
  * 
@@ -62,7 +62,7 @@ import org.wcs.smart.util.SharedUtils;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_entity")
+@Table(name="i_entity", schema="smart")
 public class IntelEntity extends UuidItem implements IIntelAuditItem{
 
 	private static final long serialVersionUID = 1L;

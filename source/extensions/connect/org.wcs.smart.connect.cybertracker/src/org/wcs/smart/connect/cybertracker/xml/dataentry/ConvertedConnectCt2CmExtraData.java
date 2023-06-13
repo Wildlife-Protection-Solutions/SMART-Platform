@@ -37,6 +37,7 @@ import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataIntegerKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataStringKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -150,11 +151,11 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 	public boolean saveInTransaction(Session session, ConfigurableModel cm) {
 		if (properties != null) {
 			properties.setModel(cm);
-			session.saveOrUpdate(properties);
+			HibernateManager.saveOrMerge(session, properties);
 		}
 		for (ConnectAlert a : alerts) {
 			a.setModel(cm);
-			session.saveOrUpdate(a);
+			HibernateManager.saveOrMerge(session, a);
 		}
 		return true;
 	}

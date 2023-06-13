@@ -228,20 +228,20 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 			
 			//update/add new mission properties	
 			for( MissionProperty mp : sd.getMissionProperties()){
-				session.saveOrUpdate(mp.getAttribute());
+				HibernateManager.saveOrMerge(session, mp.getAttribute());
 			}
 
 			//update/add new sampling unit attributes
 			for (SurveyDesignSamplingUnitAttribute sdua: sd.getSamplingUnitAttributes()){
-				session.saveOrUpdate(sdua.getSamplingUnitAttribute());
+				HibernateManager.saveOrMerge(session, sdua.getSamplingUnitAttribute());
 			}
 		
 			//save survey design
-			session.saveOrUpdate(sd);
+			HibernateManager.saveOrMerge(session, sd);
 		
 			//save sampling Units
 			for (SamplingUnit su : newSamplingUnits){
-				session.saveOrUpdate(su);
+				HibernateManager.saveOrMerge(session, su);
 			}
 
 			session.getTransaction().commit();

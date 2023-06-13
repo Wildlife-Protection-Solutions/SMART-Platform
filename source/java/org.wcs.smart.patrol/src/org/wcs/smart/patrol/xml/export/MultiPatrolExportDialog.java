@@ -60,6 +60,8 @@ import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
 import org.wcs.smart.patrol.xml.external.IPatrolExportContribution;
 import org.wcs.smart.util.SmartUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Dialog to allow users to export multiple patrols at once.
  * 
@@ -193,19 +195,17 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
-						Query<?> q = currentFilter.buildQuery(s);
-						for(Object x : q.list()){
-							Object[] row = (Object[])x;
-							
+						Query<Tuple> q = currentFilter.buildQuery(s);
+						for(Tuple row : q.list()){
 							StringBuilder sb = new StringBuilder();
-							sb.append((String)row[1]);
+							sb.append((String)row.get(1));
 							sb.append(" ["); //$NON-NLS-1$
-							sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format((LocalDate)row[3]));
+							sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format((LocalDate)row.get(3)));
 							sb.append(" - "); //$NON-NLS-1$
-							sb.append( DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format((LocalDate)row[4]));
+							sb.append( DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format((LocalDate)row.get(4)));
 							sb.append("]"); //$NON-NLS-1$
 							
-							items.add(new RowItem(sb.toString(), (UUID)row[0], (String)row[1]));
+							items.add(new RowItem(sb.toString(), (UUID)row.get(0), (String)row.get(1)));
 						}
 					}finally{
 						if (s.getTransaction().isActive()){

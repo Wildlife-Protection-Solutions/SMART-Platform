@@ -188,7 +188,7 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 					PatrolMotivatedRecord record = new PatrolMotivatedRecord();
 					record.getId().setPatrol(patrol);
 					record.getId().setIntelRecord(r);
-					if (!current.contains(record)) session.save(record);
+					if (!current.contains(record)) session.persist(record);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -213,7 +213,7 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.delete(record);
+				session.remove(record);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				if (session.getTransaction().isActive())session.getTransaction().rollback();

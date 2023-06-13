@@ -52,6 +52,8 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Dialog to allow users to export multiple incidents at once.
  * 
@@ -160,16 +162,15 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
-						Query<?> q = currentFilter.buildQuery(s);
-						for(Object x : q.list()){
-							Object[] row = (Object[])x;
+						Query<Tuple> q = currentFilter.buildQuery(s);
+						for(Tuple row : q.list()){
 							StringBuilder sb = new StringBuilder();
-							sb.append(row[1]);
+							sb.append(row.get(1));
 							sb.append(" ["); //$NON-NLS-1$
-							sb.append( DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((LocalDateTime)row[2]).toLocalDate()));
+							sb.append( DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((LocalDateTime)row.get(2)).toLocalDate()));
 							sb.append("]"); //$NON-NLS-1$
 							String pname = sb.toString();
-							data.add(new RowItem(pname, (UUID)row[0], row[1].toString()));
+							data.add(new RowItem(pname, (UUID)row.get(0), row.get(1).toString()));
 						}						
 					}finally{
 						if (s.getTransaction().isActive()){

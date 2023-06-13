@@ -271,9 +271,9 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 				List<Area.AreaType> types = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
 					String query = "SELECT type FROM Area WHERE conservationArea = :ca GROUP BY type having count(*) > 0"; //$NON-NLS-1$
-					Query<?> q = s.createQuery(query);
+					Query<Area.AreaType> q = s.createQuery(query, Area.AreaType.class);
 					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					for (Object x : q.list()) types.add((Area.AreaType)x);
+					for (Area.AreaType x : q.list()) types.add(x);
 				}catch (Exception ex){
 					QaPlugIn.displayLog(Messages.WaypointLocationParameterCollector_LoadBoundariesArea + ex.getMessage(), ex);
 				}

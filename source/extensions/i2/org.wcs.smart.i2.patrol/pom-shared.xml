@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.core.i2.patrol</artifactId>
 	<name>Intelligence II Record/Patrol Link Module</name>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 	
 	<dependencies>
 		<dependency>

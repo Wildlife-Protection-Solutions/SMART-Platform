@@ -21,16 +21,6 @@
  */
 package org.wcs.smart.asset.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.asset.model.mapping.IMetadataField;
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
@@ -41,6 +31,16 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Model class of exif_metadata_mapping.
  * 
@@ -48,7 +48,7 @@ import org.wcs.smart.ca.datamodel.Category;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.asset_metadata_mapping")
+@Table(name="asset_metadata_mapping", schema="smart")
 public class AssetMetadataMapping extends UuidItem {
 
 	private static final long serialVersionUID = 1L;

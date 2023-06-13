@@ -305,8 +305,7 @@ public enum EntityImportEngine {
 				//save new list items
 				Set<IntelAttribute> updatedItems = new HashSet<>(); 
 				for (IntelAttributeListItem i : addedItems){
-					s.save(i);
-					s.saveOrUpdate(i.getAttribute());
+					s.persist(i);
 					updatedItems.add(i.getAttribute());
 				}
 				s.flush();
@@ -316,13 +315,13 @@ public enum EntityImportEngine {
 					for (IntelAttributeListItem li : ia.getAttributeList()) {
 						li.setOrder(cnt++);
 					}
-					s.saveOrUpdate(ia);
+					s.merge(ia);
 				}
 				s.flush();
 				
 				//save new entities
 				for (IntelEntity e : newEntities){
-					s.save(e);
+					s.persist(e);
 					s.flush();
 					
 					e.createDataModelItem(s);

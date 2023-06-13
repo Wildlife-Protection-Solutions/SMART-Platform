@@ -301,9 +301,9 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		try(Session s = openSession()){
 			s.beginTransaction();
 			try{
-				basemaps.forEach(b -> s.saveOrUpdate(b));
+				basemaps.forEach(b -> s.merge(b));
 				for (BasemapDefinition d : itemsToDelete) {
-					s.delete( s.get(BasemapDefinition.class, d.getUuid()));
+					s.remove( s.get(BasemapDefinition.class, d.getUuid()));
 				}
 				s.getTransaction().commit();
 				setChangesMade(false);

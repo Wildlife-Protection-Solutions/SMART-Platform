@@ -25,8 +25,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import javax.persistence.Transient;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -89,7 +87,6 @@ public class SharedUtils {
 	 * @param z
 	 * @return
 	 */
-	@Transient
 	public static LocalDateTime toLocalDateTime(long z) {
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(z), ZoneOffset.UTC);
 	}
@@ -106,7 +103,6 @@ public class SharedUtils {
 	 * @param z
 	 * @return
 	 */
-	@Transient
 	public static long toLongTime(LocalDateTime datetime) {
 		return datetime.toInstant(ZoneOffset.UTC).toEpochMilli();		
 	}

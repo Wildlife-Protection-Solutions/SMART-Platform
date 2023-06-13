@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.query;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,27 +28,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.hql.spi.QueryTranslator;
-import org.hibernate.hql.spi.QueryTranslatorFactory;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.type.PostgresUUIDType;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.model.SharedLink;
@@ -117,6 +108,11 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
+
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Query manager for SMART Connect queries.
@@ -368,209 +364,346 @@ public enum QueryManager {
 	}
 	
 	public List<QueryProxy> getQueries(Session session, Locale l, Boolean includeMyQueries) throws Exception{
-		List<String> langs = new ArrayList<>();
-		langs.add(l.getLanguage());
-		if (!l.getCountry().isEmpty()) {
-			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
-			if (!l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 		
-		HashMap<QueryProxy, String> query2names = new HashMap<>();
-		String query = ""; //$NON-NLS-1$
+		String languageCode = l.getLanguage();
+		String countryCode = null;
+		String varientCode = null;
+		if (!l.getCountry().isEmpty()) countryCode = languageCode + "_" + l.getCountry(); //$NON-NLS-1$
+		if (!l.getVariant().isEmpty()) varientCode = countryCode += "_" + l.getVariant(); //$NON-NLS-1$
 		
-		//hql doesn't support UNION
-		//so we do some hql->sql conversion here and use
-		//native queries instead.
-		int cnt = 0;
-		HashMap<String, Object> params = new HashMap<>();
-		
+		List<QueryProxy> results = new ArrayList<>();
 		for (Class<? extends Query> q : queryClasses){
 			
-			Constructor<? extends Query> cq = q.getDeclaredConstructor();
-			cq.setAccessible(true);
-			Query c = cq.newInstance();
+			CriteriaQuery<? extends Query> cq = session.getCriteriaBuilder().createQuery(q);
+			cq.from(q);
 			
+			List<? extends Query> queries = session.createQuery(cq).list();
 			String type = q.getSimpleName();
-			String typeKey = c.getTypeKey();
-			
-			
-			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
 
-			String querypart  = null;
-			
-			if (typeKey != null) {
-				String icon = c.getIconName();				
-				querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
-						+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					 	+ " as q LEFT JOIN Label as l on l.id.element = q.uuid LEFT JOIN l.id.language as z on  (z.default = true or z.code in (:langs)) " //$NON-NLS-1$
-					 	+ "WHERE l.id.element = q.uuid "; //$NON-NLS-1$
-			}else {
-				//get query type from database
-				querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
-						+ "q.conservationArea.id, l.value, z.code, '" + type +"', q.typeKey, q.typeKey || '.png' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$
-					 	+ " as q LEFT JOIN Label as l on l.id.element = q.uuid LEFT JOIN l.id.language as z on  (z.default = true or z.code in (:langs)) " //$NON-NLS-1$
-					 	+ "WHERE l.id.element = q.uuid "; //$NON-NLS-1$
-			}
-	
-			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
-			translator.compile(Collections.EMPTY_MAP, false);
-			String sql = translator.getSQLString();
-			sql = sql.replaceFirst("\\?", ":langs"+ cnt); //$NON-NLS-1$ //$NON-NLS-2$
-			params.put("langs" + cnt, langs); //$NON-NLS-1$
-			cnt++;
-			query += sql;
-		}
-		
-		NativeQuery<?> nq = session.createNativeQuery(query);
-		for (Entry<String, Object> param : params.entrySet()) {
-			nq.setParameter(param.getKey(),  param.getValue());
-		}
-		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
-		//required for uuid data types
-	
-		nq.addScalar("col_0_0_", PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
-		nq.addScalar("col_1_0_");  //$NON-NLS-1$
-		nq.addScalar("col_2_0_"); //$NON-NLS-1$
-		nq.addScalar("col_3_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		nq.addScalar("col_4_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		nq.addScalar("col_5_0_"); //$NON-NLS-1$
-		nq.addScalar("col_6_0_"); //$NON-NLS-1$
-		nq.addScalar("col_7_0_"); //$NON-NLS-1$
-		nq.addScalar("col_8_0_"); //$NON-NLS-1$
-		nq.addScalar("col_9_0_"); //$NON-NLS-1$
-		nq.addScalar("col_10_0_"); //$NON-NLS-1$
-		List<?> items = nq.list();
-
-		for (Object i : items) {
-			Object[] data = (Object[])i;
-			UUID uuid = (UUID) data[0];
-			String id = (String)data[1];
-			boolean isShared = (boolean)data[2];
-			
-			UUID cauuid = (UUID)data[3];
-			UUID folderUuid = (UUID)data[4];
-			String caid = (String)data[5];
-			
-			String value = (String)data[6];
-			String code = (String)data[7];
-			
-			String type = (String)data[8];
-			String typekey = (String)data[9];
-			String icon = (String)data[10];
+			for (Query item : queries) {
 				
-			if (isShared || includeMyQueries) {
-				QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared, cauuid, folderUuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
+				UUID uuid = item.getUuid();
+				String id = item.getId();
+				boolean isShared = item.getIsShared();
+				
+				UUID cauuid = item.getConservationArea().getUuid();
+				UUID folderUuid = item.getFolder() == null ? null : item.getFolder().getUuid();
+				String caid = item.getConservationArea().getId();
+				
+				String defaultname = ""; //$NON-NLS-1$
+				String languagename = null;
+				String countryname = null;
+				String vairentname = null;
+				
+				for (Label name : item.getNames()) {
+					if (name.getLanguage().isDefault()) defaultname = name.getValue();
 					
-				if (!query2names.containsKey(qp)) {
-					query2names.put(qp, code);
-				}else {
-					String currentcode = query2names.get(qp);
-					int cindex = langs.indexOf(currentcode);
-					int nindex = langs.indexOf(code);
-					if ((cindex == -1 && nindex >= 0) || (cindex != -1 && nindex > cindex)) {
-						query2names.remove(qp);
-						query2names.put(qp, code);
-					}
+					if (name.getLanguage().getCode().equals(languageCode)) languagename = name.getValue();
+					if (name.getLanguage().getCode().equals(countryCode)) countryname = name.getValue();
+					if (name.getLanguage().getCode().equals(varientCode)) vairentname = name.getValue();
+					
+					 
 				}
+				
+				String value = null;
+				if (vairentname != null) {
+					value = vairentname;
+				}else if (countryname != null){
+					value = countryname;
+				}else if (languagename != null){
+					value = languagename;
+				}else {
+					value = defaultname;
+				}
+				
+				String typekey = item.getTypeKey();
+				String icon = item.getTypeKey() + ".png"; //$NON-NLS-1$
+			
+				if (isShared || includeMyQueries) {
+					QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared, cauuid, folderUuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
+					results.add(qp);
+				}
+
 			}
 		}
-
-		return new ArrayList<>(query2names.keySet());
+		return results;
+			
+			
+//			Constructor<? extends Query> cq = q.getDeclaredConstructor();
+//			cq.setAccessible(true);
+//			Query c = cq.newInstance();
+//			
+//			String type = q.getSimpleName();
+//			String typeKey = c.getTypeKey();
+//			
+//			
+//			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
+//
+//			String querypart  = null;
+//			
+//			
+////			Object entityExample = null;
+////			try {
+////				entityExample = q.getConstructor().newInstance();
+////			} catch (ReflectiveOperationException e) {
+////				throw new RuntimeException(e);
+////			}
+//			//session.unwrap(SessionImpl.class)
+//			
+//			//.getSessionFactory().getQueryEngine().getHqlTranslator().
+//			
+//			String tablename = ((AbstractEntityPersister)session.getSessionFactory().unwrap(SessionFactoryImplementor.class)
+//			.getSessionFactory().getRuntimeMetamodels()
+//			.getMappingMetamodel()
+//			.getEntityDescriptor(q).getEntityPersister()).getTableName();
+//			
+//			
+////			
+////			.getEntityDescriptor( guessEntityName( object ) );
+////			.getSessionFactory().getRuntimeMetamodels().getMappingMetamodel().getEntityDescriptor(type).
+////			getSubclassEntityPersist
+////			
+////			
+////			getFactory().getRuntimeMetamodels()
+////			.getMappingMetamodel()
+////			.getEntityDescriptor( entityName )
+////			
+////			String tablename = ((AbstractEntityPersister)(session.unwrap(SessionImpl.class)).getEntityPersister(q.getSimpleName(), entityExample)).getTableName();
+//			
+//			if (typeKey != null) {
+//				String icon = c.getIconName();				
+//				querypart = "SELECT q.uuid, q.id, q.shared, q.ca_uuid, q.folder_uuid, " //$NON-NLS-1$
+//						+ "c.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + tablename  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//					 	+ " as q JOIN smart.conservation_area c on c.uuid = q.ca_uuid LEFT JOIN smart.i18n_label l on l.element_uuid = q.uuid LEFT JOIN smart.language z on z.uuid = l.language_uuid and (z.isdefault = true or z.code in (:langs" + cnt + ")) " //$NON-NLS-1$
+//					 	+ "WHERE l.element_uuid = q.uuid "; //$NON-NLS-1$
+//			}else {
+//				//get query type from database
+//				querypart = "SELECT q.uuid, q.id, q.shared, q.ca_uuid, q.folder_uuid, " //$NON-NLS-1$
+//						+ "c.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + typeKey + ".png' FROM " + tablename  //$NON-NLS-1$ //$NON-NLS-2$
+//					 	+ " as q JOIN smart.conservation_area c on c.uuid = q.ca_uuid  LEFT JOIN smart.i18n_label l on l.element_uuid = q.uuid LEFT JOIN smart.language z on z.uuid = l.language_uuid and (z.isdefault = true or z.code in (:langs" + cnt + ")) " //$NON-NLS-1$
+//					 	+ "WHERE l.element_uuid = q.uuid "; //$NON-NLS-1$
+//			}
+//	
+//			//TODO:
+////			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
+////			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
+////			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
+////			translator.compile(Collections.EMPTY_MAP, false);
+////			String sql = translator.getSQLString();
+////			sql = sql.replaceFirst("\\?", ":langs"+ cnt); //$NON-NLS-1$ //$NON-NLS-2$
+//			params.put("langs" + cnt, langs); //$NON-NLS-1$
+//			cnt++;
+////			query += sql;
+//			query += querypart;
+//		}
+//		
+//		NativeQuery<?> nq = session.createNativeQuery(query);
+//		for (Entry<String, Object> param : params.entrySet()) {
+//			nq.setParameter(param.getKey(),  param.getValue());
+//		}
+//		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
+//		//required for uuid data types
+//	
+////		nq.addScalar("col_0_0_");// PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
+////		nq.addScalar("col_1_0_");  //$NON-NLS-1$
+////		nq.addScalar("col_2_0_"); //$NON-NLS-1$
+////		nq.addScalar("col_3_0_");// PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+////		nq.addScalar("col_4_0_");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+////		nq.addScalar("col_5_0_"); //$NON-NLS-1$
+////		nq.addScalar("col_6_0_"); //$NON-NLS-1$
+////		nq.addScalar("col_7_0_"); //$NON-NLS-1$
+////		nq.addScalar("col_8_0_"); //$NON-NLS-1$
+////		nq.addScalar("col_9_0_"); //$NON-NLS-1$
+////		nq.addScalar("col_10_0_"); //$NON-NLS-1$
+//		List<?> items = nq.list();
+//
+//		for (Object i : items) {
+//			Object[] data = (Object[])i;
+//			UUID uuid = (UUID) data[0];
+//			String id = (String)data[1];
+//			boolean isShared = (boolean)data[2];
+//			
+//			UUID cauuid = (UUID)data[3];
+//			UUID folderUuid = (UUID)data[4];
+//			String caid = (String)data[5];
+//			
+//			String value = (String)data[6];
+//			String code = (String)data[7];
+//			
+//			String type = (String)data[8];
+//			String typekey = (String)data[9];
+//			String icon = (String)data[10];
+//				
+//			if (isShared || includeMyQueries) {
+//				QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared, cauuid, folderUuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
+//					
+//				if (!query2names.containsKey(qp)) {
+//					query2names.put(qp, code);
+//				}else {
+//					String currentcode = query2names.get(qp);
+//					int cindex = langs.indexOf(currentcode);
+//					int nindex = langs.indexOf(code);
+//					if ((cindex == -1 && nindex >= 0) || (cindex != -1 && nindex > cindex)) {
+//						query2names.remove(qp);
+//						query2names.put(qp, code);
+//					}
+//				}
+//			}
+//		}
+//
+//		return new ArrayList<>(query2names.keySet());
 	}
 
 	public List<QueryProxy> getAdvancedIntelligenceQueries(Session session, Locale l) throws Exception{
-		List<String> langs = new ArrayList<>();
-		langs.add(l.getLanguage());
-		if (!l.getCountry().isEmpty()) {
-			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
-			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
-
-		}
 		
-		HashMap<QueryProxy, String> query2names = new HashMap<>();
-		String query = ""; //$NON-NLS-1$
 		
-		//hql doesn't support UNION
-		//so we do some hql->sql conversion here and use
-		//native queries instead.
-		int cnt = 0;
-		HashMap<String, Object> params = new HashMap<>();
-				
+		String languageCode = l.getLanguage();
+		String countryCode = null;
+		String varientCode = null;
+		if (!l.getCountry().isEmpty()) countryCode = languageCode + "_" + l.getCountry(); //$NON-NLS-1$
+		if (!l.getVariant().isEmpty()) varientCode = countryCode += "_" + l.getVariant(); //$NON-NLS-1$
+		
+		List<QueryProxy> results = new ArrayList<>();
 		for (Class<? extends AbstractIntelQuery> q : getAdvIntelQueryTypes()){
 			
-			Constructor<? extends AbstractIntelQuery> cq = q.getDeclaredConstructor();
-			cq.setAccessible(true);
-			AbstractIntelQuery c = cq.newInstance();
+			CriteriaQuery<? extends AbstractIntelQuery> cq = session.getCriteriaBuilder().createQuery(q);
+			cq.from(q);
 			
+			List<? extends AbstractIntelQuery> queries = session.createQuery(cq).list();
 			String type = q.getSimpleName();
-			String typeKey = c.getTypeKey();
-			String icon = c.getIconName();
-			
-			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
-			
-			String querypart = "SELECT q.uuid, q.conservationArea.uuid, " //$NON-NLS-1$
-				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
-			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
-	
-			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
-			translator.compile(Collections.EMPTY_MAP, false);
-			String sql = translator.getSQLString();
-			sql = sql.replaceFirst("\\?", ":langs"+ cnt);  //$NON-NLS-1$//$NON-NLS-2$
-			params.put("langs" + cnt, langs); //$NON-NLS-1$
-			cnt++;
-			query += sql;
 
-		}
-
-		NativeQuery<?> nq = session.createNativeQuery(query);
-		for (Entry<String, Object> param : params.entrySet()) {
-			nq.setParameter(param.getKey(),  param.getValue());
-		}
-		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
-		//required for uuid data types
-		nq.addScalar("col_0_0_", PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
-		nq.addScalar("col_1_0_", PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
-		nq.addScalar("col_2_0_"); //$NON-NLS-1$
-		nq.addScalar("col_3_0_"); //$NON-NLS-1$
-		nq.addScalar("col_4_0_"); //$NON-NLS-1$
-		nq.addScalar("col_5_0_"); //$NON-NLS-1$
-		nq.addScalar("col_6_0_"); //$NON-NLS-1$
-		nq.addScalar("col_7_0_"); //$NON-NLS-1$
-		List<?> items = nq.list();
-
-		for (Object i : items) {
-			Object[] data = (Object[])i;
-			UUID uuid = (UUID) data[0];
-			
-			UUID cauuid = (UUID)data[1];
-			String caid = (String)data[2];
-			
-			String value = (String)data[3];
-			String code = (String)data[4];
-			
-			String type = (String)data[5];
-			String typekey = (String)data[6];
-			String icon = (String)data[7];
-
-			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon); //$NON-NLS-1$
+			for (AbstractIntelQuery item : queries) {
+				
+				UUID uuid = item.getUuid();
+				UUID cauuid = item.getConservationArea().getUuid();
+				String caid = item.getConservationArea().getId();
+				
+				String defaultname = ""; //$NON-NLS-1$
+				String languagename = null;
+				String countryname = null;
+				String vairentname = null;
+				
+				for (Label name : item.getNames()) {
+					if (name.getLanguage().isDefault()) defaultname = name.getValue();
 					
-			if (!query2names.containsKey(qp)) {
-				query2names.put(qp, code);
-			}else {
-				String currentcode = query2names.get(qp);
-				int cindex = langs.indexOf(currentcode);
-				int nindex = langs.indexOf(code);
-				if (cindex == -1 && nindex >= 0) query2names.put(qp, code);
-				if (cindex != -1 && nindex > cindex) query2names.put(qp, code);
+					if (name.getLanguage().getCode().equals(languageCode)) languagename = name.getValue();
+					if (name.getLanguage().getCode().equals(countryCode)) countryname = name.getValue();
+					if (name.getLanguage().getCode().equals(varientCode)) vairentname = name.getValue();
+				}
+				
+				String value = null;
+				if (vairentname != null) {
+					value = vairentname;
+				}else if (countryname != null){
+					value = countryname;
+				}else if (languagename != null){
+					value = languagename;
+				}else {
+					value = defaultname;
+				}
+				
+				String typekey = item.getTypeKey();
+				String icon = item.getIconName();
+			
+				QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon); //$NON-NLS-1$
+				results.add(qp);
+
 			}
 		}
+		return results;
+//		
+//		List<String> langs = new ArrayList<>();
+//		langs.add(l.getLanguage());
+//		if (!l.getCountry().isEmpty()) {
+//			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
+//			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		}
+//		
+//		HashMap<QueryProxy, String> query2names = new HashMap<>();
+//		String query = ""; //$NON-NLS-1$
+//		
+//		//hql doesn't support UNION
+//		//so we do some hql->sql conversion here and use
+//		//native queries instead.
+//		int cnt = 0;
+//		HashMap<String, Object> params = new HashMap<>();
+//				
+//		for (Class<? extends AbstractIntelQuery> q : getAdvIntelQueryTypes()){
+//			
+//			Constructor<? extends AbstractIntelQuery> cq = q.getDeclaredConstructor();
+//			cq.setAccessible(true);
+//			AbstractIntelQuery c = cq.newInstance();
+//			
+//			String type = q.getSimpleName();
+//			String typeKey = c.getTypeKey();
+//			String icon = c.getIconName();
+//			
+//			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
+//			
+//			String querypart = "SELECT q.uuid, q.conservationArea.uuid, " //$NON-NLS-1$
+//				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon 
+//				+ "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+//			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
+//	
+//			//TODO:
+////			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
+////			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
+////			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
+////			translator.compile(Collections.EMPTY_MAP, false);
+////			String sql = translator.getSQLString();
+////			sql = sql.replaceFirst("\\?", ":langs"+ cnt);  //$NON-NLS-1$//$NON-NLS-2$
+////			params.put("langs" + cnt, langs); //$NON-NLS-1$
+////			cnt++;
+////			query += sql;
 
-		return new ArrayList<>(query2names.keySet());
+//		}
+//
+//		NativeQuery<?> nq = session.createNativeQuery(query);
+//		for (Entry<String, Object> param : params.entrySet()) {
+//			nq.setParameter(param.getKey(),  param.getValue());
+//		}
+//		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
+//		//required for uuid data types
+//		nq.addScalar("col_0_0_");//, PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
+//		nq.addScalar("col_1_0_");//, PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
+//		nq.addScalar("col_2_0_"); //$NON-NLS-1$
+//		nq.addScalar("col_3_0_"); //$NON-NLS-1$
+//		nq.addScalar("col_4_0_"); //$NON-NLS-1$
+//		nq.addScalar("col_5_0_"); //$NON-NLS-1$
+//		nq.addScalar("col_6_0_"); //$NON-NLS-1$
+//		nq.addScalar("col_7_0_"); //$NON-NLS-1$
+//		List<?> items = nq.list();
+//
+//		for (Object i : items) {
+//			Object[] data = (Object[])i;
+//			UUID uuid = (UUID) data[0];
+//			
+//			UUID cauuid = (UUID)data[1];
+//			String caid = (String)data[2];
+//			
+//			String value = (String)data[3];
+//			String code = (String)data[4];
+//			
+//			String type = (String)data[5];
+//			String typekey = (String)data[6];
+//			String icon = (String)data[7];
+//
+//			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon); //$NON-NLS-1$
+//					
+//			if (!query2names.containsKey(qp)) {
+//				query2names.put(qp, code);
+//			}else {
+//				String currentcode = query2names.get(qp);
+//				int cindex = langs.indexOf(currentcode);
+//				int nindex = langs.indexOf(code);
+//				if (cindex == -1 && nindex >= 0) query2names.put(qp, code);
+//				if (cindex != -1 && nindex > cindex) query2names.put(qp, code);
+//			}
+//		}
+//
+//		return new ArrayList<>(query2names.keySet());
 	}
 		
 	/**
@@ -658,13 +791,13 @@ public enum QueryManager {
 	 * @throws SQLException
 	 */
 	public int getActiveCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
-		org.hibernate.query.Query<?> q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE isActive = true AND conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
+		org.hibernate.query.Query<Tuple> q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE isActive = true AND conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc", Tuple.class); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		q.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setMaxResults(1);
-		Object[] x = (Object[])q.uniqueResult();
+		Tuple x = q.uniqueResult();
 		if (x == null) return 0;
-		return (Integer)x[1];
+		return (Integer)x.get(1);
 	}
 
 	/**
@@ -677,7 +810,7 @@ public enum QueryManager {
 	 */
 	public void removeAccessToQueriesFromCa(UUID caUuid, Session s) throws SQLException{
 		for (Class<? extends Query> q : queryClasses){
-			org.hibernate.query.Query<?> delete = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
+			MutationQuery delete = s.createMutationQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
 			delete.setParameter("ca", caUuid); //$NON-NLS-1$
 			delete.executeUpdate();
 		}

@@ -124,7 +124,7 @@ public class SqlGenerator {
 		StringBuilder sql = new StringBuilder();
 		sql.append("DROP TABLE " + obsTable); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		String newname = obsTable;
@@ -134,19 +134,19 @@ public class SqlGenerator {
 		}
 		sql.append("ALTER TABLE " + tempTable + " RENAME TO " + newname); //$NON-NLS-1$ //$NON-NLS-2$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		if (locationIndex){
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + SqlGenerator.createIndexName( obsTable ) + " on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		}
 		if (observationIndex){
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + SqlGenerator.createIndexName( obsTable ) + " on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		}
 	}
 	

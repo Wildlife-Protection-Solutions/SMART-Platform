@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
@@ -43,11 +44,10 @@ public class SmartIntegrator implements Integrator {
 	public static final String EXTENSION_ID = "org.wcs.smart.hibernate.libs.interceptor"; //$NON-NLS-1$
 	
 	//http://in.relation.to/2012/01/09/event-listener-registration/
-	
 	@Override
-	public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+	public void integrate( Metadata metadata, BootstrapContext bootstrapContext, SessionFactoryImplementor sessionFactory) {
 		for (Integrator i : getMappings()){
-			i.integrate(metadata, sessionFactory, serviceRegistry);
+			i.integrate(metadata, bootstrapContext, sessionFactory);
 		}
 	}
 	

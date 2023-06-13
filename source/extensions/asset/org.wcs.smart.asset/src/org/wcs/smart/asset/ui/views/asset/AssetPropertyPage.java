@@ -100,8 +100,8 @@ public class AssetPropertyPage {
 			session.beginTransaction();
 			try {
 				asset.setIsRetired(!asset.getIsRetired());
-				session.saveOrUpdate(historyRecord);
-				session.saveOrUpdate(asset);
+				HibernateManager.saveOrMerge(session, historyRecord);
+				HibernateManager.saveOrMerge(session, asset);			
 				asset.computeStatus(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {

@@ -170,7 +170,7 @@ public class StationEditor extends EditorPart implements MapPart {
 				if (!isNew) {
 					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
-				Query<?> q = s.createQuery(query)
+				Query<Long> q = s.createQuery(query, Long.class)
 				.setParameter("id", station.getId()) //$NON-NLS-1$
 				.setParameter("ca", station.getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
@@ -185,7 +185,8 @@ public class StationEditor extends EditorPart implements MapPart {
 				}
 				
 				s.beginTransaction();
-				s.saveOrUpdate(station);
+				HibernateManager.saveOrMerge(s, station);
+				s.merge(station);
 				s.getTransaction().commit();
 				
 				((StationEditorInput)getEditorInput()).setStationUuid(station.getUuid());

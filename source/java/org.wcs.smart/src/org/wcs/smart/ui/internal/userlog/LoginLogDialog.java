@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.userlog;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,7 +42,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
@@ -93,9 +93,9 @@ public class LoginLogDialog extends SmartStyledDialog {
 	                try{
 	                		                	
 	                	String hql = "delete from LoginLogEntry where loginTimestamp < :time"; //$NON-NLS-1$
-						Query<?> query = s.createQuery(hql);
-	               	  	query.setParameter("time",  LocalDateTime.now().minusYears(1)); //$NON-NLS-1$
-	               	  	query.executeUpdate();
+						s.createMutationQuery(hql)
+	               	  		.setParameter("time",  Timestamp.valueOf(LocalDateTime.now().minusYears(1))) //$NON-NLS-1$
+	               	  		.executeUpdate();
 	
 	                	s.getTransaction().commit();
 	                } catch (Throwable t) {

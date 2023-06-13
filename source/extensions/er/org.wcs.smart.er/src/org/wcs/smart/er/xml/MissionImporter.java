@@ -282,7 +282,7 @@ public class MissionImporter {
 				Survey survey = getSurveyById(imported, session);
 				if (survey == null){
 					//no existing survey, save the new one from the xml file.
-					session.saveOrUpdate(imported.getSurvey());
+					imported.setSurvey(HibernateManager.saveOrMerge(session, imported.getSurvey()));
 				}else{
 					//there is an existing survey with this id, associate the mission with it instead of creating a new one.
 					imported.setSurvey(survey);

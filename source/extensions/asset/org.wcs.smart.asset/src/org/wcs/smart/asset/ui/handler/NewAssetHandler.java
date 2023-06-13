@@ -181,7 +181,7 @@ public class NewAssetHandler {
 				newAsset.setAttributeValues(new ArrayList<>());
 				newAsset.setIsRetired(false);
 				
-				session.save(newAsset);
+				session.persist(newAsset);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -194,7 +194,7 @@ public class NewAssetHandler {
 	
 	private boolean checkDuplicate(Session session, String assetId) {
 		String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = LOWER(:id) AND conservationArea = :ca "; //$NON-NLS-1$
-		Query<?> q = session.createQuery(query)
+		Query<Long> q = session.createQuery(query, Long.class)
 		.setParameter("id", assetId) //$NON-NLS-1$
 		.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		Long cnt = (Long)q.uniqueResult();

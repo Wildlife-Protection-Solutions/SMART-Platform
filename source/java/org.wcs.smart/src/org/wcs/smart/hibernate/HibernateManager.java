@@ -22,6 +22,7 @@
 package org.wcs.smart.hibernate;
 
 
+import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,16 +32,11 @@ import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.EntityType;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -50,17 +46,19 @@ import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.jdbc.Work;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.mindrot.jbcrypt.BCrypt;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ProjectionUtils;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
@@ -75,6 +73,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.export.TableInfo;
@@ -86,6 +85,12 @@ import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.I18nUtil;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.EntityType;
 
 /**
  * Hibernate manager to manage database connections.
@@ -143,12 +148,19 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public synchronized static Session openSession(Interceptor interceptor){
 		initContext();
+		Session session = null;
+		
 		if (interceptor == null){
-			return SmartHibernateManager.openSession();
+			session = SmartHibernateManager.openSession();
 		}else{
-			return SmartHibernateManager.openSession(interceptor);
+			session = SmartHibernateManager.openSession(interceptor);
 		}
+		
+		SmartContext.INSTANCE.setClass(SessionFactory.class, session.getSessionFactory());
+		
+		return session;
 	}
+	
 	
 	/**
 	 * 
@@ -259,21 +271,39 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 		
 		List<TableInfo> data = new ArrayList<TableInfo>();
-		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)sessionFactory).getMetamodel();
-		for (EntityType<?> t : mi.getEntities()) {
-			AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(t.getJavaType()));
-
-			if (info.getClassMetadata() instanceof Joinable) {
-				Joinable j = ((Joinable)info.getClassMetadata());
-				if (info.getRootTableName().equals(j.getTableName())){
-					TableInfo tableInfo = new TableInfo(info.getMappedClass(), j.getTableName());
-					//find conservation area property if available
-					for (int k = 0; k < info.getPropertyTypes().length; k ++){
-						if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
-							tableInfo.setCaPropertyName(((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
+		
+		
+		try (EntityManager em = sessionFactory.createEntityManager()){
+			for (EntityType<?> t : em.getMetamodel().getEntities()) {
+				Object entityExample = null;
+				try {
+					//skip abstract classes
+					if (Modifier.isAbstract( t.getJavaType().getModifiers() )) continue;
+					entityExample = t.getJavaType().getConstructor().newInstance();
+				} catch (ReflectiveOperationException e) {
+					throw new RuntimeException(e);
+				}
+				EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);
+				
+				if (p instanceof AbstractEntityPersister) {
+					AbstractEntityPersister info = (AbstractEntityPersister) p;
+				
+					if (info instanceof Joinable) {
+						Joinable j = (Joinable)info;
+						if (info.getRootTableName().equals(j.getTableName())){
+							TableInfo tableInfo = new TableInfo(info.getMappedClass(), j.getTableName());
+							//find conservation area property if available
+							for (int k = 0; k < info.getPropertyTypes().length; k ++){
+								if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
+									tableInfo.setCaPropertyName(((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
+									break;
+								}
+							}
+							data.add(tableInfo);
 						}
 					}
-					data.add(tableInfo);
+				}else {
+					throw new RuntimeException(MessageFormat.format("Cannot determine entity details for type {0}.", t.getJavaType().toString()));
 				}
 			}
 		}
@@ -293,13 +323,33 @@ public class HibernateManager extends SmartHibernateManager{
 		if (sessionFactory == null){
 			return null;
 		}
-		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)sessionFactory).getMetamodel();
-		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(hibernateClass));
-		ClassMetadata m = info.getClassMetadata();
-		if (m instanceof Joinable){
-			return ((Joinable)m).getTableName();
+		
+		try (EntityManager em = sessionFactory.createEntityManager()){
+			Object entityExample = null;
+			try {
+				entityExample = hibernateClass.getConstructor().newInstance();
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(e);
+			}
+			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);
+			
+			if (p instanceof AbstractEntityPersister) {
+				AbstractEntityPersister info = (AbstractEntityPersister) p;
+				return info.getRootTableName();
+				
+			}
 		}
-		return null;
+		
+		//return null
+        throw new RuntimeException("Unexpected persister type; a subtype of AbstractEntityPersister expected.");
+		
+//		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)sessionFactory).getMetamodel();
+//		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(hibernateClass));
+//		ClassMetadata m = info.getClassMetadata();
+//		if (m instanceof Joinable){
+//			return ((Joinable)m).getTableName();
+//		}
+		//return null;
 		
 	}
 	
@@ -372,12 +422,13 @@ public class HibernateManager extends SmartHibernateManager{
 	public static boolean validateUserIdUnique(String userName, ConservationArea ca, Session session){
 		Transaction tx = session.beginTransaction();
 		try{
+			//TODO: test this
 			String query = "select count(*) from Employee where conservationArea = :ca and UPPER(smartUserId) = UPPER(:userId)"; //$NON-NLS-1$
-			List<?> cnt = session.createQuery(query)
+			List<Long> cnt = session.createQuery(query, Long.class)
 					.setParameter("ca", ca) //$NON-NLS-1$
 					.setParameter("userId", userName).list(); //$NON-NLS-1$ 
 			boolean ok = false;
-			if ( (Long) cnt.get(0) > 0){
+			if ( cnt.get(0) > 0){
 				ok = false;
 			}else{
 				ok = true;
@@ -566,8 +617,11 @@ public class HibernateManager extends SmartHibernateManager{
 			year = e.getStartEmploymentDate().getYear();
 		}
 		
-		String query = HibernateUtil.getHibernateCurrentDialect(session).getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$
-		List<?> results = session.createNativeQuery(query).list();
+		String query = HibernateUtil.getHibernateCurrentDialect(session)
+				.getSequenceSupport()
+				.getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$
+
+		List<?> results = session.createNativeQuery(query, Long.class).list();
 		e.setId(year + ID_FORMATTER.format(results.get(0)));
 	}
 	
@@ -913,8 +967,14 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static String getPlugInVersion(String pluginId, Session s){
-		NativeQuery<?> query = s.createNativeQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		List<?> versions = query.list();
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT version FROM "); //$NON-NLS-1$
+		sb.append(SmartDB.PLUGIN_VERSION_TBL);
+		sb.append("WHERE plugin_id = ");  //$NON-NLS-1$
+		sb.append("'" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				
+		NativeQuery<String> query = s.createNativeQuery(sb.toString(), String.class);
+		List<String> versions = query.list();
 		if (versions.size() == 0){
 			return null;
 		}else{
@@ -994,6 +1054,28 @@ public class HibernateManager extends SmartHibernateManager{
 			if (name.getElementuuid() != null){
 				session.evict(name);
 			}
+		}
+	}
+	
+
+	public static void load(Collection<? extends NamedItem> items) {
+		if (items == null) return;
+		items.forEach(e->e.getNames().size());
+	}
+	
+	public static void save(Session session, Collection<? extends UuidItem> items) {
+		if (items == null) return;
+		items.forEach(item->{if (item.getUuid() == null) session.persist(item);});
+	}
+	
+	public static <T extends UuidItem> T saveOrMerge(Session session, T item) {
+		if (item == null) return null;
+		
+		if (item.getUuid() == null) {
+			session.persist(item);
+			return item;
+		}else {
+			return session.merge(item);
 		}
 	}
 }

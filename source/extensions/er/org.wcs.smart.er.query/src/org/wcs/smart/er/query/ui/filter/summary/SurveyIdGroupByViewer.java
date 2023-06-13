@@ -25,10 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Survey;
@@ -40,6 +36,10 @@ import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Survey id group by option.
@@ -62,7 +62,7 @@ public class SurveyIdGroupByViewer extends AbstractGroupByViewer<SurveyIdGroupBy
 		if (items != null){
 			for (String it : items){
 				try{
-					Survey survey = (Survey) session.load(Survey.class, UuidUtils.stringToUuid(it));
+					Survey survey = (Survey) session.getReference(Survey.class, UuidUtils.stringToUuid(it));
 					if (survey != null){
 						allItems.add(new ListItem(survey.getUuid(), survey.getId()));
 					}

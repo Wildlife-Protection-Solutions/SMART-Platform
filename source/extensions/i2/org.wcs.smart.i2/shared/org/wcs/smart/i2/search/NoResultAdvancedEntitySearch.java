@@ -98,7 +98,7 @@ public class NoResultAdvancedEntitySearch extends AdvancedEntitySearch {
 		sb.append(eresultsTable);
 		sb.append("(entity_uuid char(16) for bit data)"); //$NON-NLS-1$
 		
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		if (profiles.isEmpty()) return null;
 		
@@ -112,7 +112,7 @@ public class NoResultAdvancedEntitySearch extends AdvancedEntitySearch {
 			List<byte[]> pb = profiles.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList());
 			List<byte[]> cab = cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList());
 			
-			session.createNativeQuery(sb.toString())
+			session.createNativeMutationQuery(sb.toString())
 				.setParameterList("profiles", pb) //$NON-NLS-1$
 				.setParameterList("cas", cab) //$NON-NLS-1$
 				.executeUpdate();
@@ -130,7 +130,7 @@ public class NoResultAdvancedEntitySearch extends AdvancedEntitySearch {
 			sb.append(" WHERE "); //$NON-NLS-1$
 			sb.append(where);
 			
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 
 			dropResultsTable(session);
 			

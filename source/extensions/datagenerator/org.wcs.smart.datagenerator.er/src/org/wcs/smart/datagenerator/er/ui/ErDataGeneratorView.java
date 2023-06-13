@@ -38,9 +38,6 @@ import java.util.function.Consumer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -113,9 +110,9 @@ import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.datagenerator.er.DataEngineRunnable;
 import org.wcs.smart.datagenerator.er.ErDataGenerator;
 import org.wcs.smart.datagenerator.er.ErDataGeneratorPlugIn;
+import org.wcs.smart.datagenerator.er.IDataEngine;
 import org.wcs.smart.datagenerator.er.MissionSpatialShiftEngine;
 import org.wcs.smart.datagenerator.er.MissionTimeShiftEngine;
-import org.wcs.smart.datagenerator.er.IDataEngine;
 import org.wcs.smart.datagenerator.er.internal.Messages;
 import org.wcs.smart.datagenerator.er.model.ObservationConfiguration;
 import org.wcs.smart.datagenerator.er.model.SurveyConfiguration;
@@ -132,6 +129,10 @@ import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.ui.properties.CategoryTreeDropDown;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * View for collection configuration details for generating
@@ -1182,10 +1183,10 @@ public class ErDataGeneratorView {
 			
 			try(Session s = HibernateManager.openSession()){
 				
-				@SuppressWarnings("unused")
-				Object[] data = (Object[]) s.createQuery("SELECT min(startDate), max(endDate) FROM Mission WHERE survey.surveyDesign.conservationArea = :ca") //$NON-NLS-1$
-					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-					.uniqueResult();
+				//@SuppressWarnings("unused")
+				//Tuple data = s.createQuery("SELECT min(startDate), max(endDate) FROM Mission WHERE survey.surveyDesign.conservationArea = :ca", Tuple.class) //$NON-NLS-1$
+				//	.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				//	.uniqueResult();
 				
 				CriteriaBuilder cb = s.getCriteriaBuilder();
 				CriteriaQuery<Category> c = cb.createQuery(Category.class);
@@ -1216,8 +1217,7 @@ public class ErDataGeneratorView {
 					}
 				}
 				
-				@SuppressWarnings("unchecked")
-				List<Area.AreaType> types = s.createQuery("SELECT distinct type FROM Area WHERE conservationArea = :ca") //$NON-NLS-1$
+				List<Area.AreaType> types = s.createQuery("SELECT distinct type FROM Area WHERE conservationArea = :ca", Area.AreaType.class) //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.list();
 				bboxItems.addAll(types);

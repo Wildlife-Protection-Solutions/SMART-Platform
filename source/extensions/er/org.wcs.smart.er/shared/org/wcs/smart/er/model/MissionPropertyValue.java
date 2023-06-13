@@ -27,20 +27,20 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.ISharedLabelProvider;
 import org.wcs.smart.SmartContext;
+
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Mission property value model object.  Link between a mission, the
@@ -50,7 +50,7 @@ import org.wcs.smart.SmartContext;
  *
  */
 @Entity
-@Table(name="smart.mission_property_value")
+@Table(name="mission_property_value", schema="smart")
 @AssociationOverrides({
 	@AssociationOverride(name = "id.mission", 
 		joinColumns = @JoinColumn(name = "mission_uuid")),

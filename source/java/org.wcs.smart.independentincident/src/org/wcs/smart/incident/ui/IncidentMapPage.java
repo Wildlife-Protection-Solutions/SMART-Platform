@@ -380,7 +380,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						pw.setRawY(newy);
 						pw.setDirection(newdirection);
 						pw.setDistance(newdistance);
-						s.update(pw);
+						s.merge(pw);
 						s.getTransaction().commit();
 						modified = true;
 					}catch (Exception ex){
@@ -449,7 +449,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						pw.setRawY(y);
 						pw.setDirection(direction);
 						pw.setDistance(distance);
-						s.update(pw);
+						s.merge(pw);
 						s.getTransaction().commit();
 						
 						Display.getDefault().syncExec(()->{

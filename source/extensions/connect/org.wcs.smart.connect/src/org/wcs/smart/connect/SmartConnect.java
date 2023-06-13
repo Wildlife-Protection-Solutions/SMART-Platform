@@ -50,21 +50,11 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -94,6 +84,17 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Class to interface with a SMART Connect server.
@@ -214,14 +215,15 @@ public class SmartConnect {
 			ctx.init(null, new TrustManager[]{trustManager}, null);
 		
 			SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(ctx);
-			org.apache.http.config.Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+			Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
 					.register("https", factory) //$NON-NLS-1$
 					.build();
 //			registry.register("https", 443, factory); //$NON-NLS-1$
-			
+
 			HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
 			HttpClient httpClient = HttpClientBuilder.create()
 					.setConnectionManager(cm)
+					
 					.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
 					.build();
 			
@@ -621,7 +623,7 @@ public class SmartConnect {
 			Long start = Files.size(p);
 			Long end = packageSize-1;
 			
-			Builder requestBuilder = target.request();
+			jakarta.ws.rs.client.Invocation.Builder requestBuilder = target.request();
 			if (start != 0){
 				requestBuilder.header("Range", "bytes=" + start + "-" + end); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}

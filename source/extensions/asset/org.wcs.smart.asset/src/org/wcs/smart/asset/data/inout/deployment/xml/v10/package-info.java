@@ -5,5 +5,8 @@
 // Generated on: 2021.04.15 at 10:16:12 AM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/assetdeployment", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/assetdeployment", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.asset.data.inout.deployment.xml.v10;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

@@ -53,7 +53,7 @@ public class IncidentJsonPostProcessor implements IJsonPostProcessor {
 				.list();
 					
 		for (CtIncidentLink l : links) {
-			session.delete(l);
+			session.remove(l);
 		}
 		
 	}

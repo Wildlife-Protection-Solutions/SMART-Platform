@@ -293,20 +293,20 @@ public class MoveAttachmentDialog extends SmartStyledTitleDialog {
 			session.beginTransaction();
 			try {
 				for (Attachment item : items) {
-					session.delete(item.attachment);
+					session.remove(item.attachment);
 					
 					if (item.observation == null) {
 						WaypointAttachment wa = new WaypointAttachment();
 						wa.setFilename(item.attachment.getFilename());
 						wa.setSignatureType(((ISignatureAttachment)item.attachment).getSignatureType());
 						wa.setWaypoint(waypoint);
-						session.save(wa);
+						session.persist(wa);
 					}else {
 						ObservationAttachment oa = new ObservationAttachment();
 						oa.setFilename(item.attachment.getFilename());
 						oa.setSignatureType(((ISignatureAttachment)item.attachment).getSignatureType());
 						oa.setObservation(item.observation);
-						session.save(oa);
+						session.persist(oa);
 					}
 				}
 				session.getTransaction().commit();

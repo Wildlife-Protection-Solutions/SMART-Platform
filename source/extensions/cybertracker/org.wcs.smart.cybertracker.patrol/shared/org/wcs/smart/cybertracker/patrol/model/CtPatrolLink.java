@@ -25,17 +25,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.wcs.smart.patrol.model.PatrolLeg;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * Links cybertracker patrolid/deviceid to SMART patrol.
@@ -44,7 +44,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
  *
  */
 @Entity
-@Table(name="smart.ct_patrol_link")
+@Table(name="ct_patrol_link", schema="smart")
 public class CtPatrolLink {
 
 	private UUID ctUuid;

@@ -216,7 +216,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					sd = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+					sd = (SurveyDesign) s.getReference(SurveyDesign.class, sd.getUuid());
 					sd.getName();
 	
 					//load attributes
@@ -461,7 +461,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 						 Object item = (Object) iterator.next();
 						 if (item instanceof SamplingUnit){
 							 ((SamplingUnit) item).setState(d.getState());
-							 s.saveOrUpdate(item);
+							 HibernateManager.saveOrMerge(s, ((SamplingUnit) item));
 						 }
 					 }
 					 s.getTransaction().commit();
@@ -518,7 +518,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 								monitor.subTask(MessageFormat.format(Messages.SamplingUnitEditorPage_DeleteProgress2, new Object[]{delete.getId()}));
 								try{
 									DeleteManager.canDelete(delete, s);
-									s.delete(delete);
+									s.remove(delete);
 								}catch (final Exception ex){
 									getSite().getShell().getDisplay().syncExec(new Runnable(){
 										@Override

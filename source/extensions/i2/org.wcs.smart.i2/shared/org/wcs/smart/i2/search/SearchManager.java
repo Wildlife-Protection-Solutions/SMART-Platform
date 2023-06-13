@@ -31,22 +31,16 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.StringType;
-import org.hibernate.type.UUIDBinaryType;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.UuidUtils;
 
 import info.debatty.java.stringsimilarity.Levenshtein;
+import jakarta.persistence.Tuple;
 
 
 public enum SearchManager {
@@ -73,14 +67,11 @@ public enum SearchManager {
 
 		List<UUID> types = null;
 		if (typeKeys != null && !typeKeys.isEmpty()){
-			 CriteriaBuilder cb = session.getCriteriaBuilder();
-			 CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
-			 Root<IntelEntityType> from = c.from(IntelEntityType.class);
-			 c.where(cb.and(
-					 from.get("conservationArea").in(conservationAreas), //$NON-NLS-1$
-					 from.get("keyId").in(typeKeys) //$NON-NLS-1$
-					 ));
-			 List<IntelEntityType> stypes = session.createQuery(c).getResultList();
+			
+			List<IntelEntityType> stypes = session.createQuery("FROM IntelEntityType WHERE conservationArea in (:cas) and keyId In (:keys)", IntelEntityType.class) //$NON-NLS-1$
+				.setParameterList("cas", conservationAreas) //$NON-NLS-1$
+				.setParameterList("keys", typeKeys) //$NON-NLS-1$
+				.list();
 			 types = stypes.stream().map(iet->iet.getUuid()).collect(Collectors.toList());
 		}
 				
@@ -115,12 +106,13 @@ public enum SearchManager {
 		}
 
 		// create the query and parameters
-		NativeQuery<?> q = session.createNativeQuery(sql.toString());
+		NativeQuery<Tuple> q = session.createNativeQuery(sql.toString(), Tuple.class);
 		//these two lines are required to get this to work
 		//on Connect with the postgresql libraries
-		q.addScalar("string_value", StringType.INSTANCE); //$NON-NLS-1$
-		q.addScalar("entity_uuid", SmartContext.INSTANCE.getClass(UUIDBinaryType.class)); //$NON-NLS-1$
-		q.setParameterList("cas", conservationAreas); //$NON-NLS-1$
+		//TODO: test this - commented out these lines need to see if works on connect
+		//q.addScalar("string_value", StringType.INSTANCE); //$NON-NLS-1$
+		//q.addScalar("entity_uuid", SmartContext.INSTANCE.getClass(UUIDBinaryType.class)); //$NON-NLS-1$
+		q.setParameterList("cas", conservationAreas.stream().map(a->a.getUuid()).collect(Collectors.toList())); //$NON-NLS-1$
 		q.setParameterList("profiles", profiles.stream().map(a->a.getUuid()).collect(Collectors.toList())); //$NON-NLS-1$
 		if (types != null){
 			q.setParameterList("types", types); //$NON-NLS-1$
@@ -130,19 +122,19 @@ public enum SearchManager {
 		}
 		q.setParameter("ml", "%" + searchFor + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		q.setMaxResults(maxResults);
-		List<?> items = q.list();
+		List<Tuple> items = q.list();
 		
 		ParsedString searchString = new ParsedString(searchFor);
 		//search through each row and compute a rating value
 		Map<UUID, IntelSearchResultItem> results = new HashMap<>();
-		for (Object rr : items){
-			Object[] row = (Object[])rr;
-			String fullstring = (String)row[0];
+		for (Tuple rr : items){
+			
+			String fullstring = (String)rr.get(0);
 			UUID uuid = null;
-			if (row[1] instanceof UUID) {
-				uuid = (UUID)row[1];
-			}else if(row[1] instanceof byte[]) {
-				uuid = UuidUtils.byteToUUID((byte[])row[1]);
+			if (rr.get(1) instanceof UUID) {
+				uuid = (UUID)rr.get(1);
+			}else if(rr.get(1) instanceof byte[]) {
+				uuid = UuidUtils.byteToUUID((byte[])rr.get(1));
 			}
 			Double value = 0.0;
 			if (searchFor.equalsIgnoreCase(fullstring)){

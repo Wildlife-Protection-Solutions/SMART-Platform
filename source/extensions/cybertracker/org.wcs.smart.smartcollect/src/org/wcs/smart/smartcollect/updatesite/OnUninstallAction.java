@@ -58,11 +58,11 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 				//drop all tables
 				for (int i = 0; i < TABLES.length; i ++){
 					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-						session.createNativeQuery("DROP TABLE smart."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+						session.createNativeMutationQuery("DROP TABLE smart."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 					}
 					
 					//delete all waypoints with source of smartcollect
-					session.createQuery("DELETE FROM Waypoint WHERE source = :source") //$NON-NLS-1$
+					session.createMutationQuery("DELETE FROM Waypoint WHERE source = :source") //$NON-NLS-1$
 						.setParameter("source", SmartCollectWaypointSource.KEY).executeUpdate(); //$NON-NLS-1$
 				}
 				

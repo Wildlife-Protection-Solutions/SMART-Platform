@@ -3,19 +3,19 @@ package org.wcs.smart.i2.patrol.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.patrol.model.Patrol;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "smart.i_patrol_record_motivation")
+@Table(name = "i_patrol_record_motivation", schema="smart")
 public class PatrolMotivatedRecord {
 	
 	private PatrolMotivatedRecordPk id = new PatrolMotivatedRecordPk();	

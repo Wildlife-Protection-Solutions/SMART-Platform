@@ -372,11 +372,11 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 			protected IStatus run(IProgressMonitor monitor) {
 				List<EntityItem> entities = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
-					ScrollableResults r = QueryFactory.buildQuery(s, IntelEntity.class, 
+					ScrollableResults<IntelEntity> r = QueryFactory.buildQuery(s, IntelEntity.class, 
 							new Object[] {"entityType", type}, //$NON-NLS-1$
 							new Object[] {"profile", profile}).scroll(); //$NON-NLS-1$
 					while(r.next()){
-						IntelEntity e = (IntelEntity)r.get()[0];
+						IntelEntity e = r.get();
 						EntityItem i = new EntityItem(e.getUuid(), e.getIdAttributeAsText());
 						entities.add(i);
 					}

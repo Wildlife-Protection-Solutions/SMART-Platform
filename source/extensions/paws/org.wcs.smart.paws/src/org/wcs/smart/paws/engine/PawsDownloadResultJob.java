@@ -234,9 +234,9 @@ public class PawsDownloadResultJob extends Job {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(run);
 				run.setStatus(newStatus);
 				run.setStatusMessage(message);
+				session.merge(run);
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				PawsPlugIn.log(ex2.getMessage(), ex2);

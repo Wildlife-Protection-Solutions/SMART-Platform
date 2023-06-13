@@ -147,7 +147,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(item);
+				HibernateManager.saveOrMerge(s, item);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();

@@ -37,11 +37,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -97,6 +92,11 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Record XML Importer.
@@ -803,9 +803,9 @@ public class RecordXmlImporter {
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 				new Object[] {"entityType", type}); //$NON-NLS-1$
 		List<IntelEntity> ids = new ArrayList<>();
-		try(ScrollableResults results = search.scroll()) {
+		try(ScrollableResults<IntelEntity> results = search.scroll()) {
 			while(results.next()) {
-				IntelEntity entity = (IntelEntity)results.get()[0];
+				IntelEntity entity = results.get();
 				if ( entity.getIdAttributeAsText().equals(entityListItem.getName()) ){
 					ids.add(entity);
 				}

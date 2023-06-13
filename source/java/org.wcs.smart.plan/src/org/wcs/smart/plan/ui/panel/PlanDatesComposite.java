@@ -143,7 +143,7 @@ public class PlanDatesComposite extends PlanComposite {
 			session.beginTransaction();
 			try {
 				if(plan.getParent() != null){
-					thisParentPlan = (Plan) session.load(Plan.class, plan.getParent().getUuid());
+					thisParentPlan = (Plan) session.getReference(Plan.class, plan.getParent().getUuid());
 				}
 	
 				SmartUtils.initDateTimeWidget(dtStartDate, plan.getStartDate() != null ? plan.getStartDate() : LocalDate.now());

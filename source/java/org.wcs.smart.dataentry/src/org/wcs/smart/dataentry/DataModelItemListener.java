@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.transaction.Synchronization;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -50,6 +48,8 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
 
+import jakarta.transaction.Synchronization;
+
 /**
  * DataModel listener for removing data model items from configured models.
  * 
@@ -62,7 +62,6 @@ import org.wcs.smart.hibernate.QueryFactory;
  * @author Emily
  *
  */
-@SuppressWarnings("unchecked")
 public enum DataModelItemListener implements IDataModelItemListener {
 	
 	INSTANCE;
@@ -142,7 +141,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 			fireCmDeleteItem(currentSession, n);
 			if (n.getParent() == null){
 				n.getModel().getNodes().remove(n);
-				currentSession.delete(n);	
+				currentSession.remove(n);	
 				interceptor.onDelete(n, n.getUuid(), null, null, null);
 			}else{
 				n.getParent().getChildren().remove(n);
@@ -203,7 +202,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 				List<CmAttributeConfig> configs= DataentryHibernateManager.getCmAttributeConfigs(currentSession, model, dmAttribute);
 				for (CmAttributeConfig cfg : configs) {
 					//EG: I tried session.delete(cfg) here and it generated some hibernate errors I could not sort out
-					currentSession.createQuery("DELETE From CmAttributeConfig WHERE uuid = :uuid").setParameter("uuid", cfg.getUuid()).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+					currentSession.createMutationQuery("DELETE From CmAttributeConfig WHERE uuid = :uuid").setParameter("uuid", cfg.getUuid()).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 					currentSession.flush();	
 				}
 				
@@ -222,7 +221,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		List<CmAttributeListItem> items = QueryFactory.buildQuery(currentSession, CmAttributeListItem.class, "listItem", li).list(); //$NON-NLS-1$
 		for (CmAttributeListItem item: items){
 			fireCmDeleteItem(currentSession, item);
-			currentSession.delete(item);
+			currentSession.remove(item);
 			interceptor.onDelete(item, item.getUuid(),null, null, null);
 		}
 		deleteAttributeOption(currentSession, li.getUuid());
@@ -238,7 +237,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		List<CmAttributeTreeNode> nodes = QueryFactory.buildQuery(currentSession, CmAttributeTreeNode.class, "dmTreeNode", node).list(); //$NON-NLS-1$
 		for (CmAttributeTreeNode tnode : nodes){
 			fireCmDeleteItem(currentSession, tnode);
-			currentSession.delete(tnode);
+			currentSession.remove(tnode);
 			interceptor.onDelete(tnode, tnode.getUuid(), null, null, null);
 		}
 		deleteAttributeOption(currentSession, node.getUuid());
@@ -250,7 +249,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 	 * @param uuidValue
 	 */
 	private void deleteAttributeOption(Session currentSession, UUID uuidValue){
-		Query<CmAttributeOption> q = currentSession.createQuery("From CmAttributeOption WHERE uuidValue = :uuid"); //$NON-NLS-1$
+		Query<CmAttributeOption> q = currentSession.createQuery("From CmAttributeOption WHERE uuidValue = :uuid", CmAttributeOption.class); //$NON-NLS-1$
 		q.setParameter("uuid", uuidValue); //$NON-NLS-1$
 		List<CmAttributeOption> ops = q.list();
 		for (CmAttributeOption o : ops){
@@ -318,7 +317,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 				}
 
 				node.getCmAttributes().add(newAttribute);
-				currentSession.saveOrUpdate(newAttribute);
+				currentSession.persist(newAttribute);
 			}
 		}
 	}
@@ -328,8 +327,8 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		if (config == null) {
 			config = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
 			m.getDefaultConfigs().put(a, config);
-			s.save(config);
-			s.saveOrUpdate(m);
+			s.persist(config);
+			s.merge(m);
 		}
 		return config;
 	}
@@ -339,8 +338,8 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		if (config == null) {
 			config = CmDefaultListsUtil.buildDefaultListConfig(m, a);
 			m.getDefaultConfigs().put(a, config);
-			s.save(config);
-			s.saveOrUpdate(m);
+			s.persist(config);
+			s.merge(m);
 		}
 		return config;
 	}
@@ -354,7 +353,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 			cmListItem.setIsActive(false); //by design
 			cmListItem.setListOrder(dmListItem.getListOrder());
 
-			currentSession.saveOrUpdate(cmListItem);
+			currentSession.persist(cmListItem);
 		}
 	}
 	

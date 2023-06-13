@@ -512,7 +512,7 @@ public class SurveyPagedResultUtils  {
 								it.addMissionPropertyValue(key,  svalue);
 							}else if (rs.getObject(5) != null){
 								it.addMissionPropertyValue(key, 
-									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, UuidUtils.byteToUUID(rs.getBytes(5)))).getName());
+									((MissionAttributeListItem)session.getReference(MissionAttributeListItem.class, UuidUtils.byteToUUID(rs.getBytes(5)))).getName());
 							}
 						}
 					}
@@ -565,7 +565,7 @@ public class SurveyPagedResultUtils  {
 							}else if (svalue != null){
 								it.addSamplingUnitAttributeValue(key,  svalue);
 							}else if (rs.getObject(5) != null){
-								String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class,  UuidUtils.byteToUUID(rs.getBytes(5)))).getName();
+								String value = ((SamplingUnitAttributeListItem)session.getReference(SamplingUnitAttributeListItem.class,  UuidUtils.byteToUUID(rs.getBytes(5)))).getName();
 								it.addSamplingUnitAttributeValue(key, value);
 							}
 						}

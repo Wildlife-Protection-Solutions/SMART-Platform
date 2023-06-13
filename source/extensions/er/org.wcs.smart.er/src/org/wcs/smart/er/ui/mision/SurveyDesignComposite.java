@@ -116,7 +116,7 @@ public class SurveyDesignComposite extends MissionComposite{
 	public SurveyDesign getSurveyDesign(Session session){
 		Object x = ((IStructuredSelection)cmbDesigns.getSelection()).getFirstElement();
 		if (x != null && x instanceof SurveyDesignEditorInput ){
-			return (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignEditorInput)x).getUuid());
+			return (SurveyDesign) session.getReference(SurveyDesign.class, ((SurveyDesignEditorInput)x).getUuid());
 		}
 		return null;
 	}

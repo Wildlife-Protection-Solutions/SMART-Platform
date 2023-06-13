@@ -89,8 +89,8 @@ public class DeletePatrolWaypointAction implements IQaAction {
 						item.setStatus(QaError.Status.DELETED);
 						item.setFixMessage(Messages.DeletePatrolWaypointAction_DeleteErrorNotFound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$ 
 					}else{
-						s.delete(pw);
-						s.delete(pw.getWaypoint());
+						s.remove(pw);
+						s.remove(pw.getWaypoint());
 						modified.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
 						pw.getPatrolLegDay().getPatrolLeg().getPatrol().equals(null);
 						deleted.add(item);

@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 
 import org.geotools.styling.Style;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
@@ -103,13 +102,12 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 			return null;
 		}
 		
-		Query<?> query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
-		List<?> results = query.list();
+		List<String> results = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid", String.class) //$NON-NLS-1$ //$NON-NLS-2$
+			.setParameter("uuid", queryUuid) //$NON-NLS-1$
+			.list();
+		
 		if (results.size() == 0 ) return null;
-		
-		String stylemap = (String)results.get(0);
-		
+		String stylemap = (String)results.get(0);		
 		try {
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
 		} catch (Exception e) {

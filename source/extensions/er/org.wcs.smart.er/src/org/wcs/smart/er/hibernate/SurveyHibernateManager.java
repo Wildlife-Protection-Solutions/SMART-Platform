@@ -27,10 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
@@ -43,6 +39,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -51,6 +48,10 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 public class SurveyHibernateManager {
 
@@ -107,7 +108,7 @@ public class SurveyHibernateManager {
 			md.getWaypoints().forEach(wp->wp.getWaypoint().getId());
 		}
 		
-		session.saveOrUpdate(mission);
+		mission = HibernateManager.saveOrMerge(session, mission);
 		
 		IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(SurveyWaypointSource.KEY);
 		if (saveWaypoints){
@@ -139,8 +140,8 @@ public class SurveyHibernateManager {
 							}
 						}
 					}
-					session.saveOrUpdate(wp.getWaypoint());
-					session.saveOrUpdate(wp);
+					HibernateManager.saveOrMerge(session, wp.getWaypoint());
+					session.merge(wp);
 				}
 				
 			}

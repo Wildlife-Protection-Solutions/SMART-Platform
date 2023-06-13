@@ -69,15 +69,17 @@ public class HibernateDataExporter implements ICaDataExporter {
 				exportEngine.exportTableData(in.getTableName(), in.getClazz().getSimpleName(), columns, in.getCaPropertyName());
 			} else {
 				
-				String hqlQuery = SmartHibernateManager.getHqlExportQuery(in.getClazz());
-				if (hqlQuery == null || hqlQuery.trim().length() == 0){
+				String caProp = SmartHibernateManager.getCaProperty(in.getClazz());
+				String caUuidProp = SmartHibernateManager.getCaUuidProperty(in.getClazz());
+				if ( (caProp == null && caUuidProp == null) || 
+					( (caProp != null && caProp.isBlank())  && (caUuidProp != null && caUuidProp.isBlank()) )) {
 					//skip this table as we can't figure out what conservation area data it is associated with
 					continue;
 				}
 				
 				String[] columns = exportEngine.getTableColumns(in.getTableName());
 				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
-				exportEngine.writeHibernateQuery(in.getTableName(), in.getClazz().getSimpleName(), columns, hqlQuery);				
+				exportEngine.writeHibernateQuery(in, columns, caProp, caUuidProp);				
 			}
 		}
 		monitor.done();

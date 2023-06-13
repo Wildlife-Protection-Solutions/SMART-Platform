@@ -35,11 +35,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -90,6 +85,11 @@ import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartFileUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Converts a SMART XML configurable model to the database
@@ -226,7 +226,7 @@ public class CmXmlToSmartImporter {
 						existing = SignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea());
 						existing.setKeyId(keyId);
 						updateNames(existing, st.getName());
-						session.saveOrUpdate(existing);
+						HibernateManager.saveOrMerge(session, existing);
 					}
 					signatures.put(st.getUuid(), existing);
 				}
@@ -321,7 +321,7 @@ public class CmXmlToSmartImporter {
 			}
 			
 			monitor.subTask(Messages.CmXmlToSmartImporter_Saving);
-			session.save(cm);
+			session.persist(cm);
 			for (IConvertedCmExtraData extraData : convertedExtraData) {
 				extraData.saveInTransaction(session, cm);
 			}

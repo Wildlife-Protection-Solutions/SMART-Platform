@@ -149,6 +149,7 @@ public class RScriptDialog extends SmartStyledTitleDialog{
 		link.addListener(SWT.Selection, evt->{
 			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), script);
 			if (dialog.open() == Window.OK) {
+				txtName.setText(script.getName());
 				validate();
 			}
 		});
@@ -280,7 +281,7 @@ public class RScriptDialog extends SmartStyledTitleDialog{
 			session.beginTransaction();
 			boolean isNew = script.getUuid() == null;
 			try {
-				session.saveOrUpdate(script);
+				HibernateManager.saveOrMerge(session, script);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				if (isNew) script.setUuid(null);

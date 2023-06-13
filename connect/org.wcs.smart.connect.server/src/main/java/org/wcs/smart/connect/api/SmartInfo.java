@@ -51,6 +51,7 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.Tuple;
 
 /**
  * API for listing, downloading and updating CyberTracker packages
@@ -95,10 +96,10 @@ public class SmartInfo extends HttpServlet{
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 			
-			Object[] data = (Object[]) session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
-			info.put("db-version", data[0].toString()); //$NON-NLS-1$
-			info.put("db-last-updated", data[1].toString()); //$NON-NLS-1$
-			info.put("file-store-version", data[2].toString()); //$NON-NLS-1$
+			Tuple data = session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version", Tuple.class).uniqueResult(); //$NON-NLS-1$
+			info.put("db-version", data.get(0).toString()); //$NON-NLS-1$
+			info.put("db-last-updated", data.get(1).toString()); //$NON-NLS-1$
+			info.put("file-store-version", data.get(2).toString()); //$NON-NLS-1$
 			
 			List<ConservationAreaInfo> areas = QueryFactory.buildQuery(session, ConservationAreaInfo.class).list();
 			JSONArray cainfo = new JSONArray();

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -36,9 +37,9 @@ import org.wcs.smart.internal.Messages;
  */
 public class SaveObjectsJob extends Job {
 	
-	private Object[] object;
+	private UuidItem[] object;
 
-	public SaveObjectsJob(String name, Object... object) {
+	public SaveObjectsJob(String name, UuidItem... object) {
 		super(name);
 		this.object = object;
 	}
@@ -55,8 +56,8 @@ public class SaveObjectsJob extends Job {
 	}
 
 	protected void doInTransaction(Session s) {
-		for (Object o : object) {
-			s.saveOrUpdate(o);
+		for (UuidItem o : object) {
+			HibernateManager.saveOrMerge(s, o);
 		}
 	}
 

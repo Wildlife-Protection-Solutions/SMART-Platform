@@ -105,6 +105,7 @@ public class DateTreeNode implements IItemTreeNode {
 		public void dispose() {
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			groupbys = (List<DateGroupByViewer>) newInput;

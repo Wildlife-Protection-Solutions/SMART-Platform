@@ -90,8 +90,7 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 	 * @param query the query to update
 	 * @param allCollumns all columns available to the query
 	 */
-	public QueryPropertiesDialog(Shell parent, 
-			Query query) {
+	public QueryPropertiesDialog(Shell parent, Query query) {
 		super(parent);
 		this.query = query;
 		this.qType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
@@ -102,17 +101,13 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 				s.clear();
 				try{
 					s.beginTransaction();
-					
-					/* load query names */
-					s.saveOrUpdate(query);
-					query.getNames().size();
-					
-					Query tmp = (Query) s.load(qType.getHibernateClass(), this.query.getUuid());
+					//load names				
+					Query currentQuery = s.getReference(qType.getHibernateClass(), this.query.getUuid());
 					this.names = new HashMap<Language, String>();
-					for (org.wcs.smart.ca.Label l : tmp.getNames()){
+					for (org.wcs.smart.ca.Label l : currentQuery.getNames()){
 						names.put(l.getLanguage(), l.getValue());
 					}
-					this.names.put(SmartDB.getCurrentLanguage(), tmp.getName());
+					this.names.put(SmartDB.getCurrentLanguage(), this.query.getName());
 				}finally {
 					s.getTransaction().rollback();
 				}
@@ -321,7 +316,7 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
 	protected boolean performSave() {
-		
+		query.setNames(new HashSet<>());
 		//update names
 		if (!query.getName().equals(txtName.getText())){
 			query.setName(txtName.getText());
@@ -329,17 +324,6 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 		for (Entry<Language, String> l : names.entrySet()){
 			query.updateName(l.getKey(), l.getValue());
 		}
-		//remove any languages no longer valid
-		Set<org.wcs.smart.ca.Label> toRemove = new HashSet<org.wcs.smart.ca.Label>();
-		for (org.wcs.smart.ca.Label l : query.getNames()){
-			if (names.get(l.getLanguage()) == null){
-				toRemove.add(l);
-			}
-		}
-		for (org.wcs.smart.ca.Label l : toRemove){
-			query.getNames().remove(l);
-		}
-		
 		for (AbstractQueryPropertyProvider provider:props){
 			provider.save(query, null);
 		}

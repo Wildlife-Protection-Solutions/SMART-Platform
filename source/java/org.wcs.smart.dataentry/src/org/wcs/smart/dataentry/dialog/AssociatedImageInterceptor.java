@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
@@ -58,7 +58,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 4.0.0
  */
-public class AssociatedImageInterceptor extends EmptyInterceptor {
+public class AssociatedImageInterceptor implements Interceptor, Serializable{
 
 	private static final long serialVersionUID = -4670080959693764999L;
 	

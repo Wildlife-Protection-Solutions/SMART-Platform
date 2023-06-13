@@ -37,11 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
@@ -81,6 +76,11 @@ import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.in.IXmlToPatrolConverter;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Converts an xml patrol file to a
@@ -714,13 +714,13 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " + //$NON-NLS-1$
 				"c.patrolType = :patrolType"; //$NON-NLS-1$
 		
-		Query<?> query = session.createQuery(sql);
+		Query<PatrolTransportType> query = session.createQuery(sql, PatrolTransportType.class);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("patrolType", type); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<PatrolTransportType> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){

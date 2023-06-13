@@ -28,11 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
@@ -61,6 +56,11 @@ import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 
 /**
@@ -310,7 +310,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				pt.setType(t);
 				pt.setMaxSpeed(t.getDefaultMaxSpeed());
 
-				s.save(pt);
+				s.persist(pt);
 				types.add(pt);
 			}
 			s.getTransaction().commit();
@@ -402,7 +402,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		
 		patrol.recalculateType();
-		session.saveOrUpdate(patrol);
+		HibernateManager.saveOrMerge(session,  patrol);
 		
 		if (saveWaypoints){
 			session.flush();
@@ -436,8 +436,8 @@ public class PatrolHibernateManager extends HibernateManager{
 										}
 									}
 									
-									session.saveOrUpdate(wp.getWaypoint());
-									session.saveOrUpdate(wp);
+									HibernateManager.saveOrMerge(session,  wp.getWaypoint());
+									session.merge(wp);
 								}
 							}
 						}
@@ -469,13 +469,12 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param session
 	 * @return all patrol ids for the current conservation area
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<String> getPatrolIds(Session session){
 		String hql = "Select id FROM Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
-		Query<?> q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		List<?> data = q.list();
-		return (List<String>)data;
+		
+		return session.createQuery(hql, String.class)
+			.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+			.list();
 	}
 	
 	/**

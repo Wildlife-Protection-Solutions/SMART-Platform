@@ -96,7 +96,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 					clone.getAttributeList().add(cloneId);
 				}
 			}
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(attribute, clone);
 		}
 	}
@@ -114,7 +114,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 			clone.setType(attribute.getType());
 			clone.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
 			engine.copyLabels(attribute, clone);
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(attribute, clone);
 			
 			for (SamplingUnitAttributeListItem item : attribute.getAttributeList()){
@@ -184,7 +184,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 				}
 			}
 			
-			engine.getSession().save(clone);
+			engine.getSession().persist(clone);
 			
 			
 			//It doesn't make sense to do this; usually if you are making a new

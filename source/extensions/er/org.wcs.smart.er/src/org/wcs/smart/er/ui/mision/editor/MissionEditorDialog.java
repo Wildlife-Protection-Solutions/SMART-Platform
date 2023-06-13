@@ -116,7 +116,7 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(toUpdate);
+				toUpdate = HibernateManager.saveOrMerge(session, toUpdate);
 			
 				LocalDate currentStart = toUpdate.getStartDate();
 				LocalDate currentEnd = toUpdate.getEndDate();
@@ -141,17 +141,17 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 					for (MissionDay md : wpDelete){
 						for (SurveyWaypoint sw : md.getWaypoints()){
 							Waypoint delete = sw.getWaypoint();
-							session.delete(sw);
-							session.delete(delete);
+							session.remove(sw);
+							session.remove(delete);
 						}
 						
 						for (MissionTrack mt : md.getTracks()){
-							session.delete(mt);
+							session.remove(mt);
 						}
 						md.getWaypoints().clear();
 						md.getTracks().clear();
 						
-						session.delete(md);
+						session.remove(md);
 					}
 					toUpdate.getMissionDays().removeAll(wpDelete);
 					
@@ -230,8 +230,8 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 		
 		composite.createControl(c);
 		try(Session session = HibernateManager.openSession()){
-			session.update(toUpdate);
-			session.update(toUpdate.getSurvey().getSurveyDesign());
+			session.merge(toUpdate);
+			session.merge(toUpdate.getSurvey().getSurveyDesign());
 			composite.init(toUpdate, session);
 		}
 		composite.addChangeListener(new ISurveyListener() {

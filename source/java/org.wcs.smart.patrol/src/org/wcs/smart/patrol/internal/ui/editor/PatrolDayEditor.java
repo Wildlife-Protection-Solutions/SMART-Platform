@@ -53,9 +53,11 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -126,8 +128,9 @@ public class PatrolDayEditor extends EditorPart {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				Patrol patrol = editor.getPatrol();
 				Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
-				session.update(editor.getPatrol());
+				
 				frmSummary = toolkit.createScrolledForm(outline);
 				frmSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 				
@@ -153,7 +156,7 @@ public class PatrolDayEditor extends EditorPart {
 				((GridLayout)frmSummary.getBody().getLayout()).marginWidth = 0;
 		
 				//find all patrol legs for this day
-				List<PatrolLeg> legs = editor.getPatrol().getLegs();		
+				List<PatrolLeg> legs = patrol.getLegs();		
 				ArrayList<PatrolLegDay> plds = new ArrayList<PatrolLegDay>();
 	
 				for (PatrolLeg leg: legs){
@@ -166,14 +169,15 @@ public class PatrolDayEditor extends EditorPart {
 						//waypoints are not cascaded (otherwise saves are cascaded too)
 						if (day.getWaypoints() != null){
 							for (PatrolWaypoint wp : day.getWaypoints()) {
-								session.update(wp.getWaypoint());
-								wp.getWaypoint().getAllObservations();
-								if (wp.getWaypoint().getAttachments() != null) {
-									for(WaypointAttachment wa : wp.getWaypoint().getAttachments()) {
+								Waypoint local = session.getReference(wp.getWaypoint());
+								
+								local.getAllObservations();
+								if (local.getAttachments() != null) {
+									for(WaypointAttachment wa : local.getAttachments()) {
 										if (wa.getSignatureType() != null)wa.getSignatureType().getName();
 									}
 								}
-								for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+								for (WaypointObservation wo : local.getAllObservations()) {
 									for (ObservationAttachment a : wo.getAttachments()) {
 										if (a.getSignatureType() != null) a.getSignatureType().getName();
 									}
@@ -203,7 +207,7 @@ public class PatrolDayEditor extends EditorPart {
 						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), 
 								pld.getPatrolLeg().getType().getName(), 
-								pld.getPatrolLeg().getMandate() == null ? "" : pld.getPatrolLeg().getType().getName(), 
+								pld.getPatrolLeg().getMandate() == null ? "" : pld.getPatrolLeg().getType().getName(),  //$NON-NLS-1$
 										SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
 
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);

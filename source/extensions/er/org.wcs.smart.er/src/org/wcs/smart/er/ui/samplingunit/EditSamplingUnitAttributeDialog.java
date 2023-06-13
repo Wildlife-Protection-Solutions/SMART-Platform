@@ -24,7 +24,6 @@ package org.wcs.smart.er.ui.samplingunit;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -64,14 +63,17 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.IconCache;
-import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -99,9 +101,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	private IconPanel iconPanel;
 	
 	private ComboViewer cmbType;
-	
-	private HashMap<Language, String> copyNames;
-	
+		
 	private TableViewer lstViewer;
 	private Button btnAdd;
 	private Button btnEdit;
@@ -109,8 +109,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	private Button btnUp;
 	private Button btnDown;
 	private Composite listPanel;
-	private List<SamplingUnitAttributeListItem> copyItems;
-
+	
 	private Session session;
 	
 	/**
@@ -124,37 +123,34 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	 */
 	public EditSamplingUnitAttributeDialog(Shell parentShell,  
 			SamplingUnitAttribute toUpdate,  
-			Collection<? extends NamedKeyItem> siblings,
-			Session session) {
+			Collection<? extends NamedKeyItem> siblings) {
 		
 		super(parentShell);
-		this.toUpdate = toUpdate;
-		this.session = session;
+		
+		session = HibernateManager.openSession(new AttachmentInterceptor());
+		session.beginTransaction();
+		
+		if (toUpdate.getUuid() == null) {
+			this.toUpdate = toUpdate;
+		}else {
+			this.toUpdate = session.getReference(toUpdate);
+		}
+		
+		//set list if necessary
+		if (this.toUpdate.getType() == AttributeType.LIST && this.toUpdate.getAttributeList() == null) { 
+			toUpdate.setAttributeList(new ArrayList<>());
+		}
+		
+		//load icon files
+		if (this.toUpdate.getIcon() != null) this.toUpdate.getIcon().computeFileLocations(session);
+		if (this.toUpdate.getAttributeList() != null) {
+			this.toUpdate.getAttributeList().forEach(i->{
+				if (i.getIcon() != null) i.getIcon().computeFileLocations(session);
+			});
+		}
 		
 		this.siblings = new ArrayList<NamedKeyItem>(siblings);
 		this.siblings.remove(toUpdate);
-
-		copyNames = new HashMap<Language, String>();
-		for (org.wcs.smart.ca.Label l : toUpdate.getNames()){
-			copyNames.put(l.getLanguage(), l.getValue());
-		}
-		
-		copyItems = new ArrayList<SamplingUnitAttributeListItem>();
-		if (toUpdate.getAttributeList() != null){
-			for (SamplingUnitAttributeListItem i : toUpdate.getAttributeList()){
-				SamplingUnitAttributeListItem item = new SamplingUnitAttributeListItem();
-				item.setKeyId( i.getKeyId() );
-				item.setAttribute(toUpdate);
-				item.setListOrder(i.getListOrder());
-				item.setName(i.getName());
-				item.setIcon(i.getIcon());
-				for (org.wcs.smart.ca.Label l : i.getNames()){
-					item.updateName(l.getLanguage(), l.getValue());
-				}
-				item.setUuid(i.getUuid());
-				copyItems.add(item);
-			}
-		}
 	}
 	
 	@Override
@@ -228,6 +224,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		iconPanel = new IconPanel(composite, true);
 		iconPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		iconPanel.setIcon(toUpdate.getIcon());
+		iconPanel.addListener(SWT.Selection,  e->validate());
 		
 		createListPanel(composite);
 		
@@ -257,7 +254,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.setLabelProvider(new SamplingUnitLabelProvider(16, IconCache.IconSetOption.ALL));
-		lstViewer.setInput(copyItems);
+		lstViewer.setInput(toUpdate.getAttributeList());
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
 		((GridData)lstViewer.getControl().getLayoutData()).widthHint = 300;
@@ -322,10 +319,10 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 				if (target.equals(obj)){
 					return false;
 				}
-				int index = copyItems.indexOf(obj);
-				int toIndex = copyItems.indexOf(target);
-				copyItems.remove(index);
-				copyItems.add(toIndex, (SamplingUnitAttributeListItem)obj);		
+				int index = toUpdate.getAttributeList().indexOf(obj);
+				int toIndex = toUpdate.getAttributeList().indexOf(target);
+				toUpdate.getAttributeList().remove(index);
+				toUpdate.getAttributeList().add(toIndex, (SamplingUnitAttributeListItem)obj);		
 				reorder();
 				return true;
 			}
@@ -378,7 +375,7 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	
 	private void reorder(){
 		int i = 0;
-		for (SamplingUnitAttributeListItem order : copyItems){
+		for (SamplingUnitAttributeListItem order : toUpdate.getAttributeList()){
 			order.setListOrder(i++);
 		}
 	}
@@ -389,12 +386,13 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 			return;
 		}
 		List<SamplingUnitAttributeListItem> siblings = new ArrayList<SamplingUnitAttributeListItem>();
-		siblings.addAll(copyItems);
+		siblings.addAll(toUpdate.getAttributeList());
 		siblings.remove(mi);
 		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), mi, siblings,nameKeyControls.getSelectedLanguage());
 		if (dialog.open() == OK){
 			((SamplingUnitLabelProvider)lstViewer.getLabelProvider()).clearCachedImages();
 			lstViewer.refresh();
+			validate();
 		}
 	}
 	
@@ -423,10 +421,11 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.FINISH_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		Button ok = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		
 		validate();
+		ok.setEnabled(false);
 	}
 
 	/*
@@ -444,79 +443,62 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	 * updates the attribute to update with the
 	 * information in the attribute panel
 	 */
-	private void updateAttribute(){
-		nameKeyControls.updateFields(toUpdate);
-		toUpdate.setType(getType());
-		
-		String name = toUpdate.findNameNull(SmartDB.getCurrentLanguage());
-		if (name == null){
-			name = toUpdate.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-		}
-		toUpdate.setName(name);
-		toUpdate.setIcon(iconPanel.getIcon());
-		
-		if (toUpdate.getType() == AttributeType.LIST){
-			if (toUpdate.getAttributeList() == null){
-				toUpdate.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
-			}
+	private void saveChanges(){
+		try {
+			nameKeyControls.updateFields(toUpdate);
+			toUpdate.setType(getType());
 			
-			List<SamplingUnitAttributeListItem> toDelete = new ArrayList<SamplingUnitAttributeListItem>();
-		
-			for (SamplingUnitAttributeListItem mi : toUpdate.getAttributeList()){
-				SamplingUnitAttributeListItem  found = null;
-				for (SamplingUnitAttributeListItem copy : copyItems){
-					if (mi.getUuid().equals(copy.getUuid())){
-						found = copy;
-						break;
-					}
-				}
-				if (found == null){
-					toDelete.add(mi);
-				}else{
-					//copy info from copy to found
-					mi.setAttribute(found.getAttribute());
-					mi.setKeyId(found.getKeyId());
-					mi.setListOrder(found.getListOrder());
-					mi.setName(found.getName());
-					mi.setIcon(found.getIcon());
-					
-					for (org.wcs.smart.ca.Label l : found.getNames()){
-						mi.updateName(l.getLanguage(), l.getValue());
-					}
-				}
+			String name = toUpdate.findNameNull(SmartDB.getCurrentLanguage());
+			if (name == null){
+				name = toUpdate.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+			toUpdate.setName(name);
+			toUpdate.setIcon(iconPanel.getIcon());
+			
+			if(toUpdate.getUuid() == null) session.persist(toUpdate);
 				
-			}
-			for (SamplingUnitAttributeListItem d : toDelete){
-				toUpdate.getAttributeList().remove(d);
-				d.setAttribute(null);
-			}
-			for (SamplingUnitAttributeListItem copy : copyItems){
-				if (copy.getUuid() == null){
-					toUpdate.getAttributeList().add(copy);
-					copy.setAttribute(toUpdate);
-				}
-			}
+			saveIcon(toUpdate);
+			if (toUpdate.getAttributeList() != null) toUpdate.getAttributeList().forEach(mi -> saveIcon(mi));
+				
+			session.getTransaction().commit();
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			session.beginTransaction();
+		}catch (Exception ex) {
+			EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
 		}
+		
+	}
+	private void saveIcon(IconItem item) {
+		if (item.getIcon() == null) return;
+		if (item.getIcon().getUuid() == null) session.persist(item.getIcon());
 	}
 	
 	@Override
-	protected void buttonPressed(int buttonId) {
-		if (IDialogConstants.OK_ID == buttonId) {
-			setReturnCode(OK);
-			updateAttribute();
-		} else if (IDialogConstants.CANCEL_ID == buttonId) {
-			setReturnCode(CANCEL);
-		}	
-		close();
+	protected void okPressed() {
+		saveChanges();
+	}
+	
+	@Override
+	protected void cancelPressed() {
+		session.getTransaction().rollback();
+		super.cancelPressed();
+	}
+	
+	@Override
+	public boolean close() {
+		session.close();
+		return super.close();
 	}
 	
 	private void addListItem(){
 		SamplingUnitAttributeListItem item = new SamplingUnitAttributeListItem();
-		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), item, copyItems,nameKeyControls.getSelectedLanguage());
+		item.setAttribute(toUpdate);
+		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), item, toUpdate.getAttributeList(),nameKeyControls.getSelectedLanguage());
 		if (dialog.open() == OK){
-			item.setListOrder(copyItems.size());
-			copyItems.add(item);
+			item.setListOrder(toUpdate.getAttributeList().size());
+			toUpdate.getAttributeList().add(item);
 			lstViewer.refresh();
+			validate();
 		}
 		
 	}
@@ -531,11 +513,18 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		}
 		
 		try{
-			if (mi.getUuid() == null || DeleteManager.canDelete(mi, session)){
-				copyItems.remove(mi);
+			if (mi.getUuid() == null) {
+				toUpdate.getAttributeList().remove(mi);
 				reorder();
-				lstViewer.refresh();		
+				lstViewer.refresh();
+			}else if (DeleteManager.canDelete(mi, session)){
+				toUpdate.getAttributeList().remove(mi);
+				session.remove(mi);
+				session.flush();
+				reorder();
+				lstViewer.refresh();
 			}
+			validate();
 		}catch (Exception ex){
 			MessageDialog.openError(getShell(), Messages.EditMissionAttributeDialog_DeleteDialotTitle, MessageFormat.format(Messages.EditMissionAttributeDialog_DeleteError, new Object[]{mi.getName()}) + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 		}
@@ -555,11 +544,11 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 			if (mi == null){
 				return;
 			}
-			int index = copyItems.indexOf(mi);
+			int index = toUpdate.getAttributeList().indexOf(mi);
 			index --;
 			if (index < 0) index = 0;
-			copyItems.remove(mi);
-			copyItems.add(index, mi);
+			toUpdate.getAttributeList().remove(mi);
+			toUpdate.getAttributeList().add(index, mi);
 			reorder();
 			lstViewer.refresh();
 			
@@ -568,13 +557,13 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 			if (mi == null){
 				return;
 			}
-			int index = copyItems.indexOf(mi);
+			int index = toUpdate.getAttributeList().indexOf(mi);
 			index ++;
-			copyItems.remove(mi);
-			if (index > copyItems.size()){
-				copyItems.add(mi);
+			toUpdate.getAttributeList().remove(mi);
+			if (index > toUpdate.getAttributeList().size()){
+				toUpdate.getAttributeList().add(mi);
 			}else{
-				copyItems.add(index, mi);
+				toUpdate.getAttributeList().add(index, mi);
 			}
 			reorder();
 			lstViewer.refresh();

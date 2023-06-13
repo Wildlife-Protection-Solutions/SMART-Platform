@@ -413,7 +413,7 @@ public abstract class AssetDataPanel {
 								newlink.getAttachments().add(newattachlink);
 								
 								oldlink.getAttachments().remove(attachlink);
-								session.delete(attachlink);
+								session.remove(attachlink);
 								break;
 							}
 						}
@@ -424,18 +424,18 @@ public abstract class AssetDataPanel {
 //				aw.getAssetLinks().forEach(a->session.saveOrUpdate(a));
 				
 				aw.getWaypoint().getAttachments().removeAll(attachmentsToDelete);
-				for(WaypointAttachment wa : attachmentsToDelete) session.delete(wa);
+				for(WaypointAttachment wa : attachmentsToDelete) session.remove(wa);
 				
-				session.save(cloneWp);
+				session.persist(cloneWp);
 				if (newDeployments.isEmpty()) {
 					throw new Exception(Messages.AssetDataPanel_NoAssetsMsg);
 				}
-				for (AssetWaypoint newWp : newDeployments.values()) session.save(newWp);
+				for (AssetWaypoint newWp : newDeployments.values()) session.persist(newWp);
 				
 				List<AssetWaypoint> toDelete = new ArrayList<>();
 				for (AssetWaypoint oldlink : aw.getAssetLinks()) {
 					if (oldlink.getAttachments().isEmpty()) {
-						session.delete(oldlink);
+						session.remove(oldlink);
 						toDelete.add(oldlink);
 					}
 				}
@@ -643,7 +643,7 @@ public abstract class AssetDataPanel {
 						continue;
 					}
 					if (wp.getLastModifiedBy() != null) SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
-					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
+					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
 							.setParameter("uuid", waypointsToDisplay.get(i)) //$NON-NLS-1$
 							.list();
 							
@@ -791,9 +791,9 @@ public abstract class AssetDataPanel {
 				s.beginTransaction();
 				try {
 					validateAndExtend(toedit.getWaypoint(), toedit.getAssetLinks(), s);
-					s.saveOrUpdate(toedit.getWaypoint());
+					HibernateManager.saveOrMerge(s, toedit.getWaypoint());
 					for (AssetWaypoint aw : toedit.getAssetLinks()) {
-						s.saveOrUpdate(aw);
+						HibernateManager.saveOrMerge(s, aw);
 					}
 					s.getTransaction().commit();
 				}catch(Exception ex) {
@@ -831,25 +831,25 @@ public abstract class AssetDataPanel {
 						
 						assetWaypoint = session.get(AssetWaypoint.class, assetWaypoint.getUuid());
 						assetWaypoint.getAttachments().forEach(a->{
-							session.delete(a);
+							session.remove(a);
 						});
 						assetWaypoint.getAttachments().clear();
 						
-						session.delete(assetWaypoint);
+						session.remove(assetWaypoint);
 						assetWaypoint.getAssetDeployment().getAssetWaypoints().remove(assetWaypoint);
 						assetWaypoint.setAssetDeployment(null);
 						
 						AssetDeployment d = (AssetDeployment)session.get(AssetDeployment.class, deploymentUuid);
 						//delete deployment if there are no more images in it
 						if (d.getAssetWaypoints().size() == 0) {
-							session.delete(d);	
+							session.remove(d);	
 						}
 						session.flush();
 						
 					});
 					
 					//delete waypoint
-					session.delete(session.get(Waypoint.class, aw.getWaypoint().getUuid()));
+					session.remove(session.get(Waypoint.class, aw.getWaypoint().getUuid()));
 					session.flush();
 				}
 				session.getTransaction().commit();
@@ -892,13 +892,13 @@ public abstract class AssetDataPanel {
 			if (deploymentStart.isAfter(wpTime) ) {
 				deploymentStart = wpTime;
 				fromaw.getAssetDeployment().setStartDate(LocalDateTime.from( deploymentStart) );
-				session.saveOrUpdate(fromaw.getAssetDeployment());
+				HibernateManager.saveOrMerge(session, fromaw.getAssetDeployment());
 				check = true;
 			}
 			if (deploymentEnd != null && deploymentEnd.isBefore(wpTime)) {
 				deploymentEnd = wpTime;
 				fromaw.getAssetDeployment().setEndDate(LocalDateTime.from(deploymentEnd));
-				session.saveOrUpdate(fromaw.getAssetDeployment());
+				HibernateManager.saveOrMerge(session, fromaw.getAssetDeployment());
 				check = true;
 			}
 			if (check) {
@@ -956,7 +956,7 @@ public abstract class AssetDataPanel {
 				List<AssetWaypointAttachment> toSave = new ArrayList<>();
 				core.getWaypoint().setDateTime(dtWaypoint.getDateTime());
 				core.getWaypoint().setComment(dtWaypoint.getComment());
-				session.saveOrUpdate(core.getWaypoint());
+				HibernateManager.saveOrMerge(session, core.getWaypoint());
 				session.flush();
 				
 				//validate and extend all deployments associated with the core
@@ -985,8 +985,8 @@ public abstract class AssetDataPanel {
 							toAssetWaypoint.setState(State.DIRTY);
 							toAssetWaypoint.setWaypoint(core.getWaypoint());
 							core.getAssetLinks().add(toAssetWaypoint);
+							session.persist(toAssetWaypoint);
 						}
-						session.saveOrUpdate(toAssetWaypoint);
 						
 						if (fromaw.getAttachments() != null) {
 							for (AssetWaypointAttachment fromattachment : fromaw.getAttachments()) {
@@ -1059,18 +1059,18 @@ public abstract class AssetDataPanel {
 					}
 
 					for (AssetWaypoint aw : from.getAssetLinks()) {
-						aw.getAttachments().forEach(a->session.delete(a));
+						aw.getAttachments().forEach(a->session.remove(a));
 						aw.getAttachments().clear();
-						session.delete(aw);
+						session.remove(aw);
 					}
-					session.delete(from.getWaypoint());
+					session.remove(from.getWaypoint());
 				}
 				
 				for (AssetWaypoint aw : core.getAssetLinks()) {
 					aw.setIncidentLength(tmpwp.getIncidentLength());
 				}
-				session.saveOrUpdate(core.getWaypoint());
-				toSave.forEach(a->session.save(a));
+				HibernateManager.saveOrMerge(session, core.getWaypoint());
+				toSave.forEach(a->session.persist(a));
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				session.getTransaction().rollback();
@@ -1179,7 +1179,7 @@ public abstract class AssetDataPanel {
 					}
 					
 					attachments.forEach(a->{
-						session.delete(a);
+						session.remove(a);
 						a.getAssetWaypoint().getAttachments().remove(a);							
 					});
 					//if no more attachment links we should remove the asset waypoint
@@ -1194,13 +1194,13 @@ public abstract class AssetDataPanel {
 				//if no more attachment links we should remove the asset waypoint
 				for (AssetWaypoint a : assetLinksToRemove) {
 					fireEvents = true;
-					session.delete(a);
+					session.remove(a);
 					session.flush();
 					AssetDeployment d = session.get(AssetDeployment.class, a.getAssetDeployment().getUuid());
 					d.getAssetWaypoints().remove(a);
 					a.setAssetDeployment(null);
 					if (d.getAssetWaypoints().size() == 0) {
-						session.delete(d);
+						session.remove(d);
 						session.flush();
 					}
 				}
@@ -1286,9 +1286,9 @@ public abstract class AssetDataPanel {
 			try {
 				if (assetWaypointLink.getUuid() == null) {
 					if (assetWaypointLink.getAssetDeployment().getUuid() == null) {
-						session.save(assetWaypointLink.getAssetDeployment());
+						session.persist(assetWaypointLink.getAssetDeployment());
 					}
-					session.save(assetWaypointLink);
+					session.persist(assetWaypointLink);
 					waypoint.getAssetLinks().add(assetWaypointLink);
 				}
 				
@@ -1305,7 +1305,7 @@ public abstract class AssetDataPanel {
 
 					//add to waypoint
 					waypoint.getWaypoint().getAttachments().add(wa);
-					session.save(wa);
+					session.persist(wa);
 					wa.computeFileLocation(session);
 
 					//create new attachment/deployment link
@@ -1314,7 +1314,7 @@ public abstract class AssetDataPanel {
 					assetAttachmentLink.setAssetWaypoint(assetWaypointLink);
 					assetWaypointLink.getAttachments().add(assetAttachmentLink);
 					
-					session.saveOrUpdate(assetWaypointLink);
+					session.merge(assetWaypointLink);
 					
 					session.flush();
 				}

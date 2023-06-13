@@ -24,14 +24,14 @@ package org.wcs.smart.event.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Action parameters, as specified by the user
@@ -39,7 +39,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "smart.e_action_parameter_value")
+@Table(name = "e_action_parameter_value", schema="smart")
 public class EActionParameterValue {
 	
 	public static final int PARAM_KEY_MAX_LENGTH = 128;

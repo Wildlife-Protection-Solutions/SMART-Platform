@@ -5,5 +5,8 @@
 // Generated on: 2021.04.15 at 09:54:18 AM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.3/patrol", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.3/patrol", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.patrol.xml.model.v13;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

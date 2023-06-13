@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.paws.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
-@Table(name="smart.paws_simple_class")
+@Table(name="paws_simple_class", schema="smart")
 public class PawsSimpleClass extends AbstractPawsClass{
 
 	private static final long serialVersionUID = 1L;

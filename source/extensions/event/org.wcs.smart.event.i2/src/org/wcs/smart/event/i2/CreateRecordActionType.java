@@ -286,9 +286,9 @@ public class CreateRecordActionType implements IActionType {
 				}
 				
 				newRecord.getAttachments().forEach(aa->{
-					session.save(aa.getAttachment());
+					session.persist(aa.getAttachment());
 				});
-				session.save(newRecord);
+				session.persist(newRecord);
 				session.getTransaction().commit();
 			}catch(Exception ex) {
 				EventPlugIn.displayLog(ex.getMessage(), ex);

@@ -54,7 +54,7 @@ public class ErSurveyQueryResultSet  {
 						} else if (svalue != null) {
 							it.addMissionPropertyValue(key, svalue);
 						} else if (rs.getObject(5) != null) {
-							it.addMissionPropertyValue(key,((MissionAttributeListItem) session.load(MissionAttributeListItem.class,(UUID)rs.getObject(5))).getName());
+							it.addMissionPropertyValue(key,((MissionAttributeListItem) session.getReference(MissionAttributeListItem.class,(UUID)rs.getObject(5))).getName());
 					
 						}
 					}
@@ -102,7 +102,7 @@ public class ErSurveyQueryResultSet  {
 						} else if (svalue != null) {
 							it.addSamplingUnitAttributeValue(key, svalue);
 						} else if (rs.getObject(5) != null) {
-							String value = ((SamplingUnitAttributeListItem) session.load(SamplingUnitAttributeListItem.class,(UUID)rs.getObject(5))).getName();
+							String value = ((SamplingUnitAttributeListItem) session.getReference(SamplingUnitAttributeListItem.class,(UUID)rs.getObject(5))).getName();
 							it.addSamplingUnitAttributeValue(key, value);
 						}
 					}

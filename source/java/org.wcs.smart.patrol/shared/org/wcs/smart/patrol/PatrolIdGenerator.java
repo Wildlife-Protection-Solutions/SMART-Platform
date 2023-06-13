@@ -25,11 +25,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.Employee;
@@ -100,15 +98,13 @@ public enum PatrolIdGenerator {
 			StringBuilder sb = new StringBuilder();
 			sb.append(p.getConservationArea().getId());
 	
-			Query<?> q = s
-					.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca"); //$NON-NLS-1$
-			q.setParameter("id", sb.toString() + "%_%"); //$NON-NLS-1$ //$NON-NLS-2$
-			q.setParameter("ca", p.getConservationArea()); //$NON-NLS-1$
+			List<String> results = s.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca", String.class) //$NON-NLS-1$
+					.setParameter("id", sb.toString() + "%_%") //$NON-NLS-1$ //$NON-NLS-2$
+					.setParameter("ca", p.getConservationArea()) //$NON-NLS-1$
+					.list();
 	
-			long idNumber = 0;
-			List<?> results = q.list();
-			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-				String localId = (String) iterator.next();
+			long idNumber = 0;			
+			for (String localId: results) {
 				try {
 					int idx = localId.lastIndexOf('_');
 					String keypart = localId.substring(0, idx);
@@ -166,7 +162,7 @@ public enum PatrolIdGenerator {
 		}
 		
 		while(true) {
-			Long number = (Long)s.createQuery("SELECT count(*) FROM Patrol WHERE id = :id AND conservationArea = :ca") //$NON-NLS-1$
+			Long number = s.createQuery("SELECT count(*) FROM Patrol WHERE id = :id AND conservationArea = :ca", Long.class) //$NON-NLS-1$
 					.setParameter("id", id) //$NON-NLS-1$
 					.setParameter("ca", p.getConservationArea()) //$NON-NLS-1$
 					.uniqueResult();

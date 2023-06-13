@@ -4,12 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
@@ -18,8 +12,14 @@ import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name="connect.data_queue")
+@Table(name="data_queue", schema="connect")
 public class ServerDataQueueItem extends DataQueueItem{
 
 	private static final long serialVersionUID = 1L;

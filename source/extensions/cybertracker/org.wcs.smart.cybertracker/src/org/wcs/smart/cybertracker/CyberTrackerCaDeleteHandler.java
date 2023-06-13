@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -50,21 +49,21 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteCTProperties(ConservationArea ca, Session session) {
-		Query<?> q = session.createQuery("delete from CyberTrackerPropertiesOption where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from CyberTrackerPropertiesOption where conservationArea = :ca") //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.executeUpdate();
 
-		q = session.createQuery("delete from CyberTrackerPropertiesProfile where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		 session.createMutationQuery("delete from CyberTrackerPropertiesProfile where conservationArea = :ca") //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.executeUpdate();
 		
 		//remove metadata packages
-		session.createQuery("DELETE FROM MetadataFieldValue WHERE conservationArea = :ca") //$NON-NLS-1$
+		session.createMutationQuery("DELETE FROM MetadataFieldValue WHERE conservationArea = :ca") //$NON-NLS-1$
 		.setParameter("ca", ca) //$NON-NLS-1$
 		.executeUpdate();
 		
 		//remove navigation layers
-		session.createQuery("DELETE FROM NavigationLayer WHERE conservationArea = :ca") //$NON-NLS-1$
+		session.createMutationQuery("DELETE FROM NavigationLayer WHERE conservationArea = :ca") //$NON-NLS-1$
 		.setParameter("ca", ca) //$NON-NLS-1$
 		.executeUpdate();
 	}

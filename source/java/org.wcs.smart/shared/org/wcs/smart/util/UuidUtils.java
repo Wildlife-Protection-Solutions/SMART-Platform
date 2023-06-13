@@ -25,6 +25,9 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.id.uuid.StandardRandomStrategy;
+
 /**
  * Shared uuid utilites for switching between strings and uuids and byte
  * arrays.
@@ -71,5 +74,9 @@ public class UuidUtils {
 	public static byte[] uuidToByte(UUID uuid){
 		return ByteBuffer.allocate(16).putLong(uuid.getMostSignificantBits())
 				.putLong(uuid.getLeastSignificantBits()).array();
+	}
+	
+	public static UUID generateUuid(SharedSessionContractImplementor implementor) {
+		return StandardRandomStrategy.INSTANCE.generateUuid(implementor);
 	}
 }

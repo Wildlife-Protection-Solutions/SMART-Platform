@@ -33,6 +33,8 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Filter for the patrol view.  Filters
  * have a date filter, patrol type filter and 
@@ -231,7 +233,7 @@ public class PatrolViewFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query<?> buildQuery(Session s){ 
+	public Query<Tuple> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate "); //$NON-NLS-1$
@@ -278,7 +280,7 @@ public class PatrolViewFilter {
 		
 		str.append("ORDER BY " + sortBy.field + " " + sortByDir.sql ); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<Tuple> query = s.createQuery(str.toString(), Tuple.class).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){
 			query.setParameterList("pt", this.types); //$NON-NLS-1$
 		}

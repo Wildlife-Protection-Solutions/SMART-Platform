@@ -394,7 +394,7 @@ public class ConnectUserAction extends HttpServlet {
 			for(SmartUserAction a : actions){
 				if ((resource == null && a.getResource() == null) ||
 					(a.getResource() != null && a.getResource().toString().equals(resource))){		
-					s.delete(a);
+					s.remove(a);
 				}
 			}
 			s.flush();
@@ -438,7 +438,7 @@ public class ConnectUserAction extends HttpServlet {
 			role.setRoleId(UUID.randomUUID().toString().replaceAll("-","")); //$NON-NLS-1$ //$NON-NLS-2$
 			role.setIsSystem(false);
 			role.setRoleName(action.getName());
-			s.save(role);
+			s.persist(role);
 			s.getTransaction().commit();
 			
 			response.setStatus(Response.Status.CREATED.getStatusCode());
@@ -476,7 +476,7 @@ public class ConnectUserAction extends HttpServlet {
 				throw new SmartConnectException(Status.NOT_FOUND);
 			}
 			role.setRoleName(action.getName());
-			s.save(role);
+			s.persist(role);
 			s.getTransaction().commit();
 			
 			response.setStatus(Response.Status.CREATED.getStatusCode());
@@ -514,7 +514,7 @@ public class ConnectUserAction extends HttpServlet {
 			if (role == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
-			s.delete(role);
+			s.remove(role);
 			
 			s.flush();
 			
@@ -590,7 +590,7 @@ public class ConnectUserAction extends HttpServlet {
 			for(SmartRoleAction a : actions){
 				if ((resource == null && a.getResource() == null) ||
 					(a.getResource() != null && a.getResource().toString().equals(resource))){		
-					s.delete(a);
+					s.remove(a);
 				}
 			}
 			s.flush();
@@ -675,7 +675,7 @@ public class ConnectUserAction extends HttpServlet {
 			if (resourceKey != null){
 				newaction.setResource(UUID.fromString(resourceKey));
 			}
-			s.save(newaction);
+			s.persist(newaction);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -792,7 +792,7 @@ public class ConnectUserAction extends HttpServlet {
 			if (resourceKey != null){
 				newaction.setResource(UUID.fromString(resourceKey));
 			}
-			s.save(newaction);
+			s.persist(newaction);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -836,7 +836,7 @@ public class ConnectUserAction extends HttpServlet {
 			
 			List<SmartUserRole> roles = q.list();
 			for(SmartUserRole a : roles){
-				s.delete(a);
+				s.remove(a);
 			}
 			s.flush();
 			
@@ -889,7 +889,7 @@ public class ConnectUserAction extends HttpServlet {
 			newrole.setRole(role);
 			newrole.setUsername(username);
 			
-			s.save(newrole);
+			s.persist(newrole);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();

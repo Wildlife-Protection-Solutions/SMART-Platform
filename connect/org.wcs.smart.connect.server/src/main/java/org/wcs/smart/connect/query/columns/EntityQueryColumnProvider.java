@@ -30,10 +30,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -55,6 +51,11 @@ import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Query column provider implementation for entity queries.
@@ -136,17 +137,16 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			if (entityTypes.size() > 0){
 				String hql = "SELECT a.keyId as att_key, b.keyId as entity_key, c.type FROM EntityAttribute a join a.entityType b join a.dmAttribute c " //$NON-NLS-1$
 						+ "WHERE b.conservationArea.uuid IN (:cauuids) and b.keyId in (:entitytypes)"; //$NON-NLS-1$
-				org.hibernate.query.Query<?> hq = s.createQuery(hql);
+				org.hibernate.query.Query<Tuple> hq = s.createQuery(hql, Tuple.class);
 				hq.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 				hq.setParameterList("entitytypes", entityTypes); //$NON-NLS-1$
 				
-				List<?> attributes = hq.list();
+				List<Tuple> attributes = hq.list();
 				List<EntityAttributeQueryColumn> entityAttributeColumns = new ArrayList<EntityAttributeQueryColumn>();
-				for (Object attRow : attributes){
-					Object[] att = (Object[])attRow;
-					String attributeKey = (String) att[0];
-					String entityType = (String) att[1];
-					AttributeType type = (AttributeType) att[2];
+				for (Tuple att : attributes){
+					String attributeKey = (String) att.get(0);
+					String entityType = (String) att.get(1);
+					AttributeType type = (AttributeType) att.get(2);
 					
 					//find attribute name for entity attribute; this is complicated 
 					//as it may be defined or it may be the attribute

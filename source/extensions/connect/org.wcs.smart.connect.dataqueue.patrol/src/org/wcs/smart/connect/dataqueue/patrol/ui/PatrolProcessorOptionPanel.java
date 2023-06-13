@@ -78,10 +78,9 @@ public class PatrolProcessorOptionPanel implements IProcessingOptionPanel {
 			op = new DataQueueProcessingOption();
 			op.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
 			op.setOptionKey(((PatrolDataQueueProcessorOption)btnIds.getData()).name());
+			session.persist(op);
 		}
 		op.setValue(String.valueOf(btnIds.getSelection()));
-		session.saveOrUpdate(op);
-		
 	}
 
 	@Override

@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.proxy.HibernateProxyHelper;
 
 /**
  * Delete manager for deleting items from the database.
@@ -57,7 +57,8 @@ public class DeleteManager {
 	 * @throws Exception if item can no be deleted
 	 */
 	public static boolean canDelete(Object x, Session session) throws Exception{
-		Class<?> clazzz = HibernateProxyHelper.getClassWithoutInitializingProxy(x);
+//		Class<?> clazzz = HibernateProxyHelper.getClassWithoutInitializingProxy(x);
+		Class<?> clazzz = Hibernate.getClass(x);
 		
 		//find all extension points for the given class
 		List<IDeleteAdvisor> items = new ArrayList<IDeleteAdvisor>();

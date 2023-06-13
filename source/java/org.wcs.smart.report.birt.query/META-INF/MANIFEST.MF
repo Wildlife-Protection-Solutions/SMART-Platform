@@ -11,7 +11,7 @@ Require-Bundle: org.wcs.smart.query;bundle-version="[8.0.0,9.0.0)";visibility:=r
  org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)",
  org.wcs.smart.birt.map;bundle-version="[8.0.0,9.0.0)";visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.wcs.smart.data.oda.smart.impl,
  org.wcs.smart.data.oda.smart.impl.table,
  org.wcs.smart.data.oda.smart.query.common,

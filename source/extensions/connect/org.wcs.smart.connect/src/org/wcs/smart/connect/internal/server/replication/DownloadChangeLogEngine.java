@@ -99,7 +99,7 @@ public class DownloadChangeLogEngine {
 				s.beginTransaction();
 				try {
 					serverInfo = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
-					s.update(record);
+					s.merge(record);
 					s.getTransaction().commit();
 				}catch(Exception ex) {
 					s.getTransaction().rollback();
@@ -179,7 +179,7 @@ public class DownloadChangeLogEngine {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(record);
+				HibernateManager.saveOrMerge(s,  record);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();

@@ -255,7 +255,7 @@ public class DataLoader {
 			LocalDateTime start = wps.get(0).getDateTime();
 			LocalDateTime end = wps.get(0).getDateTime();
 			
-			session.saveOrUpdate(p);
+			session.persist(p);
 			
 			for (Waypoint wp : wps) {
 				
@@ -264,7 +264,7 @@ public class DataLoader {
 				wp.setRawX(pnt.getX());
 				wp.setRawY(pnt.getY());
 				
-				session.saveOrUpdate(wp);
+				session.persist(wp);
 				
 				PatrolWaypoint pw = new PatrolWaypoint();
 				pw.setWaypoint(wp);
@@ -274,7 +274,7 @@ public class DataLoader {
 				if (wp.getDateTime().isAfter(end)) end = wp.getDateTime();
 				if (wp.getDateTime().isBefore(start)) start = wp.getDateTime();
 				
-				session.saveOrUpdate(pw);
+				session.persist(pw);
 			}
 			pld.setStartTime(start.toLocalTime());
 			pld.setEndTime(end.toLocalTime());

@@ -29,11 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.ScrollableResults;
@@ -152,24 +147,25 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 
 		
 		if (searchString == null || searchString.isEmpty()){
-			CriteriaBuilder cb = session.getCriteriaBuilder();
 			
-			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
-			Root<IntelEntity> from = c.from(IntelEntity.class);
-			c.select(from);
-			ArrayList<Predicate> filters = new ArrayList<>();
-			filters.add(from.get("profile").in(profiles)); //$NON-NLS-1$
-			filters.add(from.get("conservationArea").in(this.cas)); //$NON-NLS-1$
+			StringBuilder sb = new StringBuilder();
+			sb.append("FROM IntelEntity WHERE profile in (:profiles) AND conservationArea in (:cas)"); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
-				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(" AND entityType.keyId in (:types) "); //$NON-NLS-1$
 			}
-			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
-			Query<IntelEntity> q = session.createQuery(c);
+			
+			Query<IntelEntity> q = session.createQuery(sb.toString(), IntelEntity.class)
+					.setParameterList("profiles", profiles) //$NON-NLS-1$
+					.setParameterList("cas", cas); //$NON-NLS-1$
+			if (entityTypes != null && !entityTypes.isEmpty()){
+				q.setParameterList("types", entityTypes); //$NON-NLS-1$
+			}
+			
 			
 			List<IntelSearchResultItem> results = new ArrayList<>();
-			try(ScrollableResults r = q.scroll()){
+			try(ScrollableResults<IntelEntity> r = q.scroll()){
 				while(r.next()) {
-					IntelEntity it = (IntelEntity) r.get()[0];
+					IntelEntity it = r.get();
 					if(results.size() < maxResultCnt) {
 						IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(), 1.0);
 						results.add(result);

@@ -102,7 +102,7 @@ public class ConservationAreaManager {
 				runDeleteHandlers(ca, session, progress.split(1));
 				
 				progress.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
-				session.delete(ca);
+				session.remove(ca);
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				session.getTransaction().rollback();

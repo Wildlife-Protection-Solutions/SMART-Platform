@@ -41,12 +41,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ICoreLabelProvider;
@@ -124,6 +118,13 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 import org.wcs.smart.query.model.summary.ObserverGroupBy;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Label provider for summary queries.
@@ -447,18 +448,17 @@ public class SummaryItemLabelProvider {
 		return items;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<String> getTreeNodes(String attributeKey, int level){
-		Query<?> q = s.createQuery("SELECT a.hkey FROM AttributeTreeNode a join a.attribute b " + //$NON-NLS-1$
+		Query<String> q = s.createQuery("SELECT a.hkey FROM AttributeTreeNode a join a.attribute b " + //$NON-NLS-1$
 				"WHERE b.keyId = :att AND (length(a.hkey) - length(replace(a.hkey, '.', '')))-1 = :level" + //$NON-NLS-1$
 				" AND b.conservationArea.uuid IN (:cauuids) " + //$NON-NLS-1$
-				" GROUP BY a.hkey HAVING count(*) = :cnt "); //$NON-NLS-1$
+				" GROUP BY a.hkey HAVING count(*) = :cnt ", String.class); //$NON-NLS-1$
 				
 		q.setParameter("att", attributeKey); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
 		q.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
-		return (List<String>)q.list();
+		return q.list();
 	}
 	
 	private List<ListItem> getName(AttributeGroupBy item){
@@ -474,25 +474,24 @@ public class SummaryItemLabelProvider {
 			}else{
 				//we want list items that are shared with all conservation areas
 				String query = "SELECT ali.keyId FROM AttributeListItem ali join ali.attribute a WHERE a.conservationArea.uuid in (:cauuids) and a.keyId = :attributeKey group by ali.keyId HAVING count(*) = :cnt "; //$NON-NLS-1$
-				Query<?> attquery = s.createQuery(query);
+				Query<String> attquery = s.createQuery(query, String.class);
 				attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 				attquery.setParameter("attributeKey", item.getAttributeKey()); //$NON-NLS-1$
 				attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 				
 				//this gets the attribute name based on the requested locale name query 
-				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
+				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element.uuid = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
 				String allLocal = l.toString();
 				String local = l.getLanguage();
-				Query<?> nameQuery = s.createQuery(nameQueryHql);
+				Query<String> nameQuery = s.createQuery(nameQueryHql, String.class);
 				
-				List<?> listitems = attquery.list();
-				for (Object lirow: listitems){
-					String li = (String)lirow;
+				List<String> listitems = attquery.list();
+				for (String li: listitems){
 					nameQuery.setParameter("attributeKey", li); //$NON-NLS-1$
 					nameQuery.setParameter("code1", allLocal); //$NON-NLS-1$
 					nameQuery.setParameter("code2", local); //$NON-NLS-1$
 					nameQuery.setMaxResults(1);
-					String name = (String) nameQuery.uniqueResult();
+					String name = nameQuery.uniqueResult();
 					
 					items.add(new ListItem(null, name, li));
 				}
@@ -505,16 +504,16 @@ public class SummaryItemLabelProvider {
 				}
 			}else{
 				List<String> nodes = getTreeNodes(item.getAttributeKey(), item.getTreeLevel());
-				String nameQueryHql = "SELECT a.value FROM Label a, AttributeTreeNode c where a.id.element = c.uuid and c.hkey = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
+				String nameQueryHql = "SELECT a.value FROM Label a, AttributeTreeNode c where a.id.element.uuid = c.uuid and c.hkey = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
 				String allLocal = l.toString();
 				String local = l.getLanguage();
-				org.hibernate.query.Query<?> nameQuery = s.createQuery(nameQueryHql);
+				org.hibernate.query.Query<String> nameQuery = s.createQuery(nameQueryHql, String.class);
 				for (String hkey : nodes){
 					nameQuery.setParameter("attributeKey", hkey); //$NON-NLS-1$
 					nameQuery.setParameter("code1", allLocal); //$NON-NLS-1$
 					nameQuery.setParameter("code2", local); //$NON-NLS-1$
 					nameQuery.setMaxResults(1);
-					String name = (String) nameQuery.uniqueResult();
+					String name = nameQuery.uniqueResult();
 					
 					items.add(new ListItem(null, name, hkey));
 				}
@@ -610,12 +609,12 @@ public class SummaryItemLabelProvider {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
-				Query<?> q = s.createQuery(hql);
+				Query<LocalDateTime> q = s.createQuery(hql, LocalDateTime.class);
 				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
-				List<?> data = q.list();
+				List<LocalDateTime> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
+					startdate =  data.get(0).toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -665,12 +664,12 @@ public class SummaryItemLabelProvider {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
-				Query<?> q = s.createQuery(hql);
+				Query<LocalDateTime> q = s.createQuery(hql, LocalDateTime.class);
 				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
-				List<?> data = q.list();
+				List<LocalDateTime> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
+					startdate = data.get(0).toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -710,12 +709,12 @@ public class SummaryItemLabelProvider {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
-				Query<?> q = s.createQuery(hql);
+				Query<LocalDateTime> q = s.createQuery(hql, LocalDateTime.class);
 				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
-				List<?> data = q.list();
+				List<LocalDateTime> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((LocalDateTime)data.get(0)).toLocalDate();
+					startdate = data.get(0).toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -740,12 +739,12 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(EntityAttributeGroupBy item){
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 
-		Query<?> q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey"); //$NON-NLS-1$
+		Query<String> q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey", String.class); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		q.setParameter("eaKey", item.getEntityAttributeKey()); //$NON-NLS-1$
 		q.setParameter("etKey", item.getEntityKey()); //$NON-NLS-1$
 		q.setMaxResults(1);
-		String entityTypeName = (String) q.uniqueResult();
+		String entityTypeName = q.uniqueResult();
 		
 		if (entityTypeName == null){
 			logger.severe(MessageFormat.format("Entity attribute not found {0}.", item.getEntityAttributeKey())); //$NON-NLS-1$
@@ -801,7 +800,7 @@ public class SummaryItemLabelProvider {
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null && items.length > 0){
 			for (String it : items){
-				Mission m = (Mission) s.load(Mission.class, UuidUtils.stringToUuid(it));
+				Mission m = (Mission) s.getReference(Mission.class, UuidUtils.stringToUuid(it));
 				if (m != null){
 					allItems.add(new ListItem(m.getUuid(), m.getId()));
 				}else{
@@ -811,21 +810,20 @@ public class SummaryItemLabelProvider {
 			}
 		}else{
 			//load all missions
-			Query<?> missionQuery = null;
+			Query<Tuple> missionQuery = null;
 			if (sdFilter.getKey() != null){
 				String hql = "SELECT m.uuid, m.id From Mission m where m.survey.surveyDesign.keyId = :sd and m.survey.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
-				missionQuery = s.createQuery(hql)
+				missionQuery = s.createQuery(hql, Tuple.class)
 						.setParameter("sd", sdFilter.getKey()) //$NON-NLS-1$
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}else{
 				String hql = "SELECT m.uuid, m.id From Mission m where m.survey.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
-				missionQuery = s.createQuery(hql)
+				missionQuery = s.createQuery(hql, Tuple.class)
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}
-			List<?> ms = missionQuery.list();
-			for(Object mRow : ms){
-				Object[] m = (Object[])mRow;
-				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
+			List<Tuple> ms = missionQuery.list();
+			for(Tuple m : ms){
+				allItems.add(new ListItem((UUID)m.get(0), (String)m.get(1)));
 			}
 		}
 		sortItems(allItems);
@@ -837,7 +835,7 @@ public class SummaryItemLabelProvider {
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (filterkeys != null && filterkeys.length > 0){
 			for (String uuid : filterkeys){
-				Employee e = (Employee) s.load(Employee.class, UuidUtils.stringToUuid(uuid));
+				Employee e = (Employee) s.getReference(Employee.class, UuidUtils.stringToUuid(uuid));
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName(e, l)));
 			}		
 		}else{
@@ -1204,12 +1202,11 @@ public class SummaryItemLabelProvider {
 			if (sdFilter.getKey() == null) return null;
 			
 			//all sampling units for associated design
-			List<?> sus = s.createQuery("SELECT su.uuid, su.id FROM SamplingUnit su WHERE su.surveyDesign.keyId = :keyId") //$NON-NLS-1$
+			List<Tuple> sus = s.createQuery("SELECT su.uuid, su.id FROM SamplingUnit su WHERE su.surveyDesign.keyId = :keyId", Tuple.class) //$NON-NLS-1$
 					.setParameter("keyId", sdFilter.getKey()) //$NON-NLS-1$
 					.list();
-			for (Object suRow : sus){
-				Object[] su = (Object[])suRow;
-				listItems.add(new ListItem((UUID)su[0], (String)su[1]));
+			for (Tuple su : sus){
+				listItems.add(new ListItem((UUID)su.get(0), (String)su.get(1)));
 			}
 			listItems.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NoneSuFilterOpt", l))); //$NON-NLS-1$
 			
@@ -1223,7 +1220,7 @@ public class SummaryItemLabelProvider {
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null){
 			for (String it : items){
-				Survey survey = (Survey) s.load(Survey.class, UuidUtils.stringToUuid(it));
+				Survey survey = (Survey) s.getReference(Survey.class, UuidUtils.stringToUuid(it));
 				if (survey != null){
 					allItems.add(new ListItem(survey.getUuid(), survey.getId()));
 				}else{
@@ -1233,21 +1230,20 @@ public class SummaryItemLabelProvider {
 			}
 		}else{
 			//load all surveys
-			Query<?> surveyQuery = null;
+			Query<Tuple> surveyQuery = null;
 			if (sdFilter.getKey() != null){
 				String hql = "SELECT s.uuid, s.id From Survey s where s.surveyDesign.keyId = :sd and s.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
-				surveyQuery = s.createQuery(hql)
+				surveyQuery = s.createQuery(hql, Tuple.class)
 						.setParameter("sd", sdFilter.getKey()) //$NON-NLS-1$
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}else{
 				String hql = "SELECT s.uuid, s.id From Survey s where s.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
-				surveyQuery = s.createQuery(hql)
+				surveyQuery = s.createQuery(hql, Tuple.class)
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}
-			List<?> ms = surveyQuery.list();
-			for(Object mRow : ms){
-				Object[] m = (Object[])mRow;
-				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
+			List<Tuple> ms = surveyQuery.list();
+			for(Tuple m : ms){
+				allItems.add(new ListItem((UUID)m.get(0), (String)m.get(1)));
 			}
 		}
 		sortItems(allItems);

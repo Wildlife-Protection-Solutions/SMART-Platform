@@ -113,7 +113,7 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 			"GRANT ALL PRIVILEGES ON smart.patrol_plan to analyst", //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION_2, session);
 	}
@@ -156,7 +156,7 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION_1, session);

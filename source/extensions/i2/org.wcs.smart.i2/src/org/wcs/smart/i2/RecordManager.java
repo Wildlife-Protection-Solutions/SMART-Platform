@@ -28,11 +28,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -42,6 +37,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -59,6 +55,11 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Functions for managing intelligence records
@@ -87,20 +88,20 @@ public enum RecordManager {
 		
 		record = (IntelRecord) session.get(IntelRecord.class, record.getUuid());
 
-		Query<?> q = session.createQuery("DELETE FROM IntelEntityLocation where id.location IN (FROM IntelLocation ll WHERE ll.record = :record)"); //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("DELETE FROM IntelEntityLocation where id.location IN (FROM IntelLocation ll WHERE ll.record = :record)"); //$NON-NLS-1$
 		q.setParameter("record", record); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("DELETE FROM IntelWorkingSetRecord where id.record = :record"); //$NON-NLS-1$
+		q = session.createMutationQuery("DELETE FROM IntelWorkingSetRecord where id.record = :record"); //$NON-NLS-1$
 		q.setParameter("record", record); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		session.delete(record);
+		session.remove(record);
 		
 		if (record.getAttachments() != null){
 			for (IntelRecordAttachment attachment : record.getAttachments()){
 				if (AttachmentManager.INSTANCE.canDelete(attachment.getAttachment(), session)){
-					session.delete(attachment.getAttachment());
+					session.remove(attachment.getAttachment());
 				}
 			}
 		}
@@ -213,7 +214,7 @@ public enum RecordManager {
 			if (currentRecord != null){
 				query += " AND e.uuid != :entity "; //$NON-NLS-1$
 			}
-			Query<?> hql = session.createQuery(query);
+			Query<Long> hql = session.createQuery(query, Long.class);
 			hql.setParameter("attribute", attribute); //$NON-NLS-1$
 			hql.setParameter("ca", ca); //$NON-NLS-1$
 			hql.setParameter("type", type); //$NON-NLS-1$
@@ -236,7 +237,7 @@ public enum RecordManager {
 				hql.setParameter("entity",  currentRecord); //$NON-NLS-1$
 			}
 	
-			long cnt = (Long) hql.uniqueResult();
+			long cnt = hql.uniqueResult();
 			if (cnt > 0) return true;
 		}
 		return false;

@@ -61,7 +61,6 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
-import org.wcs.smart.observation.json.IJsonFeatureProcessor.Messages;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -243,7 +242,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			toUpdate.setId(id);
 		}
 
-		session.save(toUpdate);
+		session.persist(toUpdate);
 		session.flush();		
 	}
 	
@@ -289,14 +288,14 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			id = MissionIdGenerator.INSTANCE.generateSurveyId(survey, session, l);
 		}
 		survey.setId(  id );
-		session.save(survey);
+		session.persist(survey);
 		session.flush();
 		DataLink dlink = new DataLink();
 		dlink.setConservationArea(ca);
 		dlink.setProviderId(srcSurveyUuid);
 		dlink.setSmartId(survey.getUuid());
 		dlink.setDataType(SurveyLinkDataType.SURVEY.getKey());
-		session.save(dlink);
+		session.persist(dlink);
 	}
 	
 	private void processMissionDataType(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
@@ -406,7 +405,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				if (g.getUuid() != null) {
 					//clear any old link
-					session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
+					session.createMutationQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 						.setParameter("uuid", g.getUuid()) //$NON-NLS-1$
 						.setParameter("datatype", LinkDataType.OBSERVATION_GROUP.getKey()) //$NON-NLS-1$
 						.executeUpdate();
@@ -418,7 +417,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				for (WaypointObservation wo : g.getObservations()) {
 					if (wo.getUuid() != null) {
 						//clear any old link
-						session.createQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
+						session.createMutationQuery("DELETE From DataLink WHERE providerId = :uuid and dataType = :datatype") //$NON-NLS-1$
 							.setParameter("uuid", wo.getUuid()) //$NON-NLS-1$
 							.setParameter("datatype", LinkDataType.OBSERVATION.getKey()) //$NON-NLS-1$
 							.executeUpdate();	
@@ -441,8 +440,8 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			pwp.setMissionTrack(null);
 			
 			toUpdate.getWaypoints().add(pwp);
-			session.saveOrUpdate(wp);
-			session.saveOrUpdate(pwp);
+			session.persist(wp);
+			session.persist(pwp);
 			
 			session.flush();
 			
@@ -452,7 +451,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dlink.setProviderId(src);
 				dlink.setSmartId(wp.getUuid());
 				dlink.setDataType(SurveyLinkDataType.INCIDENT.getKey());
-				session.save(dlink);
+				session.persist(dlink);
 			}
 
 			//add track point
@@ -497,8 +496,11 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				existingWp.getObservationGroups().add(g);
 				g.setWaypoint(existingWp);
 			}
-			session.saveOrUpdate(existingWp);
-			for (WaypointObservationGroup g : existingWp.getObservationGroups()) session.saveOrUpdate(g);
+			if (existingWp.getUuid() == null) session.persist(existingWp);
+
+			for (WaypointObservationGroup g : existingWp.getObservationGroups()) {
+				if (g.getUuid() == null) session.persist(g);
+			}
 		}
 		
 		session.flush();
@@ -508,7 +510,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dlink.setProviderId(link.getValue());
 			dlink.setSmartId(link.getKey().getUuid());
 			dlink.setDataType(LinkDataType.OBSERVATION_GROUP.getKey());
-			session.save(dlink);
+			session.persist(dlink);
 		}
 		for (Entry<WaypointObservation, UUID> link : obslinks.entrySet()) {
 			DataLink dlink = new DataLink();
@@ -516,7 +518,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dlink.setProviderId(link.getValue());
 			dlink.setSmartId(link.getKey().getUuid());
 			dlink.setDataType(LinkDataType.OBSERVATION.getKey());
-			session.save(dlink);
+			session.persist(dlink);
 		}
 		
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
@@ -559,7 +561,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			survey.setMissions(new ArrayList<>());
 			survey.setSurveyDesign(design);
 			survey.setId(MissionIdGenerator.INSTANCE.generateSurveyId(survey, session, l) );
-			session.save(survey);
+			session.persist(survey);
 			newMission.setSurvey(survey);
 		}
 		
@@ -588,7 +590,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (newMission.getId() == null || newMission.getId().trim().isEmpty()) {
 			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
 		}
-		session.save(newMission);
+		session.persist(newMission);
 		session.flush();
 		
 		//create data links
@@ -597,7 +599,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		link.setProviderId(srcMissionUuid);
 		link.setDataType(SurveyLinkDataType.MISSION.getKey());
 		link.setSmartId(newMission.getUuid());
-		session.save(link);
+		session.persist(link);
 		
 	}
 	
@@ -820,7 +822,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		Mission mission = session.get(Mission.class, link.getSmartId());
 		if (mission == null) {
 			//the object this links to does exist, so lets delete it and allow a new one
-			session.delete(link);
+			session.remove(link);
 			return null;
 		}
 		if (!mission.getSurvey().getSurveyDesign().getConservationArea().equals(ca)) {
@@ -845,7 +847,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		Survey survey = session.get(Survey.class, link.getSmartId());
 		if (survey == null) {
 			//the object this links to does exist, so lets delete it and allow a new one
-			session.delete(link);
+			session.remove(link);
 			return null;
 		}
 		if (!survey.getSurveyDesign().getConservationArea().equals(ca)) {
@@ -895,7 +897,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		Waypoint waypoint = session.get(Waypoint.class, link.getSmartId());
 		if (waypoint == null) {
-			session.delete(link);
+			session.remove(link);
 			return null;
 		}
 		if (!waypoint.getConservationArea().equals(ca)) {
@@ -1005,7 +1007,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}
 		}
 		
-		session.save(toUpdate);
+		session.persist(toUpdate);
 		session.flush();
 		
 	}
@@ -1052,7 +1054,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			newattachment.setObservation(toUpdate);
 			toUpdate.getAttachments().add(newattachment);
 		}
-		session.save(toUpdate);
+		session.persist(toUpdate);
 		session.flush();
 	}
 	
@@ -1306,7 +1308,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (newMission.getId() == null || newMission.getId().trim().isEmpty()) {
 			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
 		}
-		session.save(toUpdate);
+		session.persist(toUpdate);
 		session.flush();
 	}
 	

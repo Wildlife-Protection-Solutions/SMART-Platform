@@ -65,6 +65,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 			session.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
 			item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError", item.getLocale()), item.getUuid().toString(), ex.getMessage())); //$NON-NLS-1$
+			session.merge(item);
 			session.getTransaction().commit();
 			
 			cleanUp(item);
@@ -76,7 +77,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 			session.beginTransaction();
 			
 			try{
-				session.update(item);
+				
 	
 				ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 				if (info.getStatus() == Status.NODATA){
@@ -94,7 +95,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				item.setMessage("{\"server_revision\": " + revision + "}"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.COMPLETE);
-				
+				session.merge(item);
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -108,7 +109,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				session.beginTransaction();
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
 				item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError2", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
-				session.saveOrUpdate(item);
+				session.merge(item);
 				session.getTransaction().commit();
 				
 			}

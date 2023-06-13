@@ -23,8 +23,6 @@ package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotFoundException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Composite;
@@ -38,6 +36,8 @@ import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Contributing alerts and data upload package items 

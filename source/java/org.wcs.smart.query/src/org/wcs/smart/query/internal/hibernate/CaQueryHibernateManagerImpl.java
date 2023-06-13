@@ -26,10 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
@@ -38,6 +34,10 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.user.UserLevelManager;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 /**
  * Utility functions for supporting query module
  * when logged in as a single conservation area
@@ -129,7 +129,7 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 	
 		for (IQueryType type : QueryTypeManager.INSTANCE.getSupportedQueryTypes()){
 
-			if (getClassMetadata(type.getHibernateClass(), session) == null){
+			if (!isMapped(type.getHibernateClass(), session)){
 				//query is not mapped to hibernate class so skip it
 				continue;
 			}

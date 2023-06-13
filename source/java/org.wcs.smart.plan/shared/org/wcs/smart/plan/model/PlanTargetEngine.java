@@ -24,13 +24,10 @@ package org.wcs.smart.plan.model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
@@ -41,6 +38,8 @@ import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;
 import org.wcs.smart.util.GeometryUtils;
+
+import jakarta.persistence.Tuple;
 
 /**
  * Computation engine for computing the status of
@@ -87,7 +86,7 @@ public class PlanTargetEngine {
 		SpatialPlanTarget thisTarget = null;
 		PlanTargetStatus result = new PlanTargetStatus(Status.COMPLETE);
 
-		thisTarget = (SpatialPlanTarget) session.load(SpatialPlanTarget.class, target.getUuid());
+		thisTarget = (SpatialPlanTarget) session.getReference(SpatialPlanTarget.class, target.getUuid());
 		if (thisTarget == null) {
 			return new PlanTargetStatus(Status.INCOMPLETE);
 		}
@@ -117,7 +116,7 @@ public class PlanTargetEngine {
 	private PlanTargetStatus computeNumericPlanTarget(NumericPlanTarget target, Session session) {
 		Double total = -9999d;
 		NumericPlanTarget thisTarget = null;
-		thisTarget = (NumericPlanTarget) session.load(
+		thisTarget = (NumericPlanTarget) session.getReference(
 				NumericPlanTarget.class, target.getUuid());
 		if (thisTarget == null) {
 			return new PlanTargetStatus(Status.INCOMPLETE);
@@ -213,16 +212,9 @@ public class PlanTargetEngine {
 		sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 		sql.append(" WHERE pp.id.plan  =:uuid ");//$NON-NLS-1$
 		
-		List<Track> tracks = new ArrayList<Track>();
-		Query<?> q = session.createQuery(sql.toString());
-		q.setParameter("uuid", plan); //$NON-NLS-1$
-
-		List<?> list = q.list();
-		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
-			tracks.add((Track) iterator.next());
-		}
-		return tracks;		
-
+		return session.createQuery(sql.toString(), Track.class)
+			.setParameter("uuid", plan) //$NON-NLS-1$
+			.list();
 	}
 	
 	
@@ -253,11 +245,10 @@ public class PlanTargetEngine {
 			sql.append(" JOIN pld.tracks as t"); //$NON-NLS-1$
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
-			Query<?> q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
-
-			List<?> rs = q.list();
-			targetTotal = (Double)rs.get(0);
+			List<Tuple> list = session.createQuery(sql.toString(), Tuple.class)
+					.setParameter("uuid", plan) //$NON-NLS-1$
+					.list();
+			targetTotal = (Double) list.get(0).get(0);
 
 		}else if (type == TargetType.PATROL_DAYS) {
 			sql.append(" SELECT "); //$NON-NLS-1$
@@ -266,19 +257,14 @@ public class PlanTargetEngine {
 			sql.append(" JOIN pp.id.patrol p"); //$NON-NLS-1$
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
-			Query<?> q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
+			List<Tuple> list = session.createQuery(sql.toString(), Tuple.class)
+					.setParameter("uuid", plan) //$NON-NLS-1$
+					.list();
 
-			List<?> list = q.list();
-
-			Iterator<?> it = list.iterator();
-			if(it.hasNext()){
-		        while(it.hasNext()){
-		          Object[] row = (Object[])it.next();
-		          LocalDate t1 = (LocalDate)row[0];
-		          LocalDate t2 = (LocalDate)row[1];
-		          targetTotal += (ChronoUnit.DAYS.between(t2, t1) + 1); 
-		        }
+			for (Tuple row : list) {
+				LocalDate t1 = (LocalDate)row.get(0);
+		        LocalDate t2 = (LocalDate)row.get(1);
+		        targetTotal += (ChronoUnit.DAYS.between(t2, t1) + 1); 		        
 		     }
 		}else if (type == TargetType.PATROL_HOURS) {
 			sql.append(" SELECT "); //$NON-NLS-1$
@@ -288,21 +274,17 @@ public class PlanTargetEngine {
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
-			Query<?> q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
-
-			List<?> list = q.list();
-
-			Iterator<?> it = list.iterator();
-			if(it.hasNext()){
-		        while(it.hasNext()){
-		          Object[] row = (Object[])it.next();
-		          LocalTime t1 = (LocalTime)row[0];
-		          LocalTime t2 = (LocalTime)row[1];
-		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1); 
-		          targetTotal += (milDiff / 3_600_000.0); 
-		        }
+			List<Tuple> list = session.createQuery(sql.toString(), Tuple.class)
+				.setParameter("uuid", plan) //$NON-NLS-1$
+				.list();
+					
+			for (Tuple row : list) {
+				LocalTime t1 = (LocalTime)row.get(0);
+				LocalTime t2 = (LocalTime)row.get(1);
+				Long milDiff = ChronoUnit.MILLIS.between(t2, t1); 
+				targetTotal += (milDiff / 3_600_000.0); 
 		    }
+		    
 
 		}else if (type == TargetType.PATROL_MANHOURS) {
 			sql.append(" SELECT "); //$NON-NLS-1$
@@ -313,21 +295,17 @@ public class PlanTargetEngine {
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
-			Query<?> q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
 
-			List<?> list = q.list();
-
-			Iterator<?> it = list.iterator();
-			if(it.hasNext()){
-		        while(it.hasNext()){
-		          Object[] row = (Object[])it.next();
-		          LocalTime t1 = (LocalTime)row[0];
-		          LocalTime t2 = (LocalTime)row[1];
+			List<Tuple> list = session.createQuery(sql.toString(), Tuple.class)
+					.setParameter("uuid", plan) //$NON-NLS-1$
+					.list();
+			
+			for (Tuple row : list) {
+				LocalTime t1 = (LocalTime)row.get(0);
+		        LocalTime t2 = (LocalTime)row.get(1);
 		          
-		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1);
-		          targetTotal += (milDiff / 3_600_000.0); 
-		        }
+		        Long milDiff = ChronoUnit.MILLIS.between(t2, t1);
+		        targetTotal += (milDiff / 3_600_000.0); 
 		    }
 
 		} else {

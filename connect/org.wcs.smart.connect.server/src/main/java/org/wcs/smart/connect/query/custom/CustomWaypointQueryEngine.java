@@ -35,7 +35,6 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
-import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor.IncidentLinkDataType;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;

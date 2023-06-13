@@ -500,7 +500,7 @@ public class BasemapTileServer {
 						bnd.setYMin(re.getMinY());
 						bnd.setXMin(re.getMinX());
 						bnd.setYMax(re.getMaxY());
-						session.save(bnd);
+						session.persist(bnd);
 						
 						session.getTransaction().commit();
 					}
@@ -556,7 +556,7 @@ public class BasemapTileServer {
 	 */
 	private byte[] findTile(Session session, BasemapDefinition layer, int x, int y, int z) {
 		byte[] data = (byte[]) session
-				.createNativeQuery("SELECT connect.find_tile(:layer, :z, :x, :y) ") //$NON-NLS-1$
+				.createNativeQuery("SELECT connect.find_tile(:layer, :z, :x, :y) ", byte[].class) //$NON-NLS-1$
 				.setParameter("layer", layer.getUuid()) //$NON-NLS-1$
 				.setParameter("z", z) //$NON-NLS-1$
 				.setParameter("x", x) //$NON-NLS-1$
@@ -822,7 +822,7 @@ public class BasemapTileServer {
 			
 			session.beginTransaction();
 			try {
-				session.save(tile);
+				session.persist(tile);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();

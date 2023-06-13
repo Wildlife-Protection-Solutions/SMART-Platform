@@ -100,16 +100,14 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 			Query wpquery = new Query();
 			QueryType xmlQuery = new QueryType();
 			wpquery.setQuery(xmlQuery);
-			xmlQuery.setQueryType(query.getTypeKey());
-			
-			CompoundMapQuery cquery = (CompoundMapQuery)query;
 			
 			List<org.wcs.smart.query.model.Query> toExport = new ArrayList<org.wcs.smart.query.model.Query>();
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					s.saveOrUpdate(query);
-		
+					query = s.getReference(query);
+					
+					xmlQuery.setQueryType(query.getTypeKey());
 					if (query.getConservationArea().getDefaultLanguage() != null){
 						xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());
 					}else{
@@ -125,7 +123,7 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 						xmlQuery.getName().add(qn);
 					}
 					
-					for (CompoundMapQueryLayer l : cquery.getLayers()){
+					for (CompoundMapQueryLayer l : ((CompoundMapQuery)query).getLayers()){
 						UUID qUuid = l.getQueryUuid();
 						IQueryType type = QueryTypeManager.INSTANCE.findQueryType(l.getQueryType());
 						if (type == null) {
@@ -138,7 +136,7 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 					s.getTransaction().rollback();
 				}
 			}
-			
+			CompoundMapQuery cquery = (CompoundMapQuery)query;
 			for (int order = 0; order < cquery.getLayers().size(); order++ ){
 				CompoundMapQueryLayer l = cquery.getLayers().get(order);
 				QueryPart qp = new QueryPart();

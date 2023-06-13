@@ -64,7 +64,7 @@ public class CloneConnect implements IConservationAreaTemplateCloner {
 			for (Entry<String, ConnectServerOption> op : options.entrySet()){
 				clone.setOption(op.getKey(), op.getValue().getValue());
 			}
-			s.save(clone);
+			s.persist(clone);
 			
 		}
 		s.flush();

@@ -26,18 +26,18 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Local data queue item.  Extends the shared data queue item adding
@@ -46,7 +46,7 @@ import org.wcs.smart.connect.dataqueue.internal.Messages;
  *
  */
 @Entity
-@Table(name="smart.connect_data_queue")
+@Table(name="connect_data_queue", schema="smart")
 public class LocalDataQueueItem extends DataQueueItem{
 
 	private static final long serialVersionUID = 1L;

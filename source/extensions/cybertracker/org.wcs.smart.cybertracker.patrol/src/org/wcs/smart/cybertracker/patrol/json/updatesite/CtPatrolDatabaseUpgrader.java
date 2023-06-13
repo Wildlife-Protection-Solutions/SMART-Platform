@@ -112,7 +112,7 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, PatrolCyberTrackerPlugIn.DB_VERSION_2, session);

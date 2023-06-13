@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 
 /**
@@ -144,7 +145,10 @@ public class PatrolEventManager {
 	/**
 	 * Fires a patrol changed event
 	 */
-	public void patrolChanged(int attributeChanged, Object source){
+	public void patrolChanged(int attributeChanged, Patrol source){
+		fireListeners(EventType.PATROL_MODIFIED, attributeChanged, source);
+	}
+	public void patrolChanged(int attributeChanged, PatrolLegDay source){
 		fireListeners(EventType.PATROL_MODIFIED, attributeChanged, source);
 	}
 	

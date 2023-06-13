@@ -23,14 +23,6 @@ package org.wcs.smart.cybertracker.patrol.model;
 
 import java.util.ArrayList;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -39,6 +31,14 @@ import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Patrol cybertracker package configuration
  * 
@@ -46,7 +46,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  *
  */
 @Entity
-@Table(name="smart.ct_patrol_package")
+@Table(name="ct_patrol_package", schema="smart")
 public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, IIncidentCtPackage{
 
 	private static final long serialVersionUID = 1L;

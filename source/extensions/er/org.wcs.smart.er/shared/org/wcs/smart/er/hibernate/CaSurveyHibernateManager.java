@@ -25,11 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -41,6 +36,10 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.QueryFactory;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Single ca survey hibernate functions.
@@ -134,27 +133,20 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 */
 	@Override
 	public List<SurveyDesignProxy> getSurveyDesignEditorInputs(Session s, SurveyDesignFilter filter) {
+		List<SurveyDesign> data ;
 		if (filter == null){
 			//get all
-			List<SurveyDesign> ds = QueryFactory.buildQuery(s, SurveyDesign.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
-			List<SurveyDesignProxy> all = new ArrayList<SurveyDesignProxy>();
-			for (SurveyDesign d : ds){
-				SurveyDesignProxy ii = new SurveyDesignProxy(d.getName(), d.getUuid(), d.getKeyId(), d.getState());
-				all.add(ii);
-			}
-			return all;
+			data = QueryFactory.buildQuery(s, SurveyDesign.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
 				
 		}else{
-			Query<?> q = filter.buildQuery(s);
-			List<?> data = q.list();
-			List<SurveyDesignProxy> all = new ArrayList<SurveyDesignProxy>();
-			for (Object d : data){
-				Object[] x = (Object[])d;
-				SurveyDesignProxy ii = new SurveyDesignProxy((String)x[1], (UUID)x[0], (String)x[3], (SurveyDesign.State)x[2]);
-				all.add(ii);
-			}
-			return all;
+			data = filter.buildQuery(s).list();
 		}
+		List<SurveyDesignProxy> all = new ArrayList<SurveyDesignProxy>(data.size());
+		for (SurveyDesign d : data) {
+			SurveyDesignProxy ii = new SurveyDesignProxy(d.getName(), d.getUuid(),  d.getKeyId(), d.getState());
+			all.add(ii);
+		}
+		return all;
 	}
 
 	/**

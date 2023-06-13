@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,9 +36,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,13 +46,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -65,6 +63,7 @@ import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
@@ -89,7 +88,13 @@ import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel;
 import org.wcs.smart.util.UuidUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.xml.bind.JAXBException;
 
 
 /**
@@ -301,7 +306,7 @@ public class DataModelApi extends HttpServlet{
 								return true;
 							}));
 							if (a.getUuid() == null){
-								session.save(a);
+								session.persist(a);
 							}
 						}
 						for (Category cat : targetDm.getCategories()){
@@ -310,7 +315,7 @@ public class DataModelApi extends HttpServlet{
 								return true;
 							});
 							if (cat.getUuid() == null){
-								session.save(cat);
+								session.persist(cat);
 							}
 						}
 					}
@@ -331,7 +336,7 @@ public class DataModelApi extends HttpServlet{
 		if (object.getIcon() == null) return;
 		object.getIcon().setConservationArea(ca);
 		if (object.getIcon().getUuid() == null) {
-			session.save(object.getIcon());
+			session.persist(object.getIcon());
 		}
 		
 	}
@@ -341,10 +346,17 @@ public class DataModelApi extends HttpServlet{
 	@Path("/metadata/configurablemodel/{modeluuid}")
 	@Produces({ MediaType.APPLICATION_XML })
 	public Response getConfigurableModel(
-			@Parameter(description="the configurable model uuid") @PathParam("modeluuid") String uuid) {
+			@Parameter(description="the configurable model uuid") @PathParam("modeluuid") String uuid,
+			@Parameter(description="if supplied format can be one of xml (default - returns only xml file) or zip (includes icons in zip file) (optional)") @QueryParam("format") String format) {
 	
 		UUID cmUuid = parseUuid(uuid);
 		
+		if (format != null) {
+			format = format.toLowerCase();
+		}else {
+			format = "xml"; //$NON-NLS-1$
+		}
+				
 		try(Session s = HibernateManager.getSession(context)){
 			s.beginTransaction();
 			try {
@@ -362,44 +374,62 @@ public class DataModelApi extends HttpServlet{
 				CmSmartToXml converter = new CmSmartToXml(s);
 				
 				converter.convert(model, new NullProgressMonitor());
-
-				java.nio.file.Path zipFile = Files.createTempFile("configurablemodel", "zip"); //$NON-NLS-1$ //$NON-NLS-2$
-
-				try (ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(
-						new BufferedOutputStream(Files.newOutputStream(zipFile)))) {
-					ZipArchiveEntry zipEntry = new ZipArchiveEntry("configurablemodel.xml"); //$NON-NLS-1$
-					tOut.putArchiveEntry(zipEntry);
-					CmXmlManager.writeDataModel(converter.getXmlModel(), tOut);
-					tOut.closeArchiveEntry();
-
-					for (Entry<String, java.nio.file.Path> include : converter.getReferencedFiles().entrySet()) {
-						zipEntry = new ZipArchiveEntry(include.getKey());
+				if (format.equals("zip")) { //$NON-NLS-1$
+					java.nio.file.Path zipFile = Files.createTempFile("configurablemodel", "zip"); //$NON-NLS-1$ //$NON-NLS-2$
+	
+					try (ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(
+							new BufferedOutputStream(Files.newOutputStream(zipFile)))) {
+						ZipArchiveEntry zipEntry = new ZipArchiveEntry("configurablemodel.xml"); //$NON-NLS-1$
 						tOut.putArchiveEntry(zipEntry);
-						try (InputStream is = Files.newInputStream(include.getValue())) {
-							IOUtils.copy(is, tOut);
-						}
+						CmXmlManager.writeDataModel(converter.getXmlModel(), tOut);
 						tOut.closeArchiveEntry();
+	
+						for (Entry<String, java.nio.file.Path> include : converter.getReferencedFiles().entrySet()) {
+							zipEntry = new ZipArchiveEntry(include.getKey());
+							tOut.putArchiveEntry(zipEntry);
+							try (InputStream is = Files.newInputStream(include.getValue())) {
+								IOUtils.copy(is, tOut);
+							}
+							tOut.closeArchiveEntry();
+						}
+	
+					} catch (Exception ex) {
+						throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex);
 					}
-
-				} catch (Exception ex) {
-					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex);
+	
+					StreamingOutput stream = new StreamingOutput() {
+						@Override
+						public void write(OutputStream output) throws IOException {
+							IOUtils.copy(Files.newInputStream(zipFile), output);
+	
+							Files.delete(zipFile);
+	
+						}
+					};
+					String filename = "cm." + uuid + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+	
+					return Response.status(Response.Status.PARTIAL_CONTENT).entity(stream)
+							.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
+							.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+							.build();
 				}
-
+				
 				StreamingOutput stream = new StreamingOutput() {
 					@Override
 					public void write(OutputStream output) throws IOException {
-						IOUtils.copy(Files.newInputStream(zipFile), output);
-
-						Files.delete(zipFile);
-
+						try {
+							CmXmlManager.writeDataModel(converter.getXmlModel(), output);
+						} catch (JAXBException e) {
+							throw new IOException(e);
+						}
 					}
 				};
-				String filename = "cm." + uuid + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+				String filename = "cm." + uuid + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
 
 				return Response.status(Response.Status.PARTIAL_CONTENT).entity(stream)
-						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
-						.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
-						.build();
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+					.build();
 				    
 				
 			} catch (Exception e) {
@@ -411,4 +441,132 @@ public class DataModelApi extends HttpServlet{
 		}
 		
 	}
+	
+	/**
+	 * returns a list of configurable models in the system
+	 * for all Conservation Areas which the user has view access to or for the
+	 * specific conservation area provided in the query
+	 * 
+	 * @param uuid
+	 * @return
+	 */
+	@GET
+	@Path("/metadata/configurablemodel")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public List<ConfigurableModelProxy> getConfigurableModels(			
+			@Parameter(description="query by conservation area (optional)") @QueryParam("ca_uuid") String querycauuid) {
+	
+		UUID caUuid = null;
+		if (querycauuid != null) {
+			caUuid = parseUuid(querycauuid);
+		}
+		
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				List<UUID> read = new ArrayList<>();
+				if (caUuid != null) {
+					if (SecurityManager.INSTANCE.canAccess(s, 
+							request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, caUuid)){
+						read.add(caUuid);
+					}
+				}else {
+					List<ConservationArea> cas = QueryFactory.buildQuery(s, ConservationArea.class).list();
+					
+					for (ConservationArea ca : cas) {
+						if (SecurityManager.INSTANCE.canAccess(s, 
+								request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, ca.getUuid())){
+							read.add(ca.getUuid());
+						}
+					}
+				}
+				if (read.isEmpty()) return Collections.emptyList();
+				
+				List<ConfigurableModel> cms = s.createQuery("FROM ConfigurableModel WHERE conservationArea.uuid IN (:cauuids)", ConfigurableModel.class) //$NON-NLS-1$
+						.setParameterList("cauuids", read) //$NON-NLS-1$
+						.list();
+				
+				List<ConfigurableModelProxy> values = new ArrayList<>();
+				for (ConfigurableModel cm : cms) {
+					values.add(new ConfigurableModelProxy(cm));
+				}
+				return values;
+				
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);
+				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, e);
+			}finally {
+				s.getTransaction().commit();
+			}
+		}
+		
+	}
+	
+	class ConfigurableModelProxy {
+		UUID uuid;
+		UUID caUuid;
+		String caName;
+		String caId;
+		String name;
+		List<Translation> translations;
+		
+		public ConfigurableModelProxy(ConfigurableModel cm) {
+			this.uuid = cm.getUuid();
+			this.caUuid = cm.getConservationArea().getUuid();
+			this.caName = cm.getConservationArea().getName();
+			this.caId = cm.getConservationArea().getId();
+			this.name = cm.getName();
+			
+			this.translations= new ArrayList<>();
+			for (Label l : cm.getNames()) {
+				this.translations.add(new Translation(l));
+			}
+			
+		}
+		
+		public UUID getUuid() {
+			return this.uuid;
+		}
+		public String getName() {
+			return this.name;
+		}
+		
+		@JsonProperty("ca_uuid")
+		public UUID getConservationAreaUuid() {
+			return this.caUuid;
+		}
+		@JsonProperty("ca_name")
+		public String getConservationAreaName() {
+			return this.caName;
+		}
+		@JsonProperty("ca_id")
+		public String getConservationAreaId() {
+			return this.caId;
+		}
+		
+		public List<Translation> getTranslations(){
+			return this.translations;
+		}
+		
+		class Translation{
+			
+			String languageCode;
+			String value;
+			
+			public Translation(Label label) {
+				this.languageCode = label.getLanguage().getCode();
+				this.value = label.getValue();
+			}
+			
+			@JsonProperty("language_code")
+			public String getLanguageCode() {
+				return this.languageCode;
+			}
+			public String getValue() {
+				return this.value;
+			}
+		}
+	}
+	
+
 }

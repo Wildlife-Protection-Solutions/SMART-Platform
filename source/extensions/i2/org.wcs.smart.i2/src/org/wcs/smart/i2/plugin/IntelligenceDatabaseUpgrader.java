@@ -36,6 +36,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -139,7 +140,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.i_recordsource add constraint ca_recordsource_type_key_unq unique(ca_uuid, keyid)" //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_2, session);
 
@@ -175,7 +176,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 					newPermission.append(Employee.USER_LEVEL_SEP);
 				}
 				newPermission.deleteCharAt(newPermission.length() - 1);
-				NativeQuery<?> update = session.createNativeQuery("Update smart.employee set smartuserlevel = :userlevel WHERE uuid = :uuid"); //$NON-NLS-1$
+				MutationQuery update = session.createNativeMutationQuery("Update smart.employee set smartuserlevel = :userlevel WHERE uuid = :uuid"); //$NON-NLS-1$
 				update.setParameter("uuid", uuid); //$NON-NLS-1$
 				update.setParameter("userlevel", newPermission.toString()); //$NON-NLS-1$
 				update.executeUpdate();
@@ -292,7 +293,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql) {
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_3, session);
@@ -304,7 +305,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.i_record ADD COLUMN smart_source varchar(2048)", //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_4, session);
@@ -335,7 +336,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.I_RECORD_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200)", //$NON-NLS-1$
 		};
 		for (String s : sql){
-			session.createNativeQuery(s).executeUpdate();
+			session.createNativeMutationQuery(s).executeUpdate();
 		}
 		
 		//for each ca we need to create some sort of default profile
@@ -349,7 +350,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			if (uuid.equals(ConservationArea.MULTIPLE_CA)) continue;
 			
 			UUID puuid = UuidUtils.byteToUUID( DerbyUtils.createUuid() );
-			session.createNativeQuery("INSERT INTO smart.i_profile_config(uuid, ca_uuid, keyid, color) VALUES(:uuid,:cauuid,:keyid,:color)")  //$NON-NLS-1$
+			session.createNativeMutationQuery("INSERT INTO smart.i_profile_config(uuid, ca_uuid, keyid, color) VALUES(:uuid,:cauuid,:keyid,:color)")  //$NON-NLS-1$
 				.setParameter("uuid", puuid) //$NON-NLS-1$
 				.setParameter("cauuid",uuid) //$NON-NLS-1$
 				.setParameter("color", color) //$NON-NLS-1$
@@ -360,7 +361,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 	
 		//add name to i18n table
-		session.createNativeQuery("INSERT INTO smart.i18n_label (language_uuid, element_uuid, value) " //$NON-NLS-1$
+		session.createNativeMutationQuery("INSERT INTO smart.i18n_label (language_uuid, element_uuid, value) " //$NON-NLS-1$
 				+ "SELECT a.uuid, b.uuid, '" + profilename + "' FROM smart.language a join smart.i_profile_config b " //$NON-NLS-1$ //$NON-NLS-2$
 				+ " on a.ca_uuid = b.ca_uuid").executeUpdate(); //$NON-NLS-1$
 			
@@ -369,13 +370,13 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		String q = "INSERT INTO smart.i_profile_entity_type(entity_type_uuid, profile_uuid) SELECT "; //$NON-NLS-1$
 		q += " a.uuid, b.uuid FROM "; //$NON-NLS-1$
 		q += " smart.i_entity_type a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid "; //$NON-NLS-1$
-		session.createNativeQuery(q).executeUpdate();
+		session.createNativeMutationQuery(q).executeUpdate();
 		
 		//line record source to profiles
 		q = "INSERT INTO smart.i_profile_record_source(record_source_uuid, profile_uuid) SELECT "; //$NON-NLS-1$
 		q += " a.uuid, b.uuid FROM "; //$NON-NLS-1$
 		q += " smart.i_recordsource a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid "; //$NON-NLS-1$
-		session.createNativeQuery(q).executeUpdate();
+		session.createNativeMutationQuery(q).executeUpdate();
 		
 		sql = new String[] {
 				"ALTER TABLE smart.i_entity ADD COLUMN profile_uuid char(16) for bit data", //$NON-NLS-1$
@@ -446,7 +447,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"UPDATE smart.i_recordsource_attribute set IS_DUPLICATE_CHECK = false", //$NON-NLS-1$
 				"alter table smart.i_recordsource_attribute alter column is_duplicate_check set not null", //$NON-NLS-1$
 		};
-		for (String s : sql) session.createNativeQuery(s).executeUpdate();
+		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
 		
 		
 		HashMap<UUID, Set<String>> usedkeys = new HashMap<>();
@@ -471,7 +472,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			}
 			used.add(keyid);
 			
-			session.createNativeQuery("UPDATE smart.i_recordsource_attribute SET keyid = '" + keyid + "' WHERE uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("UPDATE smart.i_recordsource_attribute SET keyid = '" + keyid + "' WHERE uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 				.setParameter("uuid", uuid) //$NON-NLS-1$
 				.executeUpdate();
 		}
@@ -495,12 +496,12 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			}
 			used.add(keyid);
 			
-			session.createNativeQuery("UPDATE smart.i_recordsource_attribute SET keyid = '" + keyid + "' WHERE uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("UPDATE smart.i_recordsource_attribute SET keyid = '" + keyid + "' WHERE uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 				.setParameter("uuid", uuid) //$NON-NLS-1$
 				.executeUpdate();
 		}		
 
-		session.createNativeQuery("alter table smart.i_recordsource_attribute alter column keyid not null").executeUpdate(); //$NON-NLS-1$
+		session.createNativeMutationQuery("alter table smart.i_recordsource_attribute alter column keyid not null").executeUpdate(); //$NON-NLS-1$
 
 		//need to map old permissions to new ones
 		//remove old permission from employee
@@ -558,7 +559,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			for (Integer i : intelpermissions) permission = permission | i;
 
 			//insert permission
-			session.createNativeQuery("INSERT INTO smart.i_permission (employee_uuid, profile_uuid, permissions) VALUES(:euuid, :puuid, :p)") //$NON-NLS-1$
+			session.createNativeMutationQuery("INSERT INTO smart.i_permission (employee_uuid, profile_uuid, permissions) VALUES(:euuid, :puuid, :p)") //$NON-NLS-1$
 				.setParameter("euuid", uuid) //$NON-NLS-1$
 				.setParameter("puuid", caProfileUuids.get(cauuid)) //$NON-NLS-1$
 				.setParameter("p", permission) //$NON-NLS-1$
@@ -571,7 +572,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				sb.append(","); //$NON-NLS-1$
 				sb.append(newparts.get(i));
 			}
-			session.createNativeQuery("UPDATE smart.employee set smartuserlevel = :ul where uuid = :uuid") //$NON-NLS-1$
+			session.createNativeMutationQuery("UPDATE smart.employee set smartuserlevel = :ul where uuid = :uuid") //$NON-NLS-1$
 				.setParameter("ul", sb.toString()) //$NON-NLS-1$
 				.setParameter("uuid", uuid) //$NON-NLS-1$
 				.executeUpdate();
@@ -596,7 +597,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			
 			"DROP FUNCTION smart.tempuuid" //$NON-NLS-1$
 		};
-		for (String s : sql) session.createNativeQuery(s).executeUpdate();
+		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
 
 		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_5, session);

@@ -190,7 +190,7 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 			session.beginTransaction();
 			try {
 				for (ScreenOption so : getOptionsMap().values()) {
-					session.saveOrUpdate(so);
+					HibernateManager.saveOrMerge(session, so);
 				}
 				session.getTransaction().commit();
 				setChangesMade(false);

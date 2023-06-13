@@ -26,10 +26,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -71,6 +67,10 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * A property page for managing CCAA users. 
@@ -356,7 +356,7 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 										if (del.equals(SmartDB.getCurrentEmployee())){
 											restart[0] = true;
 										}
-										s.delete(del);
+										s.remove(del);
 									}
 								}catch (Exception ex){
 									deleteError =  MessageFormat.format(

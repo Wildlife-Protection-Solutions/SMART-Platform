@@ -24,13 +24,13 @@ package org.wcs.smart.i2.model;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.query.observation.parser.ParseException;
 import org.wcs.smart.i2.query.observation.parser.Parser;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Record summary query
@@ -40,7 +40,7 @@ import org.wcs.smart.i2.query.observation.parser.Parser;
  *
  */
 @Entity
-@Table(name="smart.i_record_summary_query")
+@Table(name="i_record_summary_query", schema="smart")
 public class IntelRecordSummaryQuery extends AbstractIntelQuery {
 	
 	private static final long serialVersionUID = 1L;

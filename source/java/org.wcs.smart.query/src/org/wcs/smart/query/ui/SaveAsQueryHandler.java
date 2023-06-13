@@ -98,7 +98,7 @@ public class SaveAsQueryHandler {
 				
 				QueryEventManager.getInstance().fireBeforeSave(clone, session);
 				
-				session.save(clone);
+				session.persist(clone);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				QueryPlugIn.displayLog(Messages.SaveAsQueryHandler_CopyError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

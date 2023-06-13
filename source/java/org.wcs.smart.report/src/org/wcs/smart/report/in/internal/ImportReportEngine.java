@@ -192,10 +192,11 @@ public class ImportReportEngine {
 				//existing query
 				//remove report->query link so when validating
 				//queries we get correct results
-				String hsql = "delete from ReportQuery where id.report= :report"; //$NON-NLS-1$
-				Query<?> q = session.createQuery(hsql);
-				q.setParameter("report", importReport); //$NON-NLS-1$
-				q.executeUpdate();
+				String hsql = "delete from ReportQuery where id.report = :report"; //$NON-NLS-1$
+				session.createMutationQuery(hsql)
+					.setParameter("report",importReport) //$NON-NLS-1$
+					.executeUpdate();
+				
 			}
 			
 			Path reportXmlFile = tmpDir.resolve(newReport.getFilename());
@@ -206,7 +207,7 @@ public class ImportReportEngine {
 			}
 
 			//save report to database
-			session.saveOrUpdate(importReport);
+			importReport = HibernateManager.saveOrMerge(session,  importReport);
 			
 			SessionHandle handle = SessionHandleAdapter.getInstance().getSessionHandle();
 			ReportDesignHandle rdh = handle.openDesign(reportXmlFile.toAbsolutePath().toString());
@@ -289,11 +290,9 @@ public class ImportReportEngine {
 				});
 				// fire new/update event
 				if (isNew) {
-					ReportEventManager.getInstance().fireReportAdded(
-							importReport);
+					ReportEventManager.getInstance().fireReportAdded(importReport);
 				} else {
-					ReportEventManager.getInstance().fireReportUpdated(
-							importReport);
+					ReportEventManager.getInstance().fireReportUpdated(importReport);
 				}
 			} catch (Throwable t) {
 				throw new Exception(
@@ -646,12 +645,12 @@ public class ImportReportEngine {
 			}
 
 			//save to db
-			session.saveOrUpdate(smartQuery);
+			smartQuery = HibernateManager.saveOrMerge(session,  smartQuery);
 			queriesAdded.add(smartQuery);
 
 		}else{
 			//overwrite or use original
-			session.saveOrUpdate(smartQuery);
+			smartQuery = HibernateManager.saveOrMerge(session,  smartQuery);
 			queriesModified.add(smartQuery);
 		}
 		

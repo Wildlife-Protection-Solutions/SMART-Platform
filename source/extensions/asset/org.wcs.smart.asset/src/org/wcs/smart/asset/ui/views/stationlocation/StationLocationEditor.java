@@ -166,13 +166,13 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				if (!isNew) {
 					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
-				Query<?> q = s.createQuery(query)
+				Query<Long> q = s.createQuery(query, Long.class)
 				.setParameter("id", stationlocation.getId()) //$NON-NLS-1$
 				.setParameter("ca", stationlocation.getStation().getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
 					q.setParameter("uuid", stationlocation.getUuid()); //$NON-NLS-1$
 				}
-				Long cnt = (Long) q.uniqueResult();
+				Long cnt = q.uniqueResult();
 				if (cnt > 0) {
 					MessageDialog.openError(getSite().getShell(), Messages.StationLocationEditor_SaveDialogTtiel, 
 						MessageFormat.format(Messages.StationLocationEditor_DuplicateIdError, stationlocation.getId())
@@ -181,7 +181,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				}
 				
 				s.beginTransaction();
-				s.saveOrUpdate(stationlocation);
+				HibernateManager.saveOrMerge(s, stationlocation);
 				s.getTransaction().commit();
 				
 				((StationLocationEditorInput)getEditorInput()).setStationLocationUuid(stationlocation.getUuid());

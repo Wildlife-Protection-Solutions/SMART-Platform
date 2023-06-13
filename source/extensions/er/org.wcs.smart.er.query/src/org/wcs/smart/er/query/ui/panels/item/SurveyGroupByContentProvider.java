@@ -73,7 +73,7 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 		protected IStatus run(IProgressMonitor monitor) {
 			try(Session s = HibernateManager.openSession()){
 				if (design != null){
-					s.update(design);
+					design = s.getReference(SurveyDesign.class, design.getUuid());
 					for (MissionProperty p : design.getMissionProperties()){
 						p.getAttribute().getName();
 					}
@@ -100,7 +100,7 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 			try(Session s = HibernateManager.openSession()){
 				if (design != null){
 					listSamplingUnitAttributes = new ArrayList<SamplingUnitAttribute>();
-					s.update(design);
+					design = s.getReference(SurveyDesign.class, design.getUuid());
 					for (SurveyDesignSamplingUnitAttribute p : design.getSamplingUnitAttributes()){
 						p.getSamplingUnitAttribute().getName();
 						if (p.getSamplingUnitAttribute().getType() == AttributeType.LIST){

@@ -90,8 +90,8 @@ public class DeleteErWaypointAction implements IQaAction {
 						item.setStatus(QaError.Status.DELETED);
 						item.setFixMessage(Messages.DeleteErWaypointAction_DeleteErrorNotfound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
 					}else{
-						s.delete(pw);
-						s.delete(pw.getWaypoint());
+						s.remove(pw);
+						s.remove(pw.getWaypoint());
 						modified.add(pw.getMissionDay().getMission());
 						pw.getMissionDay().getMission().equals(null); //lazy load hibernate
 						deleted.add(item);

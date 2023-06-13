@@ -56,7 +56,7 @@ public class DeleteObjectsJob extends Job {
 
 	protected void doInTransaction(Session s) {
 		for (Object o : object) {
-			s.delete(o);
+			s.remove(o);
 		}
 	}
 	

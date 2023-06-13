@@ -72,7 +72,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -455,11 +454,11 @@ public class RoutinesListDialog extends SmartStyledTitleDialog {
 					s.getTransaction().begin();
 					try{
 						for (QaRoutine r : toDelete){
-							Query<?> q = s.createQuery("DELETE FROM QaError where qaRoutine = :r"); //$NON-NLS-1$
-							q.setParameter("r", r); //$NON-NLS-1$
-							q.executeUpdate();
+							s.createMutationQuery("DELETE FROM QaError where qaRoutine = :r") //$NON-NLS-1$
+								.setParameter("r", r) //$NON-NLS-1$
+								.executeUpdate();
 							
-							s.delete(r);
+							s.remove(r);
 							monitor.worked(1);
 						}
 						

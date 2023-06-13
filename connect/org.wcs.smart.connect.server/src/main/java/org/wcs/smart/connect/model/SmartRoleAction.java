@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.connect.model;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * SMART Connect action associated with a user role.
@@ -32,7 +32,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name="connect.role_actions")
+@Table(name="role_actions", schema="connect")
 public class SmartRoleAction  extends AbstractSmartAction{
 
 	private SmartRole role;

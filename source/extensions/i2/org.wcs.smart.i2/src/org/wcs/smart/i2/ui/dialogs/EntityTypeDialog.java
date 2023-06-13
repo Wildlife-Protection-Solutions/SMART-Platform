@@ -32,9 +32,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -133,6 +130,10 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Dialog for editing entity types.
@@ -258,13 +259,13 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						
 						if (!isNew && !newProfiles.isEmpty()) {
 							String hql = "SELECT count(*) FROM IntelEntity WHERE entityType = :type and profile NOT IN (:profiles)"; //$NON-NLS-1$
-							Long cnt = (Long) s.createQuery(hql).setParameter("type", type).setParameterList("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+							Long cnt = s.createQuery(hql, Long.class).setParameter("type", type).setParameterList("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 							if (cnt > 0) {
 								throw new Exception(Messages.EntityTypeDialog_CannotDeleteProfile);
 							}
 							
 							if (type.getDmAttribute() != null) {
-								String activeFilter = (String) s.createQuery("SELECT activeFilter FROM IntelEntityType WHERE uuid = :uuid") //$NON-NLS-1$
+								String activeFilter = s.createQuery("SELECT activeFilter FROM IntelEntityType WHERE uuid = :uuid", String.class) //$NON-NLS-1$
 									.setParameter("uuid",  type.getUuid()) //$NON-NLS-1$
 									.uniqueResult();
 							
@@ -288,7 +289,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							
 							if (type.getDmAttribute() != null && type.getDmAttribute().getUuid() == null) {
 								//create new data model attribute and configure list items
-								s.saveOrUpdate(type.getDmAttribute());
+								s.persist(type.getDmAttribute());
 								s.saveOrUpdate(type);
 								type.getDmAttribute().setAttributeList(new ArrayList<>());
 								//create a new list item for all existing entities
@@ -296,13 +297,13 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 									Long cnt = QueryFactory.buildCountQuery(s, IntelEntity.class, 
 											new Object[] {"entityType", type}); //$NON-NLS-1$
 									
-									ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
+									ScrollableResults<IntelEntity> scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type", IntelEntity.class) //$NON-NLS-1$
 											.setParameter("type",  type).scroll(); //$NON-NLS-1$
 									
 									
 									sub.setWorkRemaining(cnt.intValue()+1);
 									while(scroll.next()) {
-										IntelEntity ie = (IntelEntity)scroll.get(0);
+										IntelEntity ie = scroll.get();
 										ie.createDataModelItem(s);
 										sub.split(1);
 										s.flush();
@@ -312,14 +313,14 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								s.saveOrUpdate(type);
 								
 								//if the ID attribute was updated so we want to update list values for all entities
-								ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
+								ScrollableResults<IntelEntity> scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type", IntelEntity.class) //$NON-NLS-1$
 										.setParameter("type",  type).scroll(); //$NON-NLS-1$
 									
 								s.saveOrUpdate(type.getDmAttribute());
 								List<AttributeListItem> keys = new ArrayList<>(type.getDmAttribute().getAttributeList());
 									
 								while(scroll.next()) {
-									IntelEntity ie = (IntelEntity)scroll.get(0);
+									IntelEntity ie = (IntelEntity)scroll.get();
 									if (ie.getDmAttributeListItem() != null) {
 										String newid = ie.getIdAttributeAsText();
 										
@@ -350,7 +351,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
 												.setParameter("type",  type).scroll(); //$NON-NLS-1$
 								while(scroll.next()) {
-									IntelEntity ie = (IntelEntity) scroll.get(0);
+									IntelEntity ie = (IntelEntity) scroll.get();
 									ie.updateActiveValue();
 									s.flush();
 									sub.split(1);
@@ -367,7 +368,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							}
 							
 							if (type.getDmAttribute() == null) {
-								s.createQuery("UPDATE IntelEntity SET dmAttributeListItem = null WHERE entityType = :type") //$NON-NLS-1$
+								s.createMutationQuery("UPDATE IntelEntity SET dmAttributeListItem = null WHERE entityType = :type") //$NON-NLS-1$
 									.setParameter("type", type) //$NON-NLS-1$
 									.executeUpdate();
 							}
@@ -411,10 +412,10 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							for (IntelEntityTypeAttribute a : type.getAttributes()){
 								if (!attributeList.contains(a)){
 									//delete any entity attribute value associations
-									Query<?> qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) "); //$NON-NLS-1$
-									qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
-									qDelete.setParameter("entityType", type); //$NON-NLS-1$
-									qDelete.executeUpdate();
+									s.createMutationQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) ") //$NON-NLS-1$
+										.setParameter("att", a.getAttribute()) //$NON-NLS-1$
+										.setParameter("entityType", type) //$NON-NLS-1$
+										.executeUpdate();
 									toDelete.add(a);
 									attributesModified = true;
 								}
@@ -446,7 +447,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 									.getResultList();
 							for (IntelEntityTypeAttributeGroup g : currentGroups){
 								if (!groups.contains(g)){
-									s.delete(g);
+									s.remove(g);
 								}
 							}
 							s.flush();

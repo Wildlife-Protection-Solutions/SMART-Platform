@@ -43,7 +43,7 @@ public class RecordSourceDeleteAdvisor implements IDeleteAdvisor {
 		sb.append("WHERE ea.actionTypeKey = :actionid AND p.id.parameterKey = :pkey "); //$NON-NLS-1$
 		sb.append("AND p.parameterValue = :value AND ea.conservationArea = :ca"); //$NON-NLS-1$
 		
-		Long used = (Long)session.createQuery(sb.toString())
+		Long used = session.createQuery(sb.toString(), Long.class)
 		.setParameter("actionid", CreateRecordActionType.KEY) //$NON-NLS-1$
 		.setParameter("pkey", SourceParameter.INSTANCE.getKey()) //$NON-NLS-1$
 		.setParameter("value", irs.getKeyId()) //$NON-NLS-1$

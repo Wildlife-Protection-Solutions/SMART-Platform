@@ -39,12 +39,13 @@ import java.util.stream.Stream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.internal.Messages;
+
+import jakarta.persistence.Tuple;
 
 /**
  * Imports all the database data tables.
@@ -85,7 +86,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 			//this table to get populated otherwise sync'ing won't work correctly
 			//so we temporarily drop it here and add it back after
 			//the table data has been imported
-			session.createNativeQuery("DROP TRIGGER trg_change_log_insert").executeUpdate(); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TRIGGER trg_change_log_insert").executeUpdate(); //$NON-NLS-1$
 		}catch (Exception ex) {
 			//thrown if trigger doesn't exist
 			trg = false;
@@ -157,7 +158,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		}
 		
 		if (trg) {
-			session.createNativeQuery("CREATE TRIGGER trg_change_log_insert AFTER INSERT ON smart.connect_change_log REFERENCING NEW AS new FOR EACH ROW WHEN (smart.is_replication_enabled_ca(new.ca_uuid) = false) delete from smart.connect_change_log where uuid = new.uuid"). //$NON-NLS-1$
+			session.createNativeMutationQuery("CREATE TRIGGER trg_change_log_insert AFTER INSERT ON smart.connect_change_log REFERENCING NEW AS new FOR EACH ROW WHEN (smart.is_replication_enabled_ca(new.ca_uuid) = false) delete from smart.connect_change_log where uuid = new.uuid"). //$NON-NLS-1$
 				executeUpdate();
 		}
 		
@@ -236,8 +237,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		query.append("0"); //replace //$NON-NLS-1$
 		query.append(")");  //$NON-NLS-1$
 		
-		NativeQuery<?> sqlQuery = session.createNativeQuery(query.toString());		
-		sqlQuery.executeUpdate();
+		session.createNativeMutationQuery(query.toString()).executeUpdate();		
 	}
 	
 	/**
@@ -268,11 +268,10 @@ public class HibernateDataImporter implements ICaDataImporter{
 		
 		HashMap<String, List<String>> results = new HashMap<String, List<String>>();
 		
-		@SuppressWarnings("unchecked")
-		List<Object[]> data = session.createNativeQuery(sql.toString()).list();
-		for (Object[] d : data){
-			String source = (String) d[0];
-			String req = (String)d[1];
+		List<Tuple> data = session.createNativeQuery(sql.toString(), Tuple.class).list();
+		for (Tuple d : data){
+			String source = (String) d.get(0);
+			String req = (String)d.get(1);
 			
 			List<String> requires = results.get(source);
 			if (requires == null){

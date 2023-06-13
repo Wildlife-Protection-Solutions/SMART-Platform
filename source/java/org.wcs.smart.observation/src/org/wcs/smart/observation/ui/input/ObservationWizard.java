@@ -492,29 +492,40 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					g.getObservations().removeAll(deletedObservations);
 				}
 				for (WaypointObservation wo : deletedObservations){
-					if (wo.getUuid() != null) session.delete(wo);
+					if (wo.getUuid() != null) session.remove(wo);
 				}
 				for (ObservationAttachment a : deletedAttachments) {
-					session.delete(a);
+					session.remove(a);
 				}
-				
-				session.saveOrUpdate(wp);
+				//persist any new 
+				for (WaypointObservationGroup g : wp.getObservationGroups()) {
+					if (g.getUuid() == null) session.persist(g);
+					for(WaypointObservation wo : g.getObservations()) {
+						if (wo.getUuid() == null) session.persist(wo);
+						for (ObservationAttachment oa : wo.getAttachments()) {
+							if (oa.getUuid() == null) session.persist(oa);
+						}
+					}
+				}
+
+				//merge updates
+				Waypoint wpupdated = session.merge(wp);
 				session.flush();
 				
+				//remove any empty groups
 				List<WaypointObservationGroup> gdelete = new ArrayList<>();
-				for (WaypointObservationGroup g : wp.getObservationGroups()) {
+				for (WaypointObservationGroup g : wpupdated.getObservationGroups()) {
 					if (g.getObservations().isEmpty()) {
 						gdelete.add(g);
 					}
 				}
-				wp.getObservationGroups().removeAll(gdelete);
+				wpupdated.getObservationGroups().removeAll(gdelete);
 				
-				session.saveOrUpdate(wp);
-				
-				for (WaypointObservation wo : wp.getAllObservations()) {
+				//update observer
+				for (WaypointObservation wo : wpupdated.getAllObservations()) {
 					wo.setObserver(observer);
 				}
-				session.flush();
+				
 				//commit changes
 				session.getTransaction().commit();
 				this.deletedObservations.clear();

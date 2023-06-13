@@ -172,7 +172,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			link.setLastObservationCnt(-1);
 			link.setGroupStartTime(null);
 			link.setWaypointLinks(new ArrayList<>());
-			session.save(link);
+			session.persist(link);
 		}
 				
 		CtPatrolLink link = new CtPatrolLink();
@@ -187,7 +187,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			link.getWaypointLinks().add(l);
 		}
 		newPatrolLink.getWaypointLinks().clear();
-		session.save(link);
+		session.persist(link);
 	}
 	
 	private Patrol createNewPatrol(UUID ctUuid, CtPatrolLink patrol) throws Exception{
@@ -225,7 +225,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			link.setLastObservationCnt(-1);
 			link.setGroupStartTime(null);
 			link.setWaypointLinks(new ArrayList<>());
-			session.save(link);
+			session.persist(link);
 		}
 		
 		CtPatrolLink link = new CtPatrolLink();
@@ -240,7 +240,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			link.getWaypointLinks().add(l);
 		}
 		patrol.getWaypointLinks().clear();
-		session.save(link);
+		session.persist(link);
 		
 		return newPatrol;
 	}

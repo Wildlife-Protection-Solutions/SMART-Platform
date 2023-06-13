@@ -24,17 +24,13 @@ package org.wcs.smart.ca.datamodel;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyIconItem;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.icon.Icon;
+
+import jakarta.persistence.MappedSuperclass;
 
 /**
  * A Conservation Area data model object.  This represents

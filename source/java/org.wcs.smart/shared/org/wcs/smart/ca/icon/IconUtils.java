@@ -56,10 +56,10 @@ public enum IconUtils {
 		if (mappingString == null || mappingString.trim().length() == 0) return;
 		
 		PreparedStatement pscat = c.prepareStatement("UPDATE smart.dm_category SET icon_uuid = ? WHERE hkey = ? and ca_uuid = ?"); //$NON-NLS-1$
-		PreparedStatement psatt = c.prepareStatement("UPDATE smart.dm_attribute SET icon_uuid = ? WHERE keyid = ? and ca_uuid = ?"); //$NON-NLS-1$
+		PreparedStatement psatt = c.prepareStatement("UPDATE smart.dm_attribute SET icon_uuid = ? WHERE keyId = ? and ca_uuid = ?"); //$NON-NLS-1$
 		
-		PreparedStatement psattlist = c.prepareStatement("UPDATE smart.dm_attribute_list SET icon_uuid = ? WHERE keyid = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyid = ? and ca_uuid = ?)"); //$NON-NLS-1$
-		PreparedStatement psatttree = c.prepareStatement("UPDATE smart.dm_attribute_tree SET icon_uuid = ? WHERE hkey = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyid = ? and ca_uuid = ?)"); //$NON-NLS-1$
+		PreparedStatement psattlist = c.prepareStatement("UPDATE smart.dm_attribute_list SET icon_uuid = ? WHERE keyId = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyId = ? and ca_uuid = ?)"); //$NON-NLS-1$
+		PreparedStatement psatttree = c.prepareStatement("UPDATE smart.dm_attribute_tree SET icon_uuid = ? WHERE hkey = ? and attribute_uuid in (select uuid from smart.dm_attribute where keyId = ? and ca_uuid = ?)"); //$NON-NLS-1$
 
 		
 		String[] mappings = mappingString.split(","); //$NON-NLS-1$

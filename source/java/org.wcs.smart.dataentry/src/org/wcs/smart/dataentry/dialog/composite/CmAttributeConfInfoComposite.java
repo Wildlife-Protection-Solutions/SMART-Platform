@@ -199,7 +199,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 			resetToDefaultConfig(cmNode, config);
 		}
 		if (config.getUuid() != null) {
-			dialog.getSession().delete(config);
+			dialog.getSession().remove(config);
 		}
 		if (!deletedConfigs.contains(config)) deletedConfigs.add(config);
 		addedConfigs.remove(config);

@@ -187,7 +187,7 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 				value.setAttributeValue(v);
 			}else {
 				p.getCustomAttributes().remove(value);
-				if (!isnew) session.delete(value);
+				if (!isnew) session.remove(value);
 			}
 		}
 		return true;

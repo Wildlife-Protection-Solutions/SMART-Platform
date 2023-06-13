@@ -5,5 +5,8 @@
 // Generated on: 2017.12.21 at 10:59:43 AM PST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.example.org/assetconfiguration", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://www.example.org/assetconfiguration", elementFormDefault = XmlNsForm.QUALIFIED)
 package org.wcs.smart.asset.data.inout.xml;
+
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

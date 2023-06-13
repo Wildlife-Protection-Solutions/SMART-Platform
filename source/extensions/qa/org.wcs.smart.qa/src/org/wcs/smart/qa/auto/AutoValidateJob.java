@@ -94,7 +94,7 @@ public class AutoValidateJob extends Job{
 				Collection<QaError> errors = engine.validate(session, progress.setWorkRemaining(100).split(1));
 				session.beginTransaction();
 				for (QaError error : errors){
-					session.save(error);
+					session.persist(error);
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){

@@ -18,7 +18,7 @@
 		<property name="c3p0.idle_test_period">3000</property>
 		
 		<!-- SQL dialect -->
-		<property name="dialect">org.hibernate.dialect.DerbyTenSevenDialect</property>
+		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>
 
 		<!-- Echo all executed SQL to stdout -->
 		<property name="show_sql">false</property> 

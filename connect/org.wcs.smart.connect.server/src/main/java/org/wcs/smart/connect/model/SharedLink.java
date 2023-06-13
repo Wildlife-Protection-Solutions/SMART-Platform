@@ -25,16 +25,16 @@ package org.wcs.smart.connect.model;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * An Shared Link entity
@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @Author Jeff
  */
 @Entity
-@Table(name = "connect.shared_links")
+@Table(name = "shared_links", schema="connect")
 public class SharedLink extends ConnectUuidItem{
 	
 	private UUID ownerUuid;

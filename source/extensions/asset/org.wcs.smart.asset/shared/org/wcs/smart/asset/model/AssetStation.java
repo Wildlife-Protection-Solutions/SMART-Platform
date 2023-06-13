@@ -25,20 +25,20 @@ package org.wcs.smart.asset.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset.Status;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Model class for asset station. An asset station represents a location
@@ -49,7 +49,7 @@ import org.wcs.smart.ca.UuidItem;
  * @author egouge
  */
 @Entity
-@Table(name="smart.asset_station")
+@Table(name="asset_station", schema="smart")
 public class AssetStation extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
@@ -251,9 +251,9 @@ public class AssetStation extends UuidItem {
 			return;
 		}
 		LocalDateTime now = LocalDateTime.now();
-		String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE c.station = :station and d.startDate <= :now1 and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
+		String query = "SELECT count(*) FROM AssetDeployment d join d.stationLocation c WHERE c.station = :station and d.startDate <= :now1 and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
 
-		Long activeDeployments = (Long) session.createQuery(query)
+		Long activeDeployments = session.createQuery(query, Long.class)
 				.setParameter("now1",  now) //$NON-NLS-1$
 				.setParameter("now2",  now) //$NON-NLS-1$
 				.setParameter("station",  this) //$NON-NLS-1$
@@ -275,7 +275,7 @@ public class AssetStation extends UuidItem {
 	public List<AssetDeployment> getActiveDeployments(Session session) {
 		LocalDateTime now = LocalDateTime.now();
 		
-		String query = "SELECT d FROM AssetDeployment d join d.id.stationLocation c WHERE c.station = :station and d.startDate <= :now and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
+		String query = "SELECT d FROM AssetDeployment d join d.stationLocation c WHERE c.station = :station and d.startDate <= :now and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
 		List<AssetDeployment> ad = session.createQuery(query, AssetDeployment.class)
 				.setParameter("station",  this) //$NON-NLS-1$
 				.setParameter("now",  now) //$NON-NLS-1$

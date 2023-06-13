@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.asset.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Model class of asset module settings.  Provides a key value pair storage
@@ -37,8 +37,8 @@ import org.wcs.smart.ca.UuidItem;
  * 
  * @author egouge
  */
-@Table
-@Entity(name="smart.asset_module_settings")
+@Table(name="asset_module_settings", schema="smart")
+@Entity
 public class AssetModuleSettings extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;

@@ -61,67 +61,67 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 	}
 	
 	private void deleteSignatures(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from SignatureType where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from SignatureType where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteCaProperties(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from ConservationAreaProperty where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from ConservationAreaProperty where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteAgencyRanks(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Agency where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Agency where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteStations(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Station where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Station where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 
 	private void deleteEmployeeTeams(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from EmployeeTeamMember where id.team in (FROM EmployeeTeam WHERE conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from EmployeeTeamMember where id.team in (FROM EmployeeTeam WHERE conservationArea = :ca)") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from EmployeeTeam where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from EmployeeTeam where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteEmployees(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Employee where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Employee where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteDataModel(ConservationArea ca, Session session) throws Exception{	
-		Query<?> q = session.createQuery("delete from Category where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Category where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 
-		q = session.createQuery("delete from Attribute where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();	
+		session.createMutationQuery("delete from Attribute where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();	
 	}	
 
 	
 	private void deleteIcons(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from Icon where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from Icon where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 		
-		q = session.createQuery("delete from IconSet where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		session.createMutationQuery("delete from IconSet where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 
-//		q = session.createQuery("delete from Attribute where conservationArea = :ca"); //$NON-NLS-1$
-//		q.setParameter("ca", ca); //$NON-NLS-1$
+//		q = session.createQuery("delete from Attribute where conservationArea = :ca") //$NON-NLS-1$
+//		q.setParameter("ca", ca) //$NON-NLS-1$
 //		q.executeUpdate();	
 	}	
 }

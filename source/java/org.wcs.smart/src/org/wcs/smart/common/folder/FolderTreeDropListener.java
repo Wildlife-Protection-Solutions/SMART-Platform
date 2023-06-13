@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.IFolder;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.SaveObjectsJob;
 import org.wcs.smart.internal.Messages;
 
@@ -150,7 +151,11 @@ public abstract class FolderTreeDropListener extends ViewerDropAdapter {
 
 	private void saveChangedFolders(Collection<IFolder> changedFolders) {
 		changedFolders.remove(NoneFolder.INSTANCE);
-		Job j = new SaveObjectsJob(Messages.FolderTreeDropListener_SaveJob_Title, changedFolders.toArray());
+		Collection<UuidItem> items = new ArrayList<UuidItem>();
+		changedFolders.forEach(c->{
+			if (c instanceof UuidItem) items.add((UuidItem) c);
+		});
+		Job j = new SaveObjectsJob(Messages.FolderTreeDropListener_SaveJob_Title, items.toArray(new UuidItem[items.size()]));
 		j.schedule();
 		try {
 			j.join();

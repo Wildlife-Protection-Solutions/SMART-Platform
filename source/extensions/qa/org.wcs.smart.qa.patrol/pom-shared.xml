@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.core.qa.patrol</artifactId>
 	<name>SMART Quality Assurance Module - Patrol Support</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>

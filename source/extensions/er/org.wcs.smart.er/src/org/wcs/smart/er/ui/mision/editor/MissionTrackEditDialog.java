@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -75,7 +74,7 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				this.missionDay = (MissionDay) session.load(MissionDay.class, missionDay.getUuid());
+				this.missionDay = (MissionDay) session.getReference(MissionDay.class, missionDay.getUuid());
 	
 				String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title,
 						missionDay.getMission().getId(), 
@@ -143,16 +142,16 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 			try {
 				for (MissionTrack mt : cmp.getTracksToDelete()){
 					if (mt.getUuid() != null){
-						Query<?> q = session.createQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt"); //$NON-NLS-1$
-						q.setParameter("mt", mt); //$NON-NLS-1$
-						q.executeUpdate();
+						session.createMutationQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt") //$NON-NLS-1$
+							.setParameter("mt", mt) //$NON-NLS-1$
+							.executeUpdate();
 					
 						mt.setMissionDay(null);
-						session.delete(mt);
+						session.remove(mt);
 					}
 				}
 				
-				session.saveOrUpdate(missionDay);
+				session.merge(missionDay);
 				session.getTransaction().commit();
 				cmp.clearTracksToDelete();
 			} catch (Exception ex) {

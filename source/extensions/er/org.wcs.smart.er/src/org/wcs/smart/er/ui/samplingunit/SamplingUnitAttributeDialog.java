@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.samplingunit;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,11 +53,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
-import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -81,7 +79,6 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	
 	private List<SamplingUnitAttribute> attributes;
 	
-	private Session session;
 	
 	public SamplingUnitAttributeDialog(Shell parentShell) {
 		super(parentShell);
@@ -90,50 +87,12 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
-	@Override
-	protected void okPressed() {
-		if (saveChanges()){
-			session.getTransaction().begin();
-		};
-		
-	}
-	
-	private boolean saveChanges(){
-		try{
-			//commit changes
-			session.getTransaction().commit();			
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			return true;
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog(Messages.SamplingUnitAttributeDialog_SaveError + " \n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			return false;
-		}
-	}
-	
-	public boolean close(){
-		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), Messages.SamplingUnitAttributeDialog_CloseDialogTitle, Messages.SamplingUnitAttributeDialog_ConfirmExit)){
-				if (!saveChanges()){
-					return false;
-				}
-			}
-		}
-		if (session.getTransaction().isActive()){
-			session.getTransaction().rollback();
-		}
-		session.close();
-		return super.close();
-	}
 	
 	protected Control createDialogArea(Composite parent) {
-		session = HibernateManager.openSession(new AttachmentInterceptor());
-		session.beginTransaction();
-		
+	
 		Composite main = new Composite((Composite)super.createDialogArea(parent), SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -221,24 +180,14 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 		SamplingUnitAttribute ma = new SamplingUnitAttribute();
 		ma.setType(AttributeType.TEXT);
 		ma.setConservationArea(SmartDB.getCurrentConservationArea());
+		ma.setAttributeList(new ArrayList<>());
 		
 		EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(
-				getShell(), ma, attributes, session);
-		if (dialog.open() == OK){
-			attributes.add(ma);
-			saveIcon(ma);
-			session.save(ma);
-			sortAttributes();
-			
-			getButton(IDialogConstants.OK_ID).setEnabled(true);
-		}
+				getShell(), ma, attributes);
+		dialog.open();
+		initData();		
 	}
 
-	private void sortAttributes(){
-		Collections.sort(attributes);
-		lstAttributes.refresh();
-	}
-	
 	private void deleteAttribute(){
 		SamplingUnitAttribute ma = (SamplingUnitAttribute)((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma == null){
@@ -249,13 +198,22 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 			//do not delete
 			return;
 		}
-		try{
+		try(Session session = HibernateManager.openSession()){
 			if (DeleteManager.canDelete(ma, session)){
-				attributes.remove(ma);
-				session.delete(ma);
-				session.flush();
-				sortAttributes();
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				session.beginTransaction();
+				try {
+					session.remove(ma);
+					session.getTransaction().commit();
+				}catch(Exception ex){
+					session.getTransaction().rollback();
+					throw ex;
+				}
+				
+				attributes = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, 
+						"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+				Collections.sort(attributes);
+				lstAttributes.setInput(attributes);
+
 			}
 		}catch (Exception ex){
 			MessageDialog.openError(getShell(), Messages.SamplingUnitAttributeDialog_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitAttributeDialog_DeleteError, new Object[]{ma.getName()}) + "\n" + ex.getMessage()); //$NON-NLS-1$
@@ -265,20 +223,12 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	private void editAttribute(){
 		SamplingUnitAttribute ma = (SamplingUnitAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma != null){
-			EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(getShell(), ma, attributes, session);
+			EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(getShell(), ma, attributes);
 			dialog.open();
-			saveIcon(ma);
-			((NamedIconItemLabelProvider)lstAttributes.getLabelProvider()).clearCachedImages();
-			getButton(IDialogConstants.OK_ID).setEnabled(true);
-			lstAttributes.refresh();
+			initData();
 		}
 	}
 	
-	private void saveIcon(SamplingUnitAttribute ma) {
-		if (ma.getIcon() != null && ma.getIcon().getUuid() == null) session.saveOrUpdate(ma.getIcon());
-		if (ma.getAttributeList() != null) ma.getAttributeList().stream().filter(e->e.getIcon() != null && e.getIcon().getUuid() == null).forEach(li->session.saveOrUpdate(li.getIcon()));
-		
-	}
 	
 	private void enableButtons(){
 		boolean isSelected = lstAttributes.getSelection().isEmpty();
@@ -291,20 +241,15 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 	}
 	
 	private void initData(){
-		attributes = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, 
-				"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-		lstAttributes.setInput(attributes);
-		sortAttributes();
-		
-		attributes.forEach(a->{
-			if (a.getIcon() != null) {
-				a.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
-			}
-			for (SamplingUnitAttributeListItem li : a.getAttributeList()) {
-				if (li.getIcon() == null) continue;
-				li.getIcon().getFiles().forEach(r->r.computeFileLocation(session));
-			}
-		});
+		try(Session session = HibernateManager.openSession()){
+			attributes = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, 
+					"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+			Collections.sort(attributes);
+			lstAttributes.setInput(attributes);
+			
+			((NamedIconItemLabelProvider)lstAttributes.getLabelProvider()).clearCachedImages();			
+			lstAttributes.refresh();
+		}
 	}
 	
 	@Override

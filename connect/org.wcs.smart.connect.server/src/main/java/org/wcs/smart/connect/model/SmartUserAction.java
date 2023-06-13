@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.connect.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  * Smart connect user action entity.
@@ -31,7 +31,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name="connect.user_actions")
+@Table(name="user_actions", schema="connect")
 public class SmartUserAction extends AbstractSmartAction{
 
 	private String username;

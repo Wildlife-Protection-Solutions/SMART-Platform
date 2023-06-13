@@ -62,7 +62,7 @@ public class SurveySamplingUnitTables implements IDynamicSmartTables {
 
 		Session s = connection.getSession();
 		for (SurveyDesignProxy sdi : mgr.getSurveyDesignEditorInputs(s, null)){
-			SurveyDesign sd = (SurveyDesign)s.load(SurveyDesign.class, sdi.getUuid());
+			SurveyDesign sd = (SurveyDesign)s.getReference(SurveyDesign.class, sdi.getUuid());
 			
 			//only add valid types
 			Set<SamplingUnit.GeometryType> types = mgr.getSamplingUnitTypes(sd, s);

@@ -41,10 +41,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -93,6 +89,10 @@ import org.wcs.smart.util.SmartUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 /**
  * This class is responsible of maintaining the setting done for a user in the map.
@@ -321,6 +321,7 @@ public class MapSettings {
 		// get map definition selected
 		String jsonMap = this.baseMap.getMapDef();
 		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
+		gsonBuilder.registerTypeAdapter(Color.class, new ColorJsonTypeAdapter());
 		Gson gson = gsonBuilder.create();
 		final MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
 					
@@ -666,7 +667,7 @@ public class MapSettings {
 					currentFiles.remove(f);
 				}
 				
-				s.saveOrUpdate(this.baseMap);
+				s.merge(this.baseMap);
 				s.getTransaction().commit();
 				
 				//need to delete remaining currentFiles

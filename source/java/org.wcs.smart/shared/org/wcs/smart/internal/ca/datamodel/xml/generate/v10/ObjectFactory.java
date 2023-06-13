@@ -8,8 +8,9 @@
 
 package org.wcs.smart.internal.ca.datamodel.xml.generate.v10;
 
-import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
+
+import jakarta.xml.bind.annotation.XmlRegistry;
 
 
 /**

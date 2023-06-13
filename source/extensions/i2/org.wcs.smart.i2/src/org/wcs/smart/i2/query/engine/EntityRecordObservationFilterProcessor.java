@@ -30,13 +30,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -97,7 +98,7 @@ public class EntityRecordObservationFilterProcessor {
 	}
 	
 	private void dispose() {
-		if (dataModelTable != null) s.createNativeQuery("DROP TABLE " + dataModelTable).executeUpdate(); //$NON-NLS-1$
+		if (dataModelTable != null) s.createNativeMutationQuery("DROP TABLE " + dataModelTable).executeUpdate(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -162,7 +163,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(tableColumns);
 			sql.append(")"); //$NON-NLS-1$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 					
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + entityTable); //$NON-NLS-1$
@@ -184,7 +185,7 @@ public class EntityRecordObservationFilterProcessor {
 			logString(sql.toString());
 			if (monitor.isCanceled()) return null;
 			
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			query.setParameterList("cas", caUuids); //$NON-NLS-1$
 			query.setParameterList("profiles", profileUuids); //$NON-NLS-1$
 			query.executeUpdate();
@@ -194,7 +195,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append("CREATE INDEX " + entityTable + "_entity_uuid_idx on " + entityTable + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			if (monitor.isCanceled()) return null;
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			monitor.worked(1);
 			
@@ -229,7 +230,7 @@ public class EntityRecordObservationFilterProcessor {
 						sql.append (")"); //$NON-NLS-1$
 						
 						logString(sql.toString());
-						s.createNativeQuery(sql.toString()).executeUpdate();
+						s.createNativeMutationQuery(sql.toString()).executeUpdate();
 						
 						filterToColumnName.add(new Object[] {filter, columnName});
 						
@@ -297,7 +298,7 @@ public class EntityRecordObservationFilterProcessor {
 				}
 				sql.append(")"); //$NON-NLS-1$
 				logString(sql.toString());
-				s.createNativeQuery(sql.toString()).executeUpdate();	
+				s.createNativeMutationQuery(sql.toString()).executeUpdate();	
 				
 				final StringBuilder deleteSql = new StringBuilder();
 				deleteSql.append("INSERT INTO " + tempTable ); //$NON-NLS-1$
@@ -371,7 +372,7 @@ public class EntityRecordObservationFilterProcessor {
 				deleteSql.deleteCharAt(deleteSql.length() - 1);
 				
 				logString(deleteSql.toString());
-				s.createNativeQuery(deleteSql.toString()).executeUpdate();
+				s.createNativeMutationQuery(deleteSql.toString()).executeUpdate();
 				
 				switchTables(tempTable, entityTable, true, true, s);
 			}
@@ -393,7 +394,7 @@ public class EntityRecordObservationFilterProcessor {
 			sb.append(dataModelTable);
 			sb.append(" (entity_uuid char(16) for bit data, obs_uuid char(16) for bit data )"); //$NON-NLS-1$
 			logString(sb.toString());
-			s.createNativeQuery(sb.toString()).executeUpdate();
+			s.createNativeMutationQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
 			sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -402,7 +403,7 @@ public class EntityRecordObservationFilterProcessor {
 			sb.append(" WHERE e.entity_uuid in (SELECT entity_uuid FROM " + obsTable + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			logString(sb.toString());
-			s.createNativeQuery(sb.toString()).executeUpdate();
+			s.createNativeMutationQuery(sb.toString()).executeUpdate();
 		}
 		
 		String t2 = SqlGenerator.createTempTableName();
@@ -410,7 +411,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(entity_uuid char(16) for bit data, obs_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		if (filter.getAttributeKey() == null){
 			//only a category filter
@@ -428,7 +429,7 @@ public class EntityRecordObservationFilterProcessor {
 			logString(hkey1);
 			logString(hkey2);
 			
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
 			query.setParameter("hkey2", hkey2); //$NON-NLS-1$
 			logString(sql.toString());
@@ -437,20 +438,20 @@ public class EntityRecordObservationFilterProcessor {
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 			sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 			sql.append(" FROM " + dataModelTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid and a.obs_uuid = b.obs_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
-			query = s.createNativeQuery(sql.toString());
+			query = s.createNativeMutationQuery(sql.toString());
 			query.executeUpdate();
 			
 			sql = new StringBuilder();
 			sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			return;
 			
@@ -524,7 +525,7 @@ public class EntityRecordObservationFilterProcessor {
 		default:
 			break;
 		}
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
 		logString(filter.getAttributeKey());
 		
@@ -549,20 +550,20 @@ public class EntityRecordObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + dataModelTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid and a.obs_uuid = b.obs_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	
@@ -573,7 +574,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		if (filter.getAttribute() == SystemAttribute.RECORD_SOURCE) {
 			sql = new StringBuilder();
@@ -585,9 +586,9 @@ public class EntityRecordObservationFilterProcessor {
 			
 			logString(sql.toString());
 			logString(filter.getStringKey());
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
-			query.setParameter("recordKey", filter.getStringKey()); //$NON-NLS-1$
-			query.executeUpdate();
+			s.createNativeMutationQuery(sql.toString())
+				.setParameter("recordKey", filter.getStringKey()) //$NON-NLS-1$
+				.executeUpdate();
 		}else if (filter.getAttribute() == SystemAttribute.RECORD_STATUS) {
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -598,9 +599,9 @@ public class EntityRecordObservationFilterProcessor {
 			
 			logString(sql.toString());
 			logString(filter.getStringKey());
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
-			query.setParameter("statusKey", filter.getStringKey()); //$NON-NLS-1$
-			query.executeUpdate();
+			s.createNativeMutationQuery(sql.toString())
+				.setParameter("statusKey", filter.getStringKey()) //$NON-NLS-1$
+				.executeUpdate();
 		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || 
 				filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED || 
 				filter.getAttribute() == SystemAttribute.RECORD_DATE) {
@@ -623,7 +624,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
 			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
 			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
@@ -650,7 +651,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
 			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
 			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
@@ -664,20 +665,19 @@ public class EntityRecordObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(RecordAttributeFilter filter, String entityType, String tempTable, String columnName) throws Exception{
@@ -686,7 +686,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		
 		if (filter.getAttributeType() == null) {
@@ -720,7 +720,7 @@ public class EntityRecordObservationFilterProcessor {
 			logString(filter.getRecordSourceKey());
 			logString(filter.getKeyValue());
 			
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			if (filter.getRecordSourceKey() != null) {
 				query.setParameter("recordKey", filter.getRecordSourceKey()); //$NON-NLS-1$
 			}
@@ -822,7 +822,7 @@ public class EntityRecordObservationFilterProcessor {
 			logString(filter.getRecordSourceKey());
 			logString(filter.getAttributeKey());
 			
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			if (filter.getRecordSourceKey() != null) {
 				query.setParameter("recordKey", filter.getRecordSourceKey()); //$NON-NLS-1$
 			}
@@ -860,20 +860,20 @@ public class EntityRecordObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + entityType + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.executeUpdate();
 			
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	
@@ -884,9 +884,9 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$ 
 		logString(sql.toString());
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("uuid",  filter.getEntityUuid()); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.setParameter("uuid",  filter.getEntityUuid()) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void addFilterColumn(EntityTypeFilter filter, String obsTable, String tempTable, String columnName){
@@ -897,7 +897,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -908,27 +908,27 @@ public class EntityRecordObservationFilterProcessor {
 				
 		logString(sql.toString());
 		logString(filter.getTypeKey());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("typeKey",  filter.getTypeKey()); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.setParameter("typeKey",  filter.getTypeKey()) //$NON-NLS-1$
+			.executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
@@ -970,7 +970,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		
 		sql = new StringBuilder();
@@ -1027,7 +1027,7 @@ public class EntityRecordObservationFilterProcessor {
 		
 		logString(sql.toString());
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		logString(attribute.getKeyId());
 		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		if (filter.getEntityTypeKey() != null){
@@ -1077,20 +1077,20 @@ public class EntityRecordObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 	}
 	
@@ -1101,7 +1101,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("SELECT uuid FROM smart.area_geometries WHERE ca_uuid = :ca AND keyId = :keyid AND area_type = :type"); //$NON-NLS-1$
@@ -1137,27 +1137,27 @@ public class EntityRecordObservationFilterProcessor {
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(areaUuid));
-		query = s.createNativeQuery(sql.toString());
-		query.setParameter("areauuid", areaUuid); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.setParameter("areauuid", areaUuid) //$NON-NLS-1$
+			.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void logString(String string){
@@ -1168,24 +1168,24 @@ public class EntityRecordObservationFilterProcessor {
 		StringBuilder sql = new StringBuilder();
 		sql.append("DROP TABLE " + obsTable); //$NON-NLS-1$
 		SqlGenerator.logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("RENAME TABLE " + tempTable + " TO " + obsTable); //$NON-NLS-1$ //$NON-NLS-2$
 		SqlGenerator.logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		if (locationIndex){
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + obsTable + "_entity_uuid_idx on " + obsTable + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			SqlGenerator.logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		}
 		if (observationIndex){
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + obsTable + "_entity_uuid_idx on " + obsTable + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			SqlGenerator.logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		}
 	}
 	
