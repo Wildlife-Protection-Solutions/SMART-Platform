@@ -58,7 +58,8 @@ public class WorkItem extends ConnectUuidItem {
 		DOWN_SYNC,
 		UP_DATAQUEUE,
 		UP_CTPACKAGE,
-		UP_NAVIGATION;
+		UP_NAVIGATION,
+		RECOVERY_CA
 	}
 	
 	public enum Status{
@@ -76,6 +77,8 @@ public class WorkItem extends ConnectUuidItem {
 	private Status status;
 	private String message;
 	private String locale;
+	private int percentComplete;;
+	private String data;
 	
 	public WorkItem(){
 		
@@ -164,6 +167,23 @@ public class WorkItem extends ConnectUuidItem {
 		this.message = message;
 	}
 	
+	
+	@Column(name = "percent_complete")
+	public int getPercentComplete() {
+		return this.percentComplete;
+	}
+	public void setPercentComplete(int percentComplete) {
+		this.percentComplete = percentComplete;
+	}
+	
+	@Column(name="data")
+	public String getData(){
+		return this.data;
+	}
+	public void setData(String data){
+		this.data = data;
+	}
+
 	@Transient
 	public String getStatusURL(HttpServletRequest request) throws UnsupportedEncodingException{
 		return request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
@@ -174,22 +194,4 @@ public class WorkItem extends ConnectUuidItem {
 				+ URLEncoder.encode(getUuid().toString(), ConnectRESTApplication.UTF8);
 	}
 	
-	private int percentComplete;
-	private String statusMessage;
-	
-	@Transient
-	public int getPercentComplete() {
-		return this.percentComplete;
-	}
-	public void setPercentComplete(int percentComplete) {
-		this.percentComplete = percentComplete;
-	}
-	public void setStatusMessage(String statusMessage) {
-		this.statusMessage = statusMessage;
-	}
-	@Transient
-	public String getStatusMessage() {
-		return this.statusMessage;
-	}
 }
-

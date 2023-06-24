@@ -42,6 +42,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
+import org.wcs.smart.connect.model.ConnectServerOption.ConnectionOption;
 
 /**
  * Composite for inputting server options.
@@ -60,6 +61,7 @@ public class ConnectionOptionsPanel implements IServerOptionsPanel  {
 	
 	private static final String CD_KEY = "cd"; //$NON-NLS-1$
 	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
+	private static final String OP_KEY = "coption"; //$NON-NLS-1$
 	
 	private HashMap<ConnectServerOption.ConnectionOption, Text> optionCntrls;
 	private Collection<ModifyListener> listeners;
@@ -102,9 +104,14 @@ public class ConnectionOptionsPanel implements IServerOptionsPanel  {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				Text txt = (Text)e.getSource();
+				ConnectServerOption.ConnectionOption op = (ConnectionOption) txt.getData(OP_KEY);
 				try{
 					Long value = Long.parseLong( txt.getText());
-					if (value < 0) throw new Exception();
+					if (op == ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD) {
+						if (value < -1) throw new Exception();
+					}else {
+						if (value < 0) throw new Exception();
+					}
 					txt.setData(VALID_KEY, true);
 					((ControlDecoration)txt.getData(CD_KEY)).hide();
 				}catch (Exception ex){
@@ -126,6 +133,7 @@ public class ConnectionOptionsPanel implements IServerOptionsPanel  {
 			txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)txt.getLayoutData()).widthHint = 60;
 			txt.setData(VALID_KEY, false);
+			txt.setData(OP_KEY, op);
 			
 			if (!isEditable){
 				txt.setEnabled(false);

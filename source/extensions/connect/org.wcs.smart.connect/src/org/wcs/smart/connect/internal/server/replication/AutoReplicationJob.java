@@ -174,7 +174,7 @@ public class AutoReplicationJob extends Job {
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_CaDoesNotExistError);
 			return Status.OK_STATUS;
 		}
-		if (!caInfo.getVersion().equals(serverStatus.getVersion())){
+		if (caInfo.getVersion() == null || !caInfo.getVersion().equals(serverStatus.getVersion())){
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_VersionsDoNoMatchError);
 			return Status.OK_STATUS;
 		}

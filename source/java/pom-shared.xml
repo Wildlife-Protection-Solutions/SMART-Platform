@@ -32,6 +32,8 @@
 		
 		<commons-codec.version>1.14</commons-codec.version>
 		<commons-io.version>2.9.0</commons-io.version>
+		<commons-compress.version>1.21</commons-compress.version>
+
 		<java-string-similarity.version>2.0.0</java-string-similarity.version>
 		<jackson-databind.version>2.13.4.1</jackson-databind.version>
 		<jackson-annotations.version>2.13.2</jackson-annotations.version>

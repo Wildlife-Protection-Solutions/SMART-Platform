@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -78,6 +79,31 @@ public class ZipUtilCommon {
 		} catch (IOException e) {
 			throw new Exception("Unzip Failed:" + e.getLocalizedMessage(), e); //$NON-NLS-1$
 		}
+
+	}
+    
+    /**
+     * @param zipFile the zip file
+     * @param zipEntryFile the name of the entry in the zip file
+     * @return null if entry not found, otherwise the bytes of the entry
+     * @throws Exception  
+     */
+    public static byte[] readFileFromZip(Path zipFile, Path zipEntryFile) throws IOException{			
+		try(ZipFile archiveFile = new ZipFile(zipFile.toAbsolutePath().toFile())) {
+			
+			Enumeration<? extends ZipEntry> entries = archiveFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry zipEntry = entries.nextElement();
+				String name = zipEntry.getName();
+				
+				if (Paths.get(name).equals(zipEntryFile)) {
+					try (InputStream in = archiveFile.getInputStream(zipEntry)) {
+						return in.readAllBytes();
+					}
+				}				
+			}
+		}
+		return null;
 
 	}
 	

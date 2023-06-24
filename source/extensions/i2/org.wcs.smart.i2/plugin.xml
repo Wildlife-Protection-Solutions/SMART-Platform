@@ -2530,12 +2530,12 @@
    </extension>
    <extension
          point="org.wcs.smart.caLogin">
-      <loginHandler
-            clazz="org.wcs.smart.i2.CleanUpJob">
-      </loginHandler>
       <windowHandler
             class="org.wcs.smart.i2.MenuHandler">
       </windowHandler>
+      <postWindowOpen
+            class="org.wcs.smart.i2.CleanUpJob">
+      </postWindowOpen>
    </extension>
    <extension
          point="org.wcs.smart.caFilestoreDir">

@@ -46,6 +46,17 @@ public class WorkItemStatus {
 	private long expectedSize;
 	private String message;
 
+	private int percentComplete;
+	
+	@JsonProperty("percent_complete")
+	public int getPercentComplete() {
+		return this.percentComplete;
+	}
+	
+	public void setPercentComplete(int percentComplete) {
+		this.percentComplete = percentComplete;
+	}
+	
 	@JsonProperty("uuid")
 	public UUID getUuid(){
 		return this.uuid;

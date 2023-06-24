@@ -175,6 +175,10 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 					}
 	
 					@Override
+					protected void onUploadCancelled() {
+					}
+					
+					@Override
 					protected void onError(String errorMessage) {
 						ConnectPlugIn.log(Messages.ExportCtPackageToConnect_UploadError + errorMessage, null);
 					}
@@ -227,6 +231,11 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 						removeFile();
 					}
 	
+					@Override
+					protected void onUploadCancelled() {
+						removeFile();
+					}
+					
 					@Override
 					protected void onProcessingComplete(WorkItemStatus status) {
 						ok++;

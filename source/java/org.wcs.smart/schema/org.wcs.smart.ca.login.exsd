@@ -20,6 +20,7 @@
          <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="loginHandler" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="windowHandler" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="postWindowOpen"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -51,11 +52,11 @@
    <element name="loginHandler">
       <annotation>
          <documentation>
-            Use this element to run code when a user logs into a Conservation Area.  This will be run UI thread after the user has been validated and set.
+            Use this element to run code when a user logs into a Conservation Area.  This will be run UI thread after the user has been validated and set. This is run before the workbench window is displayed.
          </documentation>
       </annotation>
       <complexType>
-         <attribute name="clazz" type="string" use="required">
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
@@ -75,7 +76,27 @@
          </documentation>
       </annotation>
       <complexType>
-         <attribute name="class" type="string">
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.ILoginHandler"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="postWindowOpen">
+      <annotation>
+         <documentation>
+            Use this element to run code after the user logs in and after the window is open an initialized. This is where you should run any cleanup jobs etc.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   

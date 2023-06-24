@@ -159,11 +159,7 @@ public class ChangeLogPackager {
 		}
 		
 		//must be admin user otherwise you might not have permission to access tables
-		SmartDB.DbUser currentUser = SmartDB.DbUser.ADMIN;
-		if (SmartDB.getCurrentEmployee() != null){
-			currentUser = SmartDB.getCurrentUser();
-		}
-		Session s = HibernateManager.lockDatabase(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+		Session s = HibernateManager.lockDatabase();
 		try{
 			s.beginTransaction();
 			s.doWork(new Work(){
@@ -205,7 +201,7 @@ public class ChangeLogPackager {
 				ConnectPlugIn.log(ex.getMessage(), ex);
 			}
 			
-			HibernateManager.unlockDatabase(currentUser.getUserName(), currentUser.getPassword());
+			HibernateManager.unlockDatabase();
 		}
 		
 	}

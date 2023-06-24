@@ -156,7 +156,10 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 					protected void onUploadComplete(WorkItemStatus status) {
 						delete();
 					}
-
+					@Override
+					protected void onUploadCancelled() {
+						delete();
+					}
 					@Override
 					protected void onProcessingComplete(WorkItemStatus status) {
 						ok++;

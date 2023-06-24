@@ -99,14 +99,35 @@ public class PostgresqlCaLoader {
 		this.item = item;
 	}
 	
+	private void updatePercentComplete(int percent, String message) {
+		//open another session for updating work item 
+		
+		try(Session session = this.session.getSessionFactory().openSession()){
+			session.beginTransaction();
+			WorkItem toUpdate = session.getReference(this.item);
+			toUpdate.setPercentComplete(percent);
+			if (message != null) toUpdate.setMessage(message);
+			session.getTransaction().commit();			
+		}
+	}
+	
 	public void importData(Path zipFile, ConservationAreaInfo ca) throws Exception {
+		
+		
 		Path tempDir = ZipUtil.createTemporaryDirectory();
 		try{
+			updatePercentComplete(0, "Extracting uploaded data");
 			ZipUtilCommon.unzipFolder(zipFile, tempDir);
-			processDatabaseFiles(tempDir);
+			
+			updatePercentComplete(20, "Importing into database");
+			processDatabaseFiles(tempDir, 20, 40);
 			inportPlugInVersionFile(tempDir, ca);
 			validatePluginVersions(ca);
-			processFilestore(tempDir, ca);
+			
+			updatePercentComplete(60, "Importing files");
+			processFilestore(tempDir, ca, 60, 39);
+			
+			updatePercentComplete(99, "Processing Complete");
 		}finally{
 			try{
 				FileUtils.forceDelete(tempDir.toAbsolutePath().normalize().toFile());
@@ -116,7 +137,7 @@ public class PostgresqlCaLoader {
 		}
 	}
 	
-	private void processFilestore(Path dir, ConservationAreaInfo ca) throws Exception{
+	private void processFilestore(Path dir, ConservationAreaInfo ca, int progressStart, int progressSize) throws Exception{
 		Path toDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
 		if (!Files.exists(toDir)){
 			Files.createDirectories(toDir);
@@ -124,17 +145,23 @@ public class PostgresqlCaLoader {
 		
 		Path filestore = dir.resolve("filestore"); //$NON-NLS-1$
 		
+		List<Path> files = null;
 		try(Stream<Path> stream = Files.list(filestore)){
-			List<Path> files = stream.collect(Collectors.toList());
-			for (Path f : files) {
-				if (Files.isDirectory(f)) {
-					Path to = toDir.resolve(f.getFileName().toString());
-					FileUtils.copyDirectory(f.toAbsolutePath().normalize().toFile(), to.toAbsolutePath().normalize().toFile());
-				}else {
-					Files.copy(f, toDir.resolve(f.getFileName().toString()));
-				}
+			files = stream.collect(Collectors.toList());
+		}
+		
+		int cnt = 0;
+		for (Path f : files) {
+			updatePercentComplete( (int)Math.round(progressSize * (cnt / (double)files.size()) + progressStart), null);
+			cnt ++;
+			if (Files.isDirectory(f)) {
+				Path to = toDir.resolve(f.getFileName().toString());
+				FileUtils.copyDirectory(f.toAbsolutePath().normalize().toFile(), to.toAbsolutePath().normalize().toFile());
+			}else {
+				Files.copy(f, toDir.resolve(f.getFileName().toString()));
 			}
 		}
+		
 	}
 	
 	/**
@@ -146,7 +173,7 @@ public class PostgresqlCaLoader {
 	 * @param monitor progress monitor
 	 * @throws Exception
 	 */
-	private void processDatabaseFiles(Path dir) throws Exception{
+	private void processDatabaseFiles(Path dir, int progressStart, int progressSize) throws Exception{
 		HashMap<String, List<TableInfo>> tables = scanTables(dir);
 
 		//for each table check to ensure the table exists in the database
@@ -165,10 +192,20 @@ public class PostgresqlCaLoader {
 		}
 		Queue<String> tablesToProcess = new LinkedList<String>();
 		tablesToProcess.addAll(tables.keySet());
-
+		int totalTables = tablesToProcess.size();
+		
 		List<String> toIngore = Arrays.asList(TABLES_TO_IGNORE);
 		String last = "";  		//used as a check here so we don't go on forever //$NON-NLS-1$
+		int lastprogress = 0;
+		
 		while(tablesToProcess.size() > 0){
+			
+			int progress = (int)Math.round((  (totalTables - tablesToProcess.size()) / (double)totalTables) * progressSize + progressStart);
+			if (lastprogress != progress) {
+				this.updatePercentComplete(progress, null);
+				lastprogress = progress;
+			}
+			
 			String tableName = tablesToProcess.poll();
 			if (last.equals(tableName)){
 				throw new Exception(Messages.getString("PostgresqlCaLoader.CircularDep", item.getLocale())); //$NON-NLS-1$

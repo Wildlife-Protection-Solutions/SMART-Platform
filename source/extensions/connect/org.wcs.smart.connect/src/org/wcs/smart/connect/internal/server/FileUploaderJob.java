@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -71,57 +72,74 @@ public abstract class FileUploaderJob extends Job {
 	 * @throws Exception
 	 */
 	protected void uploadFile(IProgressMonitor monitor) throws Exception{
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_TaskName, 4);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_TaskName, 70);
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
+		
 		try{
-			if (checkServerStatus(serverStatus, progress.split(1))){
-				return ;
-			}
+			if (checkServerStatus(serverStatus, progress.split(10))) return;
+			
 			int cnt = 0;			
 			long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
+			long initWaitTime = waitTime;
 			
-			progress.subTask(Messages.FileUploaderJob_subTaskName);
+			//upload file
+			progress.setTaskName(Messages.FileUploaderJob_subTaskName);
 			
-			progress.setWorkRemaining(4);
-			while(cnt < ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())){
+			int maxRetry = ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer());
+			
+			SubMonitor uploadProgress = progress.split(30);
+			uploadProgress.beginTask("Uploading File: 0%",  100);
+			while(maxRetry == -1 || cnt < maxRetry){
+				progress.setTaskName(MessageFormat.format("uploading files (attempt {0})", (cnt+1)));
+
 				//upload file
 				try{
 					cnt++;
 					if (serverStatus != null) {
-						connect.uploadFile(url, file, 
-							serverStatus.getCurrentSize(),
-							progress.split(3));
+						connect.uploadFile(url, file, serverStatus.getCurrentSize(), uploadProgress);
 					}
-				}catch (Throwable ex){
-					if (ex instanceof InternalServerErrorException){
-						try{
-							InternalServerErrorException isee = (InternalServerErrorException)ex;
-							String info  = isee.getResponse().readEntity(String.class);
-							ConnectPlugIn.log(info, null);
-						}catch (Exception ex2){	
-						}
-					}
-					ConnectPlugIn.log(ex.getMessage(), ex);
-				}
-				try {
-					serverStatus = null;
-					serverStatus = connect.getWorkItemStatus(url);
-					if (checkServerStatus(serverStatus, progress.split(2))){
-						return ;
-					}
-				}catch(ProcessingTimeoutException ex) {
-					throw ex;
+				}catch (OperationCanceledException ex) {
+					if (doUploadCancelled()) return;
+				}catch (InternalServerErrorException ex) {
+					String info  = ex.getResponse().readEntity(String.class);
+					ConnectPlugIn.log(info, ex);
 				}catch (Throwable ex){
 					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
 				
-				Thread.sleep(waitTime);
-				progress.checkCanceled();
+				if (cnt % 10 == 0 && waitTime < 1_800_000 ) {
+					//add increment to wait time to max 30 minutes;
+					waitTime = waitTime + initWaitTime;
+				}
+				try {
+					uploadProgress.checkCanceled();
+					serverStatus = null;
+					serverStatus = connect.getWorkItemStatus(url);
+					if (serverStatus.getStatus() != Status.UPLOADING) {
+						break;
+					}
+					Thread.sleep(waitTime);
+				}catch (OperationCanceledException ex) {
+					if (doUploadCancelled()) return;
+				}
 			}
 			
-			//if we are here we have tried max_retry times and the file has still not been uploaded
-			throw new Exception(MessageFormat.format(Messages.FileUploaderJob_ToManyTried, ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())));
+			if (serverStatus == null || serverStatus.getStatus() == Status.UPLOADING) {
+				//if we are here we have tried max_retry times and the file has still not been uploaded
+				throw new Exception(MessageFormat.format(Messages.FileUploaderJob_ToManyTried, ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())));
+			}
+			
+			
+			//wait for processing to finish
+			//really we shouldn't allow cancelling here but that isn't supported by the
+			//api at this time so lets catch and ignore cancel requests
+			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=155479
+			
+			progress.setWorkRemaining(30);
+			if (!checkServerStatus(serverStatus, progress.split(30))){
+				throw new Exception("Unknown error occurred");
+			}
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
 			onError(serverStatus.getMessage());
@@ -129,6 +147,29 @@ public abstract class FileUploaderJob extends Job {
 		}
 	}
 	
+	/**
+	 * Can only cancel if the server status is uploading otherwise
+	 * can't cancel job.
+	 * 
+	 * @return
+	 * @throws  
+	 */
+	private boolean doUploadCancelled()  {
+		boolean canCancel = false;
+		try {
+			WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
+			if (serverStatus.getStatus() == Status.UPLOADING) {
+				canCancel = true;
+			}
+		}catch (Exception ex) {
+			ConnectPlugIn.log(ex.getMessage(), ex);
+		}
+		if (!canCancel) return false;
+		
+		//cancel
+		this.onUploadCancelled();
+		return true;
+	}
 	
 	/*
 	 * delete the local ca upload file
@@ -153,9 +194,9 @@ public abstract class FileUploaderJob extends Job {
 	 */
 	protected boolean checkServerStatus(WorkItemStatus serverStatus,
 			IProgressMonitor monitor) throws ProcessingTimeoutException, Exception{
+		
 		if (serverStatus == null) return false;
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_StatusCheckSubTaskName, 1);
-	
+		
 		if (serverStatus.getStatus() == Status.COMPLETE){
 			onUploadComplete(serverStatus);
 			onProcessingComplete(serverStatus);
@@ -167,11 +208,9 @@ public abstract class FileUploaderJob extends Job {
 			onUploadComplete(serverStatus);
 			
 			//upload was successful but we need to wait for processing
-			if (!waitProcessing(progress)){
-				//we waited 5 minutes and we do not know how to proceed
-				throw new ProcessingTimeoutException(
-						MessageFormat.format(
-								Messages.FileUploaderJob_ToLong, ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) / (1000 *60.0) ));
+			if (!waitProcessing(monitor)){
+				//we waited specified timeout and we do not know how to proceed
+				onProcessingTimeOut();
 			}
 			return true;
 			
@@ -187,30 +226,52 @@ public abstract class FileUploaderJob extends Job {
 	/*
 	 * Poll status waiting for processing to complete.
 	 */
-	protected boolean waitProcessing(IProgressMonitor monitor) throws Exception{
+	protected boolean waitProcessing(IProgressMonitor pmonitor) throws Exception{
 		
-		//wait for processing 
-		monitor.subTask(Messages.FileUploaderJob_Waiting);
+		//wait for processing
+		SubMonitor monitor = SubMonitor.convert(pmonitor);
+		monitor.beginTask(Messages.FileUploaderJob_Waiting, 100);
 		
-		Long startTime = System.nanoTime();
-		Long currentTime = System.nanoTime();
-		long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
-		while( (currentTime - startTime)  < ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l){
-			Thread.sleep(waitTime);
-			try{
-				WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
-			
-				if(serverStatus.getStatus() == Status.COMPLETE){
-					onProcessingComplete(serverStatus);
-					return true;
-				}else if (serverStatus.getStatus() == Status.ERROR){
-					onError(serverStatus.getMessage());
-					return true;
+		try {
+			Long startTime = System.nanoTime();
+			Long currentTime = System.nanoTime();
+			long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
+			int last = 0;
+			while( (currentTime - startTime)  < ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l){
+				Thread.sleep(waitTime);
+				try{
+					WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
+				
+					if(serverStatus.getStatus() == Status.COMPLETE){
+						monitor.setTaskName("Upload Complete");
+						monitor.worked(100 - last);
+						monitor.done();
+						onProcessingComplete(serverStatus);
+						return true;
+					}else if (serverStatus.getStatus() == Status.ERROR){
+						monitor.setTaskName("Upload Error");
+						monitor.worked(100 - last);
+						monitor.done();
+						onError(serverStatus.getMessage());
+						return true;
+					}
+					monitor.setTaskName(
+							MessageFormat.format("{0} ({1}% - {2})", //$NON-NLS-1$
+							Messages.FileUploaderJob_Waiting,
+							serverStatus.getPercentComplete(),
+							serverStatus.getMessage()));
+					monitor.worked(serverStatus.getPercentComplete() - last);
+					last = serverStatus.getPercentComplete();
+					monitor.checkCanceled();
+				}catch(OperationCanceledException ex) {
+					//do not allow cancelling at this stage in the process
+				}catch (Exception ex){
+					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
-			}catch (Exception ex){
-				ConnectPlugIn.log(ex.getMessage(), ex);
+				currentTime = System.nanoTime();
 			}
-			currentTime = System.nanoTime();
+		}finally {
+			monitor.done();
 		}
 		return false;
 	}
@@ -236,4 +297,23 @@ public abstract class FileUploaderJob extends Job {
 	 * @param status
 	 */
 	protected abstract void onError(String errorMessage);
+	
+	
+	/**
+	 * Called when upload is cancelled by the user
+	 * 
+	 * @param status
+	 */
+	protected abstract void onUploadCancelled();
+	
+	/**
+	 * Called when timeout occurs while waiting for SMART Connect processing.
+	 * But default this throws an excpetion but subclasses can overwrite
+	 * 
+	 */
+	protected void onProcessingTimeOut() throws ProcessingTimeoutException{
+		throw new ProcessingTimeoutException(
+				MessageFormat.format(
+						Messages.FileUploaderJob_ToLong, ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) / (1000 *60.0) ));
+	}
 }

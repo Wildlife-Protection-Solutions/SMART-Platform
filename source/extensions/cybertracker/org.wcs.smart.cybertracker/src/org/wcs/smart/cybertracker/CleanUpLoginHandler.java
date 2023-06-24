@@ -44,7 +44,7 @@ public class CleanUpLoginHandler implements ILoginHandler {
 
 	@Override
 	public void onLogin() throws Exception {
-		Job j = new Job("clean up cybertracker database data") { //$NON-NLS-1$
+		Job j = new Job("clean up cybertracker data") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				cleanLinksTable();

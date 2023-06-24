@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -41,6 +42,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -119,6 +122,7 @@ public class ConservationAreas extends HttpServlet{
 	private static final String DATA_PARAM_CHANGELOG_VALUE = "changelog"; //$NON-NLS-1$
 	private static final String DATA_PARAM_ALL_VALUE = "all"; //$NON-NLS-1$
 	private static final String DATA_PARAM_PACKAGE_VALUE = "package"; //$NON-NLS-1$
+	private static final String DATA_PARAM_RECOVERY_PACKAGE_VALUE = "recoverypackage"; //$NON-NLS-1$
 
 	public static final String PATH = "conservationarea"; //$NON-NLS-1$
 	
@@ -485,10 +489,128 @@ public class ConservationAreas extends HttpServlet{
 				return buildConservationAreaExport(caUuid);
 			}else if (data.equalsIgnoreCase(DATA_PARAM_PACKAGE_VALUE)){
 				return getExportFile(version);
+			}else if (data.equalsIgnoreCase(DATA_PARAM_RECOVERY_PACKAGE_VALUE)){
+				return getExportFile(version);
 			}else{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConservationAreas.InvalidDataParameter", SmartUtils.getRequestLocale(request)), data, DATA_PARAM_ALL_VALUE, DATA_PARAM_CHANGELOG_VALUE));			 //$NON-NLS-1$
 			}
 		}
+	}
+	
+	
+	
+	/**
+	 * <p>Gets a conservation area.<br>
+	 * This function returns different information depending on parameters
+	 * provided:
+	 *  <ul><li>If no parameters are provided it returns a JSON object
+	 * with information about the conservation area.</li>  
+	 * <li>If data, version, and revision
+	 * are provided with a value of "changelog" for data then a zip file is
+	 * returned containing the change log.  In data is provided with a value of 
+	 * "all" then a url is returned that represents the status of the ca download
+	 * package process.</li>
+	 * </ul>
+	 * </p>
+	 * <p>URL: ../server/api/conservationarea/{cauuid}<br>
+	 * Call Type: POST 
+	 * </p>
+	 * 
+	 * @param	caUuid	provided in the URL; This is the CA's UUID you want information about.
+	 */
+	@POST
+    @Path("/{cauuid}/recover")
+	@Operation(description="")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getConservationAreaRecover(@Parameter(description="the Conservation Area UUID") @PathParam("cauuid") String caUuid,
+    		InputStream input) {
+    		
+		UUID cuuid = UUID.fromString(caUuid);
+		
+		Session s = HibernateManager.getSession(context);
+		WorkItem item = null;
+		ConservationAreaInfo info = null;
+		java.nio.file.Path fileInfoPath = null;
+		
+		try {
+			s.beginTransaction();
+			try {		
+				validateRead(cuuid, s);
+					
+				info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, cuuid);
+				if (info == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
+					
+					
+				//create a new download item
+				item = new WorkItem();
+				item.setLocale(request.getLocale());
+				item.setConservationAreaInfo(info);
+				item.setLocalFilename(""); //$NON-NLS-1$
+				item.setMessage(null);
+				item.setStartTime(LocalDateTime.now());
+				item.setStatus(WorkItem.Status.PROCESSING);
+				item.setTotalBytes(-1);
+				item.setType(WorkItem.Type.RECOVERY_CA);
+	
+				s.persist(item);
+				s.flush();
+				
+			
+				//create filename for storing data
+				fileInfoPath = DataStoreManager.INSTANCE
+						.getRootDirectory()
+						.resolve(Uploader.DATASTORE_DIR)
+						.resolve(UuidUtils.uuidToString(item.getUuid()));		
+				Files.createDirectories(fileInfoPath.getParent());
+				 
+				item.setData(DataStoreManager.INSTANCE.getRootDirectory().relativize(fileInfoPath).toString());
+				s.getTransaction().commit();
+					
+			}catch(SmartConnectException ex){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				throw ex;
+			}catch (Exception ex){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				logger.log(Level.SEVERE, "Unable to start download Conservation Area process. " + ex.getMessage(), ex); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaExportError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			}				 
+				
+			try(ZipInputStream zin = new ZipInputStream(input, StandardCharsets.UTF_8)){
+				ZipEntry file = zin.getNextEntry();
+				if (file == null) throw new SmartConnectException(Response.Status.BAD_REQUEST);
+				try(OutputStream out = Files.newOutputStream(fileInfoPath)){
+					zin.transferTo(out);
+				}catch (IOException ex) {
+					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
+				}	
+			}
+				
+			try{
+				//https://localhost:8443/server/api/conservationarea/8f7fbe1b-201a-4ef4-bda8-14f5581e65ce?data=recoverypackage&version=1c88fd74-a7c5-4a67-9666-a7e47c0db508
+				String finishurl = 	request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
+						+ ":" + request.getServerPort()  //$NON-NLS-1$
+						+ request.getContextPath() 
+						+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
+						+ ConservationAreas.PATH + "/" //$NON-NLS-1$
+						+ URLEncoder.encode(info.getUuid().toString(), ConnectRESTApplication.UTF8)
+						+ "?data=" + DATA_PARAM_RECOVERY_PACKAGE_VALUE + "&version=" + item.getUuid().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+							ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
+				executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
+					
+				String url = item.getStatusURL(request);
+				return Response
+						.status(Response.Status.ACCEPTED)
+						.header(HttpHeaders.LOCATION, url)
+						.entity("{\"location\": \"" + url + "\"}").build(); //$NON-NLS-1$ //$NON-NLS-2$
+			}catch (Exception ex){
+				logger.log(Level.SEVERE, "Unable to start download conservation area process. " + ex.getMessage(), ex); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("ConservationAreas.CaExportError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			}
+		 }catch (Exception ex) {
+			logger.log(Level.SEVERE,ex.getMessage(),ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
+				
+		 }
 	}
 	
 	/**
@@ -515,6 +637,8 @@ public class ConservationAreas extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DownloadPackageNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			wkCa = s.get(ConservationArea.class,  item.getConservationAreaInfo().getUuid());
+			if (wkCa == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
+			
 			wkCa.getId();
 			
 			validateRead(item.getConservationAreaInfo().getUuid(), s);
@@ -529,7 +653,8 @@ public class ConservationAreas extends HttpServlet{
 		}
 	
 		if (item.getType() != WorkItem.Type.DOWN_CA &&
-				item.getType() != WorkItem.Type.DOWN_SYNC){
+				item.getType() != WorkItem.Type.DOWN_SYNC &&
+				item.getType() != WorkItem.Type.RECOVERY_CA){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.BadRequest", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		if (item.getStatus() != WorkItem.Status.COMPLETE){
@@ -1089,6 +1214,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setType(Type.UP_CA);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(""); //$NON-NLS-1$
+			up.setPercentComplete(0);
 			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
@@ -1162,6 +1288,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_SYNC);
 			up.setTotalBytes(totalBytes);
+			up.setPercentComplete(0);
 			up.setLocalFilename(""); //$NON-NLS-1$
 			s.persist(up);
 			

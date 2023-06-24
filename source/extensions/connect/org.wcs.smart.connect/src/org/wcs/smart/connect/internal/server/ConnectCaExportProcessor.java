@@ -21,12 +21,10 @@
  */
 package org.wcs.smart.connect.internal.server;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
-import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -53,7 +51,7 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor {
 	 * Removes a collection of data files that we not required for connect.
 	 */
 	@Override
-	public void processExport(Path tempDirectory) {
+	public void processExport(ICaDataExportEngine exportEngine) {
 		
 		try(Session s = HibernateManager.openSession()){
 			for (Class<?> c : classesToRemove){
@@ -63,12 +61,9 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor {
 				String fileName2 = tableName + "." + c.getSimpleName() + ".dat"; //$NON-NLS-1$ //$NON-NLS-2$
 				
 				for (String filename : new String[]{fileName1, fileName2}){
-					Path f = tempDirectory.resolve(ICaDataExportEngine.DATABASE_DIR).resolve(filename);
-					try{
-						Files.deleteIfExists(f);
-					}catch (Exception ex){
-						ConnectPlugIn.log(ex.getMessage(), ex);
-					}
+					Path f = exportEngine.getWorkingLocation().resolve(ICaDataExportEngine.DATABASE_DIR).resolve(filename);
+					exportEngine.excludePath(f);
+					
 				}	
 			}
 		}

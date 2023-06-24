@@ -125,9 +125,9 @@
    </extension>
    <extension
          point="org.wcs.smart.caLogin">
-      <loginHandler
-            clazz="org.wcs.smart.paws.LoginHandler">
-      </loginHandler>
+      <postWindowOpen
+            class="org.wcs.smart.paws.LoginHandler">
+      </postWindowOpen>
    </extension>
    <extension
          point="org.locationtech.udig.catalog.ServiceExtension">

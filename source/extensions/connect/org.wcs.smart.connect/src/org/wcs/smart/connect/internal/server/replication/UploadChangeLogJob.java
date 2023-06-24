@@ -133,11 +133,9 @@ public class UploadChangeLogJob extends FileUploaderJob {
 	@Override
 	protected void onError(String errorMessage) {
 		item.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+		if (errorMessage != null)item.setErrorString(errorMessage);
 		saveHistoryRecord();
 		deleteLocalFile();
-		if (errorMessage != null){
-			item.setErrorString(errorMessage);
-		}
 		
 		super.connect.close();
 	}
@@ -154,6 +152,16 @@ public class UploadChangeLogJob extends FileUploaderJob {
 				throw ex;
 			}
 		}
+	}
+
+	@Override
+	protected void onUploadCancelled() {
+		this.item.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+		this.item.setErrorString("Sync cancelled by user");
+		saveHistoryRecord();
+		deleteLocalFile();
+		
+		super.connect.close();
 	}
 
 }

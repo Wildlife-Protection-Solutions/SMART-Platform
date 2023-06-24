@@ -32,12 +32,12 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartContext;
@@ -70,7 +70,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class LoginHandler implements ILoginHandler {
+public class PostWindowOpenLoginHandler implements ILoginHandler {
 
 	@Override
 	public void onLogin() throws Exception {
@@ -80,11 +80,6 @@ public class LoginHandler implements ILoginHandler {
 			s.beginTransaction();
 			try {
 				//enable replication; we always want to enable replication if logging
-				//into a database; triggers will ensure only correct ca data is recorded in
-				//the log tables
-				DerbyReplicationManager.INSTANCE.enableReplication(s);
-	
-				//get status
 				status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());	
 				s.getTransaction().commit();
 			}catch (Exception ex) {
@@ -93,10 +88,6 @@ public class LoginHandler implements ILoginHandler {
 			}
 		}
 
-		if (status == null){
-			cleanUpFilestore();
-			return;
-		}
 		
 		//process any existing ca upload task
 		//this may effect replication state which is why we disable/enable
@@ -137,7 +128,8 @@ public class LoginHandler implements ILoginHandler {
 	 * or continue process
 	 */
 	private void processCaUploadEvents(ConnectServerStatus status){
-		if (status.getStatus() == ConnectServerStatus.Status.DONE || 
+		if (status.getStatus() == ConnectServerStatus.Status.DONE ||
+			status.getStatus() == ConnectServerStatus.Status.CANCEL || 
 				status.getStatus() == ConnectServerStatus.Status.ERROR){
 			return;
 		}
@@ -170,9 +162,15 @@ public class LoginHandler implements ILoginHandler {
 				if (connect != null){
 					//need to continue upload
 					cont = true;
-					WorkbenchJob wj = new WorkbenchJob(Messages.LoginHandler_resumejobname) {
+					Job wj = new Job(Messages.LoginHandler_resumejobname) {
+//						@Override
+//						public IStatus runInUIThread(IProgressMonitor monitor) {
+//							(new UploadCaEngine()).continueUpload(connect, status);
+//							return org.eclipse.core.runtime.Status.OK_STATUS;
+//						}
+
 						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
+						protected IStatus run(IProgressMonitor monitor) {
 							(new UploadCaEngine()).continueUpload(connect, status);
 							return org.eclipse.core.runtime.Status.OK_STATUS;
 						}

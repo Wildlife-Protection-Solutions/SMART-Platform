@@ -32,20 +32,35 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
+import org.hibernate.query.sqm.internal.QuerySqmImpl;
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
+import org.hibernate.sql.ast.tree.select.SelectStatement;
 import org.postgresql.PGConnection;
 import org.postgresql.copy.CopyManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.TableInfo;
+import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.util.Zipper;
 
 /**
  * Derby implementation of a ICaDataExportEngine
@@ -55,15 +70,24 @@ import org.wcs.smart.ca.export.TableInfo;
  */
 public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 
-	private Path outputLocation;
+	private final Logger logger = Logger.getLogger(PostgresqlCaDataExportEngine.class.getName());
+
+	
+	private Path workingLocation;
 	private ConservationArea ca;
 	private Session session;
 	private HashMap<String, String> options;
 	
-	public PostgresqlCaDataExportEngine(Path outputLocation, ConservationArea ca, Session session){
+	private Set<Path> excludefiles = new HashSet<>();
+	private Map<Path, Path> pathsToZip = new HashMap<>();
+	
+	public PostgresqlCaDataExportEngine(ConservationArea ca, Session session) throws IOException{
 		this.session = session;
 		this.ca = ca;
-		this.outputLocation = outputLocation;
+		
+		this.workingLocation = DataStoreManager.INSTANCE.getTemporaryDirectory().resolve(System.nanoTime()+""); //$NON-NLS-1$
+		if (!Files.exists(workingLocation)) Files.createDirectories(workingLocation);
+		
 	}
 	
 	/**
@@ -94,7 +118,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
-		Path columnFile = createFileName( getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path columnFile = createFileName( tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
 		try(BufferedWriter writer = Files.newBufferedWriter(columnFile, StandardCharsets.UTF_8)){
 			writer.write(tableName.toUpperCase(Locale.ROOT));
 			writer.newLine();
@@ -168,7 +192,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 		}
 		
 		//convert hql to sql
-		String sql = toSql(q.getQueryString());
+		String sql = toSql(q);
 
 		//set sql parameter
 		sql = sql.replace("?", "  '" + getConservationArea().getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -208,7 +232,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeQuery(String fileName, String query) throws IOException{
 		
-		final Path outputFile = createFileName(getExportLocation(), fileName + ".dat"); //$NON-NLS-1$
+		final Path outputFile = createFileName(fileName + ".dat"); //$NON-NLS-1$
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
@@ -254,8 +278,8 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 		});
 	}
 	
-	private Path createFileName(Path destDir, String tableName) throws IOException{
-		Path dir = destDir.resolve(DATABASE_DIR);
+	private Path createFileName(String tableName) throws IOException{
+		Path dir = this.workingLocation.resolve(DATABASE_DIR);
 		Files.createDirectories(dir);
 		return dir.resolve(tableName);
 	}
@@ -279,26 +303,34 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	/**
 	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#getExportLocation()
 	 */
-	@Override
-	public Path getExportLocation() {
-		return this.outputLocation;
+	public Path getWorkingLocation() {
+		return this.workingLocation;
 	}
 
-	
-	public String toSql(String hqlQueryText) {
+	private String toSql(Query<?> query) {
+		QuerySqmImpl<?> sqmquery = (QuerySqmImpl<?>)query;
 		
-		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
-			//TODO:
-//			final QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-//			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-//			final QueryTranslator translator = translatorFactory
-//					.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory, null);
-//			translator.compile(Collections.EMPTY_MAP, false);
-//			return translator.getSQLString();
-		}
-		return null;
+		final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
+		
+		SqmSelectStatement<?> ss = (SqmSelectStatement<?>) sqmquery.getSqmStatement();
+		SelectStatement sss = (SelectStatement) 
+				factory.getQueryEngine().getSqmTranslatorFactory()
+				.createSelectTranslator(ss, 
+						sqmquery.getQueryOptions(),
+						sqmquery.getDomainParameterXref(),
+						sqmquery.getParameterBindings(),
+						sqmquery.getLoadQueryInfluencers(),
+						factory, false)
+				.visitSelectStatement(ss);
+		
+		String sql = ((SessionFactoryImpl)session.getSessionFactory()).getJdbcServices()
+				.getDialect().getSqlAstTranslatorFactory()
+				.buildSelectTranslator(factory, sss)
+				.translate(null,  sqmquery.getQueryOptions()).getSqlString();
+		
+		return sql;
 	}
-
+	
 	@Override
 	public HashMap<String, String> getExportOptions() {
 		return this.options;
@@ -308,4 +340,35 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	public void setExportOptions(HashMap<String, String> options) {
 		this.options = options;
 	}
+	
+	public void addPath(Path source, Path target) {
+		this.pathsToZip.put(source, target);
+	}
+	
+	@Override
+	public void createExportFile(Path destZipFile, IProgressMonitor progress) throws IOException {
+		Zipper zipper = Zipper.create(destZipFile)
+			.excludeFiles(this.excludefiles)
+			.addChildrenFiles(this.workingLocation);
+		for (Entry<Path,Path> toAdd : this.pathsToZip.entrySet()) {
+			zipper.addMappedChildren(toAdd.getKey(), toAdd.getValue());
+		}
+		zipper.close();
+	}
+
+	@Override
+	public void cleanUp() {
+		try {
+			FileUtils.deleteDirectory(this.workingLocation.toFile());
+		} catch (IOException e) {
+			logger.log(Level.WARNING, e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public void excludePath(Path exclude) {
+		excludefiles.add(exclude);
+	}
+
 }
+

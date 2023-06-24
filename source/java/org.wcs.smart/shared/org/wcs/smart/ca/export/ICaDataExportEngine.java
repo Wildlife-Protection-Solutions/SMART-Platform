@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.ca.export;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 
@@ -39,6 +41,16 @@ public interface ICaDataExportEngine {
 	 * data.
 	 */
 	public static final String CA_INFO_FILENAME = "conservationarea.dat"; //$NON-NLS-1$
+	
+	/**
+	 * For recover packages this is the name of the file that contains the files 
+	 * that should be removed.
+	 */
+	public static final String DELETEFILES_FILENAME = "recover.deletelist.txt"; //$NON-NLS-1$
+	public static final String FILE_SEPARATOR = "\n"; //$NON-NLS-1$
+	public static final String DATA_SEPARATOR = ":"; //$NON-NLS-1$
+	public static final String RECOVERY_HASH_ALGORITHM ="SHA3-256"; //$NON-NLS-1$
+	
 	/**
 	 * The name of the directory where the database data is stored
 	 */
@@ -61,10 +73,44 @@ public interface ICaDataExportEngine {
 	public Session getSession();
 	
 	/**
-	 * @return the location to export data to
+	 * @return the location of the working directory for packaging files
+	 * Anything added to this directory should be added to the zip file
+	 * 
 	 */
-	public Path getExportLocation();
+	public Path getWorkingLocation();
 	
+	/**
+	 * Adds an additional file or directory for outside the working
+	 * directory to the export.
+	 * @param source the source file
+	 * @param target the target location in the zip file or null if should be placed
+	 * in root directory
+	 */
+	public void addPath(Path source, Path target);
+	
+	/**
+	 * Excludes the file from the zip. If path is a directory
+	 * the directory and all subfolders will be excluded
+	 * 
+	 * @param exclude
+	 */
+	public void excludePath(Path exclude);
+	
+	
+	
+	/**
+	 * Packages all the files into an export file.
+	 * 
+	 * @param destZipFile export file name
+	 * @throws IOException
+	 */
+	public void createExportFile(Path destZipFile, IProgressMonitor progress) throws IOException;
+
+	/**
+	 * Remove all temporary directories/files created during process
+	 */
+	public void cleanUp();
+		
 	/**
 	 * Finds all the columns in a given table
 	 * @param tableName schema qualified table name

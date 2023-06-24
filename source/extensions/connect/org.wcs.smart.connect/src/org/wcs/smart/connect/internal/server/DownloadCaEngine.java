@@ -50,7 +50,6 @@ import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 import org.wcs.smart.user.UserLevelManager;
 
@@ -127,7 +126,7 @@ public class DownloadCaEngine {
 			
 			//start by validating the package
 			progress.subTask(Messages.DownloadCaEngine_VersionValidation);
-			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+//			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 			try {
 				if (!CaImporter.validateCaImport(p)) {
 					return false;
@@ -144,7 +143,7 @@ public class DownloadCaEngine {
 			}
 			if (desktopCa != null){
 				/* delete existing ca */
-				if (!deleteCa(SmartDB.getCurrentConservationArea(), progress.split(1))){
+				if (!deleteCa(desktopCa, progress.split(1))){
 					return false;
 				}
 				if (!validateCaDeleted()){
@@ -266,15 +265,15 @@ public class DownloadCaEngine {
 		final boolean[] cont = new boolean[]{true};
 		try{
 			//we don't revert back here; that will be done after download complete
-			HibernateManager.endSessionFactory(true, false);
-			HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+//			HibernateManager.endSessionFactory(true, false);
+//			HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_DeleteTaskName, 1);
 					DisplayAccess.accessDisplayDuringStartup();
 					try{
-						ConservationAreaManager.getInstance().deleteConservationArea(ca, progress.split(1), false);
+						ConservationAreaManager.getInstance().deleteConservationArea(ca, progress.split(1), true, false);
 					}catch (final Exception ex){
 						cont[0] = false;
 						SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);
@@ -293,11 +292,11 @@ public class DownloadCaEngine {
 	private boolean deleteCa(final ConservationArea ca, final IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_DeleteTaskName, 1);
 		//we don't revert back here; that will be done after download complete
-		HibernateManager.endSessionFactory(true, false);
-		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+//		HibernateManager.endSessionFactory(true, false);
+//		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 					
 		try{
-			ConservationAreaManager.getInstance().deleteConservationArea(ca, progress.split(1), false);
+			ConservationAreaManager.getInstance().deleteConservationArea(ca, progress.split(1), true, false);
 		}catch (final Exception ex){
 			SmartPlugIn.log(Messages.DownloadCaEngine_CaDataError, ex);
 			throw new Exception("Unable to delete Conservation Area before installing new Conservation Area.", ex); //$NON-NLS-1$

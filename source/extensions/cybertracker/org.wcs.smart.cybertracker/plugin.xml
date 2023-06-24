@@ -364,9 +364,9 @@
    </extension>
    <extension
          point="org.wcs.smart.caLogin">
-      <loginHandler
-            clazz="org.wcs.smart.cybertracker.CleanUpLoginHandler">
-      </loginHandler>
+      <postWindowOpen
+            class="org.wcs.smart.cybertracker.CleanUpLoginHandler">
+      </postWindowOpen>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">

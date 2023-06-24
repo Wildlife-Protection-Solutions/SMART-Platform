@@ -35,12 +35,23 @@ public class UploadStatus extends ConnectUuidItem{
 	private long currentSize;
 	private long expectedSize;
 	private String message;
+	private int percentComplete;
 	
 	public UploadStatus(WorkItem item){
 		setUuid(item.getUuid());
 		setExpectedSize(item.getTotalBytes());
 		setStatus(item.getStatus());
 		setMessage(item.getMessage());
+		setPercentComplete(item.getPercentComplete());
+	}
+	
+	@JsonProperty("percent_complete")
+	public int getPercentComplete() {
+		return this.percentComplete;
+	}
+	
+	public void setPercentComplete(int percentComplete) {
+		this.percentComplete = percentComplete;
 	}
 	
 	@JsonProperty("status")

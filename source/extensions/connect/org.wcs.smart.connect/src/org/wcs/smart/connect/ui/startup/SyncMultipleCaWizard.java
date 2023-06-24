@@ -92,11 +92,11 @@ public class SyncMultipleCaWizard extends Wizard {
 						List<CaUserDetails> details = validateCaUsers(activeShell, allCas, username, password);
 						progress.worked(1 + (allCas.size() - details.size()));
 						
-						HibernateManager.endSessionFactory(true, false);
-						
-						SmartDB.DbUser currentUser = SmartDB.getCurrentUser();
+//						HibernateManager.endSessionFactory(true, false);
+//						
+//						SmartDB.DbUser currentUser = SmartDB.getCurrentUser();
 						try{
-							HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+//							HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 							for (CaUserDetails cainfo : details){
 								progress.subTask(cainfo.ca.getNameLabel());
 								if (syncCa(cainfo, progress.split(1))){
@@ -105,9 +105,9 @@ public class SyncMultipleCaWizard extends Wizard {
 							}
 						}catch (OperationCanceledException e) {
 							errors.add(Messages.SyncMultipleCaWizard_Cancelled);
-						}finally{
-							HibernateManager.endSessionFactory(true, true);
-							HibernateManager.setUserName(currentUser.getUserName(), currentUser.getPassword());
+//						}finally{
+//							HibernateManager.endSessionFactory(true, true);
+//							HibernateManager.setUserName(currentUser.getUserName(), currentUser.getPassword());
 							
 						}
 					}catch (Exception ex){

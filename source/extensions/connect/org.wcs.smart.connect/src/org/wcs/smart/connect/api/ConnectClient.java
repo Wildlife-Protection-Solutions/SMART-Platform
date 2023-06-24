@@ -88,6 +88,11 @@ public interface ConnectClient {
 	public String updateFile(InputStream data);
 
 	@POST
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Path("/" + CA_PATH + "/{cauuid}/recover")
+	public Response recoverCa(@PathParam("cauuid") String caUuid, InputStream data);
+	
+	@POST
 	@Path("/" + CA_PATH + "/{cauuid}")
 	public Response getDataUploadUrl(@HeaderParam("X-Upload-Content-Length") Long length, 
 			@PathParam("cauuid") String caUuid,

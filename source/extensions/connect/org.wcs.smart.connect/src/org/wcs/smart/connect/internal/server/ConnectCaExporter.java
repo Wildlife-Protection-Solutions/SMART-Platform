@@ -29,13 +29,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.export.CaExporter;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.server.ICaExportPreprocessor;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * An extension of the Conservation Area exports that is specific to SMART
@@ -57,27 +57,26 @@ public class ConnectCaExporter extends CaExporter{
 	@Override
 	public void export(Path destFile, HashMap<String, String> options, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, "", 3); //$NON-NLS-1$
-		Path tempDir = SmartUtils.createTemporaryDirectory();
+		
+		ICaDataExportEngine engine = null;
 		try{
-			exportToTempDirectory(tempDir, options, progress.split(2));
+			engine = exportData(options, progress.split(2));
 			
 			//delete temporary unnecessary files
-			preprocess(tempDir);
+			preprocess(engine);
 			
-			//zip up 
-			zipTempDirectory(tempDir, destFile, progress.split(1));
+			engine.createExportFile(destFile, progress.split(1));
+		}catch(OperationCanceledException ex) {
+			return;
 		}finally{
-			try{
-				SmartUtils.deleteDirectory(tempDir);
-			}catch(Exception ex){
-				SmartPlugIn.log("Error deleting temporary folder contanining ca backup." + tempDir.toAbsolutePath().toString(), ex); //$NON-NLS-1$
-			}
+			if (engine != null) engine.cleanUp();
 		}
+		
 	}
 	
-	protected void preprocess(Path tempDir){
+	protected void preprocess(ICaDataExportEngine engine){
 		for (ICaExportPreprocessor processor: getExportProcessors()){
-			processor.processExport(tempDir);
+			processor.processExport(engine);
 		}
 	}
 	

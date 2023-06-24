@@ -50,7 +50,8 @@ public class ConnectServerStatus {
 		BACKUP,
 		UPLOAD,
 		DONE,
-		ERROR
+		ERROR,
+		CANCEL
 	}
 	
 	private UUID cauuid;

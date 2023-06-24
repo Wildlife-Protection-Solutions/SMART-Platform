@@ -276,7 +276,7 @@ public class CleanUpJob implements Runnable {
 		}
 	
 		//keep these for 6 months
-		if (item.getType() == Type.DOWN_CA){
+		if (item.getType() == Type.DOWN_CA || item.getType() == Type.RECOVERY_CA ){
 			if (item.getStatus() == Status.COMPLETE || item.getStatus() == Status.ERROR){
 				return checkCaExport(item.getStartTime());
 			}else{

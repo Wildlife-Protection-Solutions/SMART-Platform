@@ -48,7 +48,6 @@ public class MenuHandler implements ILoginHandler {
 
 	public MenuHandler() {
 	}
-
 	@Override
 	public void onLogin() throws Exception {
 		

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.dataqueue.internal.server;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
@@ -48,7 +49,7 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 	};
 	
 	@Override
-	public void processExport(Path tempDirectory) {
+	public void processExport(ICaDataExportEngine engine) {
 		try(Session s = HibernateManager.openSession()){
 			for (Class<?> c : classesToRemove){
 				
@@ -58,29 +59,14 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 				String fileName2 = tableName + "." + c.getSimpleName() + ".dat"; //$NON-NLS-1$ //$NON-NLS-2$
 				
 				for (String filename : new String[]{fileName1, fileName2}){
-					Path f = tempDirectory.resolve(ICaDataExportEngine.DATABASE_DIR).resolve(filename);
-					try{
-						Files.deleteIfExists(f);
-					}catch (Exception ex){
-						ConnectPlugIn.log(ex.getMessage(), ex);
-					}
+					Path f = engine.getWorkingLocation().resolve(ICaDataExportEngine.DATABASE_DIR).resolve(filename);
+					engine.excludePath(f);
 				}	
-					
 			}
 		}
-		
-		//we also want to remove any items from the dataqueue folder in the data store
-		Path filestore = tempDirectory.resolve(ICaDataExportEngine.FILESTORE_DIR);
-		
-		Path dataqueue = filestore.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
-		if (Files.exists(dataqueue) && Files.isDirectory(dataqueue)){
-			try{
-				SmartUtils.deleteDirectory(dataqueue);
-			}catch(Exception ex){
-				ConnectDataQueuePlugin.log("Failed to remove data queue folder from Conservation Area export.", ex);			 //$NON-NLS-1$
-			}
-		}
-		
-	}
 
+		//we also want to remove any items from the dataqueue folder in the data store
+		Path dataqueue = Paths.get(engine.getConservationArea().getFileDataStoreLocation()).resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
+		engine.excludePath(dataqueue);
+	}
 }

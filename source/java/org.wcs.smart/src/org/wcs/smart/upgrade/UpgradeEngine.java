@@ -367,8 +367,6 @@ public class UpgradeEngine {
 	 */
 	public static String validateVersions() throws Exception{
 		
-		boolean requiresUpgrade = false;
-		
 		try(Session session = HibernateManager.openSession()){
 			
 			Map<String, String> currentversions = UpgradeEngine.getVersions(session);
@@ -377,20 +375,18 @@ public class UpgradeEngine {
 			List<IDatabaseUpgrader> torun = new ArrayList<>();
 			for (IDatabaseUpgrader upgrader : extensions) {
 				if (!upgrader.isUpdateToDate(currentversions)) {
-					requiresUpgrade = true;
 					torun.add(upgrader);
 				}
 			}
-			StringBuilder sb = new StringBuilder();
-			sb.append("The following plugins are out of date:"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			for (IDatabaseUpgrader up : torun) {
-				sb.append(up.getPluginName());
+			if (!torun.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("The following plugins are out of date:"); //$NON-NLS-1$
 				sb.append("\n"); //$NON-NLS-1$
-			}
-			
-			if (requiresUpgrade) {
-				return sb.toString();
+				for (IDatabaseUpgrader up : torun) {
+					sb.append(up.getPluginName());
+					sb.append("\n"); //$NON-NLS-1$
+				}
+				return sb.toString();				
 			}
 			return null;
 		}

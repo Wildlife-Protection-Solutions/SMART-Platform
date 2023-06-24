@@ -678,10 +678,12 @@ public class SmartConnect {
 	 * @Param monitor  the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 */
 	public void uploadFile(String url, Path f, long startByte, SubMonitor monitor) throws Exception{
+
         createClient();
         
 		//retry handler set when creating client;
         ConnectClient service =  client.target(url).proxy(ConnectClient.class);
+        
         
         //upload data in chunks so we don't run into problems with
         //uploading large files; it also better
@@ -689,12 +691,11 @@ public class SmartConnect {
         //if this fails at anypoint it exits this loop so
         //failures/retries should be done in a different loop
         int chunkSize = 25_000_000;
+        //int chunkSize = 500_000;
         long total = Files.size(f);
         long count = startByte;
-        SubMonitor m = SubMonitor.convert(monitor);
-        
-        int worksize = (int)Math.ceil((double)total / chunkSize);
-        m.setWorkRemaining( worksize );
+
+        int last = (int)((count * 100.0) / total);
         try(FileInputStream fs = new FileInputStream(f.toFile())){
 	        while( count < total) {
 	        	try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){	        	
@@ -705,9 +706,14 @@ public class SmartConnect {
 		    			service.updateFile(fis);
 		    		}
 	        	}
-	        	m.worked(1);
 	        	count += chunkSize;
-	        	//System.out.println(count + "/" + total);
+	        	int percent = (int)((count * 100.0) / total);
+	        	if (percent > 100) percent = 100;
+	        	
+	        	monitor.setTaskName("Uploading File: " + percent + "% ");
+	        	monitor.worked(percent - last);
+	        	last = percent;
+	        	monitor.checkCanceled();
 	        }
         }
 	}

@@ -23,18 +23,17 @@ package org.wcs.smart.connect.downloader.ca;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.MessageFormat;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.EntityPersister;
-import org.hibernate.persister.entity.Joinable;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
@@ -53,26 +52,23 @@ public class PostgresqlExporters {
 	public static final String PLUGIN_VERSION_TBL = "connect.ca_plugin_version"; //$NON-NLS-1$
 	
 	public void exportAll(ICaDataExportEngine exportEngine) throws Exception{
+		exportDatabaseOnly(exportEngine);
+		exportDataStore(exportEngine);
+	}
+	
+	public void exportDatabaseOnly(ICaDataExportEngine exportEngine) throws Exception{
 		exportConservationAreaInfo(exportEngine);
 		exportAggregationTable(exportEngine);
 		exportHibernateData(exportEngine);
 		exportAttAggMapTable(exportEngine);
 		exportPlugInConfiguration(exportEngine);
-		exportDataStore(exportEngine);
 		exportServerStatus(exportEngine);
 	}
 	
-	private void exportDataStore(ICaDataExportEngine exportEngine) throws Exception {
-		Path filestore = exportEngine.getExportLocation().resolve(ICaDataExportEngine.FILESTORE_DIR);
-		
-		Files.createDirectories(filestore);
-		
-		ConservationAreaInfo info = (ConservationAreaInfo) exportEngine.getSession().get(ConservationAreaInfo.class, exportEngine.getConservationArea().getUuid());
+	private void exportDataStore(ICaDataExportEngine exportEngine) throws Exception {		
+		ConservationAreaInfo info = (ConservationAreaInfo) exportEngine.getSession().get(ConservationAreaInfo.class, exportEngine.getConservationArea().getUuid());	
 		Path filestoreLocation = DataStoreManager.INSTANCE.getConservationAreaFullPath(info);
-		if (Files.exists(filestoreLocation)){
-			FileUtils.copyDirectory(filestoreLocation.toFile(), filestore.toFile());
-		}
-
+		((PostgresqlCaDataExportEngine)exportEngine).addPath(filestoreLocation, Paths.get(ICaDataExportEngine.FILESTORE_DIR));
 	}
 	
 	private void exportHibernateData(ICaDataExportEngine exportEngine) throws Exception {
@@ -196,7 +192,7 @@ public class PostgresqlExporters {
 			.createNativeQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'", String.class) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			.uniqueResult();
 		
-		Path file = exportEngine.getExportLocation().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
+		Path file = exportEngine.getWorkingLocation().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
 		ConservationArea ca = exportEngine.getConservationArea();
 		try(BufferedWriter writer = Files.newBufferedWriter(file)){
 			writer.write(UuidUtils.uuidToString(ca.getUuid()));
@@ -235,6 +231,8 @@ public class PostgresqlExporters {
 	
 	public static String getTableName(Session session, Class<?> hibernateClass){
 		
+		if (Modifier.isAbstract(hibernateClass.getModifiers())) return null;
+		
 		try (EntityManager em = session.getSessionFactory().createEntityManager()){
 			Object entityExample = null;
 			try {
@@ -242,7 +240,7 @@ public class PostgresqlExporters {
 			} catch (ReflectiveOperationException e) {
 				throw new RuntimeException(e);
 			}
-			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);			
+			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);	
 			if (p instanceof AbstractEntityPersister) {
 				AbstractEntityPersister info = (AbstractEntityPersister) p;
 				return info.getRootTableName();
@@ -256,29 +254,20 @@ public class PostgresqlExporters {
 	public static String findConservationAreaProperty(Session session, Class<?> hibernateClass){
 		
 		try (EntityManager em = session.getSessionFactory().createEntityManager()){
+
+			
 			Object entityExample = null;
 			try {
 				entityExample = hibernateClass.getConstructor().newInstance();
 			} catch (ReflectiveOperationException e) {
 				throw new RuntimeException(e);
 			}
-			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);			
-			if (p instanceof AbstractEntityPersister) {
-				AbstractEntityPersister info = (AbstractEntityPersister) p;
 			
-				if (info instanceof Joinable) {
-					Joinable j = (Joinable)info;
-					if (info.getRootTableName().equals(j.getTableName())){
-						//find conservation area property if available
-						for (int k = 0; k < info.getPropertyTypes().length; k ++){
-							if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
-								return (((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
-							}
-						}
-					}
+			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);
+			for (int k = 0; k < p.getPropertyTypes().length; k ++){
+				if (p.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
+					return (((AbstractEntityPersister)p).getPropertyColumnNames(k)[0]);
 				}
-			}else {
-				throw new RuntimeException(MessageFormat.format("Cannot determine entity details for type {0}.", hibernateClass.toString())); //$NON-NLS-1$
 			}
 		}
 		return null;

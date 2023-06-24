@@ -633,18 +633,18 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public static void saveNewConservationArea(ConservationArea newCa, Path logoFile) throws Exception{
 		
-		/* need to login as admin user to create CA */
-		HibernateManager.endSessionFactory(true);
-		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		
+//		/* need to login as admin user to create CA */
+//		HibernateManager.endSessionFactory(true);
+//		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+//		
 		try(Session s = HibernateManager.openSession()) {
 			s.beginTransaction();
 			try {
 				//save conservation area
-				s.save(newCa);
+				s.persist(newCa);
 				for(Employee e: newCa.getEmployees()){
 					generateEmployeeId(e, s);
-					s.save(e);
+					s.persist(e);
 				}		
 				
 				//create initial default projection
@@ -660,7 +660,7 @@ public class HibernateManager extends SmartHibernateManager{
 				prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				prj.setDefinition(crs.toWKT());
 				prj.setIsDefault(true);
-				s.save(prj);
+				s.persist(prj);
 				
 				//create icons
 				IconManager.INSTANCE.createDefaultIconSet(s, newCa);
@@ -681,9 +681,9 @@ public class HibernateManager extends SmartHibernateManager{
 				s.getTransaction().rollback();
 				throw ex;
 			}
-		} finally {
-			HibernateManager.endSessionFactory(true);	
-			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
+//		} finally {
+//			HibernateManager.endSessionFactory(true);	
+//			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 	}
 
@@ -970,7 +970,7 @@ public class HibernateManager extends SmartHibernateManager{
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT version FROM "); //$NON-NLS-1$
 		sb.append(SmartDB.PLUGIN_VERSION_TBL);
-		sb.append("WHERE plugin_id = ");  //$NON-NLS-1$
+		sb.append(" WHERE plugin_id = ");  //$NON-NLS-1$
 		sb.append("'" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 		NativeQuery<String> query = s.createNativeQuery(sb.toString(), String.class);

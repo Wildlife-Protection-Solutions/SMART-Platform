@@ -42,7 +42,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -50,7 +49,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.DerbyCaDataExportEngine;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -92,19 +90,15 @@ public class CaExporter {
 	 * 
 	 */
 	public void export(Path destFile,  HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_TaskName, 3); 
-		Path tempDir = SmartUtils.createTemporaryDirectory();
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_TaskName, 3);
+		ICaDataExportEngine engine = null;
 		try{
-			exportToTempDirectory(tempDir, options, progress.split(2));
-			zipTempDirectory(tempDir, destFile, progress.split(1));
+			engine = exportData(options, progress.split(2));
+			engine.createExportFile(destFile, progress.split(1));
 		}catch(OperationCanceledException ex) {
 			return;
 		}finally{
-			try{
-				SmartUtils.deleteDirectory(tempDir);
-			}catch(Exception ex){
-				SmartPlugIn.log(Messages.CaExporter_Error_TempDirDelete + tempDir.normalize().toAbsolutePath().toString(), ex);
-			}
+			if (engine != null) engine.cleanUp();
 		}
 	}
 	
@@ -115,7 +109,7 @@ public class CaExporter {
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
-	protected void exportToTempDirectory(Path tempDir, HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
+	protected ICaDataExportEngine exportData(HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
 
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_ProgressExportCA, 1);
 		
@@ -133,13 +127,16 @@ public class CaExporter {
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
+			
+			ICaDataExportEngine engine = new DerbyCaDataExportEngine(ca, session);
+			
 			/* write a conservation area info file */
-			writeConservationAreaInfo(tempDir, ca);
+			writeConservationAreaInfo(engine.getWorkingLocation(), ca);
 			progress.checkCanceled();
 			progress.worked(10);
 			
 			/* run through the exporters exporting data */
-			ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
+			
 			engine.setExportOptions(options);
 			List<ICaDataExporter> toRun = exporters.stream().filter(e->!(ca.getIsCcaa() && !e.supportsCcaa())).collect(Collectors.toList()); 
 			
@@ -150,8 +147,8 @@ public class CaExporter {
 			
 			progress.setWorkRemaining( 0 );
 			session.getTransaction().rollback();
-		}catch (OperationCanceledException ex) {
-			return;
+			
+			return engine;
 		}
 	}
 	

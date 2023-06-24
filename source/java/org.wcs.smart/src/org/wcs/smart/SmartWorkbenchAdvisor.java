@@ -22,9 +22,17 @@
 package org.wcs.smart;
 
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.application.IWorkbenchConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchAdvisor;
@@ -33,6 +41,7 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * This workbench advisor creates the window advisor, and specifies the
@@ -82,5 +91,36 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 		return true;
 	}
 
+	@Override
+	public void postStartup() {
+		//TODO: clean this up
+		//run login handlers
+		List<ILoginHandler> handlers = new ArrayList<ILoginHandler>();
+		try{
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(ILoginHandler.LOGIN_EXT_ID);
+			for (IConfigurationElement e : config) {	
+				if (e.getName().equals("postWindowOpen")){ //$NON-NLS-1$
+					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("class"); //$NON-NLS-1$
+						handlers.add(handler);
+				}
+			}
+		}catch (Exception ex){
+			//String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + "{1}.", ca.getName(), ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+			//SmartPlugIn.displayLog(error, ex);
+			SmartPlugIn.displayLog("start up error", ex);
+		}
+			
+		for (ILoginHandler h : handlers){
+			try{
+				h.onLogin();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog("start up error", ex);
+				//String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + Messages.SmartStartUp_LoginHandlerError, ca.getName(), h.getClass().getName(), ex.getMessage()); //$NON-NLS-1$
+				//SmartPlugIn.displayLog(error, ex);
+				//return false;
+			}
+		}
+	}
+	
 }
 

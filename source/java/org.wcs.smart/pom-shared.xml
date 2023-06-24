@@ -29,6 +29,11 @@
 
 
 	<dependencies>
+	     <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${commons-compress.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.wcs.smart.core</groupId>
 			<artifactId>org.wcs.smart.core.hibernate</artifactId>

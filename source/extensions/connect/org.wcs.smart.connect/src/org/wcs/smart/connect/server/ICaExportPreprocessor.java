@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.server;
 
-import java.nio.file.Path;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
 
 /**
  * A preprocessor for Conservation Area Exports that are going to
@@ -42,7 +42,7 @@ public interface ICaExportPreprocessor {
 	 * Conservation Area export has exported all data, but 
 	 * before the files are zipped.
 	 * 
-	 * @param tempDirectory the temporary location of the export
+	 * @param ICaDataExportEngine export engine
 	 */
-	public void processExport(Path tempDirectory);
+	public void processExport(ICaDataExportEngine engine);
 }

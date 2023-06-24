@@ -89,7 +89,7 @@ public class ConservationAreaManager {
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception if conservation area not deleted
 	 */
-	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor, boolean restart) throws Exception{
+	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor, boolean deleteFileStore, boolean restart) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaManager_Progress_DeleteCa, 5); 
 		
 		try(Session session = HibernateManager.openSession()){
@@ -116,21 +116,24 @@ public class ConservationAreaManager {
 				SmartPlugIn.log(ex.getMessage(), ex);
 			}
 			progress.worked(1);
-				
-			final Path fileStore = fStore;
-			if (Files.exists(fileStore)){
-				progress.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
-				try{
-					SmartUtils.deleteDirectory(fileStore);
-				}catch(final Exception ex){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.toAbsolutePath().toString(), ex);
-						}});
+
+			if (deleteFileStore) {
+				final Path fileStore = fStore;
+				if (Files.exists(fileStore)){
+					progress.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
+					try{
+						SmartUtils.deleteDirectory(fileStore);
+					}catch(final Exception ex){
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.toAbsolutePath().toString(), ex);
+							}});
+					}
 				}
+				progress.worked(1);
 			}
-			progress.worked(1);
+			
 			progress.subTask(Messages.ConservationAreaManager_Progress_Restarting);
 			
 		}

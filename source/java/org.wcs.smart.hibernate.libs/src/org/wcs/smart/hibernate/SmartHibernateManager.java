@@ -39,6 +39,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.query.Query;
 import org.hibernate.query.sqm.internal.QuerySqmImpl;
 import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
@@ -73,9 +74,8 @@ public class SmartHibernateManager {
 	//private static String userName = "login"; //$NON-NLS-1$
 	//private static String passWord = "smrt"; //$NON-NLS-1$
 	
-	//TODO: rever this - this was only for testing
-	private static String userName = "smart_admin"; //$NON-NLS-1$
-	private static String passWord = "smart_derby"; //$NON-NLS-1$
+	private static String userName = ""; //$NON-NLS-1$
+	private static String passWord = ""; //$NON-NLS-1$
 	
 	private static String databaseLocation = ""; //$NON-NLS-1$
 
@@ -93,9 +93,11 @@ public class SmartHibernateManager {
 	/**
 	 * Sets the database connection parameters.
 	 * @param dbLocation the derby database location
+	 * @throws Exception 
 	 */
-	public static void setDatabaseParameter(String dbLocation){
+	public static void setDatabaseParameter(String dbLocation) throws Exception{
 		databaseLocation = dbLocation;
+		endSessionFactory(true);
 	}
 	
 	/**
@@ -152,7 +154,7 @@ public class SmartHibernateManager {
 	private static Dialect getCurrentDialect() {
 		try {
 			if (sessionFactory != null && sessionFactory != null) {
-				return sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(JdbcServices.class).getDialect();
+				return ((SessionFactoryImpl)sessionFactory).getJdbcServices().getDialect();
 			}
 		}catch (Exception ex) {
 			ex.printStackTrace();
@@ -194,13 +196,12 @@ public class SmartHibernateManager {
 	 * Locks the database by waiting for active sessions
 	 * to complete or closing them automatically and preventing
 	 * any other sessions from being granted.  MUST call unlock 
-	 * database when complete.  Once locked it closes the session
-	 * factory and opens a new session using the given username and password.
+	 * database when complete.
 	 * 
 	 * An exception is thrown if open session remains after trying to close
 	 * @return
 	 */
-	public static Session lockDatabase(String username, String password) throws Exception{
+	public static Session lockDatabase() throws Exception{
 		//acquire lock
 		thisLock.acquire();
 		//finish or close all sessions
@@ -222,12 +223,7 @@ public class SmartHibernateManager {
 		}
 		
 		//ensure all sessions are closed
-		SmartHibernateManager.endSessionFactoryNoLock();
-		if (username != null){
-			userName = username;
-			passWord = password;
-		}
-		
+		closeAllSessions();
 		//open new session
 		return openSessionOnly(null);
 	}
@@ -239,12 +235,8 @@ public class SmartHibernateManager {
 	 * @param username the username to connect to the database after unlocking
 	 * @param password the password to connect after unlocking 
 	 */
-	public static void unlockDatabase(String username, String password){
-		if (username != null){
-			SmartHibernateManager.endSessionFactoryNoLock();
-			userName = username;
-			passWord = password;
-		}
+	public static void unlockDatabase(){
+		closeAllSessions();
 		thisLock.release();
 	}
 	
@@ -308,15 +300,15 @@ public class SmartHibernateManager {
 		
 	}
 	
-	protected static void endSessionFactoryNoLock(){
-		synchronized (sessionFactoryLock) {
-			if (sessionFactory != null){
-				closeAllSessions();
-				sessionFactory.close();
-			}
-			sessionFactory = null;	
-		}
-	}
+//	protected static void endSessionFactoryNoLock(){
+//		synchronized (sessionFactoryLock) {
+//			if (sessionFactory != null){
+//				closeAllSessions();
+//				sessionFactory.close();
+//			}
+//			sessionFactory = null;	
+//		}
+//	}
 	
 	/**
 	 * Closes the current session factory.
@@ -340,7 +332,12 @@ public class SmartHibernateManager {
 				closeAllSessions();
 			}
 			
-			endSessionFactoryNoLock();
+			synchronized (sessionFactoryLock) {
+				if (sessionFactory != null) {
+					sessionFactory.close();
+					sessionFactory = null;
+				}
+			}
 		}finally{
 			thisLock.release();
 		}
@@ -350,21 +347,23 @@ public class SmartHibernateManager {
 	 * closes all database sessions
 	 */
 	private static void closeAllSessions(){
-		//make a copy of the allSessions because causing close
-		//modifies the allSessions list which causes
-		//a concurrent mod exception;
-		List<Session> toClose = new ArrayList<Session>();
-		synchronized (openSessions) {
-			toClose.addAll(openSessions);
-		}
-		for(Session s : toClose){
-			//a listener on the session removes it from the all
-			//sessions variable
-			if (s.getTransaction().isActive()){
-				//TODO: log this case
-				s.getTransaction().rollback();
+		synchronized (sessionFactoryLock) {
+			//make a copy of the allSessions because causing close
+			//modifies the allSessions list which causes
+			//a concurrent mod exception;
+			List<Session> toClose = new ArrayList<Session>();
+			synchronized (openSessions) {
+				toClose.addAll(openSessions);
 			}
-			s.close();
+			for(Session s : toClose){
+				//a listener on the session removes it from the all
+				//sessions variable
+				if (s.getTransaction().isActive()){
+					//TODO: log this case
+					s.getTransaction().rollback();
+				}
+				s.close();
+			}
 		}
 	}
 	

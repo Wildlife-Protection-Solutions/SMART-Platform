@@ -67,6 +67,9 @@ public class DataQueueStatusJob extends Job {
 		try(Session s = HibernateManager.openSession()){
 			server = ConnectHibernateManager.getConnectServer(s);
 			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
+		}catch (Exception ex) {
+			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.DataQueueStatusJob_connectCommunicationError);
+			return Status.OK_STATUS;			
 		}
 		
 		

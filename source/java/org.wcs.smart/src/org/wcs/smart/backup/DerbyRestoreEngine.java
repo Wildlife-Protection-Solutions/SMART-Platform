@@ -239,9 +239,10 @@ public class DerbyRestoreEngine {
 		/* connect to the extractedDb and verify version */
 		SmartHibernateManager.setDatabaseParameter(extractedDb.normalize().toAbsolutePath().toString());
 		/* need to login as admin user to perform upgrade */
-		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+//		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
 		//check to install all plugins in backup and also installed in current version
+		progress.subTask("Validating Versions");
 		StringBuilder missingPlugins = new StringBuilder();
 			
 		Map<String,String> backupVersions = null;
@@ -332,7 +333,7 @@ public class DerbyRestoreEngine {
 			HibernateManager.endSessionFactory(true, true);	
 			//restore database parameter to main db
 			SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
-			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
+//			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 
 		/* create a copy of the current files incase something goes wrong */

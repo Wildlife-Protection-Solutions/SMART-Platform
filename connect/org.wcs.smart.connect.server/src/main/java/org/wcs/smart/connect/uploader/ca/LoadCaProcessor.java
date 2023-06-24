@@ -27,6 +27,8 @@ import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletContext;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -59,7 +61,6 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 		session.beginTransaction();
 		
 		try{
-			item = session.getReference(item);
 			
 			ChangeLogManager.INSTANCE.disableChangeTracking(item.getConservationAreaInfo(), session);
 		
@@ -79,7 +80,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			session.flush();
 			
 			//update ca item label
-			ConservationArea area =CaProcessorUtils.updateCaLabel(session, info);
+			ConservationArea area = CaProcessorUtils.updateCaLabel(session, info);
 			if (area != null){
 				if (area.getIsCcaa()){
 					info.setStatus(ConservationAreaInfo.Status.CCAA);
@@ -93,6 +94,8 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			}
 			
 			//update item status
+			item = session.getReference(item);
+			item.setPercentComplete(100);
 			item.setStatus(Status.COMPLETE);
 			
 			session.getTransaction().commit();

@@ -283,7 +283,7 @@ public class ConservationAreaClonerEngine {
 			}
 		}
 		
-		SmartHibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+//		SmartHibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 		session = HibernateManager.openSession(interceptor);
 		Transaction t = session.beginTransaction();
 		try{
@@ -402,7 +402,7 @@ public class ConservationAreaClonerEngine {
 			throw ex;
 		}finally{
 			session.close();
-			SmartHibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());
+//			SmartHibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());
 		}	
 	}
 	

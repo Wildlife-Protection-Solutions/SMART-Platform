@@ -57,7 +57,7 @@ public class UploadCaHandler {
 	public void uploadToConnect(Shell shell, final SmartConnect connect){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
+			pmd.run(true, true, new IRunnableWithProgress() {
 				
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,

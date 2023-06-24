@@ -320,7 +320,7 @@ public class ApplyChangeLogJob extends Job {
 			currentUser = SmartDB.getCurrentUser();
 		}
 		
-		try(Session session = HibernateManager.lockDatabase(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword())){
+		try(Session session = HibernateManager.lockDatabase()){
 			session.beginTransaction();
 			try {
 				
@@ -364,7 +364,7 @@ public class ApplyChangeLogJob extends Job {
 				throw ex;
 			}
 		}finally{
-			HibernateManager.unlockDatabase(currentUser.getUserName(), currentUser.getPassword());
+			HibernateManager.unlockDatabase();
 			
 			if (replicationEnabled){
 				//re-enable replication if it was previously enabled

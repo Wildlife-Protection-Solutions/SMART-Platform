@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
+import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
@@ -104,6 +106,19 @@ public class UploadCaEngine {
 							throw new Exception(Messages.UploadCaEngine_unknownState);
 						}
 						if (serverInfo.getStatus() == ConservationAreaProxy.Status.DATA){
+							
+							if (localStatus.getStatus() == Status.UPLOAD) {
+								//was uploading but done on connect see if we can re-link the two
+								if (localStatus.getVersion().equals(serverInfo.getVersion()) && localStatus.getServerRevision() < 0) {
+									//can link the two
+									localStatus.setStatus(Status.DONE);
+									saveStatus(localStatus);
+									showMessage("Upload to Smart Connect Complete.");
+									SmartConnect.UPLOAD_LOCK.release();
+									return;
+								}
+							}
+							
 							throw new Exception(Messages.UploadCaEngine_CaAlreadyExists);
 						}
 						
@@ -116,19 +131,37 @@ public class UploadCaEngine {
 							//continue using local file
 							if (localStatus != null){
 								if (localStatus.getStatus() == Status.ERROR || 
+									localStatus.getStatus() == Status.CANCEL ||
 										localStatus.getStatus() == Status.BACKUP){
 									//clear this file because we want to start over
 									throw new Exception(Messages.UploadCaEngine_7);
 								}
-								if (localStatus.getLocalFile() == null){
-									//we have a problem because we do not have a local file to upload anymore
-									throw new Exception(Messages.UploadCaEngine_FileNotFound);
-								}else{
-									Path f = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
-											.resolve(localStatus.getLocalFile());
-									if (!Files.exists(f)){
-										throw new Exception(Messages.UploadCaEngine_FileDeleted);	
+								
+								
+								//lets see what the state is on the server
+								WorkItemStatus serverStatus = connect.getWorkItemStatus(localStatus.getUploadUrl());
+								if (serverStatus.getStatus() == WorkItemStatus.Status.COMPLETE) {
+									//should be done try again
+									showMessage("Conservation Status inconsist. Try uploading again. If this message persists, delete Conservation Area from Connect and re-upload.");
+									SmartConnect.UPLOAD_LOCK.release();
+									return;
+								}else if (serverStatus.getStatus() == WorkItemStatus.Status.PROCESSING) {
+									//waiting for processing
+								
+								}else if (serverStatus.getStatus() == WorkItemStatus.Status.UPLOADING) {
+									//continue with upload
+									if (localStatus.getLocalFile() == null){
+										//we have a problem because we do not have a local file to upload anymore
+										throw new Exception(Messages.UploadCaEngine_FileNotFound);
+									}else{
+										Path f = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
+												.resolve(localStatus.getLocalFile());
+										if (!Files.exists(f)){
+											throw new Exception(Messages.UploadCaEngine_FileDeleted);	
+										}
 									}
+								}else {
+									throw new Exception(Messages.UploadCaEngine_7);
 								}
 							}
 						}
@@ -167,20 +200,8 @@ public class UploadCaEngine {
 					packageCa(localStatus.getLocalFile(), progress.split(1));
 					
 					localStatus.setStatus(Status.UPLOAD);
-					try(Session s = HibernateManager.openSession()){
-						s.beginTransaction();
-						try {
-							if (localStatus.getUuid() == null) {
-								s.persist(localStatus);
-							}else {
-								s.merge(localStatus);
-							}
-							s.getTransaction().commit();
-						}catch (Exception ex) {
-							s.getTransaction().rollback();
-							throw ex;
-						}
-					}
+					saveStatus(localStatus);
+
 					DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 					
 					String uploadURL = connect.getCaUploadUrl(localStatus.getUuid(), 
@@ -188,29 +209,22 @@ public class UploadCaEngine {
 							Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(localStatus.getLocalFile()));
 					
 					localStatus.setUploadUrl(uploadURL);
-					try(Session s = HibernateManager.openSession()){
-						s.beginTransaction();
-						try {
-							s.merge(localStatus);
-							s.getTransaction().commit();
-						}catch (Exception ex) {
-							s.getTransaction().rollback();
-						}
-					}
+					saveStatus(localStatus);
 				}else{
 					progress.setWorkRemaining(0);
 				}
+			}catch(OperationCanceledException ex) {
+				//cancelled by user
+				localStatus.setStatus(Status.CANCEL);
+				saveStatus(localStatus);
+				SmartConnect.UPLOAD_LOCK.release();
+				showMessage("Upload canceled");				
+				return;
 			}catch(Exception ex){
 				throw new Exception(Messages.UploadCaEngine_ConfigureError + (ex.getMessage() == null ? "" : ex.getMessage()), ex); //$NON-NLS-1$
 			}
 			
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.UploadCaEngine_UploadDialogTitle, Messages.UploadCaEngine_BackgroundProcess);		
-				}
-				
-			});
+			showMessage(Messages.UploadCaEngine_BackgroundProcess);
 			
 			UploadCaJob job = new UploadCaJob(connect, localStatus);
 			job.addJobChangeListener(new JobChangeAdapter() {
@@ -227,6 +241,31 @@ public class UploadCaEngine {
 		}
 	}
 	
+	private void saveStatus(ConnectServerStatus localStatus) {
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				if (localStatus.getUuid() == null) {
+					s.persist(localStatus);
+				}else {
+					s.merge(localStatus);
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
+		}
+	}
+	private void showMessage(String message) {
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.UploadCaEngine_UploadDialogTitle, message);		
+			}
+			
+		});
+	}
 	/**
 	 * Re-acquires a lock and continues and upload job that was terminated early.  Will not re-create upload package.
 	 */

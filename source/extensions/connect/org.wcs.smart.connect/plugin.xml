@@ -50,8 +50,11 @@
    <extension
          point="org.wcs.smart.caLogin">
       <loginHandler
-            clazz="org.wcs.smart.connect.replication.LoginHandler">
+            class="org.wcs.smart.connect.replication.PostLoginHandler">
       </loginHandler>
+      <postWindowOpen
+            class="org.wcs.smart.connect.replication.PostWindowOpenLoginHandler">
+      </postWindowOpen>
    </extension>
    <extension
          point="org.wcs.smart.startUpOption">
@@ -99,6 +102,10 @@
       <command
             id="org.wcs.smart.connect.server.changelog.syncmulti"
             name="%syncmulti.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.connect.server.recoverca"
+            name="Recover Conservation Area From Connect">
       </command>
    </extension>
    <extension
@@ -260,6 +267,18 @@
                </command>
                <command
                      commandId="org.wcs.smart.connect.server.downloadreplaceca"
+                     style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <and>
+                        <test
+                              property="org.wcs.smart.caSingle">
+                        </test>
+                     </and>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.connect.server.recoverca"
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
@@ -446,6 +465,16 @@
       <handler
             class="org.wcs.smart.connect.ui.server.SyncMultiChangeLogHandler$SyncMultiChangeLogHandlerWrapper"
             commandId="org.wcs.smart.connect.server.changelog.syncmulti">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.server.RecoverCaHandler$RecoverCaHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.recoverca">
          <enabledWhen>
             <test
                   property="org.wcs.smart.connect.replication.isEnabled"

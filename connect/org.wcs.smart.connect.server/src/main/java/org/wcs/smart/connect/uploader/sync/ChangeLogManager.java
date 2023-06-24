@@ -347,7 +347,7 @@ public enum ChangeLogManager {
 			ChangeLogItem ci = new ChangeLogItem();
 			
 			ci.setUuid((UUID)data[i++]);
-			ci.setRevision( ((BigInteger)data[i++]).longValue() );
+			ci.setRevision( (Long)data[i++] );
 			ci.setAction(Action.valueOf((String)data[i++]));
 			ci.setFileName((String)data[i++]);
 			ci.setTableName((String)data[i++]);

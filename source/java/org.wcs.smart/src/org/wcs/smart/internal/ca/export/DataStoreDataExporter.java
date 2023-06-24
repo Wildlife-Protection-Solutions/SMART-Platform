@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.internal.ca.export;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -29,7 +28,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Conservation area data exporter that
@@ -59,13 +57,10 @@ public class DataStoreDataExporter implements ICaDataExporter {
 	public void exportData(ICaDataExportEngine exportEngine,
 			IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.DataStoreDataExporter_progress, 1);
-		Path filestore = exportEngine.getExportLocation().resolve(ICaDataExportEngine.FILESTORE_DIR);
-		SmartUtils.createDirectory(filestore);
+		
 		Path filestoreLocation = Paths.get(exportEngine.getConservationArea().getFileDataStoreLocation());
+		exportEngine.addPath(filestoreLocation, Paths.get(ICaDataExportEngine.FILESTORE_DIR));
 
-		if (Files.exists(filestoreLocation)){
-			SmartUtils.copyDirectory(filestoreLocation, filestore);
-		}
 		monitor.worked(1);
 		monitor.done();
 

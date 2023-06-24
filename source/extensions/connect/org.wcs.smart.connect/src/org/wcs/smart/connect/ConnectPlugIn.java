@@ -87,6 +87,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 		ChangeLogInstaller.INSTANCE.setEnabled(true);
 		super.start(context);
 		plugin = this;
+
 		
 	}
 

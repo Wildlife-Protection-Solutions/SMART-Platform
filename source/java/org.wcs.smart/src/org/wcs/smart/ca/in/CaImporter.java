@@ -165,7 +165,7 @@ public class CaImporter {
 		//TODO: consider doing a disk space check to ensure
 		//enough disk space for this operation
 		progress.subTask(Messages.CaImporter_Progress_BackupCurrent);
-		HibernateManager.endSessionFactory(true, false);
+		//HibernateManager.endSessionFactory(true, false);
 		Path dbBackup = backup();
 		progress.worked(10);
 		
@@ -173,8 +173,8 @@ public class CaImporter {
 		Path dir = unzipFile(f);
 		
 		/* need to login as admin user to restore */
-		if (!HibernateManager.getCurrentUserName().equals(DbUser.ADMIN.getUserName()))
-			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+//		if (!HibernateManager.getCurrentUserName().equals(DbUser.ADMIN.getUserName()))
+//			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
 		try(Session session = HibernateManager.openSession()){
 			progress.worked(10);
@@ -201,7 +201,7 @@ public class CaImporter {
 					try{
 						session.close();
 					}catch (Exception ex2){}
-					HibernateManager.endSessionFactory(true, true);
+//					HibernateManager.endSessionFactory(true, true);
 					restoreBackup(dbBackup);
 				}catch (Exception e){
 					throw new Exception(Messages.CaImporter_Error_ImportErrorBackupNoRestored + ex.getLocalizedMessage(), e);
@@ -223,7 +223,7 @@ public class CaImporter {
 			}
 			
 			/* disconnect from admin user */
-			HibernateManager.endSessionFactory(true, true);
+//			HibernateManager.endSessionFactory(true, true);
 		}
 		
 	}

@@ -333,9 +333,9 @@ public class Messages extends NLS {
 	public static String ServerOptionLabelProvider_StartupUploadTooltip;
 	public static String ServerOptionLabelProvider_StartuUploadLabel;
 	public static String ServerOptionLabelProvider_UploadRetryCountLabel;
-	public static String ServerOptionLabelProvider_UploadRetryTooltip;
+	public static String ServerOptionLabelProvider_UploadRetryTooltip1;
 	public static String ServerOptionLabelProvider_WaitTimeLabel;
-	public static String ServerOptionLabelProvider_WaitTimeTooltip;
+	public static String ServerOptionLabelProvider_WaitTimeTooltip1;
 	public static String ServerOptionsPanel_ConnectOpPanelName;
 	public static String ServerOptionsPanel_Description;
 	public static String ServerOptionsPanel_InvalidNumber1;

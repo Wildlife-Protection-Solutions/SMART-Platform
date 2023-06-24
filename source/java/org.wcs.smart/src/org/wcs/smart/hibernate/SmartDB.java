@@ -66,10 +66,12 @@ public class SmartDB {
 	 */
 	public enum DbUser{
 //		LOGIN("login", "smrt"),  //$NON-NLS-1$//$NON-NLS-2$
-		LOGIN("smart_admin", "smart_derby"),//TODO: remove this
-		ANALYST("analyst", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
-		MANAGER("manager", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
-		DATAENTRY("data_entry", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+		
+//		LOGIN("smart_admin", "smart_derby"),//TODO: remove this
+//		ANALYST("analyst", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+//		MANAGER("manager", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+//		DATAENTRY("data_entry", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+		
 		ADMIN("smart_admin", "smart_derby"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private final String username;
@@ -88,7 +90,7 @@ public class SmartDB {
 	};
 	
 	//current database user account
-	private static DbUser current = DbUser.LOGIN;
+//	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
 	private static String plainTextPassword = null;
 	private static ConservationArea currentCa = null;
@@ -99,10 +101,11 @@ public class SmartDB {
 	 * @return the current database user
 	 */
 	public static DbUser getCurrentUser(){
-		if (current == null){
-			return DbUser.LOGIN;
-		}
-		return current;
+		return DbUser.ADMIN;
+//		if (current == null){
+//			return DbUser.LOGIN;
+//		}
+//		return current;
 	}
 
 	/**
@@ -186,11 +189,12 @@ public class SmartDB {
 			ConservationArea ca, 
 			ConservationAreaConfiguration configuration) throws Exception{
 		currentCa = ca;
-		if (currentEmployee == null || !currentEmployee.equals(user)){
-			//new user
-			current = findDbUser(user);
-			HibernateManager.setUserName(current.username, current.password);
-		}
+//		if (currentEmployee == null || !currentEmployee.equals(user)){
+//			//new user
+////			current = findDbUser(user);
+////			HibernateManager.setUserName(current.username, current.password);
+//			HibernateManager.setUserName(DbUser.ADMIN.password, DbUser.ADMIN.password);
+//		}
 		currentEmployee = user;
 		SmartDB.plainTextPassword = plainTextPassword;
 		caConfig = configuration;
@@ -215,31 +219,32 @@ public class SmartDB {
 	 * @return the database user
 	 */
 	public static DbUser findDbUser(Employee user){
-
-		for (String s : user.getSmartUserLevels()){
-			if (!s.equals(UserLevelManager.ADMIN.getKey()) &&
-				!s.equals(UserLevelManager.MANAGER.getKey()) &&
-				!s.equals(UserLevelManager.ANALYST.getKey()) &&
-				!s.equals(UserLevelManager.DATA_ENTRY.getKey())){
-				//some other account
-				return DbUser.ADMIN;
-			}
-		}
-		//multiple users - give admin account permission
-		//see ticket #2256
-		if (user.getSmartUserLevels().size() != 1) return DbUser.ADMIN;
-		
-		//single user level - pick correct db user
-		if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
-			return DbUser.ADMIN;
-		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.MANAGER)){
-			return DbUser.MANAGER;
-		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ANALYST)){
-			return DbUser.ANALYST;
-		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.DATA_ENTRY)){
-			return DbUser.DATAENTRY;
-		}
 		return DbUser.ADMIN;
+//		
+//		for (String s : user.getSmartUserLevels()){
+//			if (!s.equals(UserLevelManager.ADMIN.getKey()) &&
+//				!s.equals(UserLevelManager.MANAGER.getKey()) &&
+//				!s.equals(UserLevelManager.ANALYST.getKey()) &&
+//				!s.equals(UserLevelManager.DATA_ENTRY.getKey())){
+//				//some other account
+//				return DbUser.ADMIN;
+//			}
+//		}
+//		//multiple users - give admin account permission
+//		//see ticket #2256
+//		if (user.getSmartUserLevels().size() != 1) return DbUser.ADMIN;
+//		
+//		//single user level - pick correct db user
+//		if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
+//			return DbUser.ADMIN;
+//		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.MANAGER)){
+//			return DbUser.MANAGER;
+//		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ANALYST)){
+//			return DbUser.ANALYST;
+//		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.DATA_ENTRY)){
+//			return DbUser.DATAENTRY;
+//		}
+//		return DbUser.ADMIN;
 	}
 	
 	

@@ -22,16 +22,23 @@
 package org.wcs.smart.internal.ca.export;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.TableInfo;
@@ -39,6 +46,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+import org.wcs.smart.util.Zipper;
 
 /**
  * Derby implementation of a ICaDataExportEngine
@@ -53,11 +61,15 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	private Session session;
 	private HashMap<String, String> options;
 	
-	public DerbyCaDataExportEngine(Path outputLocation, ConservationArea ca, Session session){
+	private Set<Path> excludefiles = new HashSet<>();
+	private Map<Path, Path> pathsToZip = new HashMap<>();
+	
+	public DerbyCaDataExportEngine(ConservationArea ca, Session session){
 		this.session = session;
 		this.ca = ca;
-		this.outputLocation = outputLocation;
 		this.options = new HashMap<String, String>();
+		this.outputLocation = SmartUtils.createTemporaryDirectory();
+
 	}
 	
 	/**
@@ -89,7 +101,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
-		Path columnFile = createFileName(getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path columnFile = createFileName(tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
 		try(BufferedWriter writer = Files.newBufferedWriter(columnFile)){
 			writer.write(tableName);
 			writer.newLine();
@@ -198,13 +210,13 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	public void writeQuery(String fileName, String query){
 		MutationQuery sqlQuery = getSession().createNativeMutationQuery(
 				"CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
-				createFileName(getExportLocation(), fileName + ".dat"). //$NON-NLS-1$
+				createFileName(fileName + ".dat"). //$NON-NLS-1$
 				normalize().toAbsolutePath().toString() + "', null, null, 'utf-8')" ); //$NON-NLS-1$
 		sqlQuery.executeUpdate();
 	}
 	
-	private Path createFileName(Path destDir, String tableName){
-		Path dir = destDir.resolve(ICaDataExportEngine.DATABASE_DIR);
+	private Path createFileName(String tableName){
+		Path dir = this.outputLocation.resolve(ICaDataExportEngine.DATABASE_DIR);
 		SmartUtils.createDirectory(dir);
 		return dir.resolve(tableName);
 	}
@@ -226,10 +238,10 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	}
 
 	/**
-	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#getExportLocation()
+	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#getWorkingLocation()
 	 */
 	@Override
-	public Path getExportLocation() {
+	public Path getWorkingLocation() {
 		return this.outputLocation;
 	}
 
@@ -243,4 +255,34 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		this.options = options;
 	}
 
+
+	public void addPath(Path source, Path target) {
+		this.pathsToZip.put(source, target);
+	}
+	
+	@Override
+	public void createExportFile(Path destZipFile, IProgressMonitor progress) throws IOException {
+		Zipper zipper = Zipper.create(destZipFile)
+			.excludeFiles(this.excludefiles)
+			.addChildrenFiles(this.outputLocation);
+		for (Entry<Path,Path> toAdd : this.pathsToZip.entrySet()) {
+			zipper.addMappedChildren(toAdd.getKey(), toAdd.getValue());
+		}
+		zipper.close();
+	}
+
+	@Override
+	public void cleanUp() {
+		try {
+			SmartUtils.deleteDirectory(this.outputLocation);
+		} catch (IOException e) {
+			SmartPlugIn.log(e.getMessage(),e);
+		}
+		
+	}
+
+	@Override
+	public void excludePath(Path exclude) {
+		excludefiles.add(exclude);
+	}
 }

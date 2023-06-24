@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.locationtech.jts.geom.Geometry;
 import org.osgi.framework.Bundle;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.LoginLogEntry;
@@ -90,9 +89,8 @@ public class SmartStartUp {
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartStartUp_StartingDb, 3);
 		
 		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
-		Geometry x = null;
-		System.out.println(x == null);
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			throw new Exception (MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
@@ -142,13 +140,13 @@ public class SmartStartUp {
 		if (isok == null) return;
 		
 		//attempt an upgrade and try again
-		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+//		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		try {
 			(new UpgradeEngine()).upgradeSystem(sub.split(3, SubMonitor.SUPPRESS_NONE));
 		}catch (Exception ex) {
 			throw ex;
-		}finally {
-			HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
+//		}finally {
+//			HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 		isok = UpgradeEngine.validateVersions();
 		if (isok == null) return;
@@ -416,21 +414,7 @@ public class SmartStartUp {
 			}
 		}
 		
-		//run login handlers
-		List<ILoginHandler> handlers = new ArrayList<ILoginHandler>();
-		try{
-			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(ILoginHandler.LOGIN_EXT_ID);
-			for (IConfigurationElement e : config) {	
-				if (e.getName().equals("loginHandler")){ //$NON-NLS-1$
-					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("clazz"); //$NON-NLS-1$
-					handlers.add(handler);
-				}
-			}
-		}catch (Exception ex){
-			String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + "{1}.", ca.getName(), ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-			SmartPlugIn.displayLog(error, ex);
-			return false;
-		}
+
 		
 
 		//create filestore location
@@ -447,6 +431,22 @@ public class SmartStartUp {
 			}
 		}
 		
+
+		//run login handlers
+		List<ILoginHandler> handlers = new ArrayList<ILoginHandler>();
+		try{
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(ILoginHandler.LOGIN_EXT_ID);
+			for (IConfigurationElement e : config) {	
+				if (e.getName().equals("loginHandler")){ //$NON-NLS-1$
+					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("class"); //$NON-NLS-1$
+					handlers.add(handler);
+				}
+			}
+		}catch (Exception ex){
+			String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + "{1}.", ca.getName(), ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+			SmartPlugIn.displayLog(error, ex);
+			return false;
+		}
 		for (ILoginHandler h : handlers){
 			try{
 				h.onLogin();

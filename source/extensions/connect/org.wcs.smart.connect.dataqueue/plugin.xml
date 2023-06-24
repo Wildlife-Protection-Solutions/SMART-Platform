@@ -132,9 +132,9 @@
    </extension>
    <extension
          point="org.wcs.smart.caLogin">
-      <loginHandler
-            clazz="org.wcs.smart.connect.dataqueue.internal.LoginHandler">
-      </loginHandler>
+      <postWindowOpen
+            class="org.wcs.smart.connect.dataqueue.internal.LoginHandler">
+      </postWindowOpen>
    </extension>
    <extension
          point="org.wcs.smart.connect.status.contribution">

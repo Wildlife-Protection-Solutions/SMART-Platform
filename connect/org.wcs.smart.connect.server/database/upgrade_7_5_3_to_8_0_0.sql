@@ -56,6 +56,13 @@ ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_
 -- 4 to 5 upgrade for er
 ALTER TABLE SMART.SURVEY_WAYPOINT ADD CONSTRAINT SURVEY_WAYPOINT_WP_UUID_FK FOREIGN KEY (WP_UUID) REFERENCES SMART.WAYPOINT(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE				
 				
+				
+--working item				
+alter table connect.work_item add column percent_complete smallint;
+alter table connect.work_item add column data varchar;						
+ALTER TABLE "connect".work_item drop CONSTRAINT type_chk; 
+ALTER TABLE "connect".work_item ADD CONSTRAINT type_chk CHECK (((type)::text = ANY (ARRAY[('UP_CA'::character varying)::text, ('UP_SYNC'::character varying)::text, ('DOWN_CA'::character varying)::text, ('DOWN_SYNC'::character varying)::text, ('UP_DATAQUEUE'::character varying)::text, ('UP_CTPACKAGE'::character varying)::text, ('UP_NAVIGATION'::character varying)::text, ('RECOVERY_CA'::character varying)::text])));
+
 update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker';
 

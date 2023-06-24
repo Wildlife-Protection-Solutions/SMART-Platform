@@ -81,6 +81,11 @@ public class UploadCaJob extends FileUploaderJob {
 							Messages.UploadCaJob_InfoDialogTitle, 
 							Messages.UploadCaJob_InfoError +
 							(msg != null ? "\n" + msg : "")); //$NON-NLS-1$ //$NON-NLS-2$
+				}else if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.CANCEL){
+					MessageDialog.openError(Display.getDefault().getActiveShell(), 
+							Messages.UploadCaJob_InfoDialogTitle, 
+							"The upload was cancelled by the user. You will need to log into SMART Connect and delete the Conservation Area from Connect before you can attempt to upload again." +
+							(msg != null ? "\n" + msg : "")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}});
 	}
@@ -109,6 +114,16 @@ public class UploadCaJob extends FileUploaderJob {
 
 
 	@Override
+	protected void onUploadCancelled() {
+		
+		this.status.setStatus(ConnectServerStatus.Status.CANCEL);
+		saveStatus();
+		deleteLocalFile();
+		displayComplete(null);
+
+	}
+	
+	@Override
 	protected void onUploadComplete(WorkItemStatus upstatus) {
 		deleteLocalFile();
 	}
@@ -121,8 +136,6 @@ public class UploadCaJob extends FileUploaderJob {
 			saveStatus();
 			deleteLocalFile();	
 			super.connect.close();
-			
-			
 			displayComplete(null);
 		}catch (Exception ex){
 			ConnectPlugIn.displayLog(Messages.UploadCaJob_ReplicationNotEnabled, ex);
@@ -151,6 +164,16 @@ public class UploadCaJob extends FileUploaderJob {
 			}
 		}		
 		super.connect.close();
+	}
+
+	@Override
+	protected void onProcessingTimeOut() {
+		Display.getDefault().syncExec(()->
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
+				Messages.UploadCaJob_InfoDialogTitle,
+				"Time out occurred while waiting for processing to complete on Connect. Wait for processing to finish on Connect then re-upload the Conservation Area to link it to Connect."
+			)
+		);
 	}
 
 }
