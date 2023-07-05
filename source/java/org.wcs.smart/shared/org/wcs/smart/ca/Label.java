@@ -154,87 +154,9 @@ public class Label implements Serializable {
 		  }
 	}
 	
-//	public static synchronized String searchAll(Locale lang, UUID element, Session session){
-//		if (lang == null) return ""; //$NON-NLS-1$
-//		List<Label> labels = session.createQuery("FROM Label WHERE id.element.uuid = :element", Label.class)
-//			.setParameter("element", element).list();
-//		
-////		Query<Tuple> query = session.createQuery("SELECT id.language.code, value, id.language.default FROM Label WHERE id.element.uuid = :element", Tuple.class); //$NON-NLS-1$
-////		query.setParameter("element", element); //$NON-NLS-1$
-////		List<Tuple> options = query.list();
-////			
-//		if (labels.size() == 1){
-//			return labels.get(0).getValue();
-//		}
-//			
-//		return "test";
-////		String langmatch = null;
-////		String defaultvalue = null;
-////		for (Tuple obj : options){
-////			String label = (String)obj.get(1);
-////			String code = (String)obj.get(0);
-////			Locale test = null;
-////			if (code.contains("_")){ //$NON-NLS-1$
-////				String[] bits = code.split("_"); //$NON-NLS-1$
-////				test = new Locale(bits[0], bits[1]);
-////			}else{
-////				test = new Locale(code);
-////			}
-////			if (test.equals(lang)){
-////				return label;
-////			}else if (test.getLanguage().equals(lang.getLanguage())){
-////				langmatch = label;
-////			}
-////			if ((Boolean)obj.get(2)){
-////				defaultvalue = label;
-////			}
-////		}
-////		if (langmatch != null) return langmatch;
-////		if (defaultvalue != null) return defaultvalue;
-////		return null;
-//	}
-//	
-//	@Transient
-//	//public static synchronized String getDescription(
-//	public static String getDescription(
-//			NamedItem item,
-//			Session session) {
-//		
-//		Object ltemp = I18nUtil.getLocale();
-//		if (ltemp instanceof UUID) {
-//			UUID lang = (UUID)ltemp;		
-//			UUID ca = I18nUtil.getCa();
-//			
-//			if (lang != null && ca != null) {
-//				Label.LabelItemPK id = new Label.LabelItemPK();
-//				id.setElement(new UuidItem(item.getUuid()));
-//				Language ltmp = (Language) session.getReference(Language.class, lang);
-//				id.setLanguage(ltmp);
-//
-//				Label lbl = (Label) session.get(Label.class, id);
-//				if (lbl != null) return lbl.getValue();
-//				
-//				// try for the default language
-//				ConservationArea localca = (ConservationArea) session.get(ConservationArea.class, ca);
-//				id.setLanguage(localca.getDefaultLanguage());
-//				lbl = (Label) session.get(Label.class, id);
-//				if (lbl != null) return lbl.getValue();
-//			}
-//		}
-//		
-//		//TODO: if ltemp is a locale try to match that
-//		item = session.getReference(item);
-//		for (Label l : item.getNames()) {
-//			if(l.getLanguage().isDefault()) return l.getValue();
-//		}
-//		
-//		return "ERROR";
-//	
-//	}
-//	
 	@Transient
 	public static String findLabel(UUID elementuuid, Session session) {
-		if (elementuuid == null) return "";
+		if (elementuuid == null) return ""; //$NON-NLS-1$
 		
 		Object ltemp = I18nUtil.getLocale();
 		

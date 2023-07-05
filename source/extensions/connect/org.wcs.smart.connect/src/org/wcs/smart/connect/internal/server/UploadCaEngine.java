@@ -142,7 +142,7 @@ public class UploadCaEngine {
 								WorkItemStatus serverStatus = connect.getWorkItemStatus(localStatus.getUploadUrl());
 								if (serverStatus.getStatus() == WorkItemStatus.Status.COMPLETE) {
 									//should be done try again
-									showMessage("Conservation Status inconsist. Try uploading again. If this message persists, delete Conservation Area from Connect and re-upload.");
+									showMessage("Conservation status is inconsist. Try uploading again. If this message persists, delete Conservation Area from Connect and re-upload.");
 									SmartConnect.UPLOAD_LOCK.release();
 									return;
 								}else if (serverStatus.getStatus() == WorkItemStatus.Status.PROCESSING) {

@@ -62,8 +62,6 @@ import org.wcs.smart.upgrade.v700.Upgrader750To751;
 import org.wcs.smart.upgrade.v700.Upgrader751To753;
 import org.wcs.smart.upgrade.v800.Upgrader753To800;
 
-import jakarta.persistence.Tuple;
-
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -326,21 +324,8 @@ public class UpgradeEngine {
 	 * @return
 	 */
 	public static Map<String, String> getVersions(Session s) throws Exception{
-		Map<String, String> versions = null; 
-		try {
-			List<Tuple> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL, Tuple.class).list(); //$NON-NLS-1$
-			versions = new HashMap<String, String>();
-			for (Tuple x : tmpversions){
-				String pluginid = (String)x.get(0);
-				String version = (String)x.get(1);
-				versions.put(pluginid, version);
-			}
-		} catch (Exception e) {
-			//most likely it is because of old version which doesn't contain plugin_id column
-			SmartPlugIn.log(e.getMessage(), e);
-			versions = null;
-		}
-
+		Map<String, String> versions = HibernateManager.getPlugInVersions(s);
+		
 		if (versions == null) {
 			//NOTE: before 3.0.0 db-version table contained only single column with one value
 			List<String> version = s.createNativeQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL, String.class).list(); //$NON-NLS-1$

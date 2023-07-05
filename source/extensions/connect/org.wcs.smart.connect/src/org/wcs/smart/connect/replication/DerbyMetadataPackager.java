@@ -33,6 +33,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 import jakarta.persistence.Tuple;
@@ -70,12 +71,6 @@ public enum DerbyMetadataPackager {
 	}
 	
 	public HashMap<String, String> getLocalPluginVersions(Session session){
-		HashMap<String, String> plugins = new HashMap<String, String>();
-		NativeQuery<Tuple> q = session.createNativeQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL, Tuple.class); //$NON-NLS-1$
-		List<Tuple> plugin = q.list();
-		for (Tuple dversion : plugin){
-			plugins.put((String)dversion.get(1), (String)dversion.get(0));
-		}
-		return plugins;
+		return HibernateManager.getPlugInVersions(session);
 	}
 }

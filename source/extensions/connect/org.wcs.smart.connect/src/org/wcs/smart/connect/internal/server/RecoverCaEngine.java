@@ -53,10 +53,18 @@ public class RecoverCaEngine {
 	private SmartConnect connect;
 	private ProgressMonitorDialog dialog;
 	
+	private ConflictDataRecoveryEngine dataDRE = null;
+	
 	public RecoverCaEngine(ConservationArea ca, SmartConnect connect, ProgressMonitorDialog dialog){
+		this(ca, connect, false, dialog);
+	}
+	
+	
+	public RecoverCaEngine(ConservationArea ca, SmartConnect connect, boolean stashAndApplyNew, ProgressMonitorDialog dialog){
 		this.ca = ca;
 		this.connect = connect;
 		this.dialog = dialog;
+		if (stashAndApplyNew) this.dataDRE = new ConflictDataRecoveryEngine(ca);
 	}
 	
 	/**
@@ -69,10 +77,19 @@ public class RecoverCaEngine {
 	 * @throws Exception
 	 */
 	public void downloadImport(IProgressMonitor monitor) throws Exception{
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_TaskName, 5);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_TaskName, 6);
 		
 		List<Path> toDelete = new ArrayList<>();
 		Path importFile;
+		
+		
+		if (dataDRE != null) {
+			try{
+				dataDRE.buildRecoveryPackage();
+			}catch (RuntimeException ex) {
+				dataDRE.throwPackageException(ex);
+			}
+		}
 		
 		try {
 			/* build hash file of filestore files */
@@ -180,6 +197,14 @@ public class RecoverCaEngine {
 			
 		}finally{
 			Files.delete(importFile);
+		}
+		
+		if (dataDRE != null) {
+			try {
+				dataDRE.applyRecoveryPackage(progress.split(1));
+			}catch (Exception ex) {
+				dataDRE.showRecoveryError(ex);
+			}
 		}
 
 		Display.getDefault().asyncExec(()->PlatformUI.getWorkbench().restart());

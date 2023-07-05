@@ -247,10 +247,9 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	public List<org.wcs.smart.query.model.Query> findQuery(Session session, 
 			String queryName, IQueryType queryType, ConservationArea ca, Employee search) {
 		
-		
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
-		String hsql = "SELECT q FROM " + queryType.getHibernateClass().getSimpleName() + " q, Label l WHERE l.id.element = q.uuid and q.conservationArea = :ca " +  //$NON-NLS-1$//$NON-NLS-2$
-				"and l.value = :name and (q.isShared = 'true' or (q.isShared = 'false' and q.owner = :employee))"; //$NON-NLS-1$ 
+		String hsql = "SELECT q FROM " + queryType.getHibernateClass().getSimpleName() + " q, Label l WHERE l.id.element.uuid = q.uuid and q.conservationArea = :ca " +  //$NON-NLS-1$//$NON-NLS-2$
+				"and l.value = :name and (q.isShared or (not q.isShared and q.owner = :employee))"; //$NON-NLS-1$ 
 		Query<?> query = session.createQuery(hsql, queryType.getHibernateClass()); 
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("employee", search); //$NON-NLS-1$

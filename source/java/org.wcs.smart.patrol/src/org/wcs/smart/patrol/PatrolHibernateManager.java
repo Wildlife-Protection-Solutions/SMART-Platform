@@ -179,11 +179,12 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s){
 		List<PatrolTransportType> types = null;
-		String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix //$NON-NLS-1$
+		String query = "SELECT p FROM PatrolTransportType p, PatrolType t WHERE p.patrolType = t.id.type and t.isActive AND p.isActive and p.conservationArea=:ca and t.id.conservationArea=:ca2"; //'true' = derby fix //$NON-NLS-1$
 		Query<PatrolTransportType> q = s.createQuery(query, PatrolTransportType.class);
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.setParameter("ca2", ca); //$NON-NLS-1$
 		types = q.list();
+		
 		return types;
 	}
 	

@@ -710,7 +710,7 @@ public class SmartConnect {
 	        	int percent = (int)((count * 100.0) / total);
 	        	if (percent > 100) percent = 100;
 	        	
-	        	monitor.setTaskName("Uploading File: " + percent + "% ");
+	        	monitor.setTaskName(MessageFormat.format(ConnectPlugIn.PERCENT_UPLOAD_PROGRESS_MESSAGE, percent));
 	        	monitor.worked(percent - last);
 	        	last = percent;
 	        	monitor.checkCanceled();

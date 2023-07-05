@@ -43,7 +43,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.DownloadCaEngine;
 import org.wcs.smart.connect.internal.server.replication.SyncChangesRunnable;
@@ -98,8 +97,9 @@ public class DownloadInstallCcaaHandler {
 		}
 		
 		SmartConnect connect = dialog.getConnection();
-		ConservationAreaProxy proxy = new ConservationAreaProxy();
+		ConservationArea proxy = new ConservationArea();
 		proxy.setUuid(ConservationArea.MULTIPLE_CA);
+		
 		final DownloadCaEngine installer = new DownloadCaEngine(proxy, connect);
 		
 		final List<Exception> errors = new ArrayList<Exception>();

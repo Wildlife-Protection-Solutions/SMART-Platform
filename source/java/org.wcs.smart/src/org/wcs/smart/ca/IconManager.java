@@ -40,8 +40,6 @@ public enum IconManager {
 	
 	INSTANCE;
 	
-	
-	
 	/**
 	 * Gets the conservation area specific icons - these are used in the CA
 	 * or have been manually configured.
@@ -145,7 +143,7 @@ public enum IconManager {
 		blackIs.setKeyId(FixedIconSet.BLACK.key);
 		blackIs.setName(FixedIconSet.BLACK.name);
 		blackIs.updateName(ca.getDefaultLanguage(), FixedIconSet.BLACK.name);
-		session.save(blackIs);
+		session.persist(blackIs);
 		
 		IconSet colorIs = new IconSet();
 		colorIs.setConservationArea(ca);
@@ -153,7 +151,7 @@ public enum IconManager {
 		colorIs.setKeyId(FixedIconSet.COLOR.key);
 		colorIs.setName(FixedIconSet.COLOR.name);
 		colorIs.updateName(ca.getDefaultLanguage(), FixedIconSet.COLOR.name);
-		session.save(colorIs);
+		session.persist(colorIs);
 		
 		IconSet lineIs = new IconSet();
 		lineIs.setConservationArea(ca);
@@ -161,7 +159,7 @@ public enum IconManager {
 		lineIs.setKeyId(FixedIconSet.LINE.key);
 		lineIs.setName(FixedIconSet.LINE.name);
 		lineIs.updateName(ca.getDefaultLanguage(), FixedIconSet.LINE.name);
-		session.save(lineIs);
+		session.persist(lineIs);
 
 	}
 	

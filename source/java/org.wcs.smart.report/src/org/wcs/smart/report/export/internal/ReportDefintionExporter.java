@@ -43,6 +43,7 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.datatools.connectivity.oda.design.CompositeFilterExpression;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -57,6 +58,7 @@ import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -85,6 +87,9 @@ public class ReportDefintionExporter implements IReportExporter {
 	@Override
 	public void exportReport(Path file, Report report, Map<String, Object> reportParams, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.ReportDefintionExporter_Progress_Exporting, 3);
+		
+		if (!SmartUtils.createDirectory(file.getParent())) return;
+		
 		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(file))){
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 			

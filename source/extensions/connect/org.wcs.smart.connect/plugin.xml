@@ -142,6 +142,10 @@
             commandId="org.wcs.smart.connect.server.downloadreplaceca"
             icon="images/icons/obj16/server_ca_download.png">
       </image>
+      <image
+            commandId="org.wcs.smart.connect.server.recoverca"
+            icon="images/icons/obj16/server_ca_download.png">
+      </image>
    </extension>
    <extension
          id="id2"
@@ -264,18 +268,6 @@
                <command
                      commandId="org.wcs.smart.connect.server.changelog.down"
                      style="push">
-               </command>
-               <command
-                     commandId="org.wcs.smart.connect.server.downloadreplaceca"
-                     style="push">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <and>
-                        <test
-                              property="org.wcs.smart.caSingle">
-                        </test>
-                     </and>
-                  </visibleWhen>
                </command>
                <command
                      commandId="org.wcs.smart.connect.server.recoverca"

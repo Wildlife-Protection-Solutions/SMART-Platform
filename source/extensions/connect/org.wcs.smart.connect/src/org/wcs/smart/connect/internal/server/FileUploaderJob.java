@@ -89,7 +89,7 @@ public abstract class FileUploaderJob extends Job {
 			int maxRetry = ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer());
 			
 			SubMonitor uploadProgress = progress.split(30);
-			uploadProgress.beginTask("Uploading File: 0%",  100);
+			uploadProgress.beginTask(MessageFormat.format(ConnectPlugIn.PERCENT_UPLOAD_PROGRESS_MESSAGE, 0),  100);
 			while(maxRetry == -1 || cnt < maxRetry){
 				progress.setTaskName(MessageFormat.format("uploading files (attempt {0})", (cnt+1)));
 

@@ -255,7 +255,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			}
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
 			//boolean
-			String x = prefix + "." + option.getColumnName() ; //+ " = 'true'" ; //$NON-NLS-1$
+			String x = prefix + "." + option.getColumnName() ; //$NON-NLS-1$
 			return x;
 		}else if (option.getType() == PatrolQueryOptionType.UUID){
 			//uuid

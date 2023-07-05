@@ -35,7 +35,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.GeometryUtils;
 
 /**
@@ -102,10 +101,6 @@ public class SmartDB {
 	 */
 	public static DbUser getCurrentUser(){
 		return DbUser.ADMIN;
-//		if (current == null){
-//			return DbUser.LOGIN;
-//		}
-//		return current;
 	}
 
 	/**
@@ -189,12 +184,6 @@ public class SmartDB {
 			ConservationArea ca, 
 			ConservationAreaConfiguration configuration) throws Exception{
 		currentCa = ca;
-//		if (currentEmployee == null || !currentEmployee.equals(user)){
-//			//new user
-////			current = findDbUser(user);
-////			HibernateManager.setUserName(current.username, current.password);
-//			HibernateManager.setUserName(DbUser.ADMIN.password, DbUser.ADMIN.password);
-//		}
 		currentEmployee = user;
 		SmartDB.plainTextPassword = plainTextPassword;
 		caConfig = configuration;
@@ -210,41 +199,6 @@ public class SmartDB {
 	 */
 	public static Employee getCurrentEmployee(){
 		return currentEmployee;
-	}
-	
-	/**
-	 * Finds the database user for a given employee
-	 * 
-	 * @param user employee
-	 * @return the database user
-	 */
-	public static DbUser findDbUser(Employee user){
-		return DbUser.ADMIN;
-//		
-//		for (String s : user.getSmartUserLevels()){
-//			if (!s.equals(UserLevelManager.ADMIN.getKey()) &&
-//				!s.equals(UserLevelManager.MANAGER.getKey()) &&
-//				!s.equals(UserLevelManager.ANALYST.getKey()) &&
-//				!s.equals(UserLevelManager.DATA_ENTRY.getKey())){
-//				//some other account
-//				return DbUser.ADMIN;
-//			}
-//		}
-//		//multiple users - give admin account permission
-//		//see ticket #2256
-//		if (user.getSmartUserLevels().size() != 1) return DbUser.ADMIN;
-//		
-//		//single user level - pick correct db user
-//		if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
-//			return DbUser.ADMIN;
-//		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.MANAGER)){
-//			return DbUser.MANAGER;
-//		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ANALYST)){
-//			return DbUser.ANALYST;
-//		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.DATA_ENTRY)){
-//			return DbUser.DATAENTRY;
-//		}
-//		return DbUser.ADMIN;
 	}
 	
 	

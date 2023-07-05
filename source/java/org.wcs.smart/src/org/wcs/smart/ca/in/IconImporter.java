@@ -189,18 +189,7 @@ public class IconImporter {
 						Path p1 = file.getAttachmentFile();
 						Path p2 = setFile;
 						
-						//TODO: update when using java12+
-						//Files::mismatch
-						boolean areFilesSame = false;
-						try(FileReader r1 = new FileReader(p1.toFile());
-								FileReader r2 = new FileReader(p2.toFile());){
-							areFilesSame = IOUtils.contentEquals(r1, r2);
-						}catch (Exception ex) {
-							System.out.println(p1.toString());
-							System.out.println(p2.toString());
-							
-							throw ex;
-						}
+						boolean areFilesSame = (Files.mismatch(p1, p2) == -1);
 						if (!areFilesSame) {
 							//this is a different icon file so we want to
 							//delete this file 

@@ -50,7 +50,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.PlugInConfigurationExporter;
 import org.wcs.smart.internal.ca.in.CaImportEngine;

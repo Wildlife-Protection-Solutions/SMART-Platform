@@ -162,6 +162,7 @@ public class CheckBoxDropDownCellEditor extends CellEditor {
 	 * @param value
 	 *            the new value
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doSetValue(Object value) {
 	    Assert.isTrue(viewer != null);
@@ -224,12 +225,6 @@ public class CheckBoxDropDownCellEditor extends CellEditor {
 		markDirty();
 		boolean isValid = isCorrect(newValue);
 		setValueValid(isValid);
-
-		if (!isValid) {
-			//TODO
-//			MessageFormat.format(getErrorMessage(),
-//					new Object[] { selectedValue });
-		}
 
 		fireApplyEditorValue();
 		deactivate();

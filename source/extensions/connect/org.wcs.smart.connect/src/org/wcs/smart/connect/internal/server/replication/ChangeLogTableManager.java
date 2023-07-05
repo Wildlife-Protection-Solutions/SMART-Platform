@@ -117,6 +117,17 @@ public enum ChangeLogTableManager {
 			}	
 		}
 		
+		addItemNoLock(s, item);
+
+		s.getTransaction().commit();
+	}
+	
+	/**
+	 * Insert item into the table without getting a lock on the table - use with care.
+	 * @param s
+	 * @param item
+	 */
+	public void addItemNoLock(Session s, ChangeLogItem item){
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO "); //$NON-NLS-1$
 		sb.append(ChangeLogItem.TABLENAME);
@@ -140,8 +151,6 @@ public enum ChangeLogTableManager {
 		query.setParameter("key2uuid", item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2())); //$NON-NLS-1$
 		query.setParameter("source", item.getSource().name()); //$NON-NLS-1$
 		query.executeUpdate();
-
-		s.getTransaction().commit();
 	}
 	
 	/**

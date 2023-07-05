@@ -33,6 +33,25 @@ import org.hibernate.query.NativeQuery;
 public enum DerbyTriggerManager {
     INSTANCE;
    
+	
+	/**
+	 * Add trigger that removes items from the change log when replication is not enabled for the 
+	 * ca.
+	 * @param session
+	 */
+	public void addChangeLogTableTrigger(Session session) {
+		session.createNativeMutationQuery("CREATE TRIGGER trg_change_log_insert AFTER INSERT ON smart.connect_change_log REFERENCING NEW AS new FOR EACH ROW WHEN (smart.is_replication_enabled_ca(new.ca_uuid) = false) delete from smart.connect_change_log where uuid = new.uuid"). //$NON-NLS-1$
+		executeUpdate();	
+	}
+	
+	/**
+	 * Remove the trigger that removes items from the change log when replication is not enabled for the 
+	 * ca. We do this in a few select places were data is imported. 
+	 * @param session
+	 */
+	public void removeChangeLogTableTrigger(Session session) {
+		session.createNativeMutationQuery("DROP TRIGGER trg_change_log_insert").executeUpdate(); //$NON-NLS-1$
+	}
     /**
      * Determines if a given trigger exists by querying in the systriggers table.
      * 

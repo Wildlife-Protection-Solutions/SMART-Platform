@@ -40,6 +40,7 @@ public class HibernateUtil {
 	 * the current dialog in use 
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public static Dialect getHibernateCurrentDialect(Session session) {
 		try {
 			if (session != null && session.getSessionFactory() != null) {

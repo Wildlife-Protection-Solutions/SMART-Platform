@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -35,14 +34,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -63,7 +59,6 @@ import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -132,9 +127,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolLegDayInputComposite {
 
-	private static final String LOAD_WIZARD_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_LoadingImportWizard;
-	private static final String SHOW_WIZARD_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_DisplayingImportWizard;
-	
 	private DateTime dtStartTime;
 	private DateTime dtEndTime;
 	private Text restMinutes;

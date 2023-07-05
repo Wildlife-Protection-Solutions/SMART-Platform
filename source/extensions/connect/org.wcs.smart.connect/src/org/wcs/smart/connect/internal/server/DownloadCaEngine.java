@@ -43,7 +43,6 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.in.CaImporter;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerOption;
@@ -67,12 +66,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class DownloadCaEngine {
 	
-	private ConservationAreaProxy info;
+	private ConservationArea info;
 	private SmartConnect connect;
 	
-	public DownloadCaEngine(ConservationAreaProxy info, SmartConnect connect){
+	private ConflictDataRecoveryEngine dataDRE = null;
+
+	public DownloadCaEngine(ConservationArea info, SmartConnect connect){
+		this(info, connect, false);		
+	}
+	
+	public DownloadCaEngine(ConservationArea info, SmartConnect connect, boolean applyNew){
 		this.info = info;
 		this.connect = connect;
+		if (applyNew) this.dataDRE = new ConflictDataRecoveryEngine(info);
 	}
 	
 	/**
@@ -84,12 +90,21 @@ public class DownloadCaEngine {
 	 */
 	public boolean downloadImport(IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_TaskName, 5);
+		
+		
+		if (dataDRE != null) {
+			try{
+				dataDRE.buildRecoveryPackage();
+			}catch (RuntimeException ex) {
+				dataDRE.throwPackageException(ex);
+			}
+		}
+
 		try {
 			/* request ca */
 			progress.subTask(Messages.DownloadCaEngine_InitSubtaskName);
 			String statusUrl = connect.startConservationAreaDownload(info.getUuid());
 			progress.worked(1);
-			
 			
 			/* wait for ca export to be created */
 			progress.subTask(Messages.DownloadCaEngine_WaitSubTaskName);
@@ -120,13 +135,10 @@ public class DownloadCaEngine {
 			JsonNode nd = (new ObjectMapper()).readTree(message);
 			String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
 			
-			
 			Path p = connect.downloadFileFromUrl(downloadUrl, null, progress.split(1));
-			
 			
 			//start by validating the package
 			progress.subTask(Messages.DownloadCaEngine_VersionValidation);
-//			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 			try {
 				if (!CaImporter.validateCaImport(p)) {
 					return false;
@@ -159,6 +171,15 @@ public class DownloadCaEngine {
 			}finally{
 				Files.delete(p);
 			}
+			
+			if (dataDRE != null) {
+				try {
+					dataDRE.applyRecoveryPackage(progress.split(1));
+				}catch (Exception ex) {
+					dataDRE.showRecoveryError(ex);
+				}
+			}
+
 		
 		} catch (OperationCanceledException ex) {
 			return false;

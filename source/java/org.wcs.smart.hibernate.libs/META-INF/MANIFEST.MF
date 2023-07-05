@@ -260,6 +260,7 @@ Export-Package:
  org.hibernate.jpa,
  org.hibernate.loader,
  org.hibernate.metadata,
+ org.hibernate.metamodel.mapping,
  org.hibernate.metamodel.spi,
  org.hibernate.persister.entity,
  org.hibernate.persister.internal,

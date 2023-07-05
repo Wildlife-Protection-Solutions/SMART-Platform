@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.changetracking.DerbyTriggerManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
@@ -68,11 +69,31 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	private SubMonitor monitor;
 	private int totalWork = -1;
 	
+	private boolean persistChangeLogRecords = false;
+	
+	private List<ChangeLogItem> toSave = new ArrayList<>();
+	
+	/**
+	 * 
+	 * @param changeLogFile  change log file
+	 * @param changeLogFilestoreDir filestore files
+	 * @param ca conservation area
+	 * @param persistChangeLogRecords if change log records should be added back into change log table. This is
+	 * true of the cases were we want to "re-apply" new items after fixing sync conflict
+	 * @param monitor
+	 */
 	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir, 
-			ConservationArea ca, IProgressMonitor monitor) {
+			ConservationArea ca, boolean persistChangeLogRecords, IProgressMonitor monitor) {
 		super(changeLogFile, changeLogFilestoreDir);
 		this.ca = ca;
 		if (monitor != null) this.monitor = SubMonitor.convert( monitor );
+		this.persistChangeLogRecords = persistChangeLogRecords;
+	}
+	
+	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir, 
+			ConservationArea ca, IProgressMonitor monitor) {
+		this(changeLogFile, changeLogFilestoreDir, ca, false, monitor);
+		
 	}
 
 	@Override
@@ -97,7 +118,14 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, ca, Type.UPLOAD);
 		lastUploadRevision = lastUpload == null ? -1 : lastUpload.getEndRevision();
 		
+		if (persistChangeLogRecords) DerbyTriggerManager.INSTANCE.removeChangeLogTableTrigger(session);
+
 		super.processFile(session);
+		
+		if (persistChangeLogRecords) {
+			for (ChangeLogItem item : toSave) ChangeLogTableManager.INSTANCE.addItemNoLock(session, item);
+			DerbyTriggerManager.INSTANCE.addChangeLogTableTrigger(session);		
+		}
 	}
 	
 	public boolean shouldProcess(ChangeLogItem it, Path changeLogPackage) throws ConflictException{
@@ -146,6 +174,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 						cb.equal(from.get("source"), Source.LOCAL) //$NON-NLS-1$
 						));
 				Long cnt = session.createQuery(c).uniqueResult();
+				
 				if (cnt > 0){
 					throw new ConflictExceptionImpl(it);
 				}
@@ -284,8 +313,17 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	@Override
 	protected void saveItem(ChangeLogItem item, Session s) throws Exception {
 		//it is not necessary to save this change;  there is no way we can download it twice
-		//ChangeLogTableManager.INSTANCE.addItem(s, item);
+		//but when we are re-applying changes after fixing sync issues we want to record them 
+		if (persistChangeLogRecords) {
+			item.setUuid(null);
+			item.setSource(ChangeLogItem.Source.LOCAL);
+			
+			//save them after all changes are applied so we don't end up with conflicts
+			toSave.add(item);
+		}
 	}
+	
+	
 	
 	@Override
 	protected void processDataDelete(ChangeLogItem item, Connection c) throws SQLException{

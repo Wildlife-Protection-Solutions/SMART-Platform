@@ -180,7 +180,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	}
 	
 	protected void updateLastModified(Waypoint wp, Session s) {
-		s.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_lastmodified = :lastmodified, wp_lastmodifiedbyname = :lastmodifiedby WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		s.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_lastmodified = :lastmodified, wp_lastmodifiedbyname = :lastmodifiedby WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("lastmodified", wp.getLastModified()) //$NON-NLS-1$
 			.setParameter("lastmodifiedby", SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee())) //$NON-NLS-1$
 			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
@@ -193,7 +193,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 		wp.setDirection(direction);
 		wp.setDistance(distance);
 		
-		session.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_x = :x, wp_y = :y, wp_distance = :distance, wp_direction = :direction WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_x = :x, wp_y = :y, wp_distance = :distance, wp_direction = :direction WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("x", newX) //$NON-NLS-1$
 			.setParameter("y", newY) //$NON-NLS-1$
 			.setParameter("distance", distance) //$NON-NLS-1$
@@ -205,7 +205,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	private void updateWaypointDistance(Waypoint wp, Float newDistance, Session session){
 		wp.setDistance(newDistance);
 		
-		session.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_distance = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_distance = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("id", newDistance) //$NON-NLS-1$
 			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
 			.executeUpdate();
@@ -214,7 +214,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	private void updateWaypointDirection(Waypoint wp, Float newDirection, Session session){
 		wp.setDirection(newDirection);
 		
-		session.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_direction = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_direction = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("id", newDirection) //$NON-NLS-1$
 			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
 			.executeUpdate();	
@@ -223,7 +223,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	private void updateWaypointId(Waypoint wp, String newId, Session session){
 		wp.setId(newId);
 		
-		session.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_id = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_id = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("id", newId) //$NON-NLS-1$
 			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
 			.executeUpdate();
@@ -232,7 +232,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	private void updateWaypointTime(Waypoint wp, LocalTime newTime, Session session){
 		wp.setDateTime( wp.getDateTime().toLocalDate().atTime(newTime) );
 		
-		session.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_time = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_time = :id WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("id", wp.getDateTime()) //$NON-NLS-1$
 			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
 			.executeUpdate();
@@ -241,7 +241,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	private void updateWaypointComment(Waypoint wp, String newComment, Session session){
 		wp.setComment(newComment);
 		
-		session.createNamedMutationQuery("update " + engine.getQueryDataTable() + " SET wp_comment = :cmt WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("update " + engine.getQueryDataTable() + " SET wp_comment = :cmt WHERE wp_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 			.setParameter("cmt", newComment) //$NON-NLS-1$
 			.setParameter("uuid", wp.getUuid()) //$NON-NLS-1$
 			.executeUpdate();
@@ -274,7 +274,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 				//update category names in query results table
 				StringBuilder sql = new StringBuilder();
 				sql.append(" DELETE FROM " + engine.getQueryDataTable() + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				s.createNamedMutationQuery(sql.toString())
+				s.createNativeMutationQuery(sql.toString())
 					.setParameter("uuid", waypointUuid) //$NON-NLS-1$
 					.executeUpdate();
 					

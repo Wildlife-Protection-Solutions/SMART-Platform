@@ -67,6 +67,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public static final String CONNECT_URL_PREF = "org.wcs.smart.connect.url.pref"; //$NON-NLS-1$
 	public static final String CONNECT_ALERT_TYPE_CACHE_PREF = "org.wcs.smart.connect.alert.types"; //$NON-NLS-1$
 	
+	public static final String PERCENT_UPLOAD_PROGRESS_MESSAGE = "Uploading File: {0}% ";
 	/**
 	 * The constructor
 	 */

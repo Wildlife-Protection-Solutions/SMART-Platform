@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.DownloadCaEngine;
 import org.wcs.smart.hibernate.SmartDB;
@@ -56,7 +55,10 @@ public class DownloadReplaceCaHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell){
-		
+		this.execute(activeShell, false);
+	}
+	
+	public void execute(Shell activeShell, boolean applyNew) {
 		if (!MessageDialog.openConfirm(activeShell, Messages.DownloadReplaceCaHandler_DialogTitle, Messages.DownloadReplaceCaHandler_ConfirmMsg)){
 			return;
 		}
@@ -76,10 +78,8 @@ public class DownloadReplaceCaHandler {
 		}
 		
 		SmartConnect connect = dialog.getConnection();
-		ConservationAreaProxy proxy = new ConservationAreaProxy();
-		proxy.setUuid(SmartDB.getCurrentConservationArea().getUuid());
 		
-		final DownloadCaEngine installer = new DownloadCaEngine(proxy, connect);
+		final DownloadCaEngine installer = new DownloadCaEngine(SmartDB.getCurrentConservationArea(), connect, applyNew);
 		
 		final List<Exception> errors = new ArrayList<Exception>();
 		try{
@@ -108,7 +108,6 @@ public class DownloadReplaceCaHandler {
 		ConnectPlugIn.displayLog(Messages.DownloadConnectWizard_DownloadError + "\n\n" + errors.get(0).getMessage(), errors.get(0)); //$NON-NLS-1$
 		
 	}
-	
 	
 	public static class DownloadReplaceCaHandlerWrapper extends DIHandler<DownloadReplaceCaHandler>{
 		public DownloadReplaceCaHandlerWrapper() {

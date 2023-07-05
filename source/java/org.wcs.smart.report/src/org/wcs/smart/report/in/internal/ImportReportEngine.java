@@ -427,7 +427,7 @@ public class ImportReportEngine {
 	 */
 	private Report validateReport(final Report report, ConservationArea newCa, Employee newEmployee){
 		
-		String hql = "Select r from Report as  r join r.names as l where l.value = :name and ((r.owner = :owner and r.shared = 'false') or r.shared = 'true') and r.conservationArea = :ca"; //$NON-NLS-1$
+		String hql = "Select r from Report as  r join r.names as l where l.value = :name and ((r.owner = :owner and not r.shared ) or r.shared ) and r.conservationArea = :ca"; //$NON-NLS-1$
 		Query<Report> query = session.createQuery(hql, Report.class);
 		
 		query.setParameter("name", report.getName()); //$NON-NLS-1$

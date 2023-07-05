@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,6 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
@@ -242,7 +241,7 @@ public class DerbyRestoreEngine {
 //		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
 		//check to install all plugins in backup and also installed in current version
-		progress.subTask("Validating Versions");
+		progress.subTask(Messages.SmartStartUp_ValidationDbVersions);
 		StringBuilder missingPlugins = new StringBuilder();
 			
 		Map<String,String> backupVersions = null;
@@ -428,15 +427,17 @@ public class DerbyRestoreEngine {
  	*/
 	private static void validateConfiguration(Map<String, String> versions) throws Exception {
 		try(Session s = HibernateManager.openSession()){
-			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			
+			HashMap<String,String> tempversions = HibernateManager.getPlugInVersions(s);
+			
 			List<String> missingFromBackup = new ArrayList<String>();
 			List<String> missingFromSystem = new ArrayList<String>();
 			List<String> versionError = new ArrayList<String>();
 			List<String> all = new ArrayList<String>();
 			
-			for (Object x : tmpversions){
-				String pluginid = (String) ((Object[])x)[0];
-				String version = (String) ((Object[])x)[1];
+			for (Entry<String,String> x : tempversions.entrySet()){
+				String pluginid = x.getKey();
+				String version = x.getValue();
 				if (versions.get(pluginid) == null){
 					missingFromSystem.add(pluginid);
 				}else if (!versions.get(pluginid).equals(version)){

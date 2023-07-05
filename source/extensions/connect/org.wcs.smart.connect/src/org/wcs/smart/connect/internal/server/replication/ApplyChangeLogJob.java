@@ -60,6 +60,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
+import org.wcs.smart.connect.replication.changelog.ConflictException;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
@@ -166,18 +167,27 @@ public class ApplyChangeLogJob extends Job {
 		//look for unique constraint errors; likely due to duplicate keys 
 		Throwable parent = ex;
 		Exception constraint = null;
+		ConflictException conflictex = null;
 		while(parent != null){
 			if (parent instanceof SQLIntegrityConstraintViolationException){
 				constraint = (Exception) parent;
 				break;
 			}
+			if (parent instanceof ConflictException) {
+				conflictex = (ConflictException) parent;
+				break;
+			}
 			if (parent == parent.getCause()) break;
 			parent = parent.getCause();
 		}
+		if (conflictex != null) {
+			record.setHasConflictError(true);
+		}
 		if (constraint != null){
 			record.setErrorString(Messages.ApplyChangeLogJob_ConstraintError + "\n\n" + constraint.getMessage());    //$NON-NLS-1$
+		}else {
+			record.setErrorString(Messages.ApplyChangeLogJob_UnknownError + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 		}
-		record.setErrorString(Messages.ApplyChangeLogJob_UnknownError + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 	}
 	
 	//must be called from the UI thread
@@ -315,11 +325,6 @@ public class ApplyChangeLogJob extends Job {
 		boolean replicationEnabled = DerbyReplicationManager.INSTANCE.getSystemReplicationState();
 		
 		//gets the current user; for resetting after applying changes
-		SmartDB.DbUser currentUser = SmartDB.DbUser.ADMIN;
-		if (SmartDB.getCurrentEmployee() != null){
-			currentUser = SmartDB.getCurrentUser();
-		}
-		
 		try(Session session = HibernateManager.lockDatabase()){
 			session.beginTransaction();
 			try {

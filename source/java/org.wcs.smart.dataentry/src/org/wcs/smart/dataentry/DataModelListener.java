@@ -53,31 +53,31 @@ public class DataModelListener implements IDataModelListener {
 			session.beginTransaction();
 			try{
 				//delete all disabled list items
-				session.createMutationQuery("DELETE CmAttributeListItem a where a IN (SELECT cma FROM CmAttributeListItem cma WHERE cma.listItem.attribute.conservationArea = :ca and cma.listItem.isActive = 'false')") //$NON-NLS-1$
+				session.createMutationQuery("DELETE CmAttributeListItem a where a IN (SELECT cma FROM CmAttributeListItem cma WHERE cma.listItem.attribute.conservationArea = :ca and not cma.listItem.isActive)") //$NON-NLS-1$
 					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.executeUpdate();
 				session.flush();
 				
 				//delete default attribute option
-				session.createMutationQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeListItem it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)") //$NON-NLS-1$ //$NON-NLS-2$
+				session.createMutationQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeListItem it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and not it.isActive and it.attribute.conservationArea = :ca)") //$NON-NLS-1$ //$NON-NLS-2$
 					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.executeUpdate();
 				session.flush();
 				
 				//delete all disabled tree items
-				session.createMutationQuery("DELETE CmAttributeTreeNode a WHERE a IN (SELECT cm FROM CmAttributeTreeNode cm WHERE cm.dmTreeNode.attribute.conservationArea = :ca AND cm.dmTreeNode.isActive = 'false')") //$NON-NLS-1$
+				session.createMutationQuery("DELETE CmAttributeTreeNode a WHERE a IN (SELECT cm FROM CmAttributeTreeNode cm WHERE cm.dmTreeNode.attribute.conservationArea = :ca AND not cm.dmTreeNode.isActive)") //$NON-NLS-1$
 					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.executeUpdate();
 				session.flush();
 				
 				//delete default attribute option
-				session.createMutationQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeTreeNode it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and it.isActive = 'false' and it.attribute.conservationArea = :ca)") //$NON-NLS-1$ //$NON-NLS-2$
+				session.createMutationQuery("DELETE CmAttributeOption op WHERE op IN (SELECT cop FROM CmAttributeOption cop, AttributeTreeNode it WHERE cop.optionId = '" + CmAttributeOption.ID_DEFAULT_VALUE + "' AND cop.uuidValue = it.uuid and not it.isActive and it.attribute.conservationArea = :ca)") //$NON-NLS-1$ //$NON-NLS-2$
 					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.executeUpdate();
 				session.flush();
 				
 				//delete all nodes that reference in-active categories
-				Query<CmNode> nodeQuery = session.createQuery("FROM CmNode n WHERE n.category.conservationArea = :ca AND n.category.isActive = 'false'", CmNode.class); //$NON-NLS-1$
+				Query<CmNode> nodeQuery = session.createQuery("FROM CmNode n WHERE n.category.conservationArea = :ca AND not n.category.isActive", CmNode.class); //$NON-NLS-1$
 				nodeQuery.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<CmNode> toDelete = nodeQuery.list();
 				for (CmNode delete : toDelete){
@@ -108,7 +108,7 @@ public class DataModelListener implements IDataModelListener {
 						"WHERE a.attribute = b.id.attribute " + //$NON-NLS-1$
 						"AND a.attribute.conservationArea = b.id.attribute.conservationArea AND a.attribute.conservationArea = :ca " + //$NON-NLS-1$
 						"AND a.node.category.hkey like concat(b.id.category.hkey, '%') " + //$NON-NLS-1$
-						"and b.isActive = 'false'", CmAttribute.class); //$NON-NLS-1$
+						"and not b.isActive ", CmAttribute.class); //$NON-NLS-1$
 				qAttribute.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<CmAttribute> toDelete2 =  qAttribute.list();
 				for(CmAttribute delete : toDelete2){

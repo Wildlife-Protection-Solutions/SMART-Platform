@@ -243,6 +243,8 @@ public class PostgresqlExporters {
 			EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);	
 			if (p instanceof AbstractEntityPersister) {
 				AbstractEntityPersister info = (AbstractEntityPersister) p;
+				//no schema so not a table
+				if (!info.getRootTableName().contains(".")) return null; //$NON-NLS-1$
 				return info.getRootTableName();
 				
 			}

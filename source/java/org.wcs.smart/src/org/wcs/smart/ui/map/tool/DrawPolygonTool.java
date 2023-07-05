@@ -234,7 +234,6 @@ public class DrawPolygonTool extends SimpleTool {
 			error = e.getMessage();
 		}
 		if (error != null){
-			//TODO: test
 			Point loc = mapToScreen(coordinates.get(coordinates.size() - 2));
 			MessageBubble bubble = new MessageBubble((int)loc.getX(), (int)loc.getY(), error, (short)5);
 			bubble.setHorizontalCornerArc(5);

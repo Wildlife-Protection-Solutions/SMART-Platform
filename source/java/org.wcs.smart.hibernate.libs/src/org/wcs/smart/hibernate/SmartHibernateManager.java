@@ -37,7 +37,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.query.Query;
@@ -167,7 +166,6 @@ public class SmartHibernateManager {
 	 * @param hqlQueryText
 	 * @return
 	 */
-	//TODO:
 	public static String toSql(Query<?> query) {
 		QuerySqmImpl<?> sqmquery = (QuerySqmImpl<?>)query;
 		

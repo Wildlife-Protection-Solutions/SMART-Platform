@@ -272,7 +272,6 @@ public class PatrolPresentationImageViewer extends Composite {
 				if (obssource != null) {
 					WaypointObservation wo = session.get(WaypointObservation.class, obssource.getUuid());
 					attachments.addAll(wo.getAttachments());
-					//TODO: figure out what to do here 
 					attachments.addAll(wo.getWaypoint().getAttachments());
 					
 				}

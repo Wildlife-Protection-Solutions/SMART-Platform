@@ -65,6 +65,9 @@ public class CcaaDataModelDesktop extends CcaaDataModel{
 	
 	
 	protected void getDataModelInternal() {
+		RuntimeException[] ex = new RuntimeException[1];
+		ex[0] = null;
+		
 		Display.getDefault().syncExec(new Runnable(){
 
 			@Override
@@ -73,11 +76,10 @@ public class CcaaDataModelDesktop extends CcaaDataModel{
 				try {
 					dialog.run(true, false, loadAndMergeDataModelJob);
 				} catch (Exception e) {
-					//SmartPlugIn.displayLog("Error merging data model: " + e.getLocalizedMessage(), e);
-					//TODO:
-					e.printStackTrace();
+					ex[0] = new RuntimeException(e);
 				}		
 		}});
+		if (ex[0] != null) throw ex[0];
 	}
 	
 	private IRunnableWithProgress loadAndMergeDataModelJob = new IRunnableWithProgress() {

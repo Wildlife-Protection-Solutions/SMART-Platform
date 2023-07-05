@@ -26,6 +26,7 @@ import javax.inject.Named;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
@@ -107,12 +108,20 @@ public class DownloadChangeLogHandler {
 						error=true;
 					}
 					if (error){
-						MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);	
+						if (record.getHasConflictError()) {
+							MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), title,
+									null, message, MessageDialog.ERROR, 0, new String[] {"View Conflict Resolution Options", IDialogConstants.CLOSE_LABEL});
+							int rt = md.open();
+							if (rt == 0) {
+								(new RecoverCaHandler()).execute(Display.getDefault().getActiveShell());
+							}
+						}else {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
+						}
 					}else{
 						MessageDialog.openInformation(Display.getDefault().getActiveShell(), title, message);
 					}
-					
-				}
+				} 
 
 		});
 	}

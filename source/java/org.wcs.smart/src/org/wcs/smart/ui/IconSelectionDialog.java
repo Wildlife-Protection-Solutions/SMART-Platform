@@ -614,7 +614,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 					if (caIcons.contains(element)) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 					return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			
 			@Override

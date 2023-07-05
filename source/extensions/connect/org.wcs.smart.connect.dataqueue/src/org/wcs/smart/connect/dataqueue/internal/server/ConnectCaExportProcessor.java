@@ -21,18 +21,15 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.server;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
-import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.server.ICaExportPreprocessor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * A Conservation Area export processor that removes the data queue

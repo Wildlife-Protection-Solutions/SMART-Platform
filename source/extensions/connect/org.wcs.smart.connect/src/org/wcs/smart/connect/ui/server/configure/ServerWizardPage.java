@@ -54,7 +54,6 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outer.setLayout(new GridLayout());
 		
-		//TODO: fix this
 		panel = new ServerPanel(outer, true);
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		panel.addChangeListener(this);

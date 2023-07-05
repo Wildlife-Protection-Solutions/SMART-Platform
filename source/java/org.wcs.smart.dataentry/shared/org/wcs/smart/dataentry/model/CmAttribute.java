@@ -116,7 +116,9 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@Cascade(value = {org.hibernate.annotations.CascadeType.PERSIST, org.hibernate.annotations.CascadeType.MERGE, org.hibernate.annotations.CascadeType.REFRESH, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.REPLICATE})
+	@Cascade(value = {org.hibernate.annotations.CascadeType.PERSIST, 
+			org.hibernate.annotations.CascadeType.MERGE, 
+			org.hibernate.annotations.CascadeType.REFRESH})
 	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
 	public CmAttributeConfig getConfig() {
 		return config;

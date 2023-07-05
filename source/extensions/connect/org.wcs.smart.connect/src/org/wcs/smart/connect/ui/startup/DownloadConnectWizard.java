@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
@@ -92,15 +93,15 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 	@Override
 	public boolean performFinish() {
 		ConservationAreaProxy info = page5.getSelection();
-
-		if (info == null) return false;
-	
+		ConservationArea ca = new ConservationArea();
+		ca.setUuid(info.getUuid());
+			
 		ConnectServer server = createServer();
 		String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 		String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
 		
 		SmartConnect connect = SmartConnect.findInstance(server, user, pass);
-		final DownloadCaEngine installer = new DownloadCaEngine(info, connect);
+		final DownloadCaEngine installer = new DownloadCaEngine(ca, connect);
 		if (!installer.preDownload(getShell())){
 			return false;
 		}

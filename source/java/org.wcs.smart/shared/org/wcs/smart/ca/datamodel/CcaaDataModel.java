@@ -265,12 +265,7 @@ public abstract class CcaaDataModel {
 	 * @returns a list of all attributes in the merged data model
 	 */
 	public List<Attribute> getAttributes(){
-		return getDataModel().getAttributes();
-		//TODO: check this
-		
-//		List<Attribute> attributes = new ArrayList<Attribute>();
-//		attributes.addAll(getDataModel().getAttributes());
-//		return attributes;
+		return new ArrayList<>(getDataModel().getAttributes());
 	}
 	
 	

@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -52,7 +53,6 @@ import org.hibernate.internal.SessionImpl;
 import org.hibernate.jdbc.Work;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.EntityPersister;
-import org.hibernate.persister.entity.Joinable;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.mindrot.jbcrypt.BCrypt;
@@ -79,7 +79,6 @@ import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.export.TableInfo;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.I18nUtil;
@@ -87,6 +86,7 @@ import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -287,23 +287,21 @@ public class HibernateManager extends SmartHibernateManager{
 				
 				if (p instanceof AbstractEntityPersister) {
 					AbstractEntityPersister info = (AbstractEntityPersister) p;
-				
-					if (info instanceof Joinable) {
-						Joinable j = (Joinable)info;
-						if (info.getRootTableName().equals(j.getTableName())){
-							TableInfo tableInfo = new TableInfo(info.getMappedClass(), j.getTableName());
-							//find conservation area property if available
-							for (int k = 0; k < info.getPropertyTypes().length; k ++){
-								if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
-									tableInfo.setCaPropertyName(((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
-									break;
-								}
-							}
-							data.add(tableInfo);
+					//no schema so not a table
+					if (!info.getRootTableName().contains(".")) continue; //$NON-NLS-1$
+					
+					TableInfo tableInfo = new TableInfo(info.getMappedClass(), info.getRootTableName());
+					//find conservation area property if available
+					for (int k = 0; k < info.getPropertyTypes().length; k ++){
+						if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
+							tableInfo.setCaPropertyName(((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
+							break;
 						}
 					}
+					data.add(tableInfo);
+					
 				}else {
-					throw new RuntimeException(MessageFormat.format("Cannot determine entity details for type {0}.", t.getJavaType().toString()));
+					throw new RuntimeException(MessageFormat.format("Cannot determine entity details for type {0}.", t.getJavaType().toString())); //$NON-NLS-1$
 				}
 			}
 		}
@@ -336,21 +334,10 @@ public class HibernateManager extends SmartHibernateManager{
 			if (p instanceof AbstractEntityPersister) {
 				AbstractEntityPersister info = (AbstractEntityPersister) p;
 				return info.getRootTableName();
-				
 			}
 		}
 		
-		//return null
-        throw new RuntimeException("Unexpected persister type; a subtype of AbstractEntityPersister expected.");
-		
-//		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)sessionFactory).getMetamodel();
-//		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(hibernateClass));
-//		ClassMetadata m = info.getClassMetadata();
-//		if (m instanceof Joinable){
-//			return ((Joinable)m).getTableName();
-//		}
-		//return null;
-		
+        throw new RuntimeException("Unexpected persister type; a subtype of AbstractEntityPersister expected."); //$NON-NLS-1$
 	}
 	
 	/**
@@ -422,7 +409,6 @@ public class HibernateManager extends SmartHibernateManager{
 	public static boolean validateUserIdUnique(String userName, ConservationArea ca, Session session){
 		Transaction tx = session.beginTransaction();
 		try{
-			//TODO: test this
 			String query = "select count(*) from Employee where conservationArea = :ca and UPPER(smartUserId) = UPPER(:userId)"; //$NON-NLS-1$
 			List<Long> cnt = session.createQuery(query, Long.class)
 					.setParameter("ca", ca) //$NON-NLS-1$
@@ -956,6 +942,16 @@ public class HibernateManager extends SmartHibernateManager{
 		return session.createQuery(query).uniqueResult();
 	}
 	
+	public static HashMap<String,String> getPlugInVersions(Session session){
+		List<Tuple> tmpversions = session.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL, Tuple.class).list(); //$NON-NLS-1$
+		HashMap<String, String> versions = new HashMap<String, String>();
+		for (Tuple x : tmpversions){
+			String pluginid = (String)x.get(0);
+			String version = (String)x.get(1);
+			versions.put(pluginid, version);
+		}
+		return versions;
+	}
 	
 	/**
 	 * Reads the version for the given plugin from the database
@@ -994,17 +990,17 @@ public class HibernateManager extends SmartHibernateManager{
 	public static void setPlugInVersion(String pluginId, String newVersion, Session s){
 		if (newVersion == null){
 			//delete record
-			NativeQuery<?> query = s.createNativeQuery("DELETE FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			query.executeUpdate();
+			s.createNativeMutationQuery("DELETE FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				.executeUpdate();
 		}else{
 			String x = getPlugInVersion(pluginId, s);
 			if (x == null){
 				//insert new
-				NativeQuery<?> query = s.createNativeQuery("INSERT INTO " + SmartDB.PLUGIN_VERSION_TBL + " (plugin_id, version) VALUES ('" + pluginId + "', '" + newVersion + "')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				query.executeUpdate();
+				s.createNativeMutationQuery("INSERT INTO " + SmartDB.PLUGIN_VERSION_TBL + " (plugin_id, version) VALUES ('" + pluginId + "', '" + newVersion + "')") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.executeUpdate();
 			}else{
-				NativeQuery<?> query = s.createNativeQuery("UPDATE " + SmartDB.PLUGIN_VERSION_TBL + " SET version = '" + newVersion + "' WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				query.executeUpdate();
+				s.createNativeMutationQuery("UPDATE " + SmartDB.PLUGIN_VERSION_TBL + " SET version = '" + newVersion + "' WHERE plugin_id = '" + pluginId + "'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.executeUpdate();
 			}
 		}
 	}

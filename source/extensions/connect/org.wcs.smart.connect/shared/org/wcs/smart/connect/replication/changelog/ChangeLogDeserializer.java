@@ -78,7 +78,7 @@ public abstract class ChangeLogDeserializer {
 	public void processFile(final Session session) throws Exception{
 		try{
 			this.session = session;
-			
+
 			session.doWork(new Work() {
 				@Override
 				public void execute(Connection connection) throws SQLException {

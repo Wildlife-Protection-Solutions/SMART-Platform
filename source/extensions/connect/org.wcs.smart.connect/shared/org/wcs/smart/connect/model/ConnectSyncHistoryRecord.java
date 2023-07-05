@@ -215,4 +215,14 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	public void setErrorString(String error){
 		this.errorString = error;
 	}
+	
+	private boolean hasConflictError = false;
+	@Transient
+	public boolean getHasConflictError() {
+		return this.hasConflictError;
+	}
+	@Transient
+	public void setHasConflictError(boolean conflict) {
+		this.hasConflictError = conflict;
+	}
 }

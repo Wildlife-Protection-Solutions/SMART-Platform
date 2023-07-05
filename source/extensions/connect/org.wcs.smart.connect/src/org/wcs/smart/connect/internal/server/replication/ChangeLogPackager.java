@@ -46,7 +46,6 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
