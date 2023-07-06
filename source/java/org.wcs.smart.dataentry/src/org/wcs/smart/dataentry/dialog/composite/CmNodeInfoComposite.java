@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,10 +32,13 @@ import java.util.UUID;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -80,9 +84,13 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnSingleGpsPoint;
 	private ImageSelectionControl imageControl;
 	private CheckboxTableViewer chSignatures;
+	private ComboViewer cmbErOpViewer;
+	private Label lblErOp;
 	
 	private boolean isGroup;
 	private List<CmAttributeConfig> deletedConfigs;
+	 
+	private static final String NOVALUE = ""; //$NON-NLS-1$
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup, List<CmAttributeConfig> deletedConfigs) {
 		super(parent, model, session);
@@ -284,6 +292,46 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		modeViewer.addCascadeListener(new CascadeDisplayModeListener(modeViewer, this));
 		modeViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
+		Composite eropwraper = new Composite(container, SWT.NONE);
+		eropwraper.setLayout(new FillLayout());
+		
+		lblErOp = new Label(eropwraper, SWT.NONE);
+		lblErOp .setText(Messages.CmNodeInfoComposite_ErOption);
+					
+		cmbErOpViewer = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbErOpViewer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbErOpViewer.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element == NOVALUE) return NOVALUE;
+				if (element instanceof CmNode.IntegrateIncidentType) {
+					switch ((CmNode.IntegrateIncidentType)element){
+					case INTEGRATEINCIDENT: return Messages.CmNodeInfoComposite_ErOpNewIncident;				
+					case INTEGRATEPATROL: return Messages.CmNodeInfoComposite_ErOpPatrolIncident;
+					case INTEGRATEPLLINK: return Messages.CmNodeInfoComposite_ErOpPatrolLinkIncident;
+						
+					}
+				}
+				return super.getText(element);
+			}
+		});
+		List<Object> values = new ArrayList<>();
+		values.add(NOVALUE);
+		for (CmNode.IntegrateIncidentType type: CmNode.IntegrateIncidentType.values()) values.add(type);		
+		cmbErOpViewer.setInput(values);
+			
+		cmbErOpViewer.addSelectionChangedListener(e->{
+			if (!cmbErOpViewer.getControl().isEnabled()) return;
+			Object x = cmbErOpViewer.getStructuredSelection().getFirstElement();
+			if (x == NOVALUE) {
+				node.setIntegrateIncidentType(null);	
+			}else {
+				node.setIntegrateIncidentType((CmNode.IntegrateIncidentType) x);
+			}			
+			fireModelChanged();
+		});
+		cmbErOpViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		
 		addImageRow(container);
 
 		List<SignatureType> sTypes = SignatureTypeManager.INSTANCE.getTypes(session, SmartDB.getCurrentConservationArea());
@@ -333,6 +381,30 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						btnSingleGpsPoint.setSelection(getUseSingleGpsPointValue(n));
 						btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(n));
 					}
+					if (node.getModel().getUseEarthRanger()) {
+						lblErOp.setEnabled(true);
+						cmbErOpViewer.getControl().setEnabled(true);
+						if (cmbErOpViewer != null) {
+							if (n.getIntegrateIncidentType() == null) {
+								cmbErOpViewer.setSelection(new StructuredSelection(NOVALUE));
+							}else {
+								cmbErOpViewer.setSelection(new StructuredSelection(n.getIntegrateIncidentType()));
+							}
+						}
+						
+						lblErOp.setToolTipText(Messages.CmNodeInfoComposite_ErOpTooltip);
+						lblErOp.getParent().setToolTipText(lblErOp.getToolTipText());
+						
+					}else {
+						lblErOp.setEnabled(false);
+						cmbErOpViewer.getControl().setEnabled(false);
+						cmbErOpViewer.setSelection(new StructuredSelection(NOVALUE));
+						
+						lblErOp.setToolTipText(Messages.CmNodeInfoComposite_ErOpTooltipDisabled);
+						lblErOp.getParent().setToolTipText(lblErOp.getToolTipText());
+						
+					}
+					
 					modeViewer.setSelection(new StructuredSelection(node.getDisplayMode() != null ? node.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
 					imageControl.updateImage();
 					CmNodeInfoComposite.this.layout(true, true);

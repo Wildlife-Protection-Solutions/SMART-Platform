@@ -966,6 +966,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
+		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
 
 		updateObserver(toUpdate, attributes, ca, session, l);
 	

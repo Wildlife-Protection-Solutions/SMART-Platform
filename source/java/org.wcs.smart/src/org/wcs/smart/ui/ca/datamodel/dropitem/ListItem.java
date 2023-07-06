@@ -205,7 +205,7 @@ public class ListItem implements Comparable<ListItem>{
 			return key.equals(other.key);
 		}else if (uuid != null && other.uuid != null){
 			return uuid.equals(other.uuid);
-		}
+		}else if (key == null && other.key == null && uuid == null && other.uuid == null) return true;
 		return false;
 	}
 

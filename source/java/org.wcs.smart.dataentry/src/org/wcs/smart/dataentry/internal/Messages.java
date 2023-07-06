@@ -56,6 +56,12 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip1;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
+	public static String CmNodeInfoComposite_ErOpNewIncident;
+	public static String CmNodeInfoComposite_ErOpPatrolIncident;
+	public static String CmNodeInfoComposite_ErOpPatrolLinkIncident;
+	public static String CmNodeInfoComposite_ErOption;
+	public static String CmNodeInfoComposite_ErOpTooltip;
+	public static String CmNodeInfoComposite_ErOpTooltipDisabled;
 	public static String CmNodeInfoComposite_Image;
 	public static String CmNodeInfoComposite_OptionsSection;	
 	public static String CmNodeInfoComposite_PhotoRequired;
@@ -70,6 +76,7 @@ public class Messages extends NLS {
 	public static String CmRootNodeInfoComposite_NoneOption;
 	public static String CmRootNodeInfoComposite_PhotoFirst;
 	public static String CmRootNodeInfoComposite_PhotoFirstTooltip;
+	public static String CmRootNodeInfoComposite_UseErIntegration;
 	public static String CmSmartToXmlConverter_invalidVisibleWhenExpression;
 	public static String CmSmartToXmlConverter_ProcessAttributeConfigs;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
@@ -87,6 +94,7 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_DefaultConfigName;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
 	public static String CmXmlToSmartImporter_ExtractingZip;
+	public static String CmXmlToSmartImporter_HelpFileNotFound;
 	public static String CmXmlToSmartImporter_ImportingConfigs;
 	public static String CmXmlToSmartImporter_ImportingFromXml;
 	public static String CmXmlToSmartImporter_ImportingListItems;
@@ -96,6 +104,7 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_InvalidXml;
 	public static String CmXmlToSmartImporter_LanguageSelect_Message;
 	public static String CmXmlToSmartImporter_LanguageSelect_Title;
+	public static String CmXmlToSmartImporter_NoHelpFiles;
 	public static String CmXmlToSmartImporter_Problem_Attribute;
 	public static String CmXmlToSmartImporter_Problem_Category;
 	public static String CmXmlToSmartImporter_Problem_CategoryHkey;
@@ -140,13 +149,14 @@ public class Messages extends NLS {
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
 	public static String ConfigurableModelLabelProvider_AttributeGroupLabel;
+	public static String ConfigurableModelLabelProvider_ErTagLabel;
 	public static String ConfigurableModelPropertyDialog_AllFiles;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_Button_Export_File;
 	public static String ConfigurableModelPropertyDialog_Button_Import_File;
 	public static String ConfigurableModelPropertyDialog_ConfigurableModelDeafultName;
-	public static String ConfigurableModelPropertyDialog_ConfirmDelete;
+	public static String ConfigurableModelPropertyDialog_ConfirmDelete1;
 	public static String ConfigurableModelPropertyDialog_Converting;
 	public static String ConfigurableModelPropertyDialog_CreateCmModelErrorMessage;
 	public static String ConfigurableModelPropertyDialog_DeleteDialogTitle;

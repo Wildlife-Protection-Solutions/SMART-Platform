@@ -172,8 +172,10 @@ public class IncidentPackageContribution implements IPackageContribution{
 				updates.addFile(toPath);
 			}
 			
+
 			IncidentPackageExporter.exportIncidentMetadata((AbstractCtPackage)pp, s, 
 					metadataFile, tempDir, new NullProgressMonitor());
+
 			updates.addFile(metadataFile);
 		}
 		

@@ -43,6 +43,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -100,6 +101,8 @@ public class XmlToEntity {
 	
 	private Set<IntelEntity> modifiedEntities;
 	private Set<IntelRecord> modifiedRecords;
+	private boolean dmModified = false;
+	
 	public XmlToEntity(ConservationArea ca) {
 		this.ca = ca;
 	}
@@ -176,13 +179,14 @@ public class XmlToEntity {
 		progress.subTask(Messages.XmlToIntelData_SaveTask);
 		modifiedEntities = new HashSet<>();
 		modifiedRecords = new HashSet<>();
-		
+		dmModified = false;
+				
 		session.beginTransaction();
 		try {
 			entities.forEach(a->{
 				a.getEntityAttachments().forEach(aa -> session.save(aa.getAttachment()));
 				session.save(a);
-				a.createDataModelItem(session);
+				dmModified = dmModified || a.createDataModelItem(session);
 				modifiedEntities.add(a);
 				for (IntelEntityRecord r : a.getIntelligenceRecords()) {
 					modifiedRecords.add(r.getRecord());
@@ -193,6 +197,7 @@ public class XmlToEntity {
 				modifiedEntities.add(a.getSourceEntity());
 				modifiedEntities.add(a.getTargetEntity());
 			});
+			if (dmModified) DataModelManager.INSTANCE.updateLastModified(session);
 			session.getTransaction().commit();
 		}catch (Exception ex) {
 			session.getTransaction().rollback();

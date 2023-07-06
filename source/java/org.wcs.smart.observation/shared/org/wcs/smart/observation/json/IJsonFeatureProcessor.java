@@ -52,6 +52,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.IObservationLabelProvider;
 import org.wcs.smart.observation.model.DataLink;
@@ -78,9 +79,11 @@ import jakarta.xml.bind.DatatypeConverter;
 public abstract class IJsonFeatureProcessor {
 
 	public enum LinkDataType{
-		OBSERVATION_GROUP("obsgroup"), //$NON-NLS-1$
-		OBSERVATION("observation"); //$NON-NLS-1$
+		OBSERVATION_GROUP("obsgroup"), //$NON-NLS-1$ 
+		OBSERVATION("observation"); //$NON-NLS-1$ 
+		
 		private String key;
+		
 		LinkDataType(String key){
 			this.key = key;
 		}
@@ -123,6 +126,7 @@ public abstract class IJsonFeatureProcessor {
 		DISTANCE("distance"), //$NON-NLS-1$
 		BEARING("bearing"), //$NON-NLS-1$
 		COMMENT("comment"), //$NON-NLS-1$
+		CMUUID ("cmUuid"), //$NON-NLS-1$
 		OBSERVER(JSON_OBSERVER_KEY); 
 		
 		String key;
@@ -146,7 +150,9 @@ public abstract class IJsonFeatureProcessor {
 		INVALID_MLIST2_ATTRIBUTE,
 		INVALID_TREE_ATTRIBUTE,
 		INVALID_NUMBER_ATTRIBUTE,
-		SIGNATURE_TYPE_NOT_FOUND;
+		SIGNATURE_TYPE_NOT_FOUND,
+		CM_MISSING,
+		INVALID_CM_UUID;
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(IObservationLabelProvider.class).getLabel(this, l);
@@ -392,6 +398,20 @@ public abstract class IJsonFeatureProcessor {
 			wp.setComment(atts.get(WaypointMetadata.COMMENT.key).toString()); 
 		}
 
+		if (atts.containsKey(WaypointMetadata.CMUUID.key)) {
+			UUID uuid = null; 
+			try {
+				uuid = UuidUtils.stringToUuid((String)atts.get(WaypointMetadata.CMUUID.key));
+			}catch (Exception ex) {
+				throw new IOException(MessageFormat.format(Messages.INVALID_CM_UUID.getMessage(locale), atts.get(WaypointMetadata.CMUUID.key)));
+			}
+			ConfigurableModel cm = session.getReference(ConfigurableModel.class, uuid);
+			if (cm == null) {
+				warnings.add(MessageFormat.format(Messages.CM_MISSING.getMessage(locale), (String)atts.get(WaypointMetadata.CMUUID.key)));
+			}
+			wp.setSourceConfigurableModel(cm);
+		}
+		
 		wp.setAttachments(new ArrayList<>());
 
 		if (atts.containsKey("attachments")) { //$NON-NLS-1$

@@ -43,6 +43,8 @@ import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.IntegrateIncidentSource;
+import org.wcs.smart.incident.IntegratePatrolIncidentSource;
+import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -101,7 +103,9 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 	@Override
 	public boolean canProcess(String featureType) {
 		return featureType.equalsIgnoreCase(INCIDENT_DATATYPE) ||
-				featureType.equalsIgnoreCase(INTEGRATE_DATATYPE);
+				featureType.equalsIgnoreCase(INTEGRATE_DATATYPE) ||
+				featureType.equalsIgnoreCase(IntegratePatrolIncidentSource.KEY) ||
+				featureType.equalsIgnoreCase(IntegratePatrolLinkIncidentSource.KEY);
 	}
 
 	/**
@@ -118,7 +122,9 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 
 		String dtype = props.get(JSON_SMARTDATATYPE).toString(); 
-		if (!dtype.equalsIgnoreCase(INCIDENT_DATATYPE) && !dtype.equalsIgnoreCase(INTEGRATE_DATATYPE))
+		if (!dtype.equalsIgnoreCase(INCIDENT_DATATYPE) && !dtype.equalsIgnoreCase(INTEGRATE_DATATYPE) 
+				&& !dtype.equalsIgnoreCase(IntegratePatrolIncidentSource.KEY) 
+				&& !dtype.equalsIgnoreCase(IntegratePatrolLinkIncidentSource.KEY))
 			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, INCIDENT_DATATYPE));
 
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
@@ -141,6 +147,10 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		wp.setSourceId(IndepedentIncidentSource.KEY);
 		if (wpDataType.equalsIgnoreCase(INTEGRATE_DATATYPE)) {
 			wp.setSourceId(IntegrateIncidentSource.KEY);	
+		}else if (wpDataType.equalsIgnoreCase(IntegratePatrolIncidentSource.KEY)) {
+			wp.setSourceId(IntegratePatrolIncidentSource.KEY);	
+		}else if (wpDataType.equalsIgnoreCase(IntegratePatrolLinkIncidentSource.KEY)) {
+			wp.setSourceId(IntegratePatrolLinkIncidentSource.KEY);	
 		}
 		
 		if (wp.getId() == null) {
@@ -355,7 +365,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getRawY() != null) toUpdate.setRawY(wp.getRawY());
 		
 		if (wp.getDateTime() != null) toUpdate.setDateTime(wp.getDateTime());
-		
+		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+
 		//update observer
 		updateObserver(toUpdate, attributes, ca, session, l);
 		

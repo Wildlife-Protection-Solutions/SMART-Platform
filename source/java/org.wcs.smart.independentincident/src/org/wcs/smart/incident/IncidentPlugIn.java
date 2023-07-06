@@ -23,13 +23,25 @@ package org.wcs.smart.incident;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.patrol.IncidentToPatrolProcessor;
+import org.wcs.smart.incident.patrol.IncidentToPatrolProcessorJob;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.EventType;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 
 /**
  * The activator class for the incident plugin.
@@ -62,6 +74,41 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		SmartContext.INSTANCE.setClass(IIncidentLabelProvider.class, new IncidentLabelProvider());
+		
+		IPatrolEventListener scheduleIncidentProcessing = new IPatrolEventListener() {			
+			@Override
+			public void eventFired(int attributeChanged, Object source) {
+				//wait 5 seconds for other events then run 
+				//processing job
+				IncidentToPatrolProcessorJob.getInstance().schedule(5_000);
+			}
+		};
+		
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, scheduleIncidentProcessing);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, scheduleIncidentProcessing);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, scheduleIncidentProcessing);
+		
+		
+		IEventBroker eventBroker = EclipseContextFactory.getServiceContext(IncidentPlugIn.getDefault().getBundle().getBundleContext()).get(IEventBroker.class);
+		eventBroker.subscribe(SmartPlugIn.E4_SYNC_DOWNLOAD_DONE, new EventHandler() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				Object[] data = (Object[]) event.getProperty(IEventBroker.DATA);
+				if (data == null) return;
+				if (data[1] == null || !(data[1] instanceof ConservationArea)) return;
+				if (data[0] == null || !(data[0] instanceof Session)) return;
+				
+				ConservationArea ca = (ConservationArea)data[1];
+				Session session = (Session) data[0];
+					
+				try {
+					(new IncidentToPatrolProcessor(ca, false)).doWork(session);
+				} catch (Exception e) {
+					IncidentPlugIn.displayLog(e.getMessage(), e);
+				}
+			}
+		});
 	}
 
 	/*

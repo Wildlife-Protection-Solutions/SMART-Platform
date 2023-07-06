@@ -595,6 +595,7 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_ImportTranslationsProgress1;
 	public static String DataModelPropertyPage_ImportTranslationsProgress2;
 	public static String DataModelPropertyPage_ImportTranslationsTooltip;
+	public static String DataModelPropertyPage_LastModifiedLbl;
 	public static String DataModelPropertyPage_MergeButton;
 	public static String DataModelPropertyPage_MergeCompleteInfo;
 	public static String DataModelPropertyPage_MergeCompleteMsg;
@@ -1414,6 +1415,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_MergeDmProcessingDms;
 	public static String SmartLabelProvider_MergeDmTypeMismatch;
 	public static String SmartLabelProvider_MultiListAttributeType;
+	public static String SmartLabelProvider_NoneFilterOption;
 	public static String SmartLabelProvider_NotBetweenOperator;
 	public static String SmartLabelProvider_NotContainsOperator;
 	public static String SmartLabelProvider_NotOperator;
@@ -1691,6 +1693,17 @@ public class Messages extends NLS {
 	public static String BrowserView_previoustooltip;
 	public static String BrowserView_refreshtooltip;
 	public static String NumericAttributeField_InvalidNumericAttribute;
+	public static String QuickLinkPreferencePage_Message;
+	public static String QuickLinkPreferencePage_MoveDown;
+	public static String QuickLinkPreferencePage_MoveUp;
+	public static String QuickLinkPreferencePage_NameCol;
+	public static String QuickLinkPreferencePage_NameLbl;
+	public static String QuickLinkPreferencePage_SaveError;
+	public static String QuickLinkPreferencePage_SystemLinks;
+	public static String QuickLinkPreferencePage_Title;
+	public static String QuickLinkPreferencePage_UrlCol;
+	public static String QuickLinkPreferencePage_UrlLbl;
+	public static String QuickLinkPreferencePage_UserLinks;
 	public static String TreeAttributeField_InvalidTreeValue;
 	
 	static {

@@ -235,6 +235,7 @@ public class IncidentPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
+
 	private void createIncidentMetadataJson(Path incidentJson) throws IOException {
 		IconSet defaultSet = QueryFactory.buildQuery(session, 
 				IconSet.class, new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
@@ -260,8 +261,7 @@ public class IncidentPackageExporter {
 					workingDir, session, ctpackage.getConservationArea());
 			metadataScreens.add(emp);
 		}
-		
-		
+				
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
 			fw.write(metadataScreens.toJSONString());
 		}

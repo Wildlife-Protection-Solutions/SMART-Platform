@@ -3,12 +3,13 @@ SET version=8.0.0
 for /f %%i in ('date /t') do set RESULT=%%i
 echo The directory is %RESULT%
 
-SET outputlocation=C:\data\SMART\Builds\SMART7\%RESULT%
+SET outputlocation=C:\data\SMART\Builds\SMART8\%RESULT%
 echo %outputlocation%
 MKDIR %outputlocation%
 
 REM run maven to build packages
-call mvn clean install -Pallplatforms,core,plugins,utils,migrationtools,languagepacks
+REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
 REM call mvn install -Pallplatforms,migrationtools
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip

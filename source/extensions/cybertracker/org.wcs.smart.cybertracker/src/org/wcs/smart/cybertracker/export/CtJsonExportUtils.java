@@ -815,6 +815,22 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
+	public static JSONObject createConfigurableModelUuid(String key, ConfigurableModel cm) {
+		if (cm == null || cm.getUuid() == null) return null;
+		JSONObject dataType = new JSONObject();
+		dataType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_IdentifierLabel);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.UUID.name());
+		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, false);
+		
+		dataType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(cm.getUuid()));
+		dataType.put(JSON_REQUIRED_PROP_KEY, true);
+		
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(key, dataType);
+		return typeOp;
+	}
+	
 	public static JSONObject createPatrolId() {
 		JSONObject dataType = new JSONObject();
 		dataType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_IdentifierLabel);

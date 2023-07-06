@@ -86,7 +86,7 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	private List<String> ctMembers;
 
 	private List<PatrolAttributeValue> customAttributes;
-	
+		
 	public CyberTrackerPatrol(Map<String, E> elementsMap, List<S> sData) {
 		super(elementsMap, sData);
 		customAttributes = new ArrayList<>();
@@ -234,7 +234,7 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	public void setCtMembers(List<String> ctMembers) {
 		this.ctMembers = ctMembers;
 	}
-
+	
 	@Override
 	public String getType() {
 		return PatrolScreenOptionMeta.PATROL_RESOURCE_ID;

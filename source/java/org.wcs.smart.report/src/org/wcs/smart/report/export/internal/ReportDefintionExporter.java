@@ -43,7 +43,6 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.datatools.connectivity.oda.design.CompositeFilterExpression;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;

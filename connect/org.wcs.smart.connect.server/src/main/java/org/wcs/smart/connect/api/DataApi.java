@@ -47,6 +47,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.core.runtime.RegistryFactory;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -58,6 +59,7 @@ import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.er.json.SurveyDesignMetadata;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.incident.patrol.IncidentToPatrolProcessor;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
 import org.wcs.smart.observation.model.DataLink;
@@ -209,7 +211,7 @@ public class DataApi extends HttpServlet{
 	@Path("/data/{cauuid}")
 	public ProcessingResult processJsonData(
 			@Parameter(description="uuid of the conservation area associated with the data") @PathParam("cauuid") String uuid,
-			String body) {
+			String body) throws Exception {
 
 		UUID caUuid = parseUuid(uuid);
 		
@@ -221,6 +223,11 @@ public class DataApi extends HttpServlet{
 		
 		ProcessingResult rr = null;
 		try(Session s = HibernateManager.getSession(context, request.getLocale(), new AttachmentInterceptor())){
+			
+			ConservationArea ca = s.get(ConservationArea.class, caUuid);
+			if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
+			
+			
 			s.beginTransaction();
 			try {
 				if (!SecurityManager.INSTANCE.canAccess(s, 
@@ -232,8 +239,6 @@ public class DataApi extends HttpServlet{
 				}
 				
 				
-				ConservationArea ca = s.get(ConservationArea.class, caUuid);
-				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
 					
 				JsonFileProcessor processor = null;
 				try {
@@ -263,9 +268,13 @@ public class DataApi extends HttpServlet{
 				throw ex;
 			}
 			
+
+			//attempt to link patrols to incidents
+			(new IncidentToPatrolProcessor(ca, true)).doWork(s);
+			
 			s.beginTransaction();
 			try {
-				DataLink.cleanUp(s);
+				DataLink.cleanUp(RegistryFactory.getRegistry(),s);
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				logger.log(Level.WARNING, ex.getMessage(), ex);

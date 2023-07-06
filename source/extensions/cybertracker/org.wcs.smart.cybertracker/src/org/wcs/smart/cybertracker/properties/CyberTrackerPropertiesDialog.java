@@ -55,7 +55,6 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.HibernateUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;

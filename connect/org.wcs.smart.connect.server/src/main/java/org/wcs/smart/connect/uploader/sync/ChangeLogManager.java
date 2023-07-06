@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.uploader.sync;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

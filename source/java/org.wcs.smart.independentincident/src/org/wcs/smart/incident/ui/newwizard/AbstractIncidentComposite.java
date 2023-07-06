@@ -105,8 +105,19 @@ public abstract class AbstractIncidentComposite {
 	 * Updates the incident with the values from the composite.
 	 * 
 	 * @param incident
+	 * 
 	 */
 	public abstract void updateIncident(Waypoint incident);
+	
+	/**
+	 * Called after the incident is updated in the database but before
+	 * the transaction is committed. Allows
+	 * for setting of values outside the incident object. 
+	 * 
+	 * @param incident
+	 * @param session - current active session in transaction 
+	 */
+	public void afterSave(Waypoint incident, Session session) {}
 	
 	/**
 	 * Initializes the composite fields with the values

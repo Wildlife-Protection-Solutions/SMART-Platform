@@ -42,7 +42,7 @@ import org.wcs.smart.patrol.model.Team;
  *
  */
 public enum PatrolMetadataField {
-	
+
 	TRANSPORT("SMART_PatrolTransport", true, false, PatrolTransportType.LIBRARY_ICON_KEY), //$NON-NLS-1$
 	ARMED("SMART_Armed", true, true, "patrol_is_armed"), //$NON-NLS-1$ //$NON-NLS-2$
 	STATION("SMART_Station", false, true, Station.LIBRARY_ICON_KEY), //$NON-NLS-1$
@@ -52,7 +52,9 @@ public enum PatrolMetadataField {
 	COMMENT("SMART_Comments", false, true, "patrol_comment"), //$NON-NLS-1$ //$NON-NLS-2$
 	MEMBERS("SMART_Members", true, false, "patrol_members"), //$NON-NLS-1$ //$NON-NLS-2$
 	LEADER("SMART_Leader", true, false, "patrol_leader"), //$NON-NLS-1$ //$NON-NLS-2$
-	PILOT("SMART_Pilot", false, false, "patrol_pilot"); //$NON-NLS-1$ //$NON-NLS-2$
+	PILOT("SMART_Pilot", false, false, "patrol_pilot"), //$NON-NLS-1$ //$NON-NLS-2$
+	CM_ID("SMART_cmUuid", true, true, null);  //$NON-NLS-1$ //JsonCtParser.CM_UUID_KEY
+
 	
 	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
 	public static final String PATROL_ICONSET_KEY = "patrol_metadata_iconset"; //$NON-NLS-1$

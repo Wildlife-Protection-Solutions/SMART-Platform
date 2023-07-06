@@ -23,6 +23,8 @@ package org.wcs.smart.connect.api;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,11 +45,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
+import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.query.custom.CustomIncidentQueryEngine;
 import org.wcs.smart.connect.query.custom.CustomPatrolQueryEngine;
+import org.wcs.smart.connect.query.custom.CustomQueryEngine;
 import org.wcs.smart.connect.query.custom.CustomWaypointQueryEngine;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
@@ -56,7 +60,10 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.Track;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -104,12 +111,13 @@ public class CustomQueryApi extends HttpServlet{
     @Path("/patrol")
 	@Operation(description="Runs query patrol and returns the results as json")
 	public Response runPatrolQuery(
+			@Parameter(description="query by smart patrol id") @QueryParam("patrol_id") String smartid,
 			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
 			@Parameter(description="query by client patrol uuid") @QueryParam("client_patrol_uuid") String clientpatroluuid) {
 	
 		//only one filter is allowed
 		int cnt = 0;
-		String[] params = new String[] {smartpatroluuid, clientpatroluuid};
+		String[] params = new String[] {smartpatroluuid, clientpatroluuid, smartid};
 		for (String x : params) {
 			if (x != null && !x.trim().isEmpty()) cnt++;
 		}
@@ -129,6 +137,8 @@ public class CustomQueryApi extends HttpServlet{
 						patrols = engine.getPatrolsByPatrolUuid(s, smartpatroluuid, conservationAreas);
 					}else if (clientpatroluuid != null) {
 						patrols = engine.getPatrolsByClientUuid(s, clientpatroluuid, conservationAreas);
+					}else if (smartid != null) {
+						patrols = engine.getPatrolsById(s, smartid, conservationAreas);
 					}
 					
 					if (patrols == null || patrols.isEmpty() ) {
@@ -251,6 +261,114 @@ public class CustomQueryApi extends HttpServlet{
 						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
 						.entity(engine.convertToJSON(wps, s, request.getLocale()).toString())
 						.build();
+			}finally {
+				s.getTransaction().commit();
+			}
+		}catch(RuntimeException ex) {
+			logger.log(Level.SEVERE,ex.getMessage(), ex);
+			throw ex;
+		}
+	}
+	
+	/**
+	 * <p>Queries patrols for tracks and returns the results as GeoJSON</p>
+	 * <p>
+	 * URL: ../server/api/query/custom/track/patrol<br>
+	 * Call Type: GET
+	 * </p>
+	*/
+	@GET
+    @Path("/track/patrol")
+	@Operation(description="Queries patrol tracks and and returns the results as GeoJSON")
+	public Response runPatrolTrackQuery(
+			@Parameter(description="query by smart patrol uuid") @QueryParam("patrol_uuid") String smartpatroluuid,
+			@Parameter(description="query by client patrol uuid") @QueryParam("client_patrol_uuid") String clientpatroluuid,
+			@Parameter(description="query by smart patrol leg uuid") @QueryParam("patrolleg_uuid") String smartpatrolleguuid,
+			@Parameter(description="query by client patrol leg uuid") @QueryParam("client_patrolleg_uuid") String clientpatrolleguuid,
+			@Parameter(description="query by smart patrol id") @QueryParam("patrol_id") String patrolid,
+			@Parameter(description="query by track date - can provide a single date or range of dates") @QueryParam("track_date") String trackDate
+			) throws SQLException{
+
+		
+		//only one filter is allowed
+		int cnt = 0;
+		String[] params = new String[] {smartpatroluuid, clientpatroluuid, 
+				smartpatrolleguuid, clientpatrolleguuid, patrolid, trackDate};
+		for (String x : params) {
+			if (x != null && !x.trim().isEmpty()) cnt++;
+		}
+		if (cnt != 1) throw FILTER_REQURIED;
+		
+		CustomPatrolQueryEngine engine = new CustomPatrolQueryEngine();
+
+		List<Track> tracks = new ArrayList<>();
+		try(Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale())){
+			try {
+				s.beginTransaction();
+				
+				Set<UUID> conservationAreas = findConservationAreas(s);
+				if (!conservationAreas.isEmpty()) {
+					if (smartpatroluuid != null || clientpatroluuid != null || patrolid != null) {
+						List<Patrol> patrols = Collections.emptyList();
+						if (smartpatroluuid != null) {
+							patrols = engine.getPatrolsByPatrolUuid(s, smartpatroluuid, conservationAreas);
+						}else if (clientpatroluuid != null){
+							patrols = engine.getPatrolsByClientUuid(s, clientpatroluuid, conservationAreas);
+						}else if (patrolid != null) {
+							patrols = engine.getPatrolsById(s, patrolid, conservationAreas);
+
+						}
+						for(Patrol p : patrols) {
+							for (PatrolLeg l : p.getLegs()) {
+								for (PatrolLegDay d : l.getPatrolLegDays()) {
+									tracks.addAll(d.getTracks());
+									if (tracks.size() > CustomQueryEngine.MAX_RESULTS) throw CustomQueryEngine.TOO_MANY_ROWS;
+								}
+							}
+						}
+					}else if (smartpatrolleguuid != null || clientpatrolleguuid != null) {
+						List<PatrolLeg> legs = Collections.emptyList();
+						if (smartpatrolleguuid != null) {
+							legs = engine.getPatrolLegByUuid(s, smartpatrolleguuid, conservationAreas);
+						}else if (clientpatrolleguuid != null){
+							legs = engine.getPatrolLegByClientUuid(s, clientpatrolleguuid, conservationAreas);
+						}
+						
+						for (PatrolLeg l : legs) {
+							for (PatrolLegDay d : l.getPatrolLegDays()) {
+								tracks.addAll(d.getTracks());
+								if (tracks.size() > CustomQueryEngine.MAX_RESULTS) throw CustomQueryEngine.TOO_MANY_ROWS;
+							}
+						}
+						
+					}else if (trackDate != null) {
+						LocalDate[] date = parseDateString(trackDate);
+						if (date.length == 1) {
+							tracks = engine.getPatrolTracksByDate(s, date[0], null, conservationAreas);
+						}else {
+							tracks = engine.getPatrolTracksByDate(s, date[0], date[1], conservationAreas);
+						}
+						
+					}
+				}
+				
+				if (tracks == null || tracks.isEmpty() ) {
+					//empty list
+					return Response
+							.status(Status.OK)
+							.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+							.entity(((new JSONArray()).toString()))
+							.build();
+				}
+				try {
+					return Response
+							.status(Status.OK)
+							.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+							.entity(engine.convertTrackToJSON(tracks, s, request.getLocale()).toString())
+							.build();
+				} catch (ParseException e) {
+					throw new RuntimeException(e);
+				}
 			}finally {
 				s.getTransaction().commit();
 			}
@@ -432,7 +550,8 @@ public class CustomQueryApi extends HttpServlet{
 							wps = engine.getWaypointsByDate(s, date[0], date[1], conservationAreas);
 						}
 					}
-				}				
+				}
+				
 				
 				if (wps == null || wps.isEmpty()) {
 					//empty list
@@ -445,7 +564,7 @@ public class CustomQueryApi extends HttpServlet{
 				return Response
 						.status(Status.OK)
 						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
-						.entity(engine.convertToJSON(wps, s).toString())
+						.entity(engine.convertToJSON(wps, s, true).toString())
 						.build();
 			}finally {
 				s.getTransaction().commit();

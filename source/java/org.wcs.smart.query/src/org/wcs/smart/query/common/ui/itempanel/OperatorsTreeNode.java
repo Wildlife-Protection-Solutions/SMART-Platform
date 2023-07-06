@@ -86,6 +86,7 @@ public class OperatorsTreeNode implements IItemTreeNode{
 		public void dispose() {
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			if (newInput instanceof List){

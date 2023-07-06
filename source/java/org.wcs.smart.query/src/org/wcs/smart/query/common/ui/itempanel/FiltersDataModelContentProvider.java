@@ -54,6 +54,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  * @author Emily
  *
  */
+@SuppressWarnings({ "unchecked", "restriction" })
 public class FiltersDataModelContentProvider implements ITreeContentProvider{
 
 	//data model 
@@ -86,8 +87,9 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 			IWorkbenchPage[] pages = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages();
 			for (IWorkbenchPage page : pages) {
 				IViewPart view = page.findView(QueryItemView.ID);
+				
 				if (view instanceof DIViewPart) {
-					@SuppressWarnings("unchecked")
+					
 					QueryItemView qView = ((DIViewPart<QueryItemView>)view).getComponent();
 					qView.refresh();
 				}

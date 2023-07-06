@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -35,6 +36,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.filter.BooleanFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
@@ -47,6 +49,7 @@ import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
+import org.wcs.smart.observation.query.ui.WaypointCmGroupByViewer;
 import org.wcs.smart.observation.query.ui.WaypointSourceGroupByViewer;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
@@ -57,6 +60,7 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.WaypointCmFilter;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.GroupByPart;
@@ -65,12 +69,15 @@ import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
+import org.wcs.smart.query.model.summary.WaypointCmGroupBy;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
+import org.wcs.smart.util.UuidUtils;
 /**
  * Drop item factory for observation queries
  * @author Emily
@@ -127,25 +134,31 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 					items = new DropItem[]{createWaypointSourceGroupByDropItem()};
 				}else if (source == GeneralItem.CONSERVATION_AREA){
 					items = new DropItem[]{super.createConservationAreaGroupByDropItem()};
+				}else if (source == GeneralItem.WAYPOINT_CM) {
+					items = new DropItem[]{createWaypointCmGroupByDropItem()};
 				}
-			}else{
-				if (source == GeneralItem.WAYPOINT_SOURCE ||
+			}else if (source == GeneralItem.WAYPOINT_SOURCE ||
 						source == GeneralItem.OBSERVER || 
-						source == GeneralItem.WAYPOINT_ID){
+						source == GeneralItem.WAYPOINT_ID || 
+						source == GeneralItem.WAYPOINT_CM){
 					items = new DropItem[]{createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItem)source)};
-				}
 			}
 		}
-		return items;
-		
+		return items;		
 	}
 
 	public DropItem createWaypointSourceGroupByDropItem(){
 		return new WaypointSourceGroupByDropItem();
 	}
+	
+	public DropItem createWaypointCmGroupByDropItem(){
+		return new WaypointCmGroupByDropItem();
+	}
 	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItem source){
 		if (source == GeneralContentProvider.GeneralItem.WAYPOINT_SOURCE){
-			return new WaypointSourceFilterDropItem();
+			return new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.SOURCE);
+		}else if (source == GeneralContentProvider.GeneralItem.WAYPOINT_CM){
+				return new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.CM);
 		}else if (source == GeneralContentProvider.GeneralItem.WAYPOINT_ID){
 				return new WaypointIdFilterDropItem();
 		}else if (source == GeneralContentProvider.GeneralItem.OBSERVER){
@@ -290,6 +303,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
 		if (f instanceof WaypointSourceFilter){
 			return createDropItems((WaypointSourceFilter)f, session);
+		}else if (f instanceof WaypointCmFilter){
+			return createDropItems((WaypointCmFilter)f, session);			
 		}else if (f instanceof WaypointIdFilter) {
 			return createDropItems((WaypointIdFilter)f, session);
 		}else if (f instanceof BooleanFilter){
@@ -329,10 +344,31 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			di = new ErrorDropItem(MessageFormat.format(Messages.WaypointSourceFilter_InvalidSourceFilter, new Object[]{filter.getWaypointSourceKey()}));
 		}else{
 	
-			di = new WaypointSourceFilterDropItem();
+			di = new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.SOURCE);
 			di.initializeData(new Object[]{filter.getOperator(), src});
 		}
 		return new DropItem[]{di};
+	}
+	
+	private DropItem[] createDropItems(WaypointCmFilter filter, Session session) throws Exception {
+		
+		DropItem di = new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.CM);
+		
+		if (filter.getValue().equals(IFilter.NULL_OP)){
+			di.initializeData(new Object[] {new ListItem(null, null, IFilter.NULL_OP)});
+		}else {
+			try {
+				UUID cmuuid = UuidUtils.stringToUuid(filter.getValue());
+				ConfigurableModel m = session.getReference(ConfigurableModel.class, cmuuid);				
+				if (m == null) throw new Exception(Messages.ObservationDropItemFactory_CmNotFound);
+				m.getName();
+				di.initializeData(new Object[] {m});
+			}catch (Exception ex) {
+				di = new ErrorDropItem(MessageFormat.format(Messages.ObservationDropItemFactory_CmError, ex.getMessage()));
+
+			}
+		}
+		return new DropItem[] {di};
 	}
 	
 	/**
@@ -380,6 +416,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
 		if (groupBy instanceof WaypointSourceGroupBy){
 			return new WaypointSourceGroupByViewer((WaypointSourceGroupBy) groupBy);
+		}else if (groupBy instanceof WaypointCmGroupBy) {
+			return new WaypointCmGroupByViewer((WaypointCmGroupBy) groupBy);
 		}
 		return super.findViewer(groupBy);
 	}

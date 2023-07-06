@@ -46,7 +46,6 @@ import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
-import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.dataentry.model.ConfigurableModel;

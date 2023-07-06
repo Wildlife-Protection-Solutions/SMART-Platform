@@ -11,6 +11,12 @@ import jakarta.persistence.Table;
 @Table(name="conservation_area_property", schema="smart")
 public class ConservationAreaProperty extends UuidItem{
 
+	
+	/**
+	 * Key for the data model last modified property
+	 */
+	public static final String CA_DM_LAST_MODIFIED_KEY = "datamodel.lastmodified"; //$NON-NLS-1$
+	
 	/**
 	 * 
 	 */

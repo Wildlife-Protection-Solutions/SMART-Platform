@@ -101,7 +101,7 @@ public class CustomQueryEngine {
 	protected static final String KEY_FIELD = "key"; //$NON-NLS-1$
 	protected static final String LABEL_FIELD = "label"; //$NON-NLS-1$
 	
-	protected static SmartConnectException TOO_MANY_ROWS = new SmartConnectException(Status.FORBIDDEN,
+	public static SmartConnectException TOO_MANY_ROWS = new SmartConnectException(Status.FORBIDDEN,
 			"Query returns too many rows. Add additional filters to reduce number of records returned."); //$NON-NLS-1$
 	
 	/**

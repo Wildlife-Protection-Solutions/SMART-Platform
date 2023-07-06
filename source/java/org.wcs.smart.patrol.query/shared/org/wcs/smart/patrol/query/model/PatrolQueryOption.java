@@ -13,7 +13,10 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -53,6 +56,8 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	AGENCY_KEY("agencykey", "agency_uuid", PatrolLegMember.class, Agency.class, PatrolQueryOptionType.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 	RANK("rank", "rank_uuid", PatrolLegMember.class, Rank.class, PatrolQueryOptionType.UUID), //$NON-NLS-1$ //$NON-NLS-2$
 	
+	CM("cm", "source_cm_uuid", Waypoint.class, ConfigurableModel.class, PatrolQueryOptionType.UUID),  //$NON-NLS-1$//$NON-NLS-2$
+	
 	CONSERVATION_AREA("ca", "ca_uuid", Patrol.class, ConservationArea.class, PatrolQueryOptionType.UUID);  //$NON-NLS-1$//$NON-NLS-2$
 	
 	private String key;			//unique identifier key
@@ -91,6 +96,7 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	 * @return the option key
 	 */
 	public String getKey(){
+		if (this == CM) return "waypoint:" + this.key; //$NON-NLS-1$
 		return "patrol:" + this.key; //$NON-NLS-1$
 	}
 	
@@ -133,6 +139,10 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	 * @return
 	 */
 	public String getName(Session session, UUID uuid, Locale l){
+		if (this == CM && uuid == null) 
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(IFilter.NULL_OP, l);
+				
+		
 		Object x = getObject(session, uuid);
 		if (x != null){
 			if (x instanceof NamedItem){

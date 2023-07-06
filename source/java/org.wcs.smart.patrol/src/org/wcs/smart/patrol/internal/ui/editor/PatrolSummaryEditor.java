@@ -781,7 +781,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			session.beginTransaction();
 			try {
 				Patrol patrol = editor.getPatrol();
-				
+							
 				frmPatrolSummary.setText(patrol.getId());
 				
 				txtPatrolId.setText(patrol.getId(), false, false);

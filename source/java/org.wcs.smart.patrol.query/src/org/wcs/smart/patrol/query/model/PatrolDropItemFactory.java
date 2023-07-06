@@ -35,6 +35,7 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -255,7 +256,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 				option == PatrolQueryOption.TEAM ||
 				option == PatrolQueryOption.TEAM_KEY ||
 				option == PatrolQueryOption.AGENCY_KEY ||
-				option == PatrolQueryOption.PILOT){
+				option == PatrolQueryOption.PILOT ||
+				option == PatrolQueryOption.CM ) {
+			
 			item = new PatrolListDropItem(option);
 		} else {
 			switch (option.getType()) {
@@ -680,7 +683,25 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
-
+			
+		} else if (option == PatrolQueryOption.CM) {
+			try {
+				if (value1.isBlank()) {
+					ListItem m = new ListItem(null, PatrolQueryOption.CM.getName(session, null, Locale.getDefault()));
+					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
+				}else {
+					ConfigurableModel cm = session.getReference(ConfigurableModel.class, UuidUtils.stringToUuid(value1));
+					if (cm == null) throw new Exception("Configurable model not found");
+					ListItem m = new ListItem(cm.getUuid(), cm.getName());
+					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
+				}
+			}catch (Exception ex) {
+				it = new ErrorDropItem(MessageFormat.format(
+						"Error parsing configurable model filter: {0}",
+						new Object[] { value1 }));
+			}
+			
+			
 		} else if (option == PatrolQueryOption.PATROL_TYPE) {
 			PatrolType.Type t = PatrolType.Type.valueOf(value1);
 			ListItem m = new ListItem(null, t.getGuiName(Locale.getDefault()), t.name());

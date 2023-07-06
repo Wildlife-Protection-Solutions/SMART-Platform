@@ -663,6 +663,21 @@
             </visibleWhen>
          </menu>
          <menu
+               id="org.wcs.smart.menu.quicklinks"
+               label="Quick Links"
+               mnemonic="L">
+            <dynamic
+                  class="org.wcs.smart.ui.QuickLinksContributionItem"
+                  id="org.wcs.smart.menu.quicklinks.dynamic">
+            </dynamic>
+            <visibleWhen>
+               <test
+                     property="org.wcs.smart.hasquicklinks"
+                     value="true">
+               </test>
+            </visibleWhen>
+         </menu>
+         <menu
                id="org.wcs.smart.menu.help"
                label="%help.menu.label"
                mnemonic="%help.menu.mnemonic">
@@ -1206,6 +1221,13 @@
             properties="caSingle"
             type="java.lang.Object">
       </propertyTester>
+      <propertyTester
+            class="org.wcs.smart.QuickLinkMenuTester"
+            id="org.wcs.smart.quicklink"
+            namespace="org.wcs.smart"
+            properties="hasquicklinks"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
    <extension
          point="org.locationtech.udig.catalog.ServiceExtension">
@@ -1354,6 +1376,10 @@
       <class
             class="org.wcs.smart.ca.SignatureType"
             supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.QuickLink"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension
@@ -1660,6 +1686,11 @@
             id="org.wcs.smart.preference.casize"
             name="%preference.page.casize.name">
       </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.QuickLinkPreferencePage"
+            id="org.wcs.smart.preference.quicklink"
+            name="Quick Link Configuration">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">
@@ -1783,8 +1814,7 @@
    <extension
          point="org.wcs.smart.caLogin">
       <loginHandler
-            class="org.wcs.smart.udig.catalog.smart.ui.RefreshListener"
-            clazz="org.wcs.smart.udig.catalog.smart.ui.RefreshListener">
+            class="org.wcs.smart.udig.catalog.smart.ui.RefreshListener">
       </loginHandler>
    </extension>
    <extension

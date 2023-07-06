@@ -114,6 +114,7 @@ public class PatrolJsonUtils {
 		if (pilot == null){
 			pilot = (String)jsonDefaults.get(PatrolScreenOptionMeta.PILOT.key);
 		}
+
 		List<String> members = new ArrayList<String>();
 		for (Object x : jsonValues.keySet()){
 			String key = (String)x;
@@ -126,6 +127,7 @@ public class PatrolJsonUtils {
 			}	
 		}
 		CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(null, null);
+		
 		if (armed != null){
 			ctPatrol.setArmed(isArmed == null ? false : isArmed);
 		}

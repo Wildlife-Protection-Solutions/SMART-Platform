@@ -138,10 +138,11 @@ public class AssetTable extends SmartBirtTable {
 	public int[] getColumnTypes(SmartConnection connection) {
 		getAttributeColumn(connection);
 		int[] names = new int[Column.values().length + attributeColumns.size()];
-		int i = 0;
-		for (Column c : Column.values()) {
-			names[i++] = Types.VARCHAR;
+		
+		for (int i = 0; i < Column.values().length; i ++) {
+			names[i] = Types.VARCHAR;
 		}
+		int i = Column.values().length;
 		for (AssetAttribute a : attributeColumns) {
 			switch(a.getType()) {
 			case BOOLEAN:

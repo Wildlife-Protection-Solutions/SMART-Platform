@@ -278,7 +278,11 @@ public class DataModelMerger {
 		q.setParameter("key", c.getHkey());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 
-		return q.uniqueResult();
+		//could potential find more than one if they are different per ca
+		//if this is the case pick one to use
+		List<String> keys = q.list();
+		if (keys.size() > 0) return keys.get(0);
+		return null;
 	}
 	
 	private String findIconKey (Attribute a, ConservationArea[] ca, Session session){
@@ -289,7 +293,11 @@ public class DataModelMerger {
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 		
-		return q.uniqueResult();
+		//could potential find more than one if they are different per ca
+		//if this is the case pick one to use
+		List<String> keys = q.list();
+		if (keys.size() > 0) return keys.get(0);
+		return null;
 	}
 	
 	/**

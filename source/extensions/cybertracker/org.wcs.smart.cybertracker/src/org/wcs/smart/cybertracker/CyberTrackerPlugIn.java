@@ -48,6 +48,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_5_0 = "5.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_6_0 = "6.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_7_0 = "7.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_7_5 = "7.5"; //$NON-NLS-1$
 	public static final String DB_VERSION_8_0 = "8.0"; //$NON-NLS-1$
 	public static final String DB_VERSION = DB_VERSION_8_0; //current active version
 	

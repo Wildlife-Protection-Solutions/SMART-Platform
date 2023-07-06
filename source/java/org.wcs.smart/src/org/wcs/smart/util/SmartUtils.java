@@ -40,6 +40,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Comparator;
@@ -639,15 +640,15 @@ public class SmartUtils {
 	}
 	
 	public static LocalDate toLocalDate(XMLGregorianCalendar d) {
-		return LocalDate.of(d.getYear(),  d.getMonth(), d.getDay());
+		return d.toGregorianCalendar().toZonedDateTime().withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
 	}
 	
 	public static LocalTime toLocalTime(XMLGregorianCalendar d) {
-		return LocalTime.of(d.getHour(), d.getMinute(), d.getSecond());
+		return d.toGregorianCalendar().toZonedDateTime().withZoneSameInstant(ZoneId.systemDefault()).toLocalTime();
 	}
 	
 	public static LocalDateTime toLocalDateTime(XMLGregorianCalendar d) {
-		return LocalDateTime.of(d.getYear(),  d.getMonth(), d.getDay(), d.getHour(), d.getMinute(), d.getSecond());
+		return d.toGregorianCalendar().toZonedDateTime().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
 	}
 	
 	/**

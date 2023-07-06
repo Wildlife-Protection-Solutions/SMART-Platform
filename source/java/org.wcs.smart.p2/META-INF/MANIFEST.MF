@@ -12,7 +12,7 @@ Require-Bundle: org.wcs.smart;bundle-version="[8.0.0,9.0.0)",
  org.eclipse.equinox.p2.ui
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/policy_component.xml, OSGI-INF/licenseManager_component.xml
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.wcs.smart.p2,
  org.wcs.smart.p2.common.updatesite,
  org.wcs.smart.p2.ui

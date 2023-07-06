@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.query.engine;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -625,11 +624,12 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
 			MutationQuery query = s.createNativeMutationQuery(sql.toString());
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			
+			DateTimeFormatter df = DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR);
+			logString(filter.getDateValues()[0].format(df));
+			logString(filter.getDateValues()[1].format(df));			
+			query.setParameter("value1", filter.getDateValues()[0].format(df)  ); //$NON-NLS-1$
+			query.setParameter("value2", filter.getDateValues()[1].format(df)  ); //$NON-NLS-1$
 		
 			logString(sql.toString());
 			query.executeUpdate();
@@ -652,11 +652,12 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
 			MutationQuery query = s.createNativeMutationQuery(sql.toString());
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			
+			DateTimeFormatter df = DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR);
+			logString(filter.getDateValues()[0].format(df));
+			logString(filter.getDateValues()[1].format(df));			
+			query.setParameter("value1", filter.getDateValues()[0].format(df)  ); //$NON-NLS-1$
+			query.setParameter("value2", filter.getDateValues()[1].format(df)  ); //$NON-NLS-1$
 		
 			logString(sql.toString());
 			query.executeUpdate();
@@ -829,10 +830,11 @@ public class EntityRecordObservationFilterProcessor {
 			query.setParameter("attributekey",  filter.getAttributeKey()); //$NON-NLS-1$
 			
 			if (filter.getAttributeType() == AttributeType.DATE) {
-				logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-				logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-				query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-				query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+				DateTimeFormatter df = DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR);
+				logString(filter.getDateValues()[0].format(df));
+				logString(filter.getDateValues()[1].format(df));			
+				query.setParameter("value1", filter.getDateValues()[0].format(df)  ); //$NON-NLS-1$
+				query.setParameter("value2", filter.getDateValues()[1].format(df)  ); //$NON-NLS-1$			
 			}else if (filter.getAttributeType() == AttributeType.LIST) {				
 				if (listItem != null){
 					logString(listItem.getKeyId());
@@ -1039,10 +1041,11 @@ public class EntityRecordObservationFilterProcessor {
 		case BOOLEAN:
 			break;
 		case DATE:
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			DateTimeFormatter df = DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR);
+			logString(filter.getDateValues()[0].format(df));
+			logString(filter.getDateValues()[1].format(df));			
+			query.setParameter("value1", filter.getDateValues()[0].format(df)  ); //$NON-NLS-1$
+			query.setParameter("value2", filter.getDateValues()[1].format(df)  ); //$NON-NLS-1$		
 			break;
 		case LIST:
 			if (listItem != null){

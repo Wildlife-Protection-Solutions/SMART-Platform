@@ -118,6 +118,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		}else if (newInput instanceof String){
 			msg = (String) newInput;
 		}else{
+			@SuppressWarnings("unchecked")
 			Map<String, Object> keys = (Map<String, Object>) newInput;
 			
 			if (groupbys != null){

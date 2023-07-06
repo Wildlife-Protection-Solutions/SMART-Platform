@@ -316,7 +316,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * 
 	 * @return
 	 */
-	public String createTempTableName(){
+	public synchronized String createTempTableName(){
 		return "query_temp.query_temp_" + System.nanoTime(); //$NON-NLS-1$
 	}
 

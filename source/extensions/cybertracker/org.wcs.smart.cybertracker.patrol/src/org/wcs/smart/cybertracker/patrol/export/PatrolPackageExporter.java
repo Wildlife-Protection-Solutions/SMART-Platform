@@ -484,6 +484,10 @@ public class PatrolPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
 		metadataScreens.add(CtJsonExportUtils.createStartTime());
 		
+		
+		JSONObject md = CtJsonExportUtils.createConfigurableModelUuid(PatrolMetadataField.CM_ID.getJsonKey(), ((PatrolCtPackage)ctpackage).getConfigurableModel() );
+		if (md != null) metadataScreens.add(md);
+		
 		//custom attributes
 		List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
 				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$

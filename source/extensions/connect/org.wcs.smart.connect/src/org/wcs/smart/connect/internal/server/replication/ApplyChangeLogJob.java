@@ -230,6 +230,27 @@ public class ApplyChangeLogJob extends Job {
 						applyFile(sub.split(2));					
 						record.setStatus(Status.DONE);
 						
+						//replication is done
+						//fire a e4_sync_download_complete event
+						//but this event can fire processing so we need to ensure
+						//replication is turned on
+						try(Session session = HibernateManager.openSession()){
+							boolean isenabled = DerbyReplicationManager.INSTANCE.isReplicationSystemEnabled(session);
+							
+							if (!isenabled) {
+								SmartDB.setConservationAreaConfiguration(null,  null,  record.getConservationArea(), null);
+								DerbyReplicationManager.INSTANCE.enableReplication(session);
+							}
+							try {
+								eventBroker.send(SmartPlugIn.E4_SYNC_DOWNLOAD_DONE, new Object[] {session, record.getConservationArea()});
+							}finally {
+								if (!isenabled) {
+									SmartDB.setConservationAreaConfiguration(null,  null, null, null);
+									DerbyReplicationManager.INSTANCE.disableReplication(session);
+								}
+							}
+						}
+
 						if (isLoggedIn){
 							
 							sub.subTask(Messages.ApplyChangeLogJob_ValidateUserSubTask);

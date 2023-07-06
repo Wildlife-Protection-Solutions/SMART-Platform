@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;

@@ -37,6 +37,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.util.GeometryUtils;
 
 import jakarta.persistence.CascadeType;
@@ -88,7 +89,9 @@ public class Waypoint extends UuidItem {
 	private List<WaypointAttachment> attachments;
 	private List<WaypointObservationGroup> groups;
 	
-	
+	//source configurable model used to collect data (as of 757)
+	private ConfigurableModel sourceCm;
+
 	public Waypoint(){
 		
 	}
@@ -110,6 +113,17 @@ public class Waypoint extends UuidItem {
 	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
 	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="source_cm_uuid ", referencedColumnName="uuid")
+	public ConfigurableModel getSourceConfigurableModel() {
+		return sourceCm;
+	}
+
+	public void setSourceConfigurableModel(ConfigurableModel sourceCm) {
+		this.sourceCm = sourceCm;
+	}
+	
 	
 	@Column(name="id")
 	public String getId() {
@@ -326,6 +340,7 @@ public class Waypoint extends UuidItem {
 		wp.setRawY(this.y);
 		wp.setConservationArea(this.ca);
 		wp.setSourceId(this.sourceId);
+		wp.setSourceConfigurableModel(this.getSourceConfigurableModel());
 		wp.setObservationGroups(new ArrayList<WaypointObservationGroup>());
 		
 		if (this.groups != null && !this.groups.isEmpty()) {

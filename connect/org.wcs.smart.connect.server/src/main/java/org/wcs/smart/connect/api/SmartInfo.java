@@ -46,7 +46,7 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
@@ -91,11 +91,6 @@ public class SmartInfo extends HttpServlet{
 		JSONObject info = new JSONObject();
 		
 		try{
-			//first validate administrator
-			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			}
-			
 			Tuple data = session.createNativeQuery("SELECT version, last_updated, filestore_version FROM connect.connect_version", Tuple.class).uniqueResult(); //$NON-NLS-1$
 			info.put("db-version", data.get(0).toString()); //$NON-NLS-1$
 			info.put("db-last-updated", data.get(1).toString()); //$NON-NLS-1$
@@ -105,6 +100,9 @@ public class SmartInfo extends HttpServlet{
 			JSONArray cainfo = new JSONArray();
 			info.put("conservation-areas", cainfo); //$NON-NLS-1$
 			for (ConservationAreaInfo caarea : areas ) {
+				
+				if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, caarea.getUuid())) continue;
+				
 				JSONObject ca = new JSONObject();
 				ca.put("name", caarea.getLabel()); //$NON-NLS-1$
 				ca.put("uuid", caarea.getUuid().toString()); //$NON-NLS-1$
@@ -128,14 +126,16 @@ public class SmartInfo extends HttpServlet{
 			JSONArray capluginversions = new JSONArray();
 			info.put("ca-plugin-version", capluginversions); //$NON-NLS-1$
 			for (CaPluginVersion item : caversions ) {
+				
+				//only include if have access to view ca 
+				if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, item.getConservationAreaUuid())) continue;
+				
 				JSONObject plugin = new JSONObject();
 				plugin.put("ca-uuid", item.getConservationAreaUuid().toString()); //$NON-NLS-1$
 				plugin.put("plugin-id", item.getPluginId()); //$NON-NLS-1$
 				plugin.put("version", item.getVersion()); //$NON-NLS-1$
 				capluginversions.add(plugin);
 			}			
-			
-						 
 			
 		}finally{
 			session.getTransaction().rollback();
@@ -161,11 +161,6 @@ public class SmartInfo extends HttpServlet{
 		info.put("build-version", buildVersion); //$NON-NLS-1$
 		info.put("build-date", buildDate); //$NON-NLS-1$
 		
-		
-		return Response.ok(info.toJSONString()).build();
-		
+		return Response.ok(info.toJSONString()).build();	
 	}
-
-	
-	
 }

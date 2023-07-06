@@ -444,6 +444,9 @@ public class DataModel extends SimpleDataModel {
 				session.clear();
 				progress.worked(1);
 			}
+			
+			DataModelManager.INSTANCE.updateLastModified(session);
+			
 			session.getTransaction().commit();
 		} catch (HibernateException ex) {
 			session.getTransaction().rollback();

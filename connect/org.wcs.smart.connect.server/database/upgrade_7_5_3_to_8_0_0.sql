@@ -1,4 +1,6 @@
-
+***********************************************************************
+******* DO NOT USE - THIS IS IN THE UPGRADE SERVLET *****************
+***********************************************************************
 ALTER TABLE SMART.ASSET_WAYPOINT_QUERY DROP COLUMN SURVEYDESIGN_KEY;
 
 --breaking change for postgresql 14

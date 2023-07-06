@@ -103,8 +103,7 @@ public class WmsXmlReader {
         	File prj = f[0];
         	if (prj.exists()){
         		//see if it is readable
-        		try{
-        			PrjFileReader prjReader = new PrjFileReader(Files.newByteChannel(prj.toPath()));
+        		try(PrjFileReader prjReader = new PrjFileReader(Files.newByteChannel(prj.toPath()))){
         			prjReader.getCoordinateReferenceSystem();
         			return "Prj file exists and should be used."; //$NON-NLS-1$
         		}catch (Exception ex){

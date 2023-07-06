@@ -54,8 +54,6 @@ public class AdvancedEntitySearchPanel extends Composite {
 	private void createContents(FormToolkit toolkit){
 		
 		setLayout(new GridLayout());
-		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
 		
 		searchPanel = new EntitySearchPanel(this) {
 			@Override

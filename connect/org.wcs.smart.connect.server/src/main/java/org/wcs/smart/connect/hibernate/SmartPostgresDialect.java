@@ -35,7 +35,7 @@ import org.hibernate.dialect.PostgreSQLDialect;
 public class SmartPostgresDialect extends PostgreSQLDialect {
 
 	 public SmartPostgresDialect() {
-		 super(DatabaseVersion.make( 9, 5 ));
+		 super(DatabaseVersion.make( 14 ));
 
 	        /*
 	         * We use @Lob annotation for byte[] to make apache derby happy.  So

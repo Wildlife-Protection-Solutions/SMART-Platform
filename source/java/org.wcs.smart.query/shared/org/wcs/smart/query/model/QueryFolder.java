@@ -23,8 +23,6 @@ package org.wcs.smart.query.model;
 
 import java.util.List;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -137,8 +135,7 @@ public class QueryFolder extends NamedItem {
 	/**
 	 * @return the children folders
 	 */
-	@LazyCollection(LazyCollectionOption.FALSE)  //to fix hiberante bug with using fetchType=EAGER in @onetomany annoation
-	@OneToMany(mappedBy="parentFolder", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy="parentFolder", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<QueryFolder> getChildren(){
 		return this.childrenFolders;
 	}

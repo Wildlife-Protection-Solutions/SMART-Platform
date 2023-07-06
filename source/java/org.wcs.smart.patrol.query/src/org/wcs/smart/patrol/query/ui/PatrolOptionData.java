@@ -38,7 +38,10 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -104,9 +107,14 @@ public class PatrolOptionData implements IPatrolOptionData{
 			PatrolQueryOptionType type = option.getType();
 			if (type == PatrolQueryOptionType.UUID){
 				List<UUID> uuidkeys = new ArrayList<UUID>(keys.length);
+				int addnull = -1;
 				try {
 					for (int i = 0; i < keys.length; i++) {
-						uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
+						if (keys[i].equals(IFilter.NULL_OP)) {
+							addnull = i;
+						}else {
+							uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
+						}
 					}
 				} catch (Exception ex) {
 					QueryPlugIn.log(
@@ -137,6 +145,8 @@ public class PatrolOptionData implements IPatrolOptionData{
 						results.add((ListItem)object);
 					}
 				}
+				if (addnull >= 0) results.add(addnull, new ListItem(null, option.getName(session, null, Locale.getDefault()), IFilter.NULL_OP ));
+				
 			}else if (type == PatrolQueryOptionType.KEY){
 				Collection<?> data = null;
 				if (SmartDB.isMultipleAnalysis()){
@@ -241,6 +251,13 @@ public class PatrolOptionData implements IPatrolOptionData{
 				for (PatrolType t : types){
 					items.add(new ListItem(null, t.getType().getGuiName(Locale.getDefault()), t.getType().name() ));
 				}
+			}
+		}else if (option == PatrolQueryOption.CM) {
+			if (!SmartDB.isMultipleAnalysis()) {
+				List<ConfigurableModel> models = QueryFactory.buildQuery(session, ConfigurableModel.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+				for (ConfigurableModel m : models) items.add(new ListItem(m.getUuid(), m.getName()));
+				items.add(new ListItem(null, option.getName(session, null, Locale.getDefault()), IFilter.NULL_OP));
 			}
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE || option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
 			items.addAll(PatrolQueryHibernateManager.getInstance().getActiveTransportTypes(session));

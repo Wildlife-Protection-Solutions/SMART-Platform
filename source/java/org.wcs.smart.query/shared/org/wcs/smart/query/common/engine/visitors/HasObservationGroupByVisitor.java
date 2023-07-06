@@ -49,7 +49,7 @@ public class HasObservationGroupByVisitor implements IGroupByVisitor {
 			if (((AttributeGroupBy) item).getCategoryHkey() != null){
 				hasCategory = true;
 			}
-		}		
+		}
 	}
 	
 	/**

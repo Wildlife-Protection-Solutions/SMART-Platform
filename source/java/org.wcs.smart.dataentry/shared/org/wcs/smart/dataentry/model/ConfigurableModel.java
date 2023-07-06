@@ -69,6 +69,7 @@ public class ConfigurableModel extends NamedItem {
 	
 	private boolean instantGps = false;
 	private boolean photoFirst = false;
+	private boolean useEarthRanger = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -125,6 +126,14 @@ public class ConfigurableModel extends NamedItem {
 	}
 	public void setPhotoFirst(Boolean photoFirst) {
 		this.photoFirst = Boolean.TRUE.equals(photoFirst); //null <==> false
+	}
+	
+	@Column(name="use_earth_ranger")	
+	public boolean getUseEarthRanger() {
+		return useEarthRanger;
+	}
+	public void setUseEarthRanger(Boolean useEarthRanger) {
+		this.useEarthRanger = Boolean.TRUE.equals(useEarthRanger); //null <==> false
 	}
 	
 	/**

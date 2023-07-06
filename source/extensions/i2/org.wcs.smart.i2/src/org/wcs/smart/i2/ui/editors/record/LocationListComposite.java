@@ -738,8 +738,10 @@ public class LocationListComposite extends Composite{
 				String value = ((IntelLocation)element).getComment();
 				if (value == null) return ""; //$NON-NLS-1$
 				return value;
-			}else if (col == Column.DATE || col == Column.TIME){
-				return ((IntelLocation)element).getDateTime();
+			}else if (col == Column.DATE ) {
+				return ((IntelLocation)element).getDateTime().toLocalDate();
+			}else if (col == Column.TIME){
+				return ((IntelLocation)element).getDateTime().toLocalTime();
 			}else if (col == Column.OBSERVATION){
 				return ((IntelLocation)element);
 			}

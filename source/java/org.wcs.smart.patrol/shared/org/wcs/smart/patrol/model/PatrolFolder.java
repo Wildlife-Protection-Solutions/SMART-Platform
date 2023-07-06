@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolder;
@@ -96,7 +94,7 @@ public class PatrolFolder extends NamedItem implements IFolder {
 	/**
 	 * @return the children folders
 	 */
-	@LazyCollection(LazyCollectionOption.FALSE)
+//	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy="parentFolder", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "folder_order")
 	public List<PatrolFolder> getChildFolders() {

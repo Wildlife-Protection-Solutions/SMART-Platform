@@ -198,6 +198,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		List<Object[]> relationshipsToBuild = new ArrayList<>();
 		
 		int cnt = 0;
+		boolean dmModified = false;
 		
 		for (EntityItem item : items) {
 			
@@ -232,7 +233,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 					etype.getDmAttribute().getAttributeList().add(li);
 					
 					entity.setDmAttributeListItem(li);
-					
+					dmModified = true;
 					warnings.add(MessageFormat.format(Messages.EntityMigrationJob_ErrorListItemNotFound, item.getId(), etype.getName(), etype.getDmAttribute().getName() ));
 					
 					session.flush();
@@ -371,6 +372,8 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 				session.save(relation);
 			}
 		}
+		
+		if (dmModified) DataModelManager.INSTANCE.updateLastModified(session);
 		return cnt;
 	}
 	

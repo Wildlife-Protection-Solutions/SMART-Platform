@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.core.patrol</artifactId>
 	<name>Patrol Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>
@@ -23,6 +23,11 @@
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.observation</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.dataentry</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>

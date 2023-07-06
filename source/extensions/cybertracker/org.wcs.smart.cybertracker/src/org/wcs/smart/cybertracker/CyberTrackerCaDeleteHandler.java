@@ -70,6 +70,7 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 
 	private void deleteCTRegistryKey(ConservationArea ca) throws Exception {
 		try{
+			//TODO: fix or remove this
 			PdaUtil.deleteRegistryKey(ca);
 		}catch (Exception ex){
 			CyberTrackerPlugIn.log("Could not delete registry key", ex); //$NON-NLS-1$

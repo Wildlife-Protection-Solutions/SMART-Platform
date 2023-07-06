@@ -167,6 +167,7 @@ TOKEN :
  | < PATROLLEG_AGENCY_KEY : "patrol:agency" >
  | < PATROLLEG_AGENCY_KEY_KEY : "patrol:agencykey" >
  | < PATROLLEG_RANK_KEY : "patrol:rank" >
+ | < WAYPOINT_CM_KEY : "waypoint:cm" >
  | < PATROL_ATTRIBUTE_BOOLEAN_KEY : "patrol:attribute:b:"< DM_KEY> >
  | < PATROL_ATTRIBUTE_STRING_KEY : "patrol:attribute:s:"< DM_KEY > >
  | < PATROL_ATTRIBUTE_LIST_KEY : "patrol:attribute:l:"< DM_KEY > >
@@ -210,6 +211,7 @@ TOKEN :
 			< PATROLLEG_AGENCY_KEY > |
 			< PATROLLEG_AGENCY_KEY_KEY > |
 			< PATROLLEG_RANK_KEY > |
+			< WAYPOINT_CM_KEY > |
 			< PATROL_CA_KEY > |
 			< PATROLLEG_MEMBER_KEY >  ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |    < PATROL_CONTRIBUTION_GROUPBY_OPTION: (< PATROL_CONTRIBUTION > ":" < DM_KEY > ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )* ) >
@@ -843,7 +845,8 @@ IFilter StringExpression():
  				< PATROLLEG_MEMBER_KEY > |
  				< PATROLLEG_AGENCY_KEY > |
  				< PATROLLEG_AGENCY_KEY_KEY > |
- 				< PATROLLEG_RANK_KEY > 
+ 				< PATROLLEG_RANK_KEY > |
+ 				< WAYPOINT_CM_KEY >
  				
  			) 
  			{key = token.image;}

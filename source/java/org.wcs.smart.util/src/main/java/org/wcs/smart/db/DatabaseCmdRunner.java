@@ -66,16 +66,16 @@ public class DatabaseCmdRunner {
 			String table, 
 			String column) throws Exception{
 		
-		net.sourceforge.hatbox.tools.CmdLine.spatializeDb(c, "derby");
-		
-		HashMap<String, String> args = new HashMap<String, String>();
-		args.put("s", schema);
-		args.put("t", table);
-		args.put("geom", column);
-		args.put("srid", "4326");
-		net.sourceforge.hatbox.tools.CmdLine.spatialize(c, args);
-		net.sourceforge.hatbox.tools.CmdLine.buildIndex(c, args);
-		c.setAutoCommit(true);
+//		net.sourceforge.hatbox.tools.CmdLine.spatializeDb(c, "derby");
+//		
+//		HashMap<String, String> args = new HashMap<String, String>();
+//		args.put("s", schema);
+//		args.put("t", table);
+//		args.put("geom", column);
+//		args.put("srid", "4326");
+//		net.sourceforge.hatbox.tools.CmdLine.spatialize(c, args);
+//		net.sourceforge.hatbox.tools.CmdLine.buildIndex(c, args);
+//		c.setAutoCommit(true);
 	}
 	
 	

@@ -182,7 +182,7 @@ public class SmartDB {
 	 */
 	public static void setConservationAreaConfiguration(Employee user, String plainTextPassword,
 			ConservationArea ca, 
-			ConservationAreaConfiguration configuration) throws Exception{
+			ConservationAreaConfiguration configuration) throws Exception{		
 		currentCa = ca;
 		currentEmployee = user;
 		SmartDB.plainTextPassword = plainTextPassword;

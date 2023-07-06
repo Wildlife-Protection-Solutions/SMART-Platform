@@ -157,6 +157,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 					
 					if (r instanceof ISearchabledResultSet){
 						
+						@SuppressWarnings("unchecked")
 						List<IResultItem> searchResults = ((ISearchabledResultSet<IResultItem>)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
 						
 						List<WaypointQueryResultItem> items = new ArrayList<>();

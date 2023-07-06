@@ -86,6 +86,7 @@ import org.wcs.smart.util.ZipUtil;
  * directory with map files to use in the ct application (selected by user on export)
  * 
  */
+@SuppressWarnings("deprecation")
 public class SurveyPackageExporter {
 
 	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
@@ -343,6 +344,7 @@ public class SurveyPackageExporter {
 		JSONArray sus = new JSONArray();	
 		List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, 
 				new Object[] {"surveyDesign", surveyDesign}).list(); //$NON-NLS-1$
+		
 		
 		GeometryJSON util = new GeometryJSON();
 		

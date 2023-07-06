@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
@@ -93,6 +94,13 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		session.beginTransaction();
 		try{
 			HibernateManager.saveOrMerge(session, newIncident);
+			
+			for (IWizardPage page : getPages()) {
+				if (page instanceof IncidentWizardPage) {
+					((IncidentWizardPage)page).afterSave(newIncident, session);
+				}
+			}
+			
 			IncidentManager.getInstance().getIncidentProvider(newIncident.getSourceId()).waypointCreated(newIncident, session);
 			session.getTransaction().commit();
 		}catch(Exception ex){
@@ -149,7 +157,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
     	super.addPage(new IncidentWizardPage(this, new IdComposite() {
     		@Override
     		public void initFields(Waypoint incident, Session session) {
-    			newIncident.setId(IncidentManager.getInstance().getNextIncidentId(session, newIncident.getDateTime(), getObserver()));
+    			newIncident.setId(IncidentManager	.getInstance().getNextIncidentId(session, newIncident.getDateTime(), getObserver()));
     			super.initFields(incident, session);
     		}
     	}));

@@ -777,6 +777,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 					}
 					attributeToAdd.add(att);	
 					DataModelManager.INSTANCE.fireAddListener(s, att);
+					DataModelManager.INSTANCE.updateLastModified(s);
 				}
 				s.getTransaction().commit();
 				
@@ -902,6 +903,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 										if (deletel){
 											DataModelManager.INSTANCE.fireDeleteListener(s, ea.getDmAttribute());
 											s.delete(ea.getDmAttribute());
+											DataModelManager.INSTANCE.updateLastModified(s);
 										}
 									}
 								}

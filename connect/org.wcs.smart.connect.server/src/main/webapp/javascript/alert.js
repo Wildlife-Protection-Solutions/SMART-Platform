@@ -338,8 +338,12 @@ function getQueryColor(id) {
 }
 
 function addQueryLayer(id) {
+	//console.log("add query: " + id);
 	var color = getQueryColor(id);
  	var oReq = new XMLHttpRequest();
+	
+	queryLayers[id] = "loading";
+	
  	oReq.onload = function() {
  		data = this.response;
  		
@@ -368,11 +372,14 @@ function addQueryLayer(id) {
  		    c += "</tbody></table></div>";
  		    return c;
  		},  {maxWidth: 325});
- 		if(queryLayers[id]) {
- 			removeQueryLayer(id);
- 		}
- 		map.addLayer(layer);
- 		queryLayers[id] = layer;
+	
+		if (queryLayers[id] == "loading"){
+	 		if(queryLayers[id]) {
+	 			removeQueryLayer(id);
+	 		}
+	 		map.addLayer(layer);
+	 		queryLayers[id] = layer;
+		}
  	};
  	var dateFilter = "";
 	if(document.getElementById('queryDatePickerFrom').value != ""){
@@ -394,7 +401,8 @@ function addQueryLayer(id) {
 }
 
 function removeQueryLayer(id) {
-	map.removeLayer(queryLayers[id]);
+	//console.log("remove query: " + id);
+	if (queryLayers[id] != "loading") map.removeLayer(queryLayers[id]);
 	queryLayers[id] = null;
 }
 
@@ -414,7 +422,7 @@ function queryDateRangeUpdate() {
 function refreshQueries() {
 	// update query layers to use new date range
 	for(id in queryLayers) {
-		addQueryLayer(id);
+		if (queryLayers[id] != null) addQueryLayer(id);
 	}
 }
 

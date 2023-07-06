@@ -122,6 +122,7 @@ public abstract class CcaaDataModel {
 		//update icons
 		for (AttributeListItem li : items) {
 			li.setIcon( DataModelMerger.findIcon(session, findIconKey(li, session)) );
+			session.evict(li);
 		}
 		
 		//sort alphabetically as orders may be duplicated

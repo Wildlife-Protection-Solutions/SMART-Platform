@@ -55,6 +55,7 @@ import org.wcs.smart.util.UuidUtils;
  *
  * @param <T>
  */
+@SuppressWarnings("rawtypes")
 public abstract class ObservationQueryResult<T extends IObservationQueryResultItem> extends WaypointQueryResult implements IObservationPagedQueryResultSet<T>{
 	
 	public static final String TXT_SORT = "sortKeyTxt"; //$NON-NLS-1$
@@ -64,6 +65,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 	protected boolean hasSortColumns = false;
 
 	
+	@SuppressWarnings("unchecked")
 	public ObservationQueryResult(ObservationQueryEngine<T> engine, int itemCount, int wpCount) {
 		super(engine, itemCount);
 		this.wp_count = wpCount;
@@ -81,6 +83,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	public ObservationQueryEngine<T> getEngineInternal() {
 		return (ObservationQueryEngine<T>) super.engine;
 	}
@@ -246,6 +249,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 	 */
 	@Override
 	public List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		@SuppressWarnings("unchecked")
 		List<T> items = super.getResults(session, rs, from, pageSize);
 		
 		session.doWork(new Work(){

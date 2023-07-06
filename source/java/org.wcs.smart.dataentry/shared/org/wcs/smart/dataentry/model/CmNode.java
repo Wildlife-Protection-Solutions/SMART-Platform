@@ -56,6 +56,17 @@ import jakarta.persistence.Transient;
 @Table(name = "cm_node", schema="smart")
 public class CmNode extends NamedItem implements IImageAssociatedObject {
 
+	/*
+	 * these strings match the smartDataType expected by the JSON 
+	 * data processor used by the Conenct data api for adding data to 
+	 * Connect
+	 */
+	public enum IntegrateIncidentType{
+		INTEGRATEINCIDENT, //create normal incident in smart   
+		INTEGRATEPATROL, //create incident to move to patrol in smart
+		INTEGRATEPLLINK //create incidnet to link to patrol in smart
+	}
+	
 	private static final String SIGNATURE_SPACER = ","; //$NON-NLS-1$
 
 	private static final long serialVersionUID = 1L;
@@ -68,6 +79,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private CmNode parent;
 	private int nodeOrder;
 	private List<CmNode> children;
+	private IntegrateIncidentType integrateType;
 	
 	private boolean photoAllowed = false;
 	private boolean photoRequired = true;
@@ -117,6 +129,15 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 		this.nodeOrder = nodeOrder;
 	}
 
+	@Column(name = "integrate_incident_type")
+	@Enumerated(EnumType.STRING)
+	public IntegrateIncidentType getIntegrateIncidentType() {
+		return integrateType;
+	}
+	public void setIntegrateIncidentType(IntegrateIncidentType type) {
+		this.integrateType = type;
+	}
+	
 	/**
 	 * @return all children nodes; empty list if leaf node
 	 */

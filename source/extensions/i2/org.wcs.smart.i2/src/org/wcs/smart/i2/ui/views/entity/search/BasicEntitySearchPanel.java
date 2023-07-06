@@ -90,8 +90,6 @@ public class BasicEntitySearchPanel extends Composite {
 
 	private void createContents(FormToolkit toolkit) {
 		setLayout(new GridLayout());
-		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
 		
 		Composite search = toolkit.createComposite(this, SWT.NONE);
 		search.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -101,6 +99,9 @@ public class BasicEntitySearchPanel extends Composite {
 
 		Composite core = toolkit.createComposite(search, SWT.NONE);
 		core.setLayout(new GridLayout(2, false));
+		((GridLayout) core.getLayout()).marginWidth = 0;
+		((GridLayout) core.getLayout()).marginHeight = 0;
+		
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		toolkit.createLabel(core, Messages.EntitySearchView_SearchLabel);
 

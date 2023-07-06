@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.observation.ObservationSource" name="Observation Source" schema="schema/org.wcs.smart.observation.ObservationSource.exsd"/>
+   <extension-point id="org.wcs.smart.datalink.type" name="Data Link Type" schema="schema/org.wcs.smart.datalink.type.exsd"/>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
@@ -363,6 +364,17 @@
             properties="focusview"
             type="java.lang.Object">
       </propertyTester>
+   </extension>
+   <extension
+         point="org.wcs.smart.datalink.type">
+      <type
+            hibernate_class="WaypointObservationGroup"
+            type_key="obsgroup">
+      </type>
+      <type
+            hibernate_class="WaypointObservation"
+            type_key="observation">
+      </type>
    </extension>
 
 </plugin>

@@ -20,7 +20,7 @@
          <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="loginHandler" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="windowHandler" minOccurs="0" maxOccurs="unbounded"/>
-            <element ref="postWindowOpen"/>
+            <element ref="postWindowOpen" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>

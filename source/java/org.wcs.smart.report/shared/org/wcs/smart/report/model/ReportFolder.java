@@ -23,8 +23,6 @@ package org.wcs.smart.report.model;
 
 import java.util.List;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -109,7 +107,7 @@ public class ReportFolder extends NamedItem {
 	/**
 	 * @return the children folders
 	 */
-	@LazyCollection(LazyCollectionOption.FALSE)  //to fix hiberante bug with using fetchType=EAGER in @onetomany annoation
+	//@LazyCollection(LazyCollectionOption.FALSE)  //to fix hiberante bug with using fetchType=EAGER in @onetomany annoation
 	@OneToMany(mappedBy="parentFolder", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<ReportFolder> getChildren(){
 		return this.childrenFolders;

@@ -92,7 +92,7 @@ public class GridTiffImageExporter implements IQueryExporter {
 	    GridCoverage gridCoverage = reader.read(null);
 	        
 	    GridCoverageWriter writer = frmt.getWriter(file.toFile());
-	    writer.write(gridCoverage, null);
+	    writer.write(gridCoverage);
 	    writer.dispose();
 	}
 

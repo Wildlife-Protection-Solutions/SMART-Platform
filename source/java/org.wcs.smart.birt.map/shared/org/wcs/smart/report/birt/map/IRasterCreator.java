@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.birt.report.engine.extension.IBaseResultSet;
 import org.eclipse.birt.report.engine.extension.IExecutorContext;
+import org.eclipse.birt.report.model.api.DataSetHandle;
 
 /**
  * creates a raster from the query results
@@ -34,7 +35,7 @@ import org.eclipse.birt.report.engine.extension.IExecutorContext;
  */
 public interface IRasterCreator {
 
-	public boolean canProcess(IExecutorContext context, String datasetId, String queryText) throws Exception;
+	public boolean canProcess(IExecutorContext context, String datasetId, String queryText, DataSetHandle handle) throws Exception;
 	/**
 	 * Creates a raster and returns the file that contains the raster
 	 * @return
@@ -58,4 +59,6 @@ public interface IRasterCreator {
 	 * @return the maximum value in the raster; should only be called after createRaster is called
 	 */
 	public double getRasterMaxValue();
+	
+
 }

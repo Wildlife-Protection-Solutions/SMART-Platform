@@ -183,7 +183,9 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 				}
 				resultsArea.updateAndShowTable((SummaryQueryResult)results);
 			} catch (Exception ex) {
-				QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorRunningQuery, ex);
+				String message = ex.getMessage();
+				if (ex.getCause() != null) message = ex.getCause().getMessage();
+				QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorRunningQuery + "\n\n" + message, ex); //$NON-NLS-1$
 			}
 			return Status.OK_STATUS;
 		}

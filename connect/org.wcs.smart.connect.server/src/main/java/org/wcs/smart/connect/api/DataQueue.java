@@ -62,7 +62,6 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
-import org.wcs.smart.connect.dataqueue.DataQueueProcessor;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItemProxy;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
@@ -268,13 +267,13 @@ public class DataQueue {
 					
 					List<ServerDataQueueItem> items = null;
 					if(statusFilter == null) {
-						items = s.createQuery("FROM ServerDataQueueItem WHERE conservationArea = :ca ", ServerDataQueueItem.class)
-								.setParameter("ca", ca.getUuid())
+						items = s.createQuery("FROM ServerDataQueueItem WHERE conservationArea = :ca ", ServerDataQueueItem.class) //$NON-NLS-1$
+								.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
 								.list();
 					}else {
-						items = s.createQuery("FROM ServerDataQueueItem WHERE conservationArea = :ca and status in (:status)", ServerDataQueueItem.class)
-								.setParameter("ca", ca.getUuid())
-								.setParameter("status", statusFilter)
+						items = s.createQuery("FROM ServerDataQueueItem WHERE conservationArea = :ca and status in (:status)", ServerDataQueueItem.class) //$NON-NLS-1$
+								.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+								.setParameter("status", statusFilter) //$NON-NLS-1$
 								.list();
 					}
 					for (ServerDataQueueItem item : items){

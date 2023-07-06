@@ -1327,4 +1327,19 @@
             uicontribution="org.wcs.smart.patrol.PatrolIdGeneratorContribution">
       </idgenerator>
    </extension>
+   <extension
+         point="org.wcs.smart.datalink.type">
+      <type
+            hibernate_class="Patrol"
+            type_key="patrol">
+      </type>
+      <type
+            hibernate_class="PatrolLeg"
+            type_key="patrolleg">
+      </type>
+      <type
+            hibernate_class="Waypoint"
+            type_key="patrolincident">
+      </type>
+   </extension>
 </plugin>

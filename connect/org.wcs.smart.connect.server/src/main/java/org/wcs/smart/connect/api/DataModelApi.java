@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +63,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -90,6 +93,7 @@ import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -118,9 +122,61 @@ public class DataModelApi extends HttpServlet{
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 	
+	@SuppressWarnings("unchecked")
+	@GET
+	@Operation(description = "Gets the information about the datamodel for a specific Conservation Area.")
+	@Path("/metadata/datamodel/{cauuid}/info")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getDataModelInfo(
+			@Parameter(description="uuid of the conservation area to get the data model info for") @PathParam("cauuid") String uuid) {
+		
+		UUID caUuid = parseUuid(uuid);
+		
+		String lastmodified = null;
+		ConservationArea ca = null;
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				if (!SecurityManager.INSTANCE.canAccess(s, 
+						request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY,
+						caUuid)){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				
+				ca = s.get(ConservationArea.class, caUuid);
+				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
+				
+				ConservationAreaProperty prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"key", ConservationAreaProperty.CA_DM_LAST_MODIFIED_KEY}).uniqueResult(); //$NON-NLS-1$
+				
+				if (prop == null) {
+					lastmodified = Instant.ofEpochMilli(0).toString();
+				}else {
+					lastmodified = prop.getValue();
+				}
+				
+				
+			}finally {
+				s.getTransaction().rollback();
+			}
+			
+		}
+		JSONObject obj = new JSONObject();
+		obj.put("ca_uuid", ca.getUuid().toString()); //$NON-NLS-1$
+		obj.put("last_modified", lastmodified); //$NON-NLS-1$
+		
+		return Response.status(Response.Status.OK)
+				.entity(obj.toJSONString())
+				.build();
+	}
 	
 	@GET
 	@Path("/metadata/datamodel/{cauuid}")
+	@Operation(description = "Gets the datamodel xml for a given conservation area.")
 	@Produces({ MediaType.APPLICATION_XML })
 	public Response getDataModel(
 			@Parameter(description="uuid of the conservation area to get the data model for") @PathParam("cauuid") String uuid) {
@@ -186,10 +242,12 @@ public class DataModelApi extends HttpServlet{
 			itemUuid= UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Invalid uuid: " + uuid + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Conservation Area UUID", ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid UUID", ex); //$NON-NLS-1$
 		}
 		return itemUuid;
 	}
+	
+	
 	/**
 	 * <p>Uploads data to server</p>
 	 * <p>
@@ -318,6 +376,21 @@ public class DataModelApi extends HttpServlet{
 								session.persist(cat);
 							}
 						}
+						
+						//update the last modified date
+						ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+								new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+								new Object[] {"key", ConservationAreaProperty.CA_DM_LAST_MODIFIED_KEY}).uniqueResult(); //$NON-NLS-1$
+						
+						if (prop == null) {
+							prop = new ConservationAreaProperty();
+							prop.setConservationArea(ca);
+							prop.setKey(ConservationAreaProperty.CA_DM_LAST_MODIFIED_KEY);
+							
+							session.persist(prop);
+						}
+						
+						prop.setValue(Instant.now().toString());
 					}
 					session.getTransaction().commit();
 				}catch (Exception ex) {
@@ -508,6 +581,8 @@ public class DataModelApi extends HttpServlet{
 		String caName;
 		String caId;
 		String name;
+		boolean useEarthRanger;
+		
 		List<Translation> translations;
 		
 		public ConfigurableModelProxy(ConfigurableModel cm) {
@@ -516,7 +591,7 @@ public class DataModelApi extends HttpServlet{
 			this.caName = cm.getConservationArea().getName();
 			this.caId = cm.getConservationArea().getId();
 			this.name = cm.getName();
-			
+			this.useEarthRanger = cm.getUseEarthRanger();
 			this.translations= new ArrayList<>();
 			for (Label l : cm.getNames()) {
 				this.translations.add(new Translation(l));
@@ -544,6 +619,10 @@ public class DataModelApi extends HttpServlet{
 			return this.caId;
 		}
 		
+		@JsonProperty("use_with_earth_ranger")
+		public Boolean getUseEarthRanger() {
+			return this.useEarthRanger;
+		}
 		public List<Translation> getTranslations(){
 			return this.translations;
 		}

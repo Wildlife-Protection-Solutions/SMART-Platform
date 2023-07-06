@@ -286,7 +286,8 @@ public class MapItemExecutor implements IReportItemExecutor {
 					String datasetId = (((OdaDataSetHandle) layer.getHandle().getDataSet()).getExtensionID());
 					for (IRasterCreator creator : getRasterCreators()) {
 						try {
-							if (creator.canProcess(context, datasetId, queryText)) {
+							if (creator.canProcess(context, datasetId, queryText, layer.getHandle().getDataSet())) {
+								
 								Path f = creator.createRaster(context, datasetId, qresult);
 								if (f != null) {
 									info.setRasterFile(f);

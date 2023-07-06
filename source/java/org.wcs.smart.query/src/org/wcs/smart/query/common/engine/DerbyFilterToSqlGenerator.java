@@ -50,6 +50,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.ObserverFilter;
+import org.wcs.smart.query.model.filter.WaypointCmFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.util.UuidUtils;
@@ -91,6 +92,8 @@ public class DerbyFilterToSqlGenerator {
 			return toSql((DateFilter)filter, engine);
 		}else if (filter instanceof ObserverFilter){
 			return asSql((ObserverFilter)filter, engine);
+		}else if (filter instanceof WaypointCmFilter){
+			return asSql((WaypointCmFilter)filter, engine);
 		}
 		throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_FilterTypeNotSupported, new Object[]{filter.getClass().getCanonicalName()}));
 	}
@@ -106,6 +109,28 @@ public class DerbyFilterToSqlGenerator {
 			sb.append(engine.tablePrefix(WaypointObservation.class));
 			sb.append(".employee_uuid "); //$NON-NLS-1$
 			sb.append(" =  " + param); //$NON-NLS-1$
+			return sb.toString();
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	
+	/*
+	 * Observer source filter
+	 */
+	protected String asSql(WaypointCmFilter filter, IQueryEngine engine) throws SQLException{
+		try {
+			StringBuilder sb = new StringBuilder();
+			if (filter.getValue().equals(IFilter.NULL_OP)) {
+				sb.append(engine.tablePrefix(Waypoint.class));
+				sb.append(".source_cm_uuid is null"); //$NON-NLS-1$
+			}else {
+				String param = engine.addParameterValue(UuidUtils.stringToUuid(filter.getValue())); 
+				sb.append(engine.tablePrefix(Waypoint.class));
+				sb.append(".source_cm_uuid "); //$NON-NLS-1$
+				sb.append(" =  " + param); //$NON-NLS-1$
+			}
 			return sb.toString();
 		} catch (Exception e) {
 			throw new SQLException(e);

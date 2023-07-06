@@ -43,6 +43,13 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 			 return Messages.IncidentLabelProvider_SmartIntegrateIncident;
 		}
 		
+		if (item instanceof IntegratePatrolIncidentSource ){
+			 return Messages.IncidentLabelProvider_MoveToPatrolIncidentSource;
+		}
+		if (item instanceof IntegratePatrolLinkIncidentSource ){
+			 return Messages.IncidentLabelProvider_LinkToPatrolIncidentSource;
+		}
+		
 		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.IncidentLabelProvider_jsonloaded;
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.IncidentLabelProvider_invaliddatatype;
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_FEATURE_TYPE) return Messages.IncidentLabelProvider_invalidfeaturetype;

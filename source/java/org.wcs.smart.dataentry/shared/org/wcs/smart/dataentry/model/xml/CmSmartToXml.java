@@ -150,6 +150,8 @@ public class CmSmartToXml {
 		if (cmModel.getIconSet() != null) xmlModel.setIconSet(cmModel.getIconSet().getKeyId());
 		xmlModel.setInstantGps(cmModel.isInstantGps());
 		xmlModel.setPhotoFirst(cmModel.isPhotoFirst());
+		xmlModel.setUseEarthRanger(cmModel.getUseEarthRanger());
+		
 		monitor.worked(1);
 		
 		if (monitor.isCanceled()) throw new OperationCanceledException();
@@ -321,6 +323,9 @@ public class CmSmartToXml {
 			nt.setCategoryKey(node.getCategory().getKeyId());
 			nt.setCategoryHkey(node.getCategory().getHkey());
 			nt.setDmUuid(toString(node.getCategory().getUuid()));
+			if (node.getIntegrateIncidentType() != null) {
+				nt.setIntegrateIncidentType(node.getIntegrateIncidentType().name());
+			}
 			
 			//only some cateogories can collect signatures
 			for (UUID uuid : node.getSignatureUuids()) {

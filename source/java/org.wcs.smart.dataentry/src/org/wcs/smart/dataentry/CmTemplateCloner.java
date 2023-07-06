@@ -95,6 +95,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clone.setDisplayMode(cm.getDisplayMode());
 		clone.setInstantGps(cm.isInstantGps());
 		clone.setPhotoFirst(cm.isPhotoFirst());
+		clone.setUseEarthRanger(cm.getUseEarthRanger());
 		
 		//look for iconset in new ca
 		if (clone.getIconSet() != null) {
@@ -220,6 +221,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		clonedNode.setDisplayMode(toCopy.getDisplayMode());
+		clonedNode.setIntegrateIncidentType(toCopy.getIntegrateIncidentType());
 		
 		Path imgFile = toCopy.getImageFile();
 		if (imgFile != null && Files.exists(imgFile)) {

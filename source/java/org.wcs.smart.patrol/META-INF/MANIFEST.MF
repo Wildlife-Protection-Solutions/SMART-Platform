@@ -16,6 +16,7 @@ Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs
 Eclipse-BuddyPolicy: global
 Export-Package: org.wcs.smart.patrol,
  org.wcs.smart.patrol.geotools,
+ org.wcs.smart.patrol.internal.ui.views,
  org.wcs.smart.patrol.json,
  org.wcs.smart.patrol.meta,
  org.wcs.smart.patrol.model,

@@ -156,7 +156,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 					progress.checkCanceled();
 					//lookup for columns that have data
 					progress.subTask(Messages.DerbyObservationEngine_FindDataColumns);
-					HashSet<String> dataColumns = new HashSet<>();
+					Set<String> dataColumns = new HashSet<>();
 					
 					//looking for attributes that have at least one value
 					try(ResultSet rs = c.createStatement().executeQuery("select distinct a.keyid from "+queryDataTable+" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid")) { //$NON-NLS-1$ //$NON-NLS-2$

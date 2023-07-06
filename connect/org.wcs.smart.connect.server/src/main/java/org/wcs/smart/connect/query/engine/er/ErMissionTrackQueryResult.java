@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine.er;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -119,12 +120,10 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 	 */
 	@Override
 	public List<MissionTrackResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		if (rs.getRow() != from) throw new SQLException("Cannot access rows in result set in non sequential manner"); //$NON-NLS-1$
+		
 		List<MissionTrackResultItem> items = new ArrayList<>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
+		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();
 			MissionTrackResultItem it = asQueryResultItem(rs, null);
@@ -164,7 +163,6 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 
 	@Override
 	public ResultSet getResultSet(final Session session) {
-
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
@@ -209,8 +207,9 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 					sql.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
 				}
 				
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(sql.toString()); 
+				Statement st = c.createStatement();
+				st.setFetchSize(POSTGRESQL_FETCH_SIZE);
+				return st.executeQuery(sql.toString());
 			}
 		});
 	}

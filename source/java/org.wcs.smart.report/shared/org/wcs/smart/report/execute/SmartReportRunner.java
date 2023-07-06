@@ -74,6 +74,7 @@ public enum SmartReportRunner {
 	 * @param reportParameters
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, Map<String, Object> reportParameters,
 			Path renderFile, int defaultDpi) throws Exception{
@@ -107,6 +108,7 @@ public enum SmartReportRunner {
 	 * Renders a report document file to an output format
 	 * @throws EngineException 
 	 */
+	@SuppressWarnings("unchecked")
 	public void renderFile(IReportEngine engine, IRenderOption options, Path reportDoc, String currentUser, ConservationArea ca, int defaultDpi, Session session) throws EngineException {
 		IReportDocument reportDocument = engine.openReportDocument(reportDoc.toAbsolutePath().toString());
 		try {
