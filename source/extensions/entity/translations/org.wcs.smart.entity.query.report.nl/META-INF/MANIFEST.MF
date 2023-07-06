@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Entity Tracker Report Query Fragment
 Bundle-SymbolicName: org.wcs.smart.entity.query.report.nl
-Bundle-Version: 7.4.1
-Fragment-Host: org.wcs.smart.entity.query.report;bundle-version="7.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-Version: 8.0.0
+Fragment-Host: org.wcs.smart.entity.query.report;bundle-version="8.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.entity.query.report.nl

@@ -4,10 +4,10 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.4.0-SNAPSHOT</version>
+		<version>8.0.0-SNAPSHOT</version>
 		<relativePath>../../../../java</relativePath>
 	</parent>
 	<artifactId>org.wcs.smart.i2.migrate.nl</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>7.5.0</version>
+	<version>8.0.0</version>
 </project>

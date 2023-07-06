@@ -9,5 +9,5 @@
 	</parent>
 	<artifactId>org.wcs.smart.smartcollect.feature.nl</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>7.4.1</version>
+	<version>8.0.0</version>
 </project>

@@ -13,6 +13,6 @@
 	<name>SMART Independent Incident CyberTracker Language Pack</name>
 	<artifactId>org.wcs.smart.cybertracker.incident.nl</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.4.1</version>
+	<version>8.0.0</version>
 	
 </project>
