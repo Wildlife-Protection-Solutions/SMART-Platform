@@ -1047,8 +1047,10 @@ public class MissionDayComposite {
 			waypoint.setComment((String)value);
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
-			if (value != null){
+			if (value instanceof Waypoint) {
 				needSave = true;
+				waypoint = (Waypoint)value;
+				element.setWaypoint(waypoint);
 			}
 			//updated in cell editor
 		} else if (column == OtColumn.SAMPLING_UNIT) {
@@ -1076,6 +1078,20 @@ public class MissionDayComposite {
 			if (column == OtColumn.EAST || column == OtColumn.NORTH){
 				//update map
 				editor.getMissionEditor().getMap().getRenderManager().refresh(null);
+			}
+			if (column == OtColumn.ATTACHMENTS) {
+				//update reference
+				try(Session session = HibernateManager.openSession()){
+					waypoint = session.getReference(waypoint);
+					element.setWaypoint(waypoint);
+					try {
+						editor.getMissionEditor().loadWaypointDetails(element, session);
+					} catch (Exception e) {
+						EcologicalRecordsPlugIn.log(e.getMessage(), e);
+					}
+					
+				}
+							
 			}
 		}
 		observationTable.refresh();

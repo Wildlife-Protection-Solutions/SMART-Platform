@@ -74,5 +74,12 @@
     			<artifactId>c3p0</artifactId>
     			<version>${c3p0.version}</version>
 		</dependency>
+		
+		
+		        <dependency>
+		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-log4j12</artifactId>
+  		<version>1.6.4</version>
+        </dependency>
 	</dependencies>
 </project>

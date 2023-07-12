@@ -1018,7 +1018,7 @@ public class AttributeInfoPanel extends Composite {
 		nameKeyValues.initFields(att, siblings, language);
 		
 		this.currentDisplayLang = language;
-		
+	
 		chRequired.setSelection(att.getIsRequired());
 		
 		boolean canconvert = false;

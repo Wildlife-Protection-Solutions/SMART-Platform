@@ -144,14 +144,22 @@ public class Label implements Serializable {
 			if (this == key) return true;
 			if (key == null) return false;
 			if (key.getClass() != getClass()) return false;
-			return Objects.equals(getLanguage(), ((LabelItemPK)key).getLanguage()) 
-					&& Objects.equals(getElement(), ((LabelItemPK)key).getElement());
+			return Objects.equals(language, ((LabelItemPK)key).language) 
+					&& Objects.equals(element, ((LabelItemPK)key).element);
 		}
 		
 		@Override
 		public int hashCode() {
-			return Objects.hash(getLanguage(), getElement());
+			return Objects.hash(language, element);
 		  }
+		
+		
+//		//I had to overwrite this to fix issues with builds
+//		//if use the default end up with derby errors and connection closing		
+//		@Override
+//		public String toString() {
+//			return getClass().getName() + "@stackoverflowexception"; //$NON-NLS-1$
+//		}
 	}
 	
 	@Transient

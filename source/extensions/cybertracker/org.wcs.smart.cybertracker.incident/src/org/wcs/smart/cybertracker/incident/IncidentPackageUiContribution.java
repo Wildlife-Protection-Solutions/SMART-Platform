@@ -173,7 +173,7 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 	}
 	
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {
+	public void updatePackage(ICtPackage ctpackage, Session session) {
 		if (ctpackage instanceof IIncidentCtPackage) {
 			if (!btnCollect.getSelection()) {
 				((IIncidentCtPackage) ctpackage).setHasIncident(false);

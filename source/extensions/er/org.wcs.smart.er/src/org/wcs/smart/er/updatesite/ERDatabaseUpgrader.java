@@ -229,9 +229,9 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			
 					String[] bits = name.split("\\."); //$NON-NLS-1$
 					
-					Number cnt = session.createNativeQuery("select count(*) from sys.systriggers a, sys.sysschemas b WHERE a.schemaid = b.schemaid  AND  a.triggername = '" + bits[1].toUpperCase() + "' and b.schemaname ='" + bits[0].toUpperCase() + "'", Number.class) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					Long cnt = session.createNativeQuery("select count(*) from sys.systriggers a, sys.sysschemas b WHERE a.schemaid = b.schemaid  AND  a.triggername = '" + bits[1].toUpperCase() + "' and b.schemaname ='" + bits[0].toUpperCase() + "'", Long.class) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							.uniqueResult();
-					if (cnt.intValue() > 0) {
+					if (cnt > 0) {
 						session.createNativeMutationQuery("DROP trigger " + name).executeUpdate(); //$NON-NLS-1$
 						session.createNativeMutationQuery(triggers[1]).executeUpdate();
 					}

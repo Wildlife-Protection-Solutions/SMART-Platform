@@ -67,71 +67,80 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		return result;
 	}
 	
+	private void loadAttachmentDetails(Waypoint wp, Session session) {
+		for (WaypointAttachment wa : wp.getAttachments()) {
+			try {
+				wa.computeFileLocation(session);
+			}catch (Exception ex) {}
+			if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+		}
+		for (WaypointObservation wo : wp.getAllObservations()) {
+			for (WaypointObservation dbwo : wp.getAllObservations()) {
+				if (wo.equals(dbwo)) {
+					wo.setAttachments(dbwo.getAttachments());
+					for (ObservationAttachment wa : wo.getAttachments()) {
+						try {
+							wa.computeFileLocation(session);
+						}catch (Exception ex) {}
+						
+						if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+					}
+				}
+			}
+		}
+	
+		for (WaypointObservation wo : wp.getAllObservations()) {
+			wo.getAttachments().size();
+		}
+	}
+	
 	/**
 	 * @see org.eclipse.jface.viewers.DialogCellEditor#openDialogBox(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	protected Object openDialogBox(Control cellEditorWindow) {
 		Waypoint wp = (Waypoint)super.getValue();
-		
-		AttachmentDialog attd = new AttachmentDialog(cellEditorWindow.getShell(), wp);		
-		if (attd.open() == Window.CANCEL){
-			setValue(null);
-			if (!attd.hasMoved()) return Boolean.FALSE;
-			
-			//attachments may have been moved so we should reload them here
-			//for waypoint and all observations
-			try(Session session = HibernateManager.openSession()){
-				Waypoint db = session.get(Waypoint.class, wp.getUuid());
-				
-				wp.setAttachments(db.getAttachments());
-				for (WaypointAttachment wa : wp.getAttachments()) {
-					try {
-						wa.computeFileLocation(session);
-					}catch (Exception ex) {}
-					if (wa.getSignatureType() != null) wa.getSignatureType().getName();
-				}
-				for (WaypointObservation wo : wp.getAllObservations()) {
-					for (WaypointObservation dbwo : db.getAllObservations()) {
-						if (wo.equals(dbwo)) {
-							wo.setAttachments(dbwo.getAttachments());
-							for (ObservationAttachment wa : wo.getAttachments()) {
-								try {
-									wa.computeFileLocation(session);
-								}catch (Exception ex) {}
-								if (wa.getSignatureType() != null) wa.getSignatureType().getName();
-							}
-						}
-					}
-				}
-				
-				for (WaypointObservation wo : wp.getAllObservations()) {
-					wo.getAttachments().size();
-				}
-				
-			}
-			return Boolean.FALSE;
+
+		try(Session session = HibernateManager.openSession()){
+			wp = session.getReference(wp);
+			loadAttachmentDetails(wp, session);
 		}
 		
-		//Update the attachments
+		AttachmentDialog attd = new AttachmentDialog(cellEditorWindow.getShell(), wp);
+		if (attd.open() == Window.CANCEL) {
+			setValue(null);
+			if (!attd.hasMoved())
+				return Boolean.FALSE;
+
+			// attachments may have been moved so we should reload them here
+			// for waypoint and all observations
+			try (Session session = HibernateManager.openSession()) {
+				wp = session.get(Waypoint.class, wp.getUuid());
+				loadAttachmentDetails(wp, session);
+			}
+			return wp;
+		}
+
+		// Update the attachments
 		List<WaypointAttachment> attachments = attd.getAttchments();
-		if (wp.getAttachments() == null && attachments.size() > 0){
+		if (wp.getAttachments() == null && attachments.size() > 0) {
 			wp.setAttachments(new ArrayList<WaypointAttachment>());
 		}
 		for (Iterator<WaypointAttachment> iterator = wp.getAttachments().iterator(); iterator.hasNext();) {
 			WaypointAttachment att = iterator.next();
-			if (!attachments.remove(att)){
+			if (!attachments.remove(att)) {
 				att.setWaypoint(null);
 				iterator.remove();
 			}
 		}
-		
-		//add remaining; these should all be new attachments
+
+		// add remaining; these should all be new attachments
 		for (Iterator<WaypointAttachment> iterator = attachments.iterator(); iterator.hasNext();) {
 			WaypointAttachment att = (WaypointAttachment) iterator.next();
 			att.setWaypoint(wp);
 			wp.getAttachments().add(att);
 		}
+		
 		return wp;
 	}
 	

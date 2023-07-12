@@ -198,7 +198,7 @@ public class QueryDefinitionValidator {
 	 */
 	public NamedItem findValue(String langCode, String value, String objectType, List<String> warnings,  String caField){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c" +  caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c" +  caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		org.hibernate.query.Query<?> query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$

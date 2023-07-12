@@ -15,174 +15,232 @@
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
-   <plugin
+<plugin
          id="org.locationtech.udig.catalog"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.catalog.geotiff"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.catalog.rasterings"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.catalog.shp"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.catalog.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.catalog.wms"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.legend"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.libs"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.1.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.mapgraphic"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.project"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.project.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.render.feature.basic"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.render.feature.shapefile"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.render.gridcoverage.basic"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.render.wms.basic"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.style"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.style.sld"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.style.wms"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.tool.default"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.tool.select"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.project.edit"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.locationtech.udig.project.ui.editor"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+         
+         
+         
+   <plugin
+         id="org.locationtech.udig.catalog.worldimage"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
          unpack="false"/>
 
    <plugin
+         id="org.locationtech.udig.style.advanced.core"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.locationtech.udig.style.advanced.feature"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.locationtech.udig.style.advanced.raster"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.locationtech.udig.tool.measure"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.locationtech.udig.style.sld.raster"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.locationtech.udig.catalog.arcgrid"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+         
+   <plugin
+         id="org.locationtech.udig.info"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.qualifier"
+         unpack="false"/>
+
+	<plugin
          id="org.apache.ant"
          download-size="0"
          install-size="0"
@@ -426,13 +484,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.locationtech.udig.info"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.w3c.dom.smil"
          download-size="0"
          install-size="0"
@@ -462,55 +513,6 @@
 
    <plugin
          id="net.miginfocom.layout.swt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.catalog.worldimage"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.style.advanced.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.style.advanced.feature"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.style.advanced.raster"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.tool.measure"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.style.sld.raster"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.locationtech.udig.catalog.arcgrid"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -596,13 +598,6 @@
 
    <plugin
          id="org.apache.batik.ext"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.github.librepdf.openpdf"
          download-size="0"
          install-size="0"
          version="0.0.0"

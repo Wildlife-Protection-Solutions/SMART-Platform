@@ -154,7 +154,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private boolean isInit = false;
 	
 	@Override
-	public void updatePackage(ICtPackage ctpackage) throws Exception{
+	public void updatePackage(ICtPackage ctpackage, Session session) throws Exception{
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
 		AbstractCtPackage pp = (AbstractCtPackage)ctpackage;
 

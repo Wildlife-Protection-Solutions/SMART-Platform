@@ -9,7 +9,8 @@ MKDIR %outputlocation%
 
 REM run maven to build packages
 REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
-call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
+REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
+call mvn clean install -Pallplatforms,product,update,core,plugins
 REM call mvn install -Pallplatforms,migrationtools
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
@@ -38,7 +39,7 @@ move %outputlocation%\org.wcs.smart.utils.updatesite-%version%-SNAPSHOT.zip %out
 
 powershell Expand-Archive %outputlocation%\smartapp-win32.win32.x86_64.zip %outputlocation%\smartapp-win32.win32.x86_64
 
-del %outputlocation%\smartapp-win32.win32.x86_64\eclipsec.exe
+del %outputlocation%\smartapp-win32.win32.x86_64\SMARTc.exe
 mkdir %outputlocation%\smartapp-win32.win32.x86_64\updatesite
 copy %outputlocation%\site_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite
 copy %outputlocation%\migrationtools_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite

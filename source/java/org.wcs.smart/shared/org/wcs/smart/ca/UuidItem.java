@@ -22,6 +22,7 @@
 package org.wcs.smart.ca;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -84,25 +85,23 @@ public class UuidItem implements Serializable{
 		this.uuid = uuid;
 	}
 	
+//	@Override
+//	public String toString() {
+//		return "UUID Item";
+//	}
 	
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof UuidItem){
+		if (this == other) return true;
+		if (other == null) return false;
+		if (other instanceof UuidItem){
 			UuidItem s = (UuidItem)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return this == s;
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return s.getUuid().equals(this.getUuid());
-			}
+			return (Objects.equals(uuid, s.uuid));
 		}
 		return false;
 	}
-	
-	
+
 	public int hashCode(){
-		if (getUuid() != null){
-			return getUuid().hashCode();
-		}
-		return super.hashCode();
+		return Objects.hashCode(uuid);
 	}
 }

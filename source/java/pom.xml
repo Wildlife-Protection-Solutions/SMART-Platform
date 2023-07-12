@@ -29,7 +29,7 @@
 
         <java-version>17</java-version>
         <javafx-lib-version>11.0.2</javafx-lib-version>
-	<tycho-version>2.5.0</tycho-version>
+	<tycho-version>4.0.0</tycho-version>
         <!--<tycho-extras-version>1.3.0</tycho-extras-version>-->
         <tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
         
@@ -106,8 +106,8 @@
  			<version>${tycho-version}</version>
  			<configuration>
 				<encoding>UTF-8</encoding>
-				<source>11</source>
-				<target>11</target>
+				<source>${java-version}</source>
+				<target>${java-version}</target>
 				<extraClasspathElements>
 					<extraClasspathElement>
  						<groupId>com.oracle</groupId>
@@ -278,6 +278,13 @@
 			<id>update</id>
 			<modules>
 				<module>org.wcs.smart.updatesite</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>emily</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>../translations/org.wcs.smart.feature.nl</module>
 			</modules>
 		</profile>
 		<profile>
@@ -597,7 +604,7 @@
 		<profile>
 			<id>languagepacks</id>
 			<modules>
-				<!--<module>org.wcs.smart.translations.updatesite</module>-->
+				<module>org.wcs.smart.translations.updatesite</module>
 				
 				<module>../translations/org.wcs.smart.birt.map.nl</module>
 				<module>../translations/org.wcs.smart.dataentry.nl</module>

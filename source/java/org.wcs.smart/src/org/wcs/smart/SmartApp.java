@@ -41,7 +41,7 @@ public class SmartApp implements IApplication {
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {	
-		PropertyConfigurator.configure("log4j.properties"); //$NON-NLS-1$
+		PropertyConfigurator.configure(getClass().getResourceAsStream("/log4j.properties")); //$NON-NLS-1$
 		WorkbenchAdvisor workbenchAdvisor = new SmartWorkbenchAdvisor();
 		Display display = PlatformUI.createDisplay();
 	

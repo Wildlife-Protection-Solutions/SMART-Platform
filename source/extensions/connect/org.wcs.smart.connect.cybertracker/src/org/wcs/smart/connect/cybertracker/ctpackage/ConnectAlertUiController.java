@@ -546,7 +546,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 	}
 
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {
+	public void updatePackage(ICtPackage ctpackage, Session session) {
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
 		
 		AbstractCtPackage apackage = (AbstractCtPackage)ctpackage;
@@ -554,19 +554,19 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		List<MetadataFieldValue> existing = new ArrayList<>();
 		for (MetadataFieldValue vv : apackage.getMetadataValues()) {
 			if (vv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.CONNECT_ALERT.name())) {
+				session.remove(vv);
 				existing.add(vv);
 			}
 		}
+		apackage.getMetadataValues().removeAll(existing);
 		
 		List<MetadataFieldValue> newvalues = new ArrayList<>();
 		for (CtPackageAlert pa : currentAlerts) {
 			MetadataFieldValue v = pa.toMetadataField();
 			v.setCtPackage(apackage);
+			session.persist(v);
 			newvalues.add(v);
 		}
-		
-		apackage.getMetadataValues().removeAll(existing);
-		apackage.getMetadataValues().addAll(newvalues);
 		
 	}
 	

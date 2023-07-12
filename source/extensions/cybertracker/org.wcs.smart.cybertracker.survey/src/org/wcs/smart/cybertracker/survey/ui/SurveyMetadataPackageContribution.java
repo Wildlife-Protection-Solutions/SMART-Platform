@@ -485,7 +485,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	}
 
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {
+	public void updatePackage(ICtPackage ctpackage, Session session) {
 		SurveyCtPackage cpackage = ((SurveyCtPackage)ctpackage);
 		if (cpackage.getMetadataValues() == null) cpackage.setMetadataValues(new ArrayList<>());
 		
@@ -495,20 +495,21 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			map.put(v.getMetadataKey(), v);
 		}
 		
-		MetadataFieldValue v = findMetadataValue(map, MissionMetadataField.COMMENT,  btnCmt, btnCmtrq, cpackage);
+		MetadataFieldValue v = findMetadataValue(map, MissionMetadataField.COMMENT,  btnCmt, btnCmtrq, cpackage, session);
 		v.setStringValue(txtComment.getText().strip());
 		
-		v = findMetadataValue(map, MissionMetadataField.LEADER, btnLeader, btnLeaderrq, cpackage);
+		v = findMetadataValue(map, MissionMetadataField.LEADER, btnLeader, btnLeaderrq, cpackage, session);
 		if (cmbLeader.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
 			v.setUuidValue( ((Employee)cmbLeader.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
-		v = findMetadataValue(map, MissionMetadataField.MEMBERS, btnMembers, btnMembersrq, cpackage);
+		v = findMetadataValue(map, MissionMetadataField.MEMBERS, btnMembers, btnMembersrq, cpackage, session);
 		if (v.getUuidList() == null) v.setUuidList(new ArrayList<>());
+		v.getUuidList().forEach(e->session.remove(e));
 		v.getUuidList().clear();
-		
+				
 		for (Object o : lstEmployees.getCheckedElements()) {
 			if (o instanceof Employee) {
 				MetadataFieldUuidValue uuidValue = new MetadataFieldUuidValue();
@@ -527,7 +528,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		for (Entry<MissionAttribute, Object[]> custom : customAttributes.entrySet()) {
 			Object[] fields = custom.getValue();
 			MissionAttribute ma = custom.getKey();
-			v = findMetadataValue(map, ma, (Button)fields[0], (Button)fields[1], cpackage);
+			v = findMetadataValue(map, ma, (Button)fields[0], (Button)fields[1], cpackage, session);
 			customKeys.add(MissionMetadataField.generateKey(ma));
 			if (ma.getType() == AttributeType.LIST) {
 				TableComboViewer cmb = (TableComboViewer) fields[2];
@@ -554,7 +555,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, MissionMetadataField field, 
-			Button btnVisible, Button btnRequired, SurveyCtPackage cpackage) {
+			Button btnVisible, Button btnRequired, SurveyCtPackage cpackage, Session session) {
 		MetadataFieldValue v = items.get(field.name());
 		if (v == null) {
 			v = new MetadataFieldValue();
@@ -562,6 +563,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			v.setConservationArea(cpackage.getConservationArea());
 			v.setMetadataKey(field.name());
 			v.setRequired(field.isRequired());
+			session.persist(v);
 			cpackage.getMetadataValues().add(v);
 		}
 		v.setVisible(btnVisible.getSelection());
@@ -571,7 +573,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	
 	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, 
 			MissionAttribute attribute, Button btnVisible, Button btnRequired,
-			SurveyCtPackage ppackage) {
+			SurveyCtPackage ppackage, Session session) {
 		
 		MetadataFieldValue v = items.get(MissionMetadataField.generateKey(attribute));
 		if (v == null) {
@@ -580,6 +582,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			v.setConservationArea(ppackage.getConservationArea());
 			v.setMetadataKey(MissionMetadataField.generateKey(attribute));
 			v.setRequired(false);
+			session.persist(v);
 			ppackage.getMetadataValues().add(v);
 		}
 		v.setVisible(btnVisible.getSelection());

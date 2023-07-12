@@ -60,8 +60,7 @@ public class WaypointObservationGroup extends UuidItem {
 		this.waypoint = waypoint;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="observationGroup", orphanRemoval=false, 
-			cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="observationGroup", orphanRemoval=false, cascade=CascadeType.ALL)
 	@BatchSize(size=500)
 	public List<WaypointObservation> getObservations(){
 		return this.observations;

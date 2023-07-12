@@ -405,11 +405,12 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					}
 				}
 				
-				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
+				ctpackage = HibernateManager.saveOrMerge(session, ctpackage);
+				
 				for (IPackageUiContribution cc : contributions) {
-					cc.updatePackage(ctpackage);
+					cc.updatePackage(ctpackage, session);
 				}				
-				session.merge(ctpackage);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

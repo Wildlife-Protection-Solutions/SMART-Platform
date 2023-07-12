@@ -95,7 +95,7 @@ public class SaveWaypointJob extends Job {
 						pnt = saveSession.merge(pnt);
 						//required to prevent duplicate loading of survey waypoint object
 						saveSession.getReference(wp).getMissionDay().getUuid();
-						saveSession.merge(wp);
+						//saveSession.merge(wp);
 					}
 					updated.add(pnt);
 					

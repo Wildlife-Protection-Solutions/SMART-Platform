@@ -31,7 +31,8 @@ Bundle-ClassPath: .,
  lib/txw2-4.0.2.jar,
  lib/hibernate-core-6.2.3.Final.jar,
  lib/hibernate-jcache-6.2.3.Final.jar,
- lib/jakarta.activation-api-2.1.0.jar
+ lib/jakarta.activation-api-2.1.0.jar,
+ lib/slf4j-log4j12-1.6.4.jar
 Export-Package: 
  jakarta.activation,
  jakarta.inject,

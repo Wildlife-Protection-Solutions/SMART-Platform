@@ -650,11 +650,11 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				}
 				privatemd.setBooleanValue(btnPrivate.getSelection());
 				
-				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
+				ctpackage = HibernateManager.saveOrMerge(session, ctpackage);			
+				
 				for (IPackageUiContribution cc : contributions) {
-					cc.updatePackage(ctpackage);
+					cc.updatePackage(ctpackage, session);
 				}				
-				session.merge(ctpackage);
 				
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

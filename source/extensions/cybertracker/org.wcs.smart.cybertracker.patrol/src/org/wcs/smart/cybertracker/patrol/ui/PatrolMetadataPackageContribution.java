@@ -670,7 +670,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	}
 
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {		
+	public void updatePackage(ICtPackage ctpackage, Session session) {		
 		PatrolCtPackage ppackage = (PatrolCtPackage)ctpackage;
 		if (ppackage.getMetadataValues() == null) ppackage.setMetadataValues(new ArrayList<>());
 		
@@ -679,28 +679,29 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			map.put(v.getMetadataKey(), v);
 		}
 		
-		MetadataFieldValue v = findMetadataValue(map, PatrolMetadataField.ARMED, btnArmed, btnArmedrq, ppackage);
+		MetadataFieldValue v = findMetadataValue(map, PatrolMetadataField.ARMED, btnArmed, btnArmedrq, ppackage, session);
 		v.setBooleanValue(btnArmedYes.getSelection());
 		
-		v = findMetadataValue(map, PatrolMetadataField.COMMENT,  btnCmt, btnCmtrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.COMMENT,  btnCmt, btnCmtrq, ppackage, session);
 		v.setStringValue(txtComment.getText().strip());
 		
-		v = findMetadataValue(map, PatrolMetadataField.LEADER,  btnLeader, btnLeaderrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.LEADER,  btnLeader, btnLeaderrq, ppackage, session);
 		if (cmbLeader.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
 			v.setUuidValue( ((Employee)cmbLeader.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.MANDATE,  btnMandate, btnMandaterq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.MANDATE,  btnMandate, btnMandaterq, ppackage, session);
 		if (cmbMandate.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
 			v.setUuidValue( ((PatrolMandate)cmbMandate.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.MEMBERS,  btnMembers, btnMembersrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.MEMBERS,  btnMembers, btnMembersrq, ppackage, session);
 		if (v.getUuidList() == null) v.setUuidList(new ArrayList<>());
+		v.getUuidList().forEach(e->session.remove(e));
 		v.getUuidList().clear();
 		
 		for (Object o : lstEmployees.getCheckedElements()) {
@@ -717,17 +718,17 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.OBJECTIVE, btnObj, btnObjrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.OBJECTIVE, btnObj, btnObjrq, ppackage, session);
 		v.setStringValue(txtObj.getText());
 		
-		v = findMetadataValue(map, PatrolMetadataField.PILOT, btnPilot, btnPilotrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.PILOT, btnPilot, btnPilotrq, ppackage, session);
 		if (cmbPilot.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
 			v.setUuidValue( ((Employee)cmbPilot.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.STATION, btnStation, btnStationrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.STATION, btnStation, btnStationrq, ppackage, session);
 		if (cmbStation.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
@@ -738,7 +739,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.TEAM, btnTeam, btnTeamrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.TEAM, btnTeam, btnTeamrq, ppackage, session);
 		if (cmbTeam.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
@@ -749,7 +750,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.TRANSPORT,  btnTT, btnTTrq, ppackage);
+		v = findMetadataValue(map, PatrolMetadataField.TRANSPORT,  btnTT, btnTTrq, ppackage, session);
 		if (cmbTt.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
@@ -759,7 +760,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		for (Entry<PatrolAttribute, Object[]> custom : customAttributes.entrySet()) {
 			Object[] fields = custom.getValue();
 			PatrolAttribute pa = custom.getKey();
-			v = findMetadataValue(map, pa, (Button)fields[0], (Button)fields[1], ppackage);
+			v = findMetadataValue(map, pa, (Button)fields[0], (Button)fields[1], ppackage, session);
 			
 			if (pa.getType() == AttributeType.BOOLEAN) {
 				if (((Button)fields[2]).getSelection()) {
@@ -789,7 +790,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, 
 			PatrolMetadataField field, Button btnVisible, Button btnRequired,
-			PatrolCtPackage ppackage) {
+			PatrolCtPackage ppackage, Session session) {
 		
 		MetadataFieldValue v = items.get(field.name());
 		if (v == null) {
@@ -797,6 +798,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			v.setCtPackage((AbstractCtPackage)ppackage);
 			v.setConservationArea(ppackage.getConservationArea());
 			v.setMetadataKey(field.name());
+			session.persist(v);
 			ppackage.getMetadataValues().add(v);
 		}
 		v.setVisible(btnVisible.getSelection());
@@ -806,7 +808,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 
 	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, 
 			PatrolAttribute attribute, Button btnVisible, Button btnRequired,
-			PatrolCtPackage ppackage) {
+			PatrolCtPackage ppackage, Session session) {
 		
 		MetadataFieldValue v = items.get(PatrolMetadataField.generateKey(attribute));
 		if (v == null) {
@@ -814,6 +816,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			v.setCtPackage((AbstractCtPackage)ppackage);
 			v.setConservationArea(ppackage.getConservationArea());
 			v.setMetadataKey(PatrolMetadataField.generateKey(attribute));
+			session.persist(v);
 			ppackage.getMetadataValues().add(v);
 		}
 		v.setVisible(btnVisible.getSelection());

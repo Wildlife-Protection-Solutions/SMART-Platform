@@ -482,20 +482,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.datatools.modelbase.sql"
-         download-size="0"
-         install-size="0"
-         version="1.2.101.201811012051"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.datatools.modelbase.dbdefinition"
-         download-size="0"
-         install-size="0"
-         version="1.2.101.201811012051"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.core.script.function"
          download-size="0"
          install-size="0"

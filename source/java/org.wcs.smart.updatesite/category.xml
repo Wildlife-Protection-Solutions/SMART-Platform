@@ -45,9 +45,6 @@
    <feature url="features/org.wcs.smart.r.feature_8.0.0.qualifier.jar" id="org.wcs.smart.r.feature" version="8.0.0.qualifier">
       <category name="r"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.incident.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.incident.feature" version="8.0.0.qualifier">
-      <category name="smartmobile"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.plan.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="8.0.0.qualifier">
       <category name="smartmobile"/>
    </feature>
@@ -57,23 +54,20 @@
    <feature url="features/org.wcs.smart.cybertracker.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.feature" version="8.0.0.qualifier">
       <category name="smartmobile"/>
    </feature>
-   <feature url="features/org.wcs.smart.smartcollect.feature_8.0.0.qualifier.jar" id="org.wcs.smart.smartcollect.feature" version="8.0.0.qualifier">
-      <category name="smartcollect"/>
-   </feature>
    <feature id="org.wcs.smart.smartcollect.feature">
       <category name="smartcollect"/>
    </feature>
    <feature id="org.wcs.smart.cybertracker.incident.feature">
       <category name="smartmobile"/>
    </feature>
-   <feature id="org.wcs.smart.r.feature">
-      <category name="r"/>
-   </feature>
    <feature id="org.wcs.smart.event.i2.feature">
       <category name="events"/>
    </feature>
    <feature id="org.wcs.smart.i2.feature">
       <category name="profiles"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.dataqueue.cybertracker.feature.nl">
+      <category name="connectdq"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
@@ -135,5 +129,9 @@
          The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
       </description>
    </category-def>
-   <category-def name="smartcollect" label="SMART Collect"/>
+   <category-def name="smartcollect" label="SMART Collect">
+      <description>
+         Tools to support public data collection via the SMART Collect app.
+      </description>
+   </category-def>
 </site>

@@ -123,15 +123,10 @@ public class SurveyWaypoint {
 	
 	@Override
 	public boolean equals(Object other) {
-		if (other != null && other instanceof SurveyWaypoint) {
-			SurveyWaypoint s = (SurveyWaypoint) other;
-			if (s.getWaypoint() == null && this.getWaypoint() == null) {
-				return this == s;
-			} else if (s.getWaypoint() != null && this.getWaypoint() != null){
-				return s.getWaypoint().equals(this.getWaypoint());
-			}
-		}
-		return false;
+		if (other == null) return false;
+		if (other == this) return true;
+		if (!other.getClass().equals(SurveyWaypoint.class)) return false;
+		return this.id.equals(((SurveyWaypoint)other).id);
 	}
 
 	public int hashCode() {

@@ -92,7 +92,7 @@ public class SaveWaypointJob extends Job {
 						saveSession.persist(wp);
 					}else {
 						pnt = saveSession.merge(pnt);
-						saveSession.merge(wp);
+//						saveSession.merge(wp);
 					}
 					
 					// remove observations with no data

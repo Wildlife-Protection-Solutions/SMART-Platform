@@ -87,8 +87,8 @@ public class PostWindowOpenLoginHandler implements ILoginHandler {
 				throw ex;
 			}
 		}
+		if (status == null) return;
 
-		
 		//process any existing ca upload task
 		//this may effect replication state which is why we disable/enable
 		//replication state again after completed

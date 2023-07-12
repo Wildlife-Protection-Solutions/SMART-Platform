@@ -70,6 +70,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.FilterComposite;
 
@@ -254,6 +255,7 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 		lblSelectAttribute.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		lblSelectAttribute.setBounds(0, 0, 58, 13);
 		lblSelectAttribute.setText(Messages.AddAttributeDialog1_SelectAttribute_Label);
+		
 
 		//search filter field
 		final AttributeNameFilter viewerFilter = new AttributeNameFilter();
@@ -272,37 +274,17 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 		
 		//table viewer
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(compAddExisting,
-				SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
-		Table tblAttributes = checkboxTableViewer.getTable();
-		tblAttributes.setHeaderVisible(false);
+				SWT.BORDER | SWT.MULTI);
+		checkboxTableViewer.getTable().setHeaderVisible(false);
 		checkboxTableViewer.addFilter(viewerFilter);
 		
-		checkboxTableViewer.getTable().addKeyListener(new KeyAdapter() {
-			//spacebar check
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (checkboxTableViewer.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)checkboxTableViewer.getSelection());
-					selection.getFirstElement();
-					boolean value = checkboxTableViewer.getChecked(selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						checkboxTableViewer.setChecked(tp, !value);
-					}
-					e.doit = false;
-							
-				}
+		checkboxTableViewer.getControl().addKeyListener(new CheckboxSelectorKeyAdapter((CheckboxTableViewer)checkboxTableViewer));
 				
-			}
-		});
-		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		gd.heightHint = 300;
 		gd.widthHint = 300;
-		tblAttributes.setLayoutData(gd);
+		checkboxTableViewer.getControl().setLayoutData(gd);
+		
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		checkboxTableViewer.setLabelProvider(new ColumnLabelProvider(){
 			@Override
@@ -338,21 +320,17 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 				compAddExisting, SWT.NONE, false, false, session);
 		attributeInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		checkboxTableViewer
-				.addSelectionChangedListener(new ISelectionChangedListener() {
-					@Override
-					public void selectionChanged(SelectionChangedEvent event) {
-						Object x = (((StructuredSelection) checkboxTableViewer.getSelection()).getFirstElement());
-						if (x!= null && x instanceof Attribute){
-							Attribute sel = (Attribute)x ;
-							attributeInfo.setVisible(true);
-							attributeInfo.setAttribute(sel, null, lang);	//don't care about siblings; only viewing
-						} else {
-							attributeInfo.setVisible(false);
-						}
+		checkboxTableViewer.getControl().addListener(SWT.Selection, e->{
+			Object x = (((StructuredSelection) checkboxTableViewer.getSelection()).getFirstElement());
+			System.out.println(x.toString());
+			if (x!= null && x instanceof Attribute){
+				attributeInfo.setVisible(true);
+				attributeInfo.setAttribute(((Attribute)x), null, lang);	//don't care about siblings; only viewing
+			} else {
+				attributeInfo.setVisible(false);
+			}
+		});
 
-					}
-				});
 		attributeInfo.setVisible(false);
 
 		//update scrolled size

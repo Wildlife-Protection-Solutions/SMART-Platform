@@ -820,7 +820,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	
 	private NamedItem findValue(String langCode, String value, String objectType){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Query<?> query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
@@ -840,7 +840,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	
 	private NamedItem findTransportationValue(String langCode, String value, org.wcs.smart.patrol.model.PatrolType.Type type){
 		
-		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language = a.uuid " + //$NON-NLS-1$
+		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language.uuid = a.uuid " + //$NON-NLS-1$
 				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$
 		if (type != org.wcs.smart.patrol.model.PatrolType.Type.MIXED) {
 			sql += " and c.patrolType = :patrolType"; //$NON-NLS-1$"

@@ -284,11 +284,14 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
 				
-				if (ctpackage.getUuid() == null) session.persist(ctpackage);				
+				ctpackage = HibernateManager.saveOrMerge(session, ctpackage);
+				
+				session.flush();
+				
 				for (IPackageUiContribution cc : contributions) {
-					cc.updatePackage(ctpackage);
+					cc.updatePackage(ctpackage, session);
 				}				
-				session.merge(ctpackage);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -437,6 +440,8 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		
 		try(Session session = HibernateManager.openSession()){
 			SurveyCtPackage local = session.get(SurveyCtPackage.class, ((SurveyCtPackage)ctpackage).getUuid());
+			
+			if (local == null) return all;
 			
 			Label header = new Label(all, SWT.NONE);
 			header.setText(local.getName());

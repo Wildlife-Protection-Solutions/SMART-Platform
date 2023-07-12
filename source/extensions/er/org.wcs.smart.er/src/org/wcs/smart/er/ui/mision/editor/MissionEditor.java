@@ -248,9 +248,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 						md.getTracks().size();
 						try{
 							for (SurveyWaypoint wp : md.getWaypoints()){
-								ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
-								wp.getWaypoint().getObservationsAsString();
-								Hibernate.initialize(wp.getWaypoint());
+								loadWaypointDetails(wp, session);
 							}
 						}catch (Exception ex){
 							EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
@@ -280,6 +278,12 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			}
 		}
 		return this.mission;
+	}
+
+	public void loadWaypointDetails(SurveyWaypoint wp, Session session) throws Exception {
+		ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+		wp.getWaypoint().getObservationsAsString();
+		Hibernate.initialize(wp.getWaypoint());
 	}
 	
 	/**

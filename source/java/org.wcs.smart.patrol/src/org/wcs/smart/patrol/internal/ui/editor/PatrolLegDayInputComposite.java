@@ -982,9 +982,14 @@ public class PatrolLegDayInputComposite {
 			}
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
-			if (value instanceof Waypoint) needSave = true;
+			if (value instanceof Waypoint) {
+				needSave = true;
+				waypoint = (Waypoint)value;
+				((PatrolWaypoint)element).setWaypoint(waypoint);
+			}
 		}
 		if (needSave){
+			final Waypoint fwaypoint = waypoint; 
 			IJobChangeListener listener = new IJobChangeListener() {
 				@Override
 				public void sleeping(IJobChangeEvent event) { }
@@ -999,15 +1004,31 @@ public class PatrolLegDayInputComposite {
 				
 				@Override
 				public void done(IJobChangeEvent event) {
+					
 					if (column == OtColumn.EAST || column == OtColumn.NORTH){
 						//update map
 						editor.getPatrolEditor().getMap().getRenderManager().refresh(null);
+					}else if (column == OtColumn.ATTACHMENTS) {
+						//update reference
+						try(Session session = HibernateManager.openSession()){
+							Waypoint waypoint = session.getReference(fwaypoint);
+							((PatrolWaypoint)element).setWaypoint(waypoint);
+							try {
+								editor.getPatrolEditor().loadPatrolWaypointDetails(((PatrolWaypoint)element), session);
+							} catch (Exception e) {
+								SmartPatrolPlugIn.log(e.getMessage(), e);
+							}
+							
+						}
+									
 					}
 					Display.getDefault().asyncExec(()->observationTable.refresh());
 				}
 
 			};
+			
 			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element), listener);
+			
 			
 		}else {
 			observationTable.refresh();

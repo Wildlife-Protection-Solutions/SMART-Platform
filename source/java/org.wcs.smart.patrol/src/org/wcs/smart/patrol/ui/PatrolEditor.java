@@ -61,6 +61,7 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.CombinedSelectionProvider;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -73,7 +74,6 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -326,8 +326,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				
 				Hibernate.initialize(this.patrol.getStation());
 				Hibernate.initialize(this.patrol.getTeam());
-				//this.patrol.getStation().getName();
-				//this.patrol.getTeam().getName();
+				
 				this.patrol.getPatrolType().getDefaultMaxSpeed();
 				
 				this.patrol.getPatrolDatastorePath();
@@ -344,12 +343,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						pl.getMembers().forEach(m->m.getMember().getFamilyName());
 						for (PatrolLegDay pld : pl.getPatrolLegDays()){
 							pld.getTracks().forEach(t->t.getDistance());
-							for (PatrolWaypoint pw : pld.getWaypoints()){
-								
-								ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
-								pw.getWaypoint().getObservationsAsString();
-								if (pw.getWaypoint().getLastModifiedBy() != null) pw.getWaypoint().getLastModifiedBy().getFamilyName();
-							}
+							for (PatrolWaypoint pw : pld.getWaypoints()) loadPatrolWaypointDetails(pw, session);
 						}
 					}
 				} catch (Exception e) {
@@ -367,15 +361,20 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 				}
 			}catch (Exception ex){
-				if (session.getTransaction().isActive()){
-					session.getTransaction().rollback();
-				}
+				SmartPlugIn.log(ex.getMessage(), ex);
+				//if (session.getTransaction().isActive()){
+				//	session.getTransaction().rollback();
+				//}
 				throw ex;
 			}
 		}
 	}
 	
-
+	public void loadPatrolWaypointDetails(PatrolWaypoint pw, Session session) throws Exception {
+		ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+		pw.getWaypoint().getObservationsAsString();
+		if (pw.getWaypoint().getLastModifiedBy() != null) pw.getWaypoint().getLastModifiedBy().getFamilyName();
+	}
 
 	public void updatePartName(){
 		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + getPatrol().getId());

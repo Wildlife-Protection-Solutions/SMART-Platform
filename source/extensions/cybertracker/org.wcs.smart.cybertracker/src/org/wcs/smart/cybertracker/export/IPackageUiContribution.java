@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.export;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -70,5 +71,5 @@ public interface IPackageUiContribution {
 	 * Updates the contents of the package with the settings on this page
 	 * @param ctpackage
 	 */
-	public void updatePackage(ICtPackage ctpackage) throws Exception;
+	public void updatePackage(ICtPackage ctpackage, Session session) throws Exception;
 }

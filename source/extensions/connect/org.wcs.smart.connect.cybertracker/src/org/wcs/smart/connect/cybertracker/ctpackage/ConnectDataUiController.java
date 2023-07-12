@@ -335,14 +335,14 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			try {
 				fireEvents = false;
 				
-				MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
+				MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage, null);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
 					if (btnUploadData != null) btnUploadData.setSelection(true);
 				}else {
 					if (btnUploadData != null) btnUploadData.setSelection(false);
 				}
 				
-				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
 					btnUploadPeriod.setSelection(true);
 					if (data.getStringValue() != null) txtDataPeriod.setText(data.getStringValue());
@@ -354,7 +354,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					}
 				}
 				
-				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
 					btnPositionUpdates.setSelection(true);
 					txtPositionPeriod.setText(data.getStringValue());
@@ -363,7 +363,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				}
 				
 				if (btnPublic != null) {
-					data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
+					data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage, null);
 					if ((data == null || data.getBooleanValue() == null) || data.getBooleanValue()) {
 						btnPublic.setSelection(false);
 					}else {
@@ -385,6 +385,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	}
 
 	private void refreshAlertTypes(boolean force) {
+		//TODO: FIX THIS
 		(new LoadAlertTypesJob(context, force) {
 			@Override
 			public void typesLoaded(List<AlertType> atypes) {
@@ -395,7 +396,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 						cmbPositionType.setInput(types);
 						
 						if (ctpackage instanceof AbstractCtPackage) {
-							MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+							MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
 							if (data.getUuidValue() != null) {
 								
 								AlertType temp = null;
@@ -460,10 +461,10 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	}
 
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {
+	public void updatePackage(ICtPackage ctpackage, Session session) {
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
 		
-		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage, session);
 		if (btnUploadPeriod.getSelection()) {
 			data.setBooleanValue(true);
 			data.setStringValue(txtDataPeriod.getText());
@@ -478,10 +479,10 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				useconnect = false;
 			}
 		}
-		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage);
+		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage, session);
 		data.setBooleanValue(useconnect);
 		
-		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, session);
 		if (btnPositionUpdates.getSelection()) {
 			data.setBooleanValue(true);
 			data.setStringValue(txtPositionPeriod.getText());
@@ -493,7 +494,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		}
 		
 		if (btnPublic != null) {
-			data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
+			data = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage, session);
 			if (btnPublic.getSelection()) {
 				data.setBooleanValue(false);
 			}else {
@@ -504,18 +505,24 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 	}
 	
-	private MetadataFieldValue findCreateMetadataField(String key, AbstractCtPackage ctpackage) {
+	private MetadataFieldValue findCreateMetadataField(String key, AbstractCtPackage ctpackage, Session session) {
 		if (ctpackage.getMetadataValues() != null) {
 			for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
-				if (v.getMetadataKey().equals(key)) return v;
+				if (v.getMetadataKey().equals(key)) {
+					if (session != null && v.getUuid() == null) session.persist(v);
+					return v;
+				}
 			}
 		}else {
 			ctpackage.setMetadataValues(new ArrayList<>());
 		}
+		
 		MetadataFieldValue v = new MetadataFieldValue();
 		v.setMetadataKey(key);
 		v.setConservationArea(ctpackage.getConservationArea());
 		v.setCtPackage(ctpackage);
+		
+		if (session != null) session.persist(v);
 		ctpackage.getMetadataValues().add(v);
 		
 		
@@ -551,7 +558,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				surl += "/noa/cybertracker/packages/" + UuidUtils.uuidToString(ctpackage.getUuid()); //$NON-NLS-1$
 
 				try {
-					MetadataFieldValue privatemd = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage);
+					MetadataFieldValue privatemd = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage, null);
 					boolean isprivate = true;
 					if (privatemd.getBooleanValue() != null) isprivate = privatemd.getBooleanValue();
 					

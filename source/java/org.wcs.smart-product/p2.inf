@@ -1,8 +1,6 @@
 instructions.configure=\
-  addRepository(name:Local SMART Core Update Site (7.4.0),type:0,location:jar${#58}file${#58}./updatesite/site_7.4.0.zip!/,enabled:true);\
-  addRepository(name:Local SMART Core Update Site (7.4.0),type:1,location:jar${#58}file${#58}./updatesite/site_7.4.0.zip!/,enabled:true);\
-  addRepository(name:Local SMART Migration Tools Update Site (7.4.0),type:0,location:jar${#58}file${#58}./updatesite/migrationtools_7.4.0.zip!/,enabled:true);\
-  addRepository(name:Local SMART Migration Tools Update Site (7.4.0),type:1,location:jar${#58}file${#58}./updatesite/migrationtools_7.4.0.zip!/,enabled:true);\
-  addRepository(name:Online Update Site (7.4),type:0,location:https://smartupdatesite.z13.web.core.windows.net/updatesite/7.4,enabled:true);\
-  addRepository(name:Online Update Site(7.4),type:1,location:https://smartupdatesite.z13.web.core.windows.net/updatesite/7.4,enabled:true);\  
+  addRepository(name:Local SMART Core Update Site (8.0.0),type:0,location:jar${#58}file${#58}./updatesite/site_8.0.0.zip!/,enabled:true);\
+  addRepository(name:Local SMART Core Update Site (8.0.0),type:1,location:jar${#58}file${#58}./updatesite/site_8.0.0.zip!/,enabled:true);\
+  addRepository(name:Online Update Site (8.0),type:0,location:https://smartupdatesite.z13.web.core.windows.net/updatesite/8.0,enabled:true);\
+  addRepository(name:Online Update Site(8.0),type:1,location:https://smartupdatesite.z13.web.core.windows.net/updatesite/8.0,enabled:true);\  
   org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/eclipsec.exe);

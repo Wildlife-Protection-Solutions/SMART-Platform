@@ -537,7 +537,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 			
 	}
 	private Attribute findAttribute(String key, Category category){
-		String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
+		String sql = "FROM Attribute WHERE conservationArea = :ca and keyId = :key"; //$NON-NLS-1$
 		Query<Attribute> query = session.createQuery(sql, Attribute.class);
 		query.setParameter("key", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -578,7 +578,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	
 	private Category findCategory(String key){
 		String[] bits = key.split("\\."); //$NON-NLS-1$
-		String sql = "FROM Category WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
+		String sql = "FROM Category WHERE conservationArea = :ca and keyId = :key"; //$NON-NLS-1$
 		Query<Category> query = session.createQuery(sql, Category.class);
 		query.setParameter("key", bits[bits.length - 1]); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
