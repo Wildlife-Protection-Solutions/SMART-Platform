@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wcs.smart.connect</groupId>
         <artifactId>org.wcs.smart.connect</artifactId>
-        <version>7.5.7</version>
+        <version>7.5.8</version>
     </parent>
     
     <groupId>org.wcs.smart.connect.server</groupId>
@@ -661,9 +661,17 @@
                     <groupId>org.eclipse.platform</groupId>
                     <artifactId>org.eclipse.equinox.common</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.core.commands</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
-       
+       <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.core.commands</artifactId>
+            <version>3.10.400</version>
+        </dependency>
           <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.equinox.common</artifactId>
