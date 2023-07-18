@@ -24,6 +24,7 @@ package org.wcs.smart.smartcollect.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.observation.model.Waypoint;
 
 import jakarta.persistence.Column;
@@ -76,9 +77,12 @@ public class SmartCollectWaypoint implements Serializable{
 	
 	@Override
 	public boolean equals(Object other){
+		if (this == other) return true;
 		if (other == null) return false;
-		if (other.getClass() != getClass()) return false;
-		return waypoint.equals(((SmartCollectWaypoint)other).getWaypoint());
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		SmartCollectWaypoint s = (SmartCollectWaypoint)other;
+		return (Objects.equals(getWaypoint(), s.getWaypoint()));
+		
 	}
 	
 	@Override

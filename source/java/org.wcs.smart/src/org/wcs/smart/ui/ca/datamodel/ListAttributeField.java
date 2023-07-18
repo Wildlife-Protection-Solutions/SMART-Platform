@@ -215,7 +215,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		this.originalValue = (AttributeListItem)x;
 		if (originalValue == null){
 			cmbViewer.setSelection(null);
-		}else{
+		}else{			
 			if (!((List<Object>)cmbViewer.getInput()).contains(this.originalValue)){
 				//then the original value is not in the list; probably not longer active
 				//for the purpose of this particular field we wnat to add it

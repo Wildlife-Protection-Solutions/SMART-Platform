@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -195,9 +196,11 @@ public class MissionTracksComposite extends TracksComposite {
 		if (!confirmChanges()) return;
 		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMissionDay(), GPSDataImport.ImportType.TRACK);
 		wizard.setDateOption(dialog.getMissionDay().getDate());
-		WizardDialog dialog = new SmartWizardDialog(getShell(), wizard);
-		dialog.open();
-		refresh(false);		
+		WizardDialog wdialog = new SmartWizardDialog(getShell(), wizard);
+		if (wdialog.open() == Window.OK) {
+			MissionTracksComposite.this.dialog.refreshMissionDay();
+			refresh(false);		
+		}
 	}
 	
 	protected void mergeTrack() {

@@ -484,6 +484,9 @@
 				
 				<module>../extensions/paws/org.wcs.smart.paws</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module> 
+				
+				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
+				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
 			</modules>
 		</profile>
 		<profile>
@@ -577,8 +580,8 @@
 				<module>../extensions/paws/org.wcs.smart.paws</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
 				
-				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
 				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
+				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
 				
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.feature</module>

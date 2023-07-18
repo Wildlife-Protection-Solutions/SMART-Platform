@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.UuidItem;
 
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AssociationOverrides;
@@ -123,11 +124,12 @@ public class MissionMember {
 		
 		@Override
 		public boolean equals(Object other){
-			if (other == this) return true;
+			if (this == other) return true;
 			if (other == null) return false;
-			if (getClass() != other.getClass()) return false;
-			MissionMemberPk o = (MissionMemberPk) other;
-			return Objects.equals(mission, o.mission) && Objects.equals(member, o.member);
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			MissionMemberPk o = (MissionMemberPk)other;
+			return Objects.equals(getMission(), o.getMission()) && Objects.equals(getMember(), o.getMember());
+			
 		}
 		
 		@Override

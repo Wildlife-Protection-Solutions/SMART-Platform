@@ -84,21 +84,19 @@ public class UuidItem implements Serializable{
 	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
-	
-//	@Override
-//	public String toString() {
-//		return "UUID Item";
-//	}
+
 	
 	@Override
 	public boolean equals(Object other){
 		if (this == other) return true;
 		if (other == null) return false;
-		if (other instanceof UuidItem){
-			UuidItem s = (UuidItem)other;
-			return (Objects.equals(uuid, s.uuid));
-		}
-		return false;
+		if (getUuid() == null) return false;
+		//this is required for proxy classes
+		//https://stackoverflow.com/questions/11013138/hibernate-equals-and-proxy
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		UuidItem s = (UuidItem)other;
+		//must use getUuid for hibernate proxies 
+		return (Objects.equals(getUuid(), s.getUuid()));
 	}
 
 	public int hashCode(){

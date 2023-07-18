@@ -75,6 +75,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolManager;
@@ -154,12 +155,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							getSite().getShell().getDisplay().syncExec(new Runnable(){
 								@Override
 								public void run() {
+									summaryEditor.initValues();
 									createDayPages();
 									mapPage.refresh();
 								}});
 							return Status.OK_STATUS;
 						}					
 					};
+					PatrolEditor.this.patrol = null;
 					j.setSystem(true);
 					j.schedule();
 				
@@ -300,7 +303,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return PatrolManager.getInstance().canEdit(getPatrol(), ops);
 						
 	}
-	
+
 	public Patrol getPatrol() {
 		if (this.patrol != null) return this.patrol;
 		getPatrolInternal();
@@ -777,48 +780,44 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return saveJob;
 	}
 	
-	private void savePatrolPart(final Object object){
+	private void savePatrolPart(final Object patrolPart){
 		//update all the patrol values
 		for (int i = 0; i < getPageCount(); i ++){
 			getEditor(i).doSave(new NullProgressMonitor());
 		}
-		SavePatrolPartJob saveJob = new SavePatrolPartJob(patrol, object);		
-		saveJob.schedule();
-		try{
-			saveJob.join();
-		}catch (InterruptedException ex){
-			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
-		}
+		
+		
+		try(Session saveSession = HibernateManager
+				.openSession(new WaypointAttachmentInterceptor())){
+			saveSession.beginTransaction();
+		
+			try{
+			
+				if (patrolPart instanceof Patrol) {
+					if (((Patrol) patrolPart).getId() == null) {
+						String id = PatrolIdGenerator.INSTANCE.generatePatrolId(
+							((Patrol) patrolPart), saveSession);
+						((Patrol) patrolPart).setId(id);
+					}
+				}
+			
+				saveSession.merge(patrolPart);
+				saveSession.getTransaction().commit();
+			}catch (Exception ex){
+				if (saveSession.getTransaction().isActive()){
+					saveSession.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+			}
+		}				
+		PatrolEventManager.getInstance().patrolSaved(patrol, false);
+		
 	}
 	
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 
-//		//update all the patrol values
-//		for (int i = 0; i < getPageCount(); i ++){
-//			getEditor(i).doSave(monitor);
-//		}
-//		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-//				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-//				
-//				try{
-//					if (PatrolHibernateManager.savePatrolInTransaction(patrol, saveSession, false)){
-//						//saved okay
-//						PatrolEventManager.getInstance().patrolSaved(patrol, false);
-//					}
-//				}finally{
-//					if (saveSession.isOpen()){
-//						saveSession.close();
-//					}
-//				}
-//				return Status.OK_STATUS;
-//			}
-//		};
-//		saveJob.schedule();
-				
 	}
 
 	@Override

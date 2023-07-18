@@ -57,12 +57,12 @@ public class IntelRecordAttributeValueList {
 	}
 	
 	public boolean equals(Object other){
-		if (other == null) return false;
 		if (this == other) return true;
-		if (other.getClass().equals(IntelRecordAttributeValueList.class)){
-			return id.equals(((IntelRecordAttributeValueList)other).id);
-		}
-		return false;
+		if (other == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		IntelRecordAttributeValueList s = (IntelRecordAttributeValueList)other;
+		return Objects.equals(getId(), s.getId());
+
 	}
 	
 	
@@ -103,9 +103,10 @@ public class IntelRecordAttributeValueList {
 		public boolean equals(Object other){
 			if (this == other) return true;
 			if (other == null) return false;
-			if (getClass() != other.getClass()) return false;
-			IntelRecordAttributeValueListPk pk = (IntelRecordAttributeValueListPk) other;
-			return Objects.equals(elementUuid, pk.elementUuid) && Objects.equals(valueItem, pk.valueItem);
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			IntelRecordAttributeValueListPk s = (IntelRecordAttributeValueListPk)other;
+			return Objects.equals(getElementUuid(), s.getElementUuid()) && 
+					Objects.equals(getValue(), s.getValue());
 		}
 	}
 }

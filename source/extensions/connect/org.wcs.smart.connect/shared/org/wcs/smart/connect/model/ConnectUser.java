@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import org.wcs.smart.ca.Employee;
@@ -107,15 +108,12 @@ public class ConnectUser {
 	
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof ConnectUser){
-			ConnectUser s = (ConnectUser)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return this == s;
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return s.getUuid().equals(this.uuid);
-			}
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (getUuid() == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;	
+		ConnectUser s = (ConnectUser)other;		
+		return Objects.equals(getUuid(), s.getUuid());		
 	}
 	
 	

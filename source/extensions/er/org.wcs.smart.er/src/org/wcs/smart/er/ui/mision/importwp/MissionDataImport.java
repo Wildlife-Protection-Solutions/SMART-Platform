@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -42,9 +43,9 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
@@ -247,21 +248,29 @@ public class MissionDataImport {
 	public static void saveTracks(Map<MissionDay, List<MissionTrack>> tracks) throws InterruptedException {
 		Mission mission = null;
 		List<MissionTrack> tracksToSave = new ArrayList<MissionTrack>();
-		for (Iterator<Entry<MissionDay, List<MissionTrack>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
-			Entry<MissionDay, List<MissionTrack>> type = (Entry<MissionDay, List<MissionTrack>>) iterator.next();
-			
-			for (MissionTrack track : type.getValue()){
-				MissionDay md = type.getKey();
-				mission = md.getMission();
-				md.getTracks().add(track);
-				track.setMissionDay(md);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (Iterator<Entry<MissionDay, List<MissionTrack>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
+					Entry<MissionDay, List<MissionTrack>> type = (Entry<MissionDay, List<MissionTrack>>) iterator.next();
+					
+					for (MissionTrack track : type.getValue()){
+						MissionDay md = type.getKey();
+						MissionDay ref = session.getReference(md);
+						
+						ref.getTracks().add(track);
+						track.setMissionDay(ref);
+						
+						mission = md.getMission();
+					}
+					tracksToSave.addAll(type.getValue());
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				throw ex;
 			}
-			tracksToSave.addAll(type.getValue());
 		}
-		
-		SaveMissionTracksJob saveJob = new SaveMissionTracksJob(tracksToSave);
-		saveJob.schedule();
-		saveJob.join();
 		
 		//fire events
 		final Mission lmission = mission;
@@ -309,16 +318,20 @@ public class MissionDataImport {
 	}
 	
 	public static MissionTrack createTrackFromWaypoints(MissionDay missionDay){
-		List<Waypoint> wps = new ArrayList<Waypoint>();
-		for (SurveyWaypoint sw : missionDay.getWaypoints()){
-			wps.add(sw.getWaypoint());
+		try(Session session = HibernateManager.openSession()){
+			missionDay = session.getReference(missionDay);
+		
+			List<Waypoint> wps = new ArrayList<Waypoint>();
+			for (SurveyWaypoint sw : missionDay.getWaypoints()){
+				wps.add(sw.getWaypoint());
+			}
+			List<MissionTrack> tracks  = convertToTrack(wps, false);
+			if (tracks.size() != 0){
+				MissionTrack mt = convertToTrack(wps, false).get(0);
+				return mt;
+			} 
+			return null;
 		}
-		List<MissionTrack> tracks  = convertToTrack(wps, false);
-		if (tracks.size() != 0){
-			MissionTrack mt = convertToTrack(wps, false).get(0);
-			return mt;
-		} 
-		return null;
 	}
 	
 	static class Item{

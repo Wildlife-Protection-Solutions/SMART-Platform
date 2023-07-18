@@ -23,9 +23,9 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.util.UUID;
 
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -33,6 +33,7 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.map.TrackPointDialog;
 
 /**
@@ -81,18 +82,26 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 
 	@Override
 	protected void okPressed() {
-		Job job = null;
 		Mission m = track.getMissionDay().getMission();
 		//save then close
-		try{
-			if (editTrack.getLineString() == null){
-				//delete track
-				track.getMissionDay().getTracks().remove(track);
-				track.setMissionDay(null);
-				job = new DeleteMissionTracksJob(track);
-			}else{
-				track.setLineString(editTrack.getLineString());
-				job = new SaveMissionTracksJob(track);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				if (editTrack.getLineString() == null){
+					//delete track
+					session.remove(track);
+					track.getMissionDay().getTracks().remove(track);
+					track.setMissionDay(null);
+					
+				}else{
+					track.setLineString(editTrack.getLineString());
+					MissionTrack ref = session.getReference(track);
+					ref.setLineString(editTrack.getLineString());
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw ex;
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackPointDialog_GeometryError, ex);
@@ -100,15 +109,10 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 		}
 
 		//save and fire
-		try {
-			job.schedule();
-			job.join();
-			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, m);
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			setModified(false);
-		}catch (InterruptedException ex){
-			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
-		}
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, m);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		setModified(false);
+		
 	}
 	
 }

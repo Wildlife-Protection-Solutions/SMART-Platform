@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -66,6 +67,17 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 		return missionDay;
 	}
 		
+	public void refreshMissionDay() {
+		try(Session session = HibernateManager.openSession()){
+				this.missionDay = session.getReference(this.missionDay);
+				this.missionDay.getMission().getMissionDays().forEach(md-> {
+					Hibernate.initialize(md.getTracks());
+					md.getWaypoints().forEach(sw->sw.getWaypoint().getObservationsAsString());
+				} );
+			
+		}
+	
+	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite comp = (Composite) super.createDialogArea(parent);
@@ -151,9 +163,16 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 					}
 				}
 				
-				session.merge(missionDay);
+				this.missionDay = session.merge(missionDay);
+				//init waypoints
+				
+				this.missionDay.getMission().getMissionDays().forEach(md-> {
+					Hibernate.initialize(md.getTracks());
+					md.getWaypoints().forEach(sw->sw.getWaypoint().getObservationsAsString());
+				} );
 				session.getTransaction().commit();
 				cmp.clearTracksToDelete();
+				cmp.updateInput();
 			} catch (Exception ex) {
 				EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;

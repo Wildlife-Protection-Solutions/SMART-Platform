@@ -22,6 +22,9 @@
 package org.wcs.smart.asset.model;
 
 import java.io.Serializable;
+import java.util.Objects;
+
+import org.wcs.smart.ca.UuidItem;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -101,15 +104,11 @@ public class AssetStationLocationAttribute implements Serializable{
 
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof AssetStationLocationAttribute){
-			AssetStationLocationAttribute s = (AssetStationLocationAttribute)other;
-			if (s.getAttribute() == null && this.getAttribute() == null){
-				return this == s;
-			}else if (s.getAttribute() != null && this.getAttribute() != null){
-				return s.getAttribute().equals(this.getAttribute());
-			}
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		AssetStationLocationAttribute s = (AssetStationLocationAttribute)other;
+		return (Objects.equals(getAttribute(), s.getAttribute()));
 	}
 	
 	

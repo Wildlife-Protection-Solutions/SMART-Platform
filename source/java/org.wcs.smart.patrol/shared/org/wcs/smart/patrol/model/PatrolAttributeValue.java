@@ -129,8 +129,8 @@ public class PatrolAttributeValue {
 	public boolean equals(Object other){
 		if (other == null) return false;
 		if (this == other) return true;
-		if (getClass() != other.getClass()) return false;
-		return Objects.equals(id, ((PatrolAttributeValue)other).id);
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		return Objects.equals(getId(), ((PatrolAttributeValue)other).getId());
 	}
 	
 
@@ -355,10 +355,9 @@ public class PatrolAttributeValue {
 		public boolean equals(Object other){	
 			if (other == this) return true;
 			if (other == null) return false;
-			if (other.getClass() != getClass()) return false;
-			
-			return Objects.equals(patrol, ((PatrolAttributeValuePk)other).patrol) &&
-					Objects.equals(attribute, ((PatrolAttributeValuePk)other).attribute);
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;					
+			return Objects.equals(getPatrol(), ((PatrolAttributeValuePk)other).getPatrol()) &&
+					Objects.equals(getPatrolAttribute(), ((PatrolAttributeValuePk)other).getPatrolAttribute());
 		}
 		
 	}

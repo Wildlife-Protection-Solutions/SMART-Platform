@@ -1,5 +1,5 @@
 ***********************************************************************
-******* DO NOT USE - THIS IS IN THE UPGRADE SERVLET *****************
+******* DO NOT USE THIS FILE - THIS IS IN THE UPGRADE SERVLET *****************
 ***********************************************************************
 ALTER TABLE SMART.ASSET_WAYPOINT_QUERY DROP COLUMN SURVEYDESIGN_KEY;
 

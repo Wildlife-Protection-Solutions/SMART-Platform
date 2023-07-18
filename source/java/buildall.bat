@@ -1,5 +1,6 @@
 SET version=8.0.0
 
+
 for /f %%i in ('date /t') do set RESULT=%%i
 echo The directory is %RESULT%
 
@@ -7,10 +8,63 @@ SET outputlocation=C:\data\SMART\Builds\SMART8\%RESULT%
 echo %outputlocation%
 MKDIR %outputlocation%
 
+
+REM - I had to do this because maven won't work if these directories/files exist
+
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.paws.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.r.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.er.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.patrol.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.patrol.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.migrate.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.connect.dataqueue.i2.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.i2.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.report.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.report.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.incident.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.patrol.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.plan.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.survey.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.smartcollect.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.cybertracker.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.patrol.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.independentincident.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.er.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.cybertracker.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.asset.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.asset.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.birt.map.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.dataentry.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.help.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.independentincident.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.observation.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.observation.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.p2.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.patrol.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.patrol.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.plan.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.birt.query.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.nl\8.0.0
+
+
+
 REM run maven to build packages
 REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
-REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
-call mvn clean install -Pallplatforms,product,update,core,plugins
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
+REM call mvn clean install -Pallplatforms,product,update,core,plugins
 REM call mvn install -Pallplatforms,migrationtools
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip

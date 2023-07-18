@@ -302,11 +302,11 @@ public class PatrolObservationResultItem extends ObservationQueryResultItem impl
 	public boolean equals(Object other){
 		if (other == this) return true;
 		if (other == null) return false;
-		if (!other.getClass().equals(getClass())) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
 		PatrolObservationResultItem o = (PatrolObservationResultItem) other;
 		
-		return Objects.equals(patrolLegUuid, o.patrolLegUuid) &&
-				Objects.equals(patrolUuid, o.patrolUuid) &&
+		return Objects.equals(getPatrolLegUuid(), o.getPatrolLegUuid()) &&
+				Objects.equals(getPatrolUuid(), o.getPatrolUuid()) &&
 				Objects.equals(getWaypointUuid(), o.getWaypointUuid()) &&
 				Objects.equals(getObservationUuid(), o.getObservationUuid());
 	}

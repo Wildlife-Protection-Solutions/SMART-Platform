@@ -93,6 +93,7 @@ public abstract class IQaDataProvider {
 	
 	@Override
 	public boolean equals(Object other){
+		if (this == other) return true;
 		if (other == null) return false;
 		if (!other.getClass().equals(this.getClass())) return false;
 		return Objects.equals(getId(), ((IQaDataProvider)other).getId());

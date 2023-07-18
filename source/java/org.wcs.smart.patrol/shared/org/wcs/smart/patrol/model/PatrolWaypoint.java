@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -83,10 +84,11 @@ public class PatrolWaypoint {
 		
 	@Override
 	public boolean equals(Object other){
-		if (other instanceof PatrolWaypoint){
-			return this.id.equals(((PatrolWaypoint) other).id);
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		PatrolWaypoint s = (PatrolWaypoint)other;
+		return (Objects.equals(getId(), s.getId()));
 	}
 	
 	@Override
@@ -126,10 +128,12 @@ public class PatrolWaypoint {
 		
 		@Override
 		public boolean equals(Object other){
-			if (other instanceof PatrolWaypointPk){
-				return this.wp.equals(((PatrolWaypointPk) other).wp);
-			}
-			return false;
+			if (this == other) return true;
+			if (other == null) return false;
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			PatrolWaypointPk s = (PatrolWaypointPk)other;
+			return Objects.equals(getWaypoint(), s.getWaypoint()) &&
+					Objects.equals(getPatrolLegDay(), s.getPatrolLegDay()) ;
 		}
 		
 		@Override

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -137,15 +138,12 @@ public class ConnectServerStatus {
 	}
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof ConnectServerStatus){
-			ConnectServerStatus s = (ConnectServerStatus)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return this == s;
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return s.getUuid().equals(this.cauuid);
-			}
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (getUuid() == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;	
+		ConnectServerStatus s = (ConnectServerStatus)other;		
+		return Objects.equals(getUuid(), s.getUuid());	
 	}
 	
 	

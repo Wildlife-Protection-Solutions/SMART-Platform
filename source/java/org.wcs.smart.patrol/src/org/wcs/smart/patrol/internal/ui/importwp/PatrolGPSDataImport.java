@@ -36,8 +36,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
@@ -48,7 +50,6 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.ui.SavePatrolPartJob;
 import org.wcs.smart.patrol.ui.SaveWaypointJob;
 
 /**
@@ -68,27 +69,33 @@ public class PatrolGPSDataImport {
 	 * @throws Exception
 	 */
 	public static void saveTracks(final HashMap<PatrolLegDay, Track> tracks) throws Exception {
-
-		//update object references
-		for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
-			Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
-			PatrolLegDay pld = type.getKey();
-			Track t = type.getValue();
-			if (t != null){
-				pld.setTrack(t);
-				t.setPatrolLegDay(pld);
-			}else{;
-				pld.setTrack(null);
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				
+				//update object references
+				for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
+					Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
+					PatrolLegDay pld = type.getKey();
+					PatrolLegDay ref = session.getReference(pld);
+					
+					Track t = type.getValue();
+					if (t != null){
+						ref.setTrack(t);
+						t.setPatrolLegDay(ref);
+					}else{
+						ref.setTrack(null);
+					}
+				}
+				
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				throw ex;
 			}
 		}
 		
-		//save first
-		for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
-			PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
-			SavePatrolPartJob saveJob = new SavePatrolPartJob(pldToSave.getPatrolLeg().getPatrol(), pldToSave);
-			saveJob.schedule();
-			saveJob.join();
-		}
 		
 		//fire events
 		Display.getDefault().syncExec(new Runnable(){

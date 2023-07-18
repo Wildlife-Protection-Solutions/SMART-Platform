@@ -30,13 +30,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.IImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 
@@ -84,16 +87,19 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 			}
 			if (currentOption == ImportOption.ALL){
 				boolean warn = false;
-				for(PatrolLeg l : currentDay.getPatrolLeg().getPatrol().getLegs()){
-					for(PatrolLegDay d : l.getPatrolLegDays()){
-						if (d.getTrack() != null){
-							warn = true;
-							break;
+				try(Session session = HibernateManager.openSession()){
+					Patrol p = session.getReference(currentDay.getPatrolLeg().getPatrol());
+			
+					for(PatrolLeg l : p.getLegs()){
+						for(PatrolLegDay d : l.getPatrolLegDays()){
+							if (d.getTrack() != null){
+								warn = true;
+								break;
+							}
 						}
+						if (warn) break;
 					}
-					if (warn) break;
-				}
-				
+				}					
 				if (warn){
 					//warn user
 					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, Messages.ImportGpsDataWizard_TrackWarningOverwriteNew)){

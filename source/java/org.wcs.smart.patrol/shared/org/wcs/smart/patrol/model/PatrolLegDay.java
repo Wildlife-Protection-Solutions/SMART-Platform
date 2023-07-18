@@ -141,10 +141,11 @@ public class PatrolLegDay extends UuidItem {
 		if (this.tracks == null){
 			this.tracks = new ArrayList<Track>();
 		}
-		if (this.tracks.size() == 1){
-			this.tracks.get(0).setPatrolLegDay(null);
-			this.tracks.remove(0);
+		for (Track old : this.tracks) {
+			old.setPatrolLegDay(null);
 		}
+		this.tracks.clear();
+		
 		if (t != null){
 			this.tracks.add(t);
 		}

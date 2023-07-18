@@ -24,6 +24,7 @@ package org.wcs.smart.asset.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.observation.model.WaypointAttachment;
 
 import jakarta.persistence.CascadeType;
@@ -78,10 +79,11 @@ public class AssetWaypointAttachment {
 		
 	@Override
 	public boolean equals(Object other){
-		if (other instanceof AssetWaypointAttachment){
-			return this.id.equals(((AssetWaypointAttachment) other).id);
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		AssetWaypointAttachment s = (AssetWaypointAttachment)other;
+		return (Objects.equals(getId(), s.getId()));
 	}
 	
 	@Override
@@ -123,11 +125,14 @@ public class AssetWaypointAttachment {
 		
 		@Override
 		public boolean equals(Object other){
-			if (other instanceof AssetWaypointAttachmentPk){
-				AssetWaypointAttachmentPk p = (AssetWaypointAttachmentPk)other;
-				return Objects.equals(waypoint, p.waypoint) && Objects.equals(attachment, p.attachment);
-			}
-			return false;
+			
+			if (this == other) return true;
+			if (other == null) return false;
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			AssetWaypointAttachmentPk s = (AssetWaypointAttachmentPk)other;
+			return Objects.equals(getAssetWaypoint(), s.getAssetWaypoint()) && 
+					Objects.equals(getWaypointAttachment(), s.getWaypointAttachment());
+			
 		}
 		
 		@Override

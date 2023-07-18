@@ -117,8 +117,8 @@ public class PatrolLegMember {
 	public boolean equals(Object other){
 		if (other == null) return false;
 		if (other == this) return true;
-		if (getClass() != other.getClass()) return false;
-		return Objects.equals(id, ((PatrolLegMember)other).id);
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		return Objects.equals(getId(), ((PatrolLegMember)other).getId());
 	}
 	
 	@Override
@@ -160,9 +160,9 @@ public class PatrolLegMember {
 		public boolean equals(Object other){
 			if (this == other) return true;
 			if (other == null) return false;
-			if (getClass() != other.getClass()) return false;
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
 			PatrolLegMemberPk o = (PatrolLegMemberPk)other;
-			return Objects.equals(member, o.member) && Objects.equals(leg, o.leg);
+			return Objects.equals(getMember(), o.getMember()) && Objects.equals(getPatrolLeg(), o.getPatrolLeg());
 		}
 		
 		@Override

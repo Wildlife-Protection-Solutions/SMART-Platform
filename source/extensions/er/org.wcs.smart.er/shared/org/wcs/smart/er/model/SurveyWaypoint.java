@@ -159,11 +159,12 @@ public class SurveyWaypoint {
 		
 		@Override
 		public boolean equals(Object other){
-			if (other == this) return true;
+			if (this == other) return true;
 			if (other == null) return false;
-			if (getClass() != other.getClass()) return false;
-			SurveyWaypointPk o = (SurveyWaypointPk) other;
-			return Objects.equals(wp, o.wp);
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			SurveyWaypointPk o = (SurveyWaypointPk)other;
+			return Objects.equals(getWaypoint(), o.getWaypoint());
+			
 		}
 		
 		@Override

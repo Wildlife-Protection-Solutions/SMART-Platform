@@ -23,10 +23,12 @@ package org.wcs.smart.plan.model;
 
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.ca.UuidItem;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -91,15 +93,12 @@ public abstract class PlanTarget{
 
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof PlanTarget){
-			PlanTarget s = (PlanTarget)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return s.getUuid().equals(this.getUuid());
-			}
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (getUuid() == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		PlanTarget s = (PlanTarget)other;
+		return (Objects.equals(getUuid(), s.getUuid()));
 	}
 	
 	@Column(name = "name")

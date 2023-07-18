@@ -774,7 +774,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	/**
 	 * Updates the widgets with the value from the patrol.
 	 */
-	private void initValues(){
+	public void initValues(){
 		iconCache.clearCache();
 		
 		try(Session session = HibernateManager.openSession()){

@@ -24,6 +24,7 @@ package org.wcs.smart.incident.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -82,9 +83,11 @@ public class IncidentWaypoint implements Serializable{
 	
 	@Override
 	public boolean equals(Object other){
+		if (this == other) return true;
 		if (other == null) return false;
-		if (other.getClass() != getClass()) return false;
-		return waypoint.equals(((IncidentWaypoint)other).getWaypoint());
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		IncidentWaypoint s = (IncidentWaypoint)other;
+		return (Objects.equals(getWaypoint(), s.getWaypoint()));
 	}
 	
 	@Override

@@ -22,7 +22,9 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 
 import jakarta.persistence.Embeddable;
@@ -113,14 +115,14 @@ public class IntelObservationAttributeList {
 			return  observationAttribute.hashCode() * 31 + listItem.hashCode();
 			
 		}
-		public boolean equals(Object other){			
-			if (other instanceof WaypointObservationAttributeListPk){
-				if (observationAttribute == null || listItem == null){
-					return super.equals(other);
-				}
-				return observationAttribute.equals( ((WaypointObservationAttributeListPk)other).observationAttribute) && listItem.equals( ((WaypointObservationAttributeListPk)other).listItem); 
-			}
-			return false;
+		public boolean equals(Object other){	
+			if (this == other) return true;
+			if (other == null) return false;
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			WaypointObservationAttributeListPk s = (WaypointObservationAttributeListPk)other;
+			return Objects.equals(getAttributeListItem(), s.getAttributeListItem()) && 
+					Objects.equals(getObservationAttribute(), s.getObservationAttribute());
+
 		}
 		
 	}

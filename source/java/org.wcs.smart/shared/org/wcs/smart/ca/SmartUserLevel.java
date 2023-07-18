@@ -50,11 +50,12 @@ public class SmartUserLevel {
 		return getKey();
 	}
 	
-	public boolean equals(Object other){
-		if (other instanceof SmartUserLevel){
-			return ((SmartUserLevel) other).key.equals(key);
-		}
-		return false;
+	public boolean equals(Object other){		
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		SmartUserLevel s = (SmartUserLevel)other; 
+		return getKey().equals(s.getKey());
 	}
 	
 	public int hashCode(){

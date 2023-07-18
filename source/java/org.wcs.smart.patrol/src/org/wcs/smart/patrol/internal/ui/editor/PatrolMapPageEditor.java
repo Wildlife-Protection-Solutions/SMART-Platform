@@ -190,6 +190,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 					attributeChanged == PatrolEventManager.PATROL_DATES_LEG ||
 					attributeChanged == PatrolEventManager.PATROL_TRACKS ||
 					attributeChanged == PatrolEventManager.PATROL_WAYPOINTS)){
+//				parentEditor.clearPatrol();
 				refresh();
 			}
 		}

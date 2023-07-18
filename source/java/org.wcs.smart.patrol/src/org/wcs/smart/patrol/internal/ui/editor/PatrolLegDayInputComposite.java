@@ -84,6 +84,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.SmartPlugIn;
@@ -171,7 +172,12 @@ public class PatrolLegDayInputComposite {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
 			if (attributeChanged == PatrolEventManager.PATROL_TRACKS && source.equals(patrolLegDate)){
-				updateDistance();
+				try(Session session = HibernateManager.openSession()){
+					PatrolLegDay ref = session.getReference(patrolLegDate);
+					updateDistance(ref);
+					patrolLegDate.setTrack(ref.getTrack());
+				}
+				
 			}
 			
 		}
@@ -216,7 +222,7 @@ public class PatrolLegDayInputComposite {
 						
 					}
 				}
-				PatrolLegDayInputComposite.this.patrolLegDate = pld;
+				PatrolLegDayInputComposite.this.patrolLegDate = Hibernate.unproxy(pld, PatrolLegDay.class);
 				refreshObservationTable();
 			}
 			
@@ -342,7 +348,7 @@ public class PatrolLegDayInputComposite {
 		this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
 				
 		updateTotalHours();
-		updateDistance();
+		updateDistance(this.patrolLegDate);
 		
 		btnMoveWaypoint.setEnabled(false);
 		btnDeleteWaypoint.setEnabled(false);
@@ -802,15 +808,16 @@ public class PatrolLegDayInputComposite {
 		 }
 	}
 	
-	public void updateDistance(){
-		if (this.patrolLegDate.getTrack() == null || this.patrolLegDate.getTrack().getDistance() == null){
+	private void updateDistance(PatrolLegDay info){
+		if (info.getTrack() == null || info.getTrack().getDistance() == null){
 			this.viewTrackPoints.setEnabled(false);
 			this.txtDistance.setText("0"); //$NON-NLS-1$
 		}else{
-			this.txtDistance.setText(PatrolEditor.DISTANCE_FORMATTER.format(this.patrolLegDate.getTrack().getDistance()));
+			this.txtDistance.setText(PatrolEditor.DISTANCE_FORMATTER.format(info.getTrack().getDistance()));
 			this.viewTrackPoints.setEnabled(true);
 		}
 	}
+	
 	private void setupObservationTable() {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = observationTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;

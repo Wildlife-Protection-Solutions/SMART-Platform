@@ -22,7 +22,9 @@
 package org.wcs.smart.cybertracker.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 import jakarta.persistence.Embeddable;
@@ -81,10 +83,12 @@ public class ConfigurableModelCtPropertiesProfile {
 
 	@Override
 	public boolean equals(Object other){
-		if (other instanceof ConfigurableModelCtPropertiesProfile){
-			return ((ConfigurableModelCtPropertiesProfile)other).id.equals(this.id);
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		ConfigurableModelCtPropertiesProfile s = (ConfigurableModelCtPropertiesProfile)other;
+		//must use getUuid for hibernate proxies 
+		return (Objects.equals(getId(), s.getId()));
 	}
 	
 	@Override
@@ -116,10 +120,13 @@ public class ConfigurableModelCtPropertiesProfile {
 		
 		@Override
 		public boolean equals(Object other){
-			if (other instanceof ConfigurableModelCtPropertiesProfilePk){
-				return ((ConfigurableModelCtPropertiesProfilePk)other).getModel().equals(this.model);
-			}
-			return false;
+			if (this == other) return true;
+			if (other == null) return false;
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			ConfigurableModelCtPropertiesProfilePk s = (ConfigurableModelCtPropertiesProfilePk)other;
+			//must use getUuid for hibernate proxies 
+			return (Objects.equals(getModel(), s.getModel()));
+			
 		}
 		
 		@Override

@@ -115,11 +115,12 @@ public class PatrolPlan {
 		
 		@Override
 		public boolean equals(Object other){
-			if (other == this) return true;
+			if (this == other) return true;
 			if (other == null) return false;
-			if (getClass() != other.getClass()) return false;
-			PatrolPlanPk o = (PatrolPlanPk) other;
-			return Objects.equals(plan, o.plan) && Objects.equals(patrol, o.patrol);
+			if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+			PatrolPlanPk s = (PatrolPlanPk)other;
+			return Objects.equals(getPlan(), s.getPlan()) && 
+					Objects.equals(getPatrol(), s.getPatrol());
 		}
 		
 		@Override

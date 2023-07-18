@@ -22,6 +22,9 @@
 package org.wcs.smart.asset.model;
 
 import java.io.Serializable;
+import java.util.Objects;
+
+import org.wcs.smart.ca.UuidItem;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -101,15 +104,15 @@ public class AssetStationAttribute implements Serializable{
 
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof AssetStationAttribute){
-			AssetStationAttribute s = (AssetStationAttribute)other;
-			if (s.getAttribute() == null && this.getAttribute() == null){
-				return this == s;
-			}else if (s.getAttribute() != null && this.getAttribute() != null){
-				return s.getAttribute().equals(this.getAttribute());
-			}
-		}
-		return false;
+		if (this == other) return true;
+		if (other == null) return false;
+		//this is required for proxy classes
+		//https://stackoverflow.com/questions/11013138/hibernate-equals-and-proxy
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		AssetStationAttribute s = (AssetStationAttribute)other;
+		//must use getUuid for hibernate proxies 
+		return (Objects.equals(getAttribute(), s.getAttribute()));
+		
 	}
 	
 	

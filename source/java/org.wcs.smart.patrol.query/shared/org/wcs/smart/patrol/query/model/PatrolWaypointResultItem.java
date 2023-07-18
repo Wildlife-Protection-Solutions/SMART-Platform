@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
@@ -304,11 +305,12 @@ public class PatrolWaypointResultItem extends WaypointQueryResultItem implements
 	public boolean equals(Object other){
 		if (other == this) return true;
 		if (other == null) return false;
-		if (!other.getClass().equals(getClass())) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		
 		PatrolWaypointResultItem o = (PatrolWaypointResultItem) other;
 		
-		return Objects.equals(patrolLegUuid, o.patrolLegUuid) &&
-				Objects.equals(patrolUuid, o.patrolUuid) &&
+		return Objects.equals(getPatrolLegUuid(), o.getPatrolLegUuid()) &&
+				Objects.equals(getPatrolUuid(), o.getPatrolUuid()) &&
 				Objects.equals(getWaypointUuid(), o.getWaypointUuid());
 	}
 }

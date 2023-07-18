@@ -436,10 +436,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	public boolean equals(Object other){
 		if (other == this) return true;
 		if (other == null) return false;
-		if (!other.getClass().equals(getClass())) return false;
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
 		PatrolQueryResultItem o = (PatrolQueryResultItem) other;
 		
-		return Objects.equals(patrolLegUuid, o.patrolLegUuid) &&
-				Objects.equals(patrolUuid, o.patrolUuid);
+		return Objects.equals(getPatrolLegUuid(), o.getPatrolLegUuid()) &&
+				Objects.equals(getPatrolUuid(), o.getPatrolUuid());
 	}
 }
