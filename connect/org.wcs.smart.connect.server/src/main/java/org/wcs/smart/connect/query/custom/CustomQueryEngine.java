@@ -232,10 +232,11 @@ public class CustomQueryEngine {
 						joa.put(VALUE_FIELD, at.getStringValue());
 						break;
 					case TREE:
-						joa.put(VALUE_FIELD, at.getAttributeTreeNode().getKeyId());
+						joa.put(VALUE_FIELD, at.getAttributeTreeNode().getHkey());
 						AttributeTreeNode n  = at.getAttributeTreeNode();
 						while(n != null) {
-							String prefix = LABEL_FIELD + "_" + n.getNodeOrder() + "_"; //$NON-NLS-1$ //$NON-NLS-2$
+							int index = Category.hkeyLength(n.getHkey());
+							String prefix = LABEL_FIELD + "_" + index + "_"; //$NON-NLS-1$ //$NON-NLS-2$
 							for (Label ll : n.getNames()) {
 								joa.put(prefix + ll.getLanguage().getCode(), ll.getValue());
 							}
