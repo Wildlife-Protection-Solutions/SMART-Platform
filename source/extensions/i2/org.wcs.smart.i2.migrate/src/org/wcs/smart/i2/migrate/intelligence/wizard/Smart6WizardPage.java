@@ -42,10 +42,21 @@ public class Smart6WizardPage extends WizardPage {
 
 	private Text txtFile;
 	
+	private String title, message, fileLabel;
+	
 	public Smart6WizardPage() {
-		super("SMART6Page"); //$NON-NLS-1$
+		this(Messages.Smart6WizardPage_Title,
+				Messages.Smart6WizardPage_Message,
+				Messages.Smart6WizardPage_lblFileName); 
 	}
 
+	public Smart6WizardPage(String title, String message, String fileLabel) {
+		super("SMART6Page"); //$NON-NLS-1$
+		this.title = title;
+		this.message = message;
+		this.fileLabel = fileLabel;
+	}
+	
 	public String getFile() {
 		return txtFile.getText();
 	}
@@ -62,7 +73,7 @@ public class Smart6WizardPage extends WizardPage {
 		temp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(temp, SWT.NONE);
-		l.setText(Messages.Smart6WizardPage_lblFileName);
+		l.setText(fileLabel);
 		
 		txtFile = new Text(temp, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -85,8 +96,8 @@ public class Smart6WizardPage extends WizardPage {
 		
 		setControl(outer);
 		
-		setTitle(Messages.Smart6WizardPage_Title);
-		setMessage(Messages.Smart6WizardPage_Message);		
+		setTitle(this.title);
+		setMessage(this.message);		
 	}
 	
 }

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.patrol.ui;
 
+import java.net.URI;
+import java.net.URL;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -64,8 +66,10 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
@@ -98,6 +102,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolMetadataPackageContribution implements IPackageUiContribution {
 
+	private static final int ICON_SIZE = 32;
+	
 	private Button btnTT, btnArmed, btnTeam, btnStation, btnMandate, btnObj, btnCmt, btnMembers, btnLeader, btnPilot, btnArmedYes, btnArmedNo;
 	
 	private Button btnTTrq, btnArmedrq, btnTeamrq, btnStationrq, btnMandaterq, btnObjrq, btnCmtrq, btnMembersrq, btnLeaderrq, btnPilotrq;
@@ -132,6 +138,20 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		return Messages.PatrolMetadataPackageContribution_TabName; 
 	}
 	
+	private void setImage(Label label, PatrolMetadataField field, IconSet iconSet) {
+		URI uri = field.getIcon(iconSet);
+		if (uri == null) return;
+		try {
+			URL url = uri.toURL();
+			Image img = SmartUtils.getImage(url, ICON_SIZE);
+			if (img != null) {
+				label.setImage(img);
+				label.addListener(SWT.Dispose, e->img.dispose());
+			}
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+	}
 	
 	@Override
 	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
@@ -206,195 +226,200 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		c5.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)c5.getLayoutData()).heightHint = 0;
 		c5.setText(col4.getText());
-		
-		// transport type
-		Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TRANSPORTTYPE_ICON), false, true);
-		btnTT = (Button) d[0];
-		btnTTrq = (Button) d[1];
-		cmbTt = (TableComboViewer) d[2];
-		
-		// armed
-		Label l = new Label(core, SWT.NONE);
-		l.setImage(SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON));
-				
-		l = new Label(core, SWT.NONE);
-		l.setText(Messages.PatrolMetadataPackageContribution_ArmedLabel);
-		
-		btnArmed = new Button(core, SWT.CHECK);
-		btnArmed.setSelection(true);
-		btnArmed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
-		btnArmedrq = new Button(core, SWT.CHECK);
-		btnArmedrq.setSelection(true);
-		btnArmedrq.setEnabled(false);
-		btnArmedrq.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 		
-		Composite cmp = new Composite(core, SWT.NONE);
-		cmp.setLayout(new GridLayout(2, false));
-		
-		btnArmedYes = new Button(cmp, SWT.RADIO);
-		btnArmedYes.setText(Messages.PatrolMetadataPackageContribution_YesOption);
-		btnArmedYes.setEnabled(false);
-		btnArmedNo = new Button(cmp, SWT.RADIO);
-		btnArmedNo.setText(Messages.PatrolMetadataPackageContribution_NoOption);
-		btnArmedNo.setSelection(true);
-		btnArmedNo.setEnabled(false);
-		btnArmed.addListener(SWT.Selection, e->{
-			btnArmedYes.setEnabled(!btnArmed.getSelection());
-			btnArmedNo.setEnabled(!btnArmed.getSelection());
-			fireChanged();
-		});
-		btnArmedYes.addListener(SWT.Selection, e->fireChanged());
-		btnArmedNo.addListener(SWT.Selection, e->fireChanged());
-		
-		// team
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TeamLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON), true, true);
-		btnTeam = (Button) d[0];
-		btnTeamrq = (Button) d[1];
-		btnTeamrq.setSelection(false);
-		cmbTeam = (TableComboViewer) d[2];
-		
-		// station
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_StationLabel, core, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON), true, true);
-		btnStation = (Button) d[0];
-		btnStationrq = (Button) d[1];
-		btnStationrq.setSelection(false);
-		cmbStation = (TableComboViewer) d[2];
-		
-		// mandate
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON), false, true);
-		btnMandate = (Button) d[0];
-		btnMandaterq = (Button) d[1];
-		cmbMandate = (TableComboViewer) d[2];
-				
-		// objective
-		d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_OBJECTIVE_ICON), true);
-		btnObj = (Button) d[0];
-		btnObjrq = (Button) d[1];
-		btnObjrq.setSelection(false);
-		txtObj = (Text) d[2];
-		
-		// comment
-		d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_COMMENT_ICON), true);
-		btnCmt = (Button) d[0];
-		btnCmtrq = (Button) d[1];
-		btnCmtrq.setSelection(false);
-		txtComment = (Text) d[2];		
-		
-		
-		
-		ColumnLabelProvider employeeLblProvider = new ColumnLabelProvider() {
-
-			@Override
-			public String getText(Object element) {
-				if (element instanceof EmployeeTeam) return ((EmployeeTeam)element).getName();
-				if (element instanceof Employee) return SmartLabelProvider.getShortLabel((Employee)element);
-				return super.getText(element);
-			}
-			
-			@Override
-			public Font getFont(Object element) {
-				if (element instanceof EmployeeTeam || element instanceof Employee) return null;
-				return boldFont;
-			}
-		};
-		
-		// employess
-		l = new Label(core, SWT.NONE);
-		l.setImage(SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON));
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		
-		l = new Label(core, SWT.NONE);
-		l.setText(Messages.PatrolMetadataPackageContribution_MembersLabel);
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		
-		btnMembers = new Button(core, SWT.CHECK);
-		btnMembers.setSelection(true);
-		btnMembers.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-		
-		btnMembersrq = new Button(core, SWT.CHECK);
-		btnMembersrq.setSelection(true);
-		btnMembersrq.setEnabled(false);
-		btnMembersrq.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-
-		Composite cemp = new Composite(core, SWT.NONE);
-		cemp.setLayout(new GridLayout());
-		((GridLayout)cemp.getLayout()).marginWidth = 0;
-		((GridLayout)cemp.getLayout()).marginHeight = 0;
-		cemp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Label elabel = new Label(cemp, SWT.WRAP);
-		elabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)elabel.getLayoutData()).widthHint = 200;
-		
-		lstEmployees = CheckboxTableViewer.newCheckList(cemp, SWT.BORDER | SWT.MULTI);
-		lstEmployees.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(lstEmployees));
-		lstEmployees.setContentProvider(ArrayContentProvider.getInstance());
-		lstEmployees.setLabelProvider(employeeLblProvider);
-		lstEmployees.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
-		FontData fd = lstEmployees.getControl().getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(lstEmployees.getControl().getDisplay(), fd);
-		lstEmployees.getControl().addListener(SWT.Dispose,e->boldFont.dispose());
-		ViewerFilter filter = new ViewerFilter() {
-			@Override
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				if (element instanceof Employee || element instanceof EmployeeTeam) return lstEmployees.getChecked(element);
-				return true;
-			}
-		};
-		Button btnChecked = new Button(cemp, SWT.CHECK);
-		btnChecked.setText(Messages.PatrolMetadataPackageContribution_ShowChecked);
-		btnChecked.addListener(SWT.Selection, e->{
-			lstEmployees.getControl().setVisible(false);
-			if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
-			else lstEmployees.removeFilter(filter);
-			lstEmployees.getControl().setVisible(true);
-		});
-		
-		// leader
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON), false, false);
-		btnLeader = (Button) d[0];
-		btnLeaderrq = (Button)d[1];
-		cmbLeader = (ComboViewer) d[2];
-		cmbLeader.setLabelProvider(employeeLblProvider);
-		btnLeader.setEnabled(false);
-		cmbLeader.getControl().setEnabled(false);
-		// pilot
-		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON), false, false);
-		btnPilot = (Button) d[0];
-		btnPilotrq = (Button) d[1];		
-		cmbPilot = (ComboViewer) d[2];
-		cmbPilot.setLabelProvider(employeeLblProvider);
-		btnPilot.setEnabled(false);
-		cmbPilot.getControl().setEnabled(false);
-		
-		btnMembers.addListener(SWT.Selection, e->{
-			if (btnMembers.getSelection()) {
-				elabel.setText(Messages.PatrolMetadataPackageContribution_FilterMsg);
-				btnLeader.setEnabled(false);
-				btnPilot.setEnabled(false);
-				cmbLeader.getControl().setEnabled(false);
-				cmbPilot.getControl().setEnabled(false);
-			}else {
-				elabel.setText(Messages.PatrolMetadataPackageContribution_MemberMsg);
-				
-				btnLeader.setEnabled(true);
-				btnPilot.setEnabled(true);
-				cmbLeader.getControl().setEnabled(!btnLeader.getSelection());
-				cmbPilot.getControl().setEnabled(!btnPilot.getSelection());
-			}
-			fireChanged();
-		});
-		lstEmployees.addCheckStateListener(event->{
-			updateLeaderPilotLists();
-			fireChanged();
-		});
-		
-		//add custom patrol attributes
-		customAttributes = new HashMap<>();
 		try(Session session = HibernateManager.openSession()){
+			IconSet defaultIs = IconManager.INSTANCE.getDefaultIconSet(session, ctpackage.getConservationArea());
+			
+			
+			// transport type
+			Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, PatrolMetadataField.TRANSPORT, false, true, defaultIs);
+			btnTT = (Button) d[0];
+			btnTTrq = (Button) d[1];
+			cmbTt = (TableComboViewer) d[2];
+			
+			// armed
+			Label l = new Label(core, SWT.NONE);
+			setImage(l, PatrolMetadataField.ARMED, defaultIs);
+				
+			l = new Label(core, SWT.NONE);
+			l.setText(Messages.PatrolMetadataPackageContribution_ArmedLabel);
+		
+			btnArmed = new Button(core, SWT.CHECK);
+			btnArmed.setSelection(true);
+			btnArmed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+	
+			btnArmedrq = new Button(core, SWT.CHECK);
+			btnArmedrq.setSelection(true);
+			btnArmedrq.setEnabled(false);
+			btnArmedrq.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+			
+			Composite cmp = new Composite(core, SWT.NONE);
+			cmp.setLayout(new GridLayout(2, false));
+			
+			btnArmedYes = new Button(cmp, SWT.RADIO);
+			btnArmedYes.setText(Messages.PatrolMetadataPackageContribution_YesOption);
+			btnArmedYes.setEnabled(false);
+			btnArmedNo = new Button(cmp, SWT.RADIO);
+			btnArmedNo.setText(Messages.PatrolMetadataPackageContribution_NoOption);
+			btnArmedNo.setSelection(true);
+			btnArmedNo.setEnabled(false);
+			btnArmed.addListener(SWT.Selection, e->{
+				btnArmedYes.setEnabled(!btnArmed.getSelection());
+				btnArmedNo.setEnabled(!btnArmed.getSelection());
+				fireChanged();
+			});
+			btnArmedYes.addListener(SWT.Selection, e->fireChanged());
+			btnArmedNo.addListener(SWT.Selection, e->fireChanged());
+			
+			// team
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TeamLabel, core, PatrolMetadataField.TEAM, true, true, defaultIs);
+			btnTeam = (Button) d[0];
+			btnTeamrq = (Button) d[1];
+			btnTeamrq.setSelection(false);
+			cmbTeam = (TableComboViewer) d[2];
+			
+			// station
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_StationLabel, core, PatrolMetadataField.STATION, true, true, defaultIs);
+			btnStation = (Button) d[0];
+			btnStationrq = (Button) d[1];
+			btnStationrq.setSelection(false);
+			cmbStation = (TableComboViewer) d[2];
+			
+			// mandate
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel, core, PatrolMetadataField.MANDATE, false, true, defaultIs);
+			btnMandate = (Button) d[0];
+			btnMandaterq = (Button) d[1];
+			cmbMandate = (TableComboViewer) d[2];
+					
+			// objective
+			d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, PatrolMetadataField.OBJECTIVE, true, defaultIs);
+			btnObj = (Button) d[0];
+			btnObjrq = (Button) d[1];
+			btnObjrq.setSelection(false);
+			txtObj = (Text) d[2];
+			
+			// comment
+			d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel, core, PatrolMetadataField.COMMENT, true, defaultIs);
+			btnCmt = (Button) d[0];
+			btnCmtrq = (Button) d[1];
+			btnCmtrq.setSelection(false);
+			txtComment = (Text) d[2];		
+			
+			
+			
+			ColumnLabelProvider employeeLblProvider = new ColumnLabelProvider() {
+	
+				@Override
+				public String getText(Object element) {
+					if (element instanceof EmployeeTeam) return ((EmployeeTeam)element).getName();
+					if (element instanceof Employee) return SmartLabelProvider.getShortLabel((Employee)element);
+					return super.getText(element);
+				}
+				
+				@Override
+				public Font getFont(Object element) {
+					if (element instanceof EmployeeTeam || element instanceof Employee) return null;
+					return boldFont;
+				}
+			};
+			
+			// employess
+			l = new Label(core, SWT.NONE);
+			l.setImage(SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON));
+			l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			l = new Label(core, SWT.NONE);
+			l.setText(Messages.PatrolMetadataPackageContribution_MembersLabel);
+			l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			btnMembers = new Button(core, SWT.CHECK);
+			btnMembers.setSelection(true);
+			btnMembers.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+			
+			btnMembersrq = new Button(core, SWT.CHECK);
+			btnMembersrq.setSelection(true);
+			btnMembersrq.setEnabled(false);
+			btnMembersrq.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+	
+			Composite cemp = new Composite(core, SWT.NONE);
+			cemp.setLayout(new GridLayout());
+			((GridLayout)cemp.getLayout()).marginWidth = 0;
+			((GridLayout)cemp.getLayout()).marginHeight = 0;
+			cemp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Label elabel = new Label(cemp, SWT.WRAP);
+			elabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)elabel.getLayoutData()).widthHint = 200;
+			
+			lstEmployees = CheckboxTableViewer.newCheckList(cemp, SWT.BORDER | SWT.MULTI);
+			lstEmployees.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(lstEmployees));
+			lstEmployees.setContentProvider(ArrayContentProvider.getInstance());
+			lstEmployees.setLabelProvider(employeeLblProvider);
+			lstEmployees.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
+			FontData fd = lstEmployees.getControl().getFont().getFontData()[0];
+			fd.setStyle(SWT.BOLD);
+			boldFont = new Font(lstEmployees.getControl().getDisplay(), fd);
+			lstEmployees.getControl().addListener(SWT.Dispose,e->boldFont.dispose());
+			ViewerFilter filter = new ViewerFilter() {
+				@Override
+				public boolean select(Viewer viewer, Object parentElement, Object element) {
+					if (element instanceof Employee || element instanceof EmployeeTeam) return lstEmployees.getChecked(element);
+					return true;
+				}
+			};
+			Button btnChecked = new Button(cemp, SWT.CHECK);
+			btnChecked.setText(Messages.PatrolMetadataPackageContribution_ShowChecked);
+			btnChecked.addListener(SWT.Selection, e->{
+				lstEmployees.getControl().setVisible(false);
+				if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
+				else lstEmployees.removeFilter(filter);
+				lstEmployees.getControl().setVisible(true);
+			});
+			
+			// leader
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, PatrolMetadataField.LEADER, false, false, defaultIs);
+			btnLeader = (Button) d[0];
+			btnLeaderrq = (Button)d[1];
+			cmbLeader = (ComboViewer) d[2];
+			cmbLeader.setLabelProvider(employeeLblProvider);
+			btnLeader.setEnabled(false);
+			cmbLeader.getControl().setEnabled(false);
+			// pilot
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel, core, PatrolMetadataField.PILOT, false, false, defaultIs);
+			btnPilot = (Button) d[0];
+			btnPilotrq = (Button) d[1];		
+			cmbPilot = (ComboViewer) d[2];
+			cmbPilot.setLabelProvider(employeeLblProvider);
+			btnPilot.setEnabled(false);
+			cmbPilot.getControl().setEnabled(false);
+			
+			btnMembers.addListener(SWT.Selection, e->{
+				if (btnMembers.getSelection()) {
+					elabel.setText(Messages.PatrolMetadataPackageContribution_FilterMsg);
+					btnLeader.setEnabled(false);
+					btnPilot.setEnabled(false);
+					cmbLeader.getControl().setEnabled(false);
+					cmbPilot.getControl().setEnabled(false);
+				}else {
+					elabel.setText(Messages.PatrolMetadataPackageContribution_MemberMsg);
+					
+					btnLeader.setEnabled(true);
+					btnPilot.setEnabled(true);
+					cmbLeader.getControl().setEnabled(!btnLeader.getSelection());
+					cmbPilot.getControl().setEnabled(!btnPilot.getSelection());
+				}
+				fireChanged();
+			});
+			lstEmployees.addCheckStateListener(event->{
+				updateLeaderPilotLists();
+				fireChanged();
+			});
+			
+			//add custom patrol attributes
+			customAttributes = new HashMap<>();
+		
 			
 			List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
@@ -403,8 +428,15 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			
 			for (PatrolAttribute attribute : attributes) {
 				
-				//TODO: populate with icon  
 				Label icon = new Label(core, SWT.NONE);
+				if (attribute.getIcon() != null) {
+					attribute.getIcon().getFiles().forEach(e->e.computeFileLocation(session));
+					Image img = SmartUtils.getImage(attribute.getIcon(), ICON_SIZE);
+					if (img != null) {
+						icon.setImage(img);
+						icon.addListener(SWT.Dispose, e->img.dispose());
+					}
+				}
 				
 				Label name = new Label(core, SWT.NONE);
 				name.setText(attribute.getName());
@@ -425,7 +457,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				
 				if (attribute.getType() == AttributeType.TEXT) {
 					Text txt =  new Text(core, SWT.BORDER);
-					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 					txt.setEnabled(false);
 					txt.addListener(SWT.Modify, e->fireChanged());
 					data[2] = txt;
@@ -434,7 +466,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					});
 				}else if (attribute.getType() == AttributeType.NUMERIC) {
 					Text txt =  new Text(core, SWT.BORDER);
-					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 					txt.setEnabled(false);
 					txt.addListener(SWT.Modify, e->fireChanged());
 					data[2] = txt;
@@ -443,7 +475,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					});
 				}else if (attribute.getType() == AttributeType.DATE) {
 					DateTime dateTime = new DateTime(core, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-					dateTime.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+					dateTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 					dateTime.setEnabled(false);
 					btnSelected.addListener(SWT.Selection,e->{
 						dateTime.setEnabled(!btnSelected.getSelection());
@@ -454,13 +486,13 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					TableComboViewer cmb = new TableComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 					data[2] = cmb;
 					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
+					cmb.setLabelProvider(new NamedIconItemLabelProvider(ICON_SIZE));
 					List<Object> items = new ArrayList<>();
 					items.add(""); //$NON-NLS-1$
 					items.addAll(attribute.getAttributeList());
 					cmb.setInput(items);
 					cmb.getControl().setEnabled(false);
-					cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 					
 					cmb.addSelectionChangedListener(e->fireChanged());
 					
@@ -472,7 +504,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					
 					Composite part = new Composite(core, SWT.NONE);
 					part.setLayout(new GridLayout(2, false));
-					part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 					Button btnYes = new Button(part, SWT.RADIO);
 					btnYes.setText(Messages.PatrolMetadataPackageContribution_YesOption);
 					btnYes.setEnabled(false);
@@ -506,7 +538,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				customAttributes.put(attribute, data);
 			}
 		}
-		
+		((GridData)table.getLayoutData()).heightHint = 200;
 		table.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		core.layout(true);
@@ -543,11 +575,11 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	private Object[] createComboViewerSection(String sectionName, Composite parent, 
-			Image icon, boolean isOptional, boolean supportImages) {
+			PatrolMetadataField field, boolean isOptional, boolean supportImages, IconSet defaultIs) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
-		l.setImage(icon);
+		setImage(l, field, defaultIs);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText(sectionName);
@@ -571,10 +603,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			cmb = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
 		}
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
-		cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(ICON_SIZE));
 		cmb.setInput(new String[] { DialogConstants.LOADING_TEXT });
 		cmb.getControl().setEnabled(false);
-		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		
 		btn.addListener(SWT.Selection, e-> {
@@ -589,23 +621,27 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		return new Object[] {btn, btnrq, cmb};
 	}
 	
-	private Object[] createTextSection(String sectionName, Composite parent, Image icon, boolean isOptional) {
+	private Object[] createTextSection(String sectionName, Composite parent, PatrolMetadataField field, boolean isOptional, IconSet defaultIs) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
-		l.setImage(icon);
+		setImage(l, field, defaultIs);		
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
 		l = new Label(g, SWT.NONE);
 		l.setText(sectionName);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		((GridData)l.getLayoutData()).verticalIndent = 10;
 
 		Button btn = new Button(g, SWT.CHECK);
 		btn.setSelection(true);
 		btn.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		((GridData)btn.getLayoutData()).verticalIndent = 10;
 		
 		Button btnrq = new Button(g, SWT.CHECK);
 		btnrq.setSelection(true);
 		btnrq.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		((GridData)btnrq.getLayoutData()).verticalIndent = 10;
 		if (!isOptional) btnrq.setEnabled(false);
 		btnrq.addListener(SWT.Selection,e->fireChanged());
 		

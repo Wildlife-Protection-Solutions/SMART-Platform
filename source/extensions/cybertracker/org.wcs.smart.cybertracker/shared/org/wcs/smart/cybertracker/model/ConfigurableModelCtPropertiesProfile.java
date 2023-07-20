@@ -24,7 +24,6 @@ package org.wcs.smart.cybertracker.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 import jakarta.persistence.Embeddable;

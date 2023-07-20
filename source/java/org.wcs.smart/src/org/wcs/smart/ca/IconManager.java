@@ -166,4 +166,10 @@ public enum IconManager {
 	public String getLibraryFile(String iconKey, IconSet set) {
 		return IconUtils.INSTANCE.getLibraryFile(iconKey, set);
 	}
+	
+	public IconSet getDefaultIconSet(Session session, ConservationArea ca) {
+		return session.createQuery("FROM IconSet WHERE conservationArea = :ca and isDefault", IconSet.class) //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.uniqueResult();
+	}
 }

@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.migrate.UserValidationManager;
-import org.wcs.smart.i2.migrate.entity.Entity6Database;
+import org.wcs.smart.i2.migrate.entity.EntityDatabase;
 import org.wcs.smart.i2.migrate.entity.EntityTypeItem;
 import org.wcs.smart.i2.migrate.entity.EntityTypeMappingRecord;
 import org.wcs.smart.i2.migrate.internal.Messages;
@@ -49,7 +49,7 @@ import org.wcs.smart.i2.migrate.internal.Messages;
  */
 public class ValidateUserJob implements IRunnableWithProgress {
 
-	private Entity6Database smart6;
+	private EntityDatabase smart6;
 	private List<ConservationArea> toValidate;
 	
 	private Shell shell;
@@ -57,7 +57,7 @@ public class ValidateUserJob implements IRunnableWithProgress {
 	private Map<ConservationArea, Employee> employees;
 	private List<EntityTypeMappingRecord> records ;
 	
-	public ValidateUserJob(Entity6Database db, List<ConservationArea> toValidate, Shell shell) {
+	public ValidateUserJob(EntityDatabase db, List<ConservationArea> toValidate, Shell shell) {
 		this.smart6 = db;
 		this.toValidate = toValidate;
 		this.shell = shell;

@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.migrate.Smart6Database;
+import org.wcs.smart.i2.migrate.SmartSQLDatabase;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -44,7 +44,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class Intel6Database extends Smart6Database {
+public class Intel6Database extends SmartSQLDatabase {
 
 	public Intel6Database(Path dir) throws SQLException {
 		super(dir);

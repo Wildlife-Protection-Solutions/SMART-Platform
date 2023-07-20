@@ -24,7 +24,6 @@ package org.wcs.smart.smartcollect.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.observation.model.Waypoint;
 
 import jakarta.persistence.Column;

@@ -267,9 +267,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		
 		if (newProfile == null) return;
 		
-		ProfilesManager.INSTANCE.addActiveProfile(newProfile, eventBroker);
-		
-		ProfileDialog pd = new ProfileDialog(getShell(), newProfile, configs);
+		ProfileDialog pd = new ProfileDialog(getShell(), newProfile, configs, eventBroker);
 		pd.open();
 		refresh();
 	}
@@ -302,7 +300,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		if (!(x instanceof IntelProfile)) return;
 		
 		IntelProfile c = (IntelProfile)x;
-		ProfileDialog pd = new ProfileDialog(getShell(), c, configs);
+		ProfileDialog pd = new ProfileDialog(getShell(), c, configs, eventBroker);
 		pd.open();
 		refresh();
 	}

@@ -43,7 +43,9 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.migrate.ExtractDbJob;
 import org.wcs.smart.i2.migrate.MigratePlugin;
-import org.wcs.smart.i2.migrate.entity.Entity6Database;
+import org.wcs.smart.i2.migrate.entity.Entity20Database;
+import org.wcs.smart.i2.migrate.entity.Entity30Database;
+import org.wcs.smart.i2.migrate.entity.EntityDatabase;
 import org.wcs.smart.i2.migrate.entity.EntityMigrationJob;
 import org.wcs.smart.i2.migrate.intelligence.wizard.CaListWizardPage;
 import org.wcs.smart.i2.migrate.intelligence.wizard.Smart6WizardPage;
@@ -61,7 +63,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 	private CaListWizardPage page2;
 	private EntityTypeMappingPage page3;
 	
-	private Entity6Database smart6;
+	private EntityDatabase srcSmartDb;
 	private List<ConservationArea> toProcess;
 	private Map<ConservationArea, Employee> userMapping;
 	
@@ -73,9 +75,9 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 	@Override
 	public void dispose(){
 		super.dispose();
-		if (smart6 != null) {
+		if (srcSmartDb != null) {
 			try {
-				smart6.close();
+				srcSmartDb.close();
 			} catch (IOException e) {
 				MigratePlugin.log(e.getMessage(), e);
 			}
@@ -99,7 +101,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 
 	@Override
 	public boolean performFinish() {
-		EntityMigrationJob job = new EntityMigrationJob(smart6, page3.getMappings(), userMapping);
+		EntityMigrationJob job = new EntityMigrationJob(srcSmartDb, page3.getMappings(), userMapping);
 		
 		try {
 			getContainer().run(true, true, job);
@@ -131,9 +133,9 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
      */
 	public void addPages() {
     	
-    	setWindowTitle("Migrate SMART6 Entity Data");
+    	setWindowTitle("Migrate SMART Entity Data");
     	
-    	page1 = new Smart6WizardPage();
+    	page1 = new Smart6WizardPage("SMART Backup", "Select the SMART 6 or 7 backup to import data from", "SMART Backup File:");
     	page2 = new CaListWizardPage();
     	page3 = new EntityTypeMappingPage();
     	
@@ -148,35 +150,52 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getCurrentPage() == page1) {
-			if (this.smart6 != null) {
+			if (this.srcSmartDb != null) {
 				try {
-					this.smart6.close();
+					this.srcSmartDb.close();
 				}catch (Exception ex) {
 					MigratePlugin.log(ex.getMessage(), ex);
 				}
 			}
 			String fname = page1.getFile();
 			try {
-				ExtractDbJob<Entity6Database> job = new ExtractDbJob<Entity6Database>(fname) {
+				ExtractDbJob<EntityDatabase> job = new ExtractDbJob<EntityDatabase>(fname) {
 
 					@Override
-					protected List<ConservationArea> getConservationAreasWithData(Entity6Database database) throws SQLException {
+					protected List<ConservationArea> getConservationAreasWithData(EntityDatabase database) throws SQLException {
 						return database.getConservationAreasWithEntity();
 					}
 
 					@Override
-					protected Entity6Database createDatabase(Path path) throws SQLException {
-						return new Entity6Database(path);
+					protected EntityDatabase createDatabase(Path path) throws SQLException {
+						Entity20Database db2 = new Entity20Database(path);
+						if (validateVersion(db2)) return db2;						
+						try {
+							db2.doClose(false);
+						} catch (IOException e) {
+							throw new SQLException(e);
+						}
+						
+						Entity30Database db3 = new Entity30Database(path);
+						if (validateVersion(db3)) return db3;
+						try {
+							db3.doClose(false);
+						} catch (IOException e) {
+							throw new SQLException(e);
+						}
+						
+						String version = db3.getVersion("org.wcs.smart.entity"); //$NON-NLS-1$
+						throw new SQLException(MessageFormat.format("No support for migrating from this version of entity plugin (database model version: {0}).", version));						
 					}
 
 					@Override
-					protected boolean validateVersion(Entity6Database database) throws SQLException {
+					protected boolean validateVersion(EntityDatabase database) throws SQLException {
 						return database.validateEntityVersion();
 					}};
 				getContainer().run(true, true, job);
 				
 				this.toProcess = job.getConservationAreas();
-				this.smart6 = (Entity6Database)job.getDatabase();
+				this.srcSmartDb = job.getDatabase();
 				
 			} catch (Exception e) {
 				processException(e);
@@ -185,14 +204,14 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 			}
 			
 			if (toProcess == null || toProcess.isEmpty()) {
-				MessageDialog.openError(getShell(), Messages.MigrateIntelligenceWizard_NoCas, Messages.MigrateIntelligenceWizard_NoMatchingCas);
+				MessageDialog.openError(getShell(), Messages.MigrateIntelligenceWizard_NoCas, "No matching Conservation Areas found with profile data.");
 				event.doit = false;
 			}else {
 				page2.setConservationArea(toProcess);
 			}
 		}else if (event.getCurrentPage() == page2 && event.getTargetPage() == page3) {
 			try {
-				ValidateUserJob job = new ValidateUserJob(smart6, page2.getConservationAreas(), getShell());
+				ValidateUserJob job = new ValidateUserJob(srcSmartDb, page2.getConservationAreas(), getShell());
 				getContainer().run(true, true, job);
 				
 				if (job.getMappingRecords() == null) {

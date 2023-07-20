@@ -57,6 +57,10 @@ public class JsonUtils {
 	//date attributes come through in a different format; only applicable to date attributes
 	public static final String JSON_ATTRIBUTE_DATE_FORMAT_STR = "yyyy/MM/dd";  //$NON-NLS-1$
 	
+	//example string: "2019-12-30T22:48:26.0-08:00"
+	private static final String JSON_DATE_FORMAT_STRX = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
+	private static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSS"; //$NON-NLS-1$
+	
 	/**
 	 * JSON dates come in the format "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" where
 	 * the time is the local time and the time we want to use.  We want to 
@@ -64,13 +68,8 @@ public class JsonUtils {
 	 * and it causes issues with conversions if the local computer is in 
 	 * a different timezone from other computers.
 	 * @param value
-	 * @throws ParseException 
+	 * @throws DateTimeParseException 
 	 */
-	//example string: "2019-12-30T22:48:26.0-08:00"
-	private static final String JSON_DATE_FORMAT_STRX = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
-	private static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSS"; //$NON-NLS-1$
-	
-
 	public static LocalDateTime parseJsonDateTime(String value) throws DateTimeParseException {
 		try {
 			//this parses the date/time string throwing out any timezone information

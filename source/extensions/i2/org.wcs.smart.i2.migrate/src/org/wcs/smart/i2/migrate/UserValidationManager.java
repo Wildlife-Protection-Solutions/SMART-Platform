@@ -31,7 +31,7 @@ public enum UserValidationManager {
 	 * @param task
 	 * @return
 	 */
-	public Map<ConservationArea, Employee> validate(Collection<ConservationArea> toValidate, Smart6Database smart6, Shell shell,
+	public Map<ConservationArea, Employee> validate(Collection<ConservationArea> toValidate, SmartSQLDatabase smart6, Shell shell,
 			SubMonitor task) {
 
 		HashMap<ConservationArea, Employee> employeeMap = new HashMap<>();

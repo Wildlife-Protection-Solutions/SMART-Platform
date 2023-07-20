@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
@@ -146,20 +147,23 @@ public class ProfileDialog extends SmartStyledDialog {
 	private boolean permissionModified = false;
 	private Tab initTab = null;
 	
+	private IEventBroker eventBroker;
+	
 	private Listener generateKeyListener = e->{
 		String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), others);
 		txtKey.setText(newKey);
 	};
 	
-	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others) {
-		this(parent, config, others, Tab.CONFIG);
+	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others, IEventBroker eventBroker) {
+		this(parent, config, others, Tab.CONFIG, eventBroker);
 	}
 	
-	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others, Tab initTab) {
+	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others, Tab initTab, IEventBroker eventBroker) {
 		super(parent);
 		this.config = config;
 		this.others = others;
 		this.initTab = initTab;
+		this.eventBroker = eventBroker;
 	}
 	
 	@Override
@@ -200,8 +204,10 @@ public class ProfileDialog extends SmartStyledDialog {
 		}
 		
 		IntelProfile tosave = config;
+		boolean isNew = false;
 		if (config.getUuid() == null) {
 			//copy info to tosave
+			isNew = true;
 			tosave = new IntelProfile();
 			tosave.setColor(config.getColor());
 			tosave.setConservationArea(config.getConservationArea());
@@ -242,7 +248,7 @@ public class ProfileDialog extends SmartStyledDialog {
 						if (temp != null) {
 							temp.getProfile().getEntityTypes().remove(temp);
 							temp.getEntityType().getProfiles().remove(temp);
-							session.delete(temp);
+							session.remove(temp);
 							src.getProfiles().remove(temp);
 						}						
 					}
@@ -265,21 +271,21 @@ public class ProfileDialog extends SmartStyledDialog {
 						if (temp != null) {
 							temp.getProfile().getRecordSources().remove(temp);
 							temp.getRecordSource().getProfiles().remove(temp);
-							session.delete(temp);
+							session.remove(temp);
 							src.getProfiles().remove(temp);
 						}						
 					}
 				}
 				
 				for (Employee e : removed) {
-					session.createQuery("DELETE FROM IntelPermission WHERE id.employee = :e") //$NON-NLS-1$
+					session.createMutationQuery("DELETE FROM IntelPermission WHERE id.employee = :e") //$NON-NLS-1$
 						.setParameter("e", e) //$NON-NLS-1$
 						.executeUpdate();
 				}
 				for (IntelPermission p : permissions.values()) {
 					p.setProfile(tosave);
 					if (p.getPermission() == 0) {
-						session.delete(p);
+						session.remove(p);
 					}else {
 						session.saveOrUpdate(p);
 						
@@ -318,6 +324,10 @@ public class ProfileDialog extends SmartStyledDialog {
 		if (permissionModified) {
 			MessageDialog.openInformation(getShell(), Messages.ProfileDialog_PermissionTitle, Messages.ProfileDialog_PermissionMsg);
 			permissionModified = false;
+		}
+		//automatically add to active profiles
+		if (isNew && ProfilesManager.INSTANCE.canViewProfile(config)) {
+			ProfilesManager.INSTANCE.addActiveProfile(config, eventBroker);			
 		}
 	}
 	

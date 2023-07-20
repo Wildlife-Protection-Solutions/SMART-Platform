@@ -134,9 +134,9 @@ public class EntityTypeFilter  {
 	 * @param s
 	 * @return
 	 */
-	public Query<?> buildQuery(Session s){ 
+	public Query<EntityType> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
-		str.append("SELECT e.uuid, e.keyId, e.name "); //$NON-NLS-1$
+		str.append("SELECT e "); //$NON-NLS-1$
 		str.append("FROM EntityType e "); //$NON-NLS-1$
 		if (searchField != null){
 			str.append("left join e.names as lbl with lbl.id.language.uuid = :language "); //$NON-NLS-1$
@@ -158,9 +158,9 @@ public class EntityTypeFilter  {
 			str.append(" lower(" + searchField.getDbFieldName() + ") like LOWER(:eid) "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
-		str.append(" ORDER BY e.name asc"); //$NON-NLS-1$
+		str.append(" ORDER BY lbl.value asc"); //$NON-NLS-1$
 		
-		Query<?> query = s.createQuery(str.toString());
+		Query<EntityType> query = s.createQuery(str.toString(), EntityType.class);
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (searchField != null){
 			query.setParameter("language", SmartDB.getCurrentLanguage().getUuid()); //$NON-NLS-1$

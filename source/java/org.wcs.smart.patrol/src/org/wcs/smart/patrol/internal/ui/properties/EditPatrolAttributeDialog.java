@@ -77,6 +77,7 @@ import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -409,7 +410,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		pAttribute.setType(getType());
 		pAttribute.setIcon(iconComp.getIcon());
 		
-		try(Session session = HibernateManager.openSession()){
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
 				if (pAttribute.getUuid() == null) session.persist(pAttribute);

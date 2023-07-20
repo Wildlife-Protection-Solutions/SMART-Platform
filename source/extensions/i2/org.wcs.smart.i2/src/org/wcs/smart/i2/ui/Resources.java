@@ -1,6 +1,8 @@
 package org.wcs.smart.i2.ui;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -22,27 +24,39 @@ public enum Resources {
 	
 	INSTANCE;
 	
-	private HashMap<IntelProfile, Color> colorCache = new HashMap<>();
-	private HashMap<String, Image> profileImages = new HashMap<>();
-	private HashMap<IntelEntityType, Image> typeImages = new HashMap<>();
-	private HashMap<String, Image> recordImages = new HashMap<>();
+	private Map<IntelProfile, Color> colorCache = Collections.synchronizedMap(new HashMap<>());
+	private Map<String, Image> profileImages = Collections.synchronizedMap(new HashMap<>());
+	private Map<IntelEntityType, Image> typeImages = Collections.synchronizedMap(new HashMap<>());
+	private Map<String, Image> recordImages = Collections.synchronizedMap(new HashMap<>());
 	
 	public void dispose() {
-		for (Color c : colorCache.values()) c.dispose();
-		colorCache.clear();
+		synchronized (colorCache) {
+			for (Color c : colorCache.values()) c.dispose();
+			colorCache.clear();
+				
+		}
 		
 		clearEntityTypeImageCache();
 		clearRecordSourceImageCache();
 	}
 	
+	public void removeProfile(IntelProfile profile) {
+		colorCache.remove(profile);
+		profileImages.remove(profile.getKeyId());
+	}
+	
 	public void clearEntityTypeImageCache() {
-		for (Image i : typeImages.values()) i.dispose();
-		typeImages.clear();
+		synchronized (typeImages) {
+			for (Image i : typeImages.values()) i.dispose();
+			typeImages.clear();
+		}
 	}
 	
 	public void clearRecordSourceImageCache() {
-		for (Image i : recordImages.values()) i.dispose();
-		recordImages.clear();
+		synchronized (recordImages) {
+			for (Image i : recordImages.values()) i.dispose();
+			recordImages.clear();	
+		}		
 	}
 	
 	public Color getColor(IntelProfile profile) {

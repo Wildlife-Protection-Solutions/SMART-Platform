@@ -26,10 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -77,6 +80,9 @@ import org.wcs.smart.user.UserLevelManager;
 public class PermissionPreferencePage extends PreferencePage implements IIntelPreferencePage{
 
 
+	@Inject
+	private IEventBroker eventBroker;
+	
 	private TableViewer tblViewer;
 	private List<IntelProfile> profiles ;
 	
@@ -151,7 +157,7 @@ public class PermissionPreferencePage extends PreferencePage implements IIntelPr
 		List<IntelProfile> others = new ArrayList<>(profiles);
 		others.remove(profile);
 		
-		ProfileDialog pd = new ProfileDialog(getShell(), profile, others, ProfileDialog.Tab.PERMISSIONS);
+		ProfileDialog pd = new ProfileDialog(getShell(), profile, others, ProfileDialog.Tab.PERMISSIONS, eventBroker);
 		pd.open();
 		refresh();
 	}

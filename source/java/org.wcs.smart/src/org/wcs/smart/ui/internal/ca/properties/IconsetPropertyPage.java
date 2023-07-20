@@ -628,12 +628,15 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 							//there seems to be a bug in apache derby
 							//that causes all values passed to the trigger to be null
 							//as a result we get ca_uuid cannot be null error
-							//this only appears to be a problem for Attribute icons
-							//so we specifically delete them here.
+							//this only appears to be a problem for 
 							//re: #3401
 							session.createMutationQuery("UPDATE Attribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
 								.setParameter("icon", e) //$NON-NLS-1$
 								.executeUpdate();
+							session.createMutationQuery("UPDATE PatrolAttribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
+							.setParameter("icon", e) //$NON-NLS-1$
+							.executeUpdate();
+							
 							session.remove(e);
 							session.flush();
 							monitor.worked(1);

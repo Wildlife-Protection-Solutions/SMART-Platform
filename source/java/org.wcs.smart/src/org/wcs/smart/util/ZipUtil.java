@@ -259,8 +259,7 @@ public class ZipUtil {
 	public static Path unzip(Path zipFile) throws Exception{
 		Path tempDir = null;
 		try(ZipFile zout = new ZipFile(zipFile.toAbsolutePath().toFile())) {
-			tempDir = Files.createTempFile(zipFile.getFileName().toString(),
-					Long.toString(System.nanoTime()));
+			tempDir = Files.createTempDirectory("smart_"+Long.toString(System.nanoTime())); //$NON-NLS-1$
 			Files.delete(tempDir);
 			SmartUtils.createDirectory(tempDir);
 		

@@ -91,12 +91,12 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 	private Map<ConservationArea, Employee> userMapping;
 	
 	private List<EntityTypeMappingRecord> mappings;
-	private Entity6Database db;
+	private EntityDatabase db;
 	
 	private List<IntelEntityType> newTypes;
 	private int totalEntities = 0;
 	
-	public EntityMigrationJob(Entity6Database db, List<EntityTypeMappingRecord> mappings, Map<ConservationArea, Employee> userMapping) {
+	public EntityMigrationJob(EntityDatabase db, List<EntityTypeMappingRecord> mappings, Map<ConservationArea, Employee> userMapping) {
 		this.mappings = mappings;
 		this.db = db;
 		this.userMapping = userMapping;
@@ -244,7 +244,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 			
 			entity.setProfile(record.getProfile());
 			entity.setAttributes(new ArrayList<>());
-			session.save(entity);
+			session.persist(entity);
 			cnt++;
 			newItems.put(item.getUuid(), entity);
 			
@@ -369,7 +369,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 				relation.setSource(Source.ENTITY);
 				relation.setSourceEntity(i1);
 				relation.setTargetEntity(i2);
-				session.save(relation);
+				session.persist(relation);
 			}
 		}
 		
@@ -449,7 +449,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 			entityType.setActiveFilter("a:" + IntelAttribute.AttributeType.LIST.key + ":" + status.getKeyId() + " " + Operator.EQUALS.asSmartValue() + " " + Status.ACTIVE.name().toLowerCase()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		
-		session.save(entityType);
+		session.persist(entityType);
 		session.flush();
 		
 		IntelEntityTypeAttributeGroup primaryGroup = new IntelEntityTypeAttributeGroup();
@@ -458,7 +458,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		primaryGroup.setName(Messages.EntityMigrationJob_PrimaryAttributeGroupName);
 		primaryGroup.updateName(SmartDB.getCurrentLanguage(), primaryGroup.getName());
 		primaryGroup.updateName(ca.getDefaultLanguage(), primaryGroup.getName());
-		session.save(primaryGroup);
+		session.persist(primaryGroup);
 		session.flush();
 		
 		eIdAttribute.setAttributeGroup(primaryGroup);
@@ -514,7 +514,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 					rType.setTargetProfile(targetProfile);
 					rType.setConservationArea(ca);
 					
-					session.save(rType);
+					session.persist(rType);
 					
 					attributeRelationshipMapping.put(attributeItem.getUuid(), rType);
 				}else {
@@ -566,7 +566,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		for (IntelEntityTypeAttribute ia : entityType.getAttributes()) {
 			ia.setOrder(order++);
 		}
-		session.save(entityType);
+		session.persist(entityType);
 		return entityType;
 		
 		
@@ -660,7 +660,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 				listMappings.put(ali.getUuid(), iali);
 			}
 		}
-		session.save(ia);
+		session.persist(ia);
 		return ia;
 	}
 	
@@ -708,7 +708,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		ia.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_IDName);
 		ia.setName(Messages.EntityMigrationJob_IDName);
 		
-		session.save(ia);
+		session.persist(ia);
 		
 		idAttribute.put(ca.getUuid(), ia);
 		return ia;
@@ -752,7 +752,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		ia.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_PositionName);
 		ia.setName(Messages.EntityMigrationJob_PositionName);
 		
-		session.save(ia);
+		session.persist(ia);
 		positionAttribute.put(ca.getUuid(), ia);
 		return ia;
 	}
@@ -822,7 +822,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		inactive.setAttribute(ia);
 		ia.getAttributeList().add(inactive);
 		
-		session.save(ia);
+		session.persist(ia);
 		statusAttribute.put(ca.getUuid(), ia);
 		return ia;
 	}

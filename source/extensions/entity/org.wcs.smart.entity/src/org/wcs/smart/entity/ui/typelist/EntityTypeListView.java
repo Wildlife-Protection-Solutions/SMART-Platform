@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.entity.ui.typelist;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -129,13 +127,13 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
-						Query<?> query = filter.buildQuery(s);
-						List<?> results = query.list();
+						Query<EntityType> query = filter.buildQuery(s);
+						List<EntityType> results = query.list();
+						
 						input = new EntityTypeEditorInput[results.size()];
 						int i = 0;
-						for	(Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-							Object[] data = (Object[]) iterator.next();					
-							input[i++] = new EntityTypeEditorInput((UUID)data[0], (String)data[1], (String)data[2]);
+						for	(EntityType t : results) {
+							input[i++] = new EntityTypeEditorInput(t.getUuid(), t.getKeyId(), t.getName());
 						}
 						
 						monitor.internalWorked(0.5);

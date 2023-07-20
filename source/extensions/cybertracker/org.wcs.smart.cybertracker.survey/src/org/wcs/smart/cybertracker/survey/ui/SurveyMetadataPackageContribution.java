@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.survey.ui;
 
+import java.net.URI;
+import java.net.URL;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -62,10 +64,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
@@ -75,7 +80,6 @@ import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.MissionMetadataField;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -87,6 +91,7 @@ import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol metadata contribution
@@ -95,6 +100,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  *
  */
 public class SurveyMetadataPackageContribution implements IPackageUiContribution {
+
+	private static final int ICON_SIZE = 32;
 
 	private static final String CUSTOMKEY = "ISCUSTOM"; //$NON-NLS-1$
 	
@@ -134,11 +141,32 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		if (onModified != null) onModified.handleEvent(new Event());
 	}
 	
+	private void setImage(Label label, MissionMetadataField field, IconSet iconSet) {
+		URI uri = field.getIcon(iconSet);
+		if (uri == null) return;
+		try {
+			URL url = uri.toURL();
+			Image img = SmartUtils.getImage(url, ICON_SIZE);
+			if (img != null) {
+				label.setImage(img);
+				label.addListener(SWT.Dispose, e->img.dispose());
+			}
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+	}
+	
 	@Override
 	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
 		this.onInitilized = onInitilized;
+		
+		
+		IconSet defaultIs = null;
+		try(Session session = HibernateManager.openSession()){
+			defaultIs = IconManager.INSTANCE.getDefaultIconSet(session, ctpackage.getConservationArea());
+		}
 		
 		Composite outer = new Composite(parent, SWT.NONE);
 		outer.setLayout(new GridLayout());
@@ -209,7 +237,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		c5.setText(col4.getText());
 		
 		// comment
-		Object[] d = createTextSection(Messages.SurveyMetadataPackageContribution_MissionCommentLabel, core, null, true);
+		Object[] d = createTextSection(Messages.SurveyMetadataPackageContribution_MissionCommentLabel, core, MissionMetadataField.COMMENT, true, defaultIs);
 		btnCmt = (Button) d[0];
 		btnCmtrq = (Button) d[1];
 		btnCmtrq.setSelection(MissionMetadataField.COMMENT.isRequired());
@@ -234,7 +262,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		
 		// employess
 		Label l = new Label(core, SWT.NONE);
-		l.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_MEMBER_ICON));
+		setImage(l, MissionMetadataField.MEMBERS, defaultIs);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(core, SWT.NONE);
@@ -290,7 +318,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		
 		// leader
 		d = createComboViewerSection(Messages.SurveyMetadataPackageContribution_LeaderLabel, core, 
-				EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON), false);
+				MissionMetadataField.LEADER, false, defaultIs);
 		btnLeader = (Button) d[0];
 		btnLeaderrq = (Button) d[1];
 		cmbLeader = (ComboViewer) d[2];
@@ -352,11 +380,11 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		if (cmbLeader.getStructuredSelection().isEmpty() && items.size() > 0) cmbLeader.setSelection(new StructuredSelection(sorted.get(0)));
 	}
 	
-	private Object[] createComboViewerSection(String sectionName, Composite parent, Image icon, boolean isOptional) {
+	private Object[] createComboViewerSection(String sectionName, Composite parent, MissionMetadataField field, boolean isOptional, IconSet defaultIs) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
-		l.setImage(icon);
+		setImage(l, field, defaultIs);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText(sectionName);
@@ -380,7 +408,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		cmb.setLabelProvider(new NamedItemLabelProvider());
 		cmb.setInput(new String[] { DialogConstants.LOADING_TEXT });
 		cmb.getControl().setEnabled(false);
-		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		btn.addListener(SWT.Selection, e-> {
 			cmb.getControl().setEnabled(!btn.getSelection());
@@ -394,12 +422,13 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		return new Object[] {btn,btnrq, cmb};
 	}
 	
-	private Object[] createTextSection(String sectionName, Composite parent, Image icon, boolean isOptional) {
+	private Object[] createTextSection(String sectionName, Composite parent, MissionMetadataField field, boolean isOptional, IconSet defaultIs) {
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
-		l.setImage(icon);
+		setImage(l, field, defaultIs);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
 		l = new Label(g, SWT.NONE);
 		l.setText(sectionName);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -617,10 +646,17 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 
 			for (MissionAttribute attribute : attributes) {
 
-				// TODO: populate with icon
 				Label icon = new Label(core, SWT.NONE);
 				icon.setData(CUSTOMKEY, true);
 				icon.setBackground(icon.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				if (attribute.getIcon() != null) {
+					attribute.getIcon().getFiles().forEach(e->e.computeFileLocation(session));
+					Image img = SmartUtils.getImage(attribute.getIcon(), ICON_SIZE);
+					if (img != null) {
+						icon.setImage(img);
+						icon.addListener(SWT.Dispose, e->img.dispose());
+					}
+				}
 				
 				Label name = new Label(core, SWT.NONE);
 				name.setText(attribute.getName());
@@ -668,7 +704,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 					cmb.getControl().setData(CUSTOMKEY, true);
 					data[2] = cmb;
 					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
+					cmb.setLabelProvider(new NamedIconItemLabelProvider(ICON_SIZE));
 					List<Object> items = new ArrayList<>();
 					items.add(""); //$NON-NLS-1$
 					items.addAll(attribute.getAttributeList());

@@ -167,9 +167,7 @@ public enum ProfilesManager {
 			for (Iterator<IntelProfile> iterator = temp.iterator(); iterator.hasNext();) {
 				IntelProfile profile = iterator.next();
 				boolean keep = false;
-				if (IntelSecurityManager.INSTANCE.canViewEntities(profile) ||
-						IntelSecurityManager.INSTANCE.canViewRecords(profile) ||
-						IntelSecurityManager.INSTANCE.canViewQuery(profile)) {
+				if (canViewProfile(profile)) {
 					keep = true;
 				}
 				if (!keep) iterator.remove();
@@ -178,6 +176,22 @@ public enum ProfilesManager {
 			temp.forEach(p->Resources.INSTANCE.getImage(p));
 		}
 		return temp;
+	}
+	
+	/**
+	 * Determines if the current user has permission to view data
+	 * in a profile 
+	 * 
+	 * @param profile
+	 * @return
+	 */
+	public boolean canViewProfile(IntelProfile profile) {
+		if (IntelSecurityManager.INSTANCE.canViewEntities(profile) ||
+				IntelSecurityManager.INSTANCE.canViewRecords(profile) ||
+				IntelSecurityManager.INSTANCE.canViewQuery(profile)) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -334,10 +348,9 @@ public enum ProfilesManager {
 			q.executeUpdate();
 	
 			for (Class<? extends AbstractIntelQuery> c : InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
-	
 				List<? extends AbstractIntelQuery> query = session
 						.createQuery(
-								"FROM " + c.getName() + " WHERE profile_filter like :profile and conservationArea = :ca", //$NON-NLS-1$ //$NON-NLS-2$
+								"FROM " + c.getName() + " WHERE profileFilter like :profile and conservationArea = :ca", //$NON-NLS-1$ //$NON-NLS-2$
 								AbstractIntelQuery.class).setParameter("profile", profile.getKeyId() + "%") //$NON-NLS-1$ //$NON-NLS-2$
 						.setParameter("ca", profile.getConservationArea()) //$NON-NLS-1$
 						.list();
@@ -361,6 +374,8 @@ public enum ProfilesManager {
 			session.getTransaction().rollback();
 			throw ex;
 		}
+		
+		Resources.INSTANCE.removeProfile(profile);
 		
 		resetActiveProfiles();
 	}

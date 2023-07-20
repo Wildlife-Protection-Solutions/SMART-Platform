@@ -82,6 +82,7 @@ public enum PatrolMetadataField {
 	
 	public URI getIcon(IconSet set) {
 		if (this.libraryIcon == null) return null;
+		if (set == null) return null;
 		String filename = IconUtils.INSTANCE.getLibraryFile(this.libraryIcon, set);
 		if (filename == null) {
 			IconSet temp = new IconSet();

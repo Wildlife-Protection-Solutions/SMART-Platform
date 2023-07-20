@@ -50,7 +50,7 @@ import org.wcs.smart.util.ZipUtil;
  * @author Emily
  *
  */
-public abstract class ExtractDbJob<T extends Smart6Database> implements IRunnableWithProgress{
+public abstract class ExtractDbJob<T extends SmartSQLDatabase> implements IRunnableWithProgress{
 
 	private String filename;
 	

@@ -67,7 +67,7 @@
       </command>
       <command
             id="org.wcs.smart.i2.migrate.entity"
-            name="%command.entity.name">
+            name="%command.entity.name2">
       </command>
    </extension>
 
