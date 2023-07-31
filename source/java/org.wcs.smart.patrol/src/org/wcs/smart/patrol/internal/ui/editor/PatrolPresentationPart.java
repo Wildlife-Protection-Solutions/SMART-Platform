@@ -34,8 +34,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -86,7 +88,6 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -103,7 +104,6 @@ import org.locationtech.udig.project.internal.impl.StyleBlackboardImpl;
 import org.locationtech.udig.project.internal.render.SelectionStyleContent;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
-import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
@@ -128,6 +128,9 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.patrol.geotools.PatrolFeatureSource;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.map.style.PatrolReviewTrackDefaultStyle;
+import org.wcs.smart.patrol.map.style.PatrolReviewWaypointDefaultStyle;
+import org.wcs.smart.patrol.map.style.PatrolReviewWaypointRawDefaultStyle;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -144,6 +147,7 @@ import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 import org.wcs.smart.patrol.ui.IPatrolPresentationContribution;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
@@ -217,10 +221,25 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    				
 	    				super.run(monitor);
 	    				
+	    				Map<String,String> geoIdToStyle = new HashMap<>();
+	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolReviewTrackDefaultStyle.KEY);
+	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolReviewWaypointRawDefaultStyle.KEY);
+	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolReviewWaypointDefaultStyle.KEY);
+
+	    				//if a default style is not specified we'll use this style instead
+	    				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
+	    				defaultStyles.put(PatrolReviewTrackDefaultStyle.KEY, (l)->{
+	    					try {
+								IStyleBlackboard bb = StyleUtils.INSTANCE.getPatrolTrackStyle(parentEditor.getPatrol());
+								if (bb != null) l.setStyleBlackboard((StyleBlackboard) bb);
+							} catch (Exception e) {
+								SmartPlugIn.log(e.getMessage(), e);
+							}
+	    				});
 	    				for (Layer l : getLayers()) {
 	    					
-	    					Style s = l.getGeoResource().resolve(Style.class, monitor);
-	    					if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
+	    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(l, geoIdToStyle, defaultStyles, monitor);
+	    					
 	    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
 	    					if (fs != null) {
 	    						l.setName(fs.getLayerName());
@@ -232,8 +251,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    					
 	    					if (l.getGeoResource().canResolve(PatrolGeoResource.class)) {
 	    						if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) {
-	    							IStyleBlackboard bb = StyleUtils.INSTANCE.getPatrolTrackStyle(parentEditor.getPatrol());
-	    							l.setStyleBlackboard((StyleBlackboard) bb);
 	    							trackLayer = l;
 	    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
 	    							waypointLayer = l;

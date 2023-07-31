@@ -24,25 +24,51 @@ package org.wcs.smart.udig.style;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
+import org.geotools.styling.Style;
+import org.hibernate.Session;
 import org.locationtech.udig.core.internal.ExtensionPointProcessor;
 import org.locationtech.udig.core.internal.ExtensionPointUtil;
 import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.IStyleBlackboard;
 import org.locationtech.udig.project.StyleContent;
+import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.style.sld.SLD;
+import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.coverage.grid.GridCoverage;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaProperty;
+import org.wcs.smart.ca.SmartStyle;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.UuidUtils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -58,11 +84,161 @@ public class StyleManager {
 
 	public static final StyleManager INSTANCE = new StyleManager();
 	
+	/**
+	 * ConservationAreaProperty key for default map layer styles.
+	 * Default map layer styles are stored as JSON key value pairs to 
+	 * smart saved style.
+	 */
+	public static final String CA_PROPERTY_KEY = "smart.map.styles.default";
+	/**
+	 * Extension point ID for map configuration extension
+	 */
+	public static final String MAP_CONFIG_EXT = "org.wcs.smart.map.config";
+	/**
+	 * Default style extension point name
+	 */
+	public static final String DEFAULT_STYLE_PNT = "defaultmaplayerstyle";
+	
 	private static final String ID_KEY = "id"; //$NON-NLS-1$
 	private static final String VALUE_KEY = "value"; //$NON-NLS-1$
 	
+	private static final String KEY_KEY = "key";
+	private static final String STYLE_KEY = "style";
 	private StyleManager(){
 		
+	}
+	
+	/**
+	 * 
+	 * @return List of map layers which can have default styles associated with them
+	 * 
+	 * @throws CoreException
+	 */
+	public List<MapLayerDefaultStyle> getDefaultStyleMapLayers() throws CoreException{
+	
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(MAP_CONFIG_EXT);
+		if (extensionPoint == null) return Collections.emptyList();
+	            
+		IExtension[] extensions = extensionPoint.getExtensions();
+
+		List<MapLayerDefaultStyle> items = new ArrayList<>();
+	        // For each extension ...
+	    for( int i = 0; i < extensions.length; i++ ) {
+	    	IExtension extension = extensions[i];
+	        IConfigurationElement[] elements = extension.getConfigurationElements();
+
+	        // For each member of the extension ...
+	        for( int j = 0; j < elements.length; j++ ) {
+	        	IConfigurationElement element = elements[j];
+	        	if (element.getName().equalsIgnoreCase(DEFAULT_STYLE_PNT)) {
+	        		MapLayerDefaultStyle p = (MapLayerDefaultStyle) element.createExecutableExtension("class");
+					items.add(p);				
+				}	
+	        }
+	    }
+	    return items;
+	                  
+	}
+	
+	/**
+	 * Load the default map styles from the database for the given Conservation Area and
+	 * return a key value pair map linking the map layer key to the style uuid string  
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public Map<String, String> getDefaultStyles(ConservationArea ca, Session session){
+		ConservationAreaProperty currentProperty = QueryFactory.buildQuery(session, ConservationAreaProperty.class,
+				new Object[] { "conservationArea", ca },
+				new Object[] { "key", StyleManager.CA_PROPERTY_KEY }).uniqueResult();
+		if (currentProperty == null || currentProperty.getValue() == null ||
+				currentProperty.getValue().isEmpty()) {
+			return Collections.emptyMap();
+		}
+		Map<String, String> properties = new HashMap<>();
+		JsonElement json = JsonParser.parseString(currentProperty.getValue());
+		if (json instanceof JsonArray) {
+			((JsonArray) json).forEach(e -> {
+				JsonObject jsone = (JsonObject) e;
+				String key = jsone.get(KEY_KEY).getAsString();
+				String value = null;
+				if (jsone.get(STYLE_KEY) != null && !jsone.get(STYLE_KEY).isJsonNull()) {
+					value = jsone.get(STYLE_KEY).getAsString();
+				}
+				properties.put(key, value);
+			});
+		}
+		return properties;
+		
+	}
+	/**
+	 * Creates/updates the conservation area property storing the default map layer styles
+	 * with the information in the provided map.
+	 * 
+	 * @param ca
+	 * @param allstyles
+	 * @param session
+	 */
+	public void setDefaultStyles(ConservationArea ca, Map<String,String> allstyles, Session session) {
+		ConservationAreaProperty currentProperty = QueryFactory
+				.buildQuery(session, ConservationAreaProperty.class,
+						new Object[] { "conservationArea", SmartDB.getCurrentConservationArea() },
+						new Object[] { "key", StyleManager.CA_PROPERTY_KEY })
+				.uniqueResult();
+
+		if (currentProperty == null) {
+			currentProperty = new ConservationAreaProperty();
+			currentProperty.setConservationArea(ca);
+			currentProperty.setKey(StyleManager.CA_PROPERTY_KEY);
+			session.persist(currentProperty);
+		}
+
+		JsonArray json = new JsonArray();
+		for (Entry<String, String> ss : allstyles.entrySet()) {
+			JsonObject j = new JsonObject();
+			j.addProperty(KEY_KEY, ss.getKey());
+			j.addProperty(STYLE_KEY, ss.getValue());
+			json.add(j);
+		}
+		currentProperty.setValue(json.toString());
+	}
+	
+	
+	/**
+	 * Finds the default smart style associated with the given map key.
+	 * 
+	 * @param ca
+	 * @param mapKey
+	 * @param session
+	 * @return
+	 */
+	public SmartStyle getMapLayerDefaultStyle(ConservationArea ca, String mapKey, Session session) {
+		ConservationAreaProperty currentProperty = QueryFactory.buildQuery(session, ConservationAreaProperty.class,
+				new Object[] { "conservationArea", ca },
+				new Object[] { "key", StyleManager.CA_PROPERTY_KEY }).uniqueResult();
+		if (currentProperty == null || currentProperty.getValue() == null ||
+				currentProperty.getValue().isEmpty()) {
+			return null;
+		}
+		JsonElement json = JsonParser.parseString(currentProperty.getValue());
+		if (json instanceof JsonArray) {
+			JsonArray ajson = (JsonArray)json;
+			for (Object kid : ajson) {
+				if (kid instanceof JsonObject) {
+					JsonObject jkid = (JsonObject)kid;
+					String key = jkid.get(KEY_KEY).getAsString();
+					if (key.equals(mapKey)) {
+						if (jkid.get(STYLE_KEY) == null ) return null;
+						if (jkid.get(STYLE_KEY).isJsonNull()) return null;
+						String value = jkid.get(STYLE_KEY).getAsString();
+						UUID suuid = UuidUtils.stringToUuid(value);
+						
+						return session.get(SmartStyle.class, suuid);
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -300,5 +476,50 @@ public class StyleManager {
 		} catch (Exception e) {
 		}
 		return pageId;
+	}
+	
+	/**
+	 * To the layer find the appropriate style and apply it. The geoIdToMapStyle links
+	 * the georesource ID to the configured default map style key. The
+	 * defaultStyles map is optional and is used if the configured default map style is not set or not found. It
+	 * links the default map style key to the supplier which creates a style blackboard.
+	 * If no style is found by either method, a style is resolved from the georesource.
+	 * 
+	 * @param l
+	 * @param geoIdToMapStyle  (TRACK->org.wcs.smart.patrol.map.track)
+	 * @param defaultStyles optional (can be null)  (org.wcs.smart.patrol.map.track->StyleBlackboardProducer)
+	 * @param monitor
+	 * @throws WorkbenchException
+	 * @throws IOException
+	 */
+	public void applyDefaultStyleToMapLayer(Layer l, Map<String,String> geoIdToMapStyle,Map<String,Consumer<Layer>> defaultStyles, IProgressMonitor monitor) throws WorkbenchException, IOException {
+		String styleKey = null;
+		for (Entry<String,String> item: geoIdToMapStyle.entrySet()) {
+			if (l.getGeoResource().getDisplayID().endsWith("#" + item.getKey())) { //$NON-NLS-1$
+				styleKey =  item.getValue();
+				break;
+			}
+		}
+		if (styleKey != null) {
+			try(Session session = HibernateManager.openSession()){
+				SmartStyle style = StyleManager.INSTANCE.getMapLayerDefaultStyle(SmartDB.getCurrentConservationArea(), styleKey, session);
+				if (style != null) {
+					StyleBlackboard sb = StyleManager.INSTANCE.fromString(style.getStyleString());
+					l.setStyleBlackboard(sb);
+					return;
+				}
+			}
+		}
+		if (defaultStyles != null && defaultStyles.containsKey(styleKey)) {
+			defaultStyles.get(styleKey).accept(l);
+		}
+		Style s = l.getGeoResource().resolve(Style.class, monitor);
+		if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
+	}
+	
+	public void applyDefaultStyleToMapLayer(Layer l, Map<String,String> geoIdToMapStyle, IProgressMonitor monitor) throws WorkbenchException, IOException {
+		this.applyDefaultStyleToMapLayer(l, geoIdToMapStyle, Collections.emptyMap(), monitor);
+
+		
 	}
 }

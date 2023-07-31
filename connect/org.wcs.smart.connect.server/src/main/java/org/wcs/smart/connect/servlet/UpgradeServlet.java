@@ -88,7 +88,6 @@ public class UpgradeServlet extends HttpServlet {
 	final static AtomicBoolean upgradeLock = new AtomicBoolean(false);
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		
 		if (!upgradeLock.compareAndSet(false, true)) {
 			//somebody else is already running this code; we don't want to run it twice to lets get out of here
 			request.setAttribute("org.wcs.smart.upgrade", "RUNNING");  //$NON-NLS-1$//$NON-NLS-2$
@@ -1310,18 +1309,20 @@ public class UpgradeServlet extends HttpServlet {
 					//breaking change for postgresql 14
 					//Require custom server parameter names to use only characters that are valid in unquoted SQL identifiers (Tom Lane)
 					StringBuilder sb = new StringBuilder();
-					sb.append("CREATE OR REPLACE FUNCTION connect.dolog(cauuid uuid) RETURNS boolean"); //$NON-NLS-1$
-					sb.append("    LANGUAGE plpgsql"); //$NON-NLS-1$
-					sb.append("    AS $$"); //$NON-NLS-1$
-					sb.append("DECLARE"); //$NON-NLS-1$
-					sb.append("canrun boolean;"); //$NON-NLS-1$
-					sb.append("BEGIN"); //$NON-NLS-1$
-					sb.append("    --check if we should log this ca"); //$NON-NLS-1$
-					sb.append("    select current_setting('ca.trigger.t' || replace(cauuid::varchar, '-', '')) into canrun;"); //$NON-NLS-1$
-					sb.append("    return canrun;"); //$NON-NLS-1$
-					sb.append("    EXCEPTION WHEN others THEN"); //$NON-NLS-1$
-					sb.append("        RETURN TRUE;"); //$NON-NLS-1$
-					sb.append("END$$;"); //$NON-NLS-1$
+					sb.append("CREATE OR REPLACE FUNCTION connect.dolog(cauuid uuid) RETURNS boolean "); //$NON-NLS-1$
+					sb.append("    LANGUAGE plpgsql "); //$NON-NLS-1$
+					sb.append("    AS $$ "); //$NON-NLS-1$
+					sb.append("DECLARE "); //$NON-NLS-1$
+					sb.append("canrun boolean; "); //$NON-NLS-1$
+					sb.append("BEGIN "); //$NON-NLS-1$
+					//sb.append("    --check if we should log this ca "); //$NON-NLS-1$
+					sb.append("    select current_setting('ca.trigger.t' || replace(cauuid::varchar, '-', '')) into canrun; "); //$NON-NLS-1$
+					sb.append("    return canrun; "); //$NON-NLS-1$
+					sb.append("    EXCEPTION WHEN others THEN "); //$NON-NLS-1$
+					sb.append("        RETURN TRUE; "); //$NON-NLS-1$
+					sb.append("END$$; "); //$NON-NLS-1$
+					
+					//logger.log(Level.SEVERE, sb.toString());
 					
 					c.createStatement().execute(sb.toString());
 					
@@ -1359,16 +1360,16 @@ public class UpgradeServlet extends HttpServlet {
 						"ALTER table smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 						"ALTER TABLE smart.sampling_unit_attribute_list ADD COLUMN icon_uuid uuid", //$NON-NLS-1$
 						"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-						
-						// 4 to 5 upgrade for er
-						"ALTER TABLE SMART.SURVEY_WAYPOINT ADD CONSTRAINT SURVEY_WAYPOINT_WP_UUID_FK FOREIGN KEY (WP_UUID) REFERENCES SMART.WAYPOINT(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$				
-										
+					
 						//working item				
 						"alter table connect.work_item add column percent_complete smallint", //$NON-NLS-1$
 						"alter table connect.work_item add column data varchar", //$NON-NLS-1$
 						"ALTER TABLE connect.work_item drop CONSTRAINT type_chk",  //$NON-NLS-1$ 
 						"ALTER TABLE connect.work_item ADD CONSTRAINT type_chk CHECK (((type)::text = ANY (ARRAY[('UP_CA'::character varying)::text, ('UP_SYNC'::character varying)::text, ('DOWN_CA'::character varying)::text, ('DOWN_SYNC'::character varying)::text, ('UP_DATAQUEUE'::character varying)::text, ('UP_CTPACKAGE'::character varying)::text, ('UP_NAVIGATION'::character varying)::text, ('RECOVERY_CA'::character varying)::text])))", //$NON-NLS-1$
 
+						//ca property size
+						"ALTER TABLE smart.conservation_area_property alter column value set data type varchar(32672)", //$NON-NLS-1$
+						
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 

@@ -48,7 +48,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class Smart6Database implements Closeable{
+public class SmartSQLDatabase implements Closeable{
 
 	protected Path derbyPath;
 	protected Path filestore;
@@ -56,7 +56,7 @@ public class Smart6Database implements Closeable{
 	
 	protected Connection connection;
 	
-	public Smart6Database(Path dir) throws SQLException {
+	public SmartSQLDatabase(Path dir) throws SQLException {
 		this.root = dir;
 		//these might not actually be correct if users configured custom ones
 		derbyPath = dir.resolve("smartdb"); //$NON-NLS-1$
@@ -68,7 +68,7 @@ public class Smart6Database implements Closeable{
 		connection = DriverManager.getConnection(csrc);
 	}
 	
-	protected String getVersion(String pluginId) throws SQLException {
+	public String getVersion(String pluginId) throws SQLException {
 		String sql = "SELECT version FROM smart.db_version WHERE plugin_id = ?"; //$NON-NLS-1$
 		
 		try(PreparedStatement ps = connection.prepareStatement(sql)){
@@ -129,6 +129,10 @@ public class Smart6Database implements Closeable{
 	
 	@Override
 	public void close() throws IOException {
+		doClose(false);
+	}
+	
+	public void doClose(boolean deleteFile) throws IOException{ 
 		try {
 			//connection.close();
 			//shut down the connection
@@ -146,6 +150,6 @@ public class Smart6Database implements Closeable{
 		}
 		
 		//delete temporary file
-		SmartUtils.deleteDirectory(root);
+		if (deleteFile) SmartUtils.deleteDirectory(root);
 	}
 }

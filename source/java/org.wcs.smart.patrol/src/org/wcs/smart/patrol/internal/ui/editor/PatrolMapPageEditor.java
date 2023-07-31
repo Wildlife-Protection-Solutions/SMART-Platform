@@ -27,7 +27,9 @@ import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,7 +46,6 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
-import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -55,7 +56,6 @@ import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
-import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
@@ -69,6 +69,9 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.patrol.geotools.PatrolFeatureSource;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.map.style.PatrolMapTrackDefaultStyle;
+import org.wcs.smart.patrol.map.style.PatrolMapWaypointDefaultStyle;
+import org.wcs.smart.patrol.map.style.PatrolMapWaypointRawDefaultStyle;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -80,6 +83,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -124,9 +128,14 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    				
 	    				super.run(monitor);
 	    				
+	    				Map<String,String> geoIdToStyle = new HashMap<>();
+	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolMapTrackDefaultStyle.KEY);
+	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolMapWaypointRawDefaultStyle.KEY);
+	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolMapWaypointDefaultStyle.KEY);
 	    				for (Layer l : getLayers()) {
-	    					Style s = l.getGeoResource().resolve(Style.class, monitor);
-	    					if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
+	    					
+	    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(l, geoIdToStyle, monitor);
+	    					
 	    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
 	    					if (fs != null) {
 	    						l.setName(fs.getLayerName());

@@ -1205,5 +1205,14 @@
             type_key="incident">
       </type>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.incident.map.IncidentMapWaypointDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.incident.map.IncidentMapWaypointRawDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 
 </plugin>

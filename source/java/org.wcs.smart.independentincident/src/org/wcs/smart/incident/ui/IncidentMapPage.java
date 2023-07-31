@@ -25,7 +25,10 @@ import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -64,12 +67,15 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentFeatureFactory;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.map.IncidentMapWaypointDefaultStyle;
+import org.wcs.smart.incident.map.IncidentMapWaypointRawDefaultStyle;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -234,23 +240,35 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				public void run(IProgressMonitor monitor) throws Exception {
 					super.run(monitor);
 					//set custom style for points layer
+					Map<String,String> geoIdToStyle = new HashMap<>();
+    				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_TYEPNAME,  IncidentMapWaypointDefaultStyle.KEY);
+    				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_PRJ_TYEPNAME,  IncidentMapWaypointRawDefaultStyle.KEY);
+
+    				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
+    				defaultStyles.put(IncidentMapWaypointDefaultStyle.KEY, (l)->{
+    					l.getStyleBlackboard().put(SLDContent.ID, getStylingConfig());
+   					});
+    				defaultStyles.put(IncidentMapWaypointRawDefaultStyle.KEY, (l)->{
+    					l.getStyleBlackboard().put(SLDContent.ID, getPrjStylingConfig());
+   					});
+
 					int index = getLayers().size() == 1 ? 0 : 1;
 					pointLayer = getLayers().get(index);
 					pointLayer.setName(Messages.IncidentMapPage_MapLayerName);
-					pointLayer.getStyleBlackboard().put(SLDContent.ID, getStylingConfig());
 					pointLayer.setVisible(true);
+
+   					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(pointLayer, geoIdToStyle, defaultStyles, monitor);
 					
 					if (getLayers().size() > 1) {
 						prjLayer = getLayers().get(0);
 						prjLayer.setName("Independent Incident - Raw Points"); //$NON-NLS-1$
 						prjLayer.setVisible(false);
-						prjLayer.getStyleBlackboard().put(SLDContent.ID, getPrjStylingConfig());
+						StyleManager.INSTANCE.applyDefaultStyleToMapLayer(prjLayer, geoIdToStyle, defaultStyles, monitor);
 					}
 					
 					pointLayer.eNotify(new ENotificationImpl(
 							(InternalEObject) pointLayer, Notification.SET,
 							ProjectPackage.LAYER__VISIBLE, false, true));
-					
 				}
 			};
 			getMap().sendCommandSync(command);

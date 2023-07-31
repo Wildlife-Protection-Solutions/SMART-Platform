@@ -17,6 +17,7 @@
  <extension-point id="org.wcs.smart.changeLogEventHandler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
  <extension-point id="org.wcs.smart.userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
  <extension-point id="org.wcs.smart.idgenerator" name="ID Generator" schema="schema/org.wcs.smart.idgenerator.exsd"/>
+ <extension-point id="org.wcs.smart.map.config" name="SMART Map Extensions" schema="schema/org.wcs.smart.map.config.exsd"/>
    <extension
          id="product"
          name="Smart Application"
@@ -1690,6 +1691,11 @@
             class="org.wcs.smart.ui.internal.preference.QuickLinkPreferencePage"
             id="org.wcs.smart.preference.quicklink"
             name="Quick Link Configuration">
+      </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.SmartDefaultStylesPreferencePage"
+            id="org.wcs.smart.preference.map.styles"
+            name="Default Map Layer Styles">
       </page>
    </extension>
    <extension

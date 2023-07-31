@@ -27,7 +27,9 @@ import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,7 +44,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
-import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -53,7 +54,6 @@ import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
-import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -61,6 +61,11 @@ import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
+import org.wcs.smart.er.map.style.MissionMapSamplingUnitLinearDefaultStyle;
+import org.wcs.smart.er.map.style.MissionMapSamplingUnitPointDefaultStyle;
+import org.wcs.smart.er.map.style.MissionMapTrackDefaultStyle;
+import org.wcs.smart.er.map.style.MissionMapWaypointDefaultStyle;
+import org.wcs.smart.er.map.style.MissionMapWaypointRawDefaultStyle;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -76,6 +81,7 @@ import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -137,9 +143,19 @@ public class MissionMapPage extends SmartMapEditorPart {
 	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).disableRendering();
 	    				try {
 		    				super.run(monitor);
+		    				
+
+		    				Map<String,String> geoIdToStyle = new HashMap<>();
+		    				geoIdToStyle.put(MissionDataSource.MISSIONTRACK_TYPE,  MissionMapTrackDefaultStyle.KEY);
+		    				geoIdToStyle.put(MissionDataSource.MISSIONRAWWAYPOINT_TYPE,  MissionMapWaypointRawDefaultStyle.KEY);
+		    				geoIdToStyle.put(MissionDataSource.MISSIONWAYPOINT_TYPE,  MissionMapWaypointDefaultStyle.KEY);
+		    				geoIdToStyle.put(SamplingUnit.GeometryType.TRANSECT.name(),  MissionMapSamplingUnitLinearDefaultStyle.KEY);
+		    				geoIdToStyle.put(SamplingUnit.GeometryType.PLOT.name(),  MissionMapSamplingUnitPointDefaultStyle.KEY);
+
 		    				for (Layer l : getLayers()) {
-		    					Style s = l.getGeoResource().resolve(Style.class, monitor);
-		    					if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
+		    					
+		    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(l, geoIdToStyle, monitor);
+		    				
 		    					MissionFeatureSource fs = l.getGeoResource().resolve(MissionFeatureSource.class, monitor);
 		    					if (fs == null) continue;
 		    					

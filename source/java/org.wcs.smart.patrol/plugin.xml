@@ -1342,4 +1342,25 @@
             type_key="patrolincident">
       </type>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.map.style.PatrolMapTrackDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.map.style.PatrolMapWaypointDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.map.style.PatrolReviewTrackDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.map.style.PatrolReviewWaypointDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.map.style.PatrolMapWaypointRawDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.map.style.PatrolReviewWaypointRawDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 </plugin>

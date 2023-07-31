@@ -1010,4 +1010,22 @@
             type_key="survey">
       </type>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapTrackDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapWaypointDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapWaypointRawDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapSamplingUnitLinearDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapSamplingUnitPointDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 </plugin>

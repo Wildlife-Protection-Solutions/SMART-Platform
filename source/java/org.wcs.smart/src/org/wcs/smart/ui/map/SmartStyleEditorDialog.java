@@ -205,7 +205,15 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		ToolBar comptool = new ToolBar(smartArea, SWT.FLAT);
 		comptool.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		comptool.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-	
+
+		ToolItem defaults = new ToolItem(comptool, SWT.FLAT);
+		defaults.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DEFAULT_STYLE_ICON));
+		defaults.setToolTipText("Configure Default Map Layer Styles");
+		defaults.addListener(SWT.Selection,  e->{
+			(new DefaultMapLayerStylesDialog(getShell())).open();
+		});
+
+		
 		ToolItem save = new ToolItem(comptool, SWT.FLAT);
 		save.setImage(JFaceResources.getImage(SAVE_ICON));
 		save.setToolTipText(Messages.SmartStyleEditorDialog_saveTooltip);
@@ -540,10 +548,11 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Exception ex = null;
+				SmartStyle saved = toSave;
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try {
-						s.merge(toSave);
+						saved = HibernateManager.saveOrMerge(s, saved);
 						s.getTransaction().commit();
 					} catch (Exception ex1) {
 						ex = ex1;
@@ -551,9 +560,11 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 					}
 				}
 				if (ex == null){
-					setSmartLayerStyle(toSave);
+					setSmartLayerStyle(saved);
 				}
 				final Exception fex = ex;
+				final SmartStyle fsaved = saved;
+				
 				getShell().getDisplay().syncExec(new Runnable(){
 
 					@Override
@@ -562,15 +573,15 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 							SmartPlugIn.displayLog(MessageFormat.format(Messages.SmartSavedStylePage_SaveError3, fex.getMessage()), fex);
 							return;
 						}
-						setMessage(MessageFormat.format(Messages.SmartStyleEditorDialog_SavedStyle, toSave.getName()), IMessageProvider.INFORMATION);
+						setMessage(MessageFormat.format(Messages.SmartStyleEditorDialog_SavedStyle, fsaved.getName()), IMessageProvider.INFORMATION);
 						
 						try{
 							//update glyph
-							((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(toSave, null);
-							StyleBlackboard parsed = StyleManager.INSTANCE.fromString(toSave.getStyleString());
+							((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(fsaved, null);
+							StyleBlackboard parsed = StyleManager.INSTANCE.fromString(fsaved.getStyleString());
 							Style sld = (Style)parsed.get(SLDContent.ID);
 							if (sld != null){
-								((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(toSave, StyleImageProducer.INSTANCE.createImage(sld));
+								((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(fsaved, StyleImageProducer.INSTANCE.createImage(sld));
 							}
 						}catch (Exception ex){
 							

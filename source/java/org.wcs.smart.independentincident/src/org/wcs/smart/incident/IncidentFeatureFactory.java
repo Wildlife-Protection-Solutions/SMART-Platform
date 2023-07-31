@@ -45,6 +45,8 @@ public class IncidentFeatureFactory {
 	private static final String SMART_POINT_PRJ_SPEC = "fid:String,id:String,rawx:Double,rawy:Double,x:Double,y:Double,the_geom:LineString:srid=4326"; //$NON-NLS-1$
 	public  static final String SMART_POINT_PRJ_TYPE_NAME = "smart.independentincidentprojected"; //$NON-NLS-1$
 	
+	public static final String SMART_INCIDENT_TYEPNAME = "independentincident"; //$NON-NLS-1$
+	public static final String SMART_INCIDENT_PRJ_TYEPNAME = "independentincidentprojected"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a simple feature type that only include the id and the geometry.
@@ -68,7 +70,7 @@ public class IncidentFeatureFactory {
 	 * @return
 	 */
 	public static SimpleFeature createSimpleIncidentFeature(SimpleFeatureType ftype, Waypoint incident) {
-		if (ftype.getName().getLocalPart().equals("independentincident")) { //$NON-NLS-1$
+		if (ftype.getName().getLocalPart().equals(SMART_INCIDENT_TYEPNAME)) {
 			Object data[] = new Object[3];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 			int i = 0;
@@ -77,7 +79,7 @@ public class IncidentFeatureFactory {
 			data[i++] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(incident.getX(), incident.getY()));
 			SimpleFeature f = SimpleFeatureBuilder.build(ftype, data, name);
 			return f;
-		}else if (ftype.getName().getLocalPart().equals("independentincidentprojected")) { //$NON-NLS-1$
+		}else if (ftype.getName().getLocalPart().equals(SMART_INCIDENT_PRJ_TYEPNAME)) {
 			Object data[] = new Object[7];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 			int i = 0;

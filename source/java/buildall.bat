@@ -63,9 +63,8 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.
 
 REM run maven to build packages
 REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
-call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
-REM call mvn clean install -Pallplatforms,product,update,core,plugins
-REM call mvn install -Pallplatforms,migrationtools
+REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%
