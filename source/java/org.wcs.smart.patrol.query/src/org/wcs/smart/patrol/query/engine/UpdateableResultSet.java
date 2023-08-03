@@ -38,6 +38,7 @@ import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IDesktopWOEngine;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
+import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
@@ -48,9 +49,12 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 	private final static NullComparator NULL_COMPARATOR = new NullComparator(false);
 
 	IDesktopWOEngine<? extends IResultItem> engine;
+
+	protected IUpdateableResultSet wrapper;
 	
-	public UpdateableResultSet(IDesktopWOEngine<? extends IResultItem> engine) {
+	public UpdateableResultSet(IDesktopWOEngine<? extends IResultItem> engine, IUpdateableResultSet wrapper) {
 		this.engine = engine;
+		this.wrapper = wrapper;
 		
 	}
 	@Override
@@ -279,7 +283,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 					.executeUpdate();
 					
 				if (engine instanceof IDerbyWaypointEngine) {
-					((IDerbyWaypointEngine) engine).updateResultCount(s, this);
+					((IDerbyWaypointEngine) engine).updateResultCount(s, wrapper);
 				}
 				
 				s.getTransaction().commit();
@@ -506,7 +510,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 						.setParameter("uuid", observationUuid) //$NON-NLS-1$
 						.executeUpdate();
 
-					((DerbyObservationEngine) engine).updateResultCount(s, this);
+					((DerbyObservationEngine) engine).updateResultCount(s, wrapper);
 				} else {
 					sql = new StringBuilder();
 					sql.append(" UPDATE " + engine.getQueryDataTable() + " SET ob_uuid = null, wp_group_uuid = null, "); //$NON-NLS-1$ //$NON-NLS-2$

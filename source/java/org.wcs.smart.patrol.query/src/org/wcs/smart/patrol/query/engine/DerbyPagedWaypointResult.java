@@ -42,7 +42,7 @@ public class DerbyPagedWaypointResult extends WaypointQueryResult<PatrolWaypoint
 	
 	public DerbyPagedWaypointResult(DerbyWaypointEngine engine) {
 		super(engine, -1);
-		updater = new UpdateableResultSet(engine);
+		updater = new UpdateableResultSet(engine, this);
 	}
 	
 	@Override

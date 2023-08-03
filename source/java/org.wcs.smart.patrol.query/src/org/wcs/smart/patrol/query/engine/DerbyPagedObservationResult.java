@@ -49,7 +49,7 @@ public class DerbyPagedObservationResult extends ObservationQueryResult<PatrolOb
 	
 	public DerbyPagedObservationResult(DerbyObservationEngine engine) {
 		super(engine, -1 ,-1);
-		updater = new UpdateableResultSet(engine);
+		updater = new UpdateableResultSet(engine, this);
 	}
 	
 	@Override
