@@ -46,7 +46,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.internal.Messages;
-import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ca.Label;
@@ -62,7 +61,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class AttributeListPanel extends Composite {
 
 	private ListViewer items;
-	private AssetAttribute attribute;
+	private List<AssetAttributeListItem> input;
+	
 	private List<IChangeListener> listeners;
 	private Button btnAdd;
 	private Button btnRemove;
@@ -88,9 +88,9 @@ public class AttributeListPanel extends Composite {
 		}
 	}
 	
-	public void setInput(AssetAttribute attribute){
-		this.attribute = attribute;
-		items.setInput(attribute.getAttributeList());
+	public void setInput(List<AssetAttributeListItem> items){
+		this.input = items;
+		this.items.setInput(this.input);
 	}
 	
 	private void createControls(){
@@ -100,7 +100,7 @@ public class AttributeListPanel extends Composite {
 		items.setContentProvider(ArrayContentProvider.getInstance());
 		items.setLabelProvider(new AttributeListItemLabelProvider());
 		items.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)items.getControl().getLayoutData()).heightHint = 200;
+		//((GridData)items.getControl().getLayoutData()).heightHint = 20;
 		((GridData)items.getControl().getLayoutData()).widthHint = 100;
 		items.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		items.addDoubleClickListener(new IDoubleClickListener() {
@@ -202,14 +202,10 @@ public class AttributeListPanel extends Composite {
 
 	private void add(){
 		AssetAttributeListItem it = new AssetAttributeListItem();
-		it.setAttribute(attribute);
-		attribute.getAttributeList().add(it);
 		
-		AttributeListItemDialog d = new AttributeListItemDialog(getShell(), it);
-		if (d.open() == Window.CANCEL){
-			attribute.getAttributeList().remove(it);
-			it = null;
-		}else{
+		AttributeListItemDialog d = new AttributeListItemDialog(getShell(), it, this.input);
+		if (d.open() == Window.OK) {
+			this.input.add(it);
 			modified();
 		}
 		items.refresh();
@@ -236,7 +232,7 @@ public class AttributeListPanel extends Composite {
 		if (!MessageDialog.openConfirm(getShell(), Messages.AttributeListPanel_DeleteTitle,
 				MessageFormat.format(Messages.AttributeListPanel_DeleteMsg, toDelete.size(), sb.toString()))) return;
 
-		attribute.getAttributeList().removeAll(toDelete);
+		this.input.removeAll(toDelete);
 		this.items.refresh();
 		modified();
 	}
@@ -256,7 +252,10 @@ public class AttributeListPanel extends Composite {
 		for (Label l : it.getNames()){
 			copy.updateName(l.getLanguage(), l.getValue());
 		}
-		AttributeListItemDialog d = new AttributeListItemDialog(getShell(), copy);
+		List<AssetAttributeListItem> siblings = new ArrayList<>(this.input);
+		siblings.remove(it);
+		
+		AttributeListItemDialog d = new AttributeListItemDialog(getShell(), copy, siblings);
 		if (d.open() == Window.OK){
 			it.setKeyId(copy.getKeyId());
 			it.setName(copy.getName());

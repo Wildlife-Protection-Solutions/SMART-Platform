@@ -281,18 +281,16 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		Object[] data = (Object[])currentItem;
-		
 		if (colIndex == recordSourceLinkColumn) {
-			IntelEntityLocation location = (IntelEntityLocation) data[0];
+			IntelEntityLocation location = (IntelEntityLocation) currentItem;
 			if (!viewableRecords.contains(location.getLocation().getRecord().getProfile())) {
 				return INSUFFICIENT_PRIVILEGES;
 			}
 		}
-		if (data.length == 1) {
-			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(data[0], l, entity);
+		if (currentItem instanceof Object[] ) {
+			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(((Object[])currentItem)[0], l, (IntelEntity)((Object[])currentItem)[1]);
 		}else {
-			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(data[0], l, (IntelEntity)data[1]);
+			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(currentItem, l, entity);
 		}
 	}
 

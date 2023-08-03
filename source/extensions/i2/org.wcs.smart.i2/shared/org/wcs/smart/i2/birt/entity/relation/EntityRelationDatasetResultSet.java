@@ -68,7 +68,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private EntityRelationDatasetResultSetMetadata metadata;
-	private ScrollableResults results;
+	private ScrollableResults<IntelEntityRelationship> results;
 	
 	private UUID entityUuid;
 	
@@ -116,8 +116,8 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 			}
 		}
 		
-		Query<?> query1 = connection.getSession().createQuery(q1);
-		Query<?> query2 = connection.getSession().createQuery(q2);
+		Query<Long> query1 = connection.getSession().createQuery(q1, Long.class);
+		Query<IntelEntityRelationship> query2 = connection.getSession().createQuery(q2, IntelEntityRelationship.class);
 		for (Entry<String,Object> e : values.entrySet()){
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());
@@ -129,7 +129,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		query2.setParameterList("profiles1", profiles); //$NON-NLS-1$
 		query2.setParameterList("profiles2", profiles); //$NON-NLS-1$
 		
-		m_maxRows = (Long)query1.uniqueResult();
+		m_maxRows = query1.uniqueResult();
 		results = query2.setReadOnly(true)
 				.scroll(ScrollMode.FORWARD_ONLY);
 		
@@ -205,7 +205,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityRelationship i = (IntelEntityRelationship) ((Object[])currentItem)[0];
+		IntelEntityRelationship i = (IntelEntityRelationship) currentItem;
 		
 		if (colIndex <= Column.values().length){
 			return EntityRelationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(entityUuid, i, connection.getCurrentLocale());

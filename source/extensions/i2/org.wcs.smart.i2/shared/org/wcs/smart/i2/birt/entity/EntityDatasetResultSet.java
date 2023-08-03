@@ -70,7 +70,7 @@ public class EntityDatasetResultSet implements IResultSet {
 	private EntityDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
 	private IntelEntityType type;
-	private ScrollableResults results;
+	private ScrollableResults<IntelEntity> results;
 	
 	/**
 	 * Creates a new summary results set
@@ -104,7 +104,7 @@ public class EntityDatasetResultSet implements IResultSet {
 					.setParameter("type", type) //$NON-NLS-1$
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.uniqueResult();
-			results = connection.getSession().createQuery(hql)
+			results = connection.getSession().createQuery(hql, IntelEntity.class)
 					.setParameter("type", type) //$NON-NLS-1$
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
@@ -114,7 +114,7 @@ public class EntityDatasetResultSet implements IResultSet {
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.setParameter("uuid", euuid) //$NON-NLS-1$
 					.uniqueResult();
-			results = connection.getSession().createQuery(hql+ " AND uuid = :uuid") //$NON-NLS-1$
+			results = connection.getSession().createQuery(hql+ " AND uuid = :uuid", IntelEntity.class) //$NON-NLS-1$
 					.setParameter("type", type) //$NON-NLS-1$
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.setParameter("uuid", euuid) //$NON-NLS-1$
@@ -194,7 +194,7 @@ public class EntityDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntity i = (IntelEntity) ((Object[])currentItem)[0];
+		IntelEntity i = (IntelEntity) currentItem;
 		
 		if (i.getPrimaryAttachment() != null){
 			try {

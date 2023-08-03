@@ -28,6 +28,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -76,6 +77,7 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 		monitor.done();
 	}
 
+	private boolean installed = false;
 	/**
 	 * 
 	 * @param currentVersion
@@ -83,6 +85,7 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 	 */
 	private void upgrade(String currentVersion, Session session){
 		if (currentVersion == null) {
+			this.installed = true;
 			createTables(session);
 		}
 	}
@@ -183,4 +186,17 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, ConnectPlugIn.DB_VERSION_1, session);
 	}
 	
+	public void postProcess(IProgressMonitor monitor) throws Exception{
+		if (this.installed) {
+			//on new installs we need to ensure we 
+			//install change tracking for all
+			//plugins
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
+				s.getTransaction().commit();
+			}
+		}
+		
+	}
 }

@@ -382,7 +382,7 @@ public class RecordSourceSelectionDialog extends SmartStyledTitleDialog{
 			startdate = dFilter.getCustomStartDate();
 			enddate = dFilter.getCustomEndDate();
 		}
-		String query = " FROM Waypoint WHERE source = :source "; //$NON-NLS-1$
+		String query = " FROM Waypoint WHERE sourceId = :source "; //$NON-NLS-1$
 		if (startdate != null && enddate != null) {
 			query += " AND dateTime >= :start AND dateTime <= :end"; //$NON-NLS-1$
 		}

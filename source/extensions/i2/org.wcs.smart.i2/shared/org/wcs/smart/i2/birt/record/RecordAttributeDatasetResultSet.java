@@ -40,6 +40,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
@@ -64,9 +65,11 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private ScrollableResults results;
+	private ScrollableResults<IntelRecordAttributeValue> results;
 	private RecordAttributeDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
+	
+	private CoordinateReferenceSystem crs;
 	/**
 	 * Creates a new summary results set
 	 * 
@@ -81,6 +84,12 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 			RecordParameterMetadata pmetadata) {
 		this.connection = connection;
 		this.metadata = metadata;
+		
+		try {
+			crs = this.connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem();
+		}catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
 		
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelRecordAttributeValue> c = cb.createQuery(IntelRecordAttributeValue.class);
@@ -102,9 +111,8 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 			filters.add(cb.equal(from.join("record").get("uuid"), recordUuid)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		c.where(cb.and(filters.toArray(new Predicate[filters.size()]))); 
-		
+
 		results = connection.getSession().createQuery(c).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
-		
 		this.m_currentRowId = 0;
 	}
 	
@@ -176,12 +184,10 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 	 * @return
 	 */
 	private Object getCurrentItem(int colIndex) {
-		if (currentItem == null) return null;
-		IntelRecordAttributeValue i = (IntelRecordAttributeValue) ((Object[])currentItem)[0];
+		IntelRecordAttributeValue i = (IntelRecordAttributeValue) currentItem;
 		try{
-			return RecordAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale(), 
-				connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem(), 
-				connection.getSession());
+			return RecordAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, 
+				connection.getCurrentLocale(), this.crs, connection.getSession());
 		}catch (Exception ex){
 			return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
 		}

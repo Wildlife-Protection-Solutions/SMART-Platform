@@ -68,7 +68,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private ScrollableResults results;
+	private ScrollableResults<IntelEntityRecord> results;
 	private RecordEntityDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
 	
@@ -147,7 +147,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		if (results.next()){
 			currentItem = results.get();
 			
-			IntelEntityRecord record = (IntelEntityRecord) ((Object[])currentItem)[0];
+			IntelEntityRecord record = (IntelEntityRecord)currentItem;
 			if (record.getEntity().getPrimaryAttachment() != null){
 				try{
 					record.getEntity().getPrimaryAttachment().computeFileLocation(connection.getSession());
@@ -192,7 +192,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
+		IntelEntityRecord i = (IntelEntityRecord) currentItem;
 		
 		if (entityProfiles.contains(i.getEntity().getProfile())) {
 			Object value = RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());

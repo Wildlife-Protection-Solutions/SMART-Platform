@@ -68,7 +68,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private ScrollableResults results;
+	private ScrollableResults<IntelLocation> results;
 	private RecordLocationDatasetResultSetMetadata metadata;
 	private Locale l;
 	
@@ -175,7 +175,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelLocation i = (IntelLocation) ((Object[])currentItem)[0];
+		IntelLocation i = (IntelLocation) currentItem;
 		return RecordLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, l);
 	}
 

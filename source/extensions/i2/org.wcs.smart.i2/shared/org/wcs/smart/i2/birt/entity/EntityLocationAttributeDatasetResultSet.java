@@ -63,7 +63,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	
 	private EntityLocationAttributeDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
-	private ScrollableResults results;
+	private ScrollableResults<IntelEntityAttributeValue> results;
 	
 	/**
 	 * Creates a new summary results set
@@ -100,16 +100,16 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		m_maxRows = q.uniqueResult();
 		
 		
-		q = connection.getSession().createQuery(hql);
-		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY)); //$NON-NLS-1$
-		q.setParameter("etype", type); //$NON-NLS-1$
+		Query<IntelEntityAttributeValue> q2 = connection.getSession().createQuery(hql, IntelEntityAttributeValue.class);
+		q2.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q2.setParameter("profiles", connection.hasPermission(Permission.ENTITY)); //$NON-NLS-1$
+		q2.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
-			q.setParameter("euuid", entity); //$NON-NLS-1$
+			q2.setParameter("euuid", entity); //$NON-NLS-1$
 		}
 		
 		
-		results = q.setReadOnly(true)
+		results = q2.setReadOnly(true)
 				.scroll(ScrollMode.FORWARD_ONLY);
 		
 		this.connection = connection;
@@ -185,7 +185,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityAttributeValue i = (IntelEntityAttributeValue) ((Object[])currentItem)[0];
+		IntelEntityAttributeValue i = (IntelEntityAttributeValue) currentItem;
 		return EntityLocationAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
 		
 	}

@@ -37,6 +37,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Record attribute dataset result set metadata
@@ -85,7 +86,10 @@ public class RecordAttributeDatasetResultSetMetadata implements IResultSetMetaDa
 					return record.getAttribute().getName();
 				}
 			case DATE_VALUE:
-				return record.getDateValue();
+				if (record.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+					return record.getDateValue();
+				}
+				return null;
 			case NUMBER_VALUE:
 				return record.getNumberValue();
 			case STRING_VALUE:

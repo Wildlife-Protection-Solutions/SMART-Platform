@@ -67,7 +67,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private EntityAttachmentDatasetResultSetMetadata metadata;
-	private ScrollableResults results;
+	private ScrollableResults<IntelEntityAttachment> results;
 	
 	private Session currentSession = null;
 	
@@ -107,7 +107,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		}
 		
 		Query<Long> query1 = connection.getSession().createQuery(q1, Long.class);
-		Query<Long> query2 = connection.getSession().createQuery(q2, Long.class);
+		Query<IntelEntityAttachment> query2 = connection.getSession().createQuery(q2, IntelEntityAttachment.class);
 		query1.setParameterList("profiles", profiles); //$NON-NLS-1$
 		query2.setParameterList("profiles", profiles); //$NON-NLS-1$
 		for (Entry<String,Object> e : values.entrySet()){
@@ -193,7 +193,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityAttachment i = (IntelEntityAttachment) ((Object[])currentItem)[0];
+		IntelEntityAttachment i = (IntelEntityAttachment) currentItem;
 		
 		try {
 			i.getAttachment().computeFileLocation(currentSession);

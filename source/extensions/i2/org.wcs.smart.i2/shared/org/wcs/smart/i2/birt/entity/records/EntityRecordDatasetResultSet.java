@@ -66,7 +66,7 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private EntityRecordDatasetResultSetMetadata metadata;
-	private ScrollableResults results;
+	private ScrollableResults<IntelEntityRecord> results;
 	
 	private Set<IntelProfile> viewableRecords;
 	private AbstractIntelBirtConnection connection;
@@ -107,8 +107,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 			}
 		}
 		
-		Query<?> query1 = connection.getSession().createQuery(q1);
-		Query<?> query2 = connection.getSession().createQuery(q2);
+		Query<Long> query1 = connection.getSession().createQuery(q1, Long.class);
+		Query<IntelEntityRecord> query2 = connection.getSession().createQuery(q2, IntelEntityRecord.class);
 		query1.setParameterList("profiles", profiles); //$NON-NLS-1$
 		query2.setParameterList("profiles", profiles); //$NON-NLS-1$
 		for (Entry<String,Object> e : values.entrySet()){
@@ -116,7 +116,7 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 			query2.setParameter(e.getKey(), e.getValue());
 		}
 		
-		m_maxRows = (Long)query1.uniqueResult();
+		m_maxRows = query1.uniqueResult();
 		results = query2.setReadOnly(true)
 				.scroll(ScrollMode.FORWARD_ONLY);
 		
@@ -193,7 +193,7 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
+		IntelEntityRecord i = (IntelEntityRecord) currentItem;
 		if (viewableRecords.contains(i.getRecord().getProfile())) {
 			return EntityRecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 		}else {

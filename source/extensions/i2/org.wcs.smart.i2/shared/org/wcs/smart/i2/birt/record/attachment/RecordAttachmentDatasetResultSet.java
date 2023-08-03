@@ -62,7 +62,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private ScrollableResults results;
+	private ScrollableResults<IntelRecordAttachment> results;
 	private RecordAttachmentDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
 	
@@ -173,7 +173,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelRecordAttachment i = (IntelRecordAttachment) ((Object[])currentItem)[0];
+		IntelRecordAttachment i = (IntelRecordAttachment)currentItem;
 		Object value = RecordAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 		if (value instanceof ISmartAttachment) {
 			return connection.decryptAttachment(((ISmartAttachment)value));

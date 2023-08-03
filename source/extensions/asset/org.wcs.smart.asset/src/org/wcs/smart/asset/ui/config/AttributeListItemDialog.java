@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.asset.ui.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,10 +46,13 @@ public class AttributeListItemDialog extends SmartStyledTitleDialog {
 
 	private AssetAttributeListItem item;
 	private NameKeyComposite nameKeyInfo;
+	private List<AssetAttributeListItem> siblings;
 	
-	public AttributeListItemDialog(Shell parentShell, AssetAttributeListItem item) {
+	public AttributeListItemDialog(Shell parentShell, AssetAttributeListItem item,
+			List<AssetAttributeListItem> siblings) {
 		super(parentShell);
 		this.item = item;
+		this.siblings = siblings;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -97,11 +99,7 @@ public class AttributeListItemDialog extends SmartStyledTitleDialog {
 	}
 	
 	private void initFields(){
-		List<AssetAttributeListItem> kids = new ArrayList<AssetAttributeListItem>();
-		kids.addAll(item.getAttribute().getAttributeList());
-		kids.remove(item);
-		
-		nameKeyInfo.initFields(item, kids, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		nameKeyInfo.initFields(item, this.siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 	}
 	
 	@Override

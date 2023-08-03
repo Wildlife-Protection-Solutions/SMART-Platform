@@ -64,7 +64,7 @@ public class RecordDatasetResultSet implements IResultSet {
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private ScrollableResults results;
+	private ScrollableResults<IntelRecord> results;
 	private RecordDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
 	
@@ -169,7 +169,7 @@ public class RecordDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelRecord i = (IntelRecord) ((Object[])currentItem)[0];
+		IntelRecord i = (IntelRecord) currentItem;
 		return RecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
 	}
 

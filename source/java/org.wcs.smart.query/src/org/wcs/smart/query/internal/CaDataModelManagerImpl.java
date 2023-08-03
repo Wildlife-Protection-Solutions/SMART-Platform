@@ -233,7 +233,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 * @return
 	 */
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, Attribute attribute, int level, boolean active){
-		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
+		String query = "FROM AttributeTreeNode WHERE attribute.uuid =:uuid AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
 		if (active){
 			query += " and isActive = :active"; //$NON-NLS-1$ 
 		}

@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui.config;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -99,7 +100,8 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 	private NameKeyComposite nameKeyInfo;
 	private ComboViewer cmbType;
 	private List<AssetAttribute> attributeSiblings;
-	private List<AssetAttributeListItem> allItems;
+	//private List<AssetAttributeListItem> allItems;
+	private List<AssetAttributeListItem> currentItem = Collections.emptyList();
 	
 	private AttributeListPanel listPanel;
 		
@@ -123,8 +125,18 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 		try(Session s = HibernateManager.openSession()){
 			try{
 				s.beginTransaction();
-				for (AssetAttributeListItem i : allItems){
-					if(!attribute.getAttributeList().contains(i)){
+				
+				if (this.attribute.getUuid() == null) {
+					s.persist(this.attribute);
+				}else {
+					//save any new items
+					this.attribute = HibernateManager.saveOrMerge(s, attribute);
+				}
+				s.flush();
+				
+				List<AssetAttributeListItem> delete = new ArrayList<>();
+				for (AssetAttributeListItem i : attribute.getAttributeList()){				
+					if(!currentItem.contains(i)){
 
 						//delete all reference to attribute list item
 						
@@ -149,17 +161,32 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 						s.createMutationQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid") //$NON-NLS-1$
 							.setParameter("uuid", i.getUuid()) //$NON-NLS-1$
 							.executeUpdate();
+						delete.add(i);
+								
 						
-						i.setAttribute(null);
 					}
 				}
+				this.attribute.getAttributeList().removeAll(delete);
 				s.flush();
+
+				for (AssetAttributeListItem i : currentItem){
+					if (i.getUuid() == null) {
+						i.setAttribute(this.attribute);
+						s.persist(i);
+					}else {
+						s.merge(i);
+					}
+					
+				}
+				s.flush();
+				//HibernateManager.save(s,  attribute.getAttributeList());
 				
-				HibernateManager.save(s,  attribute.getAttributeList());
-				this.attribute = HibernateManager.saveOrMerge(s,  attribute);
 				
 				s.getTransaction().commit();
-
+				this.attribute = s.get(AssetAttribute.class, this.attribute.getUuid());
+				this.currentItem.clear();
+				this.currentItem.addAll(this.attribute.getAttributeList());
+				
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
 				AssetPlugIn.displayLog(Messages.AttributeDialog_SaveError + ex.getMessage(), ex);
@@ -226,14 +253,11 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 				if (type != AttributeType.LIST){
 					//clean out list items
 					listPanel.setVisible(false);
-					if (attribute.getAttributeList() != null){
-						for (AssetAttributeListItem i: attribute.getAttributeList()){
-							i.setAttribute(null);
-						}
-						attribute.getAttributeList().clear();
-					}
+					currentItem.clear();
+					if (attribute.getAttributeList() != null)  currentItem.addAll(attribute.getAttributeList());
 				}else{
 					listPanel.setVisible(true);
+					currentItem.clear();
 				}
 				attribute.setType(type);
 				
@@ -281,10 +305,12 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 					attributeSiblings.remove(attribute);
 				}
 				
-				allItems = new ArrayList<AssetAttributeListItem>();
-				if (attribute.getAttributeList() != null){
-					allItems.addAll(attribute.getAttributeList());
-				}
+//				allItems = new ArrayList<AssetAttributeListItem>();
+//				if (attribute.getAttributeList() != null){
+//					allItems.addAll(attribute.getAttributeList());
+//				}
+				
+
 				
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
@@ -298,7 +324,12 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 						}
 						
 						cmbType.getControl().setEnabled(attribute.getUuid() == null);
-						listPanel.setInput(attribute);
+						
+						currentItem = new ArrayList<AssetAttributeListItem>();
+						if (attribute.getAttributeList() != null){
+							currentItem.addAll(attribute.getAttributeList());
+						}
+						listPanel.setInput(currentItem);
 					}
 				});				
 			}
