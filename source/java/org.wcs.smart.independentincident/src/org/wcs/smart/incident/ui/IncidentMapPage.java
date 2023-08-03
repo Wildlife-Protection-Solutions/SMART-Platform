@@ -257,15 +257,16 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					pointLayer.setName(Messages.IncidentMapPage_MapLayerName);
 					pointLayer.setVisible(true);
 
-   					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(pointLayer, geoIdToStyle, defaultStyles, monitor);
-					
-					if (getLayers().size() > 1) {
-						prjLayer = getLayers().get(0);
-						prjLayer.setName("Independent Incident - Raw Points"); //$NON-NLS-1$
-						prjLayer.setVisible(false);
-						StyleManager.INSTANCE.applyDefaultStyleToMapLayer(prjLayer, geoIdToStyle, defaultStyles, monitor);
-					}
-					
+					try(Session session = HibernateManager.openSession()){
+	   					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), pointLayer, geoIdToStyle, defaultStyles, session, monitor);
+						
+						if (getLayers().size() > 1) {
+							prjLayer = getLayers().get(0);
+							prjLayer.setName("Independent Incident - Raw Points"); //$NON-NLS-1$
+							prjLayer.setVisible(false);
+							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), prjLayer, geoIdToStyle, defaultStyles, session, monitor);
+						}
+					}						
 					pointLayer.eNotify(new ENotificationImpl(
 							(InternalEObject) pointLayer, Notification.SET,
 							ProjectPackage.LAYER__VISIBLE, false, true));

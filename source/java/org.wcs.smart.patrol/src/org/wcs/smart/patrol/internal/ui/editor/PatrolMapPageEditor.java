@@ -132,18 +132,21 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolMapTrackDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolMapWaypointRawDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolMapWaypointDefaultStyle.KEY);
-	    				for (Layer l : getLayers()) {
-	    					
-	    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(l, geoIdToStyle, monitor);
-	    					
-	    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
-	    					if (fs != null) {
-	    						l.setName(fs.getLayerName());
-	    						l.setVisible(fs.getDefaultVisibility());
-	    						l.eNotify(new ENotificationImpl(
-	    								(InternalEObject) l, Notification.SET,
-	    								ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
-	    					}
+	    				
+	    				try(Session session = HibernateManager.openSession()){
+		    				for (Layer l : getLayers()) {
+		    					
+		    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(),  l, geoIdToStyle, session, monitor);
+		    					
+		    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
+		    					if (fs != null) {
+		    						l.setName(fs.getLayerName());
+		    						l.setVisible(fs.getDefaultVisibility());
+		    						l.eNotify(new ENotificationImpl(
+		    								(InternalEObject) l, Notification.SET,
+		    								ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
+		    					}
+		    				}
 	    				}
 	    				
 	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).enableRendering();

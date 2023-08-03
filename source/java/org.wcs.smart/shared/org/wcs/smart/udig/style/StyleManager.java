@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -47,7 +46,6 @@ import org.hibernate.Session;
 import org.locationtech.udig.core.internal.ExtensionPointProcessor;
 import org.locationtech.udig.core.internal.ExtensionPointUtil;
 import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.IStyleBlackboard;
 import org.locationtech.udig.project.StyleContent;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -60,9 +58,7 @@ import org.opengis.coverage.grid.GridCoverage;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.SmartStyle;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
 import com.google.gson.JsonArray;
@@ -89,21 +85,22 @@ public class StyleManager {
 	 * Default map layer styles are stored as JSON key value pairs to 
 	 * smart saved style.
 	 */
-	public static final String CA_PROPERTY_KEY = "smart.map.styles.default";
+	public static final String CA_PROPERTY_KEY = "smart.map.styles.default";  //$NON-NLS-1$
 	/**
 	 * Extension point ID for map configuration extension
 	 */
-	public static final String MAP_CONFIG_EXT = "org.wcs.smart.map.config";
+	public static final String MAP_CONFIG_EXT = "org.wcs.smart.map.config";  //$NON-NLS-1$
 	/**
 	 * Default style extension point name
 	 */
-	public static final String DEFAULT_STYLE_PNT = "defaultmaplayerstyle";
+	public static final String DEFAULT_STYLE_PNT = "defaultmaplayerstyle"; //$NON-NLS-1$
 	
 	private static final String ID_KEY = "id"; //$NON-NLS-1$
 	private static final String VALUE_KEY = "value"; //$NON-NLS-1$
 	
-	private static final String KEY_KEY = "key";
-	private static final String STYLE_KEY = "style";
+	private static final String KEY_KEY = "key";  //$NON-NLS-1$
+	private static final String STYLE_KEY = "style";  //$NON-NLS-1$
+	
 	private StyleManager(){
 		
 	}
@@ -131,7 +128,7 @@ public class StyleManager {
 	        for( int j = 0; j < elements.length; j++ ) {
 	        	IConfigurationElement element = elements[j];
 	        	if (element.getName().equalsIgnoreCase(DEFAULT_STYLE_PNT)) {
-	        		MapLayerDefaultStyle p = (MapLayerDefaultStyle) element.createExecutableExtension("class");
+	        		MapLayerDefaultStyle p = (MapLayerDefaultStyle) element.createExecutableExtension("class"); //$NON-NLS-1$
 					items.add(p);				
 				}	
 	        }
@@ -149,8 +146,8 @@ public class StyleManager {
 	 */
 	public Map<String, String> getDefaultStyles(ConservationArea ca, Session session){
 		ConservationAreaProperty currentProperty = QueryFactory.buildQuery(session, ConservationAreaProperty.class,
-				new Object[] { "conservationArea", ca },
-				new Object[] { "key", StyleManager.CA_PROPERTY_KEY }).uniqueResult();
+				new Object[] { "conservationArea", ca }, //$NON-NLS-1$
+				new Object[] { "key", StyleManager.CA_PROPERTY_KEY }).uniqueResult(); //$NON-NLS-1$
 		if (currentProperty == null || currentProperty.getValue() == null ||
 				currentProperty.getValue().isEmpty()) {
 			return Collections.emptyMap();
@@ -182,8 +179,8 @@ public class StyleManager {
 	public void setDefaultStyles(ConservationArea ca, Map<String,String> allstyles, Session session) {
 		ConservationAreaProperty currentProperty = QueryFactory
 				.buildQuery(session, ConservationAreaProperty.class,
-						new Object[] { "conservationArea", SmartDB.getCurrentConservationArea() },
-						new Object[] { "key", StyleManager.CA_PROPERTY_KEY })
+						new Object[] { "conservationArea", ca }, //$NON-NLS-1$
+						new Object[] { "key", StyleManager.CA_PROPERTY_KEY }) //$NON-NLS-1$
 				.uniqueResult();
 
 		if (currentProperty == null) {
@@ -214,8 +211,8 @@ public class StyleManager {
 	 */
 	public SmartStyle getMapLayerDefaultStyle(ConservationArea ca, String mapKey, Session session) {
 		ConservationAreaProperty currentProperty = QueryFactory.buildQuery(session, ConservationAreaProperty.class,
-				new Object[] { "conservationArea", ca },
-				new Object[] { "key", StyleManager.CA_PROPERTY_KEY }).uniqueResult();
+				new Object[] { "conservationArea", ca }, //$NON-NLS-1$
+				new Object[] { "key", StyleManager.CA_PROPERTY_KEY }).uniqueResult(); //$NON-NLS-1$
 		if (currentProperty == null || currentProperty.getValue() == null ||
 				currentProperty.getValue().isEmpty()) {
 			return null;
@@ -492,7 +489,10 @@ public class StyleManager {
 	 * @throws WorkbenchException
 	 * @throws IOException
 	 */
-	public void applyDefaultStyleToMapLayer(Layer l, Map<String,String> geoIdToMapStyle,Map<String,Consumer<Layer>> defaultStyles, IProgressMonitor monitor) throws WorkbenchException, IOException {
+	public void applyDefaultStyleToMapLayer(ConservationArea ca, Layer l, 
+			Map<String,String> geoIdToMapStyle, 
+			Map<String,Consumer<Layer>> defaultStyles, 
+			Session session, IProgressMonitor monitor) throws WorkbenchException, IOException {
 		String styleKey = null;
 		for (Entry<String,String> item: geoIdToMapStyle.entrySet()) {
 			if (l.getGeoResource().getDisplayID().endsWith("#" + item.getKey())) { //$NON-NLS-1$
@@ -501,13 +501,11 @@ public class StyleManager {
 			}
 		}
 		if (styleKey != null) {
-			try(Session session = HibernateManager.openSession()){
-				SmartStyle style = StyleManager.INSTANCE.getMapLayerDefaultStyle(SmartDB.getCurrentConservationArea(), styleKey, session);
-				if (style != null) {
-					StyleBlackboard sb = StyleManager.INSTANCE.fromString(style.getStyleString());
-					l.setStyleBlackboard(sb);
-					return;
-				}
+			SmartStyle style = StyleManager.INSTANCE.getMapLayerDefaultStyle(ca, styleKey, session);
+			if (style != null) {
+				StyleBlackboard sb = StyleManager.INSTANCE.fromString(style.getStyleString());
+				l.setStyleBlackboard(sb);
+				return;
 			}
 		}
 		if (defaultStyles != null && defaultStyles.containsKey(styleKey)) {
@@ -517,8 +515,9 @@ public class StyleManager {
 		if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
 	}
 	
-	public void applyDefaultStyleToMapLayer(Layer l, Map<String,String> geoIdToMapStyle, IProgressMonitor monitor) throws WorkbenchException, IOException {
-		this.applyDefaultStyleToMapLayer(l, geoIdToMapStyle, Collections.emptyMap(), monitor);
+	public void applyDefaultStyleToMapLayer(ConservationArea ca, Layer l, Map<String,String> geoIdToMapStyle, Session session,
+			IProgressMonitor monitor) throws WorkbenchException, IOException {
+		this.applyDefaultStyleToMapLayer(ca, l, geoIdToMapStyle, Collections.emptyMap(), session, monitor);
 
 		
 	}

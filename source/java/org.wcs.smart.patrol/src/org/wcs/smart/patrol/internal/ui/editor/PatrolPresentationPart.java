@@ -236,29 +236,31 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 								SmartPlugIn.log(e.getMessage(), e);
 							}
 	    				});
-	    				for (Layer l : getLayers()) {
-	    					
-	    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(l, geoIdToStyle, defaultStyles, monitor);
-	    					
-	    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
-	    					if (fs != null) {
-	    						l.setName(fs.getLayerName());
-	    						l.setVisible(fs.getDefaultVisibility());
-	    						l.eNotify(new ENotificationImpl(
-	    								(InternalEObject) l, Notification.SET,
-	    								ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
-	    					}
-	    					
-	    					if (l.getGeoResource().canResolve(PatrolGeoResource.class)) {
-	    						if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) {
-	    							trackLayer = l;
-	    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
-	    							waypointLayer = l;
-	    							waypointLayer.setStyleBlackboard(new WaypointLayerStyleBlackboard(waypointLayer.getStyleBlackboard()));
-	    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
-	    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
-	    						}
-	    					 }
+	    				try(Session session = HibernateManager.openSession()){
+		    				for (Layer l : getLayers()) {
+		    					
+		    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), l, geoIdToStyle, defaultStyles, session, monitor);
+		    					
+		    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
+		    					if (fs != null) {
+		    						l.setName(fs.getLayerName());
+		    						l.setVisible(fs.getDefaultVisibility());
+		    						l.eNotify(new ENotificationImpl(
+		    								(InternalEObject) l, Notification.SET,
+		    								ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
+		    					}
+		    					
+		    					if (l.getGeoResource().canResolve(PatrolGeoResource.class)) {
+		    						if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) {
+		    							trackLayer = l;
+		    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
+		    							waypointLayer = l;
+		    							waypointLayer.setStyleBlackboard(new WaypointLayerStyleBlackboard(waypointLayer.getStyleBlackboard()));
+		    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
+		    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
+		    						}
+		    					 }
+		    				}
 	    				}
 	    				
 	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).enableRendering();

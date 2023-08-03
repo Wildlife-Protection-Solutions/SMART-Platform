@@ -152,19 +152,21 @@ public class MissionMapPage extends SmartMapEditorPart {
 		    				geoIdToStyle.put(SamplingUnit.GeometryType.TRANSECT.name(),  MissionMapSamplingUnitLinearDefaultStyle.KEY);
 		    				geoIdToStyle.put(SamplingUnit.GeometryType.PLOT.name(),  MissionMapSamplingUnitPointDefaultStyle.KEY);
 
-		    				for (Layer l : getLayers()) {
-		    					
-		    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(l, geoIdToStyle, monitor);
-		    				
-		    					MissionFeatureSource fs = l.getGeoResource().resolve(MissionFeatureSource.class, monitor);
-		    					if (fs == null) continue;
-		    					
-		    					l.setName(fs.getLayerName());
-		    					l.setVisible(fs.getDefaultVisibility());
-		    					l.eNotify(new ENotificationImpl(
-		    							(InternalEObject) l, Notification.SET,
-		    							ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
-		    					
+		    				try(Session session = HibernateManager.openSession()){
+			    				for (Layer l : getLayers()) {
+			    					
+			    					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), l, geoIdToStyle, session, monitor);
+			    				
+			    					MissionFeatureSource fs = l.getGeoResource().resolve(MissionFeatureSource.class, monitor);
+			    					if (fs == null) continue;
+			    					
+			    					l.setName(fs.getLayerName());
+			    					l.setVisible(fs.getDefaultVisibility());
+			    					l.eNotify(new ENotificationImpl(
+			    							(InternalEObject) l, Notification.SET,
+			    							ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
+			    					
+			    				}
 		    				}
 	    				}finally {
 	    					((RenderManagerImpl)getMap().getRenderManagerInternal()).enableRendering();
