@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -111,7 +112,8 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 	
 				
 				// get kid folders
-				List<?> kidFolders = QueryFactory.buildQuery(s, ReportFolder.class, "parentFolder", parent).getResultList(); //$NON-NLS-1$
+				List<ReportFolder> kidFolders = QueryFactory.buildQuery(s, ReportFolder.class, "parentFolder", parent).getResultList(); //$NON-NLS-1$
+				kidFolders.forEach(e->Hibernate.initialize(e.getChildren()));
 				kids.addAll(kidFolders);
 	
 				// kid queries

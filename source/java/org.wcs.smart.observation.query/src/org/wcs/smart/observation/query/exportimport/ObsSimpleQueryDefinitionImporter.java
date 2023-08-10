@@ -27,7 +27,6 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
@@ -58,7 +57,7 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 	}
 
 	@Override
-	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
+	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 		QueryFilter queryFilter = null;
 		
 		try(Reader is = new StringReader(queryDef)){
@@ -66,15 +65,9 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 			queryFilter = parser.QueryFilter();
 		}
 		
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try {
-				QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(importCa), importCa);
-				warnings.addAll(validator.validate(queryFilter.getFilter()));
-			} finally {
-				session.getTransaction().rollback();
-			}
-		}
+		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(importCa), importCa);
+		warnings.addAll(validator.validate(queryFilter.getFilter()));
+		
 		return queryFilter.asString();
 	}
 

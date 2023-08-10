@@ -26,7 +26,6 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
@@ -68,13 +67,13 @@ public abstract class GriddedQueryDefinitionImporter extends AbstractXmlQueryImp
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType qt, ConservationArea caImport) throws Exception{
+	public Query importQuery(QueryType qt, ConservationArea caImport, Session session) throws Exception{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
 		GriddedQuery griddedQuery = createQuery(qt.getQueryType());
 		
-		QueryImportEngine.importNames(griddedQuery, qt, caImport);
+		QueryImportEngine.importNames(griddedQuery, qt, caImport, session);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
@@ -88,18 +87,11 @@ public abstract class GriddedQueryDefinitionImporter extends AbstractXmlQueryImp
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					
 					griddedQuery.setQuery(part.getValue());
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							GridQueryDefinition def = griddedQuery.getQueryDefinition();
+					GridQueryDefinition def = griddedQuery.getQueryDefinition();
 							
-							validateQuery(caImport, def, langCode, uuidLookup, session);
+					validateQuery(caImport, def, langCode, uuidLookup, session);
 							
-							griddedQuery.setQuery(def.asQuery(), def);
-						} finally {
-							session.getTransaction().rollback();
-						}
-					}
+					griddedQuery.setQuery(def.asQuery(), def);					
 				}
 			}else if (part.getKey().equalsIgnoreCase("crs")){ //$NON-NLS-1$
 				griddedQuery.setCrsDefinition(part.getValue());

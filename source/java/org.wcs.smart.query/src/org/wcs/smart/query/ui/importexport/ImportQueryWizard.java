@@ -262,10 +262,21 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 	}
 	
 	private List<Query> importQuery(Path file, QueryFolder qf) throws Exception{
-		QueryImportEngine importer = new QueryImportEngine();
-		List<Query> queries = importer.importQuery(file, SmartDB.getCurrentConservationArea());
+		List<Query> queries = null;
+		List<String> warnings = null;
+		QueryImportEngine importer = null;
 		
-		List<String> warnings = importer.getWarnings();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				importer = new QueryImportEngine(session);
+				queries = importer.importQuery(file, SmartDB.getCurrentConservationArea());
+				warnings = importer.getWarnings();
+			}finally {
+				session.getTransaction().rollback();
+			}
+		}
+		
 		if (warnings.size() > 0){
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){

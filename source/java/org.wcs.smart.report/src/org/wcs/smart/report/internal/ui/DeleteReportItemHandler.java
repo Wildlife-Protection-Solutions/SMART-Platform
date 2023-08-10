@@ -22,6 +22,7 @@
 package org.wcs.smart.report.internal.ui;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -104,28 +105,32 @@ public class DeleteReportItemHandler {
 		Job job = new Job(Messages.DeleteReportItemHandler_DeleteJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				List<Object> removed = new ArrayList<>();
+				
 				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 					Object o = (Object) iterator.next();
-					
 					String name = ""; //$NON-NLS-1$
 					try {
 						if (o instanceof ReportFolder) {
 							ReportFolder parent = (ReportFolder) o;
 							name = MessageFormat.format(Messages.DeleteReportItemHandler_deletefolder_label, new Object[]{ parent.getName()});
 							ReportManager.deleteReportFolder(parent);
-							ReportEventManager.getInstance()
-								.fireReportFolderDeleted(parent);
+							removed.add(o);
 						} else if (o instanceof Report) {
 							name = MessageFormat.format(Messages.DeleteReportItemHandler_deletereport_label, new Object[]{ ((Report)o).getName()});
 							ReportManager.deleteReport((Report) o);
-							ReportEventManager.getInstance().fireReportDeleted(
-								(Report) o);
+							removed.add(o);							
 						}
 					} catch (Exception ex) {
 						ReportPlugIn.displayLog(
 								MessageFormat.format(Messages.DeleteReportItemHandler_Delete_Error, new Object[]{name}) + ex.getLocalizedMessage(), ex);
-					}
+					}					
 				}
+				
+				removed.forEach(e->{
+					if (e instanceof Report) ReportEventManager.getInstance().fireReportDeleted((Report) e);
+					if (e instanceof ReportFolder) ReportEventManager.getInstance().fireReportFolderDeleted((ReportFolder) e);
+				});
 
 				return Status.OK_STATUS;
 			}

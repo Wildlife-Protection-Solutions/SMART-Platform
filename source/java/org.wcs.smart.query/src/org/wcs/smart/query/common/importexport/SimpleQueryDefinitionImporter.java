@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 //import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
@@ -71,7 +72,7 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType qt, ConservationArea importCa) throws Exception{
+	public Query importQuery(QueryType qt, ConservationArea importCa, Session session) throws Exception{
 		warnings.clear();
 		SimpleQuery wq;
 
@@ -88,7 +89,7 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
 		}
 		
-		QueryImportEngine.importNames(wq, qt, importCa);
+		QueryImportEngine.importNames(wq, qt, importCa, session);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
@@ -101,7 +102,7 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
-					strQueryFilter = processDefinition(importCa, part.getValue(), langCode, uuidLookup);
+					strQueryFilter = processDefinition(importCa, part.getValue(), langCode, uuidLookup, session);
 				}
 			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
 				strColumnFilter = part.getValue();
@@ -141,7 +142,7 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 	 * @param langcode the language code from the query
 	 * @param uuidLookup the list of uuid lookup items provided in the query definition file
 	 */
-	protected abstract String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception;
+	protected abstract String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception;
 
 	@Override
 	public abstract boolean canImport(IQueryType qt);

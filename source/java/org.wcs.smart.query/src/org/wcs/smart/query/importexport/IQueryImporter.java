@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.query.model.Query;
 
@@ -57,10 +58,11 @@ public interface IQueryImporter {
 	 * 
 	 * @param qt the xml query type to import.
 	 * @param the conservation area 
+	 * @param session working session
 	 * @return the imported query definition
 	 * @throws Exception if the query cannot be imported
 	 */
-	public List<Query> importQuery(Path file, ConservationArea ca) throws Exception;
+	public List<Query> importQuery(Path file, ConservationArea ca, Session session) throws Exception;
 	
 	/**
 	 * Warnings are displayed to the user and the user is allowed to choose

@@ -138,7 +138,7 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IFi
 			int size = style != null ? getNodeOptions(element).getImageSize().getSize() : ImageSizeOption.DEFAULT_IMAGE_SIZE_OPTION.getSize();
 			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment(), size);
 			Image i = thum.getImage();
-			images.put(e, i);
+			if (i != null) images.put(e, i);
 			return i;
 		}
 		return super.getImage(element);

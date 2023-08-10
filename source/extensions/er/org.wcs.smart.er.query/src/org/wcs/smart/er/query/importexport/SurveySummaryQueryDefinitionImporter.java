@@ -78,8 +78,8 @@ public class SurveySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	}
 	
 	@Override
-	public Query importQuery(QueryType qt, ConservationArea caImport) throws Exception{
-		Query query = super.importQuery(qt, caImport);
+	public Query importQuery(QueryType qt, ConservationArea caImport, Session session) throws Exception{
+		Query query = super.importQuery(qt, caImport, session);
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("surveyDesignFilter")){ //$NON-NLS-1$
 				((ISurveyQuery)query).setSurveyDesign(part.getValue());

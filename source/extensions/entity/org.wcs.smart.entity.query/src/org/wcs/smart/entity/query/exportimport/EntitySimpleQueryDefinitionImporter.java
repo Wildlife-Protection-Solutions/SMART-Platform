@@ -31,7 +31,6 @@ import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -56,7 +55,7 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	}
 
 	@Override
-	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
+	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 		QueryFilter queryFilter = null;
 		try(Reader is = new StringReader(queryDef)){
 			Parser parser = new Parser(is);
@@ -64,15 +63,9 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 		}
 
 		//perform validation
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try {
-				EntityQueryValidator validator = new EntityQueryValidator(importCa, session);
-				warnings.addAll(validator.validate(queryFilter.getFilter()));
-			} finally {
-				session.getTransaction().rollback();
-			}
-		}
+		EntityQueryValidator validator = new EntityQueryValidator(importCa, session);
+		warnings.addAll(validator.validate(queryFilter.getFilter()));
+
 		return queryFilter.asString();
 	}
 

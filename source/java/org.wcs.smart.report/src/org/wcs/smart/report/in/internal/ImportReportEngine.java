@@ -42,10 +42,6 @@ import org.eclipse.birt.report.model.api.LibraryHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -165,6 +161,7 @@ public class ImportReportEngine {
 		session.beginTransaction();
 		try{
 			Report importReport = validateReport(newReport, importCa, assignedEmployee);
+			
 			if (importReport == null){
 				//cancel pressed
 				return false;
@@ -198,7 +195,8 @@ public class ImportReportEngine {
 					.executeUpdate();
 				
 			}
-			
+
+				
 			Path reportXmlFile = tmpDir.resolve(newReport.getFilename());
 			
 			//process queries
@@ -587,28 +585,9 @@ public class ImportReportEngine {
 		importedQuery = null;
 		final List<String> queryWarnings = new ArrayList<String>();
 		
-		
-		final QueryImportEngine qi = new QueryImportEngine();
-		Job j = new Job(MessageFormat.format(Messages.ImportReportEngine_ImportQueryJobName, new Object[]{queryUuid})){
-			//run the query importer in a different thread so it 
-			//will use its own db connection
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try{
-					importedQuery = qi.importQuery(queryFile, importCa).get(0);
-					queryWarnings.addAll( qi.getWarnings());
-					return Status.OK_STATUS;
-				}catch (Exception ex){
-					return new Status(IStatus.INFO, ReportPlugIn.PLUGIN_ID, IStatus.INFO, ex.getLocalizedMessage(), ex);
-				}
-			}};
-		j.setSystem(true);
-		j.schedule();
-		j.join();
-		if (j.getResult().getCode() == IStatus.INFO){
-			throw (Exception)j.getResult().getException();
-		}
-		
+		final QueryImportEngine qi = new QueryImportEngine(session);
+		importedQuery = qi.importQuery(queryFile, importCa).get(0);
+		queryWarnings.addAll( qi.getWarnings());
 		
 		org.wcs.smart.query.model.Query smartQuery = findQuery(queryUuid, importedQuery, sharedReport, reportEmployee, importCa);
 		if (smartQuery == null){

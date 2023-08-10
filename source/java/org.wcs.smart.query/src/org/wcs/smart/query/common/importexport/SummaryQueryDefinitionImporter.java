@@ -27,7 +27,6 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
@@ -69,12 +68,12 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType xmlQuery, ConservationArea ca) throws Exception{
+	public Query importQuery(QueryType xmlQuery, ConservationArea ca, Session session) throws Exception{
 		warnings.clear();
 		
 		String langCode = xmlQuery.getLanguage();
 		SummaryQuery summaryQuery = createQuery(xmlQuery.getQueryType().toUpperCase(Locale.ROOT));
-		QueryImportEngine.importNames(summaryQuery, xmlQuery, ca);
+		QueryImportEngine.importNames(summaryQuery, xmlQuery, ca, session);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : xmlQuery.getUuiditem()){
@@ -88,16 +87,9 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					
 					summaryQuery.setQuery(part.getValue());
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
-							validateQuery(ca, sumDef, langCode, uuidLookup, session);					
-							summaryQuery.setQuery(sumDef.asQuery(), sumDef);
-						} finally {
-							session.getTransaction().rollback();
-						}
-					}
+					SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
+					validateQuery(ca, sumDef, langCode, uuidLookup, session);					
+					summaryQuery.setQuery(sumDef.asQuery(), sumDef);
 				}
 			}else if (part.getKey().equals(IStyledQuery.QUERY_STYLE_KEY)) {
 				stylePart = part.getValue();

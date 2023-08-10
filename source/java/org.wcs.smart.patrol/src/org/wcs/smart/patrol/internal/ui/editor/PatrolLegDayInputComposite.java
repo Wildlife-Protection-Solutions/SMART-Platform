@@ -107,6 +107,7 @@ import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.PatrolImportGpsDataWizard;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -562,7 +563,21 @@ public class PatrolLegDayInputComposite {
 		viewTrackPoints.setEnabled(false);
 		viewTrackPoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
-				PatrolTrackEditDialog td = new PatrolTrackEditDialog(viewTrackPoints.getShell(), patrolLegDate, editor.getPatrolEditor().canEdit() == null);
+				//find the latest object from the patrol editor otherwise we might
+				//be using old data
+				Patrol p = editor.getPatrolEditor().getPatrol();
+				PatrolLegDay current = null;
+				for (PatrolLeg pl : p.getLegs()) {
+					if (pl.equals(patrolLegDate.getPatrolLeg())) {
+						for (PatrolLegDay pld: pl.getPatrolLegDays()) {
+							if (pld.equals(patrolLegDate)) {
+								current = pld;
+							}
+						}
+					}
+				}
+				
+				PatrolTrackEditDialog td = new PatrolTrackEditDialog(viewTrackPoints.getShell(), current, editor.getPatrolEditor().canEdit() == null);
 				td.open();
 				ApplicationGIS.getToolManager().setCurrentEditor(editor.getPatrolEditor());
 			}

@@ -151,16 +151,18 @@ public class DeleteItemHandler {
 				if (parent == null){
 					s.remove(folder);
 				}else{
-					parent = s.getReference(parent);
-					parent.getChildren().remove(folder);
+					QueryFolder parentFolder = s.getReference(parent);
+					parentFolder.getChildren().remove(folder);
 					folder.setParentFolder(null);
 				}
 				s.getTransaction().commit();
+				if (parent != null) parent.getChildren().remove(folder);
 			}catch (Exception ex){
 				s.getTransaction().rollback();
 				QueryPlugIn.log(
 						MessageFormat.format(
 								Messages.DeleteItemHandler_ErrorDeleteFolder, new Object[]{folder.getName()}), ex);
+				return;
 			}
 		}
 		QueryEventManager.getInstance().fireFolderDeleted(folder);

@@ -101,10 +101,22 @@ public class ImportQueryUtil {
 	 * 
 	 */
 	public static List<Query> importQuery(Path file, QueryFolder qf, ConservationArea ca, Shell shell) throws Exception{
-		QueryImportEngine importer = new QueryImportEngine();
-		List<Query> queries = importer.importQuery(file, ca);
 		
-		List<String> warnings = importer.getWarnings();
+		List<Query> queries = null;
+		List<String> warnings = null;
+		QueryImportEngine importer = null;
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				importer = new QueryImportEngine(session);
+				queries = importer.importQuery(file, ca);
+				warnings = importer.getWarnings();
+			}finally {
+				session.getTransaction().rollback();
+			}
+		}
+		
 		if (warnings.size() > 0){
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){

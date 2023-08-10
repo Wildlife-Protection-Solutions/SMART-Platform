@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
@@ -50,12 +51,12 @@ public abstract class AbstractXmlQueryImporter implements IQueryImporter {
 	public abstract boolean canImport(IQueryType qt);
 	
 	@Override
-	public List<Query> importQuery(Path file, ConservationArea ca) throws Exception {
+	public List<Query> importQuery(Path file, ConservationArea ca, Session session) throws Exception {
 		org.wcs.smart.query.xml.model.Query q = null;
 		try(InputStream fin = new BufferedInputStream(Files.newInputStream(file))){
 			q = QueryXmlManager.readQueryFile(fin);
 		}
-		return Collections.singletonList(importQuery(q.getQuery(), ca));
+		return Collections.singletonList(importQuery(q.getQuery(), ca, session));
 	}
 
 	/**
@@ -69,11 +70,12 @@ public abstract class AbstractXmlQueryImporter implements IQueryImporter {
 	 * @return the imported query definition
 	 * @throws Exception if the query cannot be imported
 	 */
-	public abstract Query importQuery(QueryType xmlQuery, ConservationArea ca) throws Exception;
+	public abstract Query importQuery(QueryType xmlQuery, ConservationArea ca, Session session) throws Exception;
 	
 	@Override
 	public abstract ArrayList<String> getWarnings();
 
+	@Override
 	public void beforeCommit() throws Exception{}
 
 }

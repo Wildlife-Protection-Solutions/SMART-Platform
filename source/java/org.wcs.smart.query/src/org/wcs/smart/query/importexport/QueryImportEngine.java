@@ -34,7 +34,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
@@ -50,142 +49,144 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class QueryImportEngine {
-	
+
 	public static final String MAPPING_ID = "org.wcs.smart.query.import"; //$NON-NLS-1$
-	
+
 	/*
 	 * list of warnings generated during import process
 	 */
 	private ArrayList<String> warnings = new ArrayList<String>();
-	
-	
+
 	/**
 	 * Returns all valid query exporters for the given query.
+	 * 
 	 * @param query
 	 * @return
 	 */
-	public static final IQueryImporter getQueryImporter(Path f){
+	public static final IQueryImporter getQueryImporter(Path f) {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
-		
+
 		for (IConfigurationElement e : config) {
-			try{
+			try {
 				IQueryImporter importer = (IQueryImporter) e.createExecutableExtension("class"); //$NON-NLS-1$
 				if (importer.canImport(f)) {
 					return importer;
 				}
-			}catch (Exception ex){
-				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound1, new Object[]{f.toString()}),ex);
+			} catch (Exception ex) {
+				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound1,
+						new Object[] { f.toString() }), ex);
 			}
 		}
 		return null;
 	}
-	
+
 	private IQueryImporter importer = null;
-	
+	private Session session;
+
+	public QueryImportEngine(Session session) {
+		this.session = session;
+	}
+
 	/**
-	 * Imports the given definition file.
+	 * Converts the given definition file to a query object. Does not save it to the
+	 * database.
 	 * 
 	 * <p>
-	 * The returned query does not have the folder or shared value
-	 * set.  This must be set by the calling function based
-	 * on where the query is to be saved.
-	 * </p> 
+	 * The returned query does not have the folder or shared value set. This must be
+	 * set by the calling function based on where the query is to be saved.
+	 * </p>
 	 * 
 	 * @param file the query definition xml file to import
 	 * @return the imported query
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
-	public List<org.wcs.smart.query.model.Query> importQuery(Path file, ConservationArea importCa) throws Exception{
+	public List<org.wcs.smart.query.model.Query> importQuery(Path file, ConservationArea importCa) throws Exception {
 		warnings.clear();
 
 		importer = getQueryImporter(file);
-		if (importer == null){
-			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType1, new Object[]{ file.toString()}));
+		if (importer == null) {
+			throw new Exception(
+					MessageFormat.format(Messages.QueryImporter_InvalidQueryType1, new Object[] { file.toString() }));
 		}
-		
-		List<org.wcs.smart.query.model.Query> importedQuery = importer.importQuery(file, importCa);
+
+		List<org.wcs.smart.query.model.Query> importedQuery = importer.importQuery(file, importCa, session);
 		warnings.addAll(importer.getWarnings());
 		return importedQuery;
-		
+
 	}
-	
+
 	/**
 	 * Executes before commit after flush to database
+	 * 
 	 * @throws Exception
 	 */
-	public void beforeCommit() throws Exception{
+	public void beforeCommit() throws Exception {
 		importer.beforeCommit();
 	}
-	
+
 	/**
 	 * @return a list of warnings generated during the import process
 	 */
-	public List<String> getWarnings(){
+	public List<String> getWarnings() {
 		return this.warnings;
 	}
-	
+
 	/**
 	 * Imports the query names from the xml query type to the SMART query object.
+	 * 
 	 * @param query
 	 * @param qt
 	 * @throws Exception
 	 */
-	public static void importNames(org.wcs.smart.query.model.Query query, QueryType qt, ConservationArea importCa) throws Exception{
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try{
-				query.getNames().clear();
-				String xmlDefaultName = null;
-				for (QueryName qn : qt.getName()){
-					if (qn.getIsDefault()){
-						xmlDefaultName = qn.getName();
-					}
-					List<Language> values = QueryFactory.buildQuery(session, Language.class,
-							new Object[] {"ca", importCa}, //$NON-NLS-1$
-							new Object[] {"code", qn.getLanguage()}).getResultList(); //$NON-NLS-1$
-					if (values.size() > 0){
-						for (Object l : values){
-							query.updateName((Language)l, qn.getName());
-						}
-					}
+	public static void importNames(org.wcs.smart.query.model.Query query, QueryType qt, ConservationArea importCa,
+			Session session) throws Exception {
+
+		query.getNames().clear();
+		String xmlDefaultName = null;
+		for (QueryName qn : qt.getName()) {
+			if (qn.getIsDefault()) {
+				xmlDefaultName = qn.getName();
+			}
+			List<Language> values = QueryFactory.buildQuery(session, Language.class, new Object[] { "ca", importCa }, //$NON-NLS-1$
+					new Object[] { "code", qn.getLanguage() }).getResultList(); //$NON-NLS-1$
+			if (values.size() > 0) {
+				for (Object l : values) {
+					query.updateName((Language) l, qn.getName());
 				}
-				String defaultName = query.findNameNull(importCa.getDefaultLanguage());
-				if (defaultName == null){
-					if (xmlDefaultName != null){
-						query.updateName(importCa.getDefaultLanguage(), xmlDefaultName);
-					}else{
-						if (qt.getName().size()>0) {
-							query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
-						}else{
-							query.updateName(importCa.getDefaultLanguage(), Messages.QueryImportEngine_NoName);
-						}
-					}
-				}
-				String name = query.findNameNull(SmartDB.getCurrentLanguage());
-				if (name == null){
-					name = query.findNameNull(importCa.getDefaultLanguage());
-				
-					if (name == null){
-						Set<Language> langs = new HashSet<Language>();
-						for(Label l : query.getNames()){
-							langs.add(l.getLanguage());
-						}
-						Language best = SmartUtils.findLanguageMatch(langs);
-						if (best != null){
-							name = query.findName(best);
-							query.updateName(SmartDB.getCurrentLanguage(), name);
-						}else{
-							name = ""; //$NON-NLS-1$
-						}
-					}
-				}
-				query.setName(name);
-			
-			} finally {
-				session.getTransaction().rollback();
 			}
 		}
+		String defaultName = query.findNameNull(importCa.getDefaultLanguage());
+		if (defaultName == null) {
+			if (xmlDefaultName != null) {
+				query.updateName(importCa.getDefaultLanguage(), xmlDefaultName);
+			} else {
+				if (qt.getName().size() > 0) {
+					query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
+				} else {
+					query.updateName(importCa.getDefaultLanguage(), Messages.QueryImportEngine_NoName);
+				}
+			}
+		}
+		String name = query.findNameNull(SmartDB.getCurrentLanguage());
+		if (name == null) {
+			name = query.findNameNull(importCa.getDefaultLanguage());
+
+			if (name == null) {
+				Set<Language> langs = new HashSet<Language>();
+				for (Label l : query.getNames()) {
+					langs.add(l.getLanguage());
+				}
+				Language best = SmartUtils.findLanguageMatch(langs);
+				if (best != null) {
+					name = query.findName(best);
+					query.updateName(SmartDB.getCurrentLanguage(), name);
+				} else {
+					name = ""; //$NON-NLS-1$
+				}
+			}
+		}
+		query.setName(name);
+
 	}
 }
-

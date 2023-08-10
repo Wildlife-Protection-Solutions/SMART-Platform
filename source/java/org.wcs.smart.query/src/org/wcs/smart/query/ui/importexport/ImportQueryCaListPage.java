@@ -133,7 +133,7 @@ public class ImportQueryCaListPage extends WizardPage {
 							+ type.getHibernateClass().getSimpleName()
 							+ " a " //$NON-NLS-1$
 							+ "WHERE a.conservationArea = :ca " //$NON-NLS-1$
-							+ "and a.isShared ='true'", Tuple.class); //$NON-NLS-1$
+							+ "and a.isShared = true", Tuple.class); //$NON-NLS-1$
 					hquery.setParameter("ca", currentCa); //$NON-NLS-1$
 
 					List<Tuple> results = hquery.list();

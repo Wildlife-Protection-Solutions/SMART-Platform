@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -114,7 +115,8 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 							cb.isNull(folderfrom.get("employee")), //$NON-NLS-1$
 							cb.equal(folderfrom.get("conservationArea"), root.getConservationArea()) //$NON-NLS-1$
 							));				
-					List<?> kidFolders = s.createQuery(cfolder).getResultList();
+					List<ReportFolder> kidFolders = s.createQuery(cfolder).getResultList();
+					kidFolders.forEach(f->Hibernate.initialize(f.getChildren()));
 					kids.addAll(kidFolders);
 					
 					CriteriaQuery<Report> creport = cb.createQuery(Report.class);
@@ -134,7 +136,8 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 							cb.equal(folderfrom.get("employee"), SmartDB.getConservationAreaConfiguration().getCcaaUser()), //$NON-NLS-1$
 							cb.equal(folderfrom.get("conservationArea"), root.getConservationArea()) //$NON-NLS-1$
 							));				
-					List<?> kidFolders = s.createQuery(cfolder).getResultList();
+					List<ReportFolder> kidFolders = s.createQuery(cfolder).getResultList();
+					kidFolders.forEach(f->Hibernate.initialize(f.getChildren()));
 					kids.addAll(kidFolders);
 					
 					CriteriaQuery<Report> creport = cb.createQuery(Report.class);

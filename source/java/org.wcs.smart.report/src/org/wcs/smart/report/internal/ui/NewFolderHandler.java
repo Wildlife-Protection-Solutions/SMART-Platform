@@ -65,9 +65,8 @@ public class NewFolderHandler {
 				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					ReportFolder newFolder = null;
 					
-					newFolder = new ReportFolder();
+					ReportFolder newFolder = new ReportFolder();
 					Label lbl = new Label();
 					lbl.setLanguage(SmartDB.getCurrentLanguage());
 					lbl.setValue(Messages.NewFolderHandler_DefaultNewFolderName);
@@ -80,7 +79,6 @@ public class NewFolderHandler {
 					if (!SmartDB.getCurrentLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage())){
 						newFolder.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), Messages.NewFolderHandler_DefaultNewFolderName);
 					}
-					
 					
 					newFolder.setConservationArea(SmartDB.getCurrentConservationArea());
 					
@@ -96,17 +94,16 @@ public class NewFolderHandler {
 							newFolder.setEmployee(SmartDB.getCurrentEmployee());
 						}
 					}
-					if (newFolder != null){
-						try(Session s = HibernateManager.openSession()){
-							try{
-								s.beginTransaction();
-								newFolder = HibernateManager.saveOrMerge(s,  newFolder);
-								s.getTransaction().commit();
-							}catch (Exception ex){
-								ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getLocalizedMessage(), ex);
-								s.getTransaction().rollback();
-								return Status.OK_STATUS;
-							}
+					
+					try(Session s = HibernateManager.openSession()){
+						try{
+							s.beginTransaction();
+							newFolder = HibernateManager.saveOrMerge(s,  newFolder);
+							s.getTransaction().commit();
+						}catch (Exception ex){
+							ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getLocalizedMessage(), ex);
+							s.getTransaction().rollback();
+							return Status.OK_STATUS;
 						}
 						
 						ReportEventManager.getInstance().fireReportFolderAdded(newFolder);

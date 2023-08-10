@@ -92,7 +92,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 	}
 
 	@Override
-	public List<Query> importQuery(Path file, ConservationArea ca) throws Exception {
+	public List<Query> importQuery(Path file, ConservationArea ca, Session session) throws Exception {
 		layerQueryMap = new HashMap<Integer, Query>();
 		
 		List<Query> imported = new ArrayList<Query>();
@@ -109,7 +109,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				QueryType qt = q.getQuery();
 				
 				compoundQuery = new CompoundMapQuery();
-				QueryImportEngine.importNames(compoundQuery, qt, ca);
+				QueryImportEngine.importNames(compoundQuery, qt, ca, session);
 				compoundQuery.setConservationArea(ca);
 				compoundQuery.setLayers(new ArrayList<CompoundMapQueryLayer>());
 				compoundQuery.setOwner(ImportQueryUtil.findEmployee(ca));
@@ -145,10 +145,9 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				for (CompoundMapQueryLayer l : compoundQuery.getLayers()){
 					Query localQuery = null;
 				
-					try(Session s = HibernateManager.openSession()){
-						localQuery = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
-						if (localQuery != null) localQuery.getConservationArea().equals(ca);	//implemented to fix hibernate session loading problem
-					}
+					
+					localQuery = QueryHibernateManager.getInstance().findQuery(session, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
+					if (localQuery != null) localQuery.getConservationArea().equals(ca);	//implemented to fix hibernate session loading problem
 					
 					if (localQuery == null || !localQuery.getConservationArea().equals(ca)){
 					 
@@ -160,7 +159,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 						}else{
 							try{
 								//we only reference a single query
-								List<Query> importedQuery = importer.importQuery(queryPath, ca);
+								List<Query> importedQuery = importer.importQuery(queryPath, ca, session);
 								Query importedQueryMain = importedQuery.get(0);
 								//lets find the same query in the current database 
 								
