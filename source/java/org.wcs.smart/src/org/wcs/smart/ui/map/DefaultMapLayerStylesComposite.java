@@ -24,7 +24,6 @@ package org.wcs.smart.ui.map;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -54,7 +53,6 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -63,11 +61,6 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
 import org.wcs.smart.udig.style.StyleImageProducer;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.util.UuidUtils;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 /**
  * 
@@ -107,8 +100,6 @@ public class DefaultMapLayerStylesComposite extends Composite {
 	private void create() {
 
 		setLayout(new GridLayout());
-//		((GridLayout) getLayout()).marginWidth = 0;
-//		((GridLayout) getLayout()).marginHeight = 0;
 
 		List<MapLayerDefaultStyle> defaults = Collections.emptyList();
 		try {

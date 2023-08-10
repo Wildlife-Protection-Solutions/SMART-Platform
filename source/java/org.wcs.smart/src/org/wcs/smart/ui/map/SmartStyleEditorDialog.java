@@ -206,12 +206,14 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		comptool.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		comptool.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
-		ToolItem defaults = new ToolItem(comptool, SWT.FLAT);
-		defaults.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DEFAULT_STYLE_ICON));
-		defaults.setToolTipText("Configure Default Map Layer Styles");
-		defaults.addListener(SWT.Selection,  e->{
-			(new DefaultMapLayerStylesDialog(getShell())).open();
-		});
+		if (StyleManager.INSTANCE.canConfigureDefaultStyles()) {
+			ToolItem defaults = new ToolItem(comptool, SWT.FLAT);
+			defaults.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DEFAULT_STYLE_ICON));
+			defaults.setToolTipText("Configure Default Map Layer Styles");
+			defaults.addListener(SWT.Selection,  e->{
+				(new DefaultMapLayerStylesDialog(getShell())).open();
+			});
+		}
 
 		
 		ToolItem save = new ToolItem(comptool, SWT.FLAT);

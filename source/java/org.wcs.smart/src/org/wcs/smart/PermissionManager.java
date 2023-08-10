@@ -70,4 +70,8 @@ public enum PermissionManager {
 	public boolean isAdmin(){
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN);
 	}
+	
+	public boolean isManager() {
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.MANAGER) ;
+	}
 }

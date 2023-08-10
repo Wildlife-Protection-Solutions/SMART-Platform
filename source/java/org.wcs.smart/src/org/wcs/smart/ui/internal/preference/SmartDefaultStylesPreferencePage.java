@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.DefaultMapLayerStylesComposite;
 /**
  * Preference page for configuring auto-backups
@@ -77,8 +78,7 @@ public class SmartDefaultStylesPreferencePage extends PreferencePage implements
 	}
 	
 	private boolean isEditable(){
-		//return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER);
-		return true;
+		return StyleManager.INSTANCE.canConfigureDefaultStyles();
 	}
 	
 	@Override
