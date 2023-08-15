@@ -121,6 +121,10 @@ public class GeoJsonAlert{
 		return features.get(0).getProperties().getSighting();
 	}
 	
+	public String getFieldIdentifier() {
+		return features.get(0).getProperties().getFieldIdentifier();
+	}
+	
 	//direct getters for coordinates
 	public Double getLatitude() {
 		return features.get(0).getGeometry().getCoordinates().get(1);
@@ -146,7 +150,7 @@ public class GeoJsonAlert{
     	a.setY(getLatitude());
     	a.setTypeUuid(getTypeUuid());
     	a.setLevel(getLevel());
-
+    	a.setFieldIdentifier(getFieldIdentifier());
     	//default to now if no date given 
 		if(getDateTime() == null){
 			a.setDate(LocalDateTime.now());

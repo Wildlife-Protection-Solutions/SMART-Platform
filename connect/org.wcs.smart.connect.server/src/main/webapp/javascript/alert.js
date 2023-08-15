@@ -434,6 +434,7 @@ function createNewAlert() {
 	var lat = document.querySelector("input[name=lat]").value;
 	var desc = document.querySelector("textarea[name=alert_description]").value;
 	var level = document.querySelector("select[name=level]").value;
+	var fieldid = document.querySelector("input[name=fieldid]").value;
 	
 	var error = "";
 	if (long > 180 || long < -180 ) {
@@ -458,13 +459,14 @@ function createNewAlert() {
 	  "properties": {
 	    "deviceId": "0",
 	    "id": "0",
-	    "latitude": 0,
-	    "longitude": 0,
+	    "latitude": lat,
+	    "longitude": long,
 	    "altitude": 0,
 	    "accuracy": 0,
 	    "caUuid": cauuid,
 	    "level": level,
 	    "description": desc,
+	    "fieldIdentifier": fieldid,
 	    "typeUuid": alerttypeuuid,
 	    "sighting": {}
 	  }
@@ -656,7 +658,7 @@ function createAlertTable(){
 		 		date = formatAlertDateTime(alerts[i].properties.date);//new Date(Date.parse(alerts[i].properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
 
 		 		var row = tableCreateRowTDs(parent,
-		 				[alerts[i].properties.type, alerts[i].properties.caname, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
+		 				[alerts[i].properties.fieldIdentifier, alerts[i].properties.type, alerts[i].properties.caname, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
 		 				"alertrow " + ((i/2) % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
@@ -670,7 +672,7 @@ function createAlertTable(){
 			 		updateicon.title="update alert";
 			 		updateicon.onclick = updateAlert;
 			 		updateicon.href="";
-			 		row.childNodes[7].appendChild(updateicon);
+			 		row.childNodes[8].appendChild(updateicon);
 		 		}
 		 		if(candelete){
 			 		var deleteicon = document.createElement("a");
@@ -678,7 +680,7 @@ function createAlertTable(){
 			 		deleteicon.title="delete alert";
 			 		deleteicon.onclick = deleteAlert;
 			 		deleteicon.href="";
-			 		row.childNodes[7].appendChild(deleteicon);
+			 		row.childNodes[8].appendChild(deleteicon);
 		 		}
 		 	}
 		 	
@@ -816,6 +818,7 @@ function showCurrentAlert() {
 	document.getElementById("updatealertform").update_lat.value = r.y;
 	document.getElementById("updatealertform").update_track.value = r.track;
 	document.getElementById("updatealertform").update_alert_description.value = r.description;
+	document.getElementById("updatealertform").update_fieldid.value = r.fieldIdentifier;
 }
 
 /*submit updated alert details on an existing alert*/
@@ -845,7 +848,8 @@ function submitUpdatedAlert(){
 		    "x": form.update_long.value,
 		    "y": form.update_lat.value,
 		    "track": form.update_track.value,
-		    "description": form.update_alert_description.value
+		    "description": form.update_alert_description.value,
+		    "fieldIdentifier": form.update_fieldid.value
 		    };
 	var oReq = new XMLHttpRequest();
 	oReq.onload = AlertUpdated;
@@ -980,7 +984,68 @@ function updateRealtimeLayer(updatedUrl) {
                 	return i18n("alert.trackselected");
             	}
 
-                var text = i18n("alert.event");
+				var text = "<div class=\"alert_feature_popup\" >";
+				
+				if (feature.properties.fieldIdentifier){
+					text = text + "<b>" + feature.properties.fieldIdentifier + "</b><br/>";
+				}
+				
+				text += "<table>";
+				text += "<tr>";
+				text += "<td>";
+				text += i18n("alert.event");
+				text += "</td>";
+				text += "<td>";
+				if(feature.properties.type == 'Unknown Type') {
+                	text = text + "<font color='red'>"
+                }
+                text = text + feature.properties.type;
+                if(feature.properties.type == 'Unknown Type') {
+                	text = text + "</font>"
+                }
+                text += "</td>";
+                text += "</tr>";
+                
+                
+                text += "<tr>";
+				text += "<td>";
+				text += i18n("alert.reportedtime");
+				text += "</td>";
+				text += "<td>";
+				text += d;
+				text += "</td>";
+				text += "</tr>";
+				
+				text += "<tr>";
+				text += "<td>";
+				text += i18n("alert.location");
+				text += "</td>";
+				text += "<td>";
+				text += coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') ;
+				text += "</td>";
+				text += "</tr>";
+				
+				text += "<tr>";
+				text += "<td>";
+				text += i18n("alert.description");
+				text += "</td>";
+				text += "<td>";
+				text += feature.properties.desc;
+				text += "</td>";
+				text += "</tr>";
+				
+				text += "<tr>";
+				text += "<td>";
+				text += i18n("alert.importance");
+				text += "</td>";
+				text += "<td>";
+				text += feature.properties.level;
+				text += "</td>";
+				text += "</tr>";
+				text += "</table>";
+				
+				/*
+                text += i18n("alert.event");
                 if(feature.properties.type == 'Unknown Type') {
                 	text = text + "<font color='red'>"
                 }
@@ -991,10 +1056,12 @@ function updateRealtimeLayer(updatedUrl) {
                 	
                 text = text + 
                 	"<br>" + i18n("alert.reportedtime") + d +
-                	"<br>" + i18n("alert.location") +
+                	"<br>" + i18n("alert.location") +              	
                     coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') +
                     "<br>" +i18n("alert.description") + feature.properties.desc + 
                     "<br>" + i18n("alert.importance") + feature.properties.level;
+                   */
+               	text += "</div>";
                 return text;
             }
             ,
@@ -1047,7 +1114,7 @@ function stylePoints(feature, latlng) {
 	    iconColor: color,
 	    markerColor: markerColor,
 	    spin: spin,
-	    html: "<b>" + customIcon + "</b>" //bold always looks better to me 
+	  //  html: "<b>" + customIcon + "</b>" //bold always looks better to me
 	});
 	
     return L.marker(latlng, {icon: marker});

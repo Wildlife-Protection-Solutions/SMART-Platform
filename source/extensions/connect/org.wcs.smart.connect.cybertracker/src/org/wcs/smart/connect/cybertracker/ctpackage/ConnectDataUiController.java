@@ -22,8 +22,10 @@
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.inject.Inject;
 
@@ -48,6 +50,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
+import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectHibernateManager;
@@ -61,6 +64,8 @@ import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -83,7 +88,9 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private Label lblPos1, lblPos2;
 	private Text txtPositionPeriod;
 	private ComboViewer cmbPositionType;
-		
+	
+	private Text txtFieldIdStr;
+	
 	@Inject private IEclipseContext context;
 
 	private boolean fireEvents = true;
@@ -265,6 +272,44 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			refreshAlertTypes(true);
 		});
 		
+		
+		if (ctpackage.getFieldIdentifierKeys() != null && ctpackage.getFieldIdentifierKeys().length > 0) {
+			Composite idComp = new Composite(main, SWT.FLAT);
+			idComp.setLayout(new GridLayout());
+			idComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)idComp.getLayout()).marginWidth = 0;
+			((GridLayout)idComp.getLayout()).marginHeight = 0;
+			
+			SmartUiUtils.createHeaderLabel(idComp, "Alert Field Identifier");
+			
+			core = new Composite(idComp, SWT.FLAT);
+			core.setLayout(new GridLayout(1, false));
+			core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Label lblInfo = new Label(core, SWT.WRAP);
+			lblInfo.setText("Optional configuration for an identifier to be included in all alerts sent to Connect by SMART Mobile. Tokens are identified by { } and will be replaced by the values selected by the user on the device. If left blank no field identifier will be inlcuded with alerts.");
+			lblInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)lblInfo.getLayoutData()).widthHint = 600;
+			
+			StringJoiner sj = new StringJoiner(", ");
+			for (String s : ctpackage.getFieldIdentifierKeys()) sj.add("{" + s + "}");
+			
+			Text validMetadataField= new Text(core, SWT.WRAP);
+			validMetadataField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)validMetadataField.getLayoutData()).widthHint = 600;
+			validMetadataField.setText("Valid tokens for this package include: " + sj.toString());
+			validMetadataField.setEditable(false);
+			
+			txtFieldIdStr = new Text(core, SWT.BORDER);
+			txtFieldIdStr.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtFieldIdStr.addListener(SWT.Modify, e->validate());
+//			((GridData)txtId.getLayoutData()).heightHint = 50;
+//			((GridData)txtId.getLayoutData()).widthHint = 600;
+			
+			
+		}
+		
+		
 		if (ctpackage.showConnectUrlConfiguration()) {
 		
 			Composite urlComp = new Composite(main, SWT.FLAT);
@@ -290,7 +335,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			txtUrl = new Text(temp, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER);
+			txtUrl = new Text(temp, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
 			txtUrl.setEditable(false);
 			txtUrl.setEnabled(true);
 			txtUrl.setText(""); //$NON-NLS-1$
@@ -373,6 +418,16 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				if (btnUploadData != null) btnUploadData.notifyListeners(SWT.Selection,new Event());
 				btnUploadPeriod.notifyListeners(SWT.Selection, new Event());
 				btnPositionUpdates.notifyListeners(SWT.Selection, new Event());
+				
+				
+				if (txtFieldIdStr != null) {
+					data = findCreateMetadataField(ICtPackage.FIELD_IDENTIFIER_KEY, (AbstractCtPackage)ctpackage, null);
+					if (data == null || data.getStringValue() == null) {
+						txtFieldIdStr.setText("");
+					}else {
+						txtFieldIdStr.setText(data.getStringValue());
+					}
+				}
 			}finally {
 				fireEvents = true;
 			}
@@ -457,6 +512,20 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				return Messages.ConnectDataUiController_AertTypeRequired;
 			}
 		}
+		if (txtFieldIdStr != null) {
+			String id = txtFieldIdStr.getText();
+			if (!id.isBlank()) {
+				for (String key : this.ctpackage.getFieldIdentifierKeys()) {
+					id = id.replace("{" + key + "}", ""); //$NON-NLS-1$
+				}
+				
+				if (!id.isBlank() && !SmartUtils.isSimpleString(id.trim(), 
+						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, MetadataFieldValue.MAX_STRING_LENGTH) ) {
+					return MessageFormat.format("Invalid pattern. Pattern must be fewer than {0} characters and can only contain valid tokens and {1}", MetadataFieldValue.MAX_STRING_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+				}
+				
+			}
+		}
 		return null;
 	}
 
@@ -501,6 +570,15 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				data.setBooleanValue(true);
 			}
 			updateUrl();
+		}
+		
+		if (txtFieldIdStr != null) {
+			data = findCreateMetadataField(ICtPackage.FIELD_IDENTIFIER_KEY, (AbstractCtPackage)ctpackage, session);
+			if (txtFieldIdStr.getText().isBlank()) {
+				data.setStringValue(null);
+			}else {
+				data.setStringValue(txtFieldIdStr.getText());
+			}
 		}
 		
 	}

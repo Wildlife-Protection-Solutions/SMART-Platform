@@ -1370,6 +1370,10 @@ public class UpgradeServlet extends HttpServlet {
 						//ca property size
 						"ALTER TABLE smart.conservation_area_property alter column value set data type varchar(32672)", //$NON-NLS-1$
 						
+						//add field_id to alert
+						"alter table connect.alerts add column field_id varchar", //$NON-NLS-1$
+						
+						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 

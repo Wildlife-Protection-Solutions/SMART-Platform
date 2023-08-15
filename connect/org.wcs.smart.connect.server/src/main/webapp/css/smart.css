@@ -7,6 +7,13 @@ html {
  	overflow: hidden;
 }
 
+
+.alert_feature_popup{
+	font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+	font-size: 1em;
+}
+
+
 body {
 	margin: 0;
 	padding: 0;

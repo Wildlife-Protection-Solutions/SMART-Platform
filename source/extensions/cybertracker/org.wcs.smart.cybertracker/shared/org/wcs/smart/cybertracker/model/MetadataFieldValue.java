@@ -49,6 +49,8 @@ public class MetadataFieldValue extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final int MAX_STRING_LENGTH = 8192;
+			
 	private ConservationArea ca;
 	
 	//key identifying the metadata field

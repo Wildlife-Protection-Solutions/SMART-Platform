@@ -49,6 +49,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.filter.AlertFilter;
@@ -62,6 +64,7 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -576,7 +579,7 @@ public class ConnectAlert extends HttpServlet {
 		try {
 			if (existingAlert != null) {
 				validateUser(AlertAction.UPDATE_ALERTS_KEY, newGeoJsonAlert.getCaUuid());
-				if (!newAlert.getCa().getUuid().equals(newGeoJsonAlert.getCaUuid())) throw new SmartConnectException(Response.Status.BAD_REQUEST);
+				if (!newGeoJsonAlert.getCaUuid().equals(newGeoJsonAlert.getCaUuid())) throw new SmartConnectException(Response.Status.BAD_REQUEST);
 	
 				newAlert.setTrack(null);
 				ConnectAlert.updateAlert(existingAlert, newAlert, true, request);
@@ -838,20 +841,21 @@ public class ConnectAlert extends HttpServlet {
 			feature.put("geometry", point); //$NON-NLS-1$
 
 			JSONObject properties = new JSONObject();
-			properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
+			properties.put("uuid", obj.getUuid().toString()); //$NON-NLS-1$
 			if (obj.getCa() != null) {
-				properties.put("cauuid", obj.getCa().getUuid()); //$NON-NLS-1$
+				properties.put("cauuid", obj.getCa().getUuid().toString()); //$NON-NLS-1$
 			} else {
 				properties.put("cauuid", (String) null); //$NON-NLS-1$
 			}
-			properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
+			properties.put("creatoruuid", obj.getCreatorUuid().toString()); //$NON-NLS-1$
 			// date is expected to look like: //29 Sep 2020 16:29:54 GMT
 			properties.put("date", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
 			// properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
 			properties.put("desc", obj.getDescription()); //$NON-NLS-1$
 			properties.put("level", obj.getLevel()); //$NON-NLS-1$
+			properties.put("fieldIdentifier", obj.getFieldIdentifier()); //$NON-NLS-1$
 			properties.put("status", obj.getStatus().getGuiName(SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			properties.put("typeuuid", obj.getTypeUuid()); //$NON-NLS-1$
+			properties.put("typeuuid", obj.getTypeUuid().toString()); //$NON-NLS-1$
 
 			AlertType type = HibernateManager.getAlertTypeIncludeUnknown(s, obj.getTypeUuid());
 			properties.put("type", type.getLabel()); //$NON-NLS-1$
@@ -876,25 +880,31 @@ public class ConnectAlert extends HttpServlet {
 			featureList.add(feature);
 
 			// the Track feature
-			JSONObject propertiesTrack = new JSONObject();
-			propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
-			propertiesTrack.put("typeuuid", obj.getTypeUuid()); // need these to draw the right colors and //$NON-NLS-1$
-																// popups
-			propertiesTrack.put("date", obj.getDate()); //$NON-NLS-1$
-			// propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
-			propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
-			propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
-			JSONObject line = new JSONObject();
-
-			JSONArray a = new JSONArray();
-			a.add(obj.getTrack());
-			line.put("coordinates", a); //$NON-NLS-1$
-			line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
-			JSONObject featureTrack = new JSONObject();
-			featureTrack.put("geometry", line); //$NON-NLS-1$
-			featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
-			featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
-			featureList.add(featureTrack);
+			try {
+				JSONArray a2 = (JSONArray) (new JSONParser()).parse(obj.getTrack());
+					
+				if (a2.size() > 1) {
+					JSONObject propertiesTrack = new JSONObject();
+					propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
+					propertiesTrack.put("typeuuid", obj.getTypeUuid().toString()); // need these to draw the right colors and popups //$NON-NLS-1$
+					propertiesTrack.put("date", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
+					propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
+					propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
+					JSONObject line = new JSONObject();
+	
+					line.put("coordinates", a2); //$NON-NLS-1$
+						
+					line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
+					JSONObject featureTrack = new JSONObject();
+					featureTrack.put("geometry", line); //$NON-NLS-1$
+					featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+					featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
+					featureList.add(featureTrack);
+				}
+				
+			}catch (Exception ex) {
+				logger.log(Level.WARNING, ex.getMessage(), ex);
+			}
 
 		}
 		featureCollection.put("features", featureList); //$NON-NLS-1$
@@ -927,25 +937,14 @@ public class ConnectAlert extends HttpServlet {
 			existingAlert = s.getReference(existingAlert);
 			
 			//update the user generated id 
-			if (newAlert.getUserGeneratedId() != null) {
-				existingAlert.setUserGeneratedId(newAlert.getUserGeneratedId());
-			}
+			if (newAlert.getUserGeneratedId() != null) existingAlert.setUserGeneratedId(newAlert.getUserGeneratedId());
+			if (newAlert.getDate() != null) existingAlert.setDate(newAlert.getDate());
+			if (newAlert.getDescription()!= null) existingAlert.setDescription(newAlert.getDescription());
+			if (newAlert.getFieldIdentifier() != null) existingAlert.setFieldIdentifier(newAlert.getFieldIdentifier());
+			if (newAlert.getLevel() != null) existingAlert.setLevel(newAlert.getLevel());
+			if (newAlert.getStatus() != null) existingAlert.setStatus(newAlert.getStatus());
+			if (newAlert.getTypeUuid() != null) existingAlert.setTypeUuid(newAlert.getTypeUuid());
 			
-			if (newAlert.getDate() != null){
-				existingAlert.setDate(newAlert.getDate());
-			}
-			if (newAlert.getDescription()!= null){
-				existingAlert.setDescription(newAlert.getDescription());
-			}			
-			if (newAlert.getLevel() != null){
-				existingAlert.setLevel(newAlert.getLevel());
-			}
-			if (newAlert.getStatus() != null){
-				existingAlert.setStatus(newAlert.getStatus());
-			}			
-			if (newAlert.getTypeUuid() != null){
-				existingAlert.setTypeUuid(newAlert.getTypeUuid());
-			}
 		
 			if(keepPoint){//put the existing point onto the end of the track.
 				if(newAlert.getX() != null && newAlert.getY() != null){  

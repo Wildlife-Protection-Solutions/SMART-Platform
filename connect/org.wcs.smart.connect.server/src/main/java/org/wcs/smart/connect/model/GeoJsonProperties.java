@@ -23,9 +23,11 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 public class GeoJsonProperties{
 	
 	private String deviceId; 
@@ -38,7 +40,9 @@ public class GeoJsonProperties{
 	private UUID caUuid;
 	private Integer level;
 	private String description;
+	private String fieldIdentifier;
 	private UUID typeUuid;
+	
 	private GeoJsonSighting sighting;
 	
 	public String getDeviceId() {
@@ -70,6 +74,10 @@ public class GeoJsonProperties{
 	}
 	public String getDescription() {
 		return description;
+	}
+	
+	public String getFieldIdentifier() {
+		return fieldIdentifier;
 	}
 	public UUID getTypeUuid() {
 		return typeUuid;

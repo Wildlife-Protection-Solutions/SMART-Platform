@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.patrol.model;
 
 import java.util.ArrayList;
 
+import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -91,6 +92,20 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, I
 	@Transient
 	public String getTypeIdentifier() {
 		return TYPE_NAME;
+	}
+	
+	@Transient
+	@Override
+	public String[] getFieldIdentifierKeys() {
+		return new String[] {
+			PatrolMetadataField.LEADER.getJsonKey(),
+			PatrolMetadataField.TRANSPORT.getJsonKey(),
+			PatrolMetadataField.MANDATE.getJsonKey(),
+			PatrolMetadataField.STATION.getJsonKey(),
+			PatrolMetadataField.TEAM.getJsonKey(),
+			ScreensUtil.RESULT_START_DATE,
+			ScreensUtil.RESULT_START_TIME,
+		};
 	}
 
 	@Transient

@@ -57,6 +57,12 @@ public interface ICtPackage {
 	 */
 	public static final String PRIVATE_PROP_KEY = "PKG_ISPRIVATE";  //$NON-NLS-1$
 
+	
+	/**
+	 * Metadata key for field identifer strings
+	 */
+	public static final String FIELD_IDENTIFIER_KEY = "FIELD_ID_STR";  //$NON-NLS-1$
+	
 	/**
 	 * Unique identifier
 	 * @return
@@ -96,6 +102,18 @@ public interface ICtPackage {
 	 */
 	public ICtPackage copy();
 	
+	/**
+	 * Valid metadata field keys that can be
+	 * used in the field identifier configuration for alerts.
+	 * 
+	 * Can return null if no valid metadata fields. 
+	 * 
+	 * @return 
+	 */
+	@Transient
+	public default String[] getFieldIdentifierKeys() {
+		return null;
+	}
 	
 	@Transient
 	public default Path getLocalFile() throws IOException {
@@ -155,4 +173,6 @@ public interface ICtPackage {
 	public default boolean showConnectUrlConfiguration() {
 		return true;
 	}
+	
+	
 }

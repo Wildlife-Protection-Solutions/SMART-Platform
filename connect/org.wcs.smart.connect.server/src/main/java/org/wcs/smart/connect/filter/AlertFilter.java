@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.filter;
 
+import java.text.Collator;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -226,12 +227,16 @@ public class AlertFilter {
 					cb.like(cb.upper(from.get("description")), "%" + textSearchFilter.toUpperCase() + "%"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		c.where(cb.and(andFilters.toArray(new Predicate[andFilters.size()])));
+		
+		if (sortBy.equals("ca.label")) { //$NON-NLS-1$
+			List<Alert> items = s.createQuery(c).list();
+			items.sort((a,b)->Collator.getInstance().compare(a.getCa().getLabel(), b.getCa().getLabel()));
+			return items;
+		}
 		if(sortAscending){
-			c.orderBy(cb.asc(from.get(sortBy))); 
-//			c.addOrder(Order.asc(sortBy));
+			c.orderBy(cb.asc(from.get(sortBy)));
 		}else{
-			c.orderBy(cb.desc(from.get(sortBy))); 
-//			c.addOrder(Order.desc(sortBy));
+			c.orderBy(cb.desc(from.get(sortBy)));
 		}
 		return s.createQuery(c).list();
 	}

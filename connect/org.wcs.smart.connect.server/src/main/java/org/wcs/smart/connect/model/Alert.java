@@ -75,6 +75,7 @@ public class Alert extends ConnectUuidItem{
 	private String userGeneratedId; 
 	private LocalDateTime date;
 	private String description;
+	private String fieldIdentifier;
 	private Integer level;
 	private AlertStatusEnum status;
 	private Double x;
@@ -100,6 +101,14 @@ public class Alert extends ConnectUuidItem{
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	@Column(name="field_id")
+	public String getFieldIdentifier() {
+		return fieldIdentifier;
+	}
+	public void setFieldIdentifier(String fieldIdentifier) {
+		this.fieldIdentifier = fieldIdentifier;
 	}
 	
 	@Column(name="type_uuid")

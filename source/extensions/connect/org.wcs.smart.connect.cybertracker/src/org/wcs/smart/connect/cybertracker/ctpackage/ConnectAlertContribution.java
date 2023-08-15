@@ -69,11 +69,14 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 		if (!(ctpackage instanceof AbstractCtPackage)) return null;
 		
 		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
+		
+		String fieldIdMetadata = null;
 		boolean requiresconnect = false;
 		for (MetadataFieldValue v : apackage.getMetadataValues()) {
 			if (v.getMetadataKey().equals(CtConnectPackageMetadata.Properties.CONNECT_ALERT.name())) {
 				requiresconnect = true;
-				break;
+			}else if (v.getMetadataKey().equals(ICtPackage.FIELD_IDENTIFIER_KEY)) {
+				fieldIdMetadata = v.getStringValue();
 			}
 		}
 		if (!requiresconnect) return null;
@@ -112,6 +115,11 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 				JSONObject metadata = new JSONObject();
 				metadata.put(SmartMobilePackageFields.TYPEUUID_JSONKEY, palert.getType().toString());
 				metadata.put(SmartMobilePackageFields.CAUUID_JSONKEY, apackage.getConservationArea().getUuid().toString());
+				metadata.put(SmartMobilePackageFields.LEVEL_JSONKEY, palert.getLevel().value);
+				
+				if (fieldIdMetadata != null && !fieldIdMetadata.isBlank() ) {
+					metadata.put(SmartMobilePackageFields.FIELDID_JSONKEY, fieldIdMetadata);
+				}
 				metadata.put(SmartMobilePackageFields.LEVEL_JSONKEY, palert.getLevel().value);
 				
 				alert.put(SmartMobilePackageFields.METADATA_JSONKEY, metadata);

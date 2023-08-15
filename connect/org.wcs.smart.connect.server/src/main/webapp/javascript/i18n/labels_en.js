@@ -43,7 +43,7 @@ labels_en= {
 "alert.event":"Event: ",
 "alert.alertid":"Alert ID: ",
 "alert.alerttype":"Alert Type: ",
-"alert.reportedtime":"Reported time: ",
+"alert.reportedtime":"Reported: ",
 "alert.location":"Location: ",
 "alert.description":"Description: ",
 "alert.importance":"Importance: ",

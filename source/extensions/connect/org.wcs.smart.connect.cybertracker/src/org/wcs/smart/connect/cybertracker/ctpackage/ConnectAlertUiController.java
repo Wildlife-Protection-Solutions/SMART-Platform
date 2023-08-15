@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -609,6 +610,9 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 						}
 						if (n.getCmAttributes() != null) {
 							for (CmAttribute a : n.getCmAttributes()) {
+								a.isGrouped();
+								Hibernate.initialize(a);
+								Hibernate.initialize(a.getAttribute());
 								a.getNames().size();
 								a.getAttribute().getName();
 								if (a.getCurrentList() != null) {

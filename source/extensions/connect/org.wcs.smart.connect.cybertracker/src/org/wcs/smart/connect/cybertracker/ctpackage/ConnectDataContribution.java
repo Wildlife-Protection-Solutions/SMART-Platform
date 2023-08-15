@@ -94,19 +94,19 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 			}
 		}
 		
-		
+		String fieldIdMetadata = null;
 		boolean requiresConnect = false;
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
 			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
 				if (mv.getBooleanValue()) {
 					requiresConnect = true;
-					break;
 				}
 			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					requiresConnect=true;
-					break;
 				}
+			}else if (mv.getMetadataKey().equals(ICtPackage.FIELD_IDENTIFIER_KEY)) {
+				fieldIdMetadata = mv.getStringValue();
 			}
 		}
 		if (!requiresConnect) return null;
@@ -152,6 +152,9 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 					metadata.put(SmartMobilePackageFields.TYPEUUID_JSONKEY, mv.getUuidValue().toString());
 					metadata.put(SmartMobilePackageFields.CAUUID_JSONKEY, mv.getConservationArea().getUuid().toString());
 					metadata.put(SmartMobilePackageFields.LEVEL_JSONKEY, CtPackageAlert.Level.ONE.value);
+					if (fieldIdMetadata != null && !fieldIdMetadata.isBlank() ) {
+						metadata.put(SmartMobilePackageFields.FIELDID_JSONKEY, fieldIdMetadata);
+					}
 					
 					pingalert.put(SmartMobilePackageFields.METADATA_JSONKEY, metadata);
 					cc.addProfileMetadata(SmartMobilePackageFields.POSITION_UPDATES_JSONKEY, pingalert);

@@ -46,6 +46,8 @@ public class SmartMobilePackageFields {
 	
 	public static final String LEVEL_JSONKEY = "LEVEL"; //$NON-NLS-1$
 	
+	public static final String FIELDID_JSONKEY = "FIELDIDENTIFIER"; //$NON-NLS-1$
+	
 	public static final String CAUUID_JSONKEY = "CAUUID"; //$NON-NLS-1$
 	
 	public static final String DATA_SERVER_JSONKEY = "DATA_SERVER"; //$NON-NLS-1$

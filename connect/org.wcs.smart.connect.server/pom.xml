@@ -148,6 +148,14 @@
             </exclusions>
         </dependency>
        
+       <!-- for localdatetime support -->
+       	<dependency>
+    		<groupId>com.fasterxml.jackson.datatype</groupId>
+    		<artifactId>jackson-datatype-jsr310</artifactId>
+    		<version>2.12.6</version>
+		</dependency>
+					
+					
         <!--required until jackson library (via jboss) is updated to 2.13 -->
         <!-- https://github.com/FasterXML/jackson-databind/issues/3091-->
         

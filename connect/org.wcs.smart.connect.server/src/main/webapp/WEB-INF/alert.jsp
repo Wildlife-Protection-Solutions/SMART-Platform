@@ -303,11 +303,15 @@
 			<input id="long" type="text" name="long" class="formtext" style="width: 20em">
 			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label>
 			<input id="lat" type="text" name="lat" class="formtext" style="width: 20em">
+			
+			<label class="top-spacer block"><fmt:message key="alert.fieldidlabel" /></label>
+			<input id="fieldid" type="text" name="fieldid" class="formtext" style="width: 20em">
+			
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
 			<textarea name="alert_description" rows="5" cols="45"></textarea>
 			<div class="block top-spacer" style="text-align:right">
-   			  <input class="button top-spacer" type="submit" value="   <fmt:message key="alert.submit" />    "/>
-   			  <input class="button" type="button" onClick="javascript:buttonCancelCreateAlert()" value="<fmt:message key="alert.cancel" />"/>
+   			  <input class="button top-spacer" type="submit" value="   <fmt:message key="alert.submit" />   "/>
+   			  <input class="button" type="button" onClick="javascript:buttonCancelCreateAlert()" value="   <fmt:message key="alert.cancel" />   "/>
    			  </div>
     	</form>
 		</p>
@@ -358,6 +362,9 @@
 			<label class="top-spacer block "><fmt:message key="alert.latitudelabel" /></label>
 			<input id="lat" type="text" name="update_lat" class="formtext" style="width: 20em">
 			
+			<label class="top-spacer block"><fmt:message key="alert.fieldidlabel" /></label>
+			<input id="fieldid" type="text" name="update_fieldid" class="formtext" style="width: 20em">
+			
 			<label class="top-spacer block"><fmt:message key="alert.track" /></label>
 			<input size=50 id="track" type="text" name="update_track" class="formtext" style="width: 20em">
 			
@@ -378,7 +385,16 @@
 		<div id="alertTableMessage" class="msgsection"></div>
 		<div>
 		<table id="alerttable" style="width:100%">
-		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th><th><a onclick="sort('ca.label')" href="#"><fmt:message key="query.conservationarea" /></a></th><th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th><th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th><th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th><th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th><th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th><th><fmt:message key="actions" /></th></tr>
+		<tr class="table-row smart-table-header">
+			<th><a onclick="sort('fieldIdentifier')" href="#"><fmt:message key="alert.fieldIdentifier" /></a></th>
+			<th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th>
+			<th><a onclick="sort('ca.label')" href="#"><fmt:message key="query.conservationarea" /></a></th>
+			<th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th>
+			<th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th>
+			<th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th>
+			<th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th>
+			<th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th>
+			<th><fmt:message key="actions" /></th></tr>
 		</table>
 		</div> 
 	</section>
