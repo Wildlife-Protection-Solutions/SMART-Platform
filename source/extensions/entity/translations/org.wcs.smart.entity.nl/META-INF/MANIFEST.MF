@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Entity Tracker Fragment
 Bundle-SymbolicName: org.wcs.smart.entity.nl
-Bundle-Version: 7.5.6
+Bundle-Version: 7.5.8
 Fragment-Host: org.wcs.smart.entity;bundle-version="7.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart

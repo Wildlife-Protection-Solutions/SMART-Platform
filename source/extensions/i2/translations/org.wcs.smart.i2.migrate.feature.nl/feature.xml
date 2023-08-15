@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.i2.migrate.feature.nl"
       label="SMART Profile Migration Tools Language Pack"
-      version="7.5.6"
+      version="7.5.8"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
       license-feature-version="7.4.0.qualifier">
