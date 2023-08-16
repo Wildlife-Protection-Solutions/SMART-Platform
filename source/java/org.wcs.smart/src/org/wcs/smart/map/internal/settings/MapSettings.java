@@ -176,6 +176,20 @@ public class MapSettings {
 		return THIS;
 	}
 
+	private static MapRegister decodeJsonDefinition(String jsonMap) {
+		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
+		gsonBuilder.registerTypeAdapter(Color.class, new ColorJsonTypeAdapter());
+		Gson gson = gsonBuilder.create();
+		return gson.fromJson(jsonMap, MapRegister.class);
+	}
+	
+	private static String encodeJsonDefinition(MapRegister mapRegister) {
+		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
+		gsonBuilder.registerTypeAdapter(Color.class, new ColorJsonTypeAdapter());
+		Gson gson = gsonBuilder.create();		
+		return gson.toJson(mapRegister);
+	}
+	
 	/**
 	 * Makes a {@link MapRegister} taking the present values in the map provided. 
 	 * <p>
@@ -320,10 +334,7 @@ public class MapSettings {
 		
 		// get map definition selected
 		String jsonMap = this.baseMap.getMapDef();
-		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
-		gsonBuilder.registerTypeAdapter(Color.class, new ColorJsonTypeAdapter());
-		Gson gson = gsonBuilder.create();
-		final MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
+		final MapRegister userMap = decodeJsonDefinition(jsonMap);
 					
 		try {
 			List<ILayer> currentMapLayers = currentMap.getMapLayers();
@@ -645,6 +656,8 @@ public class MapSettings {
 		try(Session s = HibernateManager.openSession()){
 			try{
 				s.beginTransaction();
+				
+				
 				//this point is where files are copied into the filestore
 				//so if an error happens after this point we get files in the filestore
 				//that may never get references to a basemap and not removed.
@@ -657,17 +670,14 @@ public class MapSettings {
 				List<Path> currentFiles = getFilesToDelete(s);
 			
 				//set the basemap property
-				GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
-				Gson gson = gsonBuilder.create();
-				String jsonMap = gson.toJson(mapRegister);
-				this.baseMap.setMapDef(jsonMap);
+				this.baseMap.setMapDef(encodeJsonDefinition(mapRegister));
 				List<Path> newFiles = getFilesToDelete(s);
 			
 				for (Path f : newFiles){
 					currentFiles.remove(f);
 				}
 				
-				s.merge(this.baseMap);
+				this.baseMap = HibernateManager.saveOrMerge(s, this.baseMap);
 				s.getTransaction().commit();
 				
 				//need to delete remaining currentFiles
@@ -859,16 +869,7 @@ public class MapSettings {
 			return new ArrayList<Path>();
 		}
 		String jsonMap = this.baseMap.getMapDef();
-		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
-		Gson gson = gsonBuilder.create();
-		
-		MapRegister userMap = null;
-		try {
-			userMap = gson.fromJson(jsonMap, MapRegister.class);
-		}catch (Exception ex) {
-			SmartPlugIn.displayLog(Messages.MapSettings_InvalidJson, ex);
-			return new ArrayList<>();
-		}
+		MapRegister userMap = decodeJsonDefinition(jsonMap);
 		
 		ArrayList<Path> toDelete = new ArrayList<>();
 		
@@ -912,4 +913,5 @@ public class MapSettings {
 
 		return toDelete;
 	}
+	
 }
