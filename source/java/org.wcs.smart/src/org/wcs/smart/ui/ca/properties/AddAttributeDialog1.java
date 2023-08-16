@@ -322,7 +322,6 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 		
 		checkboxTableViewer.getControl().addListener(SWT.Selection, e->{
 			Object x = (((StructuredSelection) checkboxTableViewer.getSelection()).getFirstElement());
-			System.out.println(x.toString());
 			if (x!= null && x instanceof Attribute){
 				attributeInfo.setVisible(true);
 				attributeInfo.setAttribute(((Attribute)x), null, lang);	//don't care about siblings; only viewing
