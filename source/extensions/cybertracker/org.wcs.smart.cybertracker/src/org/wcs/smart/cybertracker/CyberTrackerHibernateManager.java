@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.Assert;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -35,14 +34,12 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
-import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
@@ -129,7 +126,7 @@ public class CyberTrackerHibernateManager {
 		List<CyberTrackerPropertiesProfile>  profiles =
 				QueryFactory.buildQuery(session, CyberTrackerPropertiesProfile.class,"conservationArea", ca).getResultList(); //$NON-NLS-1$
 		if (profiles.isEmpty()) {
-			CyberTrackerPropertiesProfile defaultProfile = createDefaultProfile(session);
+			CyberTrackerPropertiesProfile defaultProfile = getDefaultProfile(session, ca);
 			return Arrays.asList(defaultProfile);
 		}
 		return profiles;
@@ -174,51 +171,39 @@ public class CyberTrackerHibernateManager {
 		return cm2ctp;
 	}
 	
+	/**
+	 * Gets default profile for the current Conservation area
+	 * @param session
+	 * @return
+	 */
 	public static CyberTrackerPropertiesProfile getDefaultProfile(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		
-		CyberTrackerPropertiesProfile profile = QueryFactory.buildQuery(session, CyberTrackerPropertiesProfile.class,
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
-		return profile != null ? profile : createDefaultProfile(session);
+		return getDefaultProfile(session, ca);
 	}
 	
 	/**
-	 * This method must create and persist a default profile,
-	 * but it is not allowed to use current session for that (as transaction may be reverted)
-	 * At the same time returned(created) profile must be attached to current session.
+	 * This method gets the default profile and creates 
+	 *  one if the default doesn't exists. 
 	 * 
 	 * @param session
 	 * @return default CyberTracker properties profile
 	 */
-	private static CyberTrackerPropertiesProfile createDefaultProfile(Session session) {
+	public static CyberTrackerPropertiesProfile getDefaultProfile(Session session, ConservationArea ca) {
+		
+		CyberTrackerPropertiesProfile profile = QueryFactory.buildQuery(session, CyberTrackerPropertiesProfile.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
+		
+		if (profile != null) return profile;
+		
 		final CyberTrackerPropertiesProfile defaultProfile = new CyberTrackerPropertiesProfile();
-		defaultProfile.setConservationArea(SmartDB.getCurrentConservationArea());
+		defaultProfile.setConservationArea(ca);
 		defaultProfile.setDefault(true);
 		defaultProfile.setName(DEFAULT_PROFILE_NAME);
-		defaultProfile.updateName(SmartDB.getCurrentLanguage(), defaultProfile.getName());
+		defaultProfile.updateName(ca.getDefaultLanguage(), defaultProfile.getName());
+		session.persist(defaultProfile);
 		
-		Thread thread = new Thread() { //new thread is created so it will have it's own hibernate session
-		    public void run() {
-		    	try(Session s = HibernateManager.openSession()){
-		    		try {
-		    			s.beginTransaction();
-		    			s.persist(defaultProfile);
-		    			s.getTransaction().commit();
-		    		} catch (Exception e) {
-		    			SmartPlugIn.displayLog(Messages.CyberTrackerHibernateManager_CreateDefaultProfile_Error, e);
-		    		}
-	    		}
-		    }  
-		};
-		thread.start();
-		try {
-			thread.join(); //we need to wait till thread is completed
-		} catch (InterruptedException e) {
-			SmartPlugIn.displayLog(Messages.CyberTrackerHibernateManager_CreateDefaultProfile_Error, e);
-		}
-		
-		return (CyberTrackerPropertiesProfile) session.merge(defaultProfile); //attaching create object to current session
+		return defaultProfile;
 	}
 
 	public static boolean isEmptyTag0(String uuid) {

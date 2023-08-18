@@ -405,5 +405,11 @@
             class="org.wcs.smart.cybertracker.navigation.ui.FileNavigationTargetProvider">
       </targetprovider>
    </extension>
+   <extension
+         point="org.wcs.smart.caCreate">
+      <handler
+            class="org.wcs.smart.cybertracker.CaCreateHandler">
+      </handler>
+   </extension>
 
 </plugin>

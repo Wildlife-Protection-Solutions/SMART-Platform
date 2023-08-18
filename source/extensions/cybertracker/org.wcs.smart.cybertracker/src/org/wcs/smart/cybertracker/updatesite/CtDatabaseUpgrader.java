@@ -25,6 +25,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -91,7 +93,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			update50to60(session);
 			update60to70(session);
 			update70to75(session);
-			update75to80(session);
+			update75to80(session);			
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)) {
 			(new CtDatabaseUpgrader30To40()).upgrade(session);
 			update40to50(session);
@@ -121,6 +123,13 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			update75to80(session);
 		}
 		
+
+		//ensure deafult profiles exist for each CA
+		//is the first time installing the plugin #3502
+		for (ConservationArea ca : session.createQuery("FROM ConservationArea", ConservationArea.class).list()) { //$NON-NLS-1$
+			if (ca.getIsCcaa()) continue;
+			CyberTrackerHibernateManager.getDefaultProfile(session, ca);
+		}
 	}
 	
 	private void update40to50(Session session) {

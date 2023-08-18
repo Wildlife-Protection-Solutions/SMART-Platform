@@ -122,6 +122,7 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 			try {
 				//location attributes
 				for (AssetStationLocationAttribute toDelete : deletedLocationAttributes) {
+					if (locationAttributes.contains(toDelete)) continue;
 					String deleteQuery = "DELETE FROM AssetStationLocationAttributeValue WHERE id.attribute = :attribute"; //$NON-NLS-1$
 					session.createMutationQuery(deleteQuery)
 						.setParameter("attribute", toDelete.getAttribute()) //$NON-NLS-1$
@@ -131,11 +132,17 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 				int index = 0;
 				for (AssetStationLocationAttribute toUpdate : locationAttributes) {
 					toUpdate.setOrder(index++);
-					if (session.getReference(toUpdate) == null) session.persist(toUpdate);
+					AssetStationLocationAttribute existing = session.get(AssetStationLocationAttribute.class, toUpdate);
+					if (existing == null) {
+						session.persist(toUpdate);	
+					}else {
+						existing.setOrder(toUpdate.getOrder());
+					}
 				}
 				
 				//station attributes
 				for (AssetStationAttribute toDelete : deletedStationAttributes) {
+					if (stationAttributes.contains(toDelete)) continue;
 					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute"; //$NON-NLS-1$
 					session.createMutationQuery(deleteQuery)
 						.setParameter("attribute", toDelete.getAttribute()) //$NON-NLS-1$
@@ -145,7 +152,12 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 				index = 0;
 				for (AssetStationAttribute toUpdate : stationAttributes) {
 					toUpdate.setOrder(index++);
-					if (session.getReference(toUpdate) == null) session.persist(toUpdate);
+					AssetStationAttribute existing = session.get(AssetStationAttribute.class, toUpdate);
+					if (existing == null) {
+						session.persist(toUpdate);	
+					}else {
+						existing.setOrder(toUpdate.getOrder());
+					}
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex) {
@@ -158,6 +170,8 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
+	
+	
 	
 	private void modified() {
 		Button btnOk = getButton(IDialogConstants.OK_ID);
