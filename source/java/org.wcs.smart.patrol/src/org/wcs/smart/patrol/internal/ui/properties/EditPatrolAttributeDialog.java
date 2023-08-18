@@ -74,6 +74,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -232,7 +233,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			lstViewer = new TableViewer(wrapper,SWT.BORDER);
 			lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-			lstViewer.setLabelProvider(new AttributeLabelProvider(16, IconCache.IconSetOption.ALL));
+			lstViewer.setLabelProvider(new AttributeLabelProvider(IconManager.Size.ICON, IconCache.IconSetOption.ALL));
 			lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {

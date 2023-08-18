@@ -101,7 +101,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SurveyMetadataPackageContribution implements IPackageUiContribution {
 
-	private static final int ICON_SIZE = 32;
 
 	private static final String CUSTOMKEY = "ISCUSTOM"; //$NON-NLS-1$
 	
@@ -146,7 +145,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		if (uri == null) return;
 		try {
 			URL url = uri.toURL();
-			Image img = SmartUtils.getImage(url, ICON_SIZE);
+			Image img = SmartUtils.getImage(url, IconManager.Size.SMALL.size);
 			if (img != null) {
 				label.setImage(img);
 				label.addListener(SWT.Dispose, e->img.dispose());
@@ -651,7 +650,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				icon.setBackground(icon.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				if (attribute.getIcon() != null) {
 					attribute.getIcon().getFiles().forEach(e->e.computeFileLocation(session));
-					Image img = SmartUtils.getImage(attribute.getIcon(), ICON_SIZE);
+					Image img = IconManager.INSTANCE.getThumbnail(attribute.getIcon(), IconManager.Size.SMALL);
 					if (img != null) {
 						icon.setImage(img);
 						icon.addListener(SWT.Dispose, e->img.dispose());
@@ -704,7 +703,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 					cmb.getControl().setData(CUSTOMKEY, true);
 					data[2] = cmb;
 					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedIconItemLabelProvider(ICON_SIZE));
+					cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
 					List<Object> items = new ArrayList<>();
 					items.add(""); //$NON-NLS-1$
 					items.addAll(attribute.getAttributeList());

@@ -50,6 +50,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -202,7 +203,7 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
 		
 		TableComboViewer cmbTransportType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTransportType.setInput( typeOps );
 		cmbTransportType.setSelection(new StructuredSelection(legsToMerge.get(0).getType()));
@@ -218,7 +219,7 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 		lbl.setText(Messages.MergePatrolLegDialog_MandateLabel);
 		
 		TableComboViewer cmb = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-		cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		if (!mandates.contains(legsToMerge.get(0).getMandate())) mandates.add(legsToMerge.get(0).getMandate());
 		cmb.setInput( mandates); 

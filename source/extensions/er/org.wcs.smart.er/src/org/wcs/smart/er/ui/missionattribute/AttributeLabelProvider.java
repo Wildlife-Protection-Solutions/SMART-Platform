@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.missionattribute;
 
 import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
@@ -35,11 +36,11 @@ import org.wcs.smart.ui.NamedIconItemLabelProvider;
  */
 public class AttributeLabelProvider extends NamedIconItemLabelProvider {
 
-	public AttributeLabelProvider(int iconSize){
+	public AttributeLabelProvider(IconManager.Size iconSize){
 		super(iconSize);
 	}
 	
-	public AttributeLabelProvider(int iconSize, IconCache.IconSetOption iconType){
+	public AttributeLabelProvider(IconManager.Size iconSize, IconCache.IconSetOption iconType){
 		super(iconSize, iconType);
 	}
 	

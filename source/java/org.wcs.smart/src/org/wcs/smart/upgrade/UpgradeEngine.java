@@ -145,18 +145,19 @@ public class UpgradeEngine {
 		//upgrade
 		progress.subTask(Messages.UpgradeEngine_UpgradingTaskName);
 		List<IDatabaseUpgrader> run = new ArrayList<>();
+		
+		//remove any existing change log tracking
+		//this is done so any alter table statements are not
+		//prevented from running because of the triggers
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
+			s.getTransaction().commit();
+		}
+		
 		for (IDatabaseUpgrader upgrader : upgraders) {
 			SubMonitor p = progress.split(1);
 			if (upgrader.isUpdateToDate(currentVersions)) continue;
-			
-			//remove any existing change log tracking
-			//this is done so any alter table statements are not
-			//prevented from running because of the triggers
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s, upgrader.getPluginId());
-				s.getTransaction().commit();
-			}
 			
 			//execute install/upgrade
 			upgrader.upgrade(p);
@@ -170,14 +171,13 @@ public class UpgradeEngine {
 		progress.subTask(Messages.UpgradeEngine_ChangeLogTaskName);
 		SubMonitor monitor1 = progress.split(2);
 		monitor1.beginTask(Messages.UpgradeEngine_ChangeLogTaskName, run.size());
-		for (IDatabaseUpgrader upgrader : run) {
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				monitor1.split(1);
-				monitor1.subTask(Messages.UpgradeEngine_ChangeLogTaskName + ": " + upgrader.getPluginId()); //$NON-NLS-1$
-				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s, upgrader.getPluginId());
-				s.getTransaction().commit();
-			}
+		
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			monitor1.split(1);
+			monitor1.subTask(Messages.UpgradeEngine_ChangeLogTaskName);
+			ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
+			s.getTransaction().commit();
 		}
 		
 		//compress tables

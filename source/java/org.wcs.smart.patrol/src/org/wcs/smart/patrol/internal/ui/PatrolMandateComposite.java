@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.internal.ui;
 import java.text.Collator;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -32,26 +31,24 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 
 /**
@@ -94,43 +91,8 @@ public class PatrolMandateComposite extends PatrolLegItemComposite{
 
 		patrolMandateViewer = new TableViewer(table, SWT.BORDER | SWT.SINGLE);
 		patrolMandateViewer.setContentProvider(ArrayContentProvider.getInstance());
-		patrolMandateViewer.setLabelProvider(new LabelProvider(){
-			
-			private HashMap<PatrolMandate,Image> images = new HashMap<>();
-			@Override
-			public String getText(Object element) {
-				if (element instanceof PatrolMandate){
-					return ((PatrolMandate)element).getName();
-				}
-				return super.getText(element);
-			}
-			
-			@Override
-			public void dispose() {
-				super.dispose();
-				for (Image i : images.values()) i.dispose();
-				images.clear();
-			}
-			
-			@Override
-			public Image getImage(Object element) {
-				if (!(element instanceof PatrolMandate)) return null;
-				
-				PatrolMandate m = (PatrolMandate)element;
-				if (m.getIcon() == null) return null;
-				if (images.containsKey(m)) return images.get(m);
-				
-				for (IconFile file : m.getIcon().getFiles()) {
-					if (file.getIconSet().isDefault()) {
-						Image i = SmartUtils.getImage(file.getAttachmentFile(), 32);
-						images.put(m, i);
-						return i;
-					}
-				}
-				return null;
-				
-			}
-		});
+		patrolMandateViewer.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
+
 		patrolMandateViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

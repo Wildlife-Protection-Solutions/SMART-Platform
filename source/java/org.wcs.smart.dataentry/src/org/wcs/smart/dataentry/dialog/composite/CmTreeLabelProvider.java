@@ -30,6 +30,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootNode;
@@ -91,15 +92,14 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 		CmAttributeTreeNode node = getTreeNode(element);
 		if (node != null){
 			Path f = node.getImageFile();
+			Image img = null;
 			if (f == null || !Files.exists(f)) {
 				if (node.getDmTreeNode() == null || node.getDmTreeNode().getIcon() == null) return null;
 				IconFile icon = node.getDmTreeNode().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
-				if (icon != null) {
-					f = icon.getAttachmentFile();
-				}
+				img = IconManager.INSTANCE.getThumbnail(icon, IconManager.Size.ICON);
+			}else {
+				img = SmartUtils.getImage(f, IconManager.Size.ICON.size);
 			}
-			if (f == null) return null;
-			Image img = SmartUtils.getImage(f, 16);
 			if (img != null) {
 				images.add(img);
 				return img;

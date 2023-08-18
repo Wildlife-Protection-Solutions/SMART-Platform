@@ -59,6 +59,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -281,7 +282,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		nameColumn.getColumn().setText(Messages.MissionSummaryPage_PropertyLabel);
 		nameColumn.getColumn().setWidth(100);
 		nameColumn.setLabelProvider(new ColumnLabelProvider() {
-			NamedIconItemLabelProvider provider = new NamedIconItemLabelProvider(16);
+			NamedIconItemLabelProvider provider = new NamedIconItemLabelProvider(IconManager.Size.ICON);
 			public void dispose() {
 				super.dispose();
 				provider.dispose();
@@ -309,7 +310,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		valueColumn.getColumn().setWidth(100);
 		valueColumn.setLabelProvider(new ColumnLabelProvider() {
 			
-			NamedIconItemLabelProvider provider = new NamedIconItemLabelProvider(16);
+			NamedIconItemLabelProvider provider = new NamedIconItemLabelProvider(IconManager.Size.ICON);
 			@Override
 			public String getText(Object element) {
 				if (element instanceof MissionPropertyValue){

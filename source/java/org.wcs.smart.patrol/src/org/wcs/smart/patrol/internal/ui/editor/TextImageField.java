@@ -9,15 +9,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.IconItem;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 public class TextImageField extends Composite {
 
-	private int ICONSIZE = 16;
-	
 	private Label image;
 	private Text text;
 	
@@ -77,7 +75,7 @@ public class TextImageField extends Composite {
 		text.setText(item.getName());
 		
 		if (item instanceof IconItem && ((IconItem)item).getIcon() != null) {
-			Image img = SmartUtils.getImage( HibernateManager.loadIcon((IconItem)item), ICONSIZE);
+			Image img = IconManager.INSTANCE.getThumbnail( HibernateManager.loadIcon((IconItem)item), IconManager.Size.ICON);
 			image.setImage(img);
 			((GridData)image.getLayoutData()).widthHint = SWT.DEFAULT;
 		}else {

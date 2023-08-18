@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -327,7 +328,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
 		
 		TableComboViewer cmbTransportType = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTransportType.setInput( typeOps );
 		cmbTransportType.setSelection(new StructuredSelection(editLeg.getType()));
@@ -347,7 +348,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		lbl.setText(Messages.EditPatrolLegDialog_MandateLabel);
 		
 		TableComboViewer cmb = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-		cmb.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		cmb.setInput( mandateOps );
 		if (editLeg.getMandate() != null)

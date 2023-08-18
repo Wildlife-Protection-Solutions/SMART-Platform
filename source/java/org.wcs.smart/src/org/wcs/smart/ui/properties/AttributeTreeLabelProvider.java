@@ -28,6 +28,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconItem;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -55,24 +57,24 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	 * @param lang the working language; if null default is used
 	 */
 	public AttributeTreeLabelProvider(Language lang){
-		this(lang, -1);
+		this(lang, null);
 	}
 		
 	public AttributeTreeLabelProvider(){
-		this(null, -1);
+		this(null, null);
 	}
 	
 	/**
 	 * Size of icon to display, if less than 0 icons are hidden
 	 * @param iconSize
 	 */
-	public AttributeTreeLabelProvider(int iconSize){
+	public AttributeTreeLabelProvider(IconManager.Size iconSize){
 		this(null, iconSize);
 	}
 	
-	public AttributeTreeLabelProvider(Language lang, int iconSize){
+	public AttributeTreeLabelProvider(Language lang, IconManager.Size iconSize){
 		this.currentLang = lang;
-		if (iconSize > 0) this.iconCache = new IconCache(null, iconSize);
+		if (iconSize != null) this.iconCache = new IconCache(null, iconSize);
 	}
 	
 	@Override
@@ -142,7 +144,8 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	@Override
 	public Image getImage(Object element) {
 		if (iconCache == null) return null;
-		return iconCache.getImage(element);
+		if (element instanceof IconItem) return iconCache.getImage((IconItem) element);
+		return null;
 	}
 
 }

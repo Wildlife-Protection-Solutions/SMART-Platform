@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.surveydesign.editor;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.ui.missionattribute.AttributeLabelProvider;
@@ -34,7 +35,7 @@ import org.wcs.smart.er.ui.missionattribute.AttributeLabelProvider;
  */
 public class MissionPropertyLabelProvider extends AttributeLabelProvider {
 
-	public MissionPropertyLabelProvider(int iconSize) {
+	public MissionPropertyLabelProvider(IconManager.Size iconSize) {
 		super(iconSize);
 	}
 	

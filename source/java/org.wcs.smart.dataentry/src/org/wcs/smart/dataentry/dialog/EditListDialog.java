@@ -52,6 +52,7 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -65,6 +66,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -85,6 +87,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -388,7 +391,17 @@ public class EditListDialog extends SmartStyledTitleDialog{
 			}
 			
 			@Override
-			public Path getImageFile() {
+			public Image getImage(IconManager.Size size) {
+				if (cmNode == null) return null;
+				if (cmNode.hasCustomImage()) return SmartUtils.getImage(cmNode.getImageFile(), size.size);
+				if (cmNode.getListItem() == null) return null;
+				if (cmNode.getListItem().getIcon() == null) return null;
+				IconFile iconFile = cmNode.getListItem().getIcon().getIconFile(attribute.getNode().getModel().getIconSet());
+				return IconManager.INSTANCE.getThumbnail(iconFile, size);
+			}
+			
+			@Override
+			public Path getImagePath() {
 				if (cmNode == null) return null;
 				if (cmNode.hasCustomImage()) return cmNode.getImageFile();
 				if (cmNode.getListItem() == null) return null;

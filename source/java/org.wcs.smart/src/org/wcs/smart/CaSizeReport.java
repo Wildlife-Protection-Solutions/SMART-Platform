@@ -29,17 +29,12 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.osgi.framework.Constants;
+import org.wcs.smart.ca.DataStoreManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.in.DatastoreImporter;
 
 /**
  * Generates the conservation area size report with reference
@@ -54,26 +49,11 @@ public class CaSizeReport {
 	public static final String INFO_URL = "https://app.assembla.com/spaces/smart-cs/wiki/SMART_Conservation_Area_Size_Report"; //$NON-NLS-1$
 	private static final String ERROR = Messages.CaSizeReport_ErrorLbl;
 	
-	private Map<String, String> getFilestoreDirections(){
-		if (Platform.getExtensionRegistry() == null) return Collections.emptyMap();
-		Map<String, String> items = new HashMap<>();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(DatastoreImporter.FILESTORE_DIR_EXTENSION_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				String dir = e.getAttribute("directory"); //$NON-NLS-1$
-				if (dir != null && dir.length() > 0){
-					items.put(dir, Platform.getBundle(e.getContributor().getName()).getHeaders().get(Constants.BUNDLE_NAME));
-				}
-			}
-		}catch (Exception ex){
-			SmartPlugIn.log(ex.getMessage(), ex);
-		}
-		return items;
-	}
+
 	
 	public String generateReport() {
 		
-		Map<String,String> dirs = getFilestoreDirections();
+		Map<String,String> dirs = DataStoreManager.INSTANCE.getFilestoreDirectoriesToPlugin();
 		
 		//database size
 		//sum of filesize

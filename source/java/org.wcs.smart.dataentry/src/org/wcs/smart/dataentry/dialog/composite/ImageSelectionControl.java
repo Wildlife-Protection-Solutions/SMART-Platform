@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,11 +45,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.icon.ui.ImageSelectionDialog;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Control that allows to select a single image for provided object.
@@ -140,17 +139,13 @@ public class ImageSelectionControl extends Composite {
 			}
 		}
 		
-		Path file = contentProvider.getImageFile();
-		if (file != null && Files.exists(file) && !Files.isDirectory(file)) {
-			
-			if (file.getFileName().toString().endsWith(".svg") || file.getFileName().toString().endsWith(".png")) { //$NON-NLS-1$ //$NON-NLS-2$
-				lblWarnText.setText(Messages.ImageSelectionControl_BetaCtFormat);
-				warningArea.setVisible(true);
-			}
+		if (!contentProvider.isPngSvg()) {
+			lblWarnText.setText(Messages.ImageSelectionControl_BetaCtFormat);
+			warningArea.setVisible(true);
 		}
 		warningArea.getParent().getParent().layout(true);
 		
-		canvas.setToolTipText(file == null ? "" : file.getFileName().toString()); //$NON-NLS-1$
+		canvas.setToolTipText(contentProvider.getImagePath() == null ? "" : contentProvider.getImagePath().getFileName().toString()); //$NON-NLS-1$
 	}
 	
 	private void initControls() {
@@ -174,26 +169,23 @@ public class ImageSelectionControl extends Composite {
 		});
 		cmbType.setInput(Type.values());
 		
-		int size = 64;
+		IconManager.Size size = IconManager.Size.MEDIUM;
 		canvas = new Canvas(this, SWT.BORDER);
-		GridData canvasLayoutData = new GridData(size, size);
+		GridData canvasLayoutData = new GridData(size.size, size.size);
 		canvasLayoutData.verticalAlignment = SWT.TOP;
 		
 		canvas.setLayoutData(canvasLayoutData);
 		canvas.addPaintListener(new PaintListener() {
 			@Override
 			public void paintControl(PaintEvent e) {
-				
-				Path file = contentProvider.getImageFile();
-				if (file != null && Files.exists(file) && !Files.isDirectory(file)) {
-					
-					Image image = SmartUtils.getImage(file, size);
-					try {
-						e.gc.drawImage(image, 0, 0, size, size, 0, 0, size, size);
-					}finally {
-						image.dispose();
-					}
+				Image img = contentProvider.getImage(size);
+				if (img == null) return;
+				try {
+					e.gc.drawImage(img, 0, 0, size.size, size.size, 0, 0, size.size, size.size);
+				}finally {
+					img.dispose();
 				}
+				
 			}
 		});
 		
@@ -281,7 +273,7 @@ public class ImageSelectionControl extends Composite {
 		
 		lblWarnText = new Label(warningArea, SWT.WRAP);
 		lblWarnText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)lblWarnText.getLayoutData()).widthHint = size;
+		((GridData)lblWarnText.getLayoutData()).widthHint = size.size;
 		lblWarnText.setText(""); //$NON-NLS-1$
 		
 		warningArea.setVisible(false);
@@ -318,7 +310,23 @@ public class ImageSelectionControl extends Composite {
 		/**
 		 * @return an image that is supposed to be displayed.
 		 */
-		public Path getImageFile();
+		public Image getImage(IconManager.Size size);
+		
+		/**
+		 * @return an image that is supposed to be displayed.
+		 */
+		public Path getImagePath();
+		
+		/**
+		 * 
+		 * @return if image is png or svg format
+		 */
+		public default boolean isPngSvg() {
+			Path p = getImagePath();
+			if (p == null) return false;
+			if (p.toString().endsWith(".png") || p.toString().endsWith(".svg")) return true; //$NON-NLS-1$ //$NON-NLS-2$
+			return false;
+		}
 		
 		/**
 		 * Called when new image was selected.

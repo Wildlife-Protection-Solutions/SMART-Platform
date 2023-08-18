@@ -35,6 +35,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -118,8 +119,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(waypoint.getId())}));
 		this.cm = cm;
 		
-		this.iconCache16 = new IconCache(null, 16);
-		this.iconCache32 = new IconCache(null, 32);
+		this.iconCache16 = new IconCache(null, IconManager.Size.ICON);
+		this.iconCache32 = new IconCache(null, IconManager.Size.SMALL);
 		
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);

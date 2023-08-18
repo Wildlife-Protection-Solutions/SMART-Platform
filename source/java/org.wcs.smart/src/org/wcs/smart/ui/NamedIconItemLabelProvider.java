@@ -24,6 +24,7 @@ package org.wcs.smart.ui;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconItem;
+import org.wcs.smart.ca.IconManager;
 
 /**
  * LabelProvider for {@link IconItem} that returns icons in 
@@ -34,7 +35,6 @@ public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 
 	protected IconCache images ;
 	
-	private int iconSize = 32;
 	
 	/**
 	 * Create a new label provide that generates icons with default size (32)
@@ -51,7 +51,7 @@ public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 	 * 
 	 * @param iconSize
 	 */
-	public NamedIconItemLabelProvider(int iconSize) {
+	public NamedIconItemLabelProvider(IconManager.Size iconSize) {
 		images = new IconCache(null, iconSize);
 	}
 	
@@ -63,15 +63,13 @@ public class NamedIconItemLabelProvider extends NamedItemLabelProvider {
 	 * 
 	 * @param iconSize
 	 */
-	public NamedIconItemLabelProvider(int iconSize, IconCache.IconSetOption iconType) {
+	public NamedIconItemLabelProvider(IconManager.Size iconSize, IconCache.IconSetOption iconType) {
 		this(iconSize);
 		images.setIconSetOption(iconType);
 	}
 	
 	@Override
 	public Image getImage(Object element) {
-		if (iconSize <= 0) return null;
-		
 		if (element instanceof IconItem) {
 			IconItem iconItem = (IconItem) element;
 			return images.getImage(iconItem);

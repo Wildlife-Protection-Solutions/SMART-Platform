@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -54,6 +56,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -95,41 +98,8 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		
 		patrolTypeViewer = new TableViewer(table, SWT.BORDER | SWT.SINGLE);
 		patrolTypeViewer.setContentProvider(ArrayContentProvider.getInstance());
-		patrolTypeViewer.setLabelProvider(new LabelProvider(){
-			private HashMap<PatrolTransportType,Image> images = new HashMap<>();
-			
-			public String getText(Object element) {
-				if (element instanceof PatrolTransportType){
-					return ((PatrolTransportType)element).getName();
-				}
-				return super.getText(element);
-			}
-			@Override
-			public void dispose() {
-				super.dispose();
-				for (Image i : images.values()) i.dispose();
-				images.clear();
-			}
-			
-			@Override
-			public Image getImage(Object element) {
-				if (!(element instanceof PatrolTransportType)) return null;
-				
-				PatrolTransportType m = (PatrolTransportType)element;
-				if (m.getIcon() == null) return null;
-				if (images.containsKey(m)) return images.get(m);
-				
-				for (IconFile file : m.getIcon().getFiles()) {
-					if (file.getIconSet().isDefault()) {
-						Image i = SmartUtils.getImage(file.getAttachmentFile(), 32);
-						images.put(m, i);
-						return i;
-					}
-				}
-				return null;
-				
-			}
-		});
+		patrolTypeViewer.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
+		
 		patrolTypeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

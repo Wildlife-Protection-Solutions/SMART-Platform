@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -78,7 +79,7 @@ public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> imple
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		super.createComposite(parent, new AttributeTreeContentProvider(true, false),
-				new AttributeTreeLabelProvider(16));
+				new AttributeTreeLabelProvider(IconManager.Size.ICON));
 		
 		super.setInput(this.attribute);
 	}

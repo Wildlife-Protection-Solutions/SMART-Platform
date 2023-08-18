@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -117,7 +118,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		((GridData)cmbViewer.getControl().getLayoutData()).horizontalIndent = 5;
 		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 50;
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());	
-		cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

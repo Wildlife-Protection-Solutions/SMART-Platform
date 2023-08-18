@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
@@ -129,7 +130,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 				TableComboViewer cmbViewer = new TableComboViewer(outer, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-				cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(16));
+				cmbViewer.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 				
 				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 					@Override

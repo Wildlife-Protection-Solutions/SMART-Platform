@@ -31,6 +31,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
@@ -77,15 +78,16 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 		CmAttributeListItem node = getListItem(element);
 		if (node != null){
 			Path f = node.getImageFile();
+			Image img = null;
 			if (f == null || !Files.exists(f)) {
 				if (node.getListItem().getIcon() == null) return null;
 				IconFile icon = node.getListItem().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
-				if (icon != null) {
-					f = icon.getAttachmentFile();
-				}
+				if (icon == null) return null;
+				///get image from icon store
+				img = IconManager.INSTANCE.getThumbnail(icon, IconManager.Size.ICON);
+			}else {
+				img = SmartUtils.getImage(f, IconManager.Size.ICON.size);
 			}
-			if (f == null) return null;
-			Image img = SmartUtils.getImage(f, 16);
 			if (img != null) {
 				images.add(img);
 				return img;

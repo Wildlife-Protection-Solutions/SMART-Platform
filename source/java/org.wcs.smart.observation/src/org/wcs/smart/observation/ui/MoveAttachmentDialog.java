@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -427,7 +428,7 @@ public class MoveAttachmentDialog extends SmartStyledTitleDialog {
 			for (Attachment a : items) {
 				try {
 					Path p = EncryptUtils.decryptAttachment(a.attachment);
-					Image img = SmartUtils.getImage(p, 50);
+					Image img = SmartUtils.getImage(p, IconManager.Size.MEDIUM.size);
 					images.put(a, img);
 					tbViewer.getTable().getDisplay().asyncExec(()->tbViewer.refresh(a));
 				} catch (Exception e) {

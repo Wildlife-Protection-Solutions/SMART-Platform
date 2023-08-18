@@ -38,6 +38,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -47,6 +48,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -64,6 +66,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption.VisibleWhen;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Info composite for {@link CmAttribute}
@@ -178,13 +181,22 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				}
 				
 				@Override
-				public Path getImageFile() {
+				public Image getImage(IconManager.Size size) {
 					CmAttribute cmNode = getSourceObject();
 					if (cmNode == null) return null;
-					if (isCustom()) {
-						return cmNode.getImageFile();
-					}
+					if (isCustom()) return SmartUtils.getImage(cmNode.getImageFile(), size.size);
 					
+					if (cmNode.getAttribute() == null) return null;
+					Icon i = cmNode.getAttribute().getIcon();
+					if (i == null) return null;
+					IconFile iconfile = i.getIconFile(getModel().getIconSet());
+					return IconManager.INSTANCE.getThumbnail(iconfile, size);
+				}
+				@Override
+				public Path getImagePath() {
+					CmAttribute cmNode = getSourceObject();
+					if (cmNode == null) return null;
+					if (isCustom()) return cmNode.getImageFile();
 					if (cmNode.getAttribute() == null) return null;
 					Icon i = cmNode.getAttribute().getIcon();
 					if (i == null) return null;

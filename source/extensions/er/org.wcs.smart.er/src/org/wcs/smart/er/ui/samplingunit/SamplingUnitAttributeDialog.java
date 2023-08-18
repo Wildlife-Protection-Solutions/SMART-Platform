@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
@@ -102,7 +103,7 @@ public class SamplingUnitAttributeDialog extends SmartStyledTitleDialog implemen
 		
 		lstAttributes = new TableViewer(wrapper, SWT.BORDER);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(new NamedIconItemLabelProvider(32));
+		lstAttributes.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.MEDIUM));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {

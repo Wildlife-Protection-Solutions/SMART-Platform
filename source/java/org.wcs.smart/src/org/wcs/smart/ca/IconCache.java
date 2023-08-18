@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2023 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.ca;
 
 import java.util.Collections;
@@ -7,9 +28,14 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
-
+/**
+ * 
+ * @author Emily
+ * @since 8.0.0
+ *
+ */
 public class IconCache {
 	
 	/**
@@ -29,7 +55,7 @@ public class IconCache {
 	
 	private Map<IconItem,Image> images = Collections.synchronizedMap(new HashMap<>());
 
-	private int iconSize = 32;
+	private IconManager.Size iconSize = IconManager.Size.SMALL;
 	private IconSetOption iconType = IconSetOption.DEFAULT;
 	
 	/**
@@ -39,7 +65,7 @@ public class IconCache {
 	 * @param dispose
 	 */
 	public IconCache(Control dispose) {
-		this(dispose, 32);
+		this(dispose, IconManager.Size.SMALL);
 	}
 	
 	/**
@@ -47,36 +73,40 @@ public class IconCache {
 	 * it when finished with it
 	 */
 	public IconCache() {
-		this(null, 32);
+		this(null, IconManager.Size.SMALL);
 	}
 	
-	public IconCache(Control dispose, int iconSize) {
+	public IconCache(Control dispose, IconManager.Size size) {
 		if(dispose != null) {
 			dispose.addListener(SWT.Dispose, e->dispose());
 		}
-		this.iconSize = iconSize;
+		this.iconSize = size;
 	}
 	
 	public void setIconSetOption(IconSetOption option) {
 		this.iconType = option;
 	}
-	public Image getImage(Object element) {
-		if (iconSize < 0) return null;
+	
+	
+	public Image getImage(IconItem element) {
 		if (element == null) return null;
-		if (!(element instanceof IconItem)) return null;
 		
-		IconItem item = (IconItem)element;
-		if (images.containsKey(item)) return images.get(item);
-		
-		
+		if (images.containsKey(element)) return images.get(element);
+				
 		Image img = null;
-		if (iconType == IconSetOption.DEFAULT) {
-			img = SmartUtils.getImage(HibernateManager.loadIcon(item), iconSize);
+		Icon icon = HibernateManager.loadIcon(element.getIcon());
+		if (iconType == IconSetOption.DEFAULT) {			
+			img = IconManager.INSTANCE.getThumbnail(icon, iconSize);
 		}else if (iconType == IconSetOption.ALL) {
-			img = SmartUtils.generateImage(HibernateManager.loadIcon(item), iconSize);
+			img = IconManager.INSTANCE.generateImage(icon, iconSize);
 		}
 		
-		images.put(item, img);
+		synchronized (images) {
+			Image x = images.remove(element);
+			if (x != null && !x.isDisposed()) x.dispose();
+			
+			images.put(element, img);
+		}
 		return img;
 	}
 	

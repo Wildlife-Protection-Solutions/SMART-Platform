@@ -82,6 +82,7 @@ import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -802,7 +803,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		@Override
 		public Image getImage(Object element) {
 			if (column != Column.ICON) return null;
-			return iconCache.getImage(element);
+			if (element instanceof IconItem) return iconCache.getImage((IconItem) element);
+			return null;
 		}
 	}
 }

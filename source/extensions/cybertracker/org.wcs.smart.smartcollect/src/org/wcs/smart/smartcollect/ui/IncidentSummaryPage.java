@@ -68,6 +68,7 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
@@ -306,7 +307,7 @@ public class IncidentSummaryPage extends EditorPart {
 							Label img = new Label(left, SWT.NONE);
 							img.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 2));
 							img.setBackground(left.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-							Image image = SmartUtils.getImage(file.getAttachmentFile(), 32);
+							Image image = IconManager.INSTANCE.getThumbnail(file, IconManager.Size.SMALL);
 							img.setImage(image);
 							img.addListener(SWT.Dispose, e->image.dispose());
 						}

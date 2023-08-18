@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -115,7 +116,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		
 		lstAttributes = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		lstAttributes.setLabelProvider(new AttributeLabelProvider(32));
+		lstAttributes.setLabelProvider(new AttributeLabelProvider(IconManager.Size.SMALL));
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {

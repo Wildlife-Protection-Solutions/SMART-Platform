@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.internal.ca.export;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.DataStoreManager;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.internal.Messages;
@@ -59,7 +62,17 @@ public class DataStoreDataExporter implements ICaDataExporter {
 		monitor.beginTask(Messages.DataStoreDataExporter_progress, 1);
 		
 		Path filestoreLocation = Paths.get(exportEngine.getConservationArea().getFileDataStoreLocation());
-		exportEngine.addPath(filestoreLocation, Paths.get(ICaDataExportEngine.FILESTORE_DIR));
+		
+		Set<String> includeDirectories = DataStoreManager.INSTANCE.getFilestoreDirectories();
+		
+		Path root = Paths.get(ICaDataExportEngine.FILESTORE_DIR);
+		for(String s : includeDirectories) {
+			Path temp = filestoreLocation.resolve(s);
+			if (Files.exists(temp)) {
+				exportEngine.addPath(temp, root.resolve(filestoreLocation.relativize(temp)));
+			}
+		}
+		
 
 		monitor.worked(1);
 		monitor.done();

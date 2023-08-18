@@ -52,6 +52,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
@@ -246,7 +247,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Table missionPropertiesTable = toolkit.createTable(missionComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		missionPropertiesList = new TableViewer(missionPropertiesTable);
 		missionPropertiesList.setContentProvider(ArrayContentProvider.getInstance());
-		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider(16));
+		missionPropertiesList.setLabelProvider(new MissionPropertyLabelProvider(IconManager.Size.ICON));
 		missionPropertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)missionPropertiesTable.getLayoutData()).minimumHeight = 60;
 		((GridData)missionPropertiesTable.getLayoutData()).widthHint = 60;

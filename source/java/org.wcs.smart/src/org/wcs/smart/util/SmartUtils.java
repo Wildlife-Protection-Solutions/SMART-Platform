@@ -244,6 +244,11 @@ public class SmartUtils {
 		dtWidget.setTime(time.getHour(), time.getMinute(), time.getSecond());
 	}
 
+	/**
+	 * Delete directory and all files within the directory
+	 * @param dir
+	 * @throws IOException
+	 */
 	public static void deleteDirectory(final Path dir) throws IOException { 
 		if (!Files.exists(dir)) return;
 
@@ -927,61 +932,6 @@ public class SmartUtils {
 		}
 	}
 	
-	/**
-	 * Merges all the icon files into a single image. 
-	 * 
-	 * @param icon the icon to generate image from
-	 * @param size the size for each file image
-	 * @return
-	 */
-	public static Image generateImage(Icon icon, int size) {
-		if (icon == null) return null;
-		List<IconFile> files = icon.getFiles();
-		if (files.isEmpty()) return null;
-		
-		//combine all files into a single image 
-		Image img = new Image(Display.getDefault(), (size + 5) * files.size(), size);
-		GC gc = new GC(img);
-		try {
-			for (int i = 0; i < files.size(); i++) {
-				IconFile ff = files.get(i);
-				Path f = null;
-				if (ff.getCopyFromLocation() != null) {
-					f = ff.getCopyFromLocation();
-				}else {
-					f = ff.getAttachmentFile();
-				}
-				Image mm = SmartUtils.getImage(f, size);
-				if (mm != null) {
-					try {
-						gc.drawImage(mm, 0,0, size, size, i*(size+5), 0, size, size);
-					}finally {
-						mm.dispose();
-					}
-				}
-			}
-		}finally {
-			gc.dispose();
-		}
-		return img;
-	}
-	
-	/**
-	 * 
-	 * @param icon
-	 * @param size
-	 * @return the image associated with the default icon set
-	 */
-	public static Image getImage(Icon icon, Integer size) {
-		if (icon == null) return null;
-		for (IconFile file : icon.getFiles()) {
-			if (file.getIconSet().getIsDefault()) {
-				if (file.getCopyFromLocation() != null) return getImage(file.getCopyFromLocation(), size);
-				return getImage(file.getAttachmentFile(), size);
-			}
-		}
-		return null;
-	}
 	
 	/**
 	 * Converts the file to an image of the given size.  Works for svg as well as png etc.
@@ -992,7 +942,7 @@ public class SmartUtils {
 	 * @return
 	 */
 	public static Image getImage(Path file, Integer size) {
-//		if (size < 0) return null;
+		if (size < 0) return null;
 		if (file.getFileName().toString().endsWith(".svg")) { //$NON-NLS-1$
 			try {
 				return readSvg(Display.getDefault(), file, size);

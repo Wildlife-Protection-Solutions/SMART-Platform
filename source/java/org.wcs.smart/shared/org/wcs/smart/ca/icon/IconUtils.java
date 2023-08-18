@@ -25,10 +25,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Icon utils that are shared between connect and desktop
+ * @author Emily
+ *
+ */
 public enum IconUtils {
 	
 	INSTANCE;
-	
 		
 	public String getLibraryFile(String iconKey, IconSet set) {
 		if (set == null) return null;

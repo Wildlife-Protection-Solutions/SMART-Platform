@@ -25,18 +25,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.DataStoreManager;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
@@ -54,8 +51,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DatastoreImporter implements ICaDataImporter {
 
-	public static final String FILESTORE_DIR_EXTENSION_ID = "org.wcs.smart.caFilestoreDir"; //$NON-NLS-1$
-	
 	@Override
 	public void importData(ICaDataImportEngine engine, IProgressMonitor monitor)
 			throws Exception {
@@ -94,7 +89,7 @@ public class DatastoreImporter implements ICaDataImporter {
 		
 		//now we want to remove any directories that are not supported
 		//by one of the existing plugins
-		List<String> validDirs = getFilestoreDirections();
+		Set<String> validDirs = DataStoreManager.INSTANCE.getFilestoreDirectories();
 		
 		try(Stream<Path> stream = Files.list(destLocation)){
 			stream.forEach(f->{
@@ -112,23 +107,5 @@ public class DatastoreImporter implements ICaDataImporter {
 		}
 	}
 	
-	/**
-	 * @return list of ca data exporter extension points
-	 */
-	private List<String> getFilestoreDirections(){
-		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		List<String> items = new ArrayList<String>();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(FILESTORE_DIR_EXTENSION_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				String dir = e.getAttribute("directory"); //$NON-NLS-1$
-				if (dir != null && dir.length() > 0){
-					items.add(dir);
-				}
-			}
-		}catch (Exception ex){
-			SmartPlugIn.log(ex.getMessage(), ex);
-		}
-		return items;
-	}
+
 }

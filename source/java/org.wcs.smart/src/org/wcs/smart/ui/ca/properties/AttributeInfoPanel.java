@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -66,7 +65,6 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -80,6 +78,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -99,7 +98,6 @@ import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.internal.ca.properties.AttributeTree;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite panel that display and allows users to
@@ -113,7 +111,6 @@ public class AttributeInfoPanel extends Composite {
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
-	public static int LIST_ICON_SIZE = 16;
 	
 	protected NameKeyComposite nameKeyValues;
 	
@@ -449,28 +446,8 @@ public class AttributeInfoPanel extends Composite {
 							if (files.isEmpty()) return null;
 							
 							//combine all icons into a single image
-							Image img = new Image(Display.getDefault(), (LIST_ICON_SIZE+5) * files.size(), LIST_ICON_SIZE);
+							Image img = IconManager.INSTANCE.generateImage(li.getIcon(), IconManager.Size.ICON);
 							images.add(img);
-							GC gc = new GC(img);
-							try {
-								for (int i = 0; i < files.size(); i++) {
-									IconFile ff = files.get(i);
-									Path f = null;
-									if (ff.getCopyFromLocation() != null) {
-										f = ff.getCopyFromLocation();
-									}else {
-										f = ff.getAttachmentFile();
-									}
-									Image mm = SmartUtils.getImage(f, LIST_ICON_SIZE);
-									try {
-										gc.drawImage(mm, 0,0, LIST_ICON_SIZE,LIST_ICON_SIZE,i*(LIST_ICON_SIZE+5),0,LIST_ICON_SIZE,LIST_ICON_SIZE);
-									}finally{
-										mm.dispose();	
-									}
-								}
-							}finally {
-								gc.dispose();
-							}
 							return img;
 							
 						}

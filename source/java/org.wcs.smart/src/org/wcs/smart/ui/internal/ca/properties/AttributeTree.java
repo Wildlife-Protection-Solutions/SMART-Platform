@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -60,7 +59,6 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -75,6 +73,7 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -89,7 +88,6 @@ import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class that creates an attribute tree viewer for
@@ -340,30 +338,8 @@ public class AttributeTree {
 					if (files.isEmpty()) return null;
 					
 					//combine all files into a single image 
-					Image img = new Image(Display.getDefault(), (AttributeInfoPanel.LIST_ICON_SIZE+5) * files.size(), AttributeInfoPanel.LIST_ICON_SIZE);
+					Image img = IconManager.INSTANCE.generateImage(li.getIcon(), IconManager.Size.ICON);
 					images.put(li.getIcon(), img);
-					GC gc = new GC(img);
-					try {
-						for (int i = 0; i < files.size(); i++) {
-							IconFile ff = files.get(i);
-							Path f = null;
-							if (ff.getCopyFromLocation() != null) {
-								f = ff.getCopyFromLocation();
-							}else {
-								f = ff.getAttachmentFile();
-							}
-							Image mm = SmartUtils.getImage(f, AttributeInfoPanel.LIST_ICON_SIZE);
-							if (mm != null) {
-								try {
-									gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
-								}finally {
-									mm.dispose();
-								}
-							}
-						}
-					}finally {
-						gc.dispose();
-					}
 					return img;
 					
 				}

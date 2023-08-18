@@ -86,6 +86,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconItem;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -225,7 +226,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		boolean isMultiLeg = editor.getPatrol().getLegs().size() > 1;
 		
 		toolkit = new FormToolkit(parent.getDisplay());
-		iconCache = new IconCache(parent, 16);
+		iconCache = new IconCache(parent, IconManager.Size.ICON);
 		
 		outline = toolkit.createComposite(parent);
 		outline.setLayout(new GridLayout());

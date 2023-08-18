@@ -58,6 +58,7 @@ public class IconFile extends ISmartAttachment{
 
 	public static final String ICON_DIR = "icons"; //$NON-NLS-1$
 	
+	
 	private IconSet iconSet;
 	private Icon icon;
 	

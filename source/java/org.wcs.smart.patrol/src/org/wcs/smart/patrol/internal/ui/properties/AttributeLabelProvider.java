@@ -28,6 +28,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconItem;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
@@ -47,17 +49,17 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 	public AttributeLabelProvider(){
 	}
 	
-	public AttributeLabelProvider(int iconSize){
+	public AttributeLabelProvider(IconManager.Size iconSize){
 		this(iconSize, IconCache.IconSetOption.DEFAULT);
 	}
 	
-	public AttributeLabelProvider(int iconSize, IconCache.IconSetOption op){
+	public AttributeLabelProvider(IconManager.Size iconSize, IconCache.IconSetOption op){
 		this.iconCache = new IconCache(null, iconSize);
 		iconCache.setIconSetOption(op);
 	}
 
 	public AttributeLabelProvider(Language lang){
-		this(16, IconCache.IconSetOption.DEFAULT);
+		this(IconManager.Size.ICON, IconCache.IconSetOption.DEFAULT);
 		this.language = lang;
 	}
 
@@ -80,8 +82,10 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 	 * <code>ILabelProvider</code> method returns <code>null</code>.
 	 * Subclasses may override.
 	 */
+	@Override
 	public Image getImage(Object element) {
-		return iconCache.getImage(element);
+		if (element instanceof IconItem) return iconCache.getImage((IconItem) element);
+		return null;
 	}
 
 	/**
@@ -89,6 +93,7 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 	 * <code>ILabelProvider</code> method returns the element's
 	 * <code>toString</code> string. Subclasses may override.
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof PatrolAttribute){
 			if (language == null){

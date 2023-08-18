@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -382,7 +383,7 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		lbl.setText(Messages.PatrolLegSplitDialog_TransportType_Label);
 		
 		TableComboViewer cmbTransportType = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(16));
+		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
 		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
 		
 		cmbTransportType.setInput( typeOps );

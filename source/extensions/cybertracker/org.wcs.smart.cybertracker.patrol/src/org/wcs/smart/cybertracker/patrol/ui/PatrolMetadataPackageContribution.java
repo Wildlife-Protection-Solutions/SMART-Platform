@@ -101,8 +101,6 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public class PatrolMetadataPackageContribution implements IPackageUiContribution {
-
-	private static final int ICON_SIZE = 32;
 	
 	private Button btnTT, btnArmed, btnTeam, btnStation, btnMandate, btnObj, btnCmt, btnMembers, btnLeader, btnPilot, btnArmedYes, btnArmedNo;
 	
@@ -143,7 +141,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		if (uri == null) return;
 		try {
 			URL url = uri.toURL();
-			Image img = SmartUtils.getImage(url, ICON_SIZE);
+			Image img = SmartUtils.getImage(url, IconManager.Size.MEDIUM.size);
 			if (img != null) {
 				label.setImage(img);
 				label.addListener(SWT.Dispose, e->img.dispose());
@@ -431,7 +429,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				Label icon = new Label(core, SWT.NONE);
 				if (attribute.getIcon() != null) {
 					attribute.getIcon().getFiles().forEach(e->e.computeFileLocation(session));
-					Image img = SmartUtils.getImage(attribute.getIcon(), ICON_SIZE);
+					
+					Image img = IconManager.INSTANCE.getThumbnail(attribute.getIcon(), IconManager.Size.SMALL);
 					if (img != null) {
 						icon.setImage(img);
 						icon.addListener(SWT.Dispose, e->img.dispose());
@@ -486,7 +485,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					TableComboViewer cmb = new TableComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 					data[2] = cmb;
 					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedIconItemLabelProvider(ICON_SIZE));
+					cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
 					List<Object> items = new ArrayList<>();
 					items.add(""); //$NON-NLS-1$
 					items.addAll(attribute.getAttributeList());
@@ -603,7 +602,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			cmb = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
 		}
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
-		cmb.setLabelProvider(new NamedIconItemLabelProvider(ICON_SIZE));
+		cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
 		cmb.setInput(new String[] { DialogConstants.LOADING_TEXT });
 		cmb.getControl().setEnabled(false);
 		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

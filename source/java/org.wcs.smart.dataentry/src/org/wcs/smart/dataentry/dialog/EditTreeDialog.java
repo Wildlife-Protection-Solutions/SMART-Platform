@@ -51,6 +51,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -64,6 +65,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -85,6 +87,7 @@ import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Rename dialog for providing aliases for configurable model tree attribute nodes 
@@ -621,8 +624,19 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 			public boolean hasDataModel() {
 				return true;
 			}
+			
 			@Override
-			public Path getImageFile() {
+			public Image getImage(IconManager.Size size) {
+				if (cmNode == null) return null;
+				if (cmNode.hasCustomImage()) return SmartUtils.getImage(cmNode.getImageFile(), size.size);
+				if (cmNode.getDmTreeNode() == null) return null;
+				if (cmNode.getDmTreeNode().getIcon() == null) return null;
+				IconFile iconFile = cmNode.getDmTreeNode().getIcon().getIconFile(attribute.getNode().getModel().getIconSet());
+				return IconManager.INSTANCE.getThumbnail(iconFile, size);
+			}
+			
+			@Override
+			public Path getImagePath() {
 				if (cmNode == null) return null;
 				if (cmNode.hasCustomImage()) return cmNode.getImageFile();
 				if (cmNode.getDmTreeNode() == null) return null;

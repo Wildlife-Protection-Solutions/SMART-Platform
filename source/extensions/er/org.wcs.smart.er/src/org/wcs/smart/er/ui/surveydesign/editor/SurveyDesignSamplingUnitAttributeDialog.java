@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -198,7 +199,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends SmartStyledTitleDia
 		composite = new MultipleSelectComposite<SamplingUnitAttribute>(c, SWT.NONE);
 		composite.setLabelAllText(Messages.SurveyDesignSamplingUnitAttributeDialog_AllSuLAbel);
 		composite.setLabelSelectedText(Messages.SurveyDesignSamplingUnitAttributeDialog_SurveySuLabel);
-		composite.setLabelProvider(new SamplingUnitLabelProvider(16));
+		composite.setLabelProvider(new SamplingUnitLabelProvider(IconManager.Size.ICON));
 		composite.setItemComparator(new Comparator<SamplingUnitAttribute>() {
 			@Override
 			public int compare(SamplingUnitAttribute su1, SamplingUnitAttribute su2) {

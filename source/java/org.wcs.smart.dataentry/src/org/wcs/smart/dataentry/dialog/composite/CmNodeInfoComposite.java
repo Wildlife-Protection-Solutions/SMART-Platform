@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -46,6 +47,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -66,6 +68,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Info composite for {@link CmNode}
@@ -156,7 +159,22 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			}
 			
 			@Override
-			public Path getImageFile() {
+			public Image getImage(IconManager.Size size) {
+				CmNode cmNode = getSourceObject();
+				if (cmNode == null) return null;
+				if (cmNode.hasCustomImage()) {
+					return SmartUtils.getImage(getSourceObject().getImageFile(), size.size);
+				}
+				
+				if (cmNode.getCategory() == null) return null;
+				Icon i = cmNode.getCategory().getIcon();
+				if (i == null) return null;
+				IconFile iconfile = i.getIconFile(getModel().getIconSet());
+				return IconManager.INSTANCE.getThumbnail(iconfile, size);
+			}
+			
+			@Override
+			public Path getImagePath() {
 				CmNode cmNode = getSourceObject();
 				if (cmNode == null) return null;
 				if (cmNode.hasCustomImage()) {
@@ -168,8 +186,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				if (i == null) return null;
 				IconFile iconfile = i.getIconFile(getModel().getIconSet());
 				if (iconfile == null) return null;
-				return iconfile.getAttachmentFile();
-				
+				return iconfile.getAttachmentFile();	
 			}
 			
 			@Override
