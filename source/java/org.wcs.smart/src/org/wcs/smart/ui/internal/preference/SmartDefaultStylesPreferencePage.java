@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.DefaultMapLayerStylesComposite;
@@ -78,7 +79,7 @@ public class SmartDefaultStylesPreferencePage extends PreferencePage implements
 	}
 	
 	private boolean isEditable(){
-		return StyleManager.INSTANCE.canConfigureDefaultStyles();
+		return PermissionManager.INSTANCE.canConfigureDefaultStyles();
 	}
 	
 	@Override

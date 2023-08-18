@@ -35,6 +35,7 @@ import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.filter.Categories;
@@ -61,8 +62,8 @@ public class ScreensUtil {
 	public static final String COMMON_PREFIX = "SMART_"; //$NON-NLS-1$
 
 	public static final String RESULT_ID = COMMON_PREFIX + "PatrolID"; //$NON-NLS-1$
-	public static final String RESULT_START_DATE = COMMON_PREFIX + "PatrolStartDate"; //$NON-NLS-1$
-	public static final String RESULT_START_TIME = COMMON_PREFIX + "PatrolStartTime"; //$NON-NLS-1$
+	public static final String RESULT_START_DATE = MetadataFieldValue.START_DATE_METADATA_KEY;
+	public static final String RESULT_START_TIME = MetadataFieldValue.START_TIME_METADATA_KEY;
 
 	public static final String RESULT_NEW_WAYPOINT = COMMON_PREFIX + "NewWaypoint"; //$NON-NLS-1$
 	public static final String RESULT_END_WAYPOINT_GROUP = COMMON_PREFIX + "WaypointGroupEnd"; //$NON-NLS-1$

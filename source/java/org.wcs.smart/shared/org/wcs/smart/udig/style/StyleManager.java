@@ -55,7 +55,6 @@ import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.style.sld.SLD;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.coverage.grid.GridCoverage;
-import org.wcs.smart.PermissionManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.SmartStyle;
@@ -105,10 +104,7 @@ public class StyleManager {
 	private StyleManager(){
 		
 	}
-	
-	public boolean canConfigureDefaultStyles() {
-		return PermissionManager.INSTANCE.isManager() || PermissionManager.INSTANCE.isAdmin();
-	}
+
 	/**
 	 * 
 	 * @return List of map layers which can have default styles associated with them
@@ -181,7 +177,7 @@ public class StyleManager {
 	 * @param session
 	 */
 	public void setDefaultStyles(ConservationArea ca, Map<String,String> allstyles, Session session) {
-		if (!canConfigureDefaultStyles()) return;
+		
 		ConservationAreaProperty currentProperty = QueryFactory
 				.buildQuery(session, ConservationAreaProperty.class,
 						new Object[] { "conservationArea", ca }, //$NON-NLS-1$

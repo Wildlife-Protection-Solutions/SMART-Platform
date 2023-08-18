@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.survey.model;
 
 import java.util.ArrayList;
 
-import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -146,8 +145,8 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider, I
 	public String[] getFieldIdentifierKeys() {
 		return new String[] {
 			MissionMetadataField.LEADER.getJsonKey(),
-			ScreensUtil.RESULT_START_DATE,
-			ScreensUtil.RESULT_START_TIME,
+			MetadataFieldValue.START_DATE_METADATA_KEY,
+			MetadataFieldValue.START_TIME_METADATA_KEY
 		};
 	}
 }

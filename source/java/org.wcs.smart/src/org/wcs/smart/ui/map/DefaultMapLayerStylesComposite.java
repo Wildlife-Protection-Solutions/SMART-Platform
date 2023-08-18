@@ -52,6 +52,7 @@ import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -253,9 +254,10 @@ public class DefaultMapLayerStylesComposite extends Composite {
 	}
 
 	public void save() throws Exception {
+		if (!PermissionManager.INSTANCE.canConfigureDefaultStyles()) return;
 		try (Session session = HibernateManager.openSession()) {
 			session.beginTransaction();
-			try {
+			try {				
 				StyleManager.INSTANCE.setDefaultStyles(SmartDB.getCurrentConservationArea(), properties, session);
 				session.getTransaction().commit();
 			} catch (Exception ex) {

@@ -74,4 +74,12 @@ public enum PermissionManager {
 	public boolean isManager() {
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.MANAGER) ;
 	}
+	
+	/**
+	 * If user can configure the default map layer styles
+	 * @return
+	 */
+	public boolean canConfigureDefaultStyles() {
+		return PermissionManager.INSTANCE.isManager() || PermissionManager.INSTANCE.isAdmin();
+	}
 }

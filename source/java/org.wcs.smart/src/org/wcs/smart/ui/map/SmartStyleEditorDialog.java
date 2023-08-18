@@ -89,6 +89,7 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
 import org.locationtech.udig.style.sld.editor.StyleEditorDialog;
 import org.locationtech.udig.style.sld.editor.internal.IEditorNode;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SmartStyle;
@@ -206,7 +207,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		comptool.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		comptool.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
-		if (StyleManager.INSTANCE.canConfigureDefaultStyles()) {
+		if (PermissionManager.INSTANCE.canConfigureDefaultStyles()) {
 			ToolItem defaults = new ToolItem(comptool, SWT.FLAT);
 			defaults.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DEFAULT_STYLE_ICON));
 			defaults.setToolTipText("Configure Default Map Layer Styles");

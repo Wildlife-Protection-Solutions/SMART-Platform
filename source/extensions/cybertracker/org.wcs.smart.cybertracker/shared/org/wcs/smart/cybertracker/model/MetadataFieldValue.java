@@ -48,6 +48,9 @@ import jakarta.persistence.Table;
 public class MetadataFieldValue extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String START_DATE_METADATA_KEY = "SMART_PatrolStartDate"; //$NON-NLS-1$
+	public static final String START_TIME_METADATA_KEY = "SMART_PatrolStartTime"; //$NON-NLS-1$
 	
 	public static final int MAX_STRING_LENGTH = 8192;
 			
