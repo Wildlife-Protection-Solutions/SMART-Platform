@@ -29,7 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1308,15 +1307,13 @@ public class PatrolLegDayInputComposite {
 				//is up-to-date
 				if (editor.getPatrolEditor().getOptions().getTrackObserver()){
 					List<Employee> emps = new ArrayList<Employee>();
-					for (PatrolLegMember m : patrolLegDate.getPatrolLeg().getMembers()){
-						emps.add(m.getMember());
-					}
-					Collections.sort(emps, new Comparator<Employee>() {
-						@Override
-						public int compare(Employee arg0, Employee arg1) {
-							return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(arg0).toUpperCase(), SmartLabelProvider.getFullLabel(arg1).toUpperCase());
+					try(Session session = HibernateManager.openSession()){
+						PatrolLeg leg = session.getReference(patrolLegDate.getPatrolLeg());
+						for (PatrolLegMember m : leg.getMembers()){
+							emps.add(m.getMember());
 						}
-					});
+						emps.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a).toUpperCase(), SmartLabelProvider.getFullLabel(b).toUpperCase()));
+					}
 					observationEditor.setObservers(emps);
 				}else{
 					observationEditor.setObservers(null);
