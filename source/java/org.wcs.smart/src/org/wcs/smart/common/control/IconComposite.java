@@ -94,6 +94,7 @@ public class IconComposite extends Composite {
 		((GridData)image.getLayoutData()).heightHint = 16;
 		
 		btnBrowse = new Button(this, SWT.PUSH);
+		btnBrowse.setBackground( btnBrowse.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.addSelectionListener(new SelectionAdapter() {			
 			@Override
