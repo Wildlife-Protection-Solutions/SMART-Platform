@@ -109,7 +109,7 @@ public enum AssetManager {
 		session.flush();
 		
 		//delete any waypoints not associated with asset waypoint
-		try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
+		try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE sourceId = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
 				Waypoint wp = scroll.get();
 				session.remove(wp);

@@ -150,7 +150,7 @@ public class AssetType extends NamedKeyItem{
 	 * 
 	 * @return The set of asset
 	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="assetType",orphanRemoval=true, cascade= {CascadeType.ALL})
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="assetType",orphanRemoval=true, cascade = CascadeType.ALL)
 	public List<Asset> getAssets() {
 		return this.assets;
 	}
@@ -173,7 +173,7 @@ public class AssetType extends NamedKeyItem{
 	 * 
 	 * @return The set of asset_type_attribute
 	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="id.assetType",orphanRemoval=true, cascade= {CascadeType.ALL})
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="id.assetType", orphanRemoval=true, cascade = CascadeType.ALL)
 	@OrderBy("seq_order asc")
 	public List<AssetTypeAttribute> getAssetAttributes() {
 		return this.assetAttributes;
@@ -198,7 +198,7 @@ public class AssetType extends NamedKeyItem{
 	 * 
 	 * @return The set of asset_type_deployment_attribute
 	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="id.assetType",orphanRemoval=true, cascade= {CascadeType.ALL})
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="id.assetType",orphanRemoval=true, cascade = CascadeType.ALL)
 	@OrderBy("seq_order asc")
 	public List<AssetTypeDeploymentAttribute> getAssetDeploymentAttributes() {
 		return this.deploymentAttributes;

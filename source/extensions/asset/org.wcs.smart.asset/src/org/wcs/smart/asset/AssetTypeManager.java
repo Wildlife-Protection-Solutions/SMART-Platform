@@ -92,7 +92,7 @@ public enum AssetTypeManager {
 		.executeUpdate();
 		
 		//delete all asset waypoints
-		session.createMutationQuery("delete from AssetWaypoint ieav where id.assetDeployment in (FROM AssetDeployment ad WHERE ad.asset.assetType = :type)") //$NON-NLS-1$
+		session.createMutationQuery("DELETE FROM AssetWaypoint ieav WHERE assetDeployment in (FROM AssetDeployment ad WHERE ad.asset.assetType = :type)") //$NON-NLS-1$
 		.setParameter("type", type) //$NON-NLS-1$
 		.executeUpdate();
 		
@@ -102,7 +102,7 @@ public enum AssetTypeManager {
 		.executeUpdate();
 		
 		//delete all asset deployments
-		session.createMutationQuery("delete from AssetDeployment ieav where id.asset in (FROM Asset WHERE assetType = :type)") //$NON-NLS-1$
+		session.createMutationQuery("delete from AssetDeployment ieav where asset in (FROM Asset WHERE assetType = :type)") //$NON-NLS-1$
 		.setParameter("type", type) //$NON-NLS-1$
 		.executeUpdate();
 		

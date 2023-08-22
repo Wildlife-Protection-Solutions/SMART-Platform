@@ -162,16 +162,20 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 	@Override
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
+		if (isNew) type.setAssets(new ArrayList<>());
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				HibernateManager.saveOrMerge(s, type);
-				
+				type = HibernateManager.saveOrMerge(s, type);
 				for (AbstractAssetTypeAttributeMapping a : assetAttributeList){
-					if (!type.getAssetAttributes().contains(a)) type.getAssetAttributes().add((AssetTypeAttribute)a);
+					if (!type.getAssetAttributes().contains(a)) {
+						type.getAssetAttributes().add((AssetTypeAttribute)a);
+					}
 				}
 				for (AbstractAssetTypeAttributeMapping a : assetDeploymentList) {
-					if (!type.getAssetDeploymentAttributes().contains(a)) type.getAssetDeploymentAttributes().add((AssetTypeDeploymentAttribute)a);
+					if (!type.getAssetDeploymentAttributes().contains(a)) {
+						type.getAssetDeploymentAttributes().add((AssetTypeDeploymentAttribute)a);
+					}
 				}
 				
 				List<AssetTypeAttribute> toDelete = new ArrayList<AssetTypeAttribute>();
@@ -206,8 +210,13 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 					assetDeploymentList.get(i).setOrder(i);
 				}
 				
-				s.flush();
+				
 				s.getTransaction().commit();
+				
+				assetAttributeList.clear();
+				assetDeploymentList.clear();
+				assetAttributeList.addAll(type.getAssetAttributes());
+				assetDeploymentList.addAll(type.getAssetDeploymentAttributes());
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
 				AssetPlugIn.displayLog(Messages.AssetTypeDialog_SaveError + ex.getMessage(), ex);
