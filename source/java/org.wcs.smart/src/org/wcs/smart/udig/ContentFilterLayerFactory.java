@@ -49,6 +49,7 @@ import org.locationtech.udig.project.internal.impl.LayerResource;
 import org.locationtech.udig.ui.PlatformGIS;
 import org.locationtech.udig.ui.ProgressManager;
 import org.locationtech.udig.ui.palette.ColourScheme;
+import org.opengis.filter.Filter;
 
 /**
  * Extension to the layer factor that creates ContentFilterLayerImpl instead of 
@@ -59,9 +60,12 @@ import org.locationtech.udig.ui.palette.ColourScheme;
  */
 public class ContentFilterLayerFactory extends LayerFactoryImpl {
 
-	public ContentFilterLayerFactory(Map map) {
+	private Filter initialFilter;
+	
+	public ContentFilterLayerFactory(Map map, Filter initialFilter) {
 		super();
 		setMap(map);
+		this.initialFilter = initialFilter;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -80,6 +84,7 @@ public class ContentFilterLayerFactory extends LayerFactoryImpl {
 		}
 
 		ContentFilterLayerImpl layer = new ContentFilterLayerImpl();
+		if (initialFilter != null) layer.setContentFilter(initialFilter);
 
 		ID resourceID = resource.getID();
 		layer.setResourceID(resourceID);

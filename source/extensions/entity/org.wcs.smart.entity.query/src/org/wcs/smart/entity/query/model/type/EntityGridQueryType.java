@@ -24,7 +24,9 @@ package org.wcs.smart.entity.query.model.type;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +35,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
+import org.wcs.smart.entity.query.map.style.EntityGridQueryDefaultStyle;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.entity.query.ui.EntityGriddedQueryEditor;
@@ -61,6 +64,11 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
  */
 public class EntityGridQueryType implements IMappableQueryType {
 
+	private static final HashMap<String,String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put(RasterService.GRIDDED_TYPE, EntityGridQueryDefaultStyle.KEY);
+	}
+	
 	private static IQueryDropItemFactory dropItemFactory = null;
 	
 	/**
@@ -235,5 +243,15 @@ public class EntityGridQueryType implements IMappableQueryType {
 	 */
 	public boolean supportsReports(){
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 }

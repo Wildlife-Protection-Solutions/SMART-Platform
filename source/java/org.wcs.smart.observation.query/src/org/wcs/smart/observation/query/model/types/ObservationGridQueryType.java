@@ -24,7 +24,9 @@ package org.wcs.smart.observation.query.model.types;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +35,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.map.style.ObservationGridQueryDefaultStyle;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor;
@@ -63,7 +66,13 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
  *
  */
 public class ObservationGridQueryType implements IMappableQueryType {
-
+	
+	private static final HashMap<String, String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put(RasterService.GRIDDED_TYPE, ObservationGridQueryDefaultStyle.KEY);
+	}
+	
+	
 	private static IQueryDropItemFactory dropItemFactory = null;
 	
 	/**
@@ -242,5 +251,15 @@ public class ObservationGridQueryType implements IMappableQueryType {
 	 */
 	public boolean supportsReports(){
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 }

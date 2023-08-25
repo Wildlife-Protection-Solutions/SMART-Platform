@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.map.style;
 
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
  * Mission map page default waypoint style
@@ -29,7 +29,7 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
  * @author Emily
  *
  */
-public class MissionMapWaypointDefaultStyle implements MapLayerDefaultStyle {
+public class MissionMapWaypointDefaultStyle implements IMapLayerDefaultStyle {
 
 	public static final String KEY = "org.wcs.smart.mission.map.waypoint";  //$NON-NLS-1$
 	

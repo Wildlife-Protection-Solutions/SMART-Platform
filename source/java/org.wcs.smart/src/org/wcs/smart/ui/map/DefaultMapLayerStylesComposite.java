@@ -58,7 +58,7 @@ import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 import org.wcs.smart.udig.style.StyleImageProducer;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.util.UuidUtils;
@@ -102,7 +102,7 @@ public class DefaultMapLayerStylesComposite extends Composite {
 
 		setLayout(new GridLayout());
 
-		List<MapLayerDefaultStyle> defaults = Collections.emptyList();
+		List<IMapLayerDefaultStyle> defaults = Collections.emptyList();
 		try {
 			defaults = StyleManager.INSTANCE.getDefaultStyleMapLayers();
 			defaults.sort((a,b)->{
@@ -169,7 +169,7 @@ public class DefaultMapLayerStylesComposite extends Composite {
 		
 		
 		List<TableComboViewer> viewers = new ArrayList<>();
-		for (MapLayerDefaultStyle s : defaults) {
+		for (IMapLayerDefaultStyle s : defaults) {
 			Label l = new Label(c1, SWT.WRAP);
 			l.setText(s.getMapName());
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

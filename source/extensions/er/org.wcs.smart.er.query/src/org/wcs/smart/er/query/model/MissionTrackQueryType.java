@@ -24,7 +24,9 @@ package org.wcs.smart.er.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -36,6 +38,8 @@ import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.MissionTrackDateField;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
+import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
+import org.wcs.smart.er.query.map.style.MissionTrackQueryDefaultStyle;
 import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
@@ -58,6 +62,11 @@ import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
  */
 public class MissionTrackQueryType implements IMappableQueryType {
 
+	private static final HashMap<String, String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put( SurveyQueryDataSource.TRACKS_TYPE, MissionTrackQueryDefaultStyle.KEY);
+	}
+	
 	public MissionTrackQueryType() {
 	}
 
@@ -183,5 +192,15 @@ public class MissionTrackQueryType implements IMappableQueryType {
 	 */
 	public boolean supportsReports(){
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 }

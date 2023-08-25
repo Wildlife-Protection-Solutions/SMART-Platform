@@ -24,7 +24,9 @@ package org.wcs.smart.er.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -37,6 +39,7 @@ import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
+import org.wcs.smart.er.query.map.style.MissionGridQueryDefaultStyle;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveyGriddedEditor;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
@@ -67,6 +70,10 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
  */
 public class SurveyGridQueryType implements IMappableQueryType {
 
+	private static final HashMap<String, String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put( RasterService.GRIDDED_TYPE, MissionGridQueryDefaultStyle.KEY);
+	}
 	
 	private static IQueryDropItemFactory dropItemFactory;
 	
@@ -275,6 +282,16 @@ public class SurveyGridQueryType implements IMappableQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
+	}
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 	
 	/**

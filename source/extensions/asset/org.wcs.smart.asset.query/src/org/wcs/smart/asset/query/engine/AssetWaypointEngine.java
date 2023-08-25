@@ -220,7 +220,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements WaypointQue
 		sb.append(queryDataTable);
 		sb.append(".wp_uuid)"); //$NON-NLS-1$
 		QueryPlugIn.logSql(sb.toString());
-		session.createMutationQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		progress.subTask(Messages.AssetWaypointEngine_AssetDetailsSubTask); 
 		progress.split(3);

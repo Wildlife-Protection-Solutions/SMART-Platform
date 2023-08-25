@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.map.style;
 
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
  * Mission map page default track style
@@ -29,7 +29,7 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
  * @author Emily
  *
  */
-public class MissionMapSamplingUnitLinearDefaultStyle implements MapLayerDefaultStyle {
+public class MissionMapSamplingUnitLinearDefaultStyle implements IMapLayerDefaultStyle {
 
 	public static final String KEY = "org.wcs.smart.mission.map.samplingunit.linear"; //$NON-NLS-1$
 	

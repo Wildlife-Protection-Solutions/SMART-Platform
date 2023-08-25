@@ -24,7 +24,9 @@ package org.wcs.smart.observation.query.model.types;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +35,8 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
+import org.wcs.smart.observation.query.map.style.ObservationWaypointQueryDefaultStyle;
 import org.wcs.smart.observation.query.map.udig.QueryService;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
@@ -60,6 +64,11 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
  *
  */
 public class ObservationWaypointQueryType implements IMappableQueryType {
+	
+	private static final HashMap<String, String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, ObservationWaypointQueryDefaultStyle.KEY);
+	}
 	
 	private static IQueryDropItemFactory dropItemFactory = null;
 	
@@ -233,5 +242,15 @@ public class ObservationWaypointQueryType implements IMappableQueryType {
 	 */
 	public boolean supportsReports(){
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 }

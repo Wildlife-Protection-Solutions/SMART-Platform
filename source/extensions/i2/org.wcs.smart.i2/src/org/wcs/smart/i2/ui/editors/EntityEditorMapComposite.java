@@ -102,6 +102,10 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.map.style.EntityPointDataModelObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.EntityPointRecordObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.EntityPolygonRecordObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.EntityPositionAttributeDefaultStyle;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -125,6 +129,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.udig.ContentFilterLayerImpl;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -135,6 +140,13 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EntityEditorMapComposite extends Composite implements MapPart{
 
+	private static HashMap<String,String> defaultStyles = new HashMap<>();
+	static {
+		defaultStyles.put(LocationLayerType.POINT.name(), EntityPointRecordObservationDefaultStyle.KEY);
+		defaultStyles.put(LocationLayerType.POLYGON.name(), EntityPolygonRecordObservationDefaultStyle.KEY);
+		defaultStyles.put(LocationLayerType.DM_OBS.name(), EntityPointDataModelObservationDefaultStyle.KEY);
+	}
+	
 	private enum LocationTableColumn{
 		SOURCE(Messages.EntityEditorMapComposite_SourceColumnName),
 		ID(Messages.EntityEditorMapComposite_IDColumnName),
@@ -274,12 +286,19 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);
 							 locationLayers.clear();
-							 for (Layer layer : getLayers()){
-								 if (layer instanceof ContentFilterLayerImpl){
-									 locationLayers.add((ContentFilterLayerImpl) layer);
-									 layer.addListener(layerStyleChanged);
-								 }
+							 try(Session session = HibernateManager.openSession()){
+								 for (Layer layer : getLayers()){
+									 if (layer instanceof ContentFilterLayerImpl){
+										 locationLayers.add((ContentFilterLayerImpl) layer);
+										 layer.addListener(layerStyleChanged);
+									 }
+									 
+									 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+											 editor.getEntity().getConservationArea(), 
+											 layer, defaultStyles, session, monitor);
+								 }	 
 							 }
+							 
 							 Display.getDefault().asyncExec(()->{
 								 if (locationTable == null || locationTable.getControl().isDisposed()) return;
 								 createLayerGlyphs();
@@ -306,7 +325,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 		}
 		if (hasPosition){
-			locationLayer = new LocationAttributeMapLayer(getMap(), Messages.EntityEditorMapComposite_LayerName, UuidUtils.uuidToString(editor.getEntity().getUuid()));
+			locationLayer = new LocationAttributeMapLayer(getMap(), Messages.EntityEditorMapComposite_LayerName, UuidUtils.uuidToString(editor.getEntity().getUuid()), EntityPositionAttributeDefaultStyle.KEY);
 			locationLayer.createValueLayers(editor.getEntity().getAttributes());
 		}
 	}

@@ -24,7 +24,9 @@ package org.wcs.smart.asset.query.model.types;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +35,8 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.map.geotools.QueryDataSource;
+import org.wcs.smart.asset.query.map.style.AssetSummaryPointQueryDefaultStyle;
 import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
@@ -66,6 +70,11 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 public class AssetSummaryQueryType implements IMappableQueryType {
 		
 	private static IQueryDropItemFactory dropItemFactory = null;
+	
+	private static final HashMap<String, String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, AssetSummaryPointQueryDefaultStyle.KEY);
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
@@ -250,5 +259,15 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 			AssetPlugIn.log(ex.getMessage(), ex);
 		}
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 }

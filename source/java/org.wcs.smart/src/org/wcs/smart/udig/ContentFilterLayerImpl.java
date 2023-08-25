@@ -54,6 +54,7 @@ public class ContentFilterLayerImpl extends LayerImpl {
 	
 	@Override
 	public Query getQuery(boolean selection) {
+//		System.out.println(this.contentFilter);
 		try {
 			if (selection) {
 				return new Query(getSchema().getName().getLocalPart(), getFilter());

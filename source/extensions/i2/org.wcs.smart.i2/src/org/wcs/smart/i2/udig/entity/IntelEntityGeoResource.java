@@ -113,6 +113,7 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 	            return false;
 
 	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
+	        		|| adaptee.isAssignableFrom(IntelEntityService.class)
 	                || adaptee.isAssignableFrom(IService.class)
 	                || adaptee.isAssignableFrom(FeatureSource.class)
 	                || adaptee.isAssignableFrom(FeatureStore.class)
@@ -131,6 +132,9 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
     		return adaptee.cast(super.getInfo(monitor));
     	}
         if( adaptee.isAssignableFrom(IService.class) ){
+            return adaptee.cast( this.service );
+        }
+        if( adaptee.isAssignableFrom(IntelEntityService.class) ){
             return adaptee.cast( this.service );
         }
         if (adaptee.isAssignableFrom(IWorkingSetResource.class)){

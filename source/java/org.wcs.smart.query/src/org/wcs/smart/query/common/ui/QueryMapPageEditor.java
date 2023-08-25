@@ -34,6 +34,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -45,13 +46,17 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -120,22 +125,33 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 						if (parentEditor.getQueryProxy().getQuery() instanceof IStyledQuery){
 							//update layer style
 							final IStyledQuery sq = ((IStyledQuery)parentEditor.getQueryProxy().getQuery());
-							if (sq.getStyle() != null){
-								for (ILayer layer : getLayers()){
-									try{
-										String dataType = layer.getGeoResource().getIdentifier().getRef();
-										if (dataType == null){
-											dataType = layer.getGeoResource().getID().toString();
-										}
-										QueryStyleParser.INSTANCE.applyStyle(sq, dataType, (StyleBlackboard) layer.getStyleBlackboard());
-										//do this to ensure the correct events are fired
-										((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
-										
-									}catch (Exception ex){
-										QueryPlugIn.log(ex.getMessage(), ex);
+							
+							for (Layer layer : getLayers()){
+								try{
+									String dataType = layer.getGeoResource().getIdentifier().getRef();
+									if (dataType == null){
+										dataType = layer.getGeoResource().getID().toString();
 									}
+									if (sq.getStyle() != null) {
+										QueryStyleParser.INSTANCE.applyStyle(sq, dataType, (StyleBlackboard) layer.getStyleBlackboard());
+									}else {
+										//apply the default style
+										IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(parentEditor.getQueryProxy().getQuery().getTypeKey());
+										
+										try(Session session = HibernateManager.openSession()){
+											StyleManager.INSTANCE.applyDefaultStyleToMapLayer(parentEditor.getQueryProxy().getQuery().getConservationArea(),  
+													layer, qtype.getDefaultStyleMappings(), session, monitor);
+										}
+
+									}
+									//do this to ensure the correct events are fired
+									layer.setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
+									
+								}catch (Exception ex){
+									QueryPlugIn.log(ex.getMessage(), ex);
 								}
 							}
+							
 							
 							//add style listeners
 							for (final ILayer layer : getLayers()){

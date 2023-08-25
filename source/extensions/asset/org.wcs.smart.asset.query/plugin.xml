@@ -290,4 +290,16 @@
             clazz="org.wcs.smart.asset.query.plugin.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.asset.query.map.style.AssetWaypointQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.asset.query.map.style.AssetObservationQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.asset.query.map.style.AssetSummaryPointQueryDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 </plugin>

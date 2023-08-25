@@ -2642,5 +2642,59 @@
             class="org.wcs.smart.ca.datamodel.Attribute">
       </DeleteAdvisor>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.RecordObservationPointDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.RecordObservationPolygonDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.RecordPointObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.RecordPolygonObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.RecordPositionAttributeDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.EntityPointDataModelObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.EntityPointRecordObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.EntityPolygonRecordObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.EntityPositionAttributeDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsEntityRecordPolygonObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsEntityRecordPointObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsRecordPointObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsRecordPolygonObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsEntityDataModelObservationDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsEntityPositionAttributeDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsRecordObservationQueryPointDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.i2.map.style.WsRecordObservationQueryPolygonDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 
 </plugin>

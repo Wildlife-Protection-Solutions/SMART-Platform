@@ -42,6 +42,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
+import org.eclipse.ui.WorkbenchException;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
@@ -64,11 +65,20 @@ import org.opengis.filter.Filter;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.WorkingSetManager.LayerStatus;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.map.style.WsEntityDataModelObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.WsEntityPositionAttributeDefaultStyle;
+import org.wcs.smart.i2.map.style.WsEntityRecordPointObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.WsEntityRecordPolygonObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.WsRecordObservationQueryPointDefaultStyle;
+import org.wcs.smart.i2.map.style.WsRecordObservationQueryPolygonDefaultStyle;
+import org.wcs.smart.i2.map.style.WsRecordPointObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.WsRecordPolygonObservationDefaultStyle;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IWorkingSetMapLayer;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -80,9 +90,11 @@ import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
+import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
+import org.wcs.smart.i2.udig.query.QueryDataSource;
 import org.wcs.smart.i2.udig.query.QueryGeoResource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.udig.record.IntelRecordService;
@@ -105,6 +117,25 @@ public class WorkingSetMapLayersJob extends Job {
 	protected Map map;
 	protected ILayerListener[] listeners;
 	protected IEclipseContext context;
+	
+	private static HashMap<String,String> defaultEntityStyles = new HashMap<>();
+	static {
+		defaultEntityStyles.put(LocationLayerType.POINT.name(), WsEntityRecordPointObservationDefaultStyle.KEY);
+		defaultEntityStyles.put(LocationLayerType.POLYGON.name(), WsEntityRecordPolygonObservationDefaultStyle.KEY);
+		defaultEntityStyles.put(LocationLayerType.DM_OBS.name(), WsEntityDataModelObservationDefaultStyle.KEY);
+		defaultEntityStyles.put(LocationLayerType.ATTRIBUTE.name(), WsEntityPositionAttributeDefaultStyle.KEY);
+	}
+	private static HashMap<String,String> defaultRecordStyles = new HashMap<>();
+	static {
+		defaultRecordStyles.put(LocationLayerType.POINT.name(), WsRecordPointObservationDefaultStyle.KEY);
+		defaultRecordStyles.put(LocationLayerType.POLYGON.name(), WsRecordPolygonObservationDefaultStyle.KEY);
+	}
+	
+	private static HashMap<String,String> defaultQueryStyles = new HashMap<>();
+	static {
+		defaultQueryStyles.put(QueryDataSource.POINT_TYPE.getLocalPart(), WsRecordObservationQueryPointDefaultStyle.KEY);
+		defaultQueryStyles.put(QueryDataSource.POLYGON_TYPE.getLocalPart(), WsRecordObservationQueryPolygonDefaultStyle.KEY);
+	}
 	
 	private ISchedulingRule MUTEX = new ISchedulingRule() {
 		
@@ -149,17 +180,17 @@ public class WorkingSetMapLayersJob extends Job {
 					s.beginTransaction();
 					if (resource.getResourceType() == IntelWorkingSetCategory.ENTITY){
 						//find working set
-						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetEntity i WHERE i.id.entity.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetEntity i WHERE i.id.entity.uuid = :uuid and i.id.workingSet.uuid = :uuid2", IntelWorkingSetEntity.class); //$NON-NLS-1$
 						q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
 						q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
 						workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
 					}else if (resource.getResourceType() == IntelWorkingSetCategory.RECORD){
-						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetRecord i WHERE i.id.record.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetRecord i WHERE i.id.record.uuid = :uuid and i.id.workingSet.uuid = :uuid2", IntelWorkingSetRecord.class); //$NON-NLS-1$
 						q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
 						q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
 						workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
 					}else if (resource.getResourceType() == IntelWorkingSetCategory.QUERIES){
-						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetQuery i WHERE i.id.query.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetQuery i WHERE i.id.query.uuid = :uuid and i.id.workingSet.uuid = :uuid2", IntelWorkingSetQuery.class); //$NON-NLS-1$
 						q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
 						q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
 						workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
@@ -435,6 +466,8 @@ public class WorkingSetMapLayersJob extends Job {
 							 StyleBlackboard bb = layerStyles.get(styleId);
 							 if (bb != null){
 								 layer.setStyleBlackboard(bb);
+							 }else {
+								 applyDefaultStyle(monitor, layer);
 							 }
 							 
 							 boolean visible = false;
@@ -469,6 +502,8 @@ public class WorkingSetMapLayersJob extends Job {
 							StyleBlackboard bb = layerStyles.get(styleId);
 							if (bb != null) {
 								layer.setStyleBlackboard(bb);
+							}else {
+								applyDefaultStyle(monitor, layer);
 							}
 							boolean visible = false;
 							for(LayerInfo rr : toAdd){
@@ -507,6 +542,30 @@ public class WorkingSetMapLayersJob extends Job {
         	 
         	 map.getRenderManager().refresh(null);
 		}
+	}
+	
+	private void applyDefaultStyle(IProgressMonitor monitor, Layer layer)
+			throws WorkbenchException, IOException {
+		//attempt to apply default style
+		 if (layer.getGeoResource().canResolve(IntelRecordService.class)) {
+			 try(Session session = HibernateManager.openSession()){
+				 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+					 SmartDB.getCurrentConservationArea(), 
+					 layer, defaultRecordStyles, session, monitor);
+			 }
+		 }else if (layer.getGeoResource().canResolve(IntelEntityService.class)) {
+			 try(Session session = HibernateManager.openSession()){
+				 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+					 SmartDB.getCurrentConservationArea(), 
+					 layer, defaultEntityStyles, session, monitor);
+			 }
+		 }else if (layer.getGeoResource().canResolve(QueryService.class)) {
+			 try(Session session = HibernateManager.openSession()){
+				 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+					 SmartDB.getCurrentConservationArea(), 
+					 layer, defaultQueryStyles, session, monitor);
+			 }
+		 }
 	}
 
 	/*

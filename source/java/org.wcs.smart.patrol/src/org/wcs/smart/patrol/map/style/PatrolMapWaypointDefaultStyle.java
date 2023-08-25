@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol.map.style;
 
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
  * Patrol map page default waypoint style
@@ -29,7 +29,7 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
  * @author Emily
  *
  */
-public class PatrolMapWaypointDefaultStyle implements MapLayerDefaultStyle {
+public class PatrolMapWaypointDefaultStyle implements IMapLayerDefaultStyle {
 
 	public static final String KEY = "org.wcs.smart.patrol.map.waypoint";  //$NON-NLS-1$
 	

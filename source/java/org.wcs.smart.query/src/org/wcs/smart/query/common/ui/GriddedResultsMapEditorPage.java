@@ -37,6 +37,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -52,15 +53,19 @@ import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayerCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
@@ -181,13 +186,28 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 					if (parentEditor.getQueryProxy().getQuery() instanceof IStyledQuery) {
 						// update layer style
 						final IStyledQuery sq = ((IStyledQuery) parentEditor.getQueryProxy().getQuery());
-						ILayer layer = getLayers().get(0);
+						Layer layer = getLayers().get(0);
+						
+						
+						
+
 						if (sq.getStyle() != null) {
 							QueryStyleParser.INSTANCE.applyStyle(sq, RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
 							//do this to ensure the correct events are fired
-							((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
-						}
+							layer.setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
+						}else {
+							//apply the default style
+							IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(parentEditor.getQueryProxy().getQuery().getTypeKey());
+							
+							java.util.Map<String,String> styleMappings = qtype.getDefaultStyleMappings();
+							styleMappings.put(layer.getGeoResource().getIdentifier().getRef(), styleMappings.get(RasterService.GRIDDED_TYPE));
+							try(Session session = HibernateManager.openSession()){
+								StyleManager.INSTANCE.applyDefaultStyleToMapLayer(parentEditor.getQueryProxy().getQuery().getConservationArea(),  
+										layer, styleMappings, session, monitor);
+							}
 
+						}
+						
 						// add style listener
 						layer.addListener(styleListener);
 					}	 

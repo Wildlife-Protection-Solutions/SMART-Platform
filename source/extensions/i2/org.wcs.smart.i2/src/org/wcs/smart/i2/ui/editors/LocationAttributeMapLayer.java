@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,6 +35,7 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -46,13 +48,17 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.StyleUtil;
+import org.wcs.smart.i2.map.style.RecordPositionAttributeDefaultStyle;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelValueItem;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -67,13 +73,14 @@ public class LocationAttributeMapLayer {
 	private Map map;
 	private String layerName;
 	private String uniqueId;
-
+	private String defaultStyleKey;
 	private Layer layer;
 
-	public LocationAttributeMapLayer(Map map, String layerName, String uniqueId) {
+	public LocationAttributeMapLayer(Map map, String layerName, String uniqueId, String defaultStyleKey) {
 		this.map = map;
 		this.layerName = layerName;
 		this.uniqueId = uniqueId;
+		this.defaultStyleKey = defaultStyleKey;
 	}
 
 	private SimpleFeatureType createFeatureType() throws SchemaException{
@@ -213,6 +220,15 @@ public class LocationAttributeMapLayer {
 					layer.setName(layerName);
 					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", StyleUtil.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
 					layer.refresh(null);
+					
+					java.util.Map<String,String> defaultStyles = new HashMap<>();
+					defaultStyles.put(layer.getGeoResource().getIdentifier().getRef(), defaultStyleKey);
+					
+					try(Session session = HibernateManager.openSession()){
+						 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+							 SmartDB.getCurrentConservationArea(),
+							 (Layer)layer, defaultStyles, session, monitor);
+					 }
 				}
 			};
 			map.sendCommandASync(addLayers);

@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayerListener;
@@ -39,9 +40,13 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.map.style.RecordObservationPointDefaultStyle;
+import org.wcs.smart.i2.map.style.RecordObservationPolygonDefaultStyle;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.udig.query.QueryDataSource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.ui.editors.MapComposite;
 import org.wcs.smart.udig.style.StyleManager;
@@ -61,6 +66,13 @@ public class QueryMapPanel extends MapComposite {
 
 	private QueryService service = null;
 	private List<Layer> mapLayers = null;
+	
+	private static HashMap<String,String> defaultStyles = new HashMap<>();
+	static {
+		defaultStyles.put(QueryDataSource.POINT_TYPE.getLocalPart(), RecordObservationPointDefaultStyle.KEY);
+		defaultStyles.put(QueryDataSource.POLYGON_TYPE.getLocalPart(), RecordObservationPolygonDefaultStyle.KEY);
+	}
+	
 	
 	public void updateQueryLayers(IPagedQueryResultSet results){
 		if (isDisposed()) return;
@@ -93,6 +105,7 @@ public class QueryMapPanel extends MapComposite {
 						
 						String style = ((IntelRecordObservationQueryEditor)editor).getQuery().getStyle();
 						Map<String, StyleBlackboard> styles = null;;
+						
 						if (style != null){
 							styles = StyleManager.INSTANCE.fromStringMap(style);
 						}
@@ -100,6 +113,12 @@ public class QueryMapPanel extends MapComposite {
 							if (styles != null){
 								StyleBlackboard sb = styles.get(l.getGeoResource().getIdentifier().getRef());
 								if (sb != null) l.setStyleBlackboard(sb);
+							}else {
+								try(Session session = HibernateManager.openSession()){
+									StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+										((IntelRecordObservationQueryEditor)editor).getQuery().getConservationArea(),
+										l,  defaultStyles, session, monitor);
+								}
 							}
 							
 							l.addListener(new ILayerListener() {	

@@ -204,12 +204,12 @@ public class QueryItemPanel extends AbstractQueryItemPanel {
 							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 							.list();
 					
-					ainput.stationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetStationAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
+					ainput.stationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT attribute FROM AssetStationAttribute WHERE attribute.conservationArea = :ca and attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
 							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
 							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 							.list();
 					
-					ainput.stationLocationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetStationLocationAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
+					ainput.stationLocationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT attribute FROM AssetStationLocationAttribute WHERE attribute.conservationArea = :ca and attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
 							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
 							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 							.list();

@@ -112,6 +112,7 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
 
 	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
 	                || adaptee.isAssignableFrom(IService.class)
+	                || adaptee.isAssignableFrom(IntelRecordService.class)
 	                || adaptee.isAssignableFrom(FeatureSource.class)
 	                || adaptee.isAssignableFrom(FeatureStore.class)
 	                || adaptee.isAssignableFrom(SimpleFeatureStore.class)
@@ -128,6 +129,9 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
     		return adaptee.cast(super.getInfo(monitor));
     	}
         if( adaptee.isAssignableFrom(IService.class) ){
+            return adaptee.cast( this.service );
+        }
+        if( adaptee.isAssignableFrom(IntelRecordService.class) ){
             return adaptee.cast( this.service );
         }
         if (adaptee.isAssignableFrom(IWorkingSetResource.class)){

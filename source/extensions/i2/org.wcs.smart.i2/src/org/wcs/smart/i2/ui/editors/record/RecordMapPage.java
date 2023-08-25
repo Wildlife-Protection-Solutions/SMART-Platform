@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +58,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.core.internal.FeatureUtils;
@@ -68,8 +70,12 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.map.style.RecordPointObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.RecordPolygonObservationDefaultStyle;
+import org.wcs.smart.i2.map.style.RecordPositionAttributeDefaultStyle;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -77,6 +83,7 @@ import org.wcs.smart.i2.udig.record.IntelRecordDataSource;
 import org.wcs.smart.i2.udig.record.IntelRecordFeatureReader;
 import org.wcs.smart.i2.udig.record.IntelRecordFeatureSource;
 import org.wcs.smart.i2.ui.editors.LocationAttributeMapLayer;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -109,6 +116,12 @@ public class RecordMapPage extends SmartMapEditorPart {
 	private LocationListComposite locationPanel;
 	private ToolItem importItem ;
 	
+	private static HashMap<String,String> defaultStyles = new HashMap<>();
+	static {
+		defaultStyles.put(LocationLayerType.POINT.name(), RecordPointObservationDefaultStyle.KEY);
+		defaultStyles.put(LocationLayerType.POLYGON.name(), RecordPolygonObservationDefaultStyle.KEY);
+	}
+	
 	private Job localMapLayerJob = new Job(Messages.RecordMapPage_jobname) { 
 		
 		@SuppressWarnings("unchecked")
@@ -139,6 +152,12 @@ public class RecordMapPage extends SmartMapEditorPart {
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
 								 polygonLayer = getLayers().get(0);
 								 polygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POLYGON.getDefaultLayerStyle()); //$NON-NLS-1$
+								 
+								 try(Session session = HibernateManager.openSession()){
+									 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+										 recordEditor.getRecord().getConservationArea(), 
+										 (Layer)polygonLayer, defaultStyles, session, monitor);
+								 }
 							 }
 						 }
 					};
@@ -158,6 +177,11 @@ public class RecordMapPage extends SmartMapEditorPart {
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
 								 pointLayer = getLayers().get(0);
 								 pointLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POINT.getDefaultLayerStyle()); //$NON-NLS-1$
+								 try(Session session = HibernateManager.openSession()){
+									 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+										 recordEditor.getRecord().getConservationArea(), 
+										 (Layer)pointLayer, defaultStyles, session, monitor);
+								 }
 							 }
 						 }
 					};
@@ -245,7 +269,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		UUID id = recordEditor.getRecord().getUuid();
 		if (id == null) id = UUID.randomUUID();
 		
-		attributeLayer = new LocationAttributeMapLayer(getMap(), Messages.RecordMapPage_PositionMapLayerName, UuidUtils.uuidToString(id));
+		attributeLayer = new LocationAttributeMapLayer(getMap(), Messages.RecordMapPage_PositionMapLayerName, UuidUtils.uuidToString(id), RecordPositionAttributeDefaultStyle.KEY);
 		attributeLayer.createLayersRecord(recordEditor.getRecord().getAttributes());
 	}
 	

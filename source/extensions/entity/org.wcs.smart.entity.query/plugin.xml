@@ -303,4 +303,16 @@
             clazz="org.wcs.smart.entity.query.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.entity.query.map.style.EntityGridQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.entity.query.map.style.EntityWaypointQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.entity.query.map.style.EntityObservationQueryDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 </plugin>

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.incident.map;
 
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
  * Incident map page default waypoint style
@@ -29,7 +29,7 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
  * @author Emily
  *
  */
-public class IncidentMapWaypointRawDefaultStyle implements MapLayerDefaultStyle {
+public class IncidentMapWaypointRawDefaultStyle implements IMapLayerDefaultStyle {
 
 	public static final String KEY = "org.wcs.smart.incident.map.waypoint.projected";  //$NON-NLS-1$
 	

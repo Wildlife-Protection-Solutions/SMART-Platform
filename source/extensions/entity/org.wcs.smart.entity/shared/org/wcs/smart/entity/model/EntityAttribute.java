@@ -30,6 +30,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Represents a attribute associated
@@ -142,6 +143,7 @@ public class EntityAttribute extends NamedKeyItem {
 	@Override
 //	@Type(type="org.wcs.smart.ca.LabelUserType")
 //	@Column(name="uuid", insertable=false, updatable=false)
+	@Transient
 	public String getName() {
 		String n = super.getName();
 		if (n == null || n.length() == 0){

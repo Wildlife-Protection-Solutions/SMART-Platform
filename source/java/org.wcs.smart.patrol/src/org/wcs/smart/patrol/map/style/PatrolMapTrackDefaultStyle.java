@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol.map.style;
 
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
  * Patrol map page default track style
@@ -29,7 +29,7 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
  * @author Emily
  *
  */
-public class PatrolMapTrackDefaultStyle implements MapLayerDefaultStyle {
+public class PatrolMapTrackDefaultStyle implements IMapLayerDefaultStyle {
 
 	public static final String KEY = "org.wcs.smart.patrol.map.track"; //$NON-NLS-1$
 	

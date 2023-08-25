@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -40,8 +42,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -60,6 +60,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -70,6 +71,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
@@ -97,6 +100,7 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 import org.wcs.smart.udig.style.SmartLayerStyle;
 import org.wcs.smart.udig.style.StyleImageProducer;
 import org.wcs.smart.udig.style.StyleManager;
@@ -274,20 +278,55 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			}
 		});
 		
-		MenuManager mm = new MenuManager();
-		mm.add(new Action(DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
-			@Override
-			public void run(){
-				deleteStyle();
+		
+		Menu menu = new Menu(lstSmart.getControl());
+		
+		MenuItem miDelete = createMenuItem(menu, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->deleteStyle());
+		
+		MenuItem miRename = createMenuItem(menu, Messages.SmartStyleEditorDialog_RenameButton, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
+		miRename.addListener(SWT.Selection, e->renameStyle());
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem miDefault = new MenuItem(menu, SWT.CASCADE);
+		miDefault.setText("Set As Default For...");
+		try {
+			List<IMapLayerDefaultStyle> styles = StyleManager.INSTANCE.getDefaultStyleMapLayers();
+			Map<String, List<IMapLayerDefaultStyle>> stylesByMap = new HashMap<>();
+			List<String> sortedMaps = new ArrayList<>();
+			for (IMapLayerDefaultStyle s : styles) {
+				List<IMapLayerDefaultStyle> items = stylesByMap.get(s.getMapName());
+				if (items == null) {
+					items = new ArrayList<>();
+					stylesByMap.put(s.getMapName(), items);
+					sortedMaps.add(s.getMapName());
+				}
+				items.add(s);
 			}
-		});
-		mm.add(new Action(Messages.SmartStyleEditorDialog_RenameButton, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.RENAME_ICON)) {
-			@Override
-			public void run(){
-				renameStyle();
+			Collections.sort(sortedMaps);
+			Menu mapMenu = new Menu(miDefault);
+			miDefault.setMenu(mapMenu);
+			for (String map : sortedMaps) {
+				MenuItem mi = new MenuItem(mapMenu, SWT.CASCADE);
+				mi.setText(map + "...");
+				
+				Menu subMenu = new Menu(mi);
+				mi.setMenu(subMenu);
+				for (IMapLayerDefaultStyle style : stylesByMap.get(map)) {
+					MenuItem mi2 = new MenuItem(subMenu, SWT.PUSH);
+					mi2.setText(style.getLayerName());
+					mi2.addListener(SWT.Selection, e->setDefaultStyle(style));
+				}
 			}
-		});
-		lstSmart.getControl().setMenu(mm.createContextMenu(lstSmart.getControl()));
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+				
+			
+				
+				
+		lstSmart.getControl().setMenu(menu);
 		
 		
 		// -- Custom style configuration area --
@@ -393,6 +432,12 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		}
 	}
 	
+	private MenuItem createMenuItem(Menu m, String text, Image img) {
+		MenuItem mi = new MenuItem(m, SWT.PUSH);
+		mi.setText(text);
+		mi.setImage(img);
+		return mi;
+	}
 	/*
 	 * updates the style blackboard with the current selected 
 	 * smart style
@@ -734,6 +779,20 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
         updateStyleSelectionToMatchBlackboard();
     }
     
+    private void setDefaultStyle(IMapLayerDefaultStyle key) {
+    	Object item = lstSmart.getStructuredSelection().getFirstElement();
+    	if (!(item instanceof SmartStyle)) return;
+    	try(Session session = HibernateManager.openSession()){
+    		session.beginTransaction();
+    		try {
+    			StyleManager.INSTANCE.setDefaultStyle(key, ((SmartStyle)item), session);
+    			session.getTransaction().commit();
+    		}catch (Exception ex) {
+    			session.getTransaction().rollback();
+    			SmartPlugIn.displayLog(ex.getMessage(), ex);
+    		}
+    	}    	
+    }
    
     private void deleteStyle(){
     	setMessage(null);

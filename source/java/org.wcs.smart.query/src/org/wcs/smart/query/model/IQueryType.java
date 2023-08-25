@@ -22,12 +22,14 @@
 package org.wcs.smart.query.model;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 /**
  * Query type extension point.
  * 
@@ -149,4 +151,13 @@ public interface IQueryType {
 	 * @return
 	 */
 	public IDateFieldFilter[] getDateFilterOptions();
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	public default Map<String, String> getDefaultStyleMappings(){
+		return Collections.emptyMap();
+	}
 }

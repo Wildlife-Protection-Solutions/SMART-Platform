@@ -97,7 +97,7 @@ public class AddContentFilterLayersCommand extends AbstractCommand implements Un
 	                        // layer turn into layer
 	                        IGeoResource resource = (IGeoResource) o;
 	                        if (resource instanceof IFilteringResource && ((IFilteringResource)resource).canFilter()){
-	                        	layer = (new ContentFilterLayerFactory(getMap())).createLayer(resource);
+	                        	layer = (new ContentFilterLayerFactory(getMap(), initialFilter)).createLayer(resource);
 	                        }else{
 	                        	layer = defaultFactory.createLayer(resource);
 	                        }
@@ -106,12 +106,7 @@ public class AddContentFilterLayersCommand extends AbstractCommand implements Un
 	                        // leave as is; may not be a ContentFilterLayerImpl but add anyways
 	                        layer = (Layer) o;
 	                    }
-	                    if (layer != null) {
-	                    	if (layer instanceof ContentFilterLayerImpl){
-	                    		((ContentFilterLayerImpl) layer).setContentFilter(initialFilter);
-	                    	}
-	                        layers.add(layer);
-	                    }
+	                    if (layer != null) layers.add(layer);
 	                }
 	                catch (Throwable t){
 	                    ProjectPlugin.log("Unable to add "+o,t); //$NON-NLS-1$

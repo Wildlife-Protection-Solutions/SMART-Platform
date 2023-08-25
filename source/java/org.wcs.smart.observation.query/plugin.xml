@@ -283,5 +283,17 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.observation.query.map.style.ObservationGridQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.observation.query.map.style.ObservationWaypointQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.observation.query.map.style.ObservationObservationQueryDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 
 </plugin>

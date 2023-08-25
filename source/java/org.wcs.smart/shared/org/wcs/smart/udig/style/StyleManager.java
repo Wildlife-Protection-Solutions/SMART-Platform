@@ -111,14 +111,14 @@ public class StyleManager {
 	 * 
 	 * @throws CoreException
 	 */
-	public List<MapLayerDefaultStyle> getDefaultStyleMapLayers() throws CoreException{
+	public List<IMapLayerDefaultStyle> getDefaultStyleMapLayers() throws CoreException{
 	
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(MAP_CONFIG_EXT);
 		if (extensionPoint == null) return Collections.emptyList();
 	            
 		IExtension[] extensions = extensionPoint.getExtensions();
 
-		List<MapLayerDefaultStyle> items = new ArrayList<>();
+		List<IMapLayerDefaultStyle> items = new ArrayList<>();
 	        // For each extension ...
 	    for( int i = 0; i < extensions.length; i++ ) {
 	    	IExtension extension = extensions[i];
@@ -128,7 +128,7 @@ public class StyleManager {
 	        for( int j = 0; j < elements.length; j++ ) {
 	        	IConfigurationElement element = elements[j];
 	        	if (element.getName().equalsIgnoreCase(DEFAULT_STYLE_PNT)) {
-	        		MapLayerDefaultStyle p = (MapLayerDefaultStyle) element.createExecutableExtension("class"); //$NON-NLS-1$
+	        		IMapLayerDefaultStyle p = (IMapLayerDefaultStyle) element.createExecutableExtension("class"); //$NON-NLS-1$
 					items.add(p);				
 				}	
 	        }
@@ -184,12 +184,7 @@ public class StyleManager {
 						new Object[] { "key", StyleManager.CA_PROPERTY_KEY }) //$NON-NLS-1$
 				.uniqueResult();
 
-		if (currentProperty == null) {
-			currentProperty = new ConservationAreaProperty();
-			currentProperty.setConservationArea(ca);
-			currentProperty.setKey(StyleManager.CA_PROPERTY_KEY);
-			session.persist(currentProperty);
-		}
+		if (currentProperty == null) currentProperty = createDefaultProperty(ca, session);
 
 		JsonArray json = new JsonArray();
 		for (Entry<String, String> ss : allstyles.entrySet()) {
@@ -201,6 +196,19 @@ public class StyleManager {
 		currentProperty.setValue(json.toString());
 	}
 	
+	public void setDefaultStyle(IMapLayerDefaultStyle defaultStyleKey, SmartStyle style, Session session) {
+		Map<String,String> defaults = getDefaultStyles(style.getConservationArea(), session);
+		defaults.put(defaultStyleKey.getKey(), UuidUtils.uuidToString(style.getUuid()));
+		setDefaultStyles(style.getConservationArea(), defaults, session);
+	}
+	
+	private ConservationAreaProperty createDefaultProperty(ConservationArea ca, Session session) {
+		ConservationAreaProperty currentProperty = new ConservationAreaProperty();
+		currentProperty.setConservationArea(ca);
+		currentProperty.setKey(StyleManager.CA_PROPERTY_KEY);
+		session.persist(currentProperty);
+		return currentProperty;
+	}
 	
 	/**
 	 * Finds the default smart style associated with the given map key.
@@ -478,7 +486,7 @@ public class StyleManager {
 	
 	/**
 	 * To the layer find the appropriate style and apply it. The geoIdToMapStyle links
-	 * the georesource ID to the configured default map style key. The
+	 * the georesource ID reference to the configured default map style key. The
 	 * defaultStyles map is optional and is used if the configured default map style is not set or not found. It
 	 * links the default map style key to the supplier which creates a style blackboard.
 	 * If no style is found by either method, a style is resolved from the georesource.
@@ -494,9 +502,10 @@ public class StyleManager {
 			Map<String,String> geoIdToMapStyle, 
 			Map<String,Consumer<Layer>> defaultStyles, 
 			Session session, IProgressMonitor monitor) throws WorkbenchException, IOException {
+		
 		String styleKey = null;
 		for (Entry<String,String> item: geoIdToMapStyle.entrySet()) {
-			if (l.getGeoResource().getDisplayID().endsWith("#" + item.getKey())) { //$NON-NLS-1$
+			if (l.getGeoResource().getIdentifier().getRef().equals(item.getKey())) { 
 				styleKey =  item.getValue();
 				break;
 			}
@@ -518,8 +527,6 @@ public class StyleManager {
 	
 	public void applyDefaultStyleToMapLayer(ConservationArea ca, Layer l, Map<String,String> geoIdToMapStyle, Session session,
 			IProgressMonitor monitor) throws WorkbenchException, IOException {
-		this.applyDefaultStyleToMapLayer(ca, l, geoIdToMapStyle, Collections.emptyMap(), session, monitor);
-
-		
+		this.applyDefaultStyleToMapLayer(ca, l, geoIdToMapStyle, Collections.emptyMap(), session, monitor);	
 	}
 }

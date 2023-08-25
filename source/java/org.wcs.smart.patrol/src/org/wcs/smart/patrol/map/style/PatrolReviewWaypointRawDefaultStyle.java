@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol.map.style;
 
-import org.wcs.smart.udig.style.MapLayerDefaultStyle;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
  * Patrol review editor page default waypoint style
@@ -29,7 +29,7 @@ import org.wcs.smart.udig.style.MapLayerDefaultStyle;
  * @author Emily
  *
  */
-public class PatrolReviewWaypointRawDefaultStyle implements MapLayerDefaultStyle {
+public class PatrolReviewWaypointRawDefaultStyle implements IMapLayerDefaultStyle {
 
 	public static final String KEY = "org.wcs.smart.patrol.review.waypoint.raw";  //$NON-NLS-1$
 	
@@ -45,7 +45,7 @@ public class PatrolReviewWaypointRawDefaultStyle implements MapLayerDefaultStyle
 
 	@Override
 	public String getLayerName() {
-		return "Waypoint - (Raw Points)";
+		return "Waypoint (Raw Points)";
 	}
 
 }

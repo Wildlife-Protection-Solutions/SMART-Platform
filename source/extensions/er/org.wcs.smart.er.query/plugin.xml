@@ -444,5 +444,26 @@
             clazz="org.wcs.smart.er.query.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.query.map.style.MissionGridQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.query.map.style.MissionQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.query.map.style.MissionTrackQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.query.map.style.MissionWaypointQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.query.map.style.MissionObservationQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.query.map.style.MissionWaypointTrackQueryDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 
 </plugin>

@@ -357,4 +357,19 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.map.config">
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.query.map.style.PatrolObservationQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.query.map.style.PatrolWaypointQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.query.map.style.PatrolQueryDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.patrol.query.map.style.PatrolGridQueryDefaultStyle">
+      </defaultmaplayerstyle>
+   </extension>
 </plugin>

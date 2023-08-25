@@ -24,7 +24,9 @@ package org.wcs.smart.patrol.query.model.types;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +35,8 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
+import org.wcs.smart.patrol.query.map.style.PatrolObservationQueryDefaultStyle;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
@@ -65,7 +69,12 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
  *
  */
 public class PatrolObservationQueryType implements IMappableQueryType {
-
+	
+	private static final HashMap<String, String> styleMappings = new HashMap<>();
+	static{
+		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, PatrolObservationQueryDefaultStyle.KEY);
+	}
+	
 	private static IQueryDropItemFactory dropItemFactory = null;
 	
 	/**
@@ -245,5 +254,16 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 	 */
 	public boolean supportsReports(){
 		return true;
+	}
+	
+	
+	/**
+	 * 
+	 * @return a map that links a layer georesource id to the default style key
+	 * 
+	 */
+	@Override
+	public Map<String, String> getDefaultStyleMappings(){
+		return styleMappings;
 	}
 }
