@@ -234,7 +234,7 @@ public class ReportListView {
 		
 		reportList.setCellEditors(new CellEditor[] { new TextCellEditor(reportList.getTree()) });
 		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
-		reportList.setCellModifier(new ReportItemNameCellEditor());
+		reportList.setCellModifier(new ReportItemNameCellEditor(part.getContext()));
 		
 //		new TreeViewerFocusCellManager
 //				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));
@@ -418,9 +418,7 @@ public class ReportListView {
 				}
 			}
 			
-				
-					
-					//run job to update query folder
+			//run job to update query folder
 			Job internalUpdate = new Job("Move Reports Job"){ //$NON-NLS-1$
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

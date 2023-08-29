@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.swt.widgets.Item;
 import org.hibernate.Session;
@@ -33,6 +34,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 
@@ -45,20 +47,22 @@ import org.wcs.smart.report.model.ReportFolder;
 public class ReportItemNameCellEditor implements ICellModifier {
 
 	private boolean folderOnly = false;
+	private IEclipseContext context;
 	
 	/**
 	 * Creates a new cell editor
 	 */
-	public ReportItemNameCellEditor(){
-		this(false);
+	public ReportItemNameCellEditor(IEclipseContext context){
+		this(false, context);
 	}
 	
 	/**
 	 * Creates a new cell editor that only allows you to edit folders
 	 * not other items
 	 */
-	public ReportItemNameCellEditor(boolean folderOnly){
+	public ReportItemNameCellEditor(boolean folderOnly, IEclipseContext context){
 		this.folderOnly = folderOnly;
+		this.context = context;
 	}
 	
 	@Override
@@ -101,6 +105,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 								Messages.ReportItemNameCellEditor_Error_CouldNotSaveReport
 										+ ex.getLocalizedMessage(), ex);
 					}
+					ReportManager.updateReportTitle(toupdate, context);
 					ReportEventManager.getInstance().fireReportUpdated(toupdate);
 					
 				}

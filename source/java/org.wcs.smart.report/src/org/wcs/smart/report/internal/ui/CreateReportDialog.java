@@ -218,7 +218,7 @@ public class CreateReportDialog extends SmartStyledTitleDialog {
 		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
 		reportList.setCellEditors(new CellEditor[] { new TextCellEditor(reportList.getTree()) });
 		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
-		reportList.setCellModifier(new ReportItemNameCellEditor(true));
+		reportList.setCellModifier(new ReportItemNameCellEditor(true, null));
 		
 		new TreeViewerFocusCellManager
 				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));

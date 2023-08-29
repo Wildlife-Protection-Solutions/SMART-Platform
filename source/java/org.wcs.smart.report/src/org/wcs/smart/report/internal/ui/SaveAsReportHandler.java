@@ -54,7 +54,8 @@ import org.wcs.smart.ui.SmartStyledInputDialog;
 public class SaveAsReportHandler {
 
 	@Execute
-	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, final Shell activeShell){
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection,
+			final Shell activeShell){
 		if (thisSelection == null) return;
 		Report tocopy = null;
 		if (thisSelection instanceof Report) {
@@ -104,8 +105,8 @@ public class SaveAsReportHandler {
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();
 				ReportPlugIn.displayLog(Messages.NewReportHandler_Error_CouldNotCreateReport + ex.getLocalizedMessage(), ex);
 				return;
-			}
-
+			}			
+			ReportManager.updateReportTitle(report);
 		}
 	
 		ReportEventManager.getInstance().fireReportAdded(report);	

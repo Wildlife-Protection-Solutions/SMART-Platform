@@ -48,6 +48,8 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -375,4 +377,71 @@ public class ReportManager {
 		return handle.getExtensionID().equals(SMART_DATASET_TYPE) || handle.getExtensionID().equals(SMART_ATTACHMENT_DATASET_TYPE);
 	}
 
+	/**
+	 * Updates the metadata in the report title with the current report name. You
+	 * should only use this when the report is a new report, otherwise you should use
+	 * updateReporttitle(report, context) and provide the context
+	 * so if the existing report is open the open file will get updated
+	 * 
+	 * @param report
+	 */
+	//see ticket #3456
+	public static void updateReportTitle(Report report) {
+		updateReportTitle(report, null);
+	}
+	/**
+	 * Updates the metadata in the report title with the current report name. 
+	 * If the report is being editing the existing editor is found and
+	 * the report via that editor so other changes are not lost.
+	 * 
+	 * @param report
+	 */
+	//see ticket #3456	
+	public static void updateReportTitle(Report report, IEclipseContext context) {
+		//find if report is being editting
+		//if so update the title in the open editor
+		if (context != null) {
+			EPartService partService = context.get(EPartService.class);
+	
+			for (MPart part : partService.getParts()) {
+				Object thispart = E3Utils.getSourceObject(part);
+				if (thispart instanceof  RCPMultiPageReportEditor) {
+					
+					RCPMultiPageReportEditor editor = (RCPMultiPageReportEditor)thispart;
+					
+					IEditorInput input = editor.getEditorInput();
+					if (input instanceof SmartReportEditorInput) {
+						if (((SmartReportEditorInput)input).getReport().getUuid().equals(report.getUuid())) {
+							//update the report and return
+							Display.getDefault().syncExec(()->{
+								try {
+									if (editor.isDirty()) {
+										editor.getModel().setTitle(report.getName());
+									}else {
+										editor.getModel().setTitle(report.getName());
+										editor.doSave(null);
+									}
+								} catch (Exception e) {
+									ReportPlugIn.log(e.getMessage(), e);
+								}
+							});
+							return;
+						}
+					}
+				}
+			}
+		}
+		
+		
+		try {
+			//rename title in file
+			SessionHandle handle = SessionHandleAdapter.getInstance().getSessionHandle();
+			ReportDesignHandle rdh = handle.openDesign(report.getFullPath().toString());
+			rdh.setTitle(report.getName());
+			rdh.save();
+			rdh.close();
+		}catch (Exception ex) {
+			ReportPlugIn.log(ex.getMessage(), ex);
+		}
+	}
 }

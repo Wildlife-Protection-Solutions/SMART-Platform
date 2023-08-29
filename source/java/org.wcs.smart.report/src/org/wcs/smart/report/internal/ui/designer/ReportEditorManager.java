@@ -351,7 +351,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 							return;
 						}
 					}
-
+					
 					//update editor input
 					final SmartReportEditorInput input = new SmartReportEditorInput(copy);
 					try{			
@@ -369,6 +369,9 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_createFileError + ex.getLocalizedMessage(), ex);
 						return;
 					}
+					
+
+					ReportManager.updateReportTitle(copy);
 					
 					//open new editor and close me
 					editor.getSite().getShell().getDisplay().syncExec(new Runnable(){
