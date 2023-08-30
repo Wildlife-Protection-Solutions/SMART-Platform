@@ -203,12 +203,12 @@ window.onload = function() {
 			// clicking on the folder toggles the folder icon
 			// as well as toggling the display of the folder contents
 			const folderIcon = element.getElementsByClassName('folder-icon')[0];
-			if(folderIcon.classList.contains('fa-folder-open-o')) {
-				folderIcon.classList.remove('fa-folder-open-o');
-				folderIcon.classList.add('fa-folder-o');
+			if(folderIcon.classList.contains('fa-folder-open')) {
+				folderIcon.classList.remove('fa-folder-open');
+				folderIcon.classList.add('fa-folder');
 			} else {
-				folderIcon.classList.remove('fa-folder-o');
-				folderIcon.classList.add('fa-folder-open-o')
+				folderIcon.classList.remove('fa-folder');
+				folderIcon.classList.add('fa-folder-open')
 			}
 			toggleDisplay(element.nextElementSibling);
 		} else if(element.classList.contains('folder-item')) {
@@ -276,7 +276,7 @@ function addFolder(data, parent, parentName) {
 	var folderDiv = document.createElement('div');
 	folderDiv.classList.add('folder');
 	parent.appendChild(folderDiv);
-	folderDiv.innerHTML = "<div class=\"folder-name\"><i class=\"folder-icon fa fa-folder-open-o fa-lg\"></i>" + data['name'] + "</div>";
+	folderDiv.innerHTML = "<div class=\"folder-name\"><i class=\"folder-icon fa-regular fa-folder-open fa-lg\"></i>" + data['name'] + "</div>";
 	var folderContentsDiv = document.createElement('div');
 	folderContentsDiv.classList.add('folder-contents');
 	folderDiv.appendChild(folderContentsDiv);

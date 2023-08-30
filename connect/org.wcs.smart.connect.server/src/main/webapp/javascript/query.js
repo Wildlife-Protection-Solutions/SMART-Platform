@@ -142,19 +142,19 @@ window.onload = function(){
 			const folderIcon = element.getElementsByClassName('folder-icon')[0];
 			
 			if (openonly){
-				if(!folderIcon.classList.contains('fa-folder-open-o')) {
-					folderIcon.classList.remove('fa-folder-o');
-					folderIcon.classList.add('fa-folder-open-o')
+				if(!folderIcon.classList.contains('fa-folder-open')) {
+					folderIcon.classList.remove('fa-folder');
+					folderIcon.classList.add('fa-folder-open')
 					toggleDisplay(element.nextElementSibling);
 				}
 			}else{
 			
-				if(folderIcon.classList.contains('fa-folder-open-o')) {
-					folderIcon.classList.remove('fa-folder-open-o');
-					folderIcon.classList.add('fa-folder-o');
+				if(folderIcon.classList.contains('fa-folder-open')) {
+					folderIcon.classList.remove('fa-folder-open');
+					folderIcon.classList.add('fa-folder');
 				} else {
-					folderIcon.classList.remove('fa-folder-o');
-					folderIcon.classList.add('fa-folder-open-o')
+					folderIcon.classList.remove('fa-folder');
+					folderIcon.classList.add('fa-folder-open')
 				}
 				toggleDisplay(element.nextElementSibling);
 
@@ -573,7 +573,7 @@ function handleQueries() {
 	folderDiv.classList.add('folder');
 	folderDiv.dataset.selected=true;
 	parent.appendChild(folderDiv);
-	folderDiv.innerHTML = "<div class=\"folder-name folder-selected\" data-folderid=\"-1\" style=\"white-space:nowrap; padding-top:5px; padding-bottom:5px;\"><i style=\"padding-right: 5px\" class=\"folder-icon fa fa-folder-open-o fa-lg\" ></i><span class=\"folder-label\">" + i18n("query.allqueries")  + "</span></div>";
+	folderDiv.innerHTML = "<div class=\"folder-name folder-selected\" data-folderid=\"-1\" style=\"white-space:nowrap; padding-top:5px; padding-bottom:5px;\"><i style=\"padding-right: 5px\" class=\"folder-icon fa-regular fa-folder-open fa-xl\" ></i><span class=\"folder-label\">" + i18n("query.allqueries")  + "</span></div>";
 	var folderContentsDiv = document.createElement('div');
 	folderContentsDiv.classList.add('folder-contents');
 	folderDiv.appendChild(folderContentsDiv);
@@ -601,11 +601,11 @@ function addFolder(data, parent, path, level) {
 	}
 	path += data['name'];
 
-	var icon = "fa-folder-open-o";
+	var icon = "fa-folder-open";
 	var display = "";
 	if (level > 0){
 		//hide this folder
-		icon = "fa-folder-o";
+		icon = "fa-folder";
 		display = "none";
 	}
 	
@@ -618,7 +618,7 @@ function addFolder(data, parent, path, level) {
 	
 	folderDiv.appendChild(foldernamediv);
 	
-	foldernamediv.innerHTML = "<i style=\"padding-right: 5px\" class=\"folder-icon fa " + icon + " fa-lg\" ></i><span class=\"folder-label\">" + data['name'] + "</span>";
+	foldernamediv.innerHTML = "<i style=\"padding-right: 5px\" class=\"folder-icon fa-regular " + icon + " fa-xl\" ></i><span class=\"folder-label\">" + data['name'] + "</span>";
 	
 	var folderContentsDiv = document.createElement('div');
 	folderContentsDiv.classList.add('folder-contents');

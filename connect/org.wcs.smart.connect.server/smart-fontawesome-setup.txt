@@ -1,0 +1,2 @@
+The fontawesome files in the webapp/css/fontawesome folder were downloaded from https://fontawesome.com/download. Currently downloaded is v6.4.2 (August 2023). The downloaded file was unzipped and the required files placed in the webapp/css/fontawesome folder. These files include: css/fontawesome.min.css, css/regular.min.css, css/solid.min.css, webfonts/fa-regular-400.ttf, webfonts/fa-regular-400.woff2, webfonts/fa-solid-900.ttf, webfonts/fa-solid-900.woff2, fa-v4compatibility.ttf, fa-v4compatibility.woff2.   
+

@@ -5,15 +5,18 @@ var DEFAULTS_URL = "../api/connectalertfilterdefault/";
 var ACTION_URL = STYLE_URL + "actions/";
 var allActions = null;
 
-//A selection of icons, the full list, which you can type into the text box is at http://fortawesome.github.io/Font-Awesome/icons/
+//A selection of icons, the full list, which you can type into the text box is at 
+//https://fontawesome.com/v6/search?o=r&m=free
 
-var iconOptions = ["ambulance","asterisk","battery-quarter","binoculars","bomb","bug","bullseye","bus","bullhorn","car","check","circle","cog",
-                   "clipboard","cloud","crosshairs","exclamation","eye","fire","flask","gavel","group","heartbeat","home","leaf","money","motorcycle","pause","paw","user",                  
-                   "plane","play","stop","tree","trophy"];
+var iconOptions = ["ambulance","asterisk","battery-quarter","binoculars","bomb","bug","bullseye","bus","bullhorn","car-side","check","circle","cog","clipboard",
+"cloud","crosshairs","exclamation","eye","fire","fish","flask","gavel","heartbeat","hippo","house","leaf","motorcycle","pause","paw",
+"people-group","person","person-walking","plane","play","shield-halved","ship","star","stop","tent","tree","trophy","truck-pickup","user"];
 
-var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb","bug","bullseye","bus","bullhorn","car","check","circle","cog",
-                         "clipboard","cloud","crosshairs","exclamation","eye","fire","flask/chemical","gavel","group of people", "heartbeat","home","leaf","money",
-                         "motorcycle","pause","paw","person","plane","play","stop","tree","trophy"];
+
+var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb","bug","bullseye","bus","bullhorn","car (side)","check","circle",
+"cog","clipboard","cloud","crosshairs","exclamation","eye","fire","fish","flask/chemical","gavel","heartbeat","hippo","house/home","leaf",
+"motorcycle","pause","paw","people group","person","person walking","plane","play","shield halved","ship","star","stop","tent","tree",
+"trophy","truck pickup","user"];
 
 
 /* configure events on html elements */

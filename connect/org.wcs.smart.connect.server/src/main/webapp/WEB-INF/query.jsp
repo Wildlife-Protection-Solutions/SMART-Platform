@@ -10,8 +10,10 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/sharedlinkfunctions.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
 	
 	<script type="text/javascript" >
 		var search="${search}";

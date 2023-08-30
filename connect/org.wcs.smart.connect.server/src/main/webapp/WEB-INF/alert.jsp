@@ -7,7 +7,6 @@
 <%@include file="includes.jsp" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet/leaflet.css" />
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet/leaflet.awesome-markers.css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet.awesome-markers.js"></script>
@@ -21,6 +20,10 @@
 <script src="https://maps.google.com/maps/api/js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
+	
 <script type="text/javascript" >
 	var mobile="${mobile}";
 	var tab = ${tab};

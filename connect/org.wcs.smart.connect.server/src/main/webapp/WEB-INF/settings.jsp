@@ -8,13 +8,17 @@
 <script type="text/javascript" >
 	var numStyles=${numstyles};
 </script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet/leaflet.awesome-markers.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/settings.js"></script>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
+	
 <title><fmt:message key="settings.title" /></title>
 </head>
 <body style="${style_bodycss}">
@@ -322,7 +326,7 @@ font-size: 40px;</textarea>
 			<select id="type_markerIcon" class="formtext" style="width: auto !important" name="type_markerIcon">
 		<!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->				
 			</select> <fmt:message key="settings.oroneof"/> 
-			<a title="<fmt:message key="settings.iconHover" />" target="_blank" href="https://fontawesome.com/v4/icons/">
+			<a title="<fmt:message key="settings.iconHover" />" target="_blank" href="https://fontawesome.com/v6/search?o=r&m=free">
 			(<fmt:message key="settings.list" />)</a>:
 			<input class="formtext" type="text" name="iconOveride" id="iconOveride" style="width: auto !important" value=""/>
 			</span>
