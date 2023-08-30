@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -142,6 +143,21 @@ public class CleanUpJob implements Runnable {
 							//only check files here as directories as likely being used
 							//to process item
 							checkAndDelete(s, path);
+						}else {
+							//there are a number of connect servers where temp filestores are large
+							//#3572
+							//the upload & downloads are the only processes that use this 
+							//so it's safe to delete everything older than a few days - we'll make it 7					 
+							if (Files.getLastModifiedTime(path).toInstant().plus( (long)7, ChronoUnit.SECONDS).isBefore(Instant.now())) {
+								//delete directory and all contents
+								try {
+									logger.log(Level.INFO, "Deleting " + path.toFile()); //$NON-NLS-1$
+									FileUtils.forceDelete(path.toFile());
+								}catch(Throwable t) {
+									logger.log(Level.SEVERE, t.getMessage(), t);
+								}
+							}
+							
 						}
 					}
 				}
