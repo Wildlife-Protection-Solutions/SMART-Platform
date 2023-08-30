@@ -299,10 +299,12 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 	
 	private void addCategory(Category category){
+		
 		final CmNode node = new CmNode();
 		node.setModel(getModel());
 		node.setCategory(category);
-
+		session.persist(node);
+		
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		category.getAllAttribute(attrList, true);
 		for (Attribute a : attrList) {
@@ -321,6 +323,7 @@ public abstract class AbstractInfoComposite extends Composite {
 				ensureDefaultListExists(a);
 				cma.setConfig(getModel().getDefaultConfigs().get(a));
 			}
+			session.persist(cma);
 		}
 		//we need to call this part in the main ui thread
 		Display.getDefault().syncExec(new Runnable() {

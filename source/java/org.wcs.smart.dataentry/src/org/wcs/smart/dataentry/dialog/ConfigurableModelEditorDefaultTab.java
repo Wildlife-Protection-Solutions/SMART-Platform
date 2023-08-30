@@ -219,6 +219,23 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		for (final ControlButton cbtn : ControlButton.values()){
+			Button btn = new Button(buttonPanel, SWT.PUSH);
+			btn.setText(cbtn.name);
+			btn.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
+			if (cbtn == ControlButton.ADD_CATEGORY || cbtn == ControlButton.ADD_GROUP) {
+				btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			}else if (cbtn == ControlButton.DELETE) {
+				btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			}
+			
+			btn.addListener(SWT.Selection, e->doControlButtonPress(cbtn));				
+			btn.setEnabled(false);
+			dialog.setButtonLayoutData(btn);
+			controlButtons.put(cbtn,btn);
+		}
+		
 		Menu treeMenu = new Menu(modelTreeViewer.getControl());
 		
 		
