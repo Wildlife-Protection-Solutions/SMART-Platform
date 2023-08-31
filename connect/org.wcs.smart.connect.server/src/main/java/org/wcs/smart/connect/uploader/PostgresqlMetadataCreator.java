@@ -56,7 +56,7 @@ public class PostgresqlMetadataCreator {
 	public static void generateMetadata(Session session, 
 			UUID caUuid, Path file, long revision, WorkItem item) throws Exception{
 		
-		ConservationAreaInfo ca = (ConservationAreaInfo) session.getReference(ConservationAreaInfo.class, caUuid);
+		ConservationAreaInfo ca = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, caUuid);
 		if (ca == null){
 			throw new Exception(Messages.getString("PostgresqlMetadataCreator.CaNotFound", item.getLocale())); //$NON-NLS-1$
 		}

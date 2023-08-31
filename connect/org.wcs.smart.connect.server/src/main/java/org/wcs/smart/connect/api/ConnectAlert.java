@@ -934,7 +934,7 @@ public class ConnectAlert extends HttpServlet {
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try{
-			existingAlert = s.getReference(existingAlert);
+			existingAlert = s.get(Alert.class, existingAlert.getUuid());
 			
 			//update the user generated id 
 			if (newAlert.getUserGeneratedId() != null) existingAlert.setUserGeneratedId(newAlert.getUserGeneratedId());

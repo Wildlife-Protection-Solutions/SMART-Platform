@@ -92,7 +92,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			}
 			
 			//update item status
-			item = session.getReference(item);
+			item = session.get(WorkItem.class, item.getUuid());
 			item.setPercentComplete(100);
 			item.setStatus(Status.COMPLETE);
 			

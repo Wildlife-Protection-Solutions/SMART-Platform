@@ -104,7 +104,7 @@ public class PostgresqlCaLoader {
 		
 		try(Session session = this.session.getSessionFactory().openSession()){
 			session.beginTransaction();
-			WorkItem toUpdate = session.getReference(this.item);
+			WorkItem toUpdate = session.get(WorkItem.class, this.item.getUuid());
 			toUpdate.setPercentComplete(percent);
 			if (message != null) toUpdate.setMessage(message);
 			session.getTransaction().commit();			
