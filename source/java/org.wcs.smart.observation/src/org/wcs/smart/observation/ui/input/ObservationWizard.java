@@ -500,7 +500,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				}
 				//persist any new 
 				for (WaypointObservationGroup g : wp.getObservationGroups()) {
-					if (g.getUuid() == null) session.persist(g);
+					if (g.getUuid() == null) {
+						List<WaypointObservation> temp = g.getObservations();
+						g.setObservations(null);
+						session.persist(g);
+						g.setObservations(temp);
+					}
 					for(WaypointObservation wo : g.getObservations()) {
 						if (wo.getUuid() == null) session.persist(wo);
 						for (ObservationAttachment oa : wo.getAttachments()) {
