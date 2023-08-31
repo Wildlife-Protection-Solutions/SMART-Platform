@@ -272,7 +272,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				
 			}
 		} catch (Exception e) {
-			ConnectPlugIn.displayLog(Messages.ExportCtPackageToConnect_NavUploadError + e.getMessage(), e);
+			ConnectPlugIn.displayLog(Messages.ExportCtPackageToConnect_UploadError + e.getMessage(), e);
 		}
 	}
 	

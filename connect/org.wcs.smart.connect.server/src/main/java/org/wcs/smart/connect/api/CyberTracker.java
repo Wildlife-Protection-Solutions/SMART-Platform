@@ -580,13 +580,13 @@ public class CyberTracker extends HttpServlet{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
 			}
 
+			boolean isnew = false;
 			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, "ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			if (ctpackage == null) {
 				ctpackage = new CyberTrackerPackage();
 				ctpackage.setConservationArea(cainfo);
 				ctpackage.setCtPackageUuid(packageUuid);
-				
-				s.persist(ctpackage);
+				isnew = true;
 			}else {
 				if (ctpackage.getStatus() == Status.UPLOADING) {
 					throw new SmartConnectException(Response.Status.CONFLICT, Messages.getString("CyberTracker.PackageUploadingError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -612,6 +612,7 @@ public class CyberTracker extends HttpServlet{
 			sb.append(".zip"); //$NON-NLS-1$
 			ctpackage.setFilename(sb.toString());
 			
+			if (isnew) s.persist(ctpackage);
 			
 			//delete file
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
@@ -720,11 +721,12 @@ public class CyberTracker extends HttpServlet{
 			}
 
 			CyberTrackerNavigationLayer ctpackage = QueryFactory.buildQuery(s, CyberTrackerNavigationLayer.class, "uuid", navUuid).uniqueResult(); //$NON-NLS-1$
+			boolean isnew = false;
 			if (ctpackage == null) {
 				ctpackage = new CyberTrackerNavigationLayer();
 				ctpackage.setConservationArea(cainfo);
 				ctpackage.setUuid(navUuid);
-				s.persist(ctpackage);
+				isnew = true;
 			}else {
 				if (ctpackage.getStatus() == org.wcs.smart.connect.model.CyberTrackerNavigationLayer.Status.UPLOADING) {
 					throw new SmartConnectException(Response.Status.CONFLICT, Messages.getString("CyberTracker.PackageUploadingError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -748,6 +750,8 @@ public class CyberTracker extends HttpServlet{
 			sb.append(UuidUtils.uuidToString(ctpackage.getUuid()));
 			sb.append(".zip"); //$NON-NLS-1$
 			ctpackage.setFilename(sb.toString());
+			
+			if (isnew) s.persist(ctpackage);
 			
 			//delete any existing file
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
