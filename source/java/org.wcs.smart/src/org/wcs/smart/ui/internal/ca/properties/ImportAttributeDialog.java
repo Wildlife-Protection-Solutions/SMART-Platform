@@ -173,7 +173,7 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 			}
 			
 		};
-		FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true, false);
+		FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true, true);
 		
 		tv1 = fTree.getViewer();
 		tv1.setLabelProvider(nodeTypeLabelProvider);

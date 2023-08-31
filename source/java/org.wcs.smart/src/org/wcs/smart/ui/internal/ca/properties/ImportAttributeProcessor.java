@@ -78,12 +78,14 @@ public class ImportAttributeProcessor {
 	private List<AttributeTreeNode> workingRoots = null;
 	private String defaultLangCode = null;
 	private String currentKey = null;
+	private Session session = null;
 	
 	public ImportAttributeProcessor(String currentKey, Attribute attribute, 
-			List<AttributeTreeNode> workingRootNodes){
+			List<AttributeTreeNode> workingRootNodes, Session session){
 		this.currentKey = currentKey;
 		this.attribute = attribute;
 		this.workingRoots = workingRootNodes;
+		this.session = session;
 	}
 	
 	
@@ -347,17 +349,12 @@ public class ImportAttributeProcessor {
 		matchedAttribute = null;
 		defaultLangCode = null;
 		
-		List<Icon> icons;
-		List<IconSet> sets;
-		try(Session session = HibernateManager.openSession()){
-			
-			icons = IconManager.INSTANCE.getIcons(session, attribute.getConservationArea());
+		List<Icon> icons = IconManager.INSTANCE.getIcons(session, attribute.getConservationArea());
 			icons.addAll(IconManager.INSTANCE.getSystemIcons(session, attribute.getConservationArea()));
 
-			sets = QueryFactory.buildQuery(session, IconSet.class, 
+		List<IconSet> sets = QueryFactory.buildQuery(session, IconSet.class, 
 					new Object[] {"conservationArea", attribute.getConservationArea()}) //$NON-NLS-1$
 					.list();
-		}
 		
 		XmlDataModelImporter importer = new XmlDataModelImporter(icons, sets, Locale.getDefault(), null);
 		if (file != null) {

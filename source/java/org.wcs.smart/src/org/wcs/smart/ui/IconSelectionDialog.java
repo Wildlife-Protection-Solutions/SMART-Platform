@@ -23,6 +23,8 @@ package org.wcs.smart.ui;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,6 +65,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
@@ -276,10 +279,12 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		if (activeSets == null) {
 			activeSets = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
-				activeSets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
-				activeSets.forEach(set->{
-					set.getName();
-					set.getUuid().equals(null);
+				doInTransactionReadUncommitted(s, ()->{
+					activeSets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+					activeSets.forEach(set->{
+						set.getName();
+						set.getUuid().equals(null);
+					});
 				});
 			}
 			if (!activeSets.isEmpty()) currentSet = activeSets.get(0);
@@ -656,14 +661,34 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		return true;
 	}
 
+	/*
+	 * run in isolation levels that allow it to read temporarily written data  
+	 */
+	private void doInTransactionReadUncommitted(Session session, Runnable r) {
+		session.doWork(new Work() {
+            @Override
+            public void execute(Connection connection) throws SQLException {
+            	int x = connection.getTransactionIsolation();
+            	try {
+            		connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            		r.run();
+            	}finally {
+            		connection.setTransactionIsolation(x);
+            	}
+            }
+        });
+	}
 	private Job loadDataJob = new Job("load icons") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try(Session session = HibernateManager.openSession()){
-				caIcons = IconManager.INSTANCE.getIcons(session, SmartDB.getCurrentConservationArea());
-				systemIcons = IconManager.INSTANCE.getSystemIcons(session, SmartDB.getCurrentConservationArea());
+				doInTransactionReadUncommitted(session, ()->{
+					caIcons = IconManager.INSTANCE.getIcons(session, SmartDB.getCurrentConservationArea());
+					systemIcons = IconManager.INSTANCE.getSystemIcons(session, SmartDB.getCurrentConservationArea());
+				});
 			}
+			
 			Collections.sort(caIcons);
 			Collections.sort(systemIcons);
 			

@@ -406,8 +406,9 @@ public class AttributeTree {
 			btnImport.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
-					ImportAttributeProcessor processor = new ImportAttributeProcessor(info.getNameKeyComposite().getCurrentKey(),  
-							attribute, getRootNodes());
+					ImportAttributeProcessor processor = new ImportAttributeProcessor(
+							info.getNameKeyComposite().getCurrentKey(),  
+							attribute, getRootNodes(), currentSession);
 					processor.importAttribute();
 					viewer.setInput(getRootNodes());
 					fireChangeListener();
