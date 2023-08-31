@@ -16,7 +16,7 @@
 	<version>8.0.0-SNAPSHOT</version>
 		
 	<properties>
-		<hibernate.version>6.2.3.Final</hibernate.version>
+		<hibernate.version>6.3.0.Final</hibernate.version>
 		<!-- <hibernate.version>6.2.0.CR1</hibernate.version> -->
 		<ehcache.version>3.10.8</ehcache.version>
 		<derby.version>10.16.1.1</derby.version>
