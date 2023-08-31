@@ -509,4 +509,21 @@ public class PatrolHibernateManager extends HibernateManager{
 		return session.createQuery(c).getResultList();
 	}
 	
+	public static void computeAttachmentLocations(Patrol patrol, Session session) throws Exception {
+		for(PatrolLeg pd : patrol.getLegs()) {
+			for(PatrolLegDay pld : pd.getPatrolLegDays()) {
+				for (PatrolWaypoint pw : pld.getWaypoints()) {
+					for(WaypointAttachment wa : pw.getWaypoint().getAttachments()) {
+						wa.computeFileLocation(session);
+					}
+					for (WaypointObservation wo : pw.getWaypoint().getAllObservations()) { 
+						for (ObservationAttachment attachment : wo.getAttachments()) {
+							attachment.computeFileLocation(session);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 }

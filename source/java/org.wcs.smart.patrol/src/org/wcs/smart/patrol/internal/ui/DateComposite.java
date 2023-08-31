@@ -147,6 +147,9 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
 	public boolean updatePatrol(Patrol p, Session session) {
+		//TODO: fix this check as it runs on the initial create patrol wizard
+		//so if you have no data and are just sorting out dates this error message will
+		//appear
 		if (p.getStartDate() != null && p.getEndDate() != null){
 			if (getStartDate().isAfter(p.getStartDate()) || getEndDate().isBefore(p.getEndDate())){
 				if (!MessageDialog.openQuestion(dtEndDate.getShell(), Messages.DateComposite_WarnTitle, Messages.DateComposite_WarnMessage)){

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -55,10 +56,16 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -75,6 +82,7 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -117,6 +125,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private ArrayList<Patrol> newPatrols = new ArrayList<Patrol>();
 	private HashSet<UUID> movedPoints = new HashSet<UUID>();
 
+	private static final PatrolWaypointSource PATROL_WP_SRC = (PatrolWaypointSource) SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
+			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 	/**
 	 * Creates a new patrol legs composite
 	 * @param canEditDates true if the patrol dates can be changed, false if only legs can be modified
@@ -456,12 +466,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	@Override
 	public void setValues(Patrol p, Session session) {
 		this.session = session;
-		this.patrol = p;
+		this.patrol = session.get(Patrol.class,p.getUuid());
 		
 		this.legs = new ArrayList<PatrolLeg>();
 		
 		//clone the legs
 		for (PatrolLeg leg : p.getLegs()){
+			leg.getPatrolLegDays().forEach(pd->Hibernate.initialize(pd.getWaypoints()));
 			PatrolLeg tmpLeg = clonePatrolLeg(leg);
 			
 			//start time
@@ -485,6 +496,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).setEndTime(date.toLocalTime());
 			
 			this.legs.add(tmpLeg);
+		}
+		
+		
+		try {
+			PatrolHibernateManager.computeAttachmentLocations(this.patrol, session);
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(e.getMessage(), e);
 		}
 		
 		session.beginTransaction();
@@ -531,13 +549,19 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	@Override
 	public boolean updatePatrol(Patrol p, Session session) {
 		boolean isNew = p.getUuid() == null;
+
+		try {
+			if (!isNew) PatrolHibernateManager.computeAttachmentLocations(p, session);
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(e.getMessage(), e);
+			return false;
+		}
 		
 		if (this.canEditDates){
 			p.setStartDate(patrolStartDate);
 			p.setEndDate(patrolEndDate);
 		}
-		
-		
+
 		if (session.getTransaction().isActive()) session.flush();
 		
 		HashSet<PatrolLeg> currentLegs = new HashSet<PatrolLeg>(p.getLegs());
@@ -591,6 +615,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 						existing.getPatrolLegDays().get(existing.getPatrolLegDays().size() - 1).setEndTime(updatedLeg.getPatrolLegDays().get(updatedLeg.getPatrolLegDays().size()-1).getEndTime());
 						currentLegs.remove(existing);
 						iterator.remove();
+						
+						if (session.getTransaction().isActive()) session.flush();
 						break;
 					}
 				}
@@ -631,9 +657,16 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					}
 				}
 			}
+			if (session.getTransaction().isActive()) session.flush();
 			toRemove.setPatrol(null);
 			p.getLegs().remove(toRemove);
+			session.remove(toRemove);
+			if (session.getTransaction().isActive()) session.flush();
+			
+			
 		}
+		
+		if (session.getTransaction().isActive()) session.flush();
 		
 		//create leg days
 		p.createLegDays(session);
@@ -658,7 +691,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			//if we made brand new patrols, save them and copy any plan and intel links there were
 			for(Patrol p2 : newPatrols){
 				p2.createLegDays(session);
-				HibernateManager.saveOrMerge(session, p2);
+				session.persist(p2);
+				
 				
 				//save the waypoints, they are not cascaded like everything else.
 				for(PatrolLeg pl : p2.getLegs()){
@@ -666,7 +700,54 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 						if (pld.getWaypoints() != null) {
 							for(PatrolWaypoint pwp : pld.getWaypoints()) {
 								//pwp.setPatrolLegDay(pld);
-								session.merge(pwp);
+								pwp = session.merge(pwp);
+								
+								//re-create attachments as files need to move
+								List<WaypointAttachment> newAttachments = new ArrayList<>();
+								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
+									WaypointAttachment clone = new WaypointAttachment();
+									clone.setCopyFromLocation(ws.getAttachmentFile());
+									clone.setFilename(ws.getFilename());
+									clone.setWaypoint(pwp.getWaypoint());
+									clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+											.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
+											.resolve(clone.getFilename()));
+									newAttachments.add(clone);
+									session.persist(clone);
+								}
+								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
+									WaypointAttachment delete = session.getReference(ws);
+									delete.getWaypoint().getAttachments().remove(delete);
+									session.remove(delete);
+								}
+								pwp.getWaypoint().getAttachments().clear();
+								pwp.getWaypoint().getAttachments().addAll(newAttachments);
+								
+								//do the same thing for observation attachments
+								for (WaypointObservationGroup group : pwp.getWaypoint().getObservationGroups()) {
+									for (WaypointObservation wo : group.getObservations()) {
+										List<ObservationAttachment> newAttachments2 = new ArrayList<>();
+										for (ObservationAttachment ws : wo.getAttachments()) {
+											ObservationAttachment clone = new ObservationAttachment();
+											clone.setCopyFromLocation(ws.getAttachmentFile());
+											clone.setFilename(ws.getFilename());
+											clone.setObservation(wo);
+											clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+													.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
+													.resolve(clone.getFilename()));
+											newAttachments2.add(clone);
+											session.persist(clone);
+										}
+										for (ObservationAttachment ws : wo.getAttachments()) {
+											ObservationAttachment delete = session.getReference(ws);
+											delete.getObservation().getAttachments().remove(delete);
+											session.remove(delete);
+										}
+										wo.getAttachments().clear();
+										wo.getAttachments().addAll(newAttachments2);
+									}
+								}
+								session.flush();
 							}
 						}
 					}
