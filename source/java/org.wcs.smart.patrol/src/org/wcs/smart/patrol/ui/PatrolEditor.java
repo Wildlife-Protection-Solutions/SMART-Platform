@@ -376,6 +376,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void loadPatrolWaypointDetails(PatrolWaypoint pw, Session session) throws Exception {
 		ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
 		pw.getWaypoint().getObservationsAsString();
+		Hibernate.initialize(pw.getWaypoint().getSourceConfigurableModel());
 		if (pw.getWaypoint().getLastModifiedBy() != null) pw.getWaypoint().getLastModifiedBy().getFamilyName();
 	}
 
