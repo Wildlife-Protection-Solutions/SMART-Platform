@@ -393,7 +393,7 @@ public class JsonCtParser {
 			}catch (Exception ex) {
 				warnings.add(MessageFormat.format("Invalid configurable model uuid {0}. The source configurable model for this waypoint will be null.", cmuuid));
 			}
-			ConfigurableModel cm = session.getReference(ConfigurableModel.class, cmUuid);
+			ConfigurableModel cm = session.get(ConfigurableModel.class, cmUuid);
 			if (cm == null) {
 				warnings.add("The configurable referenced in the source data could not be found. The source configurable model for this waypoint will be null");
 			}

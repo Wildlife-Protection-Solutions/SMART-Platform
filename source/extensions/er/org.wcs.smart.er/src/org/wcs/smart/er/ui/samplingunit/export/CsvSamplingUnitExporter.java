@@ -84,7 +84,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			delimiter = ',';
 		}
 		
-		sd = (SurveyDesign) session.getReference(SurveyDesign.class, sd.getUuid());
+		sd = (SurveyDesign) session.get(SurveyDesign.class, sd.getUuid());
 		
 		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(f), delimiter)){
 			exportPlotsAndTransects(type, writer, sd, session, progress);

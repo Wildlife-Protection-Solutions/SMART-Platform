@@ -174,7 +174,7 @@ public class Label implements Serializable {
 			if (lang != null || ca != null){
 				Label.LabelItemPK id = new Label.LabelItemPK();
 				id.setElement(new UuidItem(elementuuid));
-				Language ltmp = (Language) session.getReference(Language.class, lang);
+				Language ltmp = (Language) session.get(Language.class, lang);
 				id.setLanguage(ltmp);
 
 				Label lbl = (Label) session.get(Label.class, id);

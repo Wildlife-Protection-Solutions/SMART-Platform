@@ -59,7 +59,7 @@ public class SaveSurveyDesignJob extends Job {
 				
 				//we need to merge mission properties; for some reason the cascade doesn't work in
 				//this case; probably a many to many problem;
-				SurveyDesign db = (SurveyDesign) session.getReference(SurveyDesign.class, design.getUuid());
+				SurveyDesign db = (SurveyDesign) session.get(SurveyDesign.class, design.getUuid());
 				List<MissionProperty> toRemove = new ArrayList<MissionProperty>();
 				for (MissionProperty mp : db.getMissionProperties()){
 					if (!design.getMissionProperties().contains(mp)){

@@ -151,7 +151,7 @@ public class DeleteItemHandler {
 				if (parent == null){
 					s.remove(folder);
 				}else{
-					QueryFolder parentFolder = s.getReference(parent);
+					QueryFolder parentFolder = s.get(QueryFolder.class, parent.getUuid());
 					parentFolder.getChildren().remove(folder);
 					folder.setParentFolder(null);
 				}

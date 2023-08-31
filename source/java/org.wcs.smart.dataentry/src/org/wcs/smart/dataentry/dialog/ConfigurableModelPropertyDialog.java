@@ -451,7 +451,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							CmSmartToXml converter = new CmSmartToXml(session);
 							ConfigurableModel toexport = cm;
 							if (cm.getUuid() != null) {
-								 toexport = session.getReference(cm);
+								 toexport = session.get(cm.getClass(), cm);
 							}
 							converter.convert(toexport, monitor);
 							org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = converter.getXmlModel();

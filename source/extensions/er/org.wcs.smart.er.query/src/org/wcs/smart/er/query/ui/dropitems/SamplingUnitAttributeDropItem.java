@@ -116,7 +116,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					SamplingUnitAttribute attribute = (SamplingUnitAttribute) s.getReference(SamplingUnitAttribute.class, ma.getUuid());
+					SamplingUnitAttribute attribute = (SamplingUnitAttribute) s.get(SamplingUnitAttribute.class, ma.getUuid());
 					for (SamplingUnitAttributeListItem i : attribute.getAttributeList()){
 						items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
 					}
@@ -463,7 +463,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		if (sd != null){
 			isAttributeSd = false;
 			try(Session s = HibernateManager.openSession()){
-				SurveyDesign temp = (SurveyDesign) s.getReference(SurveyDesign.class, design.getUuid());
+				SurveyDesign temp = (SurveyDesign) s.get(SurveyDesign.class, design.getUuid());
 				for (SurveyDesignSamplingUnitAttribute att : temp.getSamplingUnitAttributes()){
 					if (att.getSamplingUnitAttribute().equals(ma)){
 						isAttributeSd = true;

@@ -187,7 +187,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 				try{
 					//load incident 
 					session.beginTransaction();
-					this.incident = (SmartCollectWaypoint) session.getReference(SmartCollectWaypoint.class, uuid);
+					this.incident = (SmartCollectWaypoint) session.get(SmartCollectWaypoint.class, uuid);
 					this.incident.getWaypoint().getId();
 					if (this.incident.getWaypoint().getAttachments() != null) {
 						this.incident.getWaypoint().getAttachments().forEach(wa ->{

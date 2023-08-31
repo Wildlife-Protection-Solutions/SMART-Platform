@@ -87,7 +87,7 @@ public class ConnectUserAccountDialog extends SmartStyledTitleDialog{
 			try{
 				if (toUpdate != null){
 					for (ConnectUser cu : toUpdate){
-						cu = s.getReference(cu);
+						cu = s.get(cu.getClass(), cu.getUuid());
 						cu.setConnectUsername(username);
 					}
 				}else{

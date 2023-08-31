@@ -102,7 +102,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		Waypoint wp = (Waypoint)super.getValue();
 
 		try(Session session = HibernateManager.openSession()){
-			wp = session.getReference(wp);
+			wp = session.get(Waypoint.class, wp.getUuid());
 			loadAttachmentDetails(wp, session);
 		}
 		

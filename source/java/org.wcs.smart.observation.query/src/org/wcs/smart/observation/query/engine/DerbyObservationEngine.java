@@ -274,7 +274,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	 */
 	protected String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
-			Employee x = (Employee) session.getReference(Employee.class, uuid);
+			Employee x = (Employee) session.get(Employee.class, uuid);
 			if (x != null) {
 				return SmartLabelProvider.getShortLabel(x);
 			}

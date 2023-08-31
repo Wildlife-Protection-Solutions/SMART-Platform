@@ -105,7 +105,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				query = s.getReference(query);
+				query = s.get(query.getClass(), query.getUuid());
 	
 				if (query.getConservationArea().getDefaultLanguage() != null){
 					xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());

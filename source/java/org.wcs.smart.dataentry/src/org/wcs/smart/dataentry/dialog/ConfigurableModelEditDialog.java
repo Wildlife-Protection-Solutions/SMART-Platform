@@ -49,6 +49,8 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -95,6 +97,8 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 			this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
 		}else{
 			this.model = cm;
+			session.persist(this.model);
+			this.changesMade = true;
 			if (cm.getIconSet() != null) {
 				cm.setIconSet((IconSet)session.merge(cm.getIconSet()));
 			}
@@ -105,8 +109,8 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 				CmNode n = toProcess.remove(0);
 				toProcess.addAll(n.getChildren());
 				if (n.getCategory() != null) {
-					n.setCategory(session.getReference(n.getCategory()));
-					n.getCmAttributes().forEach(a->a.setAttribute(session.getReference(a.getAttribute())));
+					n.setCategory(session.get(Category.class, n.getCategory().getUuid()));
+					n.getCmAttributes().forEach(a->a.setAttribute(session.get(Attribute.class, a.getAttribute().getUuid())));
 				}
 			}
 		}
@@ -238,8 +242,6 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 		mainLayout.marginWidth = 0;
 		main.setLayout(mainLayout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		setChangesMade(model.getUuid() == null);
 		
 		tabs = getExtraTabs();
 		

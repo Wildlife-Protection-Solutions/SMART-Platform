@@ -65,7 +65,7 @@ public class TranslatePlanHandler extends TranslateNamesHandler {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try{
-					plan = (Plan) session.getReference(Plan.class, uuid);
+					plan = (Plan) session.get(Plan.class, uuid);
 					plan = (Plan) Hibernate.unproxy(plan);
 					
 				}finally{

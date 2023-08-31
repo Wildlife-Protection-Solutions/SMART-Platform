@@ -173,7 +173,7 @@ public class PatrolLegDayInputComposite {
 		public void eventFired(int attributeChanged, Object source) {
 			if (attributeChanged == PatrolEventManager.PATROL_TRACKS && source.equals(patrolLegDate)){
 				try(Session session = HibernateManager.openSession()){
-					PatrolLegDay ref = session.getReference(patrolLegDate);
+					PatrolLegDay ref = session.get(PatrolLegDay.class, patrolLegDate.getUuid());
 					updateDistance(ref);
 					patrolLegDate.setTrack(ref.getTrack());
 				}
@@ -1032,7 +1032,7 @@ public class PatrolLegDayInputComposite {
 					}else if (column == OtColumn.ATTACHMENTS) {
 						//update reference
 						try(Session session = HibernateManager.openSession()){
-							Waypoint waypoint = session.getReference(fwaypoint);
+							Waypoint waypoint = session.get(Waypoint.class, fwaypoint.getUuid());
 							((PatrolWaypoint)element).setWaypoint(waypoint);
 							try {
 								editor.getPatrolEditor().loadPatrolWaypointDetails(((PatrolWaypoint)element), session);
@@ -1308,7 +1308,7 @@ public class PatrolLegDayInputComposite {
 				if (editor.getPatrolEditor().getOptions().getTrackObserver()){
 					List<Employee> emps = new ArrayList<Employee>();
 					try(Session session = HibernateManager.openSession()){
-						PatrolLeg leg = session.getReference(patrolLegDate.getPatrolLeg());
+						PatrolLeg leg = session.get(PatrolLeg.class, patrolLegDate.getPatrolLeg().getUuid());
 						for (PatrolLegMember m : leg.getMembers()){
 							emps.add(m.getMember());
 						}

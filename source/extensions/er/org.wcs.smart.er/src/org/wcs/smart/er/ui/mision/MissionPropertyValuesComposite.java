@@ -87,7 +87,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 
 	@Override
 	public void init(Mission mission, Session session) {
-		mission = session.getReference(mission);
+		mission = session.get(Mission.class, mission.getUuid());
 		
 		controls.clear();
 		decorations = new HashMap<MissionAttribute, ControlDecoration>();

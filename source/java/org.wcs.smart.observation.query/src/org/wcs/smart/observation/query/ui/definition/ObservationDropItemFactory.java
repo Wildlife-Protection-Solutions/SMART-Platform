@@ -359,7 +359,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		}else {
 			try {
 				UUID cmuuid = UuidUtils.stringToUuid(filter.getValue());
-				ConfigurableModel m = session.getReference(ConfigurableModel.class, cmuuid);				
+				ConfigurableModel m = session.get(ConfigurableModel.class, cmuuid);				
 				if (m == null) throw new Exception(Messages.ObservationDropItemFactory_CmNotFound);
 				m.getName();
 				di.initializeData(new Object[] {m});

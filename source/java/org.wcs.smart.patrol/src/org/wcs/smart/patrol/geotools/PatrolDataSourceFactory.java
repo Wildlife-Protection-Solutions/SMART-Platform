@@ -107,7 +107,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 		
 		Patrol patrol = null;
 		try(Session session = HibernateManager.openSession()){
-			patrol = (Patrol)session.getReference(Patrol.class, UuidUtils.stringToUuid((String)params.get(PATROL_UUID.key)));	
+			patrol = session.get(Patrol.class, UuidUtils.stringToUuid((String)params.get(PATROL_UUID.key)));	
 		}catch (Exception ex){
 			throw new IOException(ex);
 		}

@@ -91,7 +91,7 @@ public class WaypointAttachment extends ISmartAttachment implements ISignatureAt
 				IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(getWaypoint().getSourceId());
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append(session.getReference(getWaypoint().getConservationArea()).getFileDataStoreLocation());
+				sb.append(session.get(ConservationArea.class, getWaypoint().getConservationArea().getUuid()).getFileDataStoreLocation());
 				sb.append(File.separator);
 				sb.append(src.getDatastoreFileLocation(getWaypoint(), session));
 				return sb.toString();

@@ -269,7 +269,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	public String[] getFullCategoryLabel(Session session, UUID categoryUuid){
 		//if (true) return new String[]{"abc"};
 		
-		Category category = (Category) session.getReference(Category.class, categoryUuid);
+		Category category = (Category) session.get(Category.class, categoryUuid);
 		Category existingCategory = findCategory(category.getHkey(), ccaaModel.getCategories());
 		
 		//find the shared category in the datamodel

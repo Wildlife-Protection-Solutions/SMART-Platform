@@ -83,7 +83,7 @@ public class ObservationAttachment extends ISmartAttachment implements ISignatur
 			}else{
 				IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(observation.getWaypoint().getSourceId());
 
-				return session.getReference(getObservation().getWaypoint().getConservationArea()).getFileDataStoreLocation() + 
+				return session.get(ConservationArea.class, getObservation().getWaypoint().getConservationArea().getUuid()).getFileDataStoreLocation() + 
 						File.separator + 
 						src.getDatastoreFileLocation(observation.getWaypoint(), session) ;
 			}

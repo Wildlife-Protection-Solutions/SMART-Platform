@@ -121,7 +121,7 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 		}
 		s.beginTransaction();
 		try{
-			source = (Plan) s.getReference(Plan.class, inputPlan.getUuid());
+			source = (Plan) s.get(Plan.class, inputPlan.getUuid());
 			if (source == null){
 				SmartPlanPlugIn.displayLog(Messages.TemplateSelectPlanWizardPage_PlanNotFound_Error, null);
 				return false;

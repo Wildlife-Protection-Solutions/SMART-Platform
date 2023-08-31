@@ -195,7 +195,7 @@ public class DeleteSurveyElementHandler {
 			if (error != null){
 				throw new Exception(error);
 			}
-			SurveyDesign design = (SurveyDesign) session.getReference(SurveyDesign.class, uuid);
+			SurveyDesign design = (SurveyDesign) session.get(SurveyDesign.class, uuid);
 			if (design == null){
 				session.getTransaction().rollback();
 				return false;
@@ -273,7 +273,7 @@ public class DeleteSurveyElementHandler {
 		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
-			Survey survey = (Survey) session.getReference(Survey.class, uuid);
+			Survey survey = (Survey) session.get(Survey.class, uuid);
 			if (survey == null){
 				session.getTransaction().rollback();
 				return false;
@@ -346,7 +346,7 @@ public class DeleteSurveyElementHandler {
 		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
-			Mission mission = (Mission) session.getReference(Mission.class, uuid);
+			Mission mission = (Mission) session.get(Mission.class, uuid);
 			if (mission == null){
 				session.getTransaction().rollback();
 				return false;

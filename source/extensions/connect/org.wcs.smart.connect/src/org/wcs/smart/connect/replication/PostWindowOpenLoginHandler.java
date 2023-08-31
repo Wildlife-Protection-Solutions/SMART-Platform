@@ -141,7 +141,7 @@ public class PostWindowOpenLoginHandler implements ILoginHandler {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					ConnectServerStatus upstatus = s.getReference(status);
+					ConnectServerStatus upstatus = s.get(ConnectServerStatus.class, status.getUuid());
 					upstatus.setStatus(Status.ERROR);
 					s.getTransaction().commit();
 					return;
@@ -184,7 +184,7 @@ public class PostWindowOpenLoginHandler implements ILoginHandler {
 				
 					s.beginTransaction();
 					try {
-						ConnectServerStatus upstatus = s.getReference(status);
+						ConnectServerStatus upstatus = s.get(ConnectServerStatus.class, status.getUuid());
 						upstatus.setStatus(Status.ERROR);
 						s.getTransaction().commit();
 						return;

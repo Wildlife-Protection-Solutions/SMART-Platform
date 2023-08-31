@@ -58,7 +58,7 @@ public class ObserverGroupByViewer extends AbstractGroupByViewer<ObserverGroupBy
 		if (filterkeys != null && filterkeys.length > 0){
 			try{
 				for (String uuid : filterkeys){
-					Employee e = (Employee) session.getReference(Employee.class, UuidUtils.stringToUuid(uuid));
+					Employee e = (Employee) session.get(Employee.class, UuidUtils.stringToUuid(uuid));
 					items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullLabel(e)));
 				}
 			}catch (Exception ex){

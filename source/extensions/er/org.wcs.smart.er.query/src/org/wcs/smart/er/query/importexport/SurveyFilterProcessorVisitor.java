@@ -71,7 +71,7 @@ public class SurveyFilterProcessorVisitor implements IFilterVisitor {
 	}
 	
 	public UuidItemType employeeToUuidItem(UUID uuid){
-		Employee e = (Employee) session.getReference(Employee.class, uuid);
+		Employee e = (Employee) session.get(Employee.class, uuid);
 		
 		UuidItemType item = new UuidItemType();
         item.setUuid(UuidUtils.uuidToString(uuid));
@@ -82,7 +82,7 @@ public class SurveyFilterProcessorVisitor implements IFilterVisitor {
 	}
 	
 	public UuidItemType samplingUnitToUuidItem(UUID uuid){
-		SamplingUnit su = (SamplingUnit)session.getReference(SamplingUnit.class, uuid);
+		SamplingUnit su = (SamplingUnit)session.get(SamplingUnit.class, uuid);
 		
 		UuidItemType item = new UuidItemType();
 		item.setUuid(UuidUtils.uuidToString(uuid));

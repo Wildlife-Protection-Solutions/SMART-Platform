@@ -61,7 +61,7 @@ public class TranslateNamesHandler {
 		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			NamedItem ltoUpdate = s.getReference(toUpdate);
+			NamedItem ltoUpdate = s.get(toUpdate.getClass(), toUpdate.getUuid());
 			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(activeShell, ltoUpdate);
 			if (dialog.open() == TranslateSimpleListItemDialog.OK){
 				s.getTransaction().commit();

@@ -87,7 +87,7 @@ public enum SyncHistoryManager {
 			s.beginTransaction();
 			try {
 				for (ConnectSyncHistoryRecord r : items){
-					r = s.getReference(r);
+					r = s.get(ConnectSyncHistoryRecord.class, r.getUuid());
 					r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
 				}
 				s.getTransaction().commit();
@@ -110,7 +110,7 @@ public enum SyncHistoryManager {
 			s.beginTransaction();
 			try {
 				for (ConnectSyncHistoryRecord r : items){
-					r = s.getReference(r);
+					r = s.get(ConnectSyncHistoryRecord.class, r.getUuid());
 					r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
 				}
 				s.getTransaction().commit();

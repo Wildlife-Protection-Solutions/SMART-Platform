@@ -132,7 +132,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 		if (toUpdate.getUuid() == null) {
 			this.toUpdate = toUpdate;
 		}else {
-			this.toUpdate = session.getReference(toUpdate);
+			this.toUpdate = session.get(MissionAttribute.class, toUpdate.getUuid());
 		}
 		
 		//set list if necessary

@@ -191,7 +191,7 @@ public class IncidentSummaryPage extends EditorPart {
 		
 		Waypoint incident = cmincident.getWaypoint();
 		try(Session session = HibernateManager.openSession()){
-			incident = session.getReference(incident);
+			incident = session.get(Waypoint.class, incident.getUuid());
 			if (incident.getComment() == null){
 				txtComments.setText(""); //$NON-NLS-1$
 			}else{

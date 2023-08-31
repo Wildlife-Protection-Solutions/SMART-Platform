@@ -95,7 +95,7 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 					
 				}else{
 					track.setLineString(editTrack.getLineString());
-					MissionTrack ref = session.getReference(track);
+					MissionTrack ref = session.get(MissionTrack.class, track.getUuid());
 					ref.setLineString(editTrack.getLineString());
 				}
 				session.getTransaction().commit();

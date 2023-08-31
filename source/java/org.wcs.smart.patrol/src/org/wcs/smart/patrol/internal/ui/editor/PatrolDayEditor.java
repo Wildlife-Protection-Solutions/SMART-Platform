@@ -169,7 +169,7 @@ public class PatrolDayEditor extends EditorPart {
 						//waypoints are not cascaded (otherwise saves are cascaded too)
 						if (day.getWaypoints() != null){
 							for (PatrolWaypoint wp : day.getWaypoints()) {
-								Waypoint local = session.getReference(wp.getWaypoint());
+								Waypoint local = session.get(Waypoint.class, wp.getWaypoint().getUuid());
 								
 								local.getAllObservations();
 								if (local.getAttachments() != null) {

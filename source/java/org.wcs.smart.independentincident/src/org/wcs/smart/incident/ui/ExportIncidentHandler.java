@@ -110,7 +110,7 @@ public class ExportIncidentHandler {
 								s.beginTransaction();
 								
 								try {
-									wp = (Waypoint) s.getReference(Waypoint.class, puuid);
+									wp = (Waypoint) s.get(Waypoint.class, puuid);
 									id = wp.getId();
 								} catch (Exception ex) {
 									IncidentPlugIn.displayLog(MessageFormat.format(Messages.ExportIncidentHandler_IncidentNotFound, new Object[]{UuidUtils.uuidToString(puuid)}), ex);

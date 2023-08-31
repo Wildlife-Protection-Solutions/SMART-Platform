@@ -265,7 +265,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try{
-						temp = (RQuery) session.getReference(RQuery.class, quuid);
+						temp = (RQuery) session.get(RQuery.class, quuid);
 						temp.getName();
 						temp.getScript().getName();
 						temp.getNames().size();
@@ -281,7 +281,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try{
-						temp = (RScript) session.getReference(RScript.class, suuid);
+						temp = (RScript) session.get(RScript.class, suuid);
 						temp.getName();
 					}finally {
 						session.getTransaction().rollback();

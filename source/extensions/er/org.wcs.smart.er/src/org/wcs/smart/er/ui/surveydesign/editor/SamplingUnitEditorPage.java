@@ -216,7 +216,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					sd = (SurveyDesign) s.getReference(SurveyDesign.class, sd.getUuid());
+					sd = (SurveyDesign) s.get(SurveyDesign.class, sd.getUuid());
 					sd.getName();
 	
 					//load attributes

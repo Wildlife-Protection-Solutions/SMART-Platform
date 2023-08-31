@@ -586,7 +586,7 @@ public class MissionDayComposite {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				Mission mission = session.getReference(editor.getMissionEditor().getMission());
+				Mission mission = session.get(Mission.class, editor.getMissionEditor().getMission().getUuid());
 				
 				//find mission day
 				missionDay = findMissionDay(mission);
@@ -729,7 +729,7 @@ public class MissionDayComposite {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				MissionDay md = (MissionDay)session.getReference(missionDay);
+				MissionDay md = session.get(MissionDay.class, missionDay.getUuid());
 	
 				for (Iterator<SurveyWaypoint> iterator = md.getWaypoints().iterator(); iterator.hasNext();) {
 					SurveyWaypoint e = iterator.next();
@@ -1082,7 +1082,7 @@ public class MissionDayComposite {
 			if (column == OtColumn.ATTACHMENTS) {
 				//update reference
 				try(Session session = HibernateManager.openSession()){
-					waypoint = session.getReference(waypoint);
+					waypoint = session.get(Waypoint.class, waypoint.getUuid());
 					element.setWaypoint(waypoint);
 					try {
 						editor.getMissionEditor().loadWaypointDetails(element, session);
@@ -1174,7 +1174,7 @@ public class MissionDayComposite {
 				if (editor.getMissionEditor().trackObserver()){
 					try(Session session = HibernateManager.openSession()){
 						emps = new ArrayList<Employee>();
-						for (MissionMember mm : session.getReference(missionDay).getMission().getMembers()){
+						for (MissionMember mm : session.get(MissionDay.class, missionDay.getUuid()).getMission().getMembers()){
 							emps.add(mm.getMember());
 							SmartLabelProvider.getFullLabel(mm.getMember());
 						}

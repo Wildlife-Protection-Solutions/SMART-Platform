@@ -716,7 +716,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 									session.persist(clone);
 								}
 								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
-									WaypointAttachment delete = session.getReference(ws);
+									WaypointAttachment delete = session.get(WaypointAttachment.class, ws.getUuid());
 									delete.getWaypoint().getAttachments().remove(delete);
 									session.remove(delete);
 								}
@@ -739,7 +739,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 											session.persist(clone);
 										}
 										for (ObservationAttachment ws : wo.getAttachments()) {
-											ObservationAttachment delete = session.getReference(ws);
+											ObservationAttachment delete = session.get(ObservationAttachment.class, ws.getUuid());
 											delete.getObservation().getAttachments().remove(delete);
 											session.remove(delete);
 										}

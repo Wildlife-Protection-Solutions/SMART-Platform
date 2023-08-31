@@ -1182,7 +1182,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				
 				for (PatrolTransportType t : toDelete){
-					if (t.getUuid() != null) s.remove(s.getReference(t));
+					if (t.getUuid() != null) s.remove(s.get(PatrolTransportType.class, t.getUuid()));
 				}
 				
 				for (PatrolTransportType tt : transportTypes){

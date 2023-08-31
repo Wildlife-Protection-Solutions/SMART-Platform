@@ -151,7 +151,7 @@ public class SurveyQueryColumnManager {
 				try(Session s = HibernateManager.openSession()){
 					SurveyDesign sd2 = null;
 					if (sd != null){
-						sd2 = (SurveyDesign) s.getReference(SurveyDesign.class, sd.getUuid());
+						sd2 = (SurveyDesign) s.get(SurveyDesign.class, sd.getUuid());
 					}
 					cols.addAll(getMissionPropertyColumns(s, sd2));
 					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
@@ -218,7 +218,7 @@ public class SurveyQueryColumnManager {
 				try(Session s = HibernateManager.openSession()){
 					SurveyDesign sd2 = null;
 					if (sd != null){
-						sd2 = (SurveyDesign) s.getReference(SurveyDesign.class, sd.getUuid());
+						sd2 = (SurveyDesign) s.get(SurveyDesign.class, sd.getUuid());
 					}
 					cols.addAll(getMissionPropertyColumns(s, sd2));
 					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
@@ -372,7 +372,7 @@ public class SurveyQueryColumnManager {
 				try(Session s = HibernateManager.openSession()){
 					SurveyDesign sd2 = null;
 					if (sd != null){
-						sd2 = (SurveyDesign) s.getReference(SurveyDesign.class, sd.getUuid());
+						sd2 = (SurveyDesign) s.get(SurveyDesign.class, sd.getUuid());
 					}
 					cols.addAll(getMissionPropertyColumns(s, sd2));
 					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
@@ -419,7 +419,7 @@ public class SurveyQueryColumnManager {
 				try{
 					SurveyDesign sd2 = null;
 					if (sd != null){
-						sd2 = (SurveyDesign) s.getReference(SurveyDesign.class, sd.getUuid());
+						sd2 = (SurveyDesign) s.get(SurveyDesign.class, sd.getUuid());
 					}
 					columns.addAll(getMissionPropertyColumns(s, sd2));
 				}finally {	

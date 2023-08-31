@@ -88,7 +88,7 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 			if (currentOption == ImportOption.ALL){
 				boolean warn = false;
 				try(Session session = HibernateManager.openSession()){
-					Patrol p = session.getReference(currentDay.getPatrolLeg().getPatrol());
+					Patrol p = session.get(Patrol.class, currentDay.getPatrolLeg().getPatrol().getUuid());
 			
 					for(PatrolLeg l : p.getLegs()){
 						for(PatrolLegDay d : l.getPatrolLegDays()){

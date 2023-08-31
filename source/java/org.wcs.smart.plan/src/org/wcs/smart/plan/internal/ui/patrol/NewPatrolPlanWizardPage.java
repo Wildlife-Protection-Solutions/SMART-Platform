@@ -112,7 +112,7 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 	 */
 	public void save(Patrol p, Session session) throws Exception{
 		if (lastSelection != null){
-			Plan plan = (Plan)session.getReference(Plan.class, lastSelection.getUuid());
+			Plan plan = (Plan)session.get(Plan.class, lastSelection.getUuid());
 			if (plan == null){
 				MessageDialog.openError(getShell(), Messages.NewPatrolPlanWizardPage_ErrorDialog_Title, 
 						MessageFormat.format(Messages.NewPatrolPlanWizardPage_ErrorDialog_Message, lastSelection.getName()));				

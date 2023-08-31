@@ -74,7 +74,7 @@ public class WaypointCmGroupByViewer extends AbstractGroupByViewer<WaypointCmGro
 				if (k.equals(IFilter.NULL_OP)) {
 					addnull = true;
 				}else {
-					ConfigurableModel cm = session.getReference(ConfigurableModel.class, UuidUtils.stringToUuid(k));
+					ConfigurableModel cm = session.get(ConfigurableModel.class, UuidUtils.stringToUuid(k));
 					if (cm != null) {
 						items.add(new ListItem(cm.getUuid(), cm.getName()));
 					}

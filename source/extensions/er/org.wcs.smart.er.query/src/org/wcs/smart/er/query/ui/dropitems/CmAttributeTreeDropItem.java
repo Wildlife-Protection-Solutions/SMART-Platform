@@ -94,7 +94,7 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					CmAttribute attribute = (CmAttribute) s.getReference(CmAttribute.class, cmAttribute.getUuid());
+					CmAttribute attribute = (CmAttribute) s.get(CmAttribute.class, cmAttribute.getUuid());
 					roots = attribute.getCurrentTree();
 					List<CmAttributeTreeNode> toLoad = new ArrayList<CmAttributeTreeNode>(roots);
 					while(toLoad.size() > 0){

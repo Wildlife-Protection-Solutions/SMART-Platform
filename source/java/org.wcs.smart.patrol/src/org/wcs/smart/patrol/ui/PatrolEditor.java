@@ -325,7 +325,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			try{
 				//load patrol items so don't have lazy loading issues later.
 				
-				this.patrol = (Patrol) session.getReference(Patrol.class, puuid);
+				this.patrol = session.get(Patrol.class, puuid);
 				
 				Hibernate.initialize(this.patrol.getStation());
 				Hibernate.initialize(this.patrol.getTeam());

@@ -539,7 +539,7 @@ public class SurveyDesignDataPage extends EditorPart {
 	
 					List<SurveyMissionProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
 					for(SurveyMissionProxy in : surveys){
-						Survey ss = (Survey) s.getReference(Survey.class, in.getUuid());
+						Survey ss = (Survey) s.get(Survey.class, in.getUuid());
 						TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), null, null, TreeNode.Type.SURVEY);					
 						for (Mission m : ss.getMissions()){
 							TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);

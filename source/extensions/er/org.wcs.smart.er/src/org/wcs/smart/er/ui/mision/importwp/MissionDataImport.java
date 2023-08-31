@@ -256,7 +256,7 @@ public class MissionDataImport {
 					
 					for (MissionTrack track : type.getValue()){
 						MissionDay md = type.getKey();
-						MissionDay ref = session.getReference(md);
+						MissionDay ref = session.get(MissionDay.class, md.getUuid());
 						
 						ref.getTracks().add(track);
 						track.setMissionDay(ref);
@@ -319,7 +319,7 @@ public class MissionDataImport {
 	
 	public static MissionTrack createTrackFromWaypoints(MissionDay missionDay){
 		try(Session session = HibernateManager.openSession()){
-			missionDay = session.getReference(missionDay);
+			missionDay = session.get(MissionDay.class, missionDay.getUuid());
 		
 			List<Waypoint> wps = new ArrayList<Waypoint>();
 			for (SurveyWaypoint sw : missionDay.getWaypoints()){

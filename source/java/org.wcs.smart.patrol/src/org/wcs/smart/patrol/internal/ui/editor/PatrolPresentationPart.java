@@ -1130,7 +1130,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				pdata = new HashMap<>();
 				
 				try(Session session = HibernateManager.openSession()){
-					Patrol patrol = session.getReference(parentEditor.getPatrol());
+					Patrol patrol = session.get(Patrol.class, parentEditor.getPatrol().getUuid());
 	
 					HashMap<LocalDate, List<PatrolLegDay>> legsbyday = new HashMap<>();
 	

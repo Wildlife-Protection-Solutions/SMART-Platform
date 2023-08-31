@@ -453,7 +453,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			session.beginTransaction();
 			try {
 				Mission mission = missionEditor.getMission();
-				mission = session.getReference(mission);
+				mission = session.get(Mission.class, mission.getUuid());
 	
 				form.setText(Messages.MissionSummaryPage_MissionLabel + mission.getId());
 				txtSurveyId.setText(mission.getSurvey().getId() + " [" + mission.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$

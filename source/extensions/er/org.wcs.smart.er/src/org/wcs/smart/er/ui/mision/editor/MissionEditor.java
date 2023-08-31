@@ -237,7 +237,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try{
-					this.mission = (Mission) session.getReference(Mission.class, muuid);				
+					this.mission = (Mission) session.get(Mission.class, muuid);				
 					Hibernate.initialize(this.mission);
 					Hibernate.initialize(this.mission.getMissionPropertyValues());
 					Hibernate.initialize(this.mission.getMembers());

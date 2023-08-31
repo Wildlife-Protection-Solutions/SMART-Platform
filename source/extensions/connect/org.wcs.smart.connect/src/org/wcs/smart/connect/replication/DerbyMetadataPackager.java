@@ -51,7 +51,7 @@ public enum DerbyMetadataPackager {
 	public void generateMetadata(Session session, ConnectServer server, 
 			Path file, long revision) throws Exception{
 		
-		ConservationArea ca = session.getReference(server.getConservationArea());
+		ConservationArea ca = session.get(ConservationArea.class, server.getConservationArea().getUuid());
 		
 		ConnectServerStatus status = (ConnectServerStatus) session.get(ConnectServerStatus.class, ca.getUuid());
 		if (status == null){

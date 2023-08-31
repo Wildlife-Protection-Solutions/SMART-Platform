@@ -105,7 +105,7 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					query = s.getReference(query);
+					query = s.get(query.getClass(), query.getUuid());
 					
 					xmlQuery.setQueryType(query.getTypeKey());
 					if (query.getConservationArea().getDefaultLanguage() != null){

@@ -318,7 +318,7 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 		if (sd != null){
 			isValidSd = false;
 			try(Session s = HibernateManager.openSession()){
-				SurveyDesign temp = (SurveyDesign) s.getReference(SurveyDesign.class, design.getUuid());
+				SurveyDesign temp = (SurveyDesign) s.get(SurveyDesign.class, design.getUuid());
 				for (SurveyDesignSamplingUnitAttribute att : temp.getSamplingUnitAttributes()){
 					if (att.getSamplingUnitAttribute().equals(attribute)){
 						isValidSd = true;

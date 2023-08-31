@@ -112,7 +112,7 @@ public class SamplingUnitFeatureSource extends ContentFeatureSource{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try(Session s = HibernateManager.openSession()){
-					SurveyDesign lDesign = (SurveyDesign) s.getReference(SurveyDesign.class, getSource().getDesign().getUuid());
+					SurveyDesign lDesign = (SurveyDesign) s.get(SurveyDesign.class, getSource().getDesign().getUuid());
 					sb.append("the_geom:"); //$NON-NLS-1$
 					if (typeName.equals(GeometryType.PLOT.name())){
 						sb.append("Point:srid=4326"); //$NON-NLS-1$

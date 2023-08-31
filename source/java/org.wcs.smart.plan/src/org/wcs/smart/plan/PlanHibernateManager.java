@@ -76,7 +76,7 @@ public class PlanHibernateManager{
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				p = (Plan) Hibernate.unproxy( session.getReference(Plan.class, planUuid));
+				p = (Plan) Hibernate.unproxy( session.get(Plan.class, planUuid));
 				if (p.getTargets() != null) p.setTargets(new ArrayList<>(p.getTargets()));
 				Hibernate.initialize(p.getNames());
 				Hibernate.initialize(p.getStation());

@@ -78,7 +78,7 @@ public class PatrolGPSDataImport {
 				for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
 					Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
 					PatrolLegDay pld = type.getKey();
-					PatrolLegDay ref = session.getReference(pld);
+					PatrolLegDay ref = session.get(PatrolLegDay.class, pld.getUuid());
 					
 					Track t = type.getValue();
 					if (t != null){

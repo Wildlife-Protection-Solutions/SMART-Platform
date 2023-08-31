@@ -106,7 +106,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (option != null && option.getUuidValue() != null){
-					AttributeTreeNode defaultNode = (AttributeTreeNode) dialog.getSession().getReference(AttributeTreeNode.class, option.getUuidValue());
+					AttributeTreeNode defaultNode = (AttributeTreeNode) dialog.getSession().get(AttributeTreeNode.class, option.getUuidValue());
 					defaultValueTreeField.setSelectedValue(defaultNode);
 				}
 				

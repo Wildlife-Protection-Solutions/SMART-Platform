@@ -117,7 +117,7 @@ public class QueryListDropListener extends ViewerDropAdapter {
 					boolean isChanged = false;
 					try(Session s = HibernateManager.openSession()){
 						try{
-							q = (Query) s.getReference(query.getType().getHibernateClass(), query.getUuid());
+							q = (Query) s.get(query.getType().getHibernateClass(), query.getUuid());
 							if (!((targetFolder == null && q.getFolder() == null) ||
 								(targetFolder != null && targetFolder.equals(q.getFolder())))){
 								//folder was changed; update it

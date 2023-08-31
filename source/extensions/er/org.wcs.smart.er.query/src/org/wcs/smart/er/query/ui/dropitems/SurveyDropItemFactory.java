@@ -320,8 +320,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IQuer
 				CmAttribute cnode = node;
 				cnode.getOrder();
 				try(Session s = HibernateManager.openSession()){
-					Category c = (Category) s.getReference(Category.class, node.getNode().getCategory().getUuid());
-					Attribute att = (Attribute) s.getReference(Attribute.class, node.getAttribute().getUuid());
+					Category c = (Category) s.get(Category.class, node.getNode().getCategory().getUuid());
+					Attribute att = (Attribute) s.get(Attribute.class, node.getAttribute().getUuid());
 					if (att.getType() == AttributeType.BOOLEAN ||
 							att.getType() == AttributeType.TEXT ||
 							att.getType() == AttributeType.NUMERIC ||
@@ -358,7 +358,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IQuer
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
-						di[0] = createCategoryDropItem( (Category)s.getReference(Category.class, node.getCategory().getUuid()));
+						di[0] = createCategoryDropItem( (Category)s.get(Category.class, node.getCategory().getUuid()));
 					}
 					return Status.OK_STATUS;
 				}

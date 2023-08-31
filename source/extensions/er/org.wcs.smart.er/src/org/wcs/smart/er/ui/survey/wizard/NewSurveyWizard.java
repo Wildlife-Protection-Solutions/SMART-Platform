@@ -71,10 +71,10 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		
 		//try to initialize the design
 		if (parentDesign != null){
-			SurveyDesign surveyDesign = (SurveyDesign) session.getReference(SurveyDesign.class, parentDesign);
+			SurveyDesign surveyDesign = (SurveyDesign) session.get(SurveyDesign.class, parentDesign);
 			newSurvey.setSurveyDesign(surveyDesign);
 		}else if (surveySibling != null){
-			Survey survey = (Survey) session.getReference(Survey.class, surveySibling);
+			Survey survey = (Survey) session.get(Survey.class, surveySibling);
 			newSurvey.setSurveyDesign(survey.getSurveyDesign());
 		}
 	}

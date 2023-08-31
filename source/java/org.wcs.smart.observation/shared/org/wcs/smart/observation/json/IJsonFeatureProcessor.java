@@ -405,7 +405,7 @@ public abstract class IJsonFeatureProcessor {
 			}catch (Exception ex) {
 				throw new IOException(MessageFormat.format(Messages.INVALID_CM_UUID.getMessage(locale), atts.get(WaypointMetadata.CMUUID.key)));
 			}
-			ConfigurableModel cm = session.getReference(ConfigurableModel.class, uuid);
+			ConfigurableModel cm = session.get(ConfigurableModel.class, uuid);
 			if (cm == null) {
 				warnings.add(MessageFormat.format(Messages.CM_MISSING.getMessage(locale), (String)atts.get(WaypointMetadata.CMUUID.key)));
 			}

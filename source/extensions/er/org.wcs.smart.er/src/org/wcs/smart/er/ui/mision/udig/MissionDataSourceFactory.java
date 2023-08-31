@@ -111,7 +111,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 		try(Session session = HibernateManager.openSession()){
 			String uuid = (String)params.get(MISSION_UUID.key);
 			if (uuid != null){
-				mission = (Mission)session.getReference(Mission.class, UuidUtils.stringToUuid(uuid));
+				mission = (Mission)session.get(Mission.class, UuidUtils.stringToUuid(uuid));
 				if (mission != null ){
 					//load lazy items
 					for (MissionDay md : mission.getMissionDays()){

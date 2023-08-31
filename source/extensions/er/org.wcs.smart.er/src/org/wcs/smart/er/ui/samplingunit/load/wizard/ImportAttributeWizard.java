@@ -58,7 +58,7 @@ public class ImportAttributeWizard extends Wizard implements IPageChangingListen
 		session = HibernateManager.openSession();
 	
 		setNeedsProgressMonitor(true);
-		this.surveyDesign = (SurveyDesign) session.getReference(SurveyDesign.class, surveyDesign.getUuid());
+		this.surveyDesign = (SurveyDesign) session.get(SurveyDesign.class, surveyDesign.getUuid());
 	}
 	
 	@Override

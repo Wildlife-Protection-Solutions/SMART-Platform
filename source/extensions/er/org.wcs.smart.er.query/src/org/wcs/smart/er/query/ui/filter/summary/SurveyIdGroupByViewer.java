@@ -62,7 +62,7 @@ public class SurveyIdGroupByViewer extends AbstractGroupByViewer<SurveyIdGroupBy
 		if (items != null){
 			for (String it : items){
 				try{
-					Survey survey = (Survey) session.getReference(Survey.class, UuidUtils.stringToUuid(it));
+					Survey survey = (Survey) session.get(Survey.class, UuidUtils.stringToUuid(it));
 					if (survey != null){
 						allItems.add(new ListItem(survey.getUuid(), survey.getId()));
 					}

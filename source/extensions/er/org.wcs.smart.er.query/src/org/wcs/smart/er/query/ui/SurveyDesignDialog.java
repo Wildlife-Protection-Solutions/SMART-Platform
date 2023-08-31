@@ -83,7 +83,7 @@ public class SurveyDesignDialog extends SmartStyledTitleDialog{
 		Object selection =  ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
 		if (selection instanceof SurveyDesignEditorInput &&
 			((SurveyDesignEditorInput)selection).getUuid() != null){
-			sd = (SurveyDesign) session.getReference(SurveyDesign.class, ((SurveyDesignEditorInput)selection).getUuid());
+			sd = (SurveyDesign) session.get(SurveyDesign.class, ((SurveyDesignEditorInput)selection).getUuid());
 		}else{
 			sd = null;
 		}

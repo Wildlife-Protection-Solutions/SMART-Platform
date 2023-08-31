@@ -75,7 +75,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		session = HibernateManager.openSession();
 	
 		setNeedsProgressMonitor(true);
-		this.surveyDesign = (SurveyDesign) session.getReference(SurveyDesign.class, surveyDesign.getUuid());
+		this.surveyDesign = (SurveyDesign) session.get(SurveyDesign.class, surveyDesign.getUuid());
 	}
 	
 	@Override

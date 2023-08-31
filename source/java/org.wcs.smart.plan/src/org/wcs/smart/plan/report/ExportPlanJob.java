@@ -80,7 +80,7 @@ public class ExportPlanJob extends Job {
 			session.beginTransaction();
 			Plan plan = null;
 			try{
-				plan = (Plan) session.getReference(Plan.class, planUuid);
+				plan = (Plan) session.get(Plan.class, planUuid);
 				this.outputFile = Files.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 				outputFile.toAbsolutePath().toFile().deleteOnExit();
 				

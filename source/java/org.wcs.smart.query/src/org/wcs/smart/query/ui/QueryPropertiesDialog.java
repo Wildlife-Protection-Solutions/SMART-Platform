@@ -101,7 +101,7 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 				try{
 					s.beginTransaction();
 					//load names				
-					Query currentQuery = s.getReference(qType.getHibernateClass(), this.query.getUuid());
+					Query currentQuery = s.get(qType.getHibernateClass(), this.query.getUuid());
 					this.names = new HashMap<Language, String>();
 					for (org.wcs.smart.ca.Label l : currentQuery.getNames()){
 						names.put(l.getLanguage(), l.getValue());

@@ -65,7 +65,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		if (items != null && items.length > 0){
 			for (String it : items){
 				try{
-					Mission m = session.getReference(Mission.class, UuidUtils.stringToUuid(it));
+					Mission m = session.get(Mission.class, UuidUtils.stringToUuid(it));
 					if (m != null){
 						allItems.add(new ListItem(m.getUuid(), m.getId()));
 					}

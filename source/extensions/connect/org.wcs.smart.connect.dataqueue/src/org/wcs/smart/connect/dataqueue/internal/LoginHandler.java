@@ -98,7 +98,7 @@ public class LoginHandler implements ILoginHandler {
 			try{
 				int order = 0;
 				for (LocalDataQueueItem i : itemsToReset){
-					i = s.getReference(i);
+					i = s.get(i.getClass(), i.getUuid());
 					if (i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
 						//downloading was not complete so clear file
 						if (i.getFullFilePath() != null){

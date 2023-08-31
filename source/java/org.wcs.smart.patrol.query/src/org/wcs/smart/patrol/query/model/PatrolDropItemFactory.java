@@ -690,7 +690,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 					ListItem m = new ListItem(null, PatrolQueryOption.CM.getName(session, null, Locale.getDefault()));
 					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
 				}else {
-					ConfigurableModel cm = session.getReference(ConfigurableModel.class, UuidUtils.stringToUuid(value1));
+					ConfigurableModel cm = session.get(ConfigurableModel.class, UuidUtils.stringToUuid(value1));
 					if (cm == null) throw new Exception("Configurable model not found");
 					ListItem m = new ListItem(cm.getUuid(), cm.getName());
 					it.initializeData(new Object[]{new PatrolOptionData(option), m});	

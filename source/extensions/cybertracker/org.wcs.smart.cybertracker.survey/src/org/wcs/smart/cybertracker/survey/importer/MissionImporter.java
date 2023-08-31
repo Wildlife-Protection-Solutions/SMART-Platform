@@ -141,7 +141,7 @@ public class MissionImporter extends AbstractSmartImporter {
 						mission.getMissionPropertyValues().add(mpv);
 					}
 				} else {
-					mission = (Mission) session.getReference(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
+					mission = (Mission) session.get(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
 					validateExistingMission(ctSurvey, mission, session);
 				}
 				

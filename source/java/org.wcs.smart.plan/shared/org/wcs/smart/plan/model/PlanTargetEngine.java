@@ -86,7 +86,7 @@ public class PlanTargetEngine {
 		SpatialPlanTarget thisTarget = null;
 		PlanTargetStatus result = new PlanTargetStatus(Status.COMPLETE);
 
-		thisTarget = (SpatialPlanTarget) session.getReference(SpatialPlanTarget.class, target.getUuid());
+		thisTarget = session.get(SpatialPlanTarget.class, target.getUuid());
 		if (thisTarget == null) {
 			return new PlanTargetStatus(Status.INCOMPLETE);
 		}
@@ -116,8 +116,7 @@ public class PlanTargetEngine {
 	private PlanTargetStatus computeNumericPlanTarget(NumericPlanTarget target, Session session) {
 		Double total = -9999d;
 		NumericPlanTarget thisTarget = null;
-		thisTarget = (NumericPlanTarget) session.getReference(
-				NumericPlanTarget.class, target.getUuid());
+		thisTarget = session.get(NumericPlanTarget.class, target.getUuid());
 		if (thisTarget == null) {
 			return new PlanTargetStatus(Status.INCOMPLETE);
 		}

@@ -59,7 +59,7 @@ public class SurveyPropertyTables implements IDynamicSmartTables {
 		}
 		Session s = connection.getSession();
 		for (SurveyDesignProxy sdi : mgr.getSurveyDesignEditorInputs(s, null)){
-			SurveyDesign sd = (SurveyDesign)s.getReference(SurveyDesign.class, sdi.getUuid());
+			SurveyDesign sd = (SurveyDesign)s.get(SurveyDesign.class, sdi.getUuid());
 			SurveyDesignPropertyTable table = new SurveyDesignPropertyTable(sd);
 			tables.add(table);
 		}

@@ -69,7 +69,7 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 		
 	public void refreshMissionDay() {
 		try(Session session = HibernateManager.openSession()){
-				this.missionDay = session.getReference(this.missionDay);
+				this.missionDay = session.get(MissionDay.class, this.missionDay.getUuid());
 				this.missionDay.getMission().getMissionDays().forEach(md-> {
 					Hibernate.initialize(md.getTracks());
 					md.getWaypoints().forEach(sw->sw.getWaypoint().getObservationsAsString());
@@ -86,7 +86,7 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				this.missionDay = (MissionDay) session.getReference(MissionDay.class, missionDay.getUuid());
+				this.missionDay = (MissionDay) session.get(MissionDay.class, missionDay.getUuid());
 	
 				String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title,
 						missionDay.getMission().getId(), 

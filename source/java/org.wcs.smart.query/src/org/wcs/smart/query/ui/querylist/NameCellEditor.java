@@ -108,7 +108,7 @@ public class NameCellEditor implements ICellModifier {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						Query thisquery = (Query) session.getReference(query.getType().getHibernateClass(), query.getUuid());
+						Query thisquery = (Query) session.get(query.getType().getHibernateClass(), query.getUuid());
 						thisquery.updateName(SmartDB.getCurrentLanguage(), newName);
 						thisquery.setName(newName);
 						query.setQueryName(newName);
@@ -148,7 +148,7 @@ public class NameCellEditor implements ICellModifier {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						toupdate = session.getReference(folder);
+						toupdate = session.get(QueryFolder.class, folder.getUuid());
 						toupdate.updateName(SmartDB.getCurrentLanguage(), newName);
 						toupdate.setName(newName);
 						folder.setName(newName);

@@ -115,7 +115,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			protected IStatus run(IProgressMonitor monitor) {
 				parent.getDisplay().syncExec(()->{
 					try(Session s = HibernateManager.openSession()){
-						item.setValues(s.getReference(patrol), s);
+						item.setValues(s.get(Patrol.class, patrol.getUuid()), s);
 					}finally {
 						//add listener after item is configured so listener
 						//doesn't get fired when initializing values
@@ -152,7 +152,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor(false))){
 			s.beginTransaction();
 			try{
-				patrol = s.getReference(patrol);
+				patrol = s.get(Patrol.class, patrol.getUuid());
 				if (!item.updatePatrol(patrol, s)){
 					return false;
 				}

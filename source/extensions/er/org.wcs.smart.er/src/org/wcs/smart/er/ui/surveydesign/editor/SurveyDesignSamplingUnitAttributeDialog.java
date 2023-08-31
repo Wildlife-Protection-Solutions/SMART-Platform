@@ -77,7 +77,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends SmartStyledTitleDia
 	public SurveyDesignSamplingUnitAttributeDialog(Shell parentShell, SurveyDesign design) {
 		super(parentShell);
 		session = HibernateManager.openSession();
-		this.design = (SurveyDesign) session.getReference(SurveyDesign.class, design.getUuid());
+		this.design = (SurveyDesign) session.get(SurveyDesign.class, design.getUuid());
 	}
 	
 	public boolean close(){

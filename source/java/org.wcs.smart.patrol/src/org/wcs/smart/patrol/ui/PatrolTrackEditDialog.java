@@ -168,7 +168,7 @@ public class PatrolTrackEditDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				PatrolLegDay ref = session.getReference(patrolLegDay);
+				PatrolLegDay ref = session.get(PatrolLegDay.class, patrolLegDay.getUuid());
 				
 				if (patrolLegDay.getTrack().getGeom() == null) {
 					ref.getTracks().clear();
