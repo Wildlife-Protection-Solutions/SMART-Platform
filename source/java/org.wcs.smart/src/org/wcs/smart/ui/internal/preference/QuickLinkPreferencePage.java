@@ -426,10 +426,11 @@ public class QuickLinkPreferencePage extends PreferencePage implements
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				for (QuickLink l : this.userLinks) session.saveOrUpdate(l);
-				for (QuickLink l : this.systemLinks) session.saveOrUpdate(l);
-				for (QuickLink l : this.removedLinks) session.delete(l);
+				for (QuickLink l : this.userLinks) HibernateManager.saveOrMerge(session, l);
+				for (QuickLink l : this.systemLinks) HibernateManager.saveOrMerge(session, l);
+				for (QuickLink l : this.removedLinks) session.remove(l);
 				session.getTransaction().commit();
+				this.removedLinks.clear();
 			}catch (Exception ex) {
 				MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, MessageFormat.format(Messages.QuickLinkPreferencePage_SaveError, ex.getMessage()));
 				loadDataJob.schedule();

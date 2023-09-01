@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
@@ -47,6 +46,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
@@ -307,7 +307,7 @@ public class Attribute extends DmObject{
 	 * @return set of valid list elements
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
-	@OrderBy(clause = "list_order")
+	@OrderBy("list_order")
 	public List<AttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}
@@ -327,7 +327,7 @@ public class Attribute extends DmObject{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null")
-	@OrderBy(clause = "node_order")
+	@OrderBy("node_order")
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;
 	}
@@ -347,7 +347,7 @@ public class Attribute extends DmObject{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute")
 	@Where(clause = "parent_uuid is null and is_active")
-	@OrderBy(clause = "node_order")
+	@OrderBy("node_order")
 	public List<AttributeTreeNode> getActiveTreeNodes(){
 		return this.activeTootTreeNodes;
 	}

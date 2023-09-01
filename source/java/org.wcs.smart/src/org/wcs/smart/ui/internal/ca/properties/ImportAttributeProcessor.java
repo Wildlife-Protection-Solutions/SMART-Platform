@@ -49,7 +49,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;

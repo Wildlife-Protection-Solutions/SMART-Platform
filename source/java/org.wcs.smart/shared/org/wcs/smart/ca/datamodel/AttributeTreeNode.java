@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
@@ -38,6 +37,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
@@ -134,7 +134,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 * @return children nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause = "node_order")
+	@OrderBy("node_order")
 	@BatchSize(size=200)
 	public List<AttributeTreeNode> getChildren(){
 		return this.children;
@@ -146,7 +146,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL})
 	@Where(clause = "is_active")
-	@OrderBy(clause = "node_order")
+	@OrderBy("node_order")
 	@BatchSize(size=200)
 	public List<AttributeTreeNode> getActiveChildren(){
 		return this.activeChildren;

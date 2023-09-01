@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -38,6 +37,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
@@ -194,7 +194,7 @@ RETURNS NULL ON NULL INPUT;
 	 * @return all children categories; <code>null</code> if leaf node
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause = "cat_order")
+	@OrderBy("cat_order")
 	public List<Category> getChildren(){
 		return this.children;
 	}
@@ -213,7 +213,7 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent")
 	@Where(clause = "is_active")
-	@OrderBy(clause = "cat_order")
+	@OrderBy("cat_order")
 	public List<Category> getActiveChildren(){
 		return this.activeChildren;
 	}
@@ -294,7 +294,7 @@ RETURNS NULL ON NULL INPUT;
 	 * with category
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.category", cascade={CascadeType.ALL}, orphanRemoval = false)
-	@OrderBy(clause = "att_order")
+	@OrderBy("att_order")
 	public List<CategoryAttribute> getAttributes(){
 		return this.attributes;
 	}

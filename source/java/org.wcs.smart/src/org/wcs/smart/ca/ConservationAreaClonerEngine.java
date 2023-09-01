@@ -44,8 +44,6 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;

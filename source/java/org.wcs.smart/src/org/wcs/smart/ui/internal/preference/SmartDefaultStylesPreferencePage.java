@@ -32,7 +32,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.DefaultMapLayerStylesComposite;
 /**
  * Preference page for configuring auto-backups
