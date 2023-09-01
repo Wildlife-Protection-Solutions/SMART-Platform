@@ -55,6 +55,7 @@
     			<groupId>org.ehcache</groupId>
    			<artifactId>ehcache</artifactId>
 			<version>${ehcache.version}</version>
+			<classifier>jakarta</classifier>
 			<exclusions>
 			<!-- https://stackoverflow.com/questions/72128029/how-do-i-resolve-could-not-find-artifact-javax-xml-bindjaxb-apipom2-3-0-b1611 -->
                 <exclusion>

@@ -806,7 +806,7 @@ public class SummaryItemLabelProvider {
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null && items.length > 0){
 			for (String it : items){
-				Mission m = (Mission) s.getReference(Mission.class, UuidUtils.stringToUuid(it));
+				Mission m = (Mission) s.get(Mission.class, UuidUtils.stringToUuid(it));
 				if (m != null){
 					allItems.add(new ListItem(m.getUuid(), m.getId()));
 				}else{
@@ -841,7 +841,7 @@ public class SummaryItemLabelProvider {
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (filterkeys != null && filterkeys.length > 0){
 			for (String uuid : filterkeys){
-				Employee e = (Employee) s.getReference(Employee.class, UuidUtils.stringToUuid(uuid));
+				Employee e = (Employee) s.get(Employee.class, UuidUtils.stringToUuid(uuid));
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName(e, l)));
 			}		
 		}else{
@@ -1235,7 +1235,7 @@ public class SummaryItemLabelProvider {
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null){
 			for (String it : items){
-				Survey survey = (Survey) s.getReference(Survey.class, UuidUtils.stringToUuid(it));
+				Survey survey = (Survey) s.get(Survey.class, UuidUtils.stringToUuid(it));
 				if (survey != null){
 					allItems.add(new ListItem(survey.getUuid(), survey.getId()));
 				}else{
@@ -1301,7 +1301,7 @@ public class SummaryItemLabelProvider {
 				if (k.equals(IFilter.NULL_OP)) {
 					addnone = true;
 				}else {
-					ConfigurableModel cm = s.getReference(ConfigurableModel.class, UuidUtils.stringToUuid(k));
+					ConfigurableModel cm = s.get(ConfigurableModel.class, UuidUtils.stringToUuid(k));
 					if (cm != null && caFilter.getConservationAreaFilterIds().contains(cm.getConservationArea().getUuid())) {
 						items.add(new ListItem(cm.getUuid(), cm.getName()));
 					}

@@ -942,7 +942,7 @@ public class SmartUtils {
 	 * @return
 	 */
 	public static Image getImage(Path file, Integer size) {
-		if (size < 0) return null;
+		if (size != null && size < 0) return null;
 		if (file.getFileName().toString().endsWith(".svg")) { //$NON-NLS-1$
 			try {
 				return readSvg(Display.getDefault(), file, size);

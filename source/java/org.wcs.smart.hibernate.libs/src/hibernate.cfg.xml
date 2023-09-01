@@ -18,19 +18,30 @@
 		<property name="c3p0.idle_test_period">3000</property>
 		
 		<!-- SQL dialect -->
-		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.DerbyDialect</property>
 
 		<!-- Echo all executed SQL to stdout -->
-		<property name="show_sql">false</property> 
+		<property name="hibernate.show_sql">false</property> 
 		
 		<property name="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext</property>
 
 		<!-- cache -->
+		<!--  second level caching doesn't improve performance a lot here -->
+		<!--  we are using a file database -->
+		<property name="hibernate.generate_statistics">false</property>
 		<property name="hibernate.cache.use_second_level_cache">false</property>
-		<property name="hibernate.cache.use_second_level_cache.use_query_cache">false</property>
-		<property name="cache.region.factory_class">org.hibernate.cache.jcache.JCacheRegionFactory</property>
+		<property name="hibernate.cache.use_second_level_cache.use_query_cache">true</property>
+		<property name="hibernate.cache.region.factory_class">jcache</property>
+        <property name="hibernate.javax.cache.provider">org.ehcache.jsr107.EhcacheCachingProvider</property>
+        <!-- placed on the classpath (note: "classpath:ehcache.xml" does not work! -->
+        <property name="hibernate.javax.cache.uri">jcache.xml</property>
+		
+		<!--
+		<property name="hibernate.cache.use_second_level_cache.use_query_cache">false</property> 
+		<property name="hibernate.cache.region.factory_class">org.hibernate.cache.jcache.JCacheRegionFactory</property>
 		<property name="hibernate.javax.cache.provider">org.ehcache.jsr107.EhcacheCachingProvider</property>
 		<property name="hibernate.javax.cache.uri">jcache.xml</property>
+		 -->
 		 
 				
 	</session-factory>

@@ -344,7 +344,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return
 	 */
 	protected String[] getCategoryLabels(UUID uuid, Locale l, Session session){
-		Category category = (Category) session.getReference(Category.class, uuid);
+		Category category = (Category) session.get(Category.class, uuid);
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(category.getName());
 		Category parent = category.getParent();
@@ -367,7 +367,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	public String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
-			Employee x = (Employee) session.getReference(Employee.class, uuid);
+			Employee x = (Employee) session.get(Employee.class, uuid);
 			if (x != null) {
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(x, locale);
 			}

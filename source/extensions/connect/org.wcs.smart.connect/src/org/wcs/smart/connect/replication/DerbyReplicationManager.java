@@ -296,37 +296,29 @@ public enum DerbyReplicationManager {
 	}
 	
 	/**
-	 * Get the cached replication state
+	 * Get the cached replication state. Will return null
+	 * if cached state unknown.
 	 * @return
 	 */
-	public boolean getCachedReplicationState(){
+	public Boolean getCachedReplicationState(){
 		if (cachedReplicationEnabled == null){
 			synchronized (this) {
 				if (cachedReplicationEnabled == null){
-					final boolean[] isEnabled = new boolean[]{false};
-					Job j = new Job("replicationstatus") { //$NON-NLS-1$
-						
+					Job j = new Job("replicationstatus") { //$NON-NLS-1$						
 						@Override
 						public IStatus run(IProgressMonitor monitor) {
 							if (!SmartHibernateManager.isSessionFactorySet()){
 								//for performance in particular for connect; skip this check if we don't have a session factory
-								isEnabled[0] = false;
+								cachedReplicationEnabled = false;
 								return Status.OK_STATUS;
 							}
 							try(Session s = HibernateManager.openSession()){
-								isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
+								cachedReplicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
 							}
 							return Status.OK_STATUS;
 						}
 					};
 					j.schedule();
-					try {
-						j.join();
-					} catch (InterruptedException e) {
-						ConnectPlugIn.log(e.getMessage(), e);
-						return false;
-					}
-					cachedReplicationEnabled = isEnabled[0];
 				}
 			}
 		}

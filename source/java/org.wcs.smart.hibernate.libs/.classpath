@@ -13,7 +13,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/derby-10.16.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/derbyshared-10.16.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/derbytools-10.16.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ehcache-3.10.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mchange-commons-java-0.2.19.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.36.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-commons-annotations-6.0.6.Final.jar"/>
@@ -31,5 +30,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.3.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-jcache-6.3.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jandex-3.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ehcache-3.10.8-jakarta.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

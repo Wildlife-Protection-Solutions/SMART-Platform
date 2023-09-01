@@ -183,7 +183,11 @@ public class ReplicationStatusContribution implements
 					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_OK_ICON));
 					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.UPTODATE, null));
 				}else {
-					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+					if (localStatus == ServerStatus.CONNECTING) {
+						lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_DISABLED_ICON));	
+					}else {
+						lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+					}
 					
 					String msg = serverMsg;
 					if (msg == null) {
@@ -215,7 +219,12 @@ public class ReplicationStatusContribution implements
 		protected IStatus run(IProgressMonitor monitor) {
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
-			if (!DerbyReplicationManager.INSTANCE.getCachedReplicationState()) {
+			
+			Boolean state = DerbyReplicationManager.INSTANCE.getCachedReplicationState();
+			if (state == null) {
+				status = ServerStatus.CONNECTING;
+				message = "Replication state not known";
+			}else if (!state) {
 				status = ServerStatus.DISABLED;
 				message = Messages.ReplicationStatusContribution_notenabled;
 			}else {
@@ -259,7 +268,11 @@ public class ReplicationStatusContribution implements
 			updateLocalStatus(status, message);
 
 			//schedule 
-			schedule(ConnectStatusManager.CHECK_LOCAL_STATUS);
+			if (state == null) {
+				schedule(500);
+			}else {
+				schedule(ConnectStatusManager.CHECK_LOCAL_STATUS);
+			}
 			return Status.OK_STATUS;
 		}	
 	};
