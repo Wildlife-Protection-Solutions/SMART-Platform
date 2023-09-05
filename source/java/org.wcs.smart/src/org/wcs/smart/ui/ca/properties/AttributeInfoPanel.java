@@ -1286,11 +1286,14 @@ public class AttributeInfoPanel extends Composite {
 								for(AttributeTreeNode toDelete : attTree.getDeletedNodes()){
 									try{
 										if (toDelete.getUuid() != null){
-											AttributeTreeNode item =session.get(toDelete.getClass(), toDelete.getUuid());
+											
+											AttributeTreeNode item = session.get(toDelete.getClass(), toDelete.getUuid());
 											if (item.getParent() != null) {
 												item.getParent().getChildren().remove(item);
+												item.getParent().getActiveChildren().remove(item);
 											}else {
 												item.getAttribute().getTree().remove(item);
+												item.getAttribute().getActiveTreeNodes().remove(item);
 											}
 											
 											session.remove(item);
