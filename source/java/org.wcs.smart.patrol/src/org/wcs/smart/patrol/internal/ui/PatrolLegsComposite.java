@@ -641,6 +641,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				}
 			}
 		}
+		//create leg days
+		p.createLegDays(session);
 		//if (session.getTransaction().isActive()) session.flush();
 		
 		//legs no longer used; these must be removed
@@ -668,8 +670,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		if (session.getTransaction().isActive()) session.flush();
 		
-		//create leg days
-		p.createLegDays(session);
+
 		p.recalculateType();
 		
 		if (session.getTransaction().isActive()) session.flush();
