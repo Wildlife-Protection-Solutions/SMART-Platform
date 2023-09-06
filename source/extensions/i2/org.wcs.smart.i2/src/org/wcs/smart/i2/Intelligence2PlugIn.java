@@ -47,7 +47,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.i2"; //$NON-NLS-1$
 
-	public static final Boolean LOG_QUERY = Boolean.TRUE;
+	public static final Boolean LOG_QUERY = Boolean.FALSE;
 	
 	//Version of Data Structures required for current implementation
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$

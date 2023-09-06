@@ -175,7 +175,7 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		SqlGenerator.logString(sql);
 			
 		try(ScrollableResults<Tuple> sc = session.createNativeQuery(sql, Tuple.class).scroll()){
-			if (!sc.setRowNumber(offset)) return items;
+			if (!sc.setRowNumber(offset+1)) return items;
 			for (int i = 0; i <= pageSize; i ++){
 				
 				Tuple t = sc.get();
