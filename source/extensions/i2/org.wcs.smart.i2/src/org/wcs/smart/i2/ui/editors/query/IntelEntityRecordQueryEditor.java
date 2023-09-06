@@ -206,7 +206,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		
 			s.beginTransaction();
 			try {
-				s.save(clone);
+				s.persist(clone);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

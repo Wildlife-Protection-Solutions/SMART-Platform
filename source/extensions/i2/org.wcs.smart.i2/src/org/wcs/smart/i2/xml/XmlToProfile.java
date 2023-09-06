@@ -167,134 +167,148 @@ public class XmlToProfile {
 		SubMonitor progress = SubMonitor.convert(monitor, 7);
 		
 		this.session = session;
-		
-		IntelProfile existing = QueryFactory.buildQuery(session, IntelProfile.class, 
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"keyId", data.getKey()}).uniqueResult(); //$NON-NLS-1$
-		if (existing != null) {
-			throw new Exception (MessageFormat.format(Messages.XmlToProfile_KeyExists, data.getKey()));
-		}
-
-		IntelProfile profile = new IntelProfile();
-		profile.setKeyId(data.getKey());
-		if (data.getColor() != null) {
-			profile.setColorObj(Color.decode("#"+data.getColor())); //$NON-NLS-1$
-		}
-		profile.setConservationArea(ca);
-		profile.setRecordSources(new HashSet<>());
-		profile.setEntityTypes(new HashSet<>());
-		updateNames(profile, data.getNames());
-		
-		
-		//process attributes
-		progress.split(1);
-		progress.subTask(Messages.XmlToIntelData_attributesTask);
-		List<IntelAttribute> attributes = processAttributes(data.getAttributes());
-		
-		//attribute mappings
-		HashMap<String, IntelAttribute> attributeMapping = new HashMap<>();
-		List<IntelAttribute> existingAttributes = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).list(); //$NON-NLS-1$
-		existingAttributes.forEach(e->attributeMapping.put(e.getKeyId(), e));
-		attributes.forEach(e->attributeMapping.put(e.getKeyId(), e));
-		
-		//process entities
-		progress.split(1);
-		progress.subTask(Messages.XmlToIntelData_entitytypesTask);
-		List<IntelEntityType> entities = proecessEntityTypes(data.getEntities(), attributeMapping);
-		
-		for (IntelEntityType e : entities) {
-			IntelProfileEntityType map = new IntelProfileEntityType();
-			map.setEntityType(e);
-			map.setProfile(profile);
-			
-			profile.getEntityTypes().add(map);
-			e.getProfiles().add(map);
-		}
-		
-		//entity mappings
-		HashMap<String, IntelEntityType> entityMappings = new HashMap<>();
-		List<IntelEntityType> existingEntities = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list(); //$NON-NLS-1$
-		existingEntities.forEach(e->entityMappings.put(e.getKeyId(), e));
-		entities.forEach(e->entityMappings.put(e.getKeyId(), e));
-		
-		//process & save record sources
-		progress.split(1);
-		progress.subTask(Messages.XmlToIntelData_recourdsourceTask);
-		List<IntelRecordSource> recordSources = processRecordSources(data.getRecordSource(), attributeMapping, entityMappings);
-		for (IntelRecordSource s : recordSources) {
-			IntelProfileRecordSource ps = new IntelProfileRecordSource();
-			ps.getId().setProfile(profile);
-			ps.getId().setRecordSource(s);
-			
-			s.getProfiles().add(ps);
-			profile.getRecordSources().add(ps);
-		}
-		
-		//processing relationship groups
-		progress.split(1);
-		progress.subTask(Messages.XmlToIntelData_relationshipgroupsTask);
-		List<IntelRelationshipGroup> relationshipGroups = processRelationshipGroups(data.getRelationshipGroups());
-				
-		//relationship group mappings
-		HashMap<String, IntelRelationshipGroup> relationshipGroupMappings = new HashMap<>();
-		List<IntelRelationshipGroup> existingGroups = QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).list(); //$NON-NLS-1$
-		existingGroups.forEach(e->relationshipGroupMappings.put(e.getKeyId(), e));
-		relationshipGroups.forEach(e->relationshipGroupMappings.put(e.getKeyId(), e));
-		
-		//process & save relationship type
-		progress.split(1);
-		progress.subTask(Messages.XmlToIntelData_relationshiptypesTask);
-		List<IntelRelationshipType> relationshipTypes = processRelationshipTypes(data.getRelationships(), attributeMapping, entityMappings, relationshipGroupMappings, profile);
-		
-
-		//validate warnings with user
-		if (!warnings.isEmpty()) {
-			boolean[] ret = new boolean[] {false};
-			Display.getDefault().syncExec(()->{
-				WarningDialog warningDialog = new WarningDialog(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_WarningsTitle, Messages.XmlToIntelData_WarningsMsg, warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-				if (warningDialog.open() == 0) {
-					ret[0] = true;
-				}
-			});	
-			//cancel
-			if (!ret[0] ) return null;
-		}
-		
-		//save changes
-		progress.split(1);
-		progress.subTask(Messages.XmlToIntelData_SaveTask);
-		
+		List<IntelAttribute> attributes;
+		List<IntelRecordSource> recordSources;
+		List<IntelRelationshipGroup> relationshipGroups;
+		List<IntelRelationshipType> relationshipTypes;
+		List<IntelEntityType> entities ;
+		IntelProfile profile;
 		
 		session.beginTransaction();
 		try {
-			
-			List<IntelProfileEntityType> types = new ArrayList<>(profile.getEntityTypes());
-			List<IntelProfileRecordSource> sources = new ArrayList<>(profile.getRecordSources());
-			
-			profile.getEntityTypes().clear();
-			profile.getRecordSources().clear();
-			session.save(profile);
-			
-			types.forEach(ipe->ipe.getEntityType().getAttributes().forEach(att->session.saveOrUpdate(att.getAttribute())));
-			
-			types.forEach(ipe->session.saveOrUpdate(ipe.getEntityType()));
-			
-			types.forEach(ipe->ipe.getEntityType().getAttributes().forEach(att->{
-				if (att.getAttributeGroup() != null) session.saveOrUpdate(att.getAttributeGroup());
-				
-			}));
-			
 			session.flush();
 			
-			profile.getEntityTypes().addAll(types);
+			IntelProfile existing = QueryFactory.buildQuery(session, IntelProfile.class, 
+					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"keyId", data.getKey()}).uniqueResult(); //$NON-NLS-1$
+			if (existing != null) {
+				throw new Exception (MessageFormat.format(Messages.XmlToProfile_KeyExists, data.getKey()));
+			}
+
+			profile = new IntelProfile();
+			profile.setKeyId(data.getKey());
+			if (data.getColor() != null) {
+				profile.setColorObj(Color.decode("#"+data.getColor())); //$NON-NLS-1$
+			}
+			profile.setConservationArea(ca);
+			profile.setRecordSources(new HashSet<>());
+			profile.setEntityTypes(new HashSet<>());
+			updateNames(profile, data.getNames());
 			
-			session.flush();	
-			sources.forEach(src->src.getRecordSource().getAttributes().forEach(att->{
-				if (att.getAttribute() != null) session.saveOrUpdate(att.getAttribute());
-			}));
+			session.persist(profile);
+		
+			session.flush();
 			
-			sources.forEach(s->session.saveOrUpdate(s.getRecordSource()));
-			profile.getRecordSources().addAll(sources);
+			//process attributes
+			progress.split(1);
+			progress.subTask(Messages.XmlToIntelData_attributesTask);
+			//returns a list of new attributes
+			attributes = processAttributes(data.getAttributes());
+			attributes.forEach(a->session.persist(a));
+		
+			session.flush();
+			
+			//attribute mappings
+			HashMap<String, IntelAttribute> attributeMapping = new HashMap<>();
+			List<IntelAttribute> existingAttributes = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).list(); //$NON-NLS-1$
+			existingAttributes.forEach(e->attributeMapping.put(e.getKeyId(), e));
+			attributes.forEach(e->attributeMapping.put(e.getKeyId(), e));
+			
+			session.flush();
+		
+			//process entities
+			progress.split(1);
+			progress.subTask(Messages.XmlToIntelData_entitytypesTask);
+			entities = proecessEntityTypes(data.getEntities(), attributeMapping);
+		
+			for (IntelEntityType e : entities) {
+				
+				if (e.getUuid() == null) {
+					
+					session.persist(e);
+//					for (IntelEntityTypeAttribute iea : e.getAttributes()) {
+//						if (iea.getAttributeGroup().getUuid() == null) {
+//							session.persist(iea.getAttributeGroup());
+//						}
+//					}
+					session.flush();
+				}
+				
+				
+				IntelProfileEntityType map = new IntelProfileEntityType();
+				map.setEntityType(e);
+				map.setProfile(profile);
+				session.persist(map);
+				profile.getEntityTypes().add(map);
+				e.getProfiles().add(map);
+			}
+		
+			session.flush();
+			
+			//entity mappings
+			HashMap<String, IntelEntityType> entityMappings = new HashMap<>();
+			List<IntelEntityType> existingEntities = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list(); //$NON-NLS-1$
+			existingEntities.forEach(e->entityMappings.put(e.getKeyId(), e));
+			entities.forEach(e->entityMappings.put(e.getKeyId(), e));
+		
+			//process & save record sources
+			progress.split(1);
+			progress.subTask(Messages.XmlToIntelData_recourdsourceTask);
+			recordSources = processRecordSources(data.getRecordSource(), attributeMapping, entityMappings);
+			for (IntelRecordSource s : recordSources) {
+				if (s.getUuid() == null) session.persist(s);
+				
+				IntelProfileRecordSource ps = new IntelProfileRecordSource();
+				ps.getId().setProfile(profile);
+				ps.getId().setRecordSource(s);
+				
+				s.getProfiles().add(ps);
+				profile.getRecordSources().add(ps);
+			}
+		
+			//processing relationship groups
+			progress.split(1);
+			progress.subTask(Messages.XmlToIntelData_relationshipgroupsTask);
+			relationshipGroups = processRelationshipGroups(data.getRelationshipGroups());
+			for (IntelRelationshipGroup group : relationshipGroups) {
+				if (group.getUuid() == null) session.persist(group);
+			}
+				
+			//relationship group mappings
+			HashMap<String, IntelRelationshipGroup> relationshipGroupMappings = new HashMap<>();
+			List<IntelRelationshipGroup> existingGroups = QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).list(); //$NON-NLS-1$
+			existingGroups.forEach(e->relationshipGroupMappings.put(e.getKeyId(), e));
+			relationshipGroups.forEach(e->relationshipGroupMappings.put(e.getKeyId(), e));
+		
+			//process & save relationship type
+			progress.split(1);
+			progress.subTask(Messages.XmlToIntelData_relationshiptypesTask);
+			relationshipTypes = processRelationshipTypes(data.getRelationships(), attributeMapping, entityMappings, relationshipGroupMappings, profile);
+			for (IntelRelationshipType type : relationshipTypes) {
+				if (type.getUuid() == null) session.persist(type);
+			}
+			
+
+			//validate warnings with user
+			if (!warnings.isEmpty()) {
+				boolean[] ret = new boolean[] {false};
+				Display.getDefault().syncExec(()->{
+					WarningDialog warningDialog = new WarningDialog(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_WarningsTitle, Messages.XmlToIntelData_WarningsMsg, warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+					if (warningDialog.open() == 0) {
+						ret[0] = true;
+					}
+				});	
+				//cancel
+				if (!ret[0] ) {
+					session.getTransaction().rollback();
+					return null;
+				}
+			}
+		
+			//save changes
+			progress.split(1);
+			progress.subTask(Messages.XmlToIntelData_SaveTask);
+					
 			session.flush();		
 			
 			IntelPermission ip = new IntelPermission();
@@ -302,26 +316,7 @@ public class XmlToProfile {
 			ip.setPermission(IntelPermission.ADMIN);
 			ip.setProfile(profile);
 					
-			session.save(ip);
-			
-			attributes.forEach(a->session.save(a));
-			
-			for (IntelEntityType a : entities) {
-				if (a.getUuid() == null) session.save(a);
-			}	
-			entityMappings.values().forEach(et->{
-			
-			et.getAttributes().forEach(eta->{
-					session.save(eta);
-					if (eta.getAttributeGroup() != null) session.save(eta.getAttributeGroup());	
-				});
-			});
-			for (IntelRecordSource a : recordSources) {
-				if (a.getUuid() == null) session.save(a);
-			}
-			
-			relationshipGroups.forEach(a->session.save(a));
-			relationshipTypes.forEach(a->session.save(a));
+			session.persist(ip);
 			
 			session.getTransaction().commit();
 		}catch (Exception ex) {

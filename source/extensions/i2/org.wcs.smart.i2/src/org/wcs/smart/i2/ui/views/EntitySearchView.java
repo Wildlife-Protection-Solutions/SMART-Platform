@@ -535,7 +535,7 @@ public class EntitySearchView {
 				try {
 					toDelete = (IntelEntitySearch) s.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
 					if (toDelete != null){
-						s.delete(toDelete);
+						s.remove(toDelete);
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex){

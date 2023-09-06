@@ -175,7 +175,7 @@ public class SaveSearchDialog extends SmartStyledTitleDialog{
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					session.save(search);
+					session.persist(search);
 					session.getTransaction().commit();
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_SaveError + ex.getMessage(), ex);

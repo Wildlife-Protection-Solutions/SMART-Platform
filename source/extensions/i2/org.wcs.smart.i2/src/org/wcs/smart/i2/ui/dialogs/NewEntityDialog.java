@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -73,7 +74,6 @@ import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -311,7 +311,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(newEntity);
+				session.persist(newEntity);
 				session.flush();
 				if (newEntity.createDataModelItem(session)) {
 					DataModelManager.INSTANCE.updateLastModified(session);
@@ -462,14 +462,13 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		if (type == null) return;
 		
 		try(Session s = HibernateManager.openSession()){
-			s.saveOrUpdate(type);
+			type = s.get(IntelEntityType.class, type.getUuid());
+			Hibernate.initialize(type);
+			Hibernate.initialize(type.getAttributes());
+			
 			for (IntelEntityTypeAttribute a : type.getAttributes()){
-				a.getAttribute().getName();
-				if (a.getAttribute().getAttributeList() != null){
-					for (IntelAttributeListItem l : a.getAttribute().getAttributeList()){
-						l.getName();
-					}
-				}
+				Hibernate.initialize(a.getAttribute());
+				Hibernate.initialize(a.getAttribute().getAttributeList());
 			}
 		}
 		
@@ -508,6 +507,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		content.setLayout(new GridLayout(2, false));
 		((GridLayout)content.getLayout()).horizontalSpacing = 7;
 		content.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		IntelEntityType ftype = type;
 		type.getAttributes().stream()
 			.filter(a -> a.getAttributeGroup() != null)
 			.map(a -> a.getAttributeGroup())
@@ -525,10 +525,10 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 				l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
 				l.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				
-				type.getAttributes().stream().filter(a -> group.equals(a.getAttributeGroup()))
+				ftype.getAttributes().stream().filter(a -> group.equals(a.getAttributeGroup()))
 				.sorted((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder()))
 				.forEach(attribute -> {
-					if (!attribute.getAttribute().equals(type.getIdAttribute())){
+					if (!attribute.getAttribute().equals(ftype.getIdAttribute())){
 						AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
 						leditor.addSelectionListener(listener);
 						attributeControls.add(leditor);
@@ -553,7 +553,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		type.getAttributes().stream().filter(a -> a.getAttributeGroup() == null)
 		.sorted((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder()))
 		.forEach(attribute -> {
-			if (!attribute.getAttribute().equals(type.getIdAttribute())){
+			if (!attribute.getAttribute().equals(ftype.getIdAttribute())){
 				AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
 				leditor.addSelectionListener(listener);
 				attributeControls.add(leditor);

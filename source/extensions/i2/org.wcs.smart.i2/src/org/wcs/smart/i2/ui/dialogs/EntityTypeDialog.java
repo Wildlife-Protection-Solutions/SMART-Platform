@@ -89,7 +89,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -351,7 +350,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								Long cnt = QueryFactory.buildCountQuery(s, IntelEntity.class, 
 										new Object[] {"entityType", type}); //$NON-NLS-1$
 								sub.setWorkRemaining(cnt.intValue()+1);
-								ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
+								ScrollableResults<IntelEntity> scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type", IntelEntity.class) //$NON-NLS-1$
 												.setParameter("type",  type).scroll(); //$NON-NLS-1$
 								while(scroll.next()) {
 									IntelEntity ie = (IntelEntity) scroll.get();

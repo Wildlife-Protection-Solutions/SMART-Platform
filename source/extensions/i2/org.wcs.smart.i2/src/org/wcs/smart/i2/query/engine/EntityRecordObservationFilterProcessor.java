@@ -1114,19 +1114,13 @@ public class EntityRecordObservationFilterProcessor {
 		logString(filter.getType().name());
 		logString(UuidUtils.uuidToString(itemProvider.getQueryConservationArea().getUuid()));
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		NativeQuery<UUID> query = s.createNativeQuery(sql.toString(), UUID.class);
 		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid()); //$NON-NLS-1$
 		query.setParameter("keyid", filter.getKey()); //$NON-NLS-1$
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
 		
-		Object x = query.uniqueResult();
-		if (x == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_AreaKeyNotFound, filter.getKey()));
-		UUID areaUuid = null;
-		if (x instanceof UUID){
-			areaUuid = (UUID) x;
-		}else if (x instanceof byte[]){
-			areaUuid = UuidUtils.byteToUUID((byte[])x);
-		}
+		UUID areaUuid = query.uniqueResult();
+		if (areaUuid == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_AreaKeyNotFound, filter.getKey()));
 		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 + " "); //$NON-NLS-1$ //$NON-NLS-2$

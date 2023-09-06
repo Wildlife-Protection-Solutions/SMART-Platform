@@ -224,8 +224,11 @@ public class ProfileDialog extends SmartStyledDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(tosave);
-
+				if (tosave.getUuid() == null) {
+					session.persist(tosave);
+				}else {
+					tosave = session.merge(tosave);
+				}
 				session.flush();
 				
 				List<IntelEntityType> esources = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
@@ -287,11 +290,11 @@ public class ProfileDialog extends SmartStyledDialog {
 					if (p.getPermission() == 0) {
 						session.remove(p);
 					}else {
-						session.saveOrUpdate(p);
+						session.merge(p);
 						
 						if (!p.getEmployee().getSmartUserLevels().contains(IntelUserUserLevel.INSTANCE.getKey())) {
 							p.getEmployee().setSmartUserLevelKeys(p.getEmployee().getSmartUserLevelKeys() + Employee.USER_LEVEL_SEP + IntelUserUserLevel.INSTANCE.getKey());
-							session.saveOrUpdate(p.getEmployee());
+							session.merge(p.getEmployee());
 						}
 					}
 				}

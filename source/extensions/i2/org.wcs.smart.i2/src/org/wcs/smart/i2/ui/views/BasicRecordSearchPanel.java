@@ -75,7 +75,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.hibernate.query.ResultListTransformer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -543,7 +542,6 @@ public class BasicRecordSearchPanel extends Composite {
 	}
 	
 	private Job refreshSourcesJob = new Job("refresh source list") { //$NON-NLS-1$
-		@SuppressWarnings("deprecation")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {		
 			List<Object> srcs = new ArrayList<>();

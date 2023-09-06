@@ -41,6 +41,8 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 
 import com.ibm.icu.text.MessageFormat;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Searches record attribute; used for searching for duplicate records
  * 
@@ -95,7 +97,7 @@ public class AttributeRecordSearch extends BasicRecordSearch {
 		if (profiles.isEmpty()) {
 			return new IntelRecordResult(0, Collections.emptyList(), System.nanoTime() - startTime);
 		}
-		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
+		Query<Long> query = session.createQuery("SELECT count(*) " + hql, Long.class); //$NON-NLS-1$
 		query.setParameter("profiles", profiles); //$NON-NLS-1$
 		query.setParameter("attribute", attributeValue.getAttribute().getAttribute()); //$NON-NLS-1$
 		if (source != null){
@@ -121,44 +123,43 @@ public class AttributeRecordSearch extends BasicRecordSearch {
 			throw new IllegalStateException(MessageFormat.format("The attribute type {0} not supported for attribute searches", attributeValue.getAttribute().getAttribute().getType().getGuiName(Locale.getDefault()))); //$NON-NLS-1$
 		}
 		
-		long cnt = (long) query.uniqueResult();
+		long cnt = query.uniqueResult();
 		
-		query = session.createQuery("SELECT r.uuid, r.title, r.recordSource.uuid, r.status, r.description, r.profile.uuid " + hql); //$NON-NLS-1$
-		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
-		query.setParameter("profiles", profiles); //$NON-NLS-1$
-		query.setParameter("attribute", attributeValue.getAttribute().getAttribute()); //$NON-NLS-1$
+		Query<Tuple> query2 = session.createQuery("SELECT r.uuid, r.title, r.recordSource.uuid, r.status, r.description, r.profile.uuid " + hql, Tuple.class); //$NON-NLS-1$
+		query2.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
+		query2.setParameter("profiles", profiles); //$NON-NLS-1$
+		query2.setParameter("attribute", attributeValue.getAttribute().getAttribute()); //$NON-NLS-1$
 		if (source != null){
-			query.setParameter("source", source); //$NON-NLS-1$
+			query2.setParameter("source", source); //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query2.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (titleSearch != null){
 			if (titleLike) {
-				query.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query2.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else {
-				query.setParameter("title", titleSearch); //$NON-NLS-1$ 
+				query2.setParameter("title", titleSearch); //$NON-NLS-1$ 
 			}
 		}
 		if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
-			query.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
+			query2.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
 		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.NUMERIC) {
-			query.setParameter("value1", attributeValue.getNumberValue()); //$NON-NLS-1$
+			query2.setParameter("value1", attributeValue.getNumberValue()); //$NON-NLS-1$
 		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.DATE) {
-			query.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
+			query2.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
 		}else {
 			throw new IllegalStateException(MessageFormat.format("The attribute type {0} not supported for attribute searches", attributeValue.getAttribute().getAttribute().getType().getGuiName(Locale.getDefault()))); //$NON-NLS-1$
 		}
-		List<?> items = query.list();
+		List<Tuple> items = query2.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();
 				
-		for (Object it : items){
-			Object[] i = (Object[])it;
-			UUID uuid = (UUID)i[0];
-			String title = (String) i[1];
-			UUID src = (UUID)i[2];
-			IntelRecord.Status status = (IntelRecord.Status)i[3];
-			IntelProfile profile = session.get(IntelProfile.class, (UUID)i[5]);
+		for (Tuple it : items){
+			UUID uuid = it.get(0, UUID.class);
+			String title = it.get(1, String.class);
+			UUID src = it.get(2, UUID.class);
+			IntelRecord.Status status = it.get(3, IntelRecord.Status.class);
+			IntelProfile profile = session.get(IntelProfile.class, it.get(5, UUID.class));
 			resultItems.add(new IntelRecordSearchResultItem(uuid, profile, src == null ? null : session.get(IntelRecordSource.class, src), title, status));
 		}
 		

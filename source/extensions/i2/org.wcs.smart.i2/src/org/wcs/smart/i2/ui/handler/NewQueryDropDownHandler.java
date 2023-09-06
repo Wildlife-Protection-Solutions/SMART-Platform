@@ -65,7 +65,6 @@ import org.eclipse.ui.PlatformUI;
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
 public class NewQueryDropDownHandler {
 
 	private static final String SOURCE_ID = "org.wcs.smart.i2.query.source"; //$NON-NLS-1$

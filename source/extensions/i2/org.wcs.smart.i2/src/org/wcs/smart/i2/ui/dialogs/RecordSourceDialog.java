@@ -72,7 +72,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -767,10 +766,12 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			//validate that all record sources are still valid
 			//which means that the profile associated with the record
 			//must match one of the profiles associated with that record source
-			if (currentSelection.getUuid() != null) session.update(currentSelection);
 			if (!newProfiles.isEmpty() && currentSelection.getUuid() != null) {
 				String hsql = "SELECT count(*) FROM IntelRecord r WHERE r.recordSource = :source and profile not in (:profiles)"; //$NON-NLS-1$
-				Long cnt = (Long)session.createQuery(hsql).setParameter("source", currentSelection).setParameter("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+				Long cnt = session.createQuery(hsql, Long.class)
+						.setParameter("source", currentSelection) //$NON-NLS-1$
+						.setParameter("profiles", newProfiles) //$NON-NLS-1$
+						.uniqueResult(); 
 				if (cnt > 0) {
 					throw new Exception(Messages.RecordSourceDialog_ProfileError);
 				}
@@ -818,28 +819,29 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			session.beginTransaction();
 			try{
 				
-				
+
+				if (currentSelection.getUuid() != null) {
+					currentSelection = session.merge(currentSelection);
+				}else {
+					session.persist(currentSelection);
+				}
 				//delete all attribute values for attributes removed from given source
 				for (IntelRecordSourceAttribute a : attributesToDelete){
 					if (a.getUuid() == null) continue; //not saved skip
 					
 					//delete any values associated with this attribute 
-					Query<?> q = session.createQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT v FROM IntelRecordAttributeValue v where v.attribute = :attribute)"); //$NON-NLS-1$
-					q.setParameter("attribute", a); //$NON-NLS-1$
-					q.executeUpdate();
-					
+					session.createMutationQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT v FROM IntelRecordAttributeValue v where v.attribute = :attribute)") //$NON-NLS-1$
+						.setParameter("attribute", a) //$NON-NLS-1$
+						.executeUpdate();
 
 					//delete any values associated with this attribute 
-					q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
-					q.setParameter("attribute", a); //$NON-NLS-1$
-					q.executeUpdate();
+					session.createMutationQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ") //$NON-NLS-1$
+						.setParameter("attribute", a) //$NON-NLS-1$
+						.executeUpdate();
 					
-					//delete the attributes
-				//	session.delete(a);
-				//	currentSelection.getAttributes().remove(a);
 				}
-				session.flush();
-				session.saveOrUpdate(currentSelection);
+//				session.flush();
+//				session.saveOrUpdate(currentSelection);
 				session.flush();
 				
 				//delete all attributes values for attributes that changes from multi to single
@@ -847,9 +849,9 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 					if (a.getUuid() == null) continue; //not saved skip 
 					
 					//delete any values associated with this attribute 
-					Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
-					q.setParameter("attribute", a); //$NON-NLS-1$
-					q.executeUpdate();
+					session.createMutationQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ") //$NON-NLS-1$
+						.setParameter("attribute", a) //$NON-NLS-1$
+						.executeUpdate();
 				}
 				
 				session.getTransaction().commit();

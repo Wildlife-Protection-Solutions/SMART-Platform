@@ -319,7 +319,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
 					if (r.getRecord().getUuid() != null){
 						modifiedEntities.add(r.getEntity());
-						s.delete(r);
+						s.remove(r);
 					}
 				}
 				
@@ -341,13 +341,13 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					for (IntelEntityLocation l : todelete){
 						l.setLocation((IntelLocation) s.merge(l.getLocation()));
 						modifiedEntities.add(l.getEntity());
-						s.delete(l);
+						s.remove(l);
 					}
 				}
 				
 	
 				for (IntelEntityLocation locationlink : deleteEntityLocationLinks){
-					s.delete(locationlink);
+					s.remove(locationlink);
 					modifiedEntities.add(locationlink.getEntity());
 				}
 				
@@ -357,14 +357,14 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				s.flush();
 				
 				for (IntelEntityAttachment entityAttachment : summaryPage.getRemovedEntityAttachments()){
-					s.delete(entityAttachment);
+					s.remove(entityAttachment);
 					entityAttachment.getEntity().getEntityAttachments().remove(entityAttachment);
 					modifiedEntities.add(entityAttachment.getEntity());
 				}
 				
 				
 				for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
-					s.save(entityAttachments);
+					s.persist(entityAttachments);
 					entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
 					modifiedEntities.add(entityAttachments.getEntity());
 				}
@@ -372,7 +372,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				
 				for (IntelEntityLocation locationlink : newEntityLocationLinks){
 					s.saveOrUpdate(locationlink.getLocation());
-					s.save(locationlink);
+					s.persist(locationlink);
 					modifiedEntities.add(locationlink.getEntity());
 				}
 				s.flush();
@@ -382,8 +382,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				for (IntelRecordAttachment ea : summaryPage.getDeleteAttachments()){
 					if (ea.getAttachment().getUuid() != null){
 						if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
-							s.delete(ea);
-							s.delete(ea.getAttachment());
+							s.remove(ea);
+							s.remove(ea.getAttachment());
 						}
 					}
 				}

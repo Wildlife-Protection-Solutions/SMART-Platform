@@ -111,6 +111,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 import org.wcs.smart.util.SmartUtils;
 
+import jakarta.persistence.Tuple;
+
 
 /**
  * View for displaying records 
@@ -766,17 +768,17 @@ public class RecordsView {
 			final List<IntelRecordProxy> allRecords = new ArrayList<IntelRecordProxy>();
 			if (!profiles.isEmpty()) {
 				try(Session s = HibernateManager.openSession()){
-					Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc, title"); //$NON-NLS-1$
+					Query<Tuple> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc, title", Tuple.class); //$NON-NLS-1$
 					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					q.setParameter("profiles", profiles); //$NON-NLS-1$
-					List<?> items = q.list();
-					for (Object it : items){
-						Object[] item = (Object[])it;
-						IntelProfile ip = s.get(IntelProfile.class, (UUID)item[5]);
-						String name = (String)item[0];
-						UUID uuid = (UUID)item[1];
-						IntelRecordSource rs = item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]);
-						IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, (IntelRecord.Status)item[4], (LocalDateTime)item[2]);
+					List<Tuple> items = q.list();
+					for (Tuple it : items){
+						
+						IntelProfile ip = s.get(IntelProfile.class, it.get(5, UUID.class));
+						String name = it.get(0, String.class);
+						UUID uuid = it.get(1, UUID.class);
+						IntelRecordSource rs = it.get(3) == null ? null : s.get(IntelRecordSource.class, it.get(3, UUID.class));
+						IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, it.get(4, IntelRecord.Status.class), it.get(2, LocalDateTime.class));
 						allRecords.add(r);
 					}
 					

@@ -721,7 +721,7 @@ public class WorkingSetView {
 					set.setName(newName);
 					set.updateName(SmartDB.getCurrentLanguage(), newName);
 					set.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
-					s.save(set);
+					s.persist(set);
 					s.getTransaction().commit();
 				}else{
 					set = null;
@@ -928,7 +928,7 @@ public class WorkingSetView {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.save(workingSet);
+				s.persist(workingSet);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();

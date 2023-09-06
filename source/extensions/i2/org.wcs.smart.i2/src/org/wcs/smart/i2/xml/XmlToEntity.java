@@ -184,8 +184,8 @@ public class XmlToEntity {
 		session.beginTransaction();
 		try {
 			entities.forEach(a->{
-				a.getEntityAttachments().forEach(aa -> session.save(aa.getAttachment()));
-				session.save(a);
+				a.getEntityAttachments().forEach(aa -> session.persist(aa.getAttachment()));
+				session.persist(a);
 				dmModified = dmModified || a.createDataModelItem(session);
 				modifiedEntities.add(a);
 				for (IntelEntityRecord r : a.getIntelligenceRecords()) {
@@ -193,7 +193,7 @@ public class XmlToEntity {
 				}
 			});
 			relationships.forEach(a->{
-				session.save(a);
+				session.persist(a);
 				modifiedEntities.add(a.getSourceEntity());
 				modifiedEntities.add(a.getTargetEntity());
 			});

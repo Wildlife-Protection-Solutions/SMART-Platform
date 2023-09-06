@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -57,20 +56,15 @@ public class RecordFilterProcessor {
 		sub.subTask(Messages.RecordFilterProcessor_TableTask);
 		String tempTable = createTemporaryRecordTable(session, profiles, dates, cas);
 		sub.worked(1);
-		try {
-			sub.subTask(Messages.RecordFilterProcessor_Filter2Task);
-			Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session, sub.newChild(1));
+		sub.subTask(Messages.RecordFilterProcessor_Filter2Task);
+		Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session, sub.newChild(1));
 			
-			sub.subTask(Messages.RecordFilterProcessor_RunningFilterTask);
-			String dataTable = filterDataTable(session, tempTable, filter,filterColumns);
-			sub.worked(1);
+		sub.subTask(Messages.RecordFilterProcessor_RunningFilterTask);
+		String dataTable = filterDataTable(session, tempTable, filter,filterColumns);
+		sub.worked(1);
 			
-			return dataTable;
-		}finally {
-			String sql = "DROP TABLE " + tempTable; //$NON-NLS-1$
-			SqlGenerator.logString(sql);
-			session.createNativeQuery(sql).executeUpdate();
-		}
+		return dataTable;
+		
 	}
 	/*
 	 * create temporary entity table and populate with all entities
@@ -95,7 +89,7 @@ public class RecordFilterProcessor {
 		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("INSERT INTO "); //$NON-NLS-1$
@@ -120,7 +114,7 @@ public class RecordFilterProcessor {
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
 		
 		logme(sb);
-		NativeQuery<?> q = session.createNativeQuery(sb.toString())
+		MutationQuery q = session.createNativeMutationQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
 			.setParameterList("profiles",  profiles); //$NON-NLS-1$
 		if (dates != null && dates[0] != null) {
@@ -183,7 +177,7 @@ public class RecordFilterProcessor {
 		sb.append( columnName );
 		sb.append(" boolean default false "); //$NON-NLS-1$	
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append("UPDATE "); //$NON-NLS-1$
@@ -235,7 +229,7 @@ public class RecordFilterProcessor {
 		
 		logme(sb);
 		
-		Query<?> q = session.createNativeQuery(sb.toString())
+		MutationQuery q = session.createNativeMutationQuery(sb.toString())
 			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$
 			.setParameter("sourceid", filter.getRecordSourceKey()); //$NON-NLS-1$
 		
@@ -274,7 +268,7 @@ public class RecordFilterProcessor {
 		sb.append(" boolean default false "); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		
 		sb = new StringBuilder();
@@ -298,7 +292,7 @@ public class RecordFilterProcessor {
 		
 		logme(sb);
 		
-		Query<?> q = session.createNativeQuery(sb.toString())
+		MutationQuery q = session.createNativeMutationQuery(sb.toString())
 			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$;
 			.setParameter("sourceid", filter.getRecordSourceKey()); //$NON-NLS-1$
 		if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
@@ -331,7 +325,7 @@ public class RecordFilterProcessor {
 		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " ); //$NON-NLS-1$
@@ -359,7 +353,7 @@ public class RecordFilterProcessor {
 			querystr = querystr.substring(0, querystr.length() - " WHERE ".length()); //$NON-NLS-1$
 		}
 		
-		NativeQuery<?> query = session.createNativeQuery(querystr);
+		MutationQuery query = session.createNativeMutationQuery(querystr);
 		for (Entry<String,Object> parameter : parameters.entrySet()) {
 			query.setParameter(parameter.getKey(),  parameter.getValue());
 			logme(parameter.getKey() + ":" + parameter.getValue()); //$NON-NLS-1$
@@ -368,7 +362,7 @@ public class RecordFilterProcessor {
 		query.executeUpdate();
 		
 		try {
-			session.createNativeQuery("DROP TABLE " + dataTable); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + dataTable).executeUpdate(); //$NON-NLS-1$
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		}

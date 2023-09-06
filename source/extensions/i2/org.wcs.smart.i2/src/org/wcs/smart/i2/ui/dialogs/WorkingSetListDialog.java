@@ -291,7 +291,7 @@ public class WorkingSetListDialog extends SmartStyledTitleDialog {
 				copy.setName(newName);
 				copy.updateName(SmartDB.getCurrentLanguage(), newName);
 				copy.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
-				s.save(copy);
+				s.persist(copy);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
@@ -320,7 +320,7 @@ public class WorkingSetListDialog extends SmartStyledTitleDialog {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					s.saveOrUpdate(toRename);
+					s.merge(toRename);
 					s.getTransaction().commit();
 				}catch (Exception ex){
 					s.getTransaction().rollback();

@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
@@ -71,6 +72,8 @@ import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAtt
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.Tuple;
 
 /**
  * Entity summary query engine.
@@ -156,7 +159,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressCleanUp);
 			for (String tableName : areaTables.values()) {
 				try {
-					session.createNativeQuery("DROP TABLE " + tableName).executeUpdate(); //$NON-NLS-1$
+					session.createNativeMutationQuery("DROP TABLE " + tableName).executeUpdate(); //$NON-NLS-1$
 				}catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -171,7 +174,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		}finally {
 			//drop table
 			try {
-				session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			}catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -199,7 +202,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(" (entity_uuid char(16) for bit data, keyid varchar(128)) "); //$NON-NLS-1$
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
+			session.createNativeMutationQuery(sb.toString()).executeUpdate();
 
 			sb = new StringBuilder();
 			sb.append(" INSERT INTO "); //$NON-NLS-1$
@@ -219,7 +222,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(" AND b.ca_uuid in (:cas)"); //$NON-NLS-1$
 			
 			logme(sb);
-			session.createNativeQuery(sb.toString())
+			session.createNativeMutationQuery(sb.toString())
 				.setParameter("attributeKey",  groupBy.getAttributeKey()) //$NON-NLS-1$
 				.setParameter("areaType",  groupBy.getAreaType().name()) //$NON-NLS-1$
 				.setParameterList("cas", cas) //$NON-NLS-1$
@@ -416,7 +419,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(" date )"); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		dataTable.addColumn("entity_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn("entity_type_key",  "varchar(128)"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn("ca_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -437,7 +440,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString())
+		session.createNativeMutationQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
 			.setParameterList("profiles",  profiles) //$NON-NLS-1$
 			.executeUpdate();
@@ -546,10 +549,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				}
 			}
 			
-			Object[] dates = (Object[])session.createNativeQuery(sb.toString()).uniqueResult();
-			if (dates != null  && dates[0] != null && dates[1] != null) {
-				LocalDate lminDate = ((java.sql.Date)dates[0]).toLocalDate();
-				LocalDate lmaxDate = ((java.sql.Date)dates[1]).toLocalDate();
+			Tuple dates = session.createNativeQuery(sb.toString(), Tuple.class).uniqueResult();
+			if (dates != null  && dates.get(0) != null && dates.get(1) != null) {
+				LocalDate lminDate = ((java.sql.Date)dates.get(0)).toLocalDate();
+				LocalDate lmaxDate = ((java.sql.Date)dates.get(1)).toLocalDate();
 				if (lminDate != null && (minDate == null || lminDate.isBefore(minDate))) {
 					minDate = lminDate;
 				}
@@ -602,7 +605,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append( getColumnType(type));
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		dataTable.addColumn(columnName,  columnType);
 		
@@ -648,7 +651,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		logme(sb);
 		
-		session.createNativeQuery(sb.toString())
+		session.createNativeMutationQuery(sb.toString())
 			.setParameter("keyid", attributeKey) //$NON-NLS-1$
 			.executeUpdate();
 		
@@ -675,7 +678,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
+		session.createNativeMutationQuery(sb.toString()).executeUpdate();
 		
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " ); //$NON-NLS-1$
@@ -731,7 +734,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		HashMap<String,Object> parameters = new HashMap<>();
 		processFilter(queryFilter, sb, parameters);
 		
-		NativeQuery<?> query = session.createNativeQuery(sb.toString());
+		MutationQuery query = session.createNativeMutationQuery(sb.toString());
 		for (Entry<String,Object> parameter : parameters.entrySet()) {
 			query.setParameter(parameter.getKey(),  parameter.getValue());
 			logme(parameter.getKey() + ":" + parameter.getValue()); //$NON-NLS-1$
@@ -740,7 +743,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		query.executeUpdate();
 		
 		try {
-			session.createNativeQuery("DROP TABLE " + dataTable.tableName); //$NON-NLS-1$
+			session.createNativeMutationQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		}

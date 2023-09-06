@@ -223,7 +223,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		
 			s.beginTransaction();
 			try {
-				s.save(clone);
+				s.persist(clone);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

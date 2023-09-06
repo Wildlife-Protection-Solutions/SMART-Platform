@@ -74,7 +74,6 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -457,30 +456,30 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 								if (source.getUuid() == null) continue;
 								
 								//delete all attributes for records with this source
-								Query<?> q2 = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.value IN (SELECT a FROM IntelRecordAttributeValue a join a.record b WHERE b.recordSource = :source)"); //$NON-NLS-1$
-								q2.setParameter("source", source); //$NON-NLS-1$
-								q2.executeUpdate();
+								session.createMutationQuery("DELETE FROM IntelRecordAttributeValueList where id.value IN (SELECT a FROM IntelRecordAttributeValue a join a.record b WHERE b.recordSource = :source)") //$NON-NLS-1$
+									.setParameter("source", source) //$NON-NLS-1$
+									.executeUpdate();
 								
-								Query<?> q1 = session.createQuery("DELETE FROM IntelRecordAttributeValue where record IN (FROM IntelRecord WHERE recordSource = :source)"); //$NON-NLS-1$
-								q1.setParameter("source", source); //$NON-NLS-1$
-								q1.executeUpdate();
+								session.createMutationQuery("DELETE FROM IntelRecordAttributeValue where record IN (FROM IntelRecord WHERE recordSource = :source)") //$NON-NLS-1$
+									.setParameter("source", source) //$NON-NLS-1$
+									.executeUpdate();
 								
 								//update intelligence records to have no source
-								Query<?> q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$
-								q.setParameter("source", source); //$NON-NLS-1$
-								q.executeUpdate();
+								session.createMutationQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source") //$NON-NLS-1$
+									.setParameter("source", source) //$NON-NLS-1$
+									.executeUpdate();
 								
 								//remove all attributes associated with source
 								for (IntelRecordSourceAttribute a : source.getAttributes()){
 									//delete any values associated with this attribute 
-									q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
-									q.setParameter("attribute", a); //$NON-NLS-1$
-									q.executeUpdate();
+									session.createMutationQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ") //$NON-NLS-1$
+										.setParameter("attribute", a) //$NON-NLS-1$
+										.executeUpdate();
 									//delete the attributes
-									session.delete(a);
+									session.remove(a);
 								}
 								//delete source
-								session.delete(source);
+								session.remove(source);
 								
 								session.getTransaction().commit();
 								deleted.add(source);

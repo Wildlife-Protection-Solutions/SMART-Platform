@@ -368,7 +368,7 @@ public enum RecordImportEngine {
 				//save new records
 				for (IntelRecord i : toSave){
 					kidMonitor.split(1);
-					s.save(i);
+					s.persist(i);
 				}
 				s.getTransaction().commit();
 			}catch (OperationCanceledException ex) {

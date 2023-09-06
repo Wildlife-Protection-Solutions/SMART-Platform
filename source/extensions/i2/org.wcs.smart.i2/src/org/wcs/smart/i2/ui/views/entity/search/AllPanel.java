@@ -143,7 +143,7 @@ public class AllPanel extends Composite {
 			try(Session session = HibernateManager.openSession()){
 				try {
 					session.beginTransaction();
-					session.createNativeQuery("DROP TABLE " + AllEntityContentProvider.DB_NAME_NAME); //$NON-NLS-1$
+					session.createMutationQuery("DROP TABLE " + AllEntityContentProvider.DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					//don't worry about it;

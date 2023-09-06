@@ -36,6 +36,8 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Basic record search
  * 
@@ -100,7 +102,7 @@ public class BasicRecordSearch implements IRecordSearch{
 		if (profiles.isEmpty()) {
 			return new IntelRecordResult(0, Collections.emptyList(), System.nanoTime() - startTime);
 		}
-		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
+		Query<Long> query = session.createQuery("SELECT count(*) " + hql, Long.class); //$NON-NLS-1$
 		query.setParameter("profiles", profiles); //$NON-NLS-1$
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
@@ -116,34 +118,33 @@ public class BasicRecordSearch implements IRecordSearch{
 			}
 		}
 		
-		long cnt = (long) query.uniqueResult();
+		long cnt = query.uniqueResult();
 		
-		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description, profile.uuid " + hql); //$NON-NLS-1$
-		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
-		query.setParameter("profiles", profiles); //$NON-NLS-1$
+		Query<Tuple> query2 = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description, profile.uuid " + hql, Tuple.class); //$NON-NLS-1$
+		query2.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
+		query2.setParameter("profiles", profiles); //$NON-NLS-1$
 		if (source != null){
-			query.setParameter("source", source); //$NON-NLS-1$
+			query2.setParameter("source", source); //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query2.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (titleSearch != null){
 			if (titleLike) {
-				query.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query2.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else {
-				query.setParameter("title", titleSearch); //$NON-NLS-1$ 
+				query2.setParameter("title", titleSearch); //$NON-NLS-1$ 
 			}
 		}
-		List<?> items = query.list();
+		List<Tuple> items = query2.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();
 				
-		for (Object it : items){
-			Object[] i = (Object[])it;
-			UUID uuid = (UUID)i[0];
-			String title = (String) i[1];
-			UUID src = (UUID)i[2];
-			IntelRecord.Status status = (IntelRecord.Status)i[3];
-			IntelProfile profile = session.get(IntelProfile.class, (UUID)i[5]);
+		for (Tuple it : items){
+			UUID uuid = it.get(0, UUID.class);
+			String title = it.get(1, String.class);
+			UUID src = it.get(2, UUID.class);
+			IntelRecord.Status status = it.get(3,IntelRecord.Status.class);
+			IntelProfile profile = session.get(IntelProfile.class, it.get(5, UUID.class));
 			resultItems.add(new IntelRecordSearchResultItem(uuid, profile, src == null ? null : session.get(IntelRecordSource.class, src), title, status));
 		}
 		

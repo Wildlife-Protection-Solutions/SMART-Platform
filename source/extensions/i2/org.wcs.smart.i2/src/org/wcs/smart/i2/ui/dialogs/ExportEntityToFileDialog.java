@@ -166,16 +166,15 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 			pmd.run(true, true, new IRunnableWithProgress() {
 
 				@Override
-				@SuppressWarnings("unchecked")
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.ExportEntityXmlDialog_Task, 1);
 					try (Session s = HibernateManager.openSession()) {
 						if (entityUuids == null) {
 							entityUuids = new ArrayList<>();
-							List<Object> items = s.createQuery("SELECT uuid FROM IntelEntity WHERE conservationArea = :ca") //$NON-NLS-1$
-							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-							.list();
-							items.forEach(item-> entityUuids.add((UUID)item));
+							List<UUID> items = s.createQuery("SELECT uuid FROM IntelEntity WHERE conservationArea = :ca", UUID.class) //$NON-NLS-1$
+									.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+									.list();
+							items.forEach(item-> entityUuids.add(item));
 						}
 						if (format == Format.XML) {
 							EntityToXml hh = new EntityToXml(s);

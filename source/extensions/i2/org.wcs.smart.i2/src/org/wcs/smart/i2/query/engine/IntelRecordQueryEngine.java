@@ -48,7 +48,6 @@ import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for intelligence observation queries.
@@ -111,7 +110,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		addProfile(session, data);
 		addRecordSource(session, data);
 		
-		Integer cnt = (Integer) session.createNativeQuery("SELECT count(*) FROM " + data).uniqueResult(); //$NON-NLS-1$
+		Integer cnt = session.createNativeQuery("SELECT count(*) FROM " + data, Integer.class).uniqueResult(); //$NON-NLS-1$
 		
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, locale, session);
 		
@@ -125,22 +124,21 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		cols.put("profile_key", cols.size()); //$NON-NLS-1$
 		cols.put("record_source_name", cols.size()); //$NON-NLS-1$
 		
-		session.createNativeQuery("ALTER TABLE " + data + " add column sort_column varchar(1028)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("ALTER TABLE " + data + " add column sort_column varchar(1028)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		results.setColumnNameToIndexMap(p.colName2Index);
 		return results;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addProfile(Session session, String datatable) {
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		List<byte[]> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable).list(); //$NON-NLS-1$
-		for (byte[] u : uuids) {
-			IntelProfile p = session.get(IntelProfile.class, UuidUtils.byteToUUID(u));
+		List<UUID> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable, UUID.class).list(); //$NON-NLS-1$
+		for (UUID u : uuids) {
+			IntelProfile p = session.get(IntelProfile.class, u);
 			
-			session.createNativeQuery("UPDATE " + datatable + " SET profile_name = :name, profile_key = :pkey WHERE profile_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("UPDATE " + datatable + " SET profile_name = :name, profile_key = :pkey WHERE profile_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 				.setParameter("name", p.getName()) //$NON-NLS-1$
 				.setParameter("uuid", p.getUuid()) //$NON-NLS-1$
 				.setParameter("pkey", p.getKeyId()) //$NON-NLS-1$
@@ -148,16 +146,15 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addRecordSource(Session session, String datatable) {
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN record_source_name varchar(1024)") //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeMutationQuery("ALTER TABLE " + datatable + " ADD COLUMN record_source_name varchar(1024)") //$NON-NLS-1$ //$NON-NLS-2$
 			.executeUpdate();
 		
-		List<byte[]> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null").list(); //$NON-NLS-1$ //$NON-NLS-2$
-		for (byte[] u : uuids) {
-			IntelRecordSource p = session.get(IntelRecordSource.class, UuidUtils.byteToUUID(u));
+		List<UUID> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null", UUID.class).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		for (UUID u : uuids) {
+			IntelRecordSource p = session.get(IntelRecordSource.class, u);
 			
-			session.createNativeQuery("UPDATE " + datatable + " SET record_source_name = :name WHERE source_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeMutationQuery("UPDATE " + datatable + " SET record_source_name = :name WHERE source_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
 				.setParameter("name", p.getName()) //$NON-NLS-1$
 				.setParameter("uuid", p.getUuid()) //$NON-NLS-1$
 				.executeUpdate();

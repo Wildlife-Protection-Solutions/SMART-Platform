@@ -86,15 +86,17 @@ public class SettingsPreferencePage extends PreferencePage implements IIntelPref
 			session.beginTransaction();
 			try {
 				for(Name n : toDelete) {
-					if (n.op.getUuid() != null) session.delete(n.op);
+					if (n.op.getUuid() != null) session.remove(n.op);
 				}
 				for (Name n : items) {
-					session.saveOrUpdate(n.op);
+					session.merge(n.op);
 				}
 				session.getTransaction().commit();
 				toDelete.clear();
 			}catch (Exception ex ){
 				session.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+				
 			}
 		}
 	}

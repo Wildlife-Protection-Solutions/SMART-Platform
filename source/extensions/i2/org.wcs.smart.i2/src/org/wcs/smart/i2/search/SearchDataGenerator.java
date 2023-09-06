@@ -95,7 +95,7 @@ public class SearchDataGenerator {
 			g.setKeyId("relationshipgroup" + i);
 			g.updateName(SmartDB.getCurrentLanguage(), "Relationship Group " + i);
 			g.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
-			session.save(g);
+			session.persist(g);
 			groups.add(g);
 			monitor.worked(1);
 		}
@@ -135,7 +135,7 @@ public class SearchDataGenerator {
 				a.setRelationshipType(type);
 				type.getAttributes().add(a);
 			}
-			session.save(type);
+			session.persist(type);
 			rtypes.add(type);
 			monitor.worked(1);
 		}
@@ -179,7 +179,7 @@ public class SearchDataGenerator {
 					attribute.getAttributeList().add(li);
 				}
 			}
-			session.save(attribute);
+			session.persist(attribute);
 			attributes.add(attribute);
 			monitor.worked(1);
 		}
@@ -247,7 +247,7 @@ public class SearchDataGenerator {
 				type.getProfiles().add(et);
 			}
 			
-			session.save(type);
+			session.persist(type);
 			types.add(type);
 			monitor.worked(1);
 			
@@ -503,7 +503,7 @@ public class SearchDataGenerator {
 			}
 			entity.setEntityType(type);
 			entity.setProfile(type.getProfiles().iterator().next().getProfile());
-			session.save(entity);
+			session.persist(entity);
 			if (i % 10 == 0) {
 				session.flush();
 			}
@@ -512,7 +512,7 @@ public class SearchDataGenerator {
 				IntelEntityAttributeValue av = generateValue(a, items);
 				//entity.getAttributes().add(av);
 				av.setEntity(entity);
-				session.save(av);
+				session.persist(av);
 			}
 			
 			List<IntelEntity> le = typesToEntity.get(type);
@@ -565,14 +565,14 @@ public class SearchDataGenerator {
 				if (relation != null){
 					//generate attributes
 					relation.setAttributes(new ArrayList<IntelEntityRelationshipAttributeValue>());
-					session.save(relation);
+					session.persist(relation);
 					rcnt++;
 					
 					for (IntelRelationshipTypeAttribute a : relation.getRelationshipType().getAttributes()){
 						IntelEntityRelationshipAttributeValue value = generateValue(a, items);
 						//relation.getAttributes().add(value);
 						value.setRelationship(relation);
-						session.save(value);
+						session.persist(value);
 					}
 					
 				}
@@ -705,7 +705,7 @@ public class SearchDataGenerator {
 			c.set(2016, 1, 1);
 			long start = c.getTimeInMillis();
 			
-			session.save(record);
+			session.persist(record);
 			//session.flush();
 			
 			
@@ -750,7 +750,7 @@ public class SearchDataGenerator {
 					loc.setGeometry((new GeometryFactory()).createPolygon(cds));
 				}
 				
-				session.save(loc);
+				session.persist(loc);
 				//session.flush();
 				
 				//add three observations
@@ -769,7 +769,7 @@ public class SearchDataGenerator {
 						attributeValue.setObservation(ob);
 					}
 					
-					session.save(ob);
+					session.persist(ob);
 				}
 				
 				//session.flush();
@@ -784,7 +784,7 @@ public class SearchDataGenerator {
 						if (r.getEntity().getLocations() == null){
 							r.getEntity().setLocations(new ArrayList<IntelEntityLocation>());
 						}						
-						session.save(elocation);
+						session.persist(elocation);
 					}
 				}
 				session.flush();

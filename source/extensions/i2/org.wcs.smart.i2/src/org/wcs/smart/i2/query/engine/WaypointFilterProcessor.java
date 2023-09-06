@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -138,7 +139,7 @@ public class WaypointFilterProcessor {
 		sql.append(tableColumns);
 		sql.append(")"); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + obsTable); //$NON-NLS-1$
@@ -163,7 +164,7 @@ public class WaypointFilterProcessor {
 		}
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameterList("cas", caUuids); //$NON-NLS-1$
 		query.setParameterList("profiles", profileUuids); //$NON-NLS-1$
 		query.executeUpdate();
@@ -173,7 +174,7 @@ public class WaypointFilterProcessor {
 		sql.append("CREATE INDEX " + obsTable + "_location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		monitor.worked(1);
 		
@@ -198,7 +199,7 @@ public class WaypointFilterProcessor {
 					sql.append (")"); //$NON-NLS-1$
 					
 					logString(sql.toString());
-					s.createNativeQuery(sql.toString()).executeUpdate();
+					s.createNativeMutationQuery(sql.toString()).executeUpdate();
 					
 					filterToColumnName.put(filter, columnName);
 					monitor.worked(1);
@@ -258,7 +259,7 @@ public class WaypointFilterProcessor {
 			sql.append(tableColumns);
 			sql.append(")"); //$NON-NLS-1$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();	
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();	
 			
 			final StringBuilder deleteSql = new StringBuilder();
 			deleteSql.append("INSERT INTO " + tempTable ); //$NON-NLS-1$
@@ -300,7 +301,7 @@ public class WaypointFilterProcessor {
 			
 			if (monitor.isCanceled()) return null;
 			logString(deleteSql.toString());
-			s.createNativeQuery(deleteSql.toString()).executeUpdate();
+			s.createNativeMutationQuery(deleteSql.toString()).executeUpdate();
 			
 			SqlGenerator.switchTables(tempTable, obsTable, true, false, s);
 		}
@@ -315,7 +316,7 @@ public class WaypointFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		if (filter.getAttributeKey() == null){
 			//only a category filter
@@ -332,7 +333,7 @@ public class WaypointFilterProcessor {
 			logString(hkey1);
 			logString(hkey2);
 			
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
 			query.setParameter("hkey2", hkey2); //$NON-NLS-1$
 			logString(sql.toString());
@@ -341,20 +342,20 @@ public class WaypointFilterProcessor {
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 			sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 			sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
-			query = s.createNativeQuery(sql.toString());
-			query.executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
+			
 			
 			sql = new StringBuilder();
 			sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 			logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
+			s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 			return;
 			
@@ -428,7 +429,7 @@ public class WaypointFilterProcessor {
 		default:
 			break;
 		}
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
 		logString(filter.getAttributeKey());
 		
@@ -454,20 +455,20 @@ public class WaypointFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	//select * from table where (column name is not null) OR NOT (columnname is not null)
@@ -478,7 +479,7 @@ public class WaypointFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -488,27 +489,27 @@ public class WaypointFilterProcessor {
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(filter.getEntityUuid()));
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("uuid", filter.getEntityUuid()); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(EntityTypeFilter filter, String obsTable, String tempTable, String columnName){
@@ -519,7 +520,7 @@ public class WaypointFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -531,27 +532,26 @@ public class WaypointFilterProcessor {
 				
 		logString(sql.toString());
 		logString(filter.getTypeKey());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		query.setParameter("typeKey",  filter.getTypeKey()); //$NON-NLS-1$
 		query.executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
@@ -592,7 +592,7 @@ public class WaypointFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 			
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -649,7 +649,7 @@ public class WaypointFilterProcessor {
 		
 		logString(sql.toString());
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		MutationQuery query = s.createNativeMutationQuery(sql.toString());
 		logString(attribute.getKeyId());
 		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		
@@ -699,20 +699,20 @@ public class WaypointFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
+		query = s.createNativeMutationQuery(sql.toString());
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 	}
 	
@@ -723,7 +723,7 @@ public class WaypointFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("SELECT uuid FROM smart.area_geometries WHERE ca_uuid = :ca AND keyId = :keyid AND area_type = :type"); //$NON-NLS-1$
@@ -733,7 +733,7 @@ public class WaypointFilterProcessor {
 		logString(filter.getType().name());
 		logString(UuidUtils.uuidToString(itemProvider.getQueryConservationArea().getUuid()));
 		
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		NativeQuery<UUID> query = s.createNativeQuery(sql.toString(), UUID.class);
 		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid()); //$NON-NLS-1$
 		query.setParameter("keyid", filter.getKey()); //$NON-NLS-1$
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
@@ -758,27 +758,26 @@ public class WaypointFilterProcessor {
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(areaUuid));
-		query = s.createNativeQuery(sql.toString());
-		query.setParameter("areauuid", areaUuid); //$NON-NLS-1$
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString())
+			.setParameter("areauuid", areaUuid) //$NON-NLS-1$
+			.executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void addFilterColumn(SystemAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
@@ -788,7 +787,7 @@ public class WaypointFilterProcessor {
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
 		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		
 		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
@@ -808,7 +807,7 @@ public class WaypointFilterProcessor {
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
 			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
@@ -836,7 +835,7 @@ public class WaypointFilterProcessor {
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
-			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
 			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
 			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
@@ -851,20 +850,19 @@ public class WaypointFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
+		s.createNativeMutationQuery(sql.toString()).executeUpdate();
 	}
 
 	private void logString(String string){

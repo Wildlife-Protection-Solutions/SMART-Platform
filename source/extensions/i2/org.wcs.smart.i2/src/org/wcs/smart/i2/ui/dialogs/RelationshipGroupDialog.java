@@ -95,7 +95,11 @@ public class RelationshipGroupDialog extends SmartStyledTitleDialog {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(group);
+				if (group.getUuid() == null) {
+					s.persist(group);
+				}else {
+					s.merge(group);
+				}
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();

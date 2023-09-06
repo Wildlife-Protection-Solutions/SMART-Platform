@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.internal.Messages;

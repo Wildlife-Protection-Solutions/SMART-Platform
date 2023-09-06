@@ -506,7 +506,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 				
 				for(IntelEntityRelationship r : relationshipsToDelete){
-					s.delete(r);
+					s.remove(r);
 					if (!r.getSourceEntity().equals(entity)){
 						otherEntityModified.add(r.getSourceEntity());
 					}
@@ -519,8 +519,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 				for (IntelEntityAttachment ea : attachmentsToDelete){
 					if (ea.getAttachment().getUuid() != null){
 						if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
-							s.delete(ea);
-							s.delete(ea.getAttachment());
+							s.remove(ea);
+							s.remove(ea.getAttachment());
 						}
 					}
 				}

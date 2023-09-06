@@ -282,7 +282,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 					IntelReportManager.INSTANCE.generateTemplate(ie.getEntityType());
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
-						s.saveOrUpdate(ie.getEntityType());
+						s.merge(ie.getEntityType());
 						s.getTransaction().commit();
 					}catch (Exception ex) {
 						throw ex;

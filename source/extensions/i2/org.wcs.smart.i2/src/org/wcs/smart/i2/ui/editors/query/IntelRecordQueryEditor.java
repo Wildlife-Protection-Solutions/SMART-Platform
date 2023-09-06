@@ -210,7 +210,7 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 		
 			s.beginTransaction();
 			try {
-				s.save(clone);
+				s.persist(clone);
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
