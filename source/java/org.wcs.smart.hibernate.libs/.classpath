@@ -27,7 +27,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/txw2-4.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/byte-buddy-1.14.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-c3p0-6.3.0.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.3.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.3.0.Final.jar" sourcepath="lib-src/hibernate-core-6.3.0.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-jcache-6.3.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jandex-3.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ehcache-3.10.8-jakarta.jar"/>
