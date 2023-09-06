@@ -537,7 +537,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				this.deletedObservations.clear();
 				this.deletedAttachments.clear();
 				
-				ObservationHibernateManager.computeAttachmentLocations(wp, session);
+				ObservationHibernateManager.computeAttachmentLocations(wpupdated, session);
+				
+				this.wp = wpupdated;
+				this.wp.getObservationsAsString();
 
 			}catch (Exception ex){
 				ObservationPlugIn.displayLog(Messages.ObservationWizard_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
