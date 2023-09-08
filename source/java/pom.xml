@@ -583,6 +583,9 @@
 				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
 				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
 				
+				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
+				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
+				
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.feature</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er</module>
