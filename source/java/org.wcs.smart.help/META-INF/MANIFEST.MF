@@ -5,7 +5,8 @@ Bundle-SymbolicName: org.wcs.smart.help; singleton:=true
 Bundle-Version: 8.0.0.qualifier
 Bundle-Activator: org.wcs.smart.help.Activator
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.core;bundle-version="3.31.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Vendor: org.wcs.smart
