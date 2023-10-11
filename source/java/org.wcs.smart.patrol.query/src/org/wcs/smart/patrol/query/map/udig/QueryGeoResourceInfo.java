@@ -73,6 +73,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 				fs.getFeatures().accepts(new FeatureVisitor() {
 					@Override
 					public void visit(Feature f) {
+						if (f.getBounds().isEmpty()) return;
 						BoundingBox bb = f.getBounds();
 						env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
 					}
