@@ -31,9 +31,12 @@ import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -63,6 +66,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -83,6 +87,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -123,7 +128,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private Composite main;
 	
 	private ArrayList<Patrol> newPatrols = new ArrayList<Patrol>();
-	private HashSet<UUID> movedPoints = new HashSet<UUID>();
 
 	private static final PatrolWaypointSource PATROL_WP_SRC = (PatrolWaypointSource) SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -466,7 +470,11 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	@Override
 	public void setValues(Patrol p, Session session) {
 		this.session = session;
-		this.patrol = session.get(Patrol.class,p.getUuid());
+		if (p.getUuid() != null) {
+			this.patrol = session.get(Patrol.class,p.getUuid());
+		}else {
+			this.patrol = p;
+		}
 		
 		this.legs = new ArrayList<PatrolLeg>();
 		
@@ -543,6 +551,16 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		tmpLeg.setUuid(leg.getUuid());
 		return tmpLeg;
 	}
+	
+	private void doflush(Session session) {
+		if (session.getTransaction().isActive()) session.flush();
+	}
+	private void doPersist(Session session, Object o) {
+		if (session.getTransaction().isActive()) session.persist(o);
+	}
+	private void doRemove(Session session, Object o) {
+		if (session.getTransaction().isActive()) session.remove(o);
+	}
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
@@ -550,8 +568,21 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	public boolean updatePatrol(Patrol p, Session session) {
 		boolean isNew = p.getUuid() == null;
 
+		Set<UUID> existingWaypoints = new HashSet<>();
+		
 		try {
 			if (!isNew) PatrolHibernateManager.computeAttachmentLocations(p, session);
+			
+			//track all existing waypoints so we can delete the ones
+			//that don't get moved around
+			for (PatrolLeg pl : p.getLegs()) {
+				for (PatrolLegDay pld : pl.getPatrolLegDays()) {
+					if (pld.getWaypoints() == null) continue;
+					for (PatrolWaypoint pw : pld.getWaypoints()) {
+						existingWaypoints.add(pw.getWaypoint().getUuid());
+					}
+				}
+			}
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(e.getMessage(), e);
 			return false;
@@ -562,194 +593,340 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			p.setEndDate(patrolEndDate);
 		}
 
-		if (session.getTransaction().isActive()) session.flush();
+		doflush(session);
 		
-		HashSet<PatrolLeg> currentLegs = new HashSet<PatrolLeg>(p.getLegs());
-		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>(legs);
+		List<PatrolLeg> toDeleteLeg = new ArrayList<>();
+		List<PatrolLegDay> toDeleteDay = new ArrayList<>();
 		
-		//if the user used the "split into a new patrol" option, 
-		//don't delete the points we are going to move
-		for(Patrol p2 : newPatrols){
-			//put all the waypoints into our 'moved' hash so they don't get 
-			//deleted when we delete the leg from the old patrol
-			for(PatrolLeg pl : p2.getLegs()){
-				for(PatrolLegDay pld : pl.getPatrolLegDays()){
-					if (pld.getWaypoints() != null){
-						for(PatrolWaypoint pwp : pld.getWaypoints()){
-							movedPoints.add(pwp.getWaypoint().getUuid());
-						}
-					}
-				}
+		//keep track of link between days and waypoints - we do this
+		//so attachments don't get deleted when we delete patrol leg days
+		//we delete the waypoints separately: see comments further down
+		Map<PatrolLegDay, List<PatrolWaypoint>> oldWaypoints = new HashMap<>();
+		for (PatrolLeg current : p.getLegs()) {
+			for (PatrolLegDay currentday : current.getPatrolLegDays()) {
+				if (currentday.getWaypoints() != null)
+					oldWaypoints.put(currentday, new ArrayList<>(currentday.getWaypoints()));	
 			}
 		}
 		
-		for (Iterator<PatrolLeg> iterator = allLegs.iterator(); iterator.hasNext();) {
-			PatrolLeg updatedLeg = (PatrolLeg) iterator.next();
-			if (updatedLeg.getUuid() != null){
-				//find in the existing
-				for (PatrolLeg existing : currentLegs){
-					if (existing.getUuid() != null && 
-							updatedLeg.getUuid().equals(existing.getUuid())){
-						//update existing leg
-						existing.setId(updatedLeg.getId());
-						existing.setEndDate(updatedLeg.getEndDate());
-						existing.setStartDate(updatedLeg.getStartDate());
-						existing.setType(updatedLeg.getType());
-						existing.setMandate(updatedLeg.getMandate());
-						
-						//remove existing members
-						for (PatrolLegMember m : existing.getMembers()){
-							m.setId(null);
+		//create leg objects from new configuration data
+		List<PatrolLeg> newlegs = new ArrayList<>();
+		for (PatrolLeg leg : legs) {
+			PatrolLeg clone = new PatrolLeg();
+			
+			List<PatrolLegDay> legDeletes = new ArrayList<>();
+			if (leg.getUuid() != null) {
+				clone = session.get(PatrolLeg.class, leg.getUuid());
+				//we are going to recreate the patrol leg days 
+				for (PatrolLegDay pld : clone.getPatrolLegDays()) {
+					
+					//delete and clear these so attachments don't get remove
+					//The WaypointAttachmentInterceptor is used for this session
+					//which will delete any attachments associated with a patrol leg day
+					//when the patrol leg day is removed
+					//we don't want that as the waypoints may be assigned back to
+					//a patrol leg day further down
+					if (pld.getWaypoints() != null) {
+						for (PatrolWaypoint pw : pld.getWaypoints()) {
+							doRemove(session, pw);
 						}
-						existing.getMembers().clear();
-						if (session.getTransaction().isActive()) session.flush();
-						
-						//replace with new members
-						for (PatrolLegMember newmember : updatedLeg.getMembers()) {
-							PatrolLegMember m = newmember.clone();
-							m.setPatrolLeg(existing);
-							existing.getMembers().add(m);
-						}
-						
-						existing.getPatrolLegDays().get(0).setStartTime(updatedLeg.getPatrolLegDays().get(0).getStartTime());
-						existing.getPatrolLegDays().get(existing.getPatrolLegDays().size() - 1).setEndTime(updatedLeg.getPatrolLegDays().get(updatedLeg.getPatrolLegDays().size()-1).getEndTime());
-						currentLegs.remove(existing);
-						iterator.remove();
-						
-						if (session.getTransaction().isActive()) session.flush();
+						pld.getWaypoints().clear();
+					}
+					toDeleteDay.add(pld);
+					legDeletes.add(pld);
+				}
+				clone.getPatrolLegDays().clear();
+				doflush(session);
+			}else {
+				
+				clone.setPatrolLegDays(new ArrayList<>());
+			}
+			newlegs.add(clone);
+			
+			//clone.setUuid(leg.getUuid());
+			clone.setEndDate(leg.getEndDate());
+			clone.setStartDate(leg.getStartDate());
+			clone.setId(leg.getId());
+			clone.setType(leg.getType());
+			clone.setMandate(leg.getMandate());
+			
+			clone.setPatrol(p);
+			
+			if (clone.getUuid() == null) {
+				doPersist(session, clone);
+				doflush(session);
+				
+				clone.setMembers(new ArrayList<>());
+				for (PatrolLegMember m : leg.getMembers()) {
+					PatrolLegMember cc = new PatrolLegMember();
+					cc.setIsLeader(m.getIsLeader());
+					cc.setIsPilot(m.getIsPilot());
+					cc.setPatrolLeg(clone);
+					cc.setMember(m.getMember());
+					doPersist(session, cc);
+					clone.getMembers().add(cc);					
+				}
+			}else {
+				//merge members
+				Set<Employee> currentMembers = new HashSet<>();
+				for (PatrolLegMember m : clone.getMembers()) currentMembers.add(m.getMember());
+				for (PatrolLegMember m : leg.getMembers()) {
+					if (!currentMembers.contains(m.getMember())) {
+						PatrolLegMember newMember = new PatrolLegMember();
+						newMember.setMember(m.getMember());
+						newMember.setPatrolLeg(clone);
+						newMember.setIsLeader(m.getIsLeader());
+						newMember.setIsPilot(m.getIsPilot());
+						clone.getMembers().add(newMember);
+					}
+				}
+				currentMembers.clear();
+				for (PatrolLegMember m : leg.getMembers()) currentMembers.add(m.getMember());
+				for (PatrolLegMember m : clone.getMembers()) {
+					if (!currentMembers.contains(m.getMember())) {
+						doRemove(session, m);
+					}
+				}
+				
+			}
+
+			//create and persist leg days
+			clone.createLegDays(session);
+			
+			for (PatrolLegDay pld : clone.getPatrolLegDays()) doPersist(session, pld);
+			
+
+			//configure leg day information and attempt to copy over waypoints
+			//to new leg days
+			
+			//configure start times
+			clone.getPatrolLegDays().get(0).setStartTime(leg.getPatrolLegDays().get(0).getStartTime());
+			clone.getPatrolLegDays().get(clone.getPatrolLegDays().size()-1).setEndTime(leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).getEndTime());
+			
+			//try to match rest minutes
+			for (PatrolLegDay d : leg.getPatrolLegDays()) {
+				
+				for (PatrolLegDay current : clone.getPatrolLegDays()) {
+					if (current.getDate().equals(d.getDate())) {
+						current.setRestMinutes(d.getRestMinutes());
 						break;
 					}
 				}
-			}
-		}
-		
-		//new legs
-  
-		for (Iterator<PatrolLeg> iterator = allLegs.iterator(); iterator.hasNext();) {
-			PatrolLeg newLeg = (PatrolLeg) iterator.next();
+			} 
 			
-			PatrolLeg clone = clonePatrolLeg(newLeg);
-			clone.setPatrol(p);
-			p.getLegs().add(clone);
-			//save the waypoints in each leg-day, they are not cascaded like everything else, presumably for a reason, so I don't want to break everything else by changing it.
-			for(PatrolLegDay pld : clone.getPatrolLegDays()){
-				if (pld.getWaypoints() != null){
-					for(PatrolWaypoint wp : pld.getWaypoints()){
-						wp.setPatrolLegDay(pld);
-						movedPoints.add(wp.getWaypoint().getUuid());
-					}
+			for (PatrolLegDay current : clone.getPatrolLegDays()) {
+				if (current.getEndTime().equals(LocalTime.MAX)) {
+					current.setEndTime(LocalTime.of(23, 59, 59));
 				}
 			}
-		}
-		//create leg days
-		p.createLegDays(session);
-		//if (session.getTransaction().isActive()) session.flush();
-		
-		//legs no longer used; these must be removed
-		for (PatrolLeg toRemove: currentLegs){
-			//we need to make sure we delete all waypoints here
-			if(toRemove.getPatrolLegDays() != null){
-				for (PatrolLegDay pld : toRemove.getPatrolLegDays()){
-					if (pld.getWaypoints() != null){
-						for (PatrolWaypoint pw : pld.getWaypoints()){
-							if(!movedPoints.contains(pw.getWaypoint().getUuid())){ //only delete the waypoints if they didn't get moved into a new leg.
-								session.remove(pw.getWaypoint());
-							}
-						}
+			doflush(session);
+			
+			
+			//lets try to re-assign any waypoints to the correct day
+			for (PatrolLegDay pd : legDeletes) {
+				PatrolLegDay found = null;
+				for(PatrolLegDay x : clone.getPatrolLegDays()){
+					if (x.getDate().equals(pd.getDate())){
+						found = x;
+						break;
 					}
 				}
-			}
-			if (session.getTransaction().isActive()) session.flush();
-			toRemove.setPatrol(null);
-			p.getLegs().remove(toRemove);
-			session.remove(toRemove);
-			if (session.getTransaction().isActive()) session.flush();
-			
-			
-		}
-		
-		if (session.getTransaction().isActive()) session.flush();
-		
-
-		p.recalculateType();
-		
-		if (session.getTransaction().isActive()) session.flush();
-		
-		if (!isNew){
-			session.merge(p);
-			for(PatrolLeg l : p.getLegs()){
-				for(PatrolLegDay d : l.getPatrolLegDays()){
-					if(d.getWaypoints() != null){
-						for(PatrolWaypoint w : d.getWaypoints()){
-							session.merge(w);
-						}
-					}
-				}
-			}
-			if (session.getTransaction().isActive()) session.flush();
-			
-			
-			//if we made brand new patrols, save them and copy any plan and intel links there were
-			for(Patrol p2 : newPatrols){
-				p2.createLegDays(session);
-				session.persist(p2);
 				
+				if (found != null) {
+					//don't process again later
+					toDeleteDay.remove(pd);
+					
+					//move waypoints
+					if (found.getWaypoints() == null) found.setWaypoints(new ArrayList<>());
+					
+					for (PatrolWaypoint pw : oldWaypoints.get(pd)) {
+						PatrolWaypoint pwclone = new PatrolWaypoint();
+						pwclone.setWaypoint(pw.getWaypoint());
+						pwclone.setPatrolLegDay(found);
+						found.getWaypoints().add(pwclone);
+						doPersist(session, pwclone);
+					}
+					
+					found.setTracks(new ArrayList<>());
+					if (pd.getTracks() != null) {
+						for (Track t : pd.getTracks()) {
+							Track tclone = new Track();
+							tclone.setDistance(t.getDistance());
+							tclone.setGeom(t.getGeom());
+							tclone.setPatrolLegDay(found);
+							found.getTracks().add(tclone);
+							doPersist(session, tclone);
+						}
+					}
+				}
+			}
+			doflush(session);	
+		}
+				
+		for (PatrolLeg existing : p.getLegs()) {
+			PatrolLeg match = null;
+			for (PatrolLeg newleg : newlegs) {
+				if (existing.getUuid() != null && existing.getUuid().equals(newleg.getUuid())) {
+					match = newleg;
+					break;
+				}
+			}
+			if (match == null) {
+				//there is no new leg so flag this for deletion
+				toDeleteLeg.add(existing);
+			}
+		}
+		
+		//attempt to move waypoints to appropriate day
+		List<PatrolLegDay> toTryMove = new ArrayList<>(toDeleteDay);
+		for (PatrolLeg pl : toDeleteLeg) toTryMove.addAll(pl.getPatrolLegDays());
+		
+		for (PatrolLegDay delete : toTryMove) {
+			//attempt to move waypoint to new day
+			
+			PatrolLegDay moveto = null;
+			for(PatrolLeg pl : newlegs) {	
+				for (PatrolLegDay d : pl.getPatrolLegDays()) {
+					if (d.getDate().equals(delete.getDate())) {
+						moveto = d;
+						break;
+					}
+				}
+				if (moveto != null) break;
+			}
+			if (moveto != null) {
+				if (moveto.getWaypoints() == null) moveto.setWaypoints(new ArrayList<>());
+				if (oldWaypoints.get(delete) != null) {
+			
+					for(PatrolWaypoint pw : oldWaypoints.get(delete)) {
+						
+						PatrolWaypoint pw2 = new PatrolWaypoint();
+						pw2.setWaypoint(pw.getWaypoint());
+						pw2.setPatrolLegDay(moveto);
+						doPersist(session, pw2);
+						
+						moveto.getWaypoints().add(pw2);
+					}	
+					doflush(session);
+				}
+				
+				if (moveto.getTracks() == null) moveto.setTracks(new ArrayList<>());
+				
+				if (delete.getTracks() != null) {
+					for (Track t : delete.getTracks()) {
+						Track tclone = new Track();
+						tclone.setPatrolLegDay(moveto);
+						tclone.setDistance(t.getDistance());
+						tclone.setGeom(t.getGeom());
+						doPersist(session, tclone);
+						moveto.getTracks().add(tclone);
+					}
+					doflush(session);
+				}
+				
+			}
+		}
+		
+		for (PatrolLeg delete : toDeleteLeg) {
+			//for attachments; see comments above
+			for (PatrolLegDay pld : delete.getPatrolLegDays()) {
+				if (pld.getWaypoints() == null) continue;
+				for (PatrolWaypoint pw : pld.getWaypoints()) {
+					doRemove(session, pw);
+				}
+				pld.getWaypoints().clear();
+			}
+			if (delete.getUuid() != null) doPersist(session, delete);
+		}
+		p.getLegs().removeAll(toDeleteLeg);
+		
+		
+		p.recalculateType();
+		doflush(session);
+		
+		//clean up attachments and orphaned waypoints
+		//any waypoints do longer attached to a patrol need to deleted
+		for (PatrolLeg pl : newlegs) {
+			for (PatrolLegDay pld : pl.getPatrolLegDays()) {
+				if (pld.getWaypoints() == null) continue;
+				for(PatrolWaypoint pw : pld.getWaypoints()) {
+					existingWaypoints.remove(pw.getWaypoint().getUuid());
+				}
+			}
+		}
+		if (isNew) {
+			p.getLegs().addAll(newlegs);
+		}
+		
+		if (!isNew) {
+			
+			for(Patrol p2 : newPatrols){
+				//deal with any legs moved to new patrols
+				//if we made brand new patrols, save them and copy any plan and intel links there were
+
+				p2.createLegDays(session);
+				
+				doPersist(session, p2);		
 				
 				//save the waypoints, they are not cascaded like everything else.
 				for(PatrolLeg pl : p2.getLegs()){
 					for(PatrolLegDay pld : pl.getPatrolLegDays()) {
-						if (pld.getWaypoints() != null) {
-							for(PatrolWaypoint pwp : pld.getWaypoints()) {
-								//pwp.setPatrolLegDay(pld);
-								pwp = session.merge(pwp);
-								
-								//re-create attachments as files need to move
-								List<WaypointAttachment> newAttachments = new ArrayList<>();
-								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
-									WaypointAttachment clone = new WaypointAttachment();
-									clone.setCopyFromLocation(ws.getAttachmentFile());
-									clone.setFilename(ws.getFilename());
-									clone.setWaypoint(pwp.getWaypoint());
-									clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
-											.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
-											.resolve(clone.getFilename()));
-									newAttachments.add(clone);
-									session.persist(clone);
-								}
-								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
-									WaypointAttachment delete = session.get(WaypointAttachment.class, ws.getUuid());
-									delete.getWaypoint().getAttachments().remove(delete);
-									session.remove(delete);
-								}
-								pwp.getWaypoint().getAttachments().clear();
-								pwp.getWaypoint().getAttachments().addAll(newAttachments);
-								
-								//do the same thing for observation attachments
-								for (WaypointObservationGroup group : pwp.getWaypoint().getObservationGroups()) {
-									for (WaypointObservation wo : group.getObservations()) {
-										List<ObservationAttachment> newAttachments2 = new ArrayList<>();
-										for (ObservationAttachment ws : wo.getAttachments()) {
-											ObservationAttachment clone = new ObservationAttachment();
-											clone.setCopyFromLocation(ws.getAttachmentFile());
-											clone.setFilename(ws.getFilename());
-											clone.setObservation(wo);
-											clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
-													.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
-													.resolve(clone.getFilename()));
-											newAttachments2.add(clone);
-											session.persist(clone);
-										}
-										for (ObservationAttachment ws : wo.getAttachments()) {
-											ObservationAttachment delete = session.get(ObservationAttachment.class, ws.getUuid());
-											delete.getObservation().getAttachments().remove(delete);
-											session.remove(delete);
-										}
-										wo.getAttachments().clear();
-										wo.getAttachments().addAll(newAttachments2);
-									}
-								}
-								session.flush();
+						if (pld.getWaypoints() == null) continue;
+						
+						for(PatrolWaypoint pwp : pld.getWaypoints()) {
+							
+							existingWaypoints.remove(pwp.getWaypoint().getUuid());
+							
+							if (session.getTransaction().isActive()) pwp = session.merge(pwp);
+							
+							//re-create attachments as files need to move
+							List<WaypointAttachment> newAttachments = new ArrayList<>();
+							for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
+								WaypointAttachment clone = new WaypointAttachment();
+								clone.setCopyFromLocation(ws.getAttachmentFile());
+								clone.setFilename(ws.getFilename());
+								clone.setWaypoint(pwp.getWaypoint());
+								clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+										.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
+										.resolve(clone.getFilename()));
+								newAttachments.add(clone);
+								doPersist(session,clone);
 							}
+							for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
+								WaypointAttachment delete = session.get(WaypointAttachment.class, ws.getUuid());
+								delete.getWaypoint().getAttachments().remove(delete);
+								doRemove(session, delete);
+							}
+							pwp.getWaypoint().getAttachments().clear();
+							pwp.getWaypoint().getAttachments().addAll(newAttachments);
+								
+							//do the same thing for observation attachments
+							for (WaypointObservationGroup group : pwp.getWaypoint().getObservationGroups()) {
+								for (WaypointObservation wo : group.getObservations()) {
+									List<ObservationAttachment> newAttachments2 = new ArrayList<>();
+									for (ObservationAttachment ws : wo.getAttachments()) {
+										ObservationAttachment clone = new ObservationAttachment();
+										clone.setCopyFromLocation(ws.getAttachmentFile());
+										clone.setFilename(ws.getFilename());
+										clone.setObservation(wo);
+										clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+												.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
+												.resolve(clone.getFilename()));
+										newAttachments2.add(clone);
+										
+										doPersist(session, clone);
+									}
+									for (ObservationAttachment ws : wo.getAttachments()) {
+										ObservationAttachment delete = session.get(ObservationAttachment.class, ws.getUuid());
+										delete.getObservation().getAttachments().remove(delete);
+										doRemove(session, delete);										
+									}
+									wo.getAttachments().clear();
+									wo.getAttachments().addAll(newAttachments2);
+								}
+							}
+							doflush(session);
+							
 						}
 					}
 				}
@@ -765,9 +942,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				lblNewPatrol.setText(Messages.PatrolLegsComposite_2);
 			}
 		}
-		if (session.getTransaction().isActive()) session.flush();
-		return true;
-			
+		
+		//any remaining waypoints were not moved or removed so delete this existing
+		for (UUID u : existingWaypoints) {
+			doRemove(session, session.get(Waypoint.class, u));
+		}
+		doflush(session);
+		return true;			
 	}
 
 	/**

@@ -110,10 +110,19 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		
 		item.createComponent(outer, SWT.NONE);
 		
+		initData();
+
+		setTitle(item.getTitle());
+		setChangesMade(false);
+		return outer;
+	}
+	
+	private void initData() {
 		Job init = new Job("initialize") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				parent.getDisplay().syncExec(()->{
+				getShell().getDisplay().syncExec(()->{
+					item.removeChangeListener(listener);
 					try(Session s = HibernateManager.openSession()){
 						item.setValues(s.get(Patrol.class, patrol.getUuid()), s);
 					}finally {
@@ -126,13 +135,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			}
 		};
 		init.schedule();
-
-		setTitle(item.getTitle());
-		setChangesMade(false);
-		return outer;
 	}
-	
-	
 	/**
 	 * Saves the updates to he database.
 	 * 
@@ -143,6 +146,10 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		if (savePatrolInternal()) {
 			setChangesMade(false);
 			PatrolEventManager.getInstance().patrolChanged(item.getAttribute(), patrol);
+			
+			//reload data
+			initData();
+			
 			return true;
 		}
 		return false;
@@ -157,6 +164,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 					return false;
 				}
 				s.getTransaction().commit();
+				
 				return true;
 			}catch (PatrolSaveException ex){
 				s.getTransaction().rollback();
@@ -166,7 +174,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			}
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getLocalizedMessage(), ex);
-		}		
+		}
 		return false;
 		
 	}

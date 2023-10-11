@@ -512,6 +512,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	public static void computeAttachmentLocations(Patrol patrol, Session session) throws Exception {
 		for(PatrolLeg pd : patrol.getLegs()) {
 			for(PatrolLegDay pld : pd.getPatrolLegDays()) {
+				if (pld.getWaypoints() == null) continue;
 				for (PatrolWaypoint pw : pld.getWaypoints()) {
 					for(WaypointAttachment wa : pw.getWaypoint().getAttachments()) {
 						wa.computeFileLocation(session);

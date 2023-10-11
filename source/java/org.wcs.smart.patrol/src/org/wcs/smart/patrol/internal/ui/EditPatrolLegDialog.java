@@ -390,6 +390,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				startTime.setEnabled(opCustom.getSelection());
+				validate();
 			}
 		};
 		opStart = new Button(opComp, SWT.RADIO);
@@ -449,6 +450,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				endTime.setEnabled(opEndCustom.getSelection());
+				validate();
 			}
 		};
 		opEnd = new Button(opComp, SWT.RADIO);

@@ -205,11 +205,11 @@ public class PatrolLeg extends UuidItem {
 	public void setPilot(PatrolLegMember plm){
 		if (this.members == null){
 			return;
-		}
+		}		
 		for (PatrolLegMember member : this.members){
 			member.setIsPilot(false);
 		}
-		plm.setIsPilot(true);
+		if (plm != null) plm.setIsPilot(true);
 	}
 	
 	

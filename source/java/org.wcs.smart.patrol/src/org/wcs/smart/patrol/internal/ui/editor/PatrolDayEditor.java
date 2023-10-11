@@ -207,7 +207,7 @@ public class PatrolDayEditor extends EditorPart {
 						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 						sec.setText(MessageFormat.format(HEADER_STRING, pld.getPatrolLeg().getId(), 
 								pld.getPatrolLeg().getType().getName(), 
-								pld.getPatrolLeg().getMandate() == null ? "" : pld.getPatrolLeg().getType().getName(),  //$NON-NLS-1$
+								pld.getPatrolLeg().getMandate() == null ? "" : pld.getPatrolLeg().getMandate().getName(),  //$NON-NLS-1$
 										SmartLabelProvider.getShortLabel(pld.getPatrolLeg().getLeader().getMember())));
 
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
