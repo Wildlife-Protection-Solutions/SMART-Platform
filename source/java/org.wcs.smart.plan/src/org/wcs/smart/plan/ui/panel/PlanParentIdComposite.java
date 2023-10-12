@@ -219,9 +219,9 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
-						HibernateManager.saveOrMerge(s,  currentPlan);
+						Plan thisPlan = s.get(Plan.class, currentPlan.getUuid());
 						//new parent cannot be a child of the current plan
-						if (findPlan(currentPlan.getChildren(), in.getUuid())){
+						if (findPlan(thisPlan.getChildren(), in.getUuid())){
 							setErrorMessage(Messages.PlanParentIdComposite_ChildParentError);
 							return;
 						}
