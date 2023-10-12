@@ -173,7 +173,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 
 	protected void applyNewConig(CmAttributeConfig cfg) {
 		if (cfg.getUuid() == null && !addedConfigs.contains(cfg)) {
-		//	dialog.getSession().save(cfg);
+			dialog.getSession().persist(cfg);
 			addedConfigs.add(cfg);
 		}
 		

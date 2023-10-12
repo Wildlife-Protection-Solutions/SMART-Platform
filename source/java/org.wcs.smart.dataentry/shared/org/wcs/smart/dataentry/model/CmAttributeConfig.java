@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLOrder;
+import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
@@ -112,8 +112,8 @@ public class CmAttributeConfig extends NamedItem {
 	 * @return  set of root tree nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="config", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@Where(clause = "parent_uuid is null")
-	@OrderBy(clause = "node_order")
+	@SQLRestriction("parent_uuid is null")	
+	@SQLOrder("node_order")
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<CmAttributeTreeNode> getTree(){
 		if (rootTreeNodes == null) {
@@ -132,7 +132,7 @@ public class CmAttributeConfig extends NamedItem {
 	 * @return  set of root tree nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="config", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@OrderBy(clause = "list_order")
+	@SQLOrder("list_order")
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<CmAttributeListItem> getList() {
 		if (listItems == null) {
