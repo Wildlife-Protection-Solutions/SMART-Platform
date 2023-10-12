@@ -117,7 +117,10 @@ public class Upgrader753To800 extends AbstractInteralDatabaseUpgrader {
 				"ALTER TABLE SMART.station ADD CONSTRAINT STATION_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
 				//increase size of property field
-				"ALTER TABLE smart.conservation_area_property alter column value set data type varchar(32672)"
+				"ALTER TABLE smart.conservation_area_property alter column value set data type varchar(32672)", //$NON-NLS-1$
+				
+				//hibernate 6 employee uuid cannot conflict with ccaa uuid
+				"update smart.employee set uuid = x'00000000000000000000000000000001' where uuid = x'00000000000000000000000000000000'" //$NON-NLS-1$
 		};
 		
 		

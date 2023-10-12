@@ -65,7 +65,10 @@ public class Employee extends UuidItem implements Serializable {
 	 * UUID for the 'shared' employee.  This employee uuid
 	 * is associated with the CrossCA Conservation Area.
 	 */
-	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
+	//I tried to use zero_uuid_str here but it conflicted with the ccaa 
+	//when I upgraded to hibernate 6
+	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ONE_UUID_STR);
+	
 	
 	public static final String USER_LEVEL_SEP = ","; //$NON-NLS-1$
 	

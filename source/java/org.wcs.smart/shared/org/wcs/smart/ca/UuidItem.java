@@ -25,7 +25,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -75,8 +75,8 @@ public class UuidItem implements Serializable{
 	 * @return the uuid for the list element
 	 */
 	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
+	@GeneratedValue
+	@UuidGenerator(style = UuidGenerator.Style.RANDOM)
 	public UUID getUuid() {
 		return uuid;
 	}

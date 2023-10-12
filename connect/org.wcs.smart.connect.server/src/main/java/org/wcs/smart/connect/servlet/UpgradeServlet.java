@@ -1373,6 +1373,9 @@ public class UpgradeServlet extends HttpServlet {
 						//add field_id to alert
 						"alter table connect.alerts add column field_id varchar", //$NON-NLS-1$
 						
+						//hibernate 6 employee uuid cannot conflict with ccaa uuid
+						"update smart.employee set uuid = '00000000000000000000000000000001' where uuid = '00000000000000000000000000000000'", //$NON-NLS-1$
+						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$

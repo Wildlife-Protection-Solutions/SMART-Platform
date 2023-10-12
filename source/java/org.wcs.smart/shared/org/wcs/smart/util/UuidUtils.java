@@ -41,6 +41,7 @@ public class UuidUtils {
 	 * 0 UUID
 	 */
 	public static String ZERO_UUID_STR = "00000000000000000000000000000000"; //$NON-NLS-1$
+	public static String ONE_UUID_STR = "00000000000000000000000000000001"; //$NON-NLS-1$
 	
 	public static UUID byteToUUID(byte[] bytes){
 		if (bytes == null) return null;

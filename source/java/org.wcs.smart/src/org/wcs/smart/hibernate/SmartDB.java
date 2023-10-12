@@ -122,9 +122,10 @@ public class SmartDB {
 	 * @return shared user or null if shared user not found
 	 */
 	public static Employee getSharedEmployee(Session session){
-		Query<Employee> q = session.createQuery("From Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca", Employee.class); //$NON-NLS-1$
+		Query<Employee> q = session.createQuery("FROM Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca", Employee.class); //$NON-NLS-1$
 		q.setParameter("e", Employee.SHARED_UUID); //$NON-NLS-1$
 		q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+		
 		List<Employee> es = q.list();
 		if (es.size() > 0){
 			return es.get(0);
