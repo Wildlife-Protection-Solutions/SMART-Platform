@@ -252,14 +252,19 @@ public class ImportReportCaListPage extends WizardPage {
 				s.beginTransaction();
 				try{
 					//load all shared reports
-					List<?> folders = QueryFactory.buildQuery(s, ReportFolder.class,
+					List<ReportFolder> folders = QueryFactory.buildQuery(s, ReportFolder.class,
 							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 							new Object[] {"employee", null}).getResultList();  //$NON-NLS-1$
 					
 					allItems.addAll(folders);
 					
+					while(!folders.isEmpty()) {
+						ReportFolder folder = folders.remove(0);
+						folders.addAll(folder.getChildren());
+					}
+					
 					//load all shared reports
-					List<?> reports = QueryFactory.buildQuery(s, Report.class,
+					List<Report> reports = QueryFactory.buildQuery(s, Report.class,
 							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 							new Object[] {"shared", true}).getResultList();  //$NON-NLS-1$
 							
