@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -193,9 +194,13 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		
 		//add attachments
 		if (item.getObservationUuid() != null){
-			List<IntelObservationAttribute> attributes = 
-					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
-			for (IntelObservationAttribute a : attributes){
+			IntelObservation obs = session.get(IntelObservation.class, item.getObservationUuid());
+			//TODO can't build another query in this session as scrollable results is using it
+			
+//			List<IntelObservationAttribute> attributes = 
+//					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
+//			for (IntelObservationAttribute a : attributes){
+				for (IntelObservationAttribute a : obs.getObservationAttributes()){
 				if (a.getAttribute().getType() == AttributeType.LIST){
 					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());	
 				}else if (a.getAttribute().getType() == AttributeType.MLIST) {
@@ -231,7 +236,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		String sortSql = configureSort(session);
 		String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
 		SqlGenerator.logString(sql);
-			
+		
 		try(ScrollableResults<Tuple> sc = session.createNativeQuery(sql, Tuple.class).scroll()){
 			if (!sc.setRowNumber(offset+1)) return items;
 			for (int i = 0; i <= pageSize; i ++){
