@@ -360,6 +360,12 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
+				if (ctpackage.getUuid() != null) {
+					ctpackage = session.get(ctpackage.getClass(), ctpackage.getUuid());
+				}else {
+					session.persist(ctpackage);
+				}
+				
 				Object first = modelViewer.getStructuredSelection().getFirstElement();
 				if (first instanceof ConfigurableModel) {
 					ctpackage.setConfigurableModel((ConfigurableModel) first);
@@ -368,8 +374,6 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
-				
-				
 				
 				List<MetadataFieldValue> md = ctpackage.getMetadataValues();
 				MetadataFieldValue ttts = null;
@@ -405,18 +409,19 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					}
 				}
 				
-				ctpackage = HibernateManager.saveOrMerge(session, ctpackage);
-				
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage, session);
 				}				
 				
 				session.getTransaction().commit();
+
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
 				throw ex;
 			}
 		}
+		
+		
 	}
 
 	private void validate() {
