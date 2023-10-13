@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -443,10 +445,14 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 						IconFile ff = ((Icon)element).getIconFile(s);						
 						Image i = imgr.get(ff.getUuid().toString());
 						if (i != null) return i;
-						Path p = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
-						Image img2 = new Image(Display.getDefault(), p.toString());
-						imgr.put(ff.getUuid().toString(), img2);
-						return img2;
+						byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
+						try(InputStream ins = new ByteArrayInputStream(data)){
+							Image img2 = new Image(Display.getDefault(), ins);
+							imgr.put(ff.getUuid().toString(), img2);
+							return img2;
+						}catch (Exception ex) {
+							SmartPlugIn.log(ex.getMessage(), ex);
+						}
 					}
 					return null;
 				}
@@ -560,7 +566,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				if (element instanceof Icon) {
 					for (Icon c : caicons) {
 						if (c.getKeyId().equals(((Icon)element).getKeyId())) {
-							return ((Icon)element).getName() + "**";
+							return ((Icon)element).getName() + "**"; //$NON-NLS-1$
 						}
 					}
 					return ((Icon)element).getName();
@@ -596,10 +602,19 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 						Image i = imgr.get(ff.getUuid().toString());
 						if (i != null) return i;
 						
-						Path p = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
-						Image img2 = new Image(Display.getDefault(), p.toString());
-						imgr.put(ff.getUuid().toString(), img2);
-						return img2;
+						byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
+						try(InputStream ins = new ByteArrayInputStream(data)){
+							Image img2 = new Image(Display.getDefault(), ins);
+							imgr.put(ff.getUuid().toString(), img2);
+							return img2;
+						}catch (Exception ex) {
+							SmartPlugIn.log(ex.getMessage(), ex);
+						}
+						
+//						Path p = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
+//						Image img2 = new Image(Display.getDefault(), p.toString());
+//						imgr.put(ff.getUuid().toString(), img2);
+//						return img2;
 						
 					}
 					return null;

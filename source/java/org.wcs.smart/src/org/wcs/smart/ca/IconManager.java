@@ -21,15 +21,17 @@
  */
 package org.wcs.smart.ca;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -62,9 +64,6 @@ public enum IconManager {
 	
 	INSTANCE;
 	
-	private static final String SYSTEM_THUMBNAILS_DIR = "system_thumbnails"; //$NON-NLS-1$
-	public static final String CA_ICON_THUMBNAIL_DIR = "icon_thumbs"; //$NON-NLS-1$
-	
 	public enum Size{
 		ICON(16),
 		SMALL(32),
@@ -76,8 +75,34 @@ public enum IconManager {
 			this.size = size;
 		}
 		
+		public static Size findSize(int size) {
+			for (Size s : values()) {
+				if (s.size == size) return s;
+			}
+			return null;
+		}
+		
 	}
 
+	private ThumbnailFileCache systemCache = null;
+	private Map<ConservationArea, ThumbnailFileCache> caCache = new HashMap<>();
+	
+	private synchronized ThumbnailFileCache getSystemCache() {
+		if (systemCache != null) return systemCache;
+		Path filename = SmartContext.INSTANCE.getTempFilestoreLocation()
+				.resolve("system_thumbnails.cache"); //$NON-NLS-1$
+		systemCache = new ThumbnailFileCache(filename);
+		return systemCache;
+	}
+	
+	private synchronized ThumbnailFileCache getCaCache(ConservationArea ca) {
+		if (caCache.containsKey(ca)) return caCache.get(ca);
+		
+		Path filename = Paths.get(ca.getFileDataStoreLocation()).resolve("icon_thumbs.cache"); //$NON-NLS-1$
+		ThumbnailFileCache temp = new ThumbnailFileCache(filename);
+		caCache.put(ca, temp);
+		return temp;
+	}
 	/**
 	 * Gets the conservation area specific icons - these are used in the CA
 	 * or have been manually configured.
@@ -267,13 +292,7 @@ public enum IconManager {
 	 * Clears all files from the conservation area thumbnail cache
 	 */
 	public void clearThumbnails() {
-		Path caDir = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-				.resolve(CA_ICON_THUMBNAIL_DIR);
-		try {
-			SmartUtils.deleteDirectory(caDir);
-		} catch (IOException e) {
-			SmartPlugIn.log(e.getMessage(), e);
-		}
+		getCaCache(SmartDB.getCurrentConservationArea()).clear();
 	}
 	
 	public void clearThumbnailFiles(Icon icon) {
@@ -281,78 +300,69 @@ public enum IconManager {
 	}
 	
 	public void clearThumbnailFile(IconFile file) {
-		String name2 = null;
-		Path iconfile = null;
 		if (!file.isSystemIcon()) {
 			//only non-system icons can be modified
-			
 			//find all thumbnails of each size
 			for(Size s : Size.values()) {
-				name2 = file.getUuid().toString() + "_" + s.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$
-				iconfile = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-						.resolve(CA_ICON_THUMBNAIL_DIR)
-						.resolve(name2);
-				if (Files.exists(iconfile)) {
-					try {
-						Files.delete(iconfile);
-					} catch (IOException e) {
-						SmartPlugIn.log(e.getMessage(), e);
-					}
-				}
+				String id = getKey(file, s);
+				getCaCache(SmartDB.getCurrentConservationArea()).remove(id);
 			}
 		}	
 	}
 	
-	public Path getThumbnailFile(IconFile file, Size size) {
-		
-		String name2 = null;
-		Path iconfile = null;
+	private  String getKey(IconFile file, Size size) {
 		if (file.isSystemIcon()) {
 			//system icons can be shared across conservation areas
-			name2 = file.getIcon().getKeyId() + "_" + file.getIconSet().getKeyId() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			iconfile = SmartContext.INSTANCE.getTempFilestoreLocation()
-					.resolve(SYSTEM_THUMBNAILS_DIR)
-					.resolve(name2);
-			
-	        
+			return file.getIcon().getKeyId() + "_" + file.getIconSet().getKeyId() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else {
 			//only available to this conservation area
-			name2 = file.getUuid().toString() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$
-			iconfile = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-					.resolve(CA_ICON_THUMBNAIL_DIR)
-					.resolve(name2);
-			
+			return file.getUuid().toString() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+	
+	public byte[] getThumbnailFile(IconFile file, Size size) {
+		
+		String name2 = getKey(file, size);
+		ThumbnailFileCache cache = null;
+		
+		if (file.isSystemIcon()) {
+			cache = getSystemCache();			
+		}else {
+			cache = getCaCache(SmartDB.getCurrentConservationArea());					
 		}
 		
-		if (!Files.exists(iconfile)) {
+		byte[] data = cache.getData(name2);
+		if (data != null) return data;
 		
-			Path temp = null;
-			if (file.getCopyFromLocation() != null) {
-				temp = file.getCopyFromLocation();
-			}else {
-				temp = file.getAttachmentFile();
-			}
+		Path temp = null;
+		if (file.getCopyFromLocation() != null) {
+			temp = file.getCopyFromLocation();
+		}else {
+			temp = file.getAttachmentFile();
+		}
 			
-			Image newImage = SmartUtils.getImage(temp, size.size);
-			if (newImage != null) {
-				try {
-					Files.createDirectories(iconfile.getParent());
-				
-					//write to file
-					ImageLoader saver = new ImageLoader();
-					saver.data = new ImageData[] { newImage.getImageData() };
-					try(OutputStream out = Files.newOutputStream(iconfile)){
-						saver.save(out, SWT.IMAGE_PNG);
-					}
-				}catch(IOException ex) {
-					SmartPlugIn.log("Cannot cache icon thumbnail: " + ex.getMessage(), ex); //$NON-NLS-1$
-					return null;
-				}finally {
-					newImage.dispose();
+		Image newImage = SmartUtils.getImage(temp, size.size);
+		if (newImage != null) {
+			try {
+				//write to cache
+				ImageLoader saver = new ImageLoader();
+				saver.data = new ImageData[] { newImage.getImageData() };
+				try(ByteArrayOutputStream out = new ByteArrayOutputStream()){
+					//write data to out
+					saver.save(out, SWT.IMAGE_PNG);
+					data = out.toByteArray();
+					
+					cache.putData(name2, data);
+					return data;
 				}
+			}catch(IOException ex) {
+				SmartPlugIn.log("Cannot cache icon thumbnail: " + ex.getMessage(), ex); //$NON-NLS-1$
+				return null;
+			}finally {
+				newImage.dispose();
 			}
 		}
-        return iconfile;
+		return null;
 	}
 	/**
 	 * 
@@ -363,10 +373,10 @@ public enum IconManager {
 	public Image getThumbnail(IconFile icon, Size size) {
 		if (icon == null) return null;
 		
-		Path p = getThumbnailFile(icon, size);
-		if (p == null) return null;
+		byte[] data = getThumbnailFile(icon, size);
+		if (data == null) return null;
 				
-		try(InputStream is  = Files.newInputStream(p)){
+		try(InputStream is = new ByteArrayInputStream(data)){
 			return new Image(Display.getDefault(), is); 
 		}catch (Exception ex) {
 			SmartPlugIn.log(ex.getLocalizedMessage(), ex);
@@ -385,9 +395,9 @@ public enum IconManager {
 		for (IconFile file : icon.getFiles()) {
 			if (file.getIconSet().getIsDefault()) {
 				
-				Path p = getThumbnailFile(file, size);
-				if (p == null) return null;
-				try(InputStream is  = Files.newInputStream(p)){
+				byte[] data = getThumbnailFile(file, size);
+				if (data == null) return null;
+				try(InputStream is  = new ByteArrayInputStream(data)){
 					return new Image(Display.getDefault(), is); 
 				}catch (Exception ex) {
 					SmartPlugIn.log(ex.getMessage(), ex);

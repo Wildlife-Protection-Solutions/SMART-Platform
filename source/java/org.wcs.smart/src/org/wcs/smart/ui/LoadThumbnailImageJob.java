@@ -39,6 +39,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.internal.Messages;
@@ -87,6 +89,17 @@ public class LoadThumbnailImageJob extends Job {
 	}
 
 	private void loadImage(Thumbnail thumb) {
+		if (thumb.getAttachment() instanceof IconFile) {
+			//attempt to use cached icons
+			IconManager.Size isize = IconManager.Size.findSize(thumb.getThumbnailSize());
+			if (isize != null) {
+				Image img = IconManager.INSTANCE.getThumbnail((IconFile)thumb.getAttachment(), isize);
+				if(img != null) {
+					thumb.setImage(img);
+					return;
+				}		
+			}			
+		}
 		Image image = null;
 		try {
 			ISmartAttachment attachment = thumb.getAttachment();

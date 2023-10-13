@@ -89,7 +89,7 @@ public class DataModelMerger {
 		try {
 			dm = SimpleDataModel.loadDataModel(defaultCa, session);
 		} catch (Exception e) {
-			throw new IllegalStateException("unable to load data model");//$NON-NLS-1$
+			throw new IllegalStateException("unable to load data model", e);//$NON-NLS-1$
 		}
 		monitor.worked(1);
 		

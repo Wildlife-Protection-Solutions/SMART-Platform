@@ -94,12 +94,17 @@ public class IconTable extends Composite implements Listener {
 				Display.getDefault().syncExec(()->{
 					thumb.addFiles(items);
 					thumb.createThumbs();
+					if (getParent().isDisposed()) return;
 					getParent().layout(true, true);
 					needmore[0] = needsToLoad();
+					
+					resize();
 				});
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				if (!needmore[0]) break;	
 			}
+			
+			
 			return Status.OK_STATUS;
 		}		
 	};
