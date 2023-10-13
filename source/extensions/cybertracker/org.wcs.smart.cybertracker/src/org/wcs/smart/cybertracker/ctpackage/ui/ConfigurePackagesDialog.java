@@ -481,7 +481,6 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 			Display.getDefault().asyncExec(()->{
 				tblViewer.setInput(packages);	
 				getShell().layout(true, true);
-//				tblViewer.getControl().getParent().layout(true);
 			});
 			
 			return Status.OK_STATUS;

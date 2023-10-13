@@ -280,13 +280,15 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
+				if (ctpackage.getUuid() != null) {
+					ctpackage = session.get(ctpackage.getClass(), ctpackage.getUuid());
+				}else {
+					session.persist(ctpackage);
+				}
+				
 				ctpackage.setSurveyDesign((SurveyDesign)designViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
-				
-				ctpackage = HibernateManager.saveOrMerge(session, ctpackage);
-				
-				session.flush();
 				
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage, session);

@@ -370,6 +370,12 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
+				if (ctpackage.getUuid() != null) {
+					ctpackage = session.get(ctpackage.getClass(), ctpackage.getUuid());
+				}else {
+					session.persist(ctpackage);
+				}
+				
 				Object first = modelViewer.getStructuredSelection().getFirstElement();
 				if (first instanceof ConfigurableModel) {
 					ctpackage.setConfigurableModel((ConfigurableModel) first);
@@ -415,9 +421,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 				}else {
 					mdObserver.setVisible(false);
 				}
-				
-				ctpackage = HibernateManager.saveOrMerge(session, ctpackage);			
-				
+
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage, session);
 				}				
