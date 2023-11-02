@@ -68,6 +68,7 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.CcaaDataModelDesktop;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -156,6 +157,13 @@ public class ImportReportEngine {
 		}
 		Report newReport = readReportInfo(reportPropFile, importCa);
 		Employee assignedEmployee = ImportQueryUtil.findEmployee(importCa);
+		
+		
+		//merge data models first in case queries use them
+		//this will prevent deadlocking database issue
+		//https://app.assembla.com/spaces/smart-cs/tickets/3620
+		if (importCa.getIsCcaa()) CcaaDataModelDesktop.getInstance().getDataModel();
+		
 		
 		session = HibernateManager.openSession();
 		session.beginTransaction();
