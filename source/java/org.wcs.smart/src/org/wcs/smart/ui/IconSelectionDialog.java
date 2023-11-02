@@ -646,6 +646,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	private Path selectFile() {
 		ImageSelectionDialog dialog = new ImageSelectionDialog(getShell());
 		if (dialog.open() != Window.OK) return null;
+		if (dialog.getImageFile() == null) return null;
 		return Paths.get(dialog.getImageFile());
 	}
 	
