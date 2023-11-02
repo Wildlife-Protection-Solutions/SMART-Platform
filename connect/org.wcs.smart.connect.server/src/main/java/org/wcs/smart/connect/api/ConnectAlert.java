@@ -847,7 +847,9 @@ public class ConnectAlert extends HttpServlet {
 			} else {
 				properties.put("cauuid", (String) null); //$NON-NLS-1$
 			}
-			properties.put("creatoruuid", obj.getCreatorUuid().toString()); //$NON-NLS-1$
+			if (obj.getCreatorUuid() != null) {
+				properties.put("creatoruuid", obj.getCreatorUuid().toString()); //$NON-NLS-1$
+			}
 			// date is expected to look like: //29 Sep 2020 16:29:54 GMT
 			properties.put("date", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
 			// properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
