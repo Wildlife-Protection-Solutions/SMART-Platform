@@ -875,6 +875,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			if (!isMulti){
 				cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+				cmbViewer.getControl().addListener(SWT.MouseWheel, e->e.doit=false);
 				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 				cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
 				List<Object> items = new ArrayList<Object>();
