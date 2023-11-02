@@ -2154,8 +2154,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 			attributelist.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			parts[counter++] = attributelist;
-		
+			
 			Composite part = toolkit.createComposite(attributelist.getBody(), SWT.NONE);
+			attributelist.setContent(part);
 			part.setLayout(createGridLayoutNoMargin(2));
 			part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			part.setVisible(false);
@@ -2191,11 +2192,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						});
 					}
-					e.addResizeListener(evt->{
-						Point p = part.computeSize(attributelist.getSize().x-20, SWT.DEFAULT);
-						p.y = p.y + 20;
-						attributelist.setMinSize(p);
+					
+					e.addResizeListener(r->{
+						
 					});
+
 					fieldEditors.add(e);
 					
 				}else{
@@ -2216,11 +2217,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						tmp.setEditable(false);
 						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 						((GridData)tmp.getLayoutData()).widthHint = 200;
-						tmp.addListener(SWT.Resize, evt->{
-							Point p = part.computeSize(attributelist.getSize().x-20, SWT.DEFAULT);
-							p.y = p.y + 20;
-							attributelist.setMinSize(p);
-						});
+
 					}else {
 						Text tmp = toolkit.createText(part, text, SWT.BORDER);
 						tmp.setEditable(false);
@@ -2228,7 +2225,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}	
 			}
-			
+
 			attributelist.layout(true);
 			part.setVisible(true);
 		}
