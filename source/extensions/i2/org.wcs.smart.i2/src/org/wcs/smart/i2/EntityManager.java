@@ -157,14 +157,14 @@ public enum EntityManager {
 
 				
 		//delete all entity relationships attributes
-		q = session.createMutationQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))");  //$NON-NLS-1$
+		q = session.createMutationQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (sourceEntity = :srcentity or targetEntity = :trgentity))");  //$NON-NLS-1$
 		q.setParameter("srcentity", entity); //$NON-NLS-1$
 		q.setParameter("trgentity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 
 		
 		//delete all entity relationships 
-		q = session.createMutationQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)"); //$NON-NLS-1$
+		q = session.createMutationQuery("DELETE FROM IntelEntityRelationship where (sourceEntity = :srcentity or targetEntity = :trgentity)"); //$NON-NLS-1$
 		q.setParameter("srcentity", entity); //$NON-NLS-1$
 		q.setParameter("trgentity", entity); //$NON-NLS-1$
 		q.executeUpdate();
