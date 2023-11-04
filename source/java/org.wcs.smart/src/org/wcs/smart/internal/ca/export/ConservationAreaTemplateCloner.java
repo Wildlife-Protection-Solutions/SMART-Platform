@@ -31,7 +31,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -118,14 +118,14 @@ public class ConservationAreaTemplateCloner implements
 	
 	
 	private void cloneSignatures(ConservationAreaClonerEngine engine) {
-		List<SignatureType> types = SignatureTypeManager.INSTANCE.getTypes(engine.getSession(), engine.getTemplateCa());
+		List<SignatureType> types = LocalSignatureTypeManager.INSTANCE.getTypes(engine.getSession(), engine.getTemplateCa());
 		
 		for (SignatureType t : types) {
 			SignatureType clone = new SignatureType();
 			engine.copyLabels(t, clone);
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKeyId(t.getKeyId());
-			SignatureTypeManager.INSTANCE.saveType(clone, engine.getSession());
+			LocalSignatureTypeManager.INSTANCE.saveType(clone, engine.getSession());
 			
 			engine.addConservationItemMapping(t, clone);
 		}

@@ -23,6 +23,7 @@ package org.wcs.smart.util;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -38,6 +39,9 @@ public class SharedUtils {
 	
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
 
+	//localtime.max gets converted to 23:59:59.99999 which in date/time gets
+	//converted to 00:00 so calculations end up incorrect
+	public static final LocalTime END_OF_DAY = LocalTime.of(23, 59, 59);
 	/**
 	 * <p>
 	 * Strips double quotes off the beginning and end of the string

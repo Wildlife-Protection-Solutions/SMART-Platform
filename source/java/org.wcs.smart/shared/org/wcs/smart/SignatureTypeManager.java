@@ -26,11 +26,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SignatureType;
-import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
 
 /**
  * For managing signature types
@@ -38,9 +34,13 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public enum SignatureTypeManager {
+public class SignatureTypeManager {
 
-	INSTANCE;
+	public static SignatureTypeManager INSTANCE = new SignatureTypeManager();
+	
+	protected SignatureTypeManager() {
+		
+	}
 	
 	/**
 	 * Gets all types for a given Conservation Area
@@ -51,25 +51,6 @@ public enum SignatureTypeManager {
 	public List<SignatureType> getTypes(Session session, ConservationArea ca){
 		return QueryFactory.buildQuery(session, SignatureType.class,
 				new Object[] {"conservationArea", ca}).list();  //$NON-NLS-1$
-	}
-	
-	/**
-	 * Delete a type from the Conservation Area
-	 * 
-	 * @param type
-	 * @param session
-	 * @throws Exception if the signature cannot be deleted
-	 */
-	public void deleteType(SignatureType type, Session session) throws Exception {
-		
-		if (!DeleteManager.canDelete(type, session)) {
-			throw new Exception(Messages.SignatureTypeManager_DeleteError);
-		}
-		
-		String sql = "UPDATE WaypointAttachment SET signatureType = null WHERE signatureType = :type";  //$NON-NLS-1$
-		session.createMutationQuery(sql).setParameter("type", type).executeUpdate(); //$NON-NLS-1$
-		
-		session.remove(type);
 	}
 	
 	/**
@@ -88,36 +69,4 @@ public enum SignatureTypeManager {
 
 	}
 	
-	/**
-	 * Saves the signature type to the database 
-	 * @param type
-	 * @param session
-	 */
-	public void saveType(SignatureType type, Session session) {
-		HibernateManager.saveOrMerge(session, type);
-	}
-	
-	/**
-	 * Creates a new type with the given name
-	 * @param ca
-	 * @param name
-	 * @return
-	 */
-	public SignatureType createType(ConservationArea ca, String name) {
-		SignatureType newType = new SignatureType();
-		newType.setConservationArea(ca);
-		newType.updateName(ca.getDefaultLanguage(), name);
-		newType.setName(name);
-		newType.updateName(SmartDB.getCurrentLanguage(), name);
-		return newType;
-	}
-	/**
-	 * Creates a new type with a default name
-	 * 
-	 * @param ca
-	 * @return
-	 */
-	public SignatureType createType(ConservationArea ca) {
-		return createType(ca, Messages.SignatureTypeManager_DefaultSignatureTypeName);
-	}
 }
