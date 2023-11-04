@@ -45,8 +45,14 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
  * @author Emily
  *
  */
-public class ImageProcessor {
+public enum ImageProcessor {
 	
+	INSTANCE;
+	
+	private void logMe(Exception ex) {
+		//TODO: 
+		ex.printStackTrace();
+	}
 	/**
 	 * Attempts to resize the attachment to the given size.  Resizes the file in the copyFromLocation
 	 * and updates this location to the new file if the file was resized correctly.
@@ -55,19 +61,20 @@ public class ImageProcessor {
 	 * @param width
 	 * @param height
 	 */
-	public static void processAttachment(ISmartAttachment attachment, int width, int height){
+	public void processAttachment(ISmartAttachment attachment, int width, int height){
 		try{
+			//fix this - files won't be deleted correctly
 			Path tempDir = Files.createTempDirectory("smart.import"); //$NON-NLS-1$
 			tempDir.toFile().deleteOnExit();
 			Path outImage = tempDir.resolve(attachment.getFilename());
-			if (ImageProcessor.resizeImage(attachment.getCopyFromLocation(), outImage, width, height)){
+			if (resizeImage(attachment.getCopyFromLocation(), outImage, width, height)){
 				if (Files.exists(outImage)){
 					attachment.setCopyFromLocation(outImage);
 					outImage.toFile().deleteOnExit();
 				}
 			}
 		}catch(Exception ex){
-			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			logMe(ex);
 		}
 	}
 	
@@ -76,7 +83,7 @@ public class ImageProcessor {
 	 * @param inFile
 	 * @return
 	 */
-	public static BufferedImage readImage(Path inFile){
+	public BufferedImage readImage(Path inFile){
 		BufferedImage toResize = null;
 		//attempt to resize
 		try(ImageInputStream iis = ImageIO.createImageInputStream(inFile.toAbsolutePath().toFile())){
@@ -90,13 +97,13 @@ public class ImageProcessor {
 				toResize = reader.read(0, reader.getDefaultReadParam());
 				return toResize;
 			}catch (Exception ex){
-				CyberTrackerPlugIn.log(ex.getMessage(), ex);
+				logMe(ex);
 				return null;
 			} finally {
 				reader.dispose();
 			}
 		}catch (Exception ex){
-			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			logMe(ex);
 			return null;
 		}
 		
@@ -113,7 +120,7 @@ public class ImageProcessor {
 	 * @param targetHeight
 	 * @return
 	 */
-	public static boolean resizeImage(Path inFile, Path outFile, int targetWidth, int targetHeight){
+	public boolean resizeImage(Path inFile, Path outFile, int targetWidth, int targetHeight){
 		if(targetWidth <=0 || targetHeight <= 0) return false;
 		
 		try{
@@ -130,7 +137,7 @@ public class ImageProcessor {
 					toResize = reader.read(0, reader.getDefaultReadParam());
 					metadata = reader.getImageMetadata(0);
 				}catch (Exception ex){
-					CyberTrackerPlugIn.log(ex.getMessage(), ex);
+					logMe(ex);
 					return false;
 				} finally {
 					reader.dispose();
@@ -185,7 +192,7 @@ public class ImageProcessor {
 			}
 			return true;
 		}catch(Exception ex){
-			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			logMe(ex);
 			return false;
 		}
 		

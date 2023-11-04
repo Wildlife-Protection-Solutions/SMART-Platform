@@ -19,40 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.json;
+package org.wcs.smart.cybertracker.survey.json;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.cybertracker.importer.json.IJsonPostProcessor;
-import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
-import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
+import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
+import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 
 /**
  * Removes all ct to SMART links where the
- * patrols are older than 6 months
+ * missions are older than 6 months
  * 
  * @author Emily
  * @since 7.0.0
  *
  */
-public class PatrolJsonPostProcessor implements IJsonPostProcessor {
+public class MissionJsonPostProcessor implements IJsonPostProcessor {
 
 	@Override
 	public void postProcess(Session session) {
 		//clean up all links that are associated with a patrol that
 		//is older than two months old
 		StringBuilder hql = new StringBuilder();
-		hql.append( "FROM CtPatrolLink l " ); //$NON-NLS-1$
+		hql.append( "FROM CtMissionLink l " ); //$NON-NLS-1$
 		hql.append( "WHERE " ); //$NON-NLS-1$
-		hql.append( "l.patrolLeg.patrol.endDate < :now " ); //$NON-NLS-1$
+		hql.append( "l.mission.endDate < :now " ); //$NON-NLS-1$
 					
-		List<CtPatrolLink> links = session.createQuery(hql.toString(), CtPatrolLink.class)
-				.setParameter("now", LocalDate.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) ) //$NON-NLS-1$
+		List<CtMissionLink> links = session.createQuery(hql.toString(), CtMissionLink.class)
+				.setParameter("now", LocalDate.now().minusMonths(IJsonProcessor.CLEANUP_MONTHS) ) //$NON-NLS-1$
 				.list();
 					
-		for (CtPatrolLink l : links) {
+		for (CtMissionLink l : links) {
 			session.remove(l);
 		}
 		

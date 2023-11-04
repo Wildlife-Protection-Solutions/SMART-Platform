@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,25 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer.json;
-
-import org.hibernate.Session;
+package org.wcs.smart.cybertracker.json;
 
 /**
- * Run after all JSON files are processed.
+ * Exception to throw when user cancels operations.
  * 
  * @author Emily
- * @since 7.0.0
  *
  */
-public interface IJsonPostProcessor {
+public class UserCancelledException extends Exception {
 
-	/**
-	 * Post process.  Exceptions are logged to the
-	 * log file but not displayed to the user.
-	 * 
-	 * @param session
-	 * @throws Exception 
-	 */
-	public void postProcess(Session session) ;
+	private static final long serialVersionUID = 1L;
+
+	public UserCancelledException(String message){
+		super(message);
+	}
 }

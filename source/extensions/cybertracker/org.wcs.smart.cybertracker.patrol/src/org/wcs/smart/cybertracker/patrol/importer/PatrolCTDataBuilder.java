@@ -45,7 +45,6 @@ import org.wcs.smart.cybertracker.importer.CyberTrackerDataBuilder;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
@@ -246,7 +245,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) throws ParseException {
 		try {
-			CyberTrackerPatrol defaultValue = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, SmartDB.getCurrentConservationArea(), session);
+			CyberTrackerPatrol defaultValue = CyberTrackerPatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, SmartDB.getCurrentConservationArea(), session);
 			
 			ctPatrol.setArmed(defaultValue.isArmed());
 			if (ctPatrol.getComment() == null) ctPatrol.setComment(defaultValue.getComment());

@@ -73,6 +73,7 @@ import org.wcs.smart.er.ui.SurveyFilteredComboViewer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog for linking cybertracker missions to SMART missions/surveys.
@@ -184,7 +185,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 						//create a new empty mission day
 						MissionDay md = new MissionDay();
 						md.setDate(working);
-						md.setEndTime(LocalTime.MAX);
+						md.setEndTime(SharedUtils.END_OF_DAY);
 						md.setStartTime(LocalTime.MIN);
 						md.setRestMinutes(0);
 						md.setMission(addToMission);
@@ -202,7 +203,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 						//create a new empty mission day
 						MissionDay md = new MissionDay();
 						md.setDate(working);
-						md.setEndTime(LocalTime.MAX);
+						md.setEndTime(SharedUtils.END_OF_DAY);
 						md.setStartTime(LocalTime.MIN);
 						md.setRestMinutes(0);
 						md.setMission(addToMission);

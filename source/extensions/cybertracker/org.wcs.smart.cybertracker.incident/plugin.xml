@@ -10,7 +10,7 @@
    <extension
          point="org.wcs.smart.cybertracker.json.processor">
       <JsonProcessor
-            class="org.wcs.smart.cybertracker.incident.IncidentJsonProcessor">
+            class="org.wcs.smart.cybertracker.incident.DesktopIncidentJsonProcessor">
       </JsonProcessor>
       <JsonPostProcessor
             class="org.wcs.smart.cybertracker.incident.IncidentJsonPostProcessor">

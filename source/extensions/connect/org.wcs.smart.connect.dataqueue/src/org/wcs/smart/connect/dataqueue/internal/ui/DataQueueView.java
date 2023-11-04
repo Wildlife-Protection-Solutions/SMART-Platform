@@ -107,6 +107,8 @@ public class DataQueueView{
 	private SashForm sash;
 	private DataQueueTable dataQueueTable;
 	
+	private Composite filterWarningComp;
+	
 	private SmartConnect connect;
 
 	@Inject private Shell shell;
@@ -173,7 +175,11 @@ public class DataQueueView{
 				if (item instanceof LocalDataQueueItem){
 					return ((LocalDataQueueItem) item).getStatus().toString();
 				}else{
-					return Messages.DataQueueView_OnServerStatus;
+					if (item.getCanProcessLocally()) {
+						return Messages.DataQueueView_OnServerStatus;
+					}else {
+						return "Queued on Server - cannot process locally";
+					}
 				}
 			}
 			return ""; //$NON-NLS-1$
@@ -303,7 +309,10 @@ public class DataQueueView{
 					@Override
 					public void run() {
 						if (tblServer == null || tblServer.getTable().isDisposed()) return;
-						tblServer.setInput(fserverItems);
+						Long serverOnly = fserverItems.stream().filter(e->!e.getCanProcessLocally()).count();
+						filterWarningComp.setVisible(serverOnly > 0 );
+						
+						tblServer.setInput(fserverItems.stream().filter(e->e.getCanProcessLocally()).toList());
 						tblServer.refresh();
 					}
 				});
@@ -521,7 +530,8 @@ public class DataQueueView{
 		((GridLayout)main.getLayout()).marginWidth = 0;
 		
 		Composite buttonComp = toolkit.createComposite(main, SWT.NONE);
-		GridLayout gl = new GridLayout(2, false);
+		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		GridLayout gl = new GridLayout(3, false);
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		buttonComp.setLayout(gl);
@@ -541,6 +551,19 @@ public class DataQueueView{
 				processSelected();
 			}
 		});
+		
+		filterWarningComp = new Composite(buttonComp, SWT.NONE);
+		filterWarningComp.setLayout(new GridLayout(2, false));
+		filterWarningComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label l = new Label(filterWarningComp, SWT.NONE);
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		l = new Label(filterWarningComp, SWT.WRAP);
+		l.setText("Items shown here are filtered to only includes items that can be processed on the Desktop.");
+		l.setToolTipText("These settings are managed on the 'SMART Mobile Data Queue Settings' SMART Connect server configuration.");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 200;
+		
+		
 		Hyperlink link = toolkit.createHyperlink(main, Messages.DataQueueView_RefreshLabel, SWT.NONE);
 		link.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override

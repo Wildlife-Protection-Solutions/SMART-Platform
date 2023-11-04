@@ -55,7 +55,7 @@
    <extension
          point="org.wcs.smart.cybertracker.json.processor">
       <JsonProcessor
-            class="org.wcs.smart.smartcollect.json.SmartCollectDataProcessor">
+            class="org.wcs.smart.smartcollect.json.DesktopSmartCollectJsonProcessor">
       </JsonProcessor>
    </extension>
    <extension

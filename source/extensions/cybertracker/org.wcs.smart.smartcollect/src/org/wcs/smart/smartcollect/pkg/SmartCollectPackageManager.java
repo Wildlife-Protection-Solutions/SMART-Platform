@@ -68,19 +68,6 @@ import org.wcs.smart.smartcollect.ui.SmartCollectPackageConfigurator;
  */
 public class SmartCollectPackageManager implements ICtPackageManager {
 	
-	/**
-	 * Mobile value identifying the waypoints as a smartcollect waypoint
-	 */
-	public static final String SMARTCOLLECT_RESOURCE_ID = "smartcollect"; //$NON-NLS-1$
-	
-	
-	/**
-	 * SMARTCollect package metadata key for username field
-	 */
-	public static final String USERNAMEMETADATA_KEY = "SMART_CollectUser"; //$NON-NLS-1$
-
-
-
 	
 	@Override
 	public String getTypeIdentifier() {

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.survey.export;
+package org.wcs.smart.cybertracker.survey.importer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +28,11 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
-import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil.JsonSurveyKey;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
+import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -59,7 +58,7 @@ public class SurveyJsonUtils {
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
 		SurveyDesign design = null;
-		String surveyDesign = (String) jsonValues.get(SurveyScreensUtil.RESULT_SURVEY_DESIGN);
+		String surveyDesign = (String) jsonValues.get(SurveyMetadata.JsonKey.SURVEY_DESIGN.key);
 		List<SurveyDesign> cas = QueryFactory.buildQuery(session, SurveyDesign.class,  
 				new Object[] {"keyId", surveyDesign}, //$NON-NLS-1$
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
@@ -68,32 +67,32 @@ public class SurveyJsonUtils {
 			design = cas.get(0);
 		}
 		
-		String comment = (String)jsonValues.get(SurveyScreensUtil.RESULT_MISSION_COMMENTS);
+		String comment = (String)jsonValues.get(SurveyMetadata.JsonKey.MISSION_COMMENTS.key);
 		if (comment == null){
-			comment = (String)jsonDefaults.get(SurveyScreensUtil.RESULT_MISSION_COMMENTS);
+			comment = (String)jsonDefaults.get(SurveyMetadata.JsonKey.MISSION_COMMENTS.key);
 		}
-		String leader = (String)jsonValues.get(SurveyScreensUtil.RESULT_MISSION_LEADER);
+		String leader = (String)jsonValues.get(SurveyMetadata.JsonKey.MISSION_LEADER.key);
 		if (leader == null){
-			leader = (String)jsonDefaults.get(SurveyScreensUtil.RESULT_MISSION_LEADER);
+			leader = (String)jsonDefaults.get(SurveyMetadata.JsonKey.MISSION_LEADER.key);
 		}
 	
 		List<String> members = new ArrayList<String>();
 		for (Object x : jsonValues.keySet()){
 			String key = (String)x;
-			if (startsWith(key, JsonKey.EMPLOYEE.key)) members.add(key);
+			if (startsWith(key, CtJsonUtil.JsonDataModelKey.EMPLOYEE.key)) members.add(key);
 		}
 		if( members.isEmpty()){
 			for (Object x : jsonDefaults.keySet()){
 				String key = (String)x;
-				if (startsWith(key, JsonKey.EMPLOYEE.key)) members.add(key);
+				if (startsWith(key, CtJsonUtil.JsonDataModelKey.EMPLOYEE.key)) members.add(key);
 			}	
 		}
 		
 		SamplingUnit startSu = null;
-		String su = (String)jsonValues.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
+		String su = (String)jsonValues.get(SurveyMetadata.JsonKey.MISSION_START_SAMPLING_UNIT.key);
 		if (su != null){
-			if (startsWith(su, JsonSurveyKey.SAMPLING_UNIT.key)){
-				String suUuid = su.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
+			if (startsWith(su, SurveyMetadata.JsonSurveyKey.SAMPLING_UNIT.key)){
+				String suUuid = su.substring(SurveyMetadata.JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
 				if (suUuid != null&& !suUuid.equalsIgnoreCase("null")){ //$NON-NLS-1$
 					SamplingUnit suu = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suUuid));
 					if (suu != null){
@@ -109,7 +108,7 @@ public class SurveyJsonUtils {
 		ctMission.setStartSamplingUnit(startSu);
 		ctMission.setMembers(new ArrayList<Employee>());
 		for (String member: members){
-			UUID uuid = UuidUtils.stringToUuid(member.substring(JsonKey.EMPLOYEE.key.length() + 1));
+			UUID uuid = UuidUtils.stringToUuid(member.substring(CtJsonUtil.JsonDataModelKey.EMPLOYEE.key.length() + 1));
 			Employee employee = (Employee) session.get(Employee.class, uuid);
 			if (employee != null){
 				ctMission.getMembers().add(employee);
@@ -127,6 +126,6 @@ public class SurveyJsonUtils {
 	}
 
 	private static boolean startsWith(String value, String key){
-		return value.startsWith(key + CyberTrackerConfExporter.KEY_SEP);
+		return value.startsWith(key + CtJsonUtil.KEY_SEP);
 	}
 }

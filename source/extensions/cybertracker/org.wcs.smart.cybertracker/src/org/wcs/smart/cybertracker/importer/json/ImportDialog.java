@@ -67,6 +67,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -492,19 +494,19 @@ public class ImportDialog extends SmartStyledTitleDialog{
 		
 		try(Reader in = Files.newBufferedReader(p, StandardCharsets.UTF_8)){
 			json = IOUtils.toString(in);
-			features.addAll(JsonCtParser.parseFeaturesFromJsonString(json));
+			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json));
 			
 			for (int i = 0; i < features.size(); i ++) {
 				JSONObject f = (JSONObject)features.get(i);
-				if (f.get(JsonCtParser.PROPERTIES_KEY) != null && f.get(JsonCtParser.PROPERTIES_KEY) instanceof JSONObject) {
-					JSONObject prop = (JSONObject) f.get(JsonCtParser.PROPERTIES_KEY);
+				if (f.get(CtJsonObservationParser.PROPERTIES_KEY) != null && f.get(CtJsonObservationParser.PROPERTIES_KEY) instanceof JSONObject) {
+					JSONObject prop = (JSONObject) f.get(CtJsonObservationParser.PROPERTIES_KEY);
 					if (startDateTime == null) {
-						startDateTime = prop.get(JsonCtParser.DATETIME_KEY).toString();
+						startDateTime = prop.get(CtJsonObservationParser.DATETIME_KEY).toString();
 					}
 					if (i == features.size() - 1) {
-						endDateTime = prop.get(JsonCtParser.DATETIME_KEY).toString();
+						endDateTime = prop.get(CtJsonObservationParser.DATETIME_KEY).toString();
 					}
-					if (prop.containsKey(JsonCtParser.SIGHTINGS_KEY)) {
+					if (prop.containsKey(CtJsonObservationParser.SIGHTINGS_KEY)) {
 						incidentcnt++;
 					}
 				}

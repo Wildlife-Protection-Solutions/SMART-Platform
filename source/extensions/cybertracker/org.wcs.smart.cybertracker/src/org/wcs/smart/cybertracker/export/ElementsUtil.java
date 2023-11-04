@@ -35,6 +35,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Media;
@@ -214,7 +215,7 @@ public class ElementsUtil {
 			if (tag0 != null){
 				item.setJsonId(tag0);
 			}else{
-				item.setJsonId(CyberTrackerConfExporter.NULL_KEY);
+				item.setJsonId(CtJsonUtil.NULL_KEY);
 			}
 			addElementsItemMedia(item, node.getImageFile());
 		}

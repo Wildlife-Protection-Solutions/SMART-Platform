@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
-import java.awt.image.BufferedImage;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,7 +38,6 @@ import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
@@ -54,16 +52,16 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
-import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
-import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.importer.TimeDataContainer.TimeCut;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
+import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
@@ -460,7 +458,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			} else if (ScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
 				E e = eMap.get(a.getV());
 				newWp = ElementsUtil.BOOL_TRUE.equals(e.getTag0());
-			} else if (SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT.equals(a.getN())) {
+			} else if (SurveyMetadata.JsonKey.MISSION_SAMPLING_UNIT.key.equalsIgnoreCase(a.getN())) {
 				E e = eMap.get(a.getV());
 				if (e != null) {
 					SamplingUnit su = null;
@@ -576,7 +574,7 @@ public class MissionImporter extends AbstractSmartImporter {
 	protected void processImages(Mission mission, Session session){
 		if (mission == null) return;
 		ConservationArea ca = ((SurveyDesign) session.get(SurveyDesign.class, mission.getSurvey().getSurveyDesign().getUuid())).getConservationArea();
-		CyberTrackerPropertiesOption opResize = getImageResizeOption(ca, session);
+		CyberTrackerPropertiesOption opResize = CtJsonUtil.getImageResizeOption(ca, session);
 		
 		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return;
 		
@@ -600,43 +598,16 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 		
 		//TODO: this needs testing; inparticular the attachment.getCopyFromLocation() option
-		double maxsizebytes = getImageMaxSizeOption(ca, session) * 1048576l;
+		double maxsizebytes = CtJsonUtil.getImageMaxSizeOption(ca, session) * 1048576l;
 		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
 			//attempt to resize image automatically
-			int[] size = getImageAutoResizeSizeOption(ca, session);		
+			int[] size = CtJsonUtil.getImageAutoResizeSizeOption(ca, session);		
 			for (ISmartAttachment attachment : attachments){
 				//only process new attachments
 				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes){
-					ImageProcessor.processAttachment(attachment,size[0], size[1]);
+					ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
 				}
 			}	
-		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
-			//prompt user for image size
-			Point[] allSize = new Point[]{null};
-			for (ISmartAttachment attachment : attachments){
-				//only process new attachments
-				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().toAbsolutePath().toFile().length() < maxsizebytes) continue;
-				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
-				if (image == null) continue;
-				
-				Point[] size = new Point[]{null};
-				if (allSize[0] != null){
-					size[0] = allSize[0];
-				}else{
-					//prompt
-					Display.getDefault().syncExec(()->{
-						ReSizeImageDialog dialog = new ReSizeImageDialog(Display.getDefault().getActiveShell(),attachment,image);
-						int open = dialog.open();
-						size[0] = dialog.getImageSize();
-						if (open == IDialogConstants.YES_TO_ALL_ID){
-							allSize[0] = size[0];	
-						}
-						
-					});
-				}
-				if (size[0] == null || size[0].x == -1 || size[0].y == -1) continue; //do not resize
-				ImageProcessor.processAttachment(attachment, size[0].x, size[0].y);	
-			}
 		}
 	}
 }

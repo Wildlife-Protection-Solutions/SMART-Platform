@@ -31,7 +31,6 @@ import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
@@ -148,7 +147,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	
 	@Override
 	public String getType() {
-		return SurveyScreensUtil.DATATYPE_SURVEY;
+		return SurveyMetadata.DATATYPE_SURVEY;
 	}
 
 	@Override

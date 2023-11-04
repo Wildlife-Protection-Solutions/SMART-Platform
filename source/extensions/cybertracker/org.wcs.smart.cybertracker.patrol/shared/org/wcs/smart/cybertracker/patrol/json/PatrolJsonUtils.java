@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.export;
+package org.wcs.smart.cybertracker.patrol.json;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -34,13 +34,9 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
-import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
-import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
-import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.patrol.model.JsonPatrol;
+import org.wcs.smart.cybertracker.patrol.model.PatrolMetadata.JsonPatrolKey;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolAttribute;
@@ -62,16 +58,17 @@ public class PatrolJsonUtils {
 	public static DateTimeFormatter TIMEFORMAT = DateTimeFormatter.ofPattern("HH:mm:ss"); //$NON-NLS-1$
 	
 	public static final String ATTRIBUTE_PREFIX = "SMART_"; //$NON-NLS-1$
-	
+	public static final String END_PATROL_KEY = "SMART_EndPatrol"; //$NON-NLS-1$
+
 	/**
 	 * 
 	 * @param jsonDefaults default values 
-	 * @param jsonValues actual selected values
+	 * @param jsonValues actual selected values (sightings section of feature)
 	 * @param session
 	 * @return
 	 * @throws ParseException 
 	 */
-	public static CyberTrackerPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, ConservationArea ca, Session session) throws ParseException{
+	public static JsonPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, ConservationArea ca, Session session) throws Exception{
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
@@ -84,7 +81,7 @@ public class PatrolJsonUtils {
 		if (armed == null) {
 			armed = jsonDefaults.get(PatrolScreenOptionMeta.ARMED.key);
 		}
-		Boolean isArmed = JsonUtils.convertToBoolean(armed);
+		Boolean isArmed = CtJsonUtil.convertToBoolean(armed);
 		
 		String team = (String)jsonValues.get(PatrolScreenOptionMeta.TEAM.key);
 		if (team == null){
@@ -118,15 +115,15 @@ public class PatrolJsonUtils {
 		List<String> members = new ArrayList<String>();
 		for (Object x : jsonValues.keySet()){
 			String key = (String)x;
-			if (startsWith(key, JsonKey.EMPLOYEE.key)) members.add(key);
+			if (startsWith(key, CtJsonUtil.JsonDataModelKey.EMPLOYEE.key)) members.add(key);
 		}
 		if( members.isEmpty()){
 			for (Object x : jsonDefaults.keySet()){
 				String key = (String)x;
-				if (startsWith(key, JsonKey.EMPLOYEE.key)) members.add(key);
+				if (startsWith(key, CtJsonUtil.JsonDataModelKey.EMPLOYEE.key)) members.add(key);
 			}	
 		}
-		CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(null, null);
+		JsonPatrol ctPatrol = new JsonPatrol();
 		
 		if (armed != null){
 			ctPatrol.setArmed(isArmed == null ? false : isArmed);
@@ -136,7 +133,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(team.substring(JsonPatrolKey.TEAM.key.length() + 1));
 			Team teamObj = (Team) session.get(Team.class, uuid);
 			if (teamObj == null || !teamObj.getConservationArea().equals(ca)){
-				ctPatrol.addWarning(PatrolMeta.TEAM, Messages.PatrolJsonUtils_TeamNotFound);
+				ctPatrol.addWarning(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TEAM_NOT_FOUND));
 			}
 			ctPatrol.setTeam(teamObj);
 		}
@@ -145,7 +142,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(station.substring(JsonPatrolKey.STATION.key.length() + 1));
 			Station stationObj = (Station) session.get(Station.class, uuid);
 			if (stationObj == null || !stationObj.getConservationArea().equals(ca)){
-				ctPatrol.addWarning(PatrolMeta.STATION, Messages.PatrolJsonUtils_StationNotFound);
+				ctPatrol.addWarning(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.STATION_NOT_FOUND));
 			}
 			ctPatrol.setStation(stationObj);
 		}
@@ -154,7 +151,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(mandate.substring(JsonPatrolKey.MANDATE.key.length() + 1));
 			PatrolMandate mandateObj = (PatrolMandate) session.get(PatrolMandate.class, uuid);
 			if (mandateObj == null || !mandateObj.getConservationArea().equals(ca)){
-				ctPatrol.addWarning(PatrolMeta.MANDATE, Messages.PatrolJsonUtils_MandatenotFound);
+				ctPatrol.addWarning(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.MANDATE_NOT_FOUND));
 			}
 			ctPatrol.setMandate(mandateObj);
 		}
@@ -163,12 +160,12 @@ public class PatrolJsonUtils {
 		
 		ctPatrol.setMembers(new ArrayList<Employee>());
 		for (String member: members){
-			UUID uuid = UuidUtils.stringToUuid(member.substring(JsonKey.EMPLOYEE.key.length() + 1));
+			UUID uuid = UuidUtils.stringToUuid(member.substring(CtJsonUtil.JsonDataModelKey.EMPLOYEE.key.length() + 1));
 			Employee employee = (Employee) session.get(Employee.class, uuid);
 			if (employee != null  && employee.getConservationArea().equals(ca)){
 				ctPatrol.getMembers().add(employee);
 			}else{
-				ctPatrol.addWarning(PatrolMeta.MEMBERS, Messages.PatrolJsonUtils_MemberNotFound);
+				ctPatrol.addWarning(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.MEMBER_NOT_FOUND));
 			}
 			
 			if (member.equals(leader)){
@@ -183,7 +180,8 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(ptransport.substring(JsonPatrolKey.TRANSPORT_TYPE.key.length() + 1));
 			PatrolTransportType transportObj = (PatrolTransportType) session.get(PatrolTransportType.class, uuid);
 			if (transportObj == null || !transportObj.getConservationArea().equals(ca)){
-				ctPatrol.addError(PatrolMeta.TRANSPORT, Messages.PatrolJsonUtils_TTNotFound);
+				throw new Exception( (new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR)).getMessage());
+
 			}else{
 				ctPatrol.setPatrolTransportType(transportObj);
 			}
@@ -200,7 +198,7 @@ public class PatrolJsonUtils {
 			
 			
 			if (pa.getType() == Attribute.AttributeType.BOOLEAN) {
-				value = JsonUtils.convertToBoolean(value);
+				value = CtJsonUtil.convertToBoolean(value);
 			}else if (pa.getType() == Attribute.AttributeType.LIST) {
 				UUID uuid = UuidUtils.stringToUuid( (String)value );
 				for (PatrolAttributeListItem item : pa.getAttributeList()) {
@@ -229,6 +227,6 @@ public class PatrolJsonUtils {
 	}
 
 	private static boolean startsWith(String value, String key){
-		return value.startsWith(key + CyberTrackerConfExporter.KEY_SEP);
+		return value.startsWith(key + CtJsonUtil.KEY_SEP);
 	}
 }

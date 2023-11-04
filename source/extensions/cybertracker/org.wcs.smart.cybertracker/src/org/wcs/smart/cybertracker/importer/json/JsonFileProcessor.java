@@ -46,6 +46,9 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
+import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -56,7 +59,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class JsonFileProcessor {
 	
-	private static volatile List<IJsonProcessor> jsonProcessors;
+	private static volatile List<IDesktopJsonProcessor> jsonProcessors;
 	private static volatile List<IJsonPostProcessor> jsonPostProcessors;
 	
 	/**
@@ -176,7 +179,7 @@ public class JsonFileProcessor {
 		
 		final List<JSONObject> features = new ArrayList<>();;
 		try {
-			features.addAll(JsonCtParser.parseFeaturesFromJsonString(json));
+			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json));
 		}catch (Throwable ex) {
 			returnValue.ex = ex;
 			returnValue.status = FileStatus.ERROR;
@@ -191,10 +194,10 @@ public class JsonFileProcessor {
 			notProc.addAll(features);
 			
 			
-			List<IJsonProcessor> processors = getProcessors();
+			List<IDesktopJsonProcessor> processors = getProcessors();
 			
 			StringBuilder statusMsg = new StringBuilder();
-			for (IJsonProcessor p : processors){
+			for (IDesktopJsonProcessor p : processors){
 				List<JSONObject> processed = p.processJson(features, session);
 				notProc.removeAll(processed);
 				String msg = p.getStatusMessage();
@@ -244,7 +247,7 @@ public class JsonFileProcessor {
 			}
 			session.getTransaction().commit();
 
-			for (IJsonProcessor p : processors){
+			for (IDesktopJsonProcessor p : processors){
 				try{
 					p.afterSave();
 				}catch (Throwable t){
@@ -285,17 +288,17 @@ public class JsonFileProcessor {
 		}
 	}
 
-	private static List<IJsonProcessor> getProcessors() throws Exception{
+	private static List<IDesktopJsonProcessor> getProcessors() throws Exception{
 		if (jsonProcessors == null){
 			synchronized (JsonFileProcessor.class) {
 				if (jsonProcessors == null){
-					ArrayList<IJsonProcessor> temp = new ArrayList<IJsonProcessor>();
+					ArrayList<IDesktopJsonProcessor> temp = new ArrayList<IDesktopJsonProcessor>();
 					IConfigurationElement[] config = Platform.getExtensionRegistry()
-							.getConfigurationElementsFor(IJsonProcessor.EXTENSION_ID);
+							.getConfigurationElementsFor(IDesktopJsonProcessor.EXTENSION_ID);
 					
 					for (IConfigurationElement e : config) {
 						if (e.getName().equalsIgnoreCase("JsonProcessor")){ //$NON-NLS-1$
-							IJsonProcessor proc = (IJsonProcessor) e.createExecutableExtension("class"); //$NON-NLS-1$
+							IDesktopJsonProcessor proc = (IDesktopJsonProcessor) e.createExecutableExtension("class"); //$NON-NLS-1$
 							temp.add(proc);
 						}
 					}
@@ -304,8 +307,8 @@ public class JsonFileProcessor {
 			}
 			
 		}
-		List<IJsonProcessor> copy = new ArrayList<IJsonProcessor>(jsonProcessors.size());
-		for (IJsonProcessor p : jsonProcessors){
+		List<IDesktopJsonProcessor> copy = new ArrayList<IDesktopJsonProcessor>(jsonProcessors.size());
+		for (IDesktopJsonProcessor p : jsonProcessors){
 			copy.add(p.getClass().getConstructor().newInstance());
 		}
 		return copy;
@@ -317,7 +320,7 @@ public class JsonFileProcessor {
 				if (jsonPostProcessors == null){
 					ArrayList<IJsonPostProcessor> temp2 = new ArrayList<IJsonPostProcessor>();					
 					IConfigurationElement[] config = Platform.getExtensionRegistry()
-							.getConfigurationElementsFor(IJsonProcessor.EXTENSION_ID);
+							.getConfigurationElementsFor(IDesktopJsonProcessor.EXTENSION_ID);
 					
 					for (IConfigurationElement e : config) {
 						if (e.getName().equalsIgnoreCase("JsonPostProcessor")){ //$NON-NLS-1$

@@ -50,6 +50,7 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.smartcollect.model.SmartCollectionMetadata;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -218,7 +219,7 @@ public class SmartCollectPackageExporter {
 	@SuppressWarnings("unchecked")
 	private void createMetadata(Path incidentJson) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackageManager.SMARTCOLLECT_RESOURCE_ID));
+		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackage.PACKAGE_TYPENAME.toUpperCase()));
 		
 		
 		JSONObject dataType = new JSONObject();
@@ -227,7 +228,7 @@ public class SmartCollectPackageExporter {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
 		dataType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(SmartCollectPackageManager.USERNAMEMETADATA_KEY, dataType);
+		typeOp.put(SmartCollectionMetadata.USERNAMEMETADATA_KEY, dataType);
 		metadataScreens.add(typeOp);
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){

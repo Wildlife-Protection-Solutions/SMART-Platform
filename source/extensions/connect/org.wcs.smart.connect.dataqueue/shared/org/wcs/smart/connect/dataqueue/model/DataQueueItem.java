@@ -29,6 +29,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Transient;
 
 /**
  * Data queue item containing fields shared between the server
@@ -47,6 +48,8 @@ public class DataQueueItem extends UuidItem{
 	private UUID caUuid;
 	private String name;
 
+	@Transient
+	private boolean canProcessLocally = false;
 	
 	@Column(name="type")
 	public String getType(){
@@ -75,5 +78,12 @@ public class DataQueueItem extends UuidItem{
 		this.name = name;
 	}
 
-	
+	@Transient
+	public void setCanProcessLocally(boolean canProcess) {
+		this.canProcessLocally = canProcess;
+	}
+	@Transient
+	public boolean getCanProcessLocally() {
+		return this.canProcessLocally;
+	}
 }

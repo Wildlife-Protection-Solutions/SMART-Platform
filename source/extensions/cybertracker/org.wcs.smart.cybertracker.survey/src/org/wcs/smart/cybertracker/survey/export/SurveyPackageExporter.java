@@ -54,13 +54,14 @@ import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.MissionMetadataField;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
+import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
@@ -368,7 +369,7 @@ public class SurveyPackageExporter {
 		su.put(MissionMetadataField.SAMPING_UNIT.getJsonKey(), sus);
 		metadataScreens.add(su);
 		
-		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyScreensUtil.DATATYPE_SURVEY));
+		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyMetadata.DATATYPE_SURVEY));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
 		metadataScreens.add(CtJsonExportUtils.createStartTime());
@@ -415,7 +416,7 @@ public class SurveyPackageExporter {
 		}
 		
 		JSONObject objectiveOp = new JSONObject();
-		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
+		objectiveOp.put(SurveyMetadata.JsonKey.MISSION_PROPERTY_PREFIX.key + prop.getKeyId(), objective);
 		return objectiveOp;
 	}
 	
@@ -448,7 +449,7 @@ public class SurveyPackageExporter {
 		}
 		
 		JSONObject objectiveOp = new JSONObject();
-		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
+		objectiveOp.put(SurveyMetadata.JsonKey.MISSION_PROPERTY_PREFIX.key  + prop.getKeyId(), objective);
 		return objectiveOp;
 	}
 	
@@ -477,7 +478,7 @@ public class SurveyPackageExporter {
 		
 		for (MissionAttributeListItem item : prop.getAttributeList()) {
 			JSONObject ttype = new JSONObject();
-			ttype.put("uuid", SurveyScreensUtil.JsonSurveyKey.MISSION_ATT_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
+			ttype.put("uuid", SurveyMetadata.JsonSurveyKey.MISSION_ATT_LIST.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
 			ttype.put("label", item.getName()); //$NON-NLS-1$
 			optionOptions.add(ttype);
 			
@@ -493,7 +494,7 @@ public class SurveyPackageExporter {
 			}
 		}
 		JSONObject objectiveOp = new JSONObject();
-		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
+		objectiveOp.put(SurveyMetadata.JsonKey.MISSION_PROPERTY_PREFIX.key + prop.getKeyId(), objective);
 		return objectiveOp;
 	}
 	
@@ -506,7 +507,7 @@ public class SurveyPackageExporter {
 		dataType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
 		dataType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, design.getKeyId());
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(SurveyScreensUtil.RESULT_SURVEY_DESIGN, dataType);
+		typeOp.put( SurveyMetadata.JsonKey.SURVEY_DESIGN.key, dataType);
 		return typeOp;
 	}
 }

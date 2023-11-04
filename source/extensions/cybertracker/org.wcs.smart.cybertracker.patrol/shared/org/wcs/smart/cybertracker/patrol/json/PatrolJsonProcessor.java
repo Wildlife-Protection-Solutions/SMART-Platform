@@ -35,10 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -47,21 +43,17 @@ import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.common.control.WarningDialog;
-import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
-import org.wcs.smart.cybertracker.importer.json.JsonTrackUtils;
-import org.wcs.smart.cybertracker.importer.json.UserCancelledException;
-import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
-import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
+import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import org.wcs.smart.cybertracker.json.JsonTrackUtils;
+import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
+import org.wcs.smart.cybertracker.json.UserCancelledException;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
-import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.cybertracker.patrol.model.JsonPatrol;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -70,7 +62,6 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
@@ -90,25 +81,40 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class PatrolJsonProcessor implements IJsonProcessor {
+public abstract class PatrolJsonProcessor implements IJsonProcessor {
+	
+	//TODO: patrols without transport type cannot be saved
+	//at this point those are warning in the JsonPatrol but nothing
+	//is done yet
 	
 	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 	
-	private List<String> warnings;
+	protected List<JsonImportWarning> warnings;
 	
-	private Set<Patrol> modifiedPatrols;
-	private Set<Patrol> newPatrols = new HashSet<>();
-	private HashMap<UUID, CtPatrolLink> newPatrolLinks;
+	protected Set<Patrol> modifiedPatrols;
+	protected Set<Patrol> newPatrols = new HashSet<>();
+	protected HashMap<UUID, CtPatrolLink> newPatrolLinks;
 	
-	//resize value for apply to all option
-	private Point allSize = null;
+	protected ConservationArea ca;
 	
-	private ConservationArea ca;
+	protected boolean duplicateWarningGenerated = false;
 	
-	public PatrolJsonProcessor() {
-		this.ca = SmartDB.getCurrentConservationArea();
-		warnings = new ArrayList<String>();
+	public enum StatusMessage{
+		ADDED, MODIFIED;
+		
+		public String getMessage() {
+			switch(this) {
+			case ADDED: return "Created {0} Patrols";
+			case MODIFIED: return "Modified {0} Patrols";
+			}
+			return "";
+		}
+	}
+	
+	public PatrolJsonProcessor(ConservationArea ca) {
+		this.ca = ca;
+		warnings = new ArrayList<>();
 	}
 
 	@Override
@@ -116,22 +122,22 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		modifiedPatrols = new HashSet<Patrol>();
 		newPatrolLinks = new HashMap<UUID, CtPatrolLink>();
 		
-		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
+		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();
 		
 		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
-			JsonCtParser parser = new JsonCtParser();
+			CtJsonObservationParser parser = new CtJsonObservationParser();
 			
-			if (!JsonCtParser.isTrackPoint(feature)) observationFeatureCount++;
+			if (!CtJsonUtil.isTrackPoint(feature)) observationFeatureCount++;
 			
 			try{
-				JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
+				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
-				JSONObject sighting = (JSONObject)properties.get(JsonCtParser.SIGHTINGS_KEY);
+				JSONObject sighting = (JSONObject)properties.get(CtJsonObservationParser.SIGHTINGS_KEY);
 				if (sighting == null) continue;
 				
-				String type = (String) sighting.get(ScreensUtil.RESULT_DATATYPE);
-				String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+				String type = (String) sighting.get(CtJsonUtil.JsonKey.DATATYPE.key);
+				String deviceId = (String) properties.get(CtJsonObservationParser.DEVICE_ID);
 				
 				// Validate data type
 				if (!PatrolScreenOptionMeta.PATROL_RESOURCE_ID.equalsIgnoreCase(type)){
@@ -143,13 +149,17 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				if (observationCounter == null) continue;
 								
 				//read cybertracker patrol id and convert to uuid
-				String ctPatrolId = (String) sighting.get(ScreensUtil.RESULT_ID);
+				String ctPatrolId = (String) sighting.get(CtJsonUtil.JsonKey.ID.key);
 				UUID ctPatrolUuid = UuidUtils.stringToUuid(ctPatrolId);
 				
 				//check the database for link; if not found check local links
 				CtPatrolLink link = (CtPatrolLink) session.get(CtPatrolLink.class, ctPatrolUuid);
 				if (link == null){
 					link = newPatrolLinks.get(ctPatrolUuid);
+				}else if (!link.getPatrolLeg().getPatrol().getConservationArea().equals(this.ca)) {
+					//error data in file is being loaded into a patrol in a different ca
+					//this is an error 
+					throw new SmartMobileProcessingError(MessageFormat.format("The Conservation Area associated with the file ({0}), does not match the Conservation Area of the patrol currently linked to this data ({1})", this.ca.getNameLabel(), link.getPatrolLeg().getPatrol().getConservationArea().getNameLabel()));
 				}
 				
 				//ensure valid observation id
@@ -158,27 +168,43 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					if (observationCounter != 1) continue;
 				}else{
 					//must be the next observation
-					if (link.getLastObservationCnt()  + 1 != observationCounter) continue;					
+					if (link.getLastObservationCnt()  + 1 != observationCounter) {
+
+						//in an effort to improve error reporting lets make an assumption here 
+						if (link.getLastObservationCnt() + 1 > observationCounter) {
+							if (!duplicateWarningGenerated) {
+								//only report once per file
+								warnings.add(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.DUPLICATE,
+										link.getPatrolLeg().getPatrol().getId(), link.getLastObservationCnt()+1, observationCounter));
+										
+								duplicateWarningGenerated = true;
+							}
+						}else if (link.getLastObservationCnt() +1 < observationCounter) {
+							//likely we haven't yet processed previous files should probably be requeued
+						}
+						
+						continue;					
+					}
 				}
 				
 				//is the end of this leg and needs a new leg
 				//is this the end of the patrol
 				boolean changeLeg = false;
-				boolean isPatrolEnd = sighting.containsKey(PatrolScreensUtil.END_PATROL_KEY) ;
-				if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
-					String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
-					if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_END_PATROL_KEY)) {
+				boolean isPatrolEnd = sighting.containsKey(PatrolJsonUtils.END_PATROL_KEY) ;
+				if (sighting.containsKey(CtJsonUtil.JsonKey.OBSERVATION.key)) {
+					String value = (String) sighting.get(CtJsonUtil.JsonKey.OBSERVATION.key);
+					if (value.trim().equalsIgnoreCase(CtJsonObservationParser.OBSERVATION_TYPE_END_PATROL_KEY)) {
 						isPatrolEnd = true;
 					}
 					
-					if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_CHANGE_PATROL_KEY)) {
+					if (value.trim().equalsIgnoreCase(CtJsonObservationParser.OBSERVATION_TYPE_CHANGE_PATROL_KEY)) {
 						changeLeg = true;
 					}
 				}
 				
 				if (changeLeg) {
 					//end the current leg and start a new one
-					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+					LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 					
 					if (link != null) {					
 						//update the leg end time
@@ -187,9 +213,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						pd.setEndTime(dt.toLocalTime());
 						
 						//start a new leg
-						String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
-						CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
-						warnings.addAll(ct.getErrors());
+						String defaultValues = (String)sighting.get(CtJsonUtil.JsonKey.DEFAULT_METADATA_VALUES.key);
+						JsonPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
+						warnings.addAll(ct.getWarnings());
 						
 						PatrolLeg newLeg = addLegFromSighting(link.getPatrolLeg().getPatrol(), ct, sighting, deviceId, ctPatrolUuid, observationCounter, dt, session);
 
@@ -217,7 +243,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
 					//for this patrol
-					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+					LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 					if (link == null){
 						//create a new patrol object
 						link = createPatrolFromSighing(sighting, deviceId, ctPatrolUuid, observationCounter, session);
@@ -250,29 +276,29 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				warnings.addAll(parser.getWarnings());
 				wp.setId(String.valueOf(observationCounter));
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setConservationArea(SmartDB.getCurrentConservationArea());
+				wp.setConservationArea(this.ca);
 
-				allSize = JsonCtParser.processImages(wp, allSize, session);
+				parser.processImages(wp, session);
 				
 				boolean noObservation = false;
 				//patrol paused; no observation; record only as track point
 				//same is true for NewPatrol or ChangePatrol observation type
 				boolean isPaused = false;
 				boolean isResumed = false;
-				if (sighting.containsKey(ScreensUtil.RESULT_PAUSED)) {
+				if (sighting.containsKey(CtJsonUtil.JsonKey.PAUSED.key)) {
 					isPaused = true;
-				}else if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
-					if (((String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY)).trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_PAUSE_PATROL_KEY)) {
+				}else if (sighting.containsKey(CtJsonUtil.JsonKey.OBSERVATION.key)) {
+					if (((String) sighting.get(CtJsonUtil.JsonKey.OBSERVATION.key)).trim().equalsIgnoreCase(CtJsonObservationParser.OBSERVATION_TYPE_PAUSE_PATROL_KEY)) {
 						isPaused = true;
 					}
-					if (((String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY)).trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_RESUME_PATROL_KEY)) {
+					if (((String) sighting.get(CtJsonUtil.JsonKey.OBSERVATION.key)).trim().equalsIgnoreCase(CtJsonObservationParser.OBSERVATION_TYPE_RESUME_PATROL_KEY)) {
 						isResumed = true;
 					}
 				}
 				if (isResumed) {
 					//compute rest times
 					if (link != null) {
-						LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+						LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 						PatrolLegDay currentDay = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MIN, session);
 						//the pause event is recorded as a track point; not a waypoint
 						//so find the previous track point
@@ -324,9 +350,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				noObservation = changeLeg || isPaused || isResumed;
 				if (!noObservation) {
 					//check if this is the start of the patrol
-					if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
-						String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
-						if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_START_PATROL_KEY)) {
+					if (sighting.containsKey(CtJsonUtil.JsonKey.OBSERVATION.key)) {
+						String value = (String) sighting.get(CtJsonUtil.JsonKey.OBSERVATION.key);
+						if (value.trim().equalsIgnoreCase(CtJsonObservationParser.OBSERVATION_TYPE_START_PATROL_KEY)) {
 							noObservation = true;
 						}
 					}
@@ -356,12 +382,12 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				//group id (SMART7)
 				UUID ctRootId = null;
 				UUID ctObsGroup = null;
-				if (properties.containsKey(JsonCtParser.ROOT_ID_KEY)) ctRootId = UuidUtils.stringToUuid((String)properties.get(JsonCtParser.ROOT_ID_KEY));
-				if (sighting.containsKey(ScreensUtil.RESULT_SIGHTINGGROUPID)) ctObsGroup = UuidUtils.stringToUuid((String)sighting.get(ScreensUtil.RESULT_SIGHTINGGROUPID));
+				if (properties.containsKey(CtJsonObservationParser.ROOT_ID_KEY)) ctRootId = UuidUtils.stringToUuid((String)properties.get(CtJsonObservationParser.ROOT_ID_KEY));
+				if (sighting.containsKey(CtJsonUtil.JsonKey.OBSERVATION_GROUP.key)) ctObsGroup = UuidUtils.stringToUuid((String)sighting.get(CtJsonUtil.JsonKey.OBSERVATION_GROUP.key));
 				
 				if (ctRootId == null || ctObsGroup == null) {
 					//this is the old way of processing 
-					if (!sighting.containsKey(ScreensUtil.RESULT_NEW_WAYPOINT)){
+					if (!sighting.containsKey(CtJsonUtil.JsonKey.NEW_WAYPOINT.key)){
 						//assume this is a group attribute
 						
 						if (link == null){
@@ -393,8 +419,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					
 					//Determine if this is a "Add to Last Waypoint" option
 					boolean addToLast = false;
-					Object v = sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT);
-					Boolean isNew = JsonUtils.convertToBoolean(v);
+					Object v = sighting.get(CtJsonUtil.JsonKey.NEW_WAYPOINT.key);
+					Boolean isNew = CtJsonUtil.convertToBoolean(v);
 					if (isNew == null) {
 						addToLast = false;
 					}else {
@@ -404,7 +430,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					if (addToLast){
 						if (link == null){
 							//we have nothing to add this to; this is an error
-							warnings.add(Messages.PatrolJsonProcessor_NoPatrolFound);
+							warnings.add(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND)); 
 							continue;
 						}
 						
@@ -464,7 +490,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 								wa.setWaypoint(mwpg.getWaypoint());
 								mwpg.getWaypoint().getAttachments().add(wa);
 								
-								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+								wa.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
 										.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
 										.resolve(wa.getFilename()));
 							
@@ -472,7 +498,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							for(WaypointObservation wo : wp.getAllObservations()){
 								if (wo.getAttachments() != null){
 									for (ObservationAttachment a : wo.getAttachments()){
-										a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										a.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
 												.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
 												.resolve(a.getFilename()));
 									}
@@ -498,14 +524,14 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 								wa.setWaypoint(mwp);
 								mwp.getAttachments().add(wa);
 							
-								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+								wa.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
 										.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
 										.resolve(wa.getFilename()));
 							}
 							for(WaypointObservation wo : wp.getAllObservations()){
 								if (wo.getAttachments() != null){
 									for (ObservationAttachment a : wo.getAttachments()){
-										a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										a.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
 												.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
 												.resolve(a.getFilename()));
 									}
@@ -532,7 +558,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						//we want this newly created waypoint
 						addToExistingLeg(link.getPatrolLeg(), wp, session);
 						
-						if (link.getPatrolLeg().getPatrol().getUuid() != null) session.saveOrUpdate(wp);
+						if (link.getPatrolLeg().getPatrol().getUuid() != null) {
+							if (wp.getUuid() == null) session.persist(wp);
+						}
 						
 						//update patrol links
 						CtPatrolWpLink wplink = new CtPatrolWpLink();
@@ -559,41 +587,20 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				processedFeatures.add(feature);
 				
 				session.flush();
+			}catch (SmartMobileProcessingError ex) {
+				throw ex;
 			}catch (Exception ex){
 				//TODO: if there is a session.flush error we have a problem we need to stop and rollback
-				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
-				warnings.add(Messages.PatrolJsonProcessor_ParseError + ex.getMessage());
+				logException(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
+				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()) );
+				//add this as a processed feature so we don't continue to re-try
+				//if there is an error something needs to be done to resolve it before
+				//continue processing
 			}
 		}
-		
+
 		//display warnings to user; this may throw a cancelled exception if the user doesn't want to proceed
-		displayWarnings(warnings);
-		
-		final boolean[] cancel = new boolean[]{false};
-		if (!newPatrolLinks.isEmpty()){
-			
-			//we need to ask the user if they want to create a new patrol or add to an existing patrol
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					try{
-						PatrolDialog pd = new PatrolDialog(Display.getDefault().getActiveShell(), newPatrolLinks, session);
-						if (pd.open() == Window.CANCEL){
-							cancel[0] = true;
-						}else{
-							modifiedPatrols.addAll(pd.getMergedPatrols());
-							newPatrols = pd.getNewPatrols();
-						}
-					}catch (Exception ex){
-						CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorDialog, Messages.PatrolJsonProcessor_ErrorMesg + ex.getMessage(), ex);
-						cancel[0] = true;
-					}
-				}	
-			});
-		}
-		if (cancel[0]){
-			throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled);
-		}
+		processPatrolWarnings(warnings);
 		
 		if (observationFeatureCount > 0 && processedFeatures.size() == 0){
 			//there is at least one observation feature; but nothing could be processed
@@ -602,15 +609,55 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			//see ticket: #1877
 			return processedFeatures;
 		}
+				
+		if (!newPatrolLinks.isEmpty()){
+			//create new patrols or modify existing patrols
+			assignPatrols(session);			
+		}
+		
+		
 		//try processing track features
 		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
 		processedFeatures.addAll(trackProcessor.processJson(features, session));
 		modifiedPatrols.addAll(trackProcessor.getModifiedPatrols());
-		displayWarnings(trackProcessor.getWarnings());
+		processTrackWarnings(trackProcessor.getWarnings());
 		
 		return processedFeatures;
 	}
 	
+
+	@Override
+	public List<JsonImportWarning> getWarnings(){
+		return this.warnings;
+	}
+	
+	protected abstract void logException(String message, Exception ex);
+	
+	/**
+	 * Should throw exception if processing should stop 
+	 * 
+	 * @throws UserCancelledException
+	 */
+	protected void processPatrolWarnings(List<JsonImportWarning> warnings) throws UserCancelledException{
+		
+	}
+	
+	/**
+	 * Should throw exception if processing should stop.  
+	 * @throws UserCancelledException
+	 */
+	protected void processTrackWarnings(List<JsonImportWarning> warnings) throws UserCancelledException{
+		
+	}
+	
+	
+	/**
+	 * Should throw exception if processing should stop 
+	 * 
+	 * @throws UserCancelledException
+	 */
+	protected abstract void assignPatrols(Session session) throws UserCancelledException;
+
 	/**
 	 * returns 0 if error
 	 * 1 if ok
@@ -626,14 +673,14 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	 */
 	private int processGroup(JSONObject sighting, PatrolLeg legToUpdate, Waypoint wp, 
 			List<WaypointObservationAttribute> applyAll, LocalDateTime groupStartTime, Session session) throws Exception{
-		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
+		if (!sighting.containsKey(CtJsonUtil.JsonKey.END_WAYPOINT_GROUP.key)){
 			//clear observations associated with 
 			wp.getObservationGroups().clear();
 			addToExistingLeg(legToUpdate, wp, session);
 			
 			return 1;
 		}else{
-			if ("FALSE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
+			if ("FALSE".equalsIgnoreCase((String)sighting.get(CtJsonUtil.JsonKey.END_WAYPOINT_GROUP.key))){ //$NON-NLS-1$
 				if (wp.getRawX() == null || wp.getRawY() == null){
 					//no location; add to previous 
 					if (addWaypointToLastObservation(legToUpdate, wp, session) != null) return 1;
@@ -642,7 +689,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					addToExistingLeg(legToUpdate, wp, session);
 					return 2;
 				}
-			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
+			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(CtJsonUtil.JsonKey.END_WAYPOINT_GROUP.key))){ //$NON-NLS-1$
 				if (wp.getRawX() == null || wp.getRawY() == null){
 					//no location; add to previous 
 					PatrolWaypoint pw = addWaypointToLastObservation(legToUpdate, wp, session);
@@ -749,7 +796,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			}
 		}
 		if (legToUpdate.getUuid() != null){
-			session.saveOrUpdate(lastWaypoint);
+			//session.saveOrUpdate(lastWaypoint);
 			session.flush();
 		}
 		
@@ -757,41 +804,16 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		return lastWaypoint;
 	}
-	/*
-	 * displays warning dialog to user allowing them to cancel the processing
-	 */
-	private void displayWarnings(List<String> warnings) throws Exception{
-		 if (!warnings.isEmpty()){
-			 	final boolean[] cont = {false};
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
-								Messages.PatrolJsonProcessor_WarningsLabel, 
-								Messages.PatrolJsonProcessor_WarningsMsg,
-								warnings,
-								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
-						if (wd.open() == 0){
-							cont[0] = true;
-						}else{
-							cont[0] = false;
-						}
-					}	
-				});
-				if (!cont[0]){
-					throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled2);
-				}
-		 }
-	}
+
 	
 	private CtPatrolLink createPatrolFromSighing(JSONObject sighting, String deviceId, UUID ctUuid, int observationCounter, Session session) throws Exception{
 		Patrol p = new Patrol();
 		p.setConservationArea(ca);
-		String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
-		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
-		warnings.addAll(ct.getErrors());
+		String defaultValues = (String)sighting.get(CtJsonUtil.JsonKey.DEFAULT_METADATA_VALUES.key);
+		JsonPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
+		warnings.addAll(ct.getWarnings());
 		
-		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);		
+		String startDate = (String)sighting.get(MetadataFieldValue.START_DATE_METADATA_KEY);		
 		LocalDate dStartDate = LocalDate.parse(startDate, PatrolJsonUtils.DATEFORMAT);
 		p.setEndDate(dStartDate);
 		p.setStartDate(dStartDate);
@@ -810,7 +832,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			p.getCustomAttributes().add(v);
 		}
 		
-		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
+		String startTime = (String)sighting.get(MetadataFieldValue.START_TIME_METADATA_KEY);
 		LocalDateTime startDateTime = dStartDate.atTime(LocalTime.parse(startTime, PatrolJsonUtils.TIMEFORMAT));
 		
 		PatrolLeg pl = addLegFromSighting(p, ct, sighting, deviceId, ctUuid, observationCounter, startDateTime, session);
@@ -827,7 +849,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		return link;
 	}
 		
-	private PatrolLeg addLegFromSighting(Patrol patrol, CyberTrackerPatrol ct,			
+	private PatrolLeg addLegFromSighting(Patrol patrol, JsonPatrol ct,			
 			JSONObject sighting,
 			String deviceId, UUID ctUuid, int observationCounter,
 			LocalDateTime startDateTime,
@@ -857,7 +879,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		//make a single patrol leg day for the start date and time
 		PatrolLegDay one = new PatrolLegDay();
 		one.setStartTime(startDateTime.toLocalTime());
-		one.setEndTime(LocalTime.MAX);
+		one.setEndTime(SharedUtils.END_OF_DAY);
 		pl.getPatrolLegDays().add(one);
 		
 		pl.createLegDays(session);	
@@ -877,7 +899,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				for (WaypointAttachment wa : wp.getAttachments()){
 					//the associated patrol waypoint has not been saved yet
 					//so we need to fix up all attachment
-					wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+					wa.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
 							.resolve(PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session))
 							.resolve(wa.getFilename()));
 				}
@@ -886,17 +908,17 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			for(WaypointObservation wo : wp.getAllObservations()){
 				if (wo.getAttachments() != null){
 					for (ObservationAttachment a : wo.getAttachments()){
-						a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+						a.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
 								.resolve(PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session))
 								.resolve(a.getFilename()));
 					}
 				}
 			}
 			
-			session.saveOrUpdate(wp);
-			session.saveOrUpdate(addToD);
+			if (wp.getUuid() == null) session.persist(wp);
+			if (addToD.getPatrolLeg().getPatrol().getUuid() == null) session.persist(addToD.getPatrolLeg().getPatrol());
+			if (addToD.getUuid() == null) session.persist(addToD);
 			session.persist(pw);
-			session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
 			session.flush();
 		}
 	}
@@ -910,27 +932,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		return pw;
 	}
-	
 
-	@Override
-	public void afterSave(){
-		for (Patrol p : modifiedPatrols){
-			try{
-				PatrolEventManager.getInstance().patrolSaved(p, true);
-			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorTitle, ex.getMessage(), ex);
-			}
-		}
-		for (Patrol p : newPatrols){
-			try{
-				PatrolEventManager.getInstance().patrolAdded(p);
-			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorTitle, ex.getMessage(), ex);
-			}
-		}
-	}
 	
-	private static final PatrolLegDay findLegDay(PatrolLeg leg, LocalDate day, boolean create, LocalTime startTime, Session session){
+	private PatrolLegDay findLegDay(PatrolLeg leg, LocalDate day, boolean create, LocalTime startTime, Session session){
 		for (PatrolLegDay pld : leg.getPatrolLegDays()){
 			if (pld.getDate().isEqual(day)){
 				return pld;
@@ -977,12 +981,12 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}else{
 			pld.setStartTime(startTime);
 		}
-		pld.setEndTime(LocalTime.MAX);
+		pld.setEndTime(SharedUtils.END_OF_DAY);
 		
 		return pld;
 	}
 	
-	public static final void addPointToTrack(PatrolLegDay pld, Coordinate pnt, LocalDateTime time) throws Exception{
+	private void addPointToTrack(PatrolLegDay pld, Coordinate pnt, LocalDateTime time) throws Exception{
 		if (pnt == null) return;
 		if (pld == null) return;
 		if (pld.getTrack() == null){
@@ -1003,7 +1007,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 	}
 	
-	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
+	private void addPointToTrack(PatrolLeg leg, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
 		if (pnt == null) return;
 		PatrolLegDay pld = findLegDay(leg, time.toLocalDate(), true, LocalTime.MIN, session);
 		addPointToTrack(pld, pnt, time);
@@ -1015,8 +1019,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newPatrols.isEmpty()){
-			sb.append(MessageFormat.format(Messages.PatrolJsonProcessor_CreatedMsg, newPatrols.size()));
-			sb.append("("); //$NON-NLS-1$
+			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(), newPatrols.size()));
+			sb.append(" ("); //$NON-NLS-1$
 			for(Patrol p : newPatrols){
 				sb.append(p.getId());
 				sb.append(" "); //$NON-NLS-1$
@@ -1027,8 +1031,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		HashSet<Patrol> tmp = new HashSet<Patrol>(modifiedPatrols);
 		tmp.removeAll(newPatrols);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format(Messages.PatrolJsonProcessor_ModifiedMsg, tmp.size()));
-			sb.append("("); //$NON-NLS-1$
+			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(), tmp.size()));
+			sb.append(" ("); //$NON-NLS-1$
 			for(Patrol p : tmp){
 				sb.append(p.getId());
 				sb.append(" "); //$NON-NLS-1$
@@ -1038,6 +1042,5 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 		return sb.toString();
 	}
-	
 	
 }

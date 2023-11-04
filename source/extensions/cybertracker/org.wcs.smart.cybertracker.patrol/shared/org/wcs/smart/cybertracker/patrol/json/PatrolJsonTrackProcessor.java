@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.patrol.json;
 
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -38,11 +37,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
-import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
-import org.wcs.smart.cybertracker.importer.json.JsonTrackUtils;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
+import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import org.wcs.smart.cybertracker.json.JsonTrackUtils;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
@@ -70,7 +69,7 @@ import org.wcs.smart.patrol.model.Track;
 public class PatrolJsonTrackProcessor implements IJsonProcessor {
 
 	private Set<Patrol> modifiedPatrols;
-	private List<String> warnings;
+	private List<JsonImportWarning> warnings;
 	
 	public PatrolJsonTrackProcessor() {
 	}
@@ -88,18 +87,18 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 		HashMap<String, List<CtPatrolLink>> linkmap = new HashMap<>();
 
 		for (JSONObject feature : features){
-			if (!JsonCtParser.isTrackPoint(feature)) continue;
+			if (!CtJsonUtil.isTrackPoint(feature)) continue;
 
-			JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
-			JSONObject geom = (JSONObject) feature.get(JsonCtParser.GEOMETRY_KEY);
-			JSONArray pntArray = (JSONArray) geom.get(JsonCtParser.GEOMETRY_COORDINATE_KEY);
+			JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
+			JSONObject geom = (JSONObject) feature.get(CtJsonObservationParser.GEOMETRY_KEY);
+			JSONArray pntArray = (JSONArray) geom.get(CtJsonObservationParser.GEOMETRY_COORDINATE_KEY);
 			if (pntArray.size() < 2 || pntArray.get(0) == null || pntArray.get(1) == null) continue;
 			
 			Double x = ((Number) pntArray.get(0)).doubleValue();
 			Double y = ((Number) pntArray.get(1)).doubleValue();
-			LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+			LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 
-			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+			String deviceId = (String) properties.get(CtJsonObservationParser.DEVICE_ID);
 			 
 			List<CtPatrolLink> links = linkmap.get(deviceId);
 			if (links == null) {
@@ -110,12 +109,12 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			//we want to find the patrol leg with a day that matches this day and time
 			List<PatrolLegDay> matches = new ArrayList<PatrolLegDay>();
 			for (CtPatrolLink link : links){
-				if (JsonCtParser.isDateBetween(dt.toLocalDate(), link.getPatrolLeg().getStartDate(), link.getPatrolLeg().getEndDate())){
+				if (CtJsonUtil.isDateBetween(dt.toLocalDate(), link.getPatrolLeg().getStartDate(), link.getPatrolLeg().getEndDate())){
 					
 					//lets look for a patrol leg day that matches
 					for (PatrolLegDay pld : link.getPatrolLeg().getPatrolLegDays()){
 						if (pld.getDate().isEqual(dt.toLocalDate()) &&
-								JsonCtParser.isTimeBetween(dt.toLocalTime(), pld.getStartTime(), pld.getEndTime())){
+								CtJsonUtil.isTimeBetween(dt.toLocalTime(), pld.getStartTime(), pld.getEndTime())){
 							matches.add(pld);
 						}
 					}
@@ -179,17 +178,10 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 				sb.deleteCharAt(sb.length() - 1);
 				sb.deleteCharAt(sb.length() - 1);
 				
-				warnings.add(MessageFormat.format(Messages.PatrolJsonTrackProcessor_MultiplePnts, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dt), sb.toString()));
+				warnings.add(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dt), sb.toString()));
 			}
-				
-			
 		}
 		return processed;
-
-	}
-
-	@Override
-	public void afterSave() {
 	}
 
 	@Override
@@ -197,7 +189,8 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 		return null;
 	}
 	
-	public List<String> getWarnings(){
+	@Override
+	public List<JsonImportWarning> getWarnings(){
 		return this.warnings;
 	}
 }

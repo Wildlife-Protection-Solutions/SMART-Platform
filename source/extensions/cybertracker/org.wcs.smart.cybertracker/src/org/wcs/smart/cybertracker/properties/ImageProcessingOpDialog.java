@@ -68,7 +68,7 @@ import jakarta.persistence.criteria.Root;
 public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements Listener{
 	
 	private Button btnDoResize;
-	private Button btnPrompt;
+//	private Button btnPrompt;
 	private Button btnAuto;
 	private ResizeOptionComposite resizeComp;
 	private Text txtMaxSize;
@@ -89,21 +89,21 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 	@Override
 	public void handleEvent(Event event) {
 		if (!btnDoResize.getSelection()){
-			btnPrompt.setEnabled(false);
+//			btnPrompt.setEnabled(false);
 			btnAuto.setEnabled(false);
 			resizeComp.setEnabled(false);
 			txtMaxSize.setEnabled(false);
 			lblMaxSize.setEnabled(false);
 		}else{
-			btnPrompt.setEnabled(true);
+//			btnPrompt.setEnabled(true);
 			btnAuto.setEnabled(true);
 			txtMaxSize.setEnabled(true);
 			lblMaxSize.setEnabled(true);
-			if (btnPrompt.getSelection()){
-				resizeComp.setEnabled(false);
-			}else{
+//			if (btnPrompt.getSelection()){
+//				resizeComp.setEnabled(false);
+//			}else{
 				resizeComp.setEnabled(true);
-			}
+//			}
 		}
 		modified(true);
 	}
@@ -136,13 +136,13 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 		((GridData)txtMaxSize.getLayoutData()).widthHint = 50;
 		txtMaxSize.addListener(SWT.Modify, e->modified(true));
 		
-		btnPrompt = new Button(main, SWT.RADIO);
-		btnPrompt.setText(Messages.ImageProcessingOpDialog_promptOption);
-		btnPrompt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)btnPrompt.getLayoutData()).horizontalIndent = indent;
-		btnPrompt.addListener(SWT.Selection, this);
-		btnPrompt.setToolTipText(Messages.ImageProcessingOpDialog_promptTooltip);
-		
+//		btnPrompt = new Button(main, SWT.RADIO);
+//		btnPrompt.setText(Messages.ImageProcessingOpDialog_promptOption);
+//		btnPrompt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		((GridData)btnPrompt.getLayoutData()).horizontalIndent = indent;
+//		btnPrompt.addListener(SWT.Selection, this);
+//		btnPrompt.setToolTipText(Messages.ImageProcessingOpDialog_promptTooltip);
+//		
 		btnAuto = new Button(main, SWT.RADIO);
 		btnAuto.setText(Messages.ImageProcessingOpDialog_autoOption);
 		btnAuto.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -259,10 +259,10 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 					maxSize.setDoubleValue(Double.parseDouble(txtMaxSize.getText()));
 					
 					
-					if (btnPrompt.getSelection()){
-						resizeOp.setStringValue(ImageResizeOption.MANUAL.name());
-						if (sizeOp != null) s.remove(sizeOp);
-					}else{
+//					if (btnPrompt.getSelection()){
+//						resizeOp.setStringValue(ImageResizeOption.MANUAL.name());
+//						if (sizeOp != null) s.remove(sizeOp);
+//					}else{
 						resizeOp.setStringValue(ImageResizeOption.AUTO.name());
 						if (sizeOp == null){
 							sizeOp = new CyberTrackerPropertiesOption();
@@ -276,7 +276,7 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 						}else{
 							sizeOp.setStringValue(selectedSizeOp.name());
 						}
-					}
+//					}
 				}
 				
 				s.getTransaction().commit();
@@ -318,15 +318,15 @@ public class ImageProcessingOpDialog extends SmartStyledTitleDialog implements L
 							for (CyberTrackerPropertiesOption.ImageResizeOption r : ImageResizeOption.values()){
 								if (r.name().equalsIgnoreCase(value)){
 									if (r.equals(ImageResizeOption.AUTO) ){
-										btnPrompt.setSelection(false);
+//										btnPrompt.setSelection(false);
 										btnAuto.setSelection(true);
 										btnDoResize.setSelection(true);
-									}else if (r.equals(ImageResizeOption.MANUAL)){
-										btnPrompt.setSelection(true);
-										btnAuto.setSelection(false);
-										btnDoResize.setSelection(true);
+//									}else if (r.equals(ImageResizeOption.MANUAL)){
+//										btnPrompt.setSelection(true);
+//										btnAuto.setSelection(false);
+//										btnDoResize.setSelection(true);
 									}else if (r.equals(ImageResizeOption.NONE)){
-										btnPrompt.setSelection(false);
+//										btnPrompt.setSelection(false);
 										btnAuto.setSelection(true);
 										btnDoResize.setSelection(false);
 									}

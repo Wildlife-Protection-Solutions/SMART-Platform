@@ -53,14 +53,15 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.json.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.patrol.model.PatrolMetadataField;
 import org.wcs.smart.cybertracker.patrol.model.TransportTypeTrackTimerSetting;
@@ -619,7 +620,7 @@ public class PatrolPackageExporter {
 			if (metadata.getStringValue() != null) {
 				String value = metadata.getStringValue();
 				if (pa.getType() == Attribute.AttributeType.DATE) {
-					value = DateTimeFormatter.ofPattern(JsonUtils.JSON_ATTRIBUTE_DATE_FORMAT_STR).format( LocalDate.parse(metadata.getStringValue()));			
+					value = DateTimeFormatter.ofPattern(CtJsonUtil.JSON_ATTRIBUTE_DATE_FORMAT_STR).format( LocalDate.parse(metadata.getStringValue()));			
 				}
 				optionType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, value);
 			}

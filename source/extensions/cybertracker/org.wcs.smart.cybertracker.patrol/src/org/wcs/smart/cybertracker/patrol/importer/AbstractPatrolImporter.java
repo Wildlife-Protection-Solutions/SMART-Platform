@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.patrol.importer;
 
-import java.awt.image.BufferedImage;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,7 +34,6 @@ import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
@@ -48,6 +46,7 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ImportError;
@@ -57,7 +56,6 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
-import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -326,7 +324,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 	protected void processImages(List<PatrolLeg> legs, Session session){
 		if (legs.size() == 0);
 		ConservationArea ca = legs.get(0).getPatrol().getConservationArea();
-		CyberTrackerPropertiesOption opResize = getImageResizeOption(ca, session);
+		CyberTrackerPropertiesOption opResize = CtJsonUtil.getImageResizeOption(ca, session);
 		
 		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return;
 		
@@ -351,41 +349,15 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 				}
 			}
 		}
-		double maxsizebytes = getImageMaxSizeOption(ca, session) * 1048576l;
+		double maxsizebytes = CtJsonUtil.getImageMaxSizeOption(ca, session) * 1048576l;
 		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
 			//attempt to resize image automatically
-			int[] size = getImageAutoResizeSizeOption(ca, session);		
+			int[] size = CtJsonUtil.getImageAutoResizeSizeOption(ca, session);		
 			for (ISmartAttachment attachment : attachments){
 				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes){
-					ImageProcessor.processAttachment(attachment,size[0], size[1]);
+					ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
 				}
 			}	
-		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
-			//prompt user for image size
-			Point[] allSize = new Point[]{null};
-			for (ISmartAttachment attachment : attachments){
-				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() < maxsizebytes) continue;
-				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
-				if (image == null) continue;
-				
-				Point[] size = new Point[]{null};
-				if (allSize[0] != null){
-					size[0] = allSize[0];
-				}else{
-					//prompt
-					Display.getDefault().syncExec(()->{
-						ReSizeImageDialog dialog = new ReSizeImageDialog(Display.getDefault().getActiveShell(),attachment,image);
-						int open = dialog.open();
-						size[0] = dialog.getImageSize();
-						if (open == IDialogConstants.YES_TO_ALL_ID){
-							allSize[0] = size[0];	
-						}
-						
-					});
-				}
-				if (size[0] == null || size[0].x == -1 || size[0].y == -1) continue; //do not resize
-				ImageProcessor.processAttachment(attachment, size[0].x, size[0].y);	
-			}
 		}
 	}
 }

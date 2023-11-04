@@ -54,9 +54,9 @@ import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
-import org.wcs.smart.cybertracker.importer.json.UserCancelledException;
+import org.wcs.smart.cybertracker.importer.json.IDesktopJsonProcessor;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.util.ZLibUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -78,8 +78,8 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	private ProgressMonitorDialog pmdDialog;
 	
 	private Object lock = new Object();
-	private static volatile List<IJsonProcessor> jsonProcessors;
-	
+	private static volatile List<IDesktopJsonProcessor> jsonProcessors;
+
 	private Listener disposeListener = new Listener() {
 		
 		@Override
@@ -91,10 +91,12 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	};
 	
 	public CybertrackerItemProcessor() {
+
 	}
 
 	@Override
 	public boolean canProcess(String type) {
+		if (!MobileProcessingEngine.INSTANCE.getCanSmartMobileDesktopProcessing()) return false;
 		return (type.toUpperCase(Locale.ROOT).equals(CT_TYPE) || type.toUpperCase(Locale.ROOT).equals(CT_ZIP_TYPE));
 	}
 	
@@ -170,17 +172,17 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 		return returnValue;		
 	}
 
-	private static List<IJsonProcessor> getProcessors() throws Exception{
+	private static List<IDesktopJsonProcessor> getProcessors() throws Exception{
 		if (jsonProcessors == null){
 			synchronized (CybertrackerItemProcessor.class) {
 				if (jsonProcessors == null){
-					ArrayList<IJsonProcessor> temp = new ArrayList<IJsonProcessor>();
+					ArrayList<IDesktopJsonProcessor> temp = new ArrayList<IDesktopJsonProcessor>();
 					IConfigurationElement[] config = Platform.getExtensionRegistry()
-							.getConfigurationElementsFor(IJsonProcessor.EXTENSION_ID);
+							.getConfigurationElementsFor(IDesktopJsonProcessor.EXTENSION_ID);
 					
 					for (IConfigurationElement e : config) {
 						if (e.getName().equalsIgnoreCase("JsonProcessor")){ //$NON-NLS-1$
-							IJsonProcessor proc = (IJsonProcessor) e.createExecutableExtension("class"); //$NON-NLS-1$
+							IDesktopJsonProcessor proc = (IDesktopJsonProcessor) e.createExecutableExtension("class"); //$NON-NLS-1$
 							temp.add(proc);
 						}
 					}
@@ -189,8 +191,8 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 			}
 			
 		}
-		List<IJsonProcessor> copy = new ArrayList<IJsonProcessor>(jsonProcessors.size());
-		for (IJsonProcessor p : jsonProcessors){
+		List<IDesktopJsonProcessor> copy = new ArrayList<IDesktopJsonProcessor>(jsonProcessors.size());
+		for (IDesktopJsonProcessor p : jsonProcessors){
 			copy.add(p.getClass().getConstructor().newInstance());
 		}
 		return copy;
@@ -208,7 +210,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	}
 	
 	private ProcessingStatus run() throws Exception{
-		List<JSONObject> features = JsonCtParser.parseFeaturesFromJsonString(json);
+		List<JSONObject> features = CtJsonUtil.parseFeaturesFromJsonString(json);
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 		
 			session.beginTransaction();
@@ -216,8 +218,8 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				List<JSONObject> notProc = new ArrayList<JSONObject>();
 				notProc.addAll(features);
 				StringBuilder statusMsg = new StringBuilder();
-				List<IJsonProcessor> processors = getProcessors();
-				for (IJsonProcessor p : processors){
+				List<IDesktopJsonProcessor> processors = getProcessors();
+				for (IDesktopJsonProcessor p : processors){
 					List<JSONObject> processed = p.processJson(features, session);
 					notProc.removeAll(processed);
 					String msg = p.getStatusMessage();
@@ -268,7 +270,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, MessageFormat.format(Messages.CybertrackerItemProcessor_CompleteMsg, statusMsg.toString()));
 				
 				
-				for (IJsonProcessor p : processors){
+				for (IDesktopJsonProcessor p : processors){
 					try{
 						p.afterSave();
 					}catch (Throwable t){

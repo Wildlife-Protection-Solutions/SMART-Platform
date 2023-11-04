@@ -36,11 +36,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
-import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
-import org.wcs.smart.cybertracker.importer.json.JsonTrackUtils;
-import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
+import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import org.wcs.smart.cybertracker.json.JsonTrackUtils;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -69,8 +69,10 @@ import org.wcs.smart.util.SharedUtils;
  */
 public class MissionJsonTrackProcessor  implements IJsonProcessor {
 
-	private Set<Mission> modifiedMissions;
-	private List<String> warnings;
+	public static final String TRACK_LBL = "Track{0}";
+	
+	protected Set<Mission> modifiedMissions;
+	protected List<JsonImportWarning> warnings;
 	
 	public MissionJsonTrackProcessor() {
 	}
@@ -89,18 +91,18 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 		HashMap<String, List<CtMissionLink>> linkmap = new HashMap<>();
 		
 		for (JSONObject feature : features){
-			if (!JsonCtParser.isTrackPoint(feature)) continue;
+			if (!CtJsonUtil.isTrackPoint(feature)) continue;
 
-			JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
-			JSONObject geom = (JSONObject) feature.get(JsonCtParser.GEOMETRY_KEY);
-			JSONArray pntArray = (JSONArray) geom.get(JsonCtParser.GEOMETRY_COORDINATE_KEY);
+			JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
+			JSONObject geom = (JSONObject) feature.get(CtJsonObservationParser.GEOMETRY_KEY);
+			JSONArray pntArray = (JSONArray) geom.get(CtJsonObservationParser.GEOMETRY_COORDINATE_KEY);
 			if (pntArray.size() < 2 || pntArray.get(0) == null || pntArray.get(1) == null) continue;
 			
 			Double x = ((Number) pntArray.get(0)).doubleValue();
 			Double y = ((Number) pntArray.get(1)).doubleValue();
-			LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+			LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 
-			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+			String deviceId = (String) properties.get(CtJsonObservationParser.DEVICE_ID);
 			
 			List<CtMissionLink> links = linkmap.get(deviceId);
 			if (links == null) {
@@ -111,12 +113,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			//we want to find the patrol leg with a day that matches this day and time
 			Set<MissionDay> matches = new HashSet<MissionDay>();
 			for (CtMissionLink link : links){
-				if (JsonCtParser.isDateBetween(dt.toLocalDate(), link.getMission().getStartDate(), link.getMission().getEndDate())){
+				if (CtJsonUtil.isDateBetween(dt.toLocalDate(), link.getMission().getStartDate(), link.getMission().getEndDate())){
 					
 					//lets look for a patrol leg day that matches
 					for (MissionDay pld : link.getMission().getMissionDays()){
 						if (pld.getDate().isEqual(dt.toLocalDate()) &&
-								JsonCtParser.isTimeBetween(dt.toLocalTime(), pld.getStartTime(), pld.getEndTime())){
+								CtJsonUtil.isTimeBetween(dt.toLocalTime(), pld.getStartTime(), pld.getEndTime())){
 							matches.add(pld);
 						}
 					}
@@ -141,8 +143,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 					}
 					sb.deleteCharAt(sb.length() - 1);
 					sb.deleteCharAt(sb.length() - 1);
-					
-					warnings.add(MessageFormat.format(Messages.MissionJsonTrackProcessor_MultipleMatched, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(dt), sb.toString()));
+					warnings.add(new MissionJsonImportWarning(MissionJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(dt), sb.toString()));
 				}
 				
 			}
@@ -152,15 +153,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	}
 
 	@Override
-	public void afterSave() {
-	}
-
-	@Override
 	public String getStatusMessage() {
 		return null;
 	}
 	
-	public List<String> getWarnings(){
+	@Override
+	public List<JsonImportWarning> getWarnings(){
 		return this.warnings;
 	}
 	
@@ -173,7 +171,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack newTrack = new MissionTrack();
 			md.getTracks().add(newTrack);
 			newTrack.setMissionDay(md);
-			newTrack.setId(MessageFormat.format(Messages.MissionJsonTrackProcessor_TrackLabel,  md.getTracks().size()));
+			newTrack.setId(MessageFormat.format(TRACK_LBL,  md.getTracks().size()));
 			newTrack.setSamplingUnit(su);
 			addTo = newTrack;
 			
@@ -197,7 +195,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 				MissionTrack newTrack = new MissionTrack();
 				md.getTracks().add(newTrack);
 				newTrack.setMissionDay(md);
-				newTrack.setId(MessageFormat.format(Messages.MissionJsonTrackProcessor_TrackLabel,  md.getTracks().size()));
+				newTrack.setId(MessageFormat.format(TRACK_LBL,  md.getTracks().size()));
 				newTrack.setSamplingUnit(su);
 				addTo = newTrack;
 			}
@@ -231,7 +229,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack newTrack = new MissionTrack();
 			md.getTracks().add(newTrack);
 			newTrack.setMissionDay(md);
-			newTrack.setId(MessageFormat.format(Messages.MissionJsonTrackProcessor_TrackLabel,  md.getTracks().size()));
+			newTrack.setId(MessageFormat.format(TRACK_LBL,  md.getTracks().size()));
 			addTo = newTrack;
 			
 		}else{

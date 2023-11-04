@@ -50,7 +50,6 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.locationtech.jts.geom.Coordinate;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -59,23 +58,19 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.JsonUtils.ParseResult;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.CtJsonUtil.ParseResult;
+import org.wcs.smart.cybertracker.json.JsonImportWarning;
 import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.ImageSizeOption;
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.cybertracker.util.SightsUtil;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -99,65 +94,9 @@ public abstract class AbstractSmartImporter {
 
 	public static final DateTimeFormatter CT_DT_FORMATTER = DateTimeFormatter.ofPattern(ICyberTrackerConstants.CT_DATE_FORMAT);
 
-	/**
-	 * Gets the cybertracker image resize option
-	 * @param ca
-	 * @param session
-	 * @return
-	 */
-	public static CyberTrackerPropertiesOption getImageResizeOption(ConservationArea ca, Session session){
-		return QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"optionId", OptionID.RESIZE_IMAGE.name()}).uniqueResult(); //$NON-NLS-1$
-	}
 	
-	/**
-	 * Gets the maximum files size for cybertracker image attachments before it
-	 * attempts to resize it.  Returns 0 if value not set.
-	 * @param ca
-	 * @param session
-	 * @return
-	 */
-	public static double getImageMaxSizeOption(ConservationArea ca, Session session){
-		CyberTrackerPropertiesOption opImageMaxSize = QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"optionId", OptionID.MAX_IMAGE_SIZE.name()}).uniqueResult(); //$NON-NLS-1$
-		if (opImageMaxSize == null || opImageMaxSize.getDoubleValue() == null) return 0;
-		return opImageMaxSize.getDoubleValue();
-	}
 	
-	/**
-	 * Gets the target width/height to resize image to.
-	 * 
-	 * @param ca
-	 * @param session
-	 * @return
-	 */
-	public static int[] getImageAutoResizeSizeOption(ConservationArea ca, Session session){
-		CyberTrackerPropertiesOption opImageSize = QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"optionId", OptionID.IMAGE_SIZE.name()}).uniqueResult(); //$NON-NLS-1$
-		
-		if (opImageSize == null) return new int[]{-1,-1};
-		if (opImageSize.getStringValue().startsWith(ImageSizeOption.CUSTOM.name())){
-			String[] bits = opImageSize.getStringValue().split(CyberTrackerPropertiesOption.PROP_SEP); 
-			int width = -1;
-			int height = -1;
-			try{
-				width = Integer.parseInt(bits[1]);
-				height = Integer.parseInt(bits[2]);
-			}catch(Exception ex){}
-			return new int[]{width, height};
-		}else{
-			for (ImageSizeOption op : ImageSizeOption.values()){
-				if (opImageSize.getStringValue().equalsIgnoreCase(op.name())){
-					return new int[]{op.width, op.height};
-				}
-			}
-		}
-		
-		return new int[]{-1,-1};
-	}
+	
 	
 	protected DateTimeFormatter getFilenameDateFormat() {
 		return filenameDateFormat;
@@ -297,7 +236,7 @@ public abstract class AbstractSmartImporter {
 			} else if (ElementsUtil.MULISELECT_ELEMENT_TAG.equals(e.getTag1())) {
 				if (processMultiselect) {
 					processMultiselect = false;
-					preMsAtts = attributes.remove(CyberTrackerConfExporter.MULTI_SELECT_INDEX); //all previously enter values MUST be here
+					preMsAtts = attributes.remove(CtJsonUtil.MULTI_SELECT_INDEX); //all previously enter values MUST be here
 					if (preMsAtts == null) {
 						preMsAtts = Collections.emptyList();
 					}
@@ -333,8 +272,8 @@ public abstract class AbstractSmartImporter {
 		}
 		
 		//-1 index means they are add to all observations
-		List<A> addToAll = attributes.get(CyberTrackerConfExporter.MULTI_SELECT_INDEX);
-		attributes.remove(CyberTrackerConfExporter.MULTI_SELECT_INDEX);
+		List<A> addToAll = attributes.get(CtJsonUtil.MULTI_SELECT_INDEX);
+		attributes.remove(CtJsonUtil.MULTI_SELECT_INDEX);
 		if (addToAll != null){
 			for(List<A> attribute: attributes.values()){
 				attribute.addAll(addToAll);
@@ -407,9 +346,10 @@ public abstract class AbstractSmartImporter {
 				}else{
 					//json attribute values
 					try {
-						ParseResult results = JsonUtils.parseDefaultAttributeValues((JSONObject)(new JSONParser()).parse(defaultData), session);
-						for (String x : results.getWarnings()){
-							addWarning(x);
+						ParseResult results = CtJsonUtil.parseDefaultAttributeValues((JSONObject)(new JSONParser()).parse(defaultData), session);
+						for (JsonImportWarning x : results.getWarnings()){
+							//TODO:
+							addWarning(x.getMessage());
 						}
 						for (WaypointObservationAttribute aa : results.getAttributes()){
 							aa.setObservation(obs);

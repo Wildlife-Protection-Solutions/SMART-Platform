@@ -27,6 +27,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
@@ -48,7 +49,7 @@ public class SurveyCTExporter extends CyberTrackerConfExporter {
 	protected void processExportSource(Elements elems, Object exportSource) {
 		super.processExportSource(elems, exportSource);
 		CyberTrackerId id = new CyberTrackerId();
-		ElementsUtil.addElementsItem(elems, SurveyScreensUtil.RESULT_SURVEY_DESIGN, id.getItemId(), getSourceKey(exportSource));
+		ElementsUtil.addElementsItem(elems, SurveyMetadata.JsonKey.SURVEY_DESIGN.key, id.getItemId(), getSourceKey(exportSource));
 		
 	}
 	

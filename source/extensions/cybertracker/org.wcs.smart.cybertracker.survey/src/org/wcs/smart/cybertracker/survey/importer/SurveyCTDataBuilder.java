@@ -44,11 +44,10 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-import org.wcs.smart.cybertracker.survey.export.SurveyJsonUtils;
-import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
+import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -163,7 +162,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 	
 	private void recordSurveyDesign(CyberTrackerSurvey ctSurvey, Map<String, E> eMap, Session session) {
 		for (E e : eMap.values()) {
-			if (SurveyScreensUtil.RESULT_SURVEY_DESIGN.equals(e.getN())) {
+			if (SurveyMetadata.JsonKey.SURVEY_DESIGN.key.equals(e.getN())) {
 				String key = e.getTag0();
 				SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(key, session);
 				if (sd != null) {
@@ -188,9 +187,9 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctSurvey.setId(v);
-		} else if (SurveyScreensUtil.RESULT_MISSION_COMMENTS.equals(n)) {
+		} else if (SurveyMetadata.JsonKey.MISSION_COMMENTS.key.equals(n)) {
 			ctSurvey.setComment(v);
-		} else if (SurveyScreensUtil.RESULT_MISSION_LEADER.equals(n)) {
+		} else if (SurveyMetadata.JsonKey.MISSION_LEADER.key.equals(n)) {
 			E e = eMap.get(v);
 			Employee emp = fetchFromTag0(Employee.class, e, session);
 			if (emp == null && e.getTag0() != null)
@@ -205,7 +204,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			if (emp != null) {
 				ctSurvey.getMembers().add(emp);
 			}
-		} else if (SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT.equals(n)) {
+		} else if (SurveyMetadata.JsonKey.MISSION_START_SAMPLING_UNIT.key.equals(n)) {
 			E e = eMap.get(v);
 			if (e != null) {
 				if (e.getTag0() != null) {
@@ -216,7 +215,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 					ctSurvey.setStartSamplingUnit(su);
 				}
 			}
-		} else if (n != null && n.startsWith(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX)) {
+		} else if (n != null && n.startsWith( SurveyMetadata.JsonKey.MISSION_PROPERTY_PREFIX.key)) {
 			String tag0 = i != null ? i.getTag0() : null;
 			MissionAttribute ma = tag0 != null ? SurveyHibernateManager.getInstance().getMissionAttributeByKey(tag0, session) : null;
 			if (ma == null) {

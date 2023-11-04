@@ -14,4 +14,10 @@
          </type>
       </processor>
    </extension>
+   <extension
+         point="org.wcs.smart.connect.configure.optionpanel">
+      <Panel
+            class="org.wcs.smart.connect.dataqueue.cybertracker.SmartMobileDataQueueOptionPanel">
+      </Panel>
+   </extension>
 </plugin>

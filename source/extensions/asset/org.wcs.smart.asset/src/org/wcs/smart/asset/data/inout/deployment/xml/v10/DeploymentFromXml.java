@@ -38,7 +38,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.deployment.DeploymentToXml;
@@ -250,7 +250,7 @@ public class DeploymentFromXml {
 					WaypointAttachment attachment = new WaypointAttachment();
 					
 					if (xmlattachment.getSignatureTypeKey() != null && !xmlattachment.getSignatureTypeKey().trim().isEmpty()) {
-						SignatureType stype = SignatureTypeManager.INSTANCE.findType(xmlattachment.getSignatureTypeKey(), ca, session);
+						SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(xmlattachment.getSignatureTypeKey(), ca, session);
 						if (stype != null) {
 							attachment.setSignatureType(stype);
 						}else {
@@ -314,7 +314,7 @@ public class DeploymentFromXml {
 							attachment.setObservation(wo);
 							attachment.setFilename(filename);
 							attachment.setCopyFromLocation(fname);
-							SignatureType stype = SignatureTypeManager.INSTANCE.findType(xmlattachment.getSignatureTypeKey(), ca, session);
+							SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(xmlattachment.getSignatureTypeKey(), ca, session);
 							if (stype != null) {
 								attachment.setSignatureType(stype);
 							}else {

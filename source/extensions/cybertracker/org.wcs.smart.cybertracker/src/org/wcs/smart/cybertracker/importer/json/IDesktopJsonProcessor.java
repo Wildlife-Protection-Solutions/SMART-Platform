@@ -21,17 +21,20 @@
  */
 package org.wcs.smart.cybertracker.importer.json;
 
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
+
 /**
- * Exception to throw when user cancels operations.
+ * Interface for plugins that can processes cybertracker JSON data
  * 
  * @author Emily
  *
  */
-public class UserCancelledException extends Exception {
+public interface IDesktopJsonProcessor extends IJsonProcessor{
 
-	private static final long serialVersionUID = 1L;
-
-	public UserCancelledException(String message){
-		super(message);
-	}
+	/**
+	 * Called after save is complete.  This can be used to fire system
+	 * events etc.
+	 */
+	public void afterSave();
+	
 }

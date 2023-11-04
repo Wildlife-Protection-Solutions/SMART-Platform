@@ -65,8 +65,6 @@ public class IncidentPackageContribution implements IPackageContribution{
 	public static final String INCIDENT_MODEL_FILE = "incident_model.xml"; //$NON-NLS-1$
 	public static final String INCIDENT_METADATA_FILE = "incident_metadata.json"; //$NON-NLS-1$
 
-	//incident resource key
-	public static final String INCIDENT_RESOURCE_ID = "incident"; //$NON-NLS-1$
 
 	@Override
 	public IPackageUiContribution getUiController() {

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer.json;
+package org.wcs.smart.cybertracker.json;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -28,9 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,15 +43,12 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SignatureTypeManager;
+//import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SignatureType;
@@ -62,16 +57,11 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.ImageProcessor;
-import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
-import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonUtil.JsonDataModelKey;
+import org.wcs.smart.cybertracker.json.JsonImportWarning.Type;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
-import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
+//import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -89,8 +79,16 @@ import jakarta.xml.bind.DatatypeConverter;
  * @author Emily
  *
  */
-public class JsonCtParser {
 
+//TODO: cleanup attachments
+//attachments are put in a temporary file that are not removed after loaded
+//also attachments that are resized have another file that does not get deleted
+//as the software used deleteonexit which won't work on connect - for this
+//see ImageProcessor.java
+public class CtJsonObservationParser {
+
+	public static final String FEATURE_KEY = "feature"; //$NON-NLS-1$
+	public static final String FEATURES_KEY = "features"; //$NON-NLS-1$
 	public static final String SIGHTINGS_KEY = "sighting"; //$NON-NLS-1$
 	public static final String FEATURE_TYPE_KEY = "type"; //$NON-NLS-1$
 	public static final String PROPERTIES_KEY = "properties"; //$NON-NLS-1$
@@ -118,171 +116,26 @@ public class JsonCtParser {
 	/*
 	 * These are keys for the new BETA CT Json format
 	 */
-	public static final String OBSERVATION_TYPE_KEY = "SMART_ObservationType"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_START_PATROL_KEY = "NewPatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_OBSERVATION_KEY = "Observation"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_END_PATROL_KEY = "StopPatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_PAUSE_PATROL_KEY = "PausePatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_RESUME_PATROL_KEY = "ResumePatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_CHANGE_PATROL_KEY = "ChangePatrol"; //$NON-NLS-1$
-	
-	/**
-	 * The number of months old a patrol is before all links to
-	 * this patrol and removed from the database
-	 */
-	public static final int CLEANUP_MONTHS = 6;
-	
-	public static List<JSONObject> parseFeaturesFromJsonString(String json) throws Exception{
-		JSONObject jsonData = null; 
-		try {
-			Object obj = (new JSONParser()).parse(json);
-			jsonData = (JSONObject) obj;
-		}catch (Exception ex){
-			CyberTrackerPlugIn.log(ex.getMessage(), ex);
-			throw new Exception(Messages.JsonCtParser_ParseError + ":" + ex.getMessage(), ex); //$NON-NLS-1$
-		}
 		
-		JSONArray jsFeatures = (JSONArray) jsonData.get("features"); //$NON-NLS-1$
-		if (jsFeatures == null) throw new Exception("No JSON object with key 'features' found"); //$NON-NLS-1$
-		List<JSONObject> features = new ArrayList<JSONObject>();
-		for (int i = 0; i < jsFeatures.size(); i ++){
-			JSONObject feature = (JSONObject) jsFeatures.get(i);
-			features.add(feature);
-		}
-		return features;
-	}
-
-	/**
-	 * Determines if the jSONOBject represents a track feature.  We assume
-	 * track points are point features that contain properties but not sighting
-	 * information.
-	 * 
-	 * @param feature
-	 * @return
-	 */
-	public static boolean isTrackPoint(JSONObject feature){
-		//only want to process features with no sighting data
-		JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
-		if (properties == null) return false;
-		JSONObject sighting = (JSONObject)properties.get(JsonCtParser.SIGHTINGS_KEY);
-		if (sighting != null) return false;
-		
-		JSONObject geom = (JSONObject) feature.get(JsonCtParser.GEOMETRY_KEY);
-		if (!"Point".equalsIgnoreCase((String)geom.get(JsonCtParser.GEOMETRY_TYPE_KEY))){ //$NON-NLS-1$
-			//only parse points
-			return false;
-		}
-		
-		return true;
-	}
-		
-	/**
-	 * 
-	 * @param waypoint the waypoint to size
-	 * @param selectedSize the size to apply to the waypoint (to support apply to all); can be null
-	 * @param session
-	 * @return
-	 */
-	public static Point processImages(Waypoint waypoint, Point selectedSize, Session session){
-		final Point[] selectAllSize = new Point[]{selectedSize};
-		
-		if (waypoint == null) return selectAllSize[0];
-		
-		ConservationArea ca = waypoint.getConservationArea();
-		CyberTrackerPropertiesOption opResize =  AbstractSmartImporter.getImageResizeOption(ca, session);
-		
-		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return selectAllSize[0];
-		
-		double maxsizebytes =  AbstractSmartImporter.getImageMaxSizeOption(ca, session) * 1048576l;
-		List<ISmartAttachment> attachments = new ArrayList<>();
-		if (waypoint.getAttachments() != null ){
-			for (WaypointAttachment attachment : waypoint.getAttachments()){
-				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes)
-					attachments.add(attachment);
-			}
-		}
-		
-		for (WaypointObservation wo : waypoint.getAllObservations()){
-			if (wo.getAttachments() == null) continue;
-			for (ObservationAttachment attachment : wo.getAttachments()){
-				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes)
-					attachments.add(attachment);
-			}						
-		}
-		
-		
-		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
-			//attempt to resize image automatically
-			int[] size = AbstractSmartImporter.getImageAutoResizeSizeOption(ca, session);		
-			for (ISmartAttachment attachment : attachments){
-				ImageProcessor.processAttachment(attachment,size[0], size[1]);
-			}	
-		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
-			//prompt user for image size
-			for (ISmartAttachment attachment : attachments){
-				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() < maxsizebytes) continue;
-				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
-				if (image == null) continue;
-				
-				Point[] size = new Point[]{null};
-
-				if (selectAllSize[0] != null){
-					size[0] = selectAllSize[0];
-				}else{
-					//prompt
-					Display.getDefault().syncExec(()->{
-						ReSizeImageDialog dialog = new ReSizeImageDialog(Display.getDefault().getActiveShell(),attachment,image);
-						int open = dialog.open();
-						size[0] = dialog.getImageSize();
-						if (open == IDialogConstants.YES_TO_ALL_ID){
-							selectAllSize[0] = size[0];	
-						}
-						
-					});
-				}
-				if (size[0] == null || size[0].x == -1 || size[0].y == -1) continue; //do not resize
-				ImageProcessor.processAttachment(attachment, size[0].x, size[0].y);	
-			}
-		}
-		return selectAllSize[0];
-	}
-	
-	/**
-	 * Determines if the time represented by date1 is between the times
-	 * represented by date2 and date3.  Only compares time parts not
-	 * date parts. 
-	 * Also drop milliseconds and only compares seconds - see #3530.
-	 * @return
-	 */
-	public static boolean isTimeBetween(LocalTime d1, LocalTime d2, LocalTime d3){
-		if (d3 == null) d3 = LocalTime.MAX;
-		
-		d1 = d1.withNano(0);
-		d2 = d2.withNano(0);
-		d3 = d3.withNano(0);
-		
-		return ((d1.equals(d2) || d1.isAfter(d2)) && 
-				(d1.equals(d3) || d1.isBefore(d3)));
-	}
-	
-	/**
-	 * Determines if the date represented by date1 is between the date
-	 * represented by date2 and date3.  Only compares date parts not time
-	 * 
-	 * @return
-	 */
-	public static boolean isDateBetween(LocalDate d1, LocalDate d2, LocalDate d3){
-		return ((d1.isEqual(d2) || d1.isAfter(d2)) && 
-				(d1.isEqual(d3) || d1.isBefore(d3)));
-	}
-	
 	private JSONParser parser = new JSONParser();
 	
-	private List<String> warnings = null;
+	private List<JsonImportWarning> warnings = null;
 	
 	private List<WaypointObservationAttribute> applyToAllObservations;
+
 	
-	public List<String> getWarnings(){
+	private void logException(Exception ex) {
+		//TODO:
+		ex.printStackTrace();
+	}
+	
+	public List<JsonImportWarning> getWarnings(){
 		return this.warnings;
 	}
 	
@@ -318,20 +171,16 @@ public class JsonCtParser {
 	 */
 	public Integer parseObservationCounter(JSONObject sighting) throws Exception{
 		//Validate counter
-		if (!sighting.containsKey(ScreensUtil.RESULT_OBSERVATION_COUNTER)){
+		if (!sighting.containsKey(CtJsonUtil.JsonKey.OBSERVATION_COUNTER.key)){
 			//no observation counter; we cannot process this
 			return null;
 		}
 		Integer observationCounter = null;
-		Object o = sighting.get(ScreensUtil.RESULT_OBSERVATION_COUNTER);
-		if (o instanceof Integer) {
-			observationCounter = (Integer)o;
-		}else if (o instanceof Double) {
-			observationCounter = ((Double)o).intValue();
-		}else if (o instanceof Number) {
+		Object o = sighting.get(CtJsonUtil.JsonKey.OBSERVATION_COUNTER.key);
+		if (o instanceof Number) {
 			observationCounter = ((Number)o).intValue();
 		}else {
-			throw new Exception("Invalid value for observation counter: " + o.toString()); //$NON-NLS-1$
+			throw new Exception((new JsonError(JsonError.Type.INVALID_OBS_COUNTER, o.toString())).getMessage()); 
 		}
 		return observationCounter;
 	}
@@ -342,13 +191,12 @@ public class JsonCtParser {
 	 * @param sighting
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public Waypoint createWaypoint(JSONObject feature, ConservationArea ca, Session session) throws Exception{
 		
-		warnings = new ArrayList<String>();
+		warnings = new ArrayList<JsonImportWarning>();
 		
-		if (!((String)feature.get(FEATURE_TYPE_KEY)).equalsIgnoreCase("feature")){ //$NON-NLS-1$
-			throw new Exception(Messages.JsonCtParser_NoFeatureFound);
+		if (!((String)feature.get(FEATURE_TYPE_KEY)).equalsIgnoreCase(FEATURE_KEY)){
+			throw new Exception((new JsonError(JsonError.Type.FEATURE_OBJECT_NOT_FOUND, FEATURE_KEY)).getMessage());
 		}
 		
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
@@ -358,8 +206,9 @@ public class JsonCtParser {
 		Waypoint newWaypoint = new Waypoint();
 		Coordinate c = readXYFromProperties(feature);
 		if (c == null) {
-			throw new Exception(Messages.JsonCtParser_latlongnotfound);
+			throw new Exception((new JsonError(JsonError.Type.LAT_LONG_NOT_FOUND)).getMessage());
 		}
+		
 		newWaypoint.setRawX(c.x);
 		newWaypoint.setRawY(c.y);
 			
@@ -374,7 +223,7 @@ public class JsonCtParser {
 		newWaypoint.setDirection(direction);
 		newWaypoint.setDistance(distance);
 		
-		LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(DATETIME_KEY));
+		LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);
 
 		newWaypoint.setObservationGroups(new ArrayList<>());
@@ -387,16 +236,17 @@ public class JsonCtParser {
 		if (observations.containsKey(CM_UUID_KEY)) {
 			//configure cm associated with waypoint (new 7.5.7)
 			String cmuuid = observations.get(CM_UUID_KEY).toString();
+			ConfigurableModel cm = null;
 			UUID cmUuid = null;
 			try {
 				cmUuid = UuidUtils.stringToUuid(cmuuid);
+				cm = session.get(ConfigurableModel.class, cmUuid);
+				if (cm == null) warnings.add(new JsonImportWarning(JsonImportWarning.Type.INVALID_CM, cmuuid));				
 			}catch (Exception ex) {
-				warnings.add(MessageFormat.format("Invalid configurable model uuid {0}. The source configurable model for this waypoint will be null.", cmuuid));
+				logException(ex);
+				warnings.add(new JsonImportWarning(JsonImportWarning.Type.INVALID_CM, cmuuid));
 			}
-			ConfigurableModel cm = session.get(ConfigurableModel.class, cmUuid);
-			if (cm == null) {
-				warnings.add("The configurable referenced in the source data could not be found. The source configurable model for this waypoint will be null");
-			}
+			
 			newWaypoint.setSourceConfigurableModel(cm);
 		}
 		
@@ -413,26 +263,32 @@ public class JsonCtParser {
 		//default values
 		JSONObject defaultValues = null;
 		int imagecounter = 0;
+		
+		//parse other observation details (categories/attribute/ etc)
 		for (Entry<?,?> e : (Set<Entry<?,?>>)observations.entrySet()){
+			
 			String key = (String)e.getKey();
-			if (key.startsWith(JsonKey.CATEGORY.key + CyberTrackerConfExporter.KEY_SEP)){
+			
+			//CATEGORY
+			if (key.startsWith(JsonDataModelKey.CATEGORY.key + CtJsonUtil.KEY_SEP)){
 				//cateogries; if set to null this was a group from the configurable model
 				//otherwise we want to find the "leaf" category
 				//FORM: '"c:0": "null", "c:1": "<uuid>"'
-				if (!((String)e.getValue()).equals(CyberTrackerConfExporter.NULL_KEY)){
+				if (!((String)e.getValue()).equals(CtJsonUtil.NULL_KEY)){
 					int level = Integer.parseInt(key.substring(2));
 					if (level > catLevel){
 						categoryUuid = (String)e.getValue();
 					}
 				}
 			}
-				
-			if (key.startsWith(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP) ||
-					key.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP) ||
-					key.startsWith(JsonKey.ATTRIBUTE_MULTILIST.key + CyberTrackerConfExporter.KEY_SEP)
+			
+			//ATTRIBUTES
+			if (key.startsWith(JsonDataModelKey.ATTRIBUTE.key + CtJsonUtil.KEY_SEP) ||
+					key.startsWith(JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP) ||
+					key.startsWith(JsonDataModelKey.ATTRIBUTE_MULTILIST.key + CtJsonUtil.KEY_SEP)
 					){
 				
-				String[] bits = key.split (CyberTrackerConfExporter.KEY_SEP.toString());
+				String[] bits = key.split (CtJsonUtil.KEY_SEP.toString());
 				//identifies which observation this attribute applies to
 				int obsnum = Integer.parseInt(bits[1]);
 				List<ObservationInfo> data = attributes.get(obsnum);
@@ -441,36 +297,38 @@ public class JsonCtParser {
 					attributes.put(obsnum, data);
 				}
 				
-				if (key.startsWith(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP)){	
+				if (key.startsWith(JsonDataModelKey.ATTRIBUTE.key + CtJsonUtil.KEY_SEP)){	
 					//attributes
 					//FORM: '"a:0:<uuid>": "value"'
 					ObservationInfo info = new ObservationInfo(bits[0], bits[2], e.getValue());
 					data.add(info);
 				}
-				if (key.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP)){
+				if (key.startsWith(JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP)){
 					//attribute list item
 					//FORM: '"al:0:<uuid>": true'
-					data.add(new ObservationInfo(JsonKey.ATTRIBUTE_LIST.key, (String)bits[2], JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + (String)bits[2]));
+					data.add(new ObservationInfo(JsonDataModelKey.ATTRIBUTE_LIST.key, (String)bits[2], JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP + (String)bits[2]));
 				}
 			
-				if (key.startsWith(JsonKey.ATTRIBUTE_MULTILIST.key + CyberTrackerConfExporter.KEY_SEP)){
+				if (key.startsWith(JsonDataModelKey.ATTRIBUTE_MULTILIST.key + CtJsonUtil.KEY_SEP)){
 					//multi lists
 					//FORM: '"ml:0:<attributeuuid>:l:<listitemuuid>": value'
 					//number attribute
-					data.add(new ObservationInfo(JsonKey.ATTRIBUTE.key, (String)bits[2], e.getValue()));
+					data.add(new ObservationInfo(JsonDataModelKey.ATTRIBUTE.key, (String)bits[2], e.getValue()));
 					//list attribute
-					data.add(new ObservationInfo(JsonKey.ATTRIBUTE_LIST.key, (String)bits[4], JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + (String)bits[4]));
+					data.add(new ObservationInfo(JsonDataModelKey.ATTRIBUTE_LIST.key, (String)bits[4], JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP + (String)bits[4]));
 				}
 			}
-			if (key.startsWith(ScreensUtil.RESULT_PHOTO) || key.startsWith(ScreensUtil.RESULT_AUDIO)){
+			
+			//PHOTO/AUDIO file
+			if (key.startsWith(CtJsonUtil.JsonKey.PHOTO.key) || key.startsWith(CtJsonUtil.JsonKey.AUDIO.key)){
 				//SMART_Photo0:0 SMART_Photo1:1 SMART_Photo0:0
 				AttachmentInfo.AttachmentType type = AttachmentInfo.AttachmentType.PHOTO;
-				if (key.startsWith(ScreensUtil.RESULT_AUDIO)) {
+				if (key.startsWith(CtJsonUtil.JsonKey.AUDIO.key)) {
 					type = AttachmentInfo.AttachmentType.AUDIO;
 				}
 				AttachmentInfo info = new AttachmentInfo(type, (String)e.getValue(), imagecounter++);
-				if (key.contains(String.valueOf(CyberTrackerConfExporter.KEY_SEP))) {
-					int obsnum = Integer.parseInt(key.split(String.valueOf(CyberTrackerConfExporter.KEY_SEP))[1]); 
+				if (key.contains(String.valueOf(CtJsonUtil.KEY_SEP))) {
+					int obsnum = Integer.parseInt(key.split(String.valueOf(CtJsonUtil.KEY_SEP))[1]); 
 				
 					List<AttachmentInfo> data = observationAttachments.get(obsnum);
 					if (data == null){
@@ -481,24 +339,24 @@ public class JsonCtParser {
 				}else {
 					waypointAttachments.add(info);
 				}
-			}else if (key.startsWith(ScreensUtil.RESULT_SIGNATURE)) {
+			}else if (key.startsWith(CtJsonUtil.JsonKey.SIGNATURE.key)) {
 				//"SMART_Signature_<typekey>:<obsnum>"
 				//"SMART_Signature_signaturetypea:0"
 				
 				//associate signature with observations
 				int obsnum = 0;
 				String keypart = key;
-				if (key.contains(String.valueOf(CyberTrackerConfExporter.KEY_SEP))) {
-					String[] bits = key.split(String.valueOf(CyberTrackerConfExporter.KEY_SEP));
+				if (key.contains(String.valueOf(CtJsonUtil.KEY_SEP))) {
+					String[] bits = key.split(String.valueOf(CtJsonUtil.KEY_SEP));
 					obsnum = Integer.parseInt(bits[1]);
 					keypart = bits[0];
 				}
-				String keyId = keypart.replaceFirst(ScreensUtil.RESULT_SIGNATURE, ""); //$NON-NLS-1$
+				String keyId = keypart.replaceFirst(CtJsonUtil.JsonKey.SIGNATURE.key, ""); //$NON-NLS-1$
 				SignatureType stype = SignatureTypeManager.INSTANCE.findType(keyId, ca, session);
 				
 				AttachmentInfo ainfo = null;
 				if (stype == null) {
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_SignatureTypeNotFoundWarning, keyId));
+					warnings.add(new JsonImportWarning(Type.INVALID_SIGNATURE, keyId));
 					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue()), imagecounter++);
 				}else {
 					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), imagecounter++, stype);
@@ -512,7 +370,7 @@ public class JsonCtParser {
 			}
 			
 			//default values
-			if (key.equalsIgnoreCase(ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES) ){
+			if (key.equalsIgnoreCase(CtJsonUtil.JsonKey.DEFAULT_ATTRIBUTE_VALUES.key) ){
 				String jsonDefaults = (String) e.getValue();
 				if (jsonDefaults != null && !jsonDefaults.isEmpty()){
 					defaultValues = (JSONObject)parser.parse(jsonDefaults);
@@ -531,19 +389,17 @@ public class JsonCtParser {
 				newWaypoint.getObservationGroups().add(g);
 				g.setObservations(new ArrayList<>());
 			}
-			UUID puuid = null;
 			try {
-				puuid = UuidUtils.stringToUuid(categoryUuid);
-				
-				category = (Category) session.get(Category.class, puuid);
+				category = CtJsonUtil.findCategory(categoryUuid, session);
 				if (category == null || !category.getConservationArea().equals(ca)){
 					//category not found, lets return the waypoint without observations so we can
 					//still load the rest of the data if desired
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
+					warnings.add(new JsonImportWarning(JsonImportWarning.Type.CATEGORY_NOT_FOUND, categoryUuid));
 					return newWaypoint;
 				}
 			}catch (Exception ex) {
-				warnings.add(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
+				logException(ex);
+				warnings.add(new JsonImportWarning(JsonImportWarning.Type.CATEGORY_NOT_FOUND, categoryUuid));
 				return newWaypoint;
 			}
 			
@@ -555,24 +411,29 @@ public class JsonCtParser {
 		
 				
 		//configure default values
-		JsonUtils.ParseResult defaults = JsonUtils.parseDefaultAttributeValues(defaultValues, session);
+		CtJsonUtil.ParseResult defaults = CtJsonUtil.parseDefaultAttributeValues(defaultValues, session);
 		warnings.addAll(defaults.getWarnings());
 		
 		List<WaypointObservationAttribute> defaultAttributes = defaults.getAttributes(); 
 				
 		//these attribute values must be applied to all observations
-		List<WaypointObservationAttribute>  applyAllObs = createWaypointObservationAttribute(attributes.get(CyberTrackerConfExporter.MULTI_SELECT_INDEX), category, defaultAttributes, session);
+		List<WaypointObservationAttribute>  applyAllObs = createWaypointObservationAttribute(attributes.get(CtJsonUtil.MULTI_SELECT_INDEX), category, defaultAttributes, session);
 		applyToAllObservations = applyAllObs;
 		
-		
+		//observer
 		Employee observer = null;
-		if (observations.containsKey(ScreensUtil.RESULT_OBSERVER)){
-			String ob = (String) observations.get(ScreensUtil.RESULT_OBSERVER);
-			if (ob.startsWith(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP)){
-				String uuid = ob.substring(JsonKey.EMPLOYEE.key.length() + 1);
-				observer = (Employee) session.get(Employee.class, UuidUtils.stringToUuid(uuid));
-				if (observer == null){
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_ObserverNotFound, uuid));
+		if (observations.containsKey(CtJsonUtil.JsonKey.OBSERVER.key)){
+			String ob = (String) observations.get(CtJsonUtil.JsonKey.OBSERVER.key);
+			if (ob.startsWith(JsonDataModelKey.EMPLOYEE.key + CtJsonUtil.KEY_SEP)){
+				String uuid = ob.substring(JsonDataModelKey.EMPLOYEE.key.length() + 1);
+				try {
+					observer = (Employee) session.get(Employee.class, UuidUtils.stringToUuid(uuid));
+					if (observer == null){
+						warnings.add(new JsonImportWarning(Type.INVALID_OBSERVER, uuid));
+					}
+				}catch (Exception ex) {
+					logException(ex);
+					warnings.add(new JsonImportWarning(Type.INVALID_OBSERVER, uuid));
 				}
 			}
 		}
@@ -611,7 +472,7 @@ public class JsonCtParser {
 		}else{
 			for (Entry<Integer, List<ObservationInfo>> e : attributes.entrySet()){
 				int order = e.getKey();
-				if (order == CyberTrackerConfExporter.MULTI_SELECT_INDEX) continue; //skip the defaults
+				if (order == CtJsonUtil.MULTI_SELECT_INDEX) continue; //skip the defaults
 				
 				List<ObservationInfo> values = (List<ObservationInfo>) e.getValue();
 						
@@ -675,28 +536,49 @@ public class JsonCtParser {
 		
 		return newWaypoint;
 	}
-	
 	/**
-	 * may return null if attribute not found
-	 * @param uuid
+	 * 
+	 * @param waypoint the waypoint to size
+	 * @param selectedSize the size to apply to the waypoint (to support apply to all); can be null
 	 * @param session
 	 * @return
-	 * @throws Exception
 	 */
-	private Attribute findAttribute(String uuid, Session session) throws Exception{
-		return JsonUtils.findAttribute(uuid, session);
+	public void processImages(Waypoint waypoint, Session session){
+		if (waypoint == null) return;
+		
+		ConservationArea ca = waypoint.getConservationArea();
+		CyberTrackerPropertiesOption opResize =  CtJsonUtil.getImageResizeOption(ca, session);
+		
+		if (opResize == null) return;		
+		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return;
+		
+		double maxsizebytes =  CtJsonUtil.getImageMaxSizeOption(ca, session) * 1048576l;
+		List<ISmartAttachment> attachments = new ArrayList<>();
+		if (waypoint.getAttachments() != null ){
+			for (WaypointAttachment attachment : waypoint.getAttachments()){
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes)
+					attachments.add(attachment);
+			}
+		}
+		
+		for (WaypointObservation wo : waypoint.getAllObservations()){
+			if (wo.getAttachments() == null) continue;
+			for (ObservationAttachment attachment : wo.getAttachments()){
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes)
+					attachments.add(attachment);
+			}						
+		}
+		
+		
+		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
+			//attempt to resize image automatically
+			int[] size = CtJsonUtil.getImageAutoResizeSizeOption(ca, session);		
+			for (ISmartAttachment attachment : attachments){
+				ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+			}
+		}
 	}
 	
-	/**
-	 * Can return null if not list item found
-	 * @param uuid
-	 * @param session
-	 * @return
-	 * @throws Exception
-	 */
-	private AttributeListItem findAttributeListItem(String uuid, Session session) throws Exception{
-		return JsonUtils.findAttributeListItem(uuid, session);
-	}
 	
 //	/**
 //	 * Can return null if the tree node is not found
@@ -781,8 +663,8 @@ public class JsonCtParser {
 			String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
 			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
 				
-			if (image == null) {
-				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, info));
+			if (image == null){
+				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO, info.getImageCount()));
 				return null;
 			} else {
 				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
@@ -845,21 +727,22 @@ public class JsonCtParser {
 		HashMap<Attribute, ObservationInfo> mitems = new HashMap<>();
 		
 		for (ObservationInfo obj : values){
-			if (obj.keyType.equals(JsonKey.ATTRIBUTE_LIST.key)){
+			if (obj.keyType.equals(JsonDataModelKey.ATTRIBUTE_LIST.key)){
 				//this identifies this list element occur; switch to attribute=element format
-				AttributeListItem li =  findAttributeListItem(obj.uuid, session);
+				AttributeListItem li = CtJsonUtil.findAttributeListItem(obj.uuid, session);
 				if (li == null){
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_ListAttributeNotFound, obj.uuid));
+					warnings.add(new JsonImportWarning(Type.LIST_ATTRIBUTE_NOT_FOUND, obj.uuid));
 				}else{
 					if (li.getAttribute().getType() == AttributeType.MLIST) {
 						ObservationInfo info = mitems.get(li.getAttribute());
 						if (info == null) {
-							info = new ObservationInfo(JsonKey.ATTRIBUTE.key, UuidUtils.uuidToString(li.getAttribute().getUuid()), new ArrayList<>());
+							info = new ObservationInfo(JsonDataModelKey.ATTRIBUTE.key, UuidUtils.uuidToString(li.getAttribute().getUuid()), new ArrayList<>());
 							mitems.put(li.getAttribute(), info);
 						}
+						
 						((ArrayList<AttributeListItem>)info.value).add(li);
 					}else {
-						obj.keyType = JsonKey.ATTRIBUTE.key;
+						obj.keyType = JsonDataModelKey.ATTRIBUTE.key;
 						obj.uuid = UuidUtils.uuidToString( li.getAttribute().getUuid() );
 					}
 				}
@@ -868,24 +751,27 @@ public class JsonCtParser {
 		values.addAll(mitems.values());
 		
 		for (ObservationInfo obj : values){
-			if (obj.keyType.equals(JsonKey.ATTRIBUTE_LIST.key))continue; //processed above
-			if (obj.keyType.equals(JsonKey.ATTRIBUTE.key)){
-				Attribute att = findAttribute( obj.uuid, session);
+			if (obj.keyType.equals(JsonDataModelKey.ATTRIBUTE_LIST.key))continue; //processed above
+			if (obj.keyType.equals(JsonDataModelKey.ATTRIBUTE.key)){
+				Attribute att = CtJsonUtil.findAttribute( obj.uuid, session);
 				if (att == null){
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_AttributeNotFound, obj.uuid));
+					warnings.add(new JsonImportWarning(Type.ATTRIBUTE_NOT_FOUND, obj.uuid));
 					continue;
 				}
-				if (!validAttributes.contains(att)) throw new Exception(MessageFormat.format(Messages.JsonCtParser_CatAttributeNotFound, att.getName(), c.getName()));
+				if (!validAttributes.contains(att)) {
+					warnings.add(new JsonImportWarning(Type.ATT_CAT_NOT_ASSOCIATED, att.getName(), c.getName()));
+					continue;
+				}
 				
 				boolean add = true;
 				WaypointObservationAttribute wpatt = new WaypointObservationAttribute();
 				try{
 					wpatt.setAttribute(att);
-					if (!JsonUtils.setAttributeValue(wpatt, obj.value, session, warnings)){
+					if (!CtJsonUtil.setAttributeValue(wpatt, obj.value, session, warnings)){
 						add = false;
 					}else{
-					//check if this attribute already exists for the observation.  Attribute
-					//can only exist once except for the tree nodes
+						//check if this attribute already exists for the observation.  Attribute
+						//can only exist once except for the tree nodes
 						for (Iterator<WaypointObservationAttribute> iterator = results.iterator(); iterator.hasNext();) {
 							WaypointObservationAttribute wpa = (WaypointObservationAttribute) iterator.next();
 						
@@ -899,7 +785,7 @@ public class JsonCtParser {
 									wpatt.setStringValue(null);
 								}else{
 									if (wpa.getAttribute().getType()!=AttributeType.TREE){
-										warnings.add(MessageFormat.format(Messages.JsonCtParser_MultiValuesSameAttribute, att.getName()));
+										warnings.add(new JsonImportWarning(Type.DUPLICATE_ATTRIBUTES, att.getName()));
 										add = false;
 									}
 									//trees can be specified as each node is specified; we want to pick the longest one
@@ -914,8 +800,8 @@ public class JsonCtParser {
 						}
 					}
 				}catch (Exception ex){
-					CyberTrackerPlugIn.log(ex.getMessage(), ex);
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotParseValue, att.getName(), obj.value, ex.getMessage()));				
+					logException(ex);
+					warnings.add(new JsonImportWarning(Type.OBS_ATTRIBUTE_PARSE_ERROR, att.getName(), obj.value, ex.getLocalizedMessage()));
 					add = false;
 				}
 				if (add) results.add(wpatt);
@@ -956,8 +842,10 @@ public class JsonCtParser {
 		public AttachmentType getType() {
 			return this.type;
 		}
+		
 	}
 	private class ObservationInfo{
+		
 		public String keyType;
 		public String uuid;
 		public Object value;

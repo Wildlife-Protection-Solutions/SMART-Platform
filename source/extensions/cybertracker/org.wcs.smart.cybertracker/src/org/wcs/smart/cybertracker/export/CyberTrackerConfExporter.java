@@ -63,6 +63,8 @@ import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
 import org.wcs.smart.cybertracker.export.data.TreeNodeDataProvider;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.CtJsonUtil.JsonDataModelKey;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -97,26 +99,9 @@ import jakarta.xml.bind.Marshaller;
  * @since 2.0.0
  */
 public class CyberTrackerConfExporter {
-	public static final int MULTI_SELECT_INDEX = -1;
+
 	
-	public static final Character KEY_SEP = ':'; 
-	public static final String NULL_KEY = "null"; //$NON-NLS-1$
-	
-	public static enum JsonKey{
-		CATEGORY("c"), //$NON-NLS-1$
-		ATTRIBUTE("a"), //$NON-NLS-1$
-		EMPLOYEE("e"), //$NON-NLS-1$
-		ATTRIBUTE_LIST("l"), //$NON-NLS-1$
-		ATTRIBUTE_MULTILIST("ml"), //$NON-NLS-1$
-		ATTRIBUTE_TREE("t"); //$NON-NLS-1$
-		
-		public String key;
-		
-		private JsonKey(String key){
-			this.key = key;
-		}
-		
-	}
+
 	private static final String NODE_DEPTH_RESULT_PREFIX = "node"; //$NON-NLS-1$
 	private static final String NODE_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
 	
@@ -464,7 +449,7 @@ public class CyberTrackerConfExporter {
 		}
 		
 		//showOncesAfter will be empty if collectMultipleObservations is not set!!!
-		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesAfter(), keyMap, nextId, MULTI_SELECT_INDEX, true, null);
+		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesAfter(), keyMap, nextId, CtJsonUtil.MULTI_SELECT_INDEX, true, null);
 		nodeList.addAll(buildResult.getNodes());
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		
@@ -520,15 +505,15 @@ public class CyberTrackerConfExporter {
 			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
 			if (tag2 == null){
 				if (numAttr != null){
-					item.setJsonId(JsonKey.ATTRIBUTE_MULTILIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(numAttr.getAttribute().getUuid()) + CyberTrackerConfExporter.KEY_SEP + JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+					item.setJsonId(JsonDataModelKey.ATTRIBUTE_MULTILIST.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(numAttr.getAttribute().getUuid()) + CtJsonUtil.KEY_SEP + JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
 				}else{
-					item.setJsonId(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+					item.setJsonId(JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
 				}
 			}else{
 				if (numAttr != null){
-					item.setJsonId(JsonKey.ATTRIBUTE_MULTILIST.key + CyberTrackerConfExporter.KEY_SEP +tag2 + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(numAttr.getAttribute().getUuid()) + CyberTrackerConfExporter.KEY_SEP + JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+					item.setJsonId(JsonDataModelKey.ATTRIBUTE_MULTILIST.key + CtJsonUtil.KEY_SEP +tag2 + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(numAttr.getAttribute().getUuid()) + CtJsonUtil.KEY_SEP + JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
 				}else{
-					item.setJsonId(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP+ tag2 + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+					item.setJsonId(JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP+ tag2 + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
 				}
 			}
 			ElementsUtil.addElementsItemMedia(item, listItem.getImageFile());
@@ -583,7 +568,7 @@ public class CyberTrackerConfExporter {
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		CyberTrackerId id = startId;
 		
-		int multiSelectIndex = MULTI_SELECT_INDEX;
+		int multiSelectIndex = CtJsonUtil.MULTI_SELECT_INDEX;
 		for (int i = 0; i < attrList.size(); i++) {
 			CmAttribute cmAttr = attrList.get(i);
 			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(cmAttr.getAttribute().getType())) {
@@ -759,7 +744,7 @@ public class CyberTrackerConfExporter {
 			String tag0 = UuidUtils.uuidToString(treeNode.getUuid());
 			CyberTrackerId id = new CyberTrackerId();
 			Elements.List.Items.Item item =  ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0);
-			item.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
+			item.setJsonId(JsonDataModelKey.ATTRIBUTE_TREE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
 			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 			ids.add(id);
 			items.add(treeNode.getTreeNode());
@@ -818,7 +803,7 @@ public class CyberTrackerConfExporter {
 				}
 				String elId = (new CyberTrackerId()).getItemId();
 				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
-				valueItem.setJsonId(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(uuidValue));
+				valueItem.setJsonId(JsonDataModelKey.ATTRIBUTE_LIST.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(uuidValue));
 				return recordDefaultValue(attribute, valueItem);
 			}
 			break;
@@ -845,7 +830,7 @@ public class CyberTrackerConfExporter {
 				}
 				String elId = (new CyberTrackerId()).getItemId();
 				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
-				valueItem.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(uuidValue));
+				valueItem.setJsonId(JsonDataModelKey.ATTRIBUTE_TREE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(uuidValue));
 				return recordDefaultValue(attribute, valueItem);
 			}
 			break;
@@ -882,7 +867,7 @@ public class CyberTrackerConfExporter {
 		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
 		Elements.List.Items.Item keyItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, valueItem.getId());
-		keyItem.setJsonId(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(attribute.getUuid()));
+		keyItem.setJsonId(JsonDataModelKey.ATTRIBUTE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(attribute.getUuid()));
 		return new CtDataKeyValueRecord(keyItem, valueItem);
 	}
 
@@ -890,7 +875,7 @@ public class CyberTrackerConfExporter {
 		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
 		Elements.List.Items.Item keyItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, valueStr);
-		keyItem.setJsonId(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(attribute.getUuid()));
+		keyItem.setJsonId(JsonDataModelKey.ATTRIBUTE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(attribute.getUuid()));
 		return new CtDataKeyValueRecord(keyItem, valueStr);
 	}
 	
@@ -919,7 +904,7 @@ public class CyberTrackerConfExporter {
 		if (id == null) {
 			id = new CyberTrackerId();
 			Item item = ElementsUtil.addElementsItem(elements, NODE_DEPTH_RESULT_PREFIX+String.valueOf(level), id.getItemId(), String.valueOf(level), ElementsUtil.CATEGORY_ELEMENT_TAG);
-			item.setJsonId(JsonKey.CATEGORY.key + CyberTrackerConfExporter.KEY_SEP + level);
+			item.setJsonId(JsonDataModelKey.CATEGORY.key + CtJsonUtil.KEY_SEP + level);
 			nodeLevel2resultId.put(level, id);
 		}
 		return id;
@@ -952,7 +937,7 @@ public class CyberTrackerConfExporter {
 	 * @return
 	 */
 	private CyberTrackerId getAttributeResultElementId(Attribute attribute, Integer index, boolean applyAll) {
-		if (applyAll) index = MULTI_SELECT_INDEX;
+		if (applyAll) index = CtJsonUtil.MULTI_SELECT_INDEX;
 		Map<Integer, CyberTrackerId> map = attr2resultId.get(attribute);
 		if (map == null) {
 			map = new HashMap<Integer, CyberTrackerId>();
@@ -963,7 +948,7 @@ public class CyberTrackerConfExporter {
 			id = new CyberTrackerId();
 			String uuid = UuidUtils.uuidToString(attribute.getUuid());
 			Item it = ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"_"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
-			it.setJsonId(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP + index.toString() + CyberTrackerConfExporter.KEY_SEP + uuid);
+			it.setJsonId(JsonDataModelKey.ATTRIBUTE.key + CtJsonUtil.KEY_SEP + index.toString() + CtJsonUtil.KEY_SEP + uuid);
 			map.put(index, id);
 		}
 		return id;
@@ -1005,7 +990,7 @@ public class CyberTrackerConfExporter {
 		for (IAttributeTreeNodeProxy treeNode : map.keySet()) {
 			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, treeNode.getName(), map.get(treeNode).getItemId(), UuidUtils.uuidToString(treeNode.getUuid()));
 			if (treeNode.getTreeNode().getDmTreeNode() != null){
-				item.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
+				item.setJsonId(JsonDataModelKey.ATTRIBUTE_TREE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
 			}
 			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 		}

@@ -264,7 +264,7 @@
    <extension
          point="org.wcs.smart.cybertracker.json.processor">
       <JsonProcessor
-            class="org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor">
+            class="org.wcs.smart.cybertracker.patrol.json.DesktopPatrolJsonProcessor">
       </JsonProcessor>
       <JsonPostProcessor
             class="org.wcs.smart.cybertracker.patrol.json.PatrolJsonPostProcessor">

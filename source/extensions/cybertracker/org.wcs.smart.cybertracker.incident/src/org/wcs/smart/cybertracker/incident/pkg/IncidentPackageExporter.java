@@ -43,7 +43,6 @@ import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
-import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
@@ -242,7 +241,7 @@ public class IncidentPackageExporter {
 				new Object[] {"isDefault", true}).getSingleResult(); //$NON-NLS-1$
 		
 		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentPackageContribution.INCIDENT_RESOURCE_ID));
+		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentCtPackage.TYPE_NAME.toUpperCase()));
 		
 		//observer employee options
 		MetadataFieldValue md = null;

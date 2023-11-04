@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.smartcollect.internal.Messages;
-import org.wcs.smart.smartcollect.json.SmartCollectDataProcessor.ProcessingOption;
+import org.wcs.smart.smartcollection.json.SmartCollectJsonProcessor.ProcessingOption;
 import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
@@ -46,7 +46,7 @@ import org.wcs.smart.ui.SmartStyledDialog;
 public class ValidationDialog extends SmartStyledDialog {
 
 	private String users;
-	private SmartCollectDataProcessor.ProcessingOption option;
+	private DesktopSmartCollectJsonProcessor.ProcessingOption option;
 	
 	public ValidationDialog(Shell parent, String users) {
 		super(parent);

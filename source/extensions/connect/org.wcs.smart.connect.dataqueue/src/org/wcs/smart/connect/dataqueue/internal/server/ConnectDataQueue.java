@@ -30,8 +30,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
+import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
+import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 import org.wcs.smart.connect.model.ConnectServerOption;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -57,8 +59,23 @@ public enum ConnectDataQueue {
 		ResteasyWebTarget target = client.target(connect.getServer().getServerUrl() + SmartConnect.API_URL);
 		DataQueueApi simple = target.proxy(DataQueueApi.class);
 		
+		List<DataQueueItem> items = simple.getItems(ca.getUuid().toString(), DataQueueApi.ServerStatus.QUEUED.name());
 		
-		return simple.getItems(ca.getUuid().toString(), DataQueueApi.ServerStatus.QUEUED.name());
+		//determine which can be processed locally
+		List<IItemProcessor> processor =  ProcessorManager.INSTANCE.getProcessors();
+		
+		for (DataQueueItem i : items) {
+			boolean canprocess = false;
+			for (IItemProcessor p : processor) {
+				if (p.canProcess(i.getType())) {
+					canprocess = true;
+					break;
+				}
+			}
+			i.setCanProcessLocally(canprocess);
+		}
+		
+		return items;
 	}
 
 	/**

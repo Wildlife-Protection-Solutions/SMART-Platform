@@ -33,7 +33,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SignatureType;
@@ -334,7 +334,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 							
 					WaypointAttachment att = new WaypointAttachment();
 					if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isBlank()) {
-						SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+						SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
 						if (stype != null) {
 							att.setSignatureType(stype);
 						}else {
@@ -393,7 +393,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 								Messages.XMLtoMissionConverter_1, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
 						if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isBlank()) {
-							SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+							SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
 							if (stype != null) {
 								att.setSignatureType(stype);
 							}else {

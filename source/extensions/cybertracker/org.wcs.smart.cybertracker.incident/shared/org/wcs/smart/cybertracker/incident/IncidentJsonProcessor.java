@@ -23,29 +23,25 @@ package org.wcs.smart.cybertracker.incident;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.common.control.WarningDialog;
-import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
-import org.wcs.smart.cybertracker.importer.json.UserCancelledException;
-import org.wcs.smart.cybertracker.incident.internal.Messages;
+import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
+import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
+import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -58,21 +54,44 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class IncidentJsonProcessor implements IJsonProcessor {
+public abstract class IncidentJsonProcessor implements IJsonProcessor {
 
-	private List<String> warnings;
+	protected List<JsonImportWarning> warnings;
 	
-	private Set<Waypoint> newIncidents;
-	private Set<Waypoint> modifiedIncidents;
-	//resize value for apply to all option
-	private Point allSize = null;
+	protected Set<Waypoint> newIncidents;
+	protected Set<Waypoint> modifiedIncidents;
 	
-	private List<CtIncidentLink> groupMappings;
+	protected List<CtIncidentLink> groupMappings;
+	protected ConservationArea ca;
 	
-	public IncidentJsonProcessor() {
-		warnings = new ArrayList<String>();
+	public enum StatusMessage{
+		ADDED, MODIFIED;
+		
+		public String getMessage() {
+			switch(this) {
+			case ADDED: return "Created {0} Incidents";
+			case MODIFIED: return "Modified {0} Incidents";
+			}
+			return "";
+		}
+	}
+	
+	public IncidentJsonProcessor(ConservationArea ca) {
+		warnings = new ArrayList<>();
+		this.ca = ca;
 	}
 
+	protected abstract void logException(String message, Exception ex);
+	
+	protected void processWarnings(List<JsonImportWarning> warnings) throws UserCancelledException{
+		
+	};
+	
+	@Override
+	public List<JsonImportWarning> getWarnings(){
+		return this.warnings;
+	}
+	
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
 		newIncidents = new HashSet<>();
@@ -82,18 +101,19 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
 		for (JSONObject feature : features){
-			JsonCtParser parser = new JsonCtParser();
-			if (JsonCtParser.isTrackPoint(feature)) continue;
+			CtJsonObservationParser parser = new CtJsonObservationParser();
+			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
 			try{
-				JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
+				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
-				JSONObject sighting = (JSONObject)properties.get(JsonCtParser.SIGHTINGS_KEY);
+				JSONObject sighting = (JSONObject)properties.get(CtJsonObservationParser.SIGHTINGS_KEY);
 				if (sighting == null) continue;				
 				
-				String type = (String) sighting.get(ScreensUtil.RESULT_DATATYPE);
+				String type = (String) sighting.get(CtJsonUtil.JsonKey.DATATYPE.key);
+
 				// Validate data type
-				if (!IncidentPackageContribution.INCIDENT_RESOURCE_ID.equalsIgnoreCase(type)){
+				if (!IncidentCtPackage.TYPE_NAME.equalsIgnoreCase(type)){
 					//not an incident point; skip it
 					continue;
 				}
@@ -106,12 +126,13 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				if (observationCounter == null) continue;
 				
 				//read group id 
-				String strGroupId = ((String) sighting.get(ScreensUtil.RESULT_SIGHTINGGROUPID)).trim();
-				if (strGroupId == null || strGroupId.isEmpty()) throw new Exception("No group id provided for independent incident.  Incident cannot be loaded"); //$NON-NLS-1$
-
+				String strGroupId = ((String) sighting.get(CtJsonUtil.JsonKey.OBSERVATION_GROUP.key));
+				if (strGroupId == null || strGroupId.trim().isEmpty()) throw new Exception("No group id provided for independent incident.  Incident cannot be loaded"); //$NON-NLS-1$
+				strGroupId = strGroupId.trim();
+				
 				UUID groupUuid = parseUuid(strGroupId);
 
-				String rootId = ((String)properties.get(JsonCtParser.ROOT_ID_KEY));
+				String rootId = ((String)properties.get(CtJsonObservationParser.ROOT_ID_KEY));
 				//lets see if there is a waypoint to add to (based on groupid)
 				
 				if (rootId == null) {
@@ -146,8 +167,8 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				}
 			
 				//Parse the waypoint information 				
-				Waypoint parsedWp = parser.createWaypoint(feature, SmartDB.getCurrentConservationArea(), session);
-				allSize = JsonCtParser.processImages(parsedWp, allSize, session);
+				Waypoint parsedWp = parser.createWaypoint(feature,ca, session);
+				parser.processImages(parsedWp, session);
 				
 				if (currentLink.getWaypoint() == null) {
 					currentLink.setWaypoint(parsedWp);
@@ -166,10 +187,13 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 						}
 					}
 					
-					currentLink.getWaypoint().setId(IncidentManager.getInstance().getNextIncidentId(session, currentLink.getWaypoint().getDateTime(), observer));
 					currentLink.getWaypoint().setSourceId(IndepedentIncidentSource.KEY);
-					currentLink.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-
+					currentLink.getWaypoint().setConservationArea(ca);
+					
+					String id = IncidentIdGenerator.INSTANCE.getNextIncidentId(session, ca, 
+							Collections.singleton(currentLink.getWaypoint().getSourceId()), currentLink.getWaypoint().getDateTime(), observer);
+					currentLink.getWaypoint().setId(id);
+					
 					//there is no position; likely skip on device; lets set to 0
 					if (currentLink.getWaypoint().getX() == null) currentLink.getWaypoint().setRawX(0);
 					if (currentLink.getWaypoint().getY() == null) currentLink.getWaypoint().setRawY(0);
@@ -228,22 +252,21 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				}
 				warnings.addAll(parser.getWarnings());
 			
-				//TODO: test & fixes this
-				//session.saveOrUpdate(currentLink.getWaypoint());
-				//session.saveOrUpdate(currentLink);
-				//if (rootLink != null) session.saveOrUpdate(rootLink);
+				if (currentLink.getWaypoint().getUuid() == null) session.persist(currentLink.getWaypoint());
+				if (currentLink.getUuid() == null) session.persist(currentLink);
+				if (rootLink != null && rootLink.getUuid() == null) session.persist(rootLink);
 				
 				processedFeatures.add(feature);
 				
 			}catch (Exception ex){
 				//if there is a session.flush error we have a problem we need to stop and rollback
-				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
-				warnings.add(Messages.IncidentJsonProcessor_ParseError + ex.getMessage());
+				logException(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
+				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()));
 			}
 		}
 		
 		//display warnings to user; this may throw a cancelled exception if the user doesn't want to proceed
-		displayWarnings(warnings);
+		processWarnings(warnings);
 				
 		return processedFeatures;
 	}
@@ -292,51 +315,6 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 		if (links.isEmpty()) return null;
 		return links.get(0);
 	}
-	/*
-	 * displays warning dialog to user allowing them to cancel the processing
-	 */
-	private void displayWarnings(List<String> warnings) throws Exception{
-		 if (!warnings.isEmpty()){
-			 	final boolean[] cont = {false};
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
-								Messages.IncidentJsonProcessor_WaringsTitle, 
-								Messages.IncidentJsonProcessor_WarningsMessage,
-								warnings,
-								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
-						if (wd.open() == 0){
-							cont[0] = true;
-						}else{
-							cont[0] = false;
-						}
-					}	
-				});
-				if (!cont[0]){
-					throw new UserCancelledException(Messages.IncidentJsonProcessor_CanceledMsg);
-				}
-		 }
-	}
-	
-
-	@Override
-	public void afterSave(){
-		for (Waypoint p : modifiedIncidents){
-			try{
-				IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_MODIFIED, p);
-			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError(Messages.IncidentJsonProcessor_NotificationError, ex.getMessage(), ex);
-			}
-		}
-		for (Waypoint p : newIncidents){
-			try{
-				IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, p);
-			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError(Messages.IncidentJsonProcessor_NotificationError2, ex.getMessage(), ex);
-			}
-		}
-	}
 	
 	@Override
 	public String getStatusMessage() {
@@ -344,7 +322,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newIncidents.isEmpty()){
-			sb.append(MessageFormat.format(Messages.IncidentJsonProcessor_CreatedLabel, newIncidents.size()));
+			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(), newIncidents.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : newIncidents){
 				sb.append(p.getId());
@@ -357,7 +335,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 		HashSet<Waypoint> tmp = new HashSet<>(modifiedIncidents);
 		for (Waypoint w : newIncidents) tmp.remove(w);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format(Messages.IncidentJsonProcessor_ModifiedLabel, tmp.size()));
+			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(), tmp.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : tmp){
 				sb.append(p.getId());

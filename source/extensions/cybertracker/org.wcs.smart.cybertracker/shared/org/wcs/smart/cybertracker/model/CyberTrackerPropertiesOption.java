@@ -71,8 +71,7 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 
 	public enum ImageResizeOption{
 		NONE,
-		AUTO,
-		MANUAL;
+		AUTO;
 	}
 	
 	public enum ImageSizeOption{

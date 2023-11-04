@@ -34,8 +34,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
@@ -44,6 +42,7 @@ import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
 import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
+import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -51,6 +50,7 @@ import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
@@ -75,34 +75,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SurveyScreensUtil extends ScreensUtil {
 
-	public static enum JsonSurveyKey {
-		MISSION_ATT_LIST("ml"), //$NON-NLS-1$
-		MISSION_ATT("ma"), //$NON-NLS-1$
-		SAMPLING_UNIT("su"); //$NON-NLS-1$
-		
-		public String key;
-		
-		private JsonSurveyKey(String key){
-			this.key = key;
-		}
-	}
 	
-	
-	public static final String RESULT_SURVEY_DESIGN = ScreensUtil.COMMON_PREFIX + "SurveyDesign"; //$NON-NLS-1$
-
-	public static final String RESULT_MISSION_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
-	
-	public static final String RESULT_MISSION_COMMENTS = ScreensUtil.COMMON_PREFIX + "Comments"; //$NON-NLS-1$
-	
-	public static final String RESULT_MISSION_START_SAMPLING_UNIT = ScreensUtil.COMMON_PREFIX + "StartSamplingUnit"; //$NON-NLS-1$
-	
-	public static final String RESULT_MISSION_SAMPLING_UNIT = ScreensUtil.COMMON_PREFIX + "SamplingUnit"; //$NON-NLS-1$
-
-	public static final String RESULT_MISSION_PROPETY_PREFIX = ScreensUtil.COMMON_PREFIX + "MP_"; //$NON-NLS-1$
-	
-	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
-	
-	public static final String END_MISSION_KEY = "SMART_EndMission"; //$NON-NLS-1$
 
 	protected SurveyScreensUtil(CyberTrackerUtil ctUtil) {
 		super(ctUtil);
@@ -110,13 +83,13 @@ public class SurveyScreensUtil extends ScreensUtil {
 
 	@Override
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
-		CyberTrackerId dataType = registerDatatype(elements, DATATYPE_SURVEY);
+		CyberTrackerId dataType = registerDatatype(elements, SurveyMetadata.DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
-		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, dataType, DATATYPE_SURVEY);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, dataType, SurveyMetadata.DATATYPE_SURVEY);
 		
 		
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -140,7 +113,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 				members.add(SmartLabelProvider.getShortLabel(i));
 				CyberTrackerId mctid = new CyberTrackerId();
 				Item employee = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-				employee.setJsonId(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(i.getUuid()));
+				employee.setJsonId(CtJsonUtil.JsonDataModelKey.EMPLOYEE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(i.getUuid()));
 				memberIds.add(mctid);
 			}
 			
@@ -150,7 +123,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 			}
 			
 			id = addMembersNode(id, result, memberIds);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, membersFilter);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, SurveyMetadata.JsonKey.MISSION_LEADER.key, memberIds, membersFilter);
 		} else {
 			//adding default members
 			ScreenOption leader_so = screenOptions.get(MissionScreenOptionMeta.LEADER);
@@ -160,7 +133,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 					if (e.getUuid().equals(sou.getUuidValue())) {
 						CyberTrackerId mctid = new CyberTrackerId();
 						Elements.List.Items.Item memberValue = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-						memberValue.setJsonId(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(e.getUuid()));
+						memberValue.setJsonId(CtJsonUtil.JsonDataModelKey.EMPLOYEE.key + CtJsonUtil.KEY_SEP + UuidUtils.uuidToString(e.getUuid()));
 						result.defaultValues.add(new CtDataKeyValueRecord(memberValue, ICyberTrackerConstants.STR_TRUE));
 						memberIds.add(mctid);
 						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
@@ -171,21 +144,21 @@ public class SurveyScreensUtil extends ScreensUtil {
 			}
 			
 			if (leader_so == null || leader_so.isVisible()) {
-				id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, false);
+				id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, SurveyMetadata.JsonKey.MISSION_LEADER.key, memberIds, false);
 			} else {
 				if (leaderItem == null) {
 					CyberTrackerPlugIn.displayError(Messages.SurveyScreensUtil_ErrorDialog_Title, Messages.SurveyScreensUtil_Error_Leader, null);
 					return null;
 				}
-				result.defaultValues.add(createDefaultResultRecord(RESULT_MISSION_LEADER, elements, leaderItem));
+				result.defaultValues.add(createDefaultResultRecord(SurveyMetadata.JsonKey.MISSION_LEADER.key, elements, leaderItem));
 			}
 		}
 
 		so = screenOptions.get(MissionScreenOptionMeta.COMMENT);
 		if (so == null || so.isVisible()) {
-			id = addNoteNextNode(id, result, elements, Messages.SurveyScreensUtil_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
+			id = addNoteNextNode(id, result, elements, Messages.SurveyScreensUtil_Comments, SurveyMetadata.JsonKey.MISSION_COMMENTS.key, Mission.MAX_LENGTH_COMMENT);
 		} else {
-			result.defaultValues.add(createDefaultResultRecord(RESULT_MISSION_COMMENTS, elements, so.getStringValue()));
+			result.defaultValues.add(createDefaultResultRecord(SurveyMetadata.JsonKey.MISSION_COMMENTS.key, elements, so.getStringValue()));
 		}
 
 		String sdKey = getSurveyDesignKeyId(elements);
@@ -195,11 +168,11 @@ public class SurveyScreensUtil extends ScreensUtil {
 		for (MissionProperty missionProperty : missionProperties) {
 			MissionAttribute missionAttribute = missionProperty.getAttribute();
 			String tag0 = missionAttribute.getKeyId();
-			String resultElName = RESULT_MISSION_PROPETY_PREFIX + missionAttribute.getKeyId();
+			String resultElName = SurveyMetadata.JsonKey.MISSION_PROPERTY_PREFIX.key + missionAttribute.getKeyId();
 			if (missionAttribute.getType() != null) {
 				switch (missionAttribute.getType()) {
 				case LIST:
-					cyberTrackerIds = toCyberTrackerIds(elements, missionAttribute.getAttributeList(),  JsonSurveyKey.MISSION_ATT_LIST.key);
+					cyberTrackerIds = toCyberTrackerIds(elements, missionAttribute.getAttributeList(),  SurveyMetadata.JsonSurveyKey.MISSION_ATT_LIST.key);
 					id = addSimpleNextRadioNode(id, result, elements, missionAttribute.getName(), resultElName, tag0, cyberTrackerIds, true);
 					continue;
 				case NUMERIC:
@@ -220,7 +193,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		noneSu.setId(Messages.SurveyScreensUtil_NoSamplingUnit);
 		samplingUnits.add(noneSu);
 		cyberTrackerIds = suToCtIds(elements, samplingUnits);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_StartSamplingUnit, RESULT_MISSION_START_SAMPLING_UNIT, cyberTrackerIds, true);
+		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_StartSamplingUnit, SurveyMetadata.JsonKey.MISSION_START_SAMPLING_UNIT.key, cyberTrackerIds, true);
 
 		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, surveyDesign.getTrackObserver(), memberIds, membersFilter, ctProps);
 		result.rootId = id;
@@ -247,7 +220,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSurvey);
 		nodeIds.add(createEndTripNodes(container, startId, Messages.SurveyScreensUtil_EndSurveyMessage));
-		jsonIds.add(END_MISSION_KEY);
+		jsonIds.add(SurveyMetadata.JsonKey.END_MISSION_KEY.key);
 		
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add(Messages.SurveyScreensUtil_PauseSurvey);
@@ -267,7 +240,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 	//Not the best design, but we can obtain required data from Elements in this case
 	private String getSurveyDesignKeyId(Elements elements) {
 		for (Item item : elements.getList().getItems().getItem()) {
-			if (SurveyScreensUtil.RESULT_SURVEY_DESIGN.equals(item.getName())) {
+			if (SurveyMetadata.JsonKey.SURVEY_DESIGN.key.equalsIgnoreCase(item.getName())) {
 				return item.getTag0();
 			}
 		}
@@ -289,7 +262,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 
 	private CyberTrackerId createSamplingUnitNodes(MetaExportResult container, Elements elements, CyberTrackerId nextTaskId, List<CyberTrackerId> ctElemIds) {
 		CyberTrackerId id = new CyberTrackerId();
-		addSimpleNextRadioNode(id, container, elements, Messages.SurveyScreensUtil_SamplingUnit, RESULT_MISSION_SAMPLING_UNIT, ctElemIds, false);
+		addSimpleNextRadioNode(id, container, elements, Messages.SurveyScreensUtil_SamplingUnit, SurveyMetadata.JsonKey.MISSION_SAMPLING_UNIT.key, ctElemIds, false);
 		Node suNode = container.screenNodes.get(container.screenNodes.size()-1);
 		Control control2 = ScreensObjectFactory.getNavigationControl(suNode);
 		control2.setShowNext("False"); //$NON-NLS-1$
@@ -325,7 +298,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		//add the survey design to the main screen so its included in the metadata for the JSON objects
 		Node startNode = container.screenNodes.get(1);
 		for (Item item : elements.getList().getItems().getItem()) {
-			if (SurveyScreensUtil.RESULT_SURVEY_DESIGN.equals(item.getName())) {
+			if (SurveyMetadata.JsonKey.SURVEY_DESIGN.key.equalsIgnoreCase(item.getName())) {
 				Control ctl = getScreensFactory().createAttrubuteControl14(item.getId(), false, item.getTag0());
 				ScreensObjectFactory.addControlToNode(startNode, ctl);		
 				break;
@@ -344,7 +317,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 			labelValues.add(su.getId());
 			String uuid = UuidUtils.uuidToString(su.getUuid());
 			tag0Values.add(uuid);
-			jsonValues.add(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP + uuid);
+			jsonValues.add(SurveyMetadata.JsonSurveyKey.SAMPLING_UNIT.key + CtJsonUtil.KEY_SEP + uuid);
 		}
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values, jsonValues);
 	}

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer.json;
+package org.wcs.smart.cybertracker.json;
 
 import java.util.List;
 
@@ -37,21 +37,27 @@ public interface IJsonProcessor {
 	public static final String EXTENSION_ID = "org.wcs.smart.cybertracker.json.processor"; //$NON-NLS-1$
 	
 	/**
+	 * The number of months old a patrol is before all links to
+	 * this patrol and removed from the database
+	 */
+	public static final int CLEANUP_MONTHS = 6;
+	
+	/**
 	 * @param features
 	 * @return a list of objects that have been processed
 	 */
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception;
-	
-	/**
-	 * Called after save is complete.  This can be used to fire system
-	 * events etc.
-	 */
-	public void afterSave();
-	
+		
 	/**
 	 * 
 	 * @return an optional status message to include in the processing items
 	 * status message
 	 */
 	public String getStatusMessage();
+	
+	/**
+	 * 
+	 * @return list of warnings generated during processing
+	 */
+	public List<JsonImportWarning> getWarnings();
 }
