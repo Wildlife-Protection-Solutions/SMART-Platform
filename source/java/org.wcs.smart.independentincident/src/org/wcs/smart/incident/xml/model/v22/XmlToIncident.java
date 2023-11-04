@@ -34,7 +34,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SignatureType;
@@ -162,7 +162,7 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 					String filename = attType.getFilename();
 					
 					if (attType.getSignatureTypeKey() != null && !attType.getSignatureTypeKey().trim().isEmpty()) {
-						SignatureType stype = SignatureTypeManager.INSTANCE.findType(attType.getSignatureTypeKey(), ca, session);
+						SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(attType.getSignatureTypeKey(), ca, session);
 						if (stype == null) {
 							warnings.add(MessageFormat.format(Messages.XmlToIncident_SignatureTypeNotFound,attType.getSignatureTypeKey()));
 						}else {
@@ -227,7 +227,7 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 					}else{
 
 						if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isEmpty()) {
-							SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+							SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
 							if (stype == null) {
 								warnings.add(MessageFormat.format(Messages.XmlToIncident_SignatureTypeNotFound,attachment.getSignatureTypeKey()));
 							}else {
