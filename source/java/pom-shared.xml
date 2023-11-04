@@ -12,7 +12,9 @@
 		<smart.version>8.0.0-SNAPSHOT</smart.version>
 		<geotools.version>28.1</geotools.version>
 		<jts.version>1.19.0</jts.version>
-		<hibernate.version>6.1.6.Final</hibernate.version>
+		
+		<hibernate.version>6.3.0.Final</hibernate.version>
+
 		<birt.version>4.9.0</birt.version>
 		<udig.version>3.1.0-SNAPSHOT</udig.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
