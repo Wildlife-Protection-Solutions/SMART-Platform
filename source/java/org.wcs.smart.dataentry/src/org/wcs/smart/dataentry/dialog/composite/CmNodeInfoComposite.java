@@ -46,7 +46,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SignatureType;
@@ -351,7 +351,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		addImageRow(container);
 
-		List<SignatureType> sTypes = SignatureTypeManager.INSTANCE.getTypes(session, SmartDB.getCurrentConservationArea());
+		List<SignatureType> sTypes = LocalSignatureTypeManager.INSTANCE.getTypes(session, SmartDB.getCurrentConservationArea());
 		if (!sTypes.isEmpty()) {
 			label = new Label(container, SWT.NONE);
 			label.setText(Messages.CmNodeInfoComposite_SignaturesLabel);

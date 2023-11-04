@@ -40,7 +40,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
@@ -213,7 +213,7 @@ public class CmXmlToSmartImporter {
 			}
 			
 			//signatures
-			List<SignatureType> types = SignatureTypeManager.INSTANCE.getTypes(session,  SmartDB.getCurrentConservationArea());
+			List<SignatureType> types = LocalSignatureTypeManager.INSTANCE.getTypes(session,  SmartDB.getCurrentConservationArea());
 			
 			if (xmlCm.getSignatures() != null) {
 				for (org.wcs.smart.dataentry.model.xml.generated.SignatureType st : xmlCm.getSignatures().getSignatureType()) {
@@ -228,7 +228,7 @@ public class CmXmlToSmartImporter {
 					}
 					if (existing == null) {
 						warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_SignatureTypeNotFound, keyId));
-						existing = SignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea());
+						existing = LocalSignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea());
 						existing.setKeyId(keyId);
 						updateNames(existing, st.getName());
 						HibernateManager.saveOrMerge(session, existing);
