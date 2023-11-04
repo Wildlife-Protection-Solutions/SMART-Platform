@@ -59,7 +59,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.SignatureType;
@@ -105,7 +105,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		super(parent, Messages.PatrolOptionsPropertyPage_DialogTitle);
 		try(Session s = HibernateManager.openSession()){
 			patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
-			types = SignatureTypeManager.INSTANCE.getTypes(s, SmartDB.getCurrentConservationArea());
+			types = LocalSignatureTypeManager.INSTANCE.getTypes(s, SmartDB.getCurrentConservationArea());
 			types.forEach(t->{
 				Hibernate.initialize(t);
 				t.getNames().forEach(n->Hibernate.initialize(n.getLanguage()));
@@ -390,7 +390,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 					return null;
 				});
 		if (nameD.open() == Window.OK) {
-			SignatureType newType = SignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea(), nameD.getValue());
+			SignatureType newType = LocalSignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea(), nameD.getValue());
 			newType.setKeyId( NamedKeyItem.generateKey(newType.getName(), types) );
 			
 			types.add(newType);
@@ -504,11 +504,11 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 				this.patrolOption = s.merge(patrolOption);
 				
 				for (SignatureType t : deleteTypes) {
-					SignatureTypeManager.INSTANCE.deleteType(t, s);
+					LocalSignatureTypeManager.INSTANCE.deleteType(t, s);
 				}
 				s.flush();
 				
-				types.forEach(t->SignatureTypeManager.INSTANCE.saveType(t, s));
+				types.forEach(t->LocalSignatureTypeManager.INSTANCE.saveType(t, s));
 				
 				s.getTransaction().commit();
 				setChangesMade(false);
