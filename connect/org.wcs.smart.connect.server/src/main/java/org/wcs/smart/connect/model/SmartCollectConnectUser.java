@@ -31,6 +31,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 @Entity
@@ -91,5 +92,15 @@ public class SmartCollectConnectUser extends UuidItem{
 	}
 	public void setValidationKey(String key) {
 		this.validationKey = key;
+	}
+	
+	@Transient
+	public SmartCollectUser toSmartCollectUser() {
+		SmartCollectUser u = new SmartCollectUser();
+		u.setSource(getSource());
+		u.setState(getState());
+		u.setUuid(getUuid());
+		u.setDeviceId(getDeviceId());
+		return u;
 	}
 }

@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
@@ -69,6 +70,9 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			session.merge(item);
 			session.getTransaction().commit();
 		}
+		
+		//immediately start processing json file
+		SmartMobileJsonProcessorManager.INSTANCE.startProcessing(session.getFactory());
 	}
 
 }

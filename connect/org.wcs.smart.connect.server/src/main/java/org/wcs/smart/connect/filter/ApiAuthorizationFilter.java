@@ -55,7 +55,7 @@ import org.wcs.smart.connect.servlet.UserRoleRequestWrapper;
  * access to the request action/resource.
  *  
  */
-@WebFilter(filterName="api authorization files",urlPatterns={ConnectRESTApplication.ALL_APP_PATH})
+@WebFilter(asyncSupported = true, filterName="api authorization files",urlPatterns={ConnectRESTApplication.ALL_APP_PATH})
 public class ApiAuthorizationFilter implements Filter {
 
 	private final Logger logger = Logger.getLogger(ApiAuthorizationFilter.class.getName());

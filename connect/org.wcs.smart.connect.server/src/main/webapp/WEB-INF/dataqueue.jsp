@@ -9,6 +9,11 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dataqueue.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/userssharedfunctions.js"></script>
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
+	
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 	<title><fmt:message key="dataqueue.pagetitle"/></title>
 </head>
@@ -32,30 +37,42 @@
 		    <input id="enddatefilter" type="text" name="enddate" class="formtext" style="max-width:8em; margin-left: 1px; margin-right:1px;"/>
 		</div>
 		
-
-		<div style="display: flex; flex: 1 1 auto; height: 0; border-top: 1px solid #BBBBBB; border-bottom: 1px solid #BBBBBB;">
-  			<div style="height: 100%; overflow: auto; flex-grow: 1">
-				<div id="fileTable" class="catable table-cell smart-table">
-				  	<div class="table-row smart-table-header">
-				  		<div class="table-cell smart-table-cell"></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('caName')" ><fmt:message key="dataqueue.calabel"/></a></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')" ><fmt:message key="dataqueue.namelabel"/></a></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')" ><fmt:message key="dataqueue.typelabel"/></a></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('status')" ><fmt:message key="dataqueue.statuslabel"/></a></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('lastModifiedDate')" ><fmt:message key="dataqueue.lastmodifiedlabel"/></a></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedDate')" ><fmt:message key="dataqueue.uploadeddatelabel"/></a></div>
-						<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedBy')" ><fmt:message key="dataqueue.uploadeduserlabel"/></a></div>
-						<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
-					</div>
-	  			</div> 
-	  		</div>
-	  		
-	  		<div style="flex-grow: 1; margin-left:20px" id="filepreview">
-		  		<div class="smart-table-header"><fmt:message key="dataqueue.preview"/></div>
-		  		<textarea style="width:90%; height: 90%" id="previewarea"></textarea>
-		  		<div><fmt:message key="dataqueue.previewmsg"/></div>
-	  		</div>
-	  		
+		<div style="flex-grow: 1; display: flex; overflow: hidden;  border-top: 1px solid #BBBBBB; border-bottom: 1px solid #BBBBBB;">
+			<div style="display: flex; height: 100%; flex-basis:60%;">
+	  			<div style="overflow: auto; width: 100%">
+					<div id="fileTable" class="catable table-cell smart-table">
+					  	<div class="table-row smart-table-header">
+					  		<div class="table-cell smart-table-cell"></div>
+							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('caName')" ><fmt:message key="dataqueue.calabel"/></a></div>
+							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')" ><fmt:message key="dataqueue.namelabel"/></a></div>
+							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')" ><fmt:message key="dataqueue.typelabel"/></a></div>
+							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('status')" ><fmt:message key="dataqueue.statuslabel"/></a></div>
+							<!-- <div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('lastModifiedDate')" ><fmt:message key="dataqueue.lastmodifiedlabel"/></a></div> -->
+							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedDate')" ><fmt:message key="dataqueue.uploadeddatelabel"/></a></div>
+							<!-- <div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedBy')" ><fmt:message key="dataqueue.uploadeduserlabel"/></a></div> -->
+							<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
+						</div>
+		  			</div> 
+		  		</div>
+		  	</div>
+		  	<div style="display: flex; height: 100%; flex-basis:40%;">
+		  	<div style="display: flex; flex-direction: column; width: 100%; overflow:auto; padding-left:5px; padding-right:5px">
+			  		<div class="tabheader pageheader" style="border-radius: 0px; border-bottom:1px solid #BBBBBB;">
+		  				<a id="filedetails" class="tab ">Details</a>
+		  				<a id="filepreview" class="tab "><fmt:message key="dataqueue.preview"/></a>
+			  		</div>
+			  		<div style="display:flex; flex-grow:1; overflow: auto">
+			  			<div id="filedetails_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
+			  			</div>
+			  			<div id="filepreview_body" class="tabbody" style="flex-grow:1" >
+			  			<div style="display: flex; flex-direction: column; overflow: auto;height:100%">
+				  			<textarea style="flex-grow: 1" id="previewarea"></textarea>
+				  			<div><fmt:message key="dataqueue.previewmsg"/></div>
+			  			</div>
+			  			</div>
+			  		</div>
+		  	</div>
+			</div>
 		</div>
 		<div class="top-spacer link_small" >
 			<fmt:message key="dataqueue.lastupdated"/>
@@ -66,13 +83,15 @@
 			<a id="selectCompleted" style="padding-right:5px" href="#"><fmt:message key="dataqueue.checkcomplete"/></a>
 			<a id="selectAll" href="#"><fmt:message key="dataqueue.checkall"/></a>
 			<span style="padding-left: 10px; padding-right:10px">|</span>
-			<!--<input type="button" style="margin-left: 10px; margin-right:10px"  class="button" value="<fmt:message key="dataqueue.deletebtn"/>" id="btnDeleteSelected"/>-->
 			<a id="btnDeleteSelected" style="padding-right:5px" href="#"><fmt:message key="dataqueue.deletebtn"/></a>
 			<c:if test="${canupload}">
 				<span style="padding-left: 10px; padding-right:10px">|</span>
-				<!-- <input style="margin-left: 10px; margin-right:10px" type = "button" class="button" id="btnNewFile" value="<fmt:message key="dataqueue.newfilebutton"/>"/>-->
 				<a id="btnNewFile" style="padding-right:5px" href="#"><fmt:message key="dataqueue.newfilebutton"/></a>
-			</c:if>	
+			</c:if>
+			<c:if test="${canrun}">
+				<span style="padding-left: 10px; padding-right:10px">|</span>
+				<a id="btnStartProcessing" style="padding-right:5px" href="#" title="initiate connect processing">Launch File Processing</a>
+			</c:if>		
 		</div>
 		
 	</div>

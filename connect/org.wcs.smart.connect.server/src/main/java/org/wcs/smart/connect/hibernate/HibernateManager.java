@@ -93,6 +93,16 @@ public class HibernateManager {
 		return session;
 	}
 	
+	public static Session newSession(SessionFactory factory, Locale l, Interceptor interceptor){
+		I18nUtil.setLocale(l);
+		Session session = factory.withOptions().interceptor(interceptor).openSession();
+		
+		if (interceptor instanceof AttachmentInterceptor) {
+			((AttachmentInterceptor)interceptor).setSession(session, l);
+		}
+		return session;
+	}
+	
 	/**
 	 * Creates a new session from the given context that uses the given
 	 * locale for loading database labels. 

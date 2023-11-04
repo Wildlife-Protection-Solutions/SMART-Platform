@@ -215,7 +215,7 @@ th {
 	border-top: 1px solid #eceeef;
 }
 .smart-table-cell{
-	padding: 4px;
+	padding: 8px;
 	vertical-align: middle;
 }
 .smart-table-rowon{
@@ -403,104 +403,15 @@ th {
 .top-spacer{
 	margin-top: 10px;
 }
-.warn-icon{
-	background-image: url("images/warn.png");
-    width:16px;
-    height: 16px;
-    background-repeat: no-repeat;
-}
-.info-icon{
-	background-image: url("images/information.png");
-    width:16px;
-    height: 16px;
-    background-repeat: no-repeat;
-    display: block;
-}
-.download-icon{
-    background-image: url("images/download.png");
-    width:16px;
-    height: 16px;
-    background-repeat: no-repeat;
-    display: block;
-    float: right;
-} 
 
-.run-icon{
-	background-image: url("images/run.png");
-	width:16px;
-	height: 16px;
-	background-repeat: no-repeat;
-	display: block;
+.icon-btn-default{
+	color: #003366;
 	cursor: pointer;
 }
 
-.delete-icon{
-	background-image: url("images/delete.png");
-	width:16px;
-	height: 16px;
-	background-repeat: no-repeat;
-	display: block;
-	cursor: pointer;
-	float: right;
-}
-
-.sendvalidate-icon{
-	background-image: url("images/validate_email.png");
-	width:16px;
-	height: 16px;
-	background-repeat: no-repeat;
-	display: block;
-	cursor: pointer;
-	float: right;
-}
-
-.validate-icon{
-	background-image: url("images/validate_user.png");
-	width:16px;
-	height: 16px;
-	background-repeat: no-repeat;
-	display: block;
-	cursor: pointer;
-	float: right;
-}
-
-.blacklist-icon{
-	background-image: url("images/blacklist_user.png");
-	width:16px;
-	height: 16px;
-	background-repeat: no-repeat;
-	display: block;
-	cursor: pointer;
-	float: right;
-}
-
-.update-icon{
-	background-image: url("images/edit.png");
-	width:16px;
-	height: 16px;
-	background-repeat: no-repeat;
-	display: block;
-	float: right;
-	cursor: pointer;
-}
-.up-icon{
-	background-image: url("images/uparrow.png");
-	width:16px;
-	height: 14px;
-	background-repeat: no-repeat;
-	display: block;
-	float: right;
-	cursor: pointer;
-}
-
-.down-icon{
-	background-image: url("images/downarrow.png");
-	width:16px;
-	height: 14px;
-	background-repeat: no-repeat;
-	display: block;
-	float: right;
-	cursor: pointer;
+.icon-btn-spacing{
+	margin-left: 4px;
+	margin-right: 4px;
 }
 
 .dashboard-section{
@@ -604,7 +515,7 @@ th {
 }
 .folder-icon {
 	margin: 2px;
-	color: darkblue;
+	color: #003366;
 }
 .query-icon {
 	margin: 0px 4px 1px 4px;
@@ -824,10 +735,6 @@ fieldset{
   width: 50%;
   display: inline-block;
   min-width:200px;
-}
-
-.filterIcon{
-	background: url('images/iconsfilter.png') no-repeat 0 0;
 }
 
 #typetable{

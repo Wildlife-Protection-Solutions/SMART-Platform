@@ -9,6 +9,9 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/userssharedfunctions.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/users.js"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
 
 
 <title><fmt:message key="users.pagetitle"/></title>
@@ -47,8 +50,12 @@
 			<div data-username ="${user.getUsername()}" class="smartuser userrow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
-				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" data-email="${user.getEmail()}" title="<fmt:message key="users.editusertooltip"/>" class="edituser update-icon"></a></div>
- 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deactivateusertooltip"/>" class="deactivateuser delete-icon"></a></div> 
+				<div class="table-cell smart-table-cell ">
+					<i data-username = "${user.getUsername()}" data-email="${user.getEmail()}" title="<fmt:message key="users.editusertooltip"/>" class="fa-regular fa-xl fa-pen-to-square icon-btn-default"></i>
+				</div>
+ 				<div class="table-cell smart-table-cell ">
+ 					<i data-username = "${user.getUsername()}" title="<fmt:message key="users.deactivateusertooltip"/>" class="fa-solid fa-xl fa-user-xmark icon-btn-default"></i>
+ 				</div> 
 <%-- 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deleteusertooltip"/>" class="deleteuser delete-icon"></a></div> --%>
 
 			</div>
@@ -67,8 +74,12 @@
 			<div data-username ="${user.getUsername()}" class="smartinactiveuser inactiveuserrow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
-				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.activateusertooltip"/>" class="activateuser run-icon"></a></div>
-				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deleteusertooltip"/>" class="deleteuser delete-icon"></a></div>
+				<div class="table-cell smart-table-cell ">
+					<i data-username = "${user.getUsername()}" title="<fmt:message key="users.activateusertooltip"/>" class="fa-solid fa-xl fa-user-plus icon-btn-default"></i>
+				</div>
+				<div class="table-cell smart-table-cell ">
+					<i data-username = "${user.getUsername()}" title="<fmt:message key="users.deleteusertooltip"/>" class="fa-solid fa-xl fa-xmark icon-btn-default"></i>
+				</div>
 			</div>
 			</c:forEach>  
   		</div>

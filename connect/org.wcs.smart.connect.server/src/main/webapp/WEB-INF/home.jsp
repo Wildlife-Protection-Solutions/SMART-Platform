@@ -7,6 +7,9 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/home.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
 	<title><fmt:message key="home.pagetitle"/></title>
 	
 </head>

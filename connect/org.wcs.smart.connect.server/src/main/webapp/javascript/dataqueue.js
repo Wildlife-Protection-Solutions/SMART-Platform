@@ -7,6 +7,7 @@ var files = "";
 
 var startDatePicker;
 var endDatePicker;
+var warningcache;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -16,6 +17,11 @@ window.onload = function(){
 	var newbtn = document.querySelector("#btnNewFile");
 	if (newbtn != null){
 		newbtn.onclick=clearAndShowNewFileDialog;
+	}
+	
+	let startbtn = document.querySelector("#btnStartProcessing");
+	if (startbtn != null){
+		startbtn.onclick = startFileProcessing;
 	}
 	document.querySelector("#cancelNewFile").onclick = function(){closeDialog('newFileDialog');};
 	document.querySelector("#cancelUpdateFile").onclick = function(){closeDialog('updateFileDialog');};
@@ -28,7 +34,10 @@ window.onload = function(){
 	document.getElementById("selectNone").onclick = checkNone;
 	
 	document.getElementById("refreshnow").onclick = refreshFileList;
-
+	
+	document.querySelector("#filedetails").onclick=function(){showTab("filedetails");}
+	document.querySelector("#filepreview").onclick=function(){showTab("filepreview");}
+	showTab("filedetails");
 	
 	refreshFileList();
 	
@@ -52,6 +61,83 @@ window.onload = function(){
 	});
 	
 	updateDateFilterVisibility();
+	
+	
+ 	if(typeof(EventSource) !== "undefined") {
+		var url = DATAQUEUEURL + '/updates';
+     	var source = new EventSource(url);
+     	
+    	source.addEventListener("dataqueue", function(event) {
+			console.log("Event recieved:" + event.data);
+			var item = JSON.parse(event.data);
+        	if (item.status == null){
+				//deleted
+			}else{
+				//search of item in table and update table
+				for (var i = 0; i < files.length; i ++){
+					if (files[i].uuid == item.uuid){
+						files[i] = item;
+						let tr = document.getElementById("fileRow" + i);
+						if (tr == null){
+							//no row likely new - perhaps initiate full refresh
+							return;
+						}
+
+						//TODO: update these drop downs
+						//caMap.set(caUuid, ca);
+		 				//statusSet.add(files[i].status);		 		
+						//typeSet.add(files[i].type);
+		 		
+		 				tr.dataset.uuid = item.uuid;
+		 				tr.dataset.status = item.status;
+		 				tr.dataset.type = item.type;
+		 				tr.dataset.cauuid = item.conservationArea;
+						tr.dataset.uploadeddate = files[i].uploadedDate;
+						
+						  while (tr.childNodes[4].firstChild) {
+   							 tr.childNodes[4].removeChild(tr.childNodes[4].lastChild);
+  						}
+						tr.childNodes[4].innerHTML = item.status
+						
+						if (item.status == "COMPLETE_WARN" || (item.status == "QUEUED" && files[i].statusMessage )){
+				
+							//add a warning icon with tooltip message
+							var img = document.createElement("i");
+					 		img.className = getStatusImage("WARNING");
+					 		img.style.color = getStatusImageColor("WARNING");
+					 		img.style.paddingRight="2px";
+							tr.childNodes[4].prepend(img);
+							
+							if (item.status == "COMPLETE_WARN"){
+								img.title = "Completed but warnings were generated while processing. Click on row to view warnings.";
+							}else{
+								img.title = "Processing was attempted but could not be completed. Item was requeued. Click on row to view details.";
+							}
+						}
+						
+					 	var img = document.createElement("i");
+					 	img.className = getStatusImage(item.status);
+					 	img.style.color = getStatusImageColor(item.status);
+					 	img.style.paddingRight="2px";
+						tr.childNodes[4].style.whiteSpace = "nowrap";
+					 	tr.childNodes[4].prepend(img);
+					}
+				}
+			}
+        	
+        	
+    	}, false);
+
+    	
+    	source.onerror = function(event) {
+			console.log(event);
+			//displayError(event.data);
+			source.close();
+    	};
+
+	 } else {
+     	displayError("Sorry, server-sent events are not supported in your browser...");
+ 	}
 }
 
 /*uploads the new file to the server API*/  
@@ -145,6 +231,7 @@ function clearAndShowNewFileDialog(){
 
 
 function refreshFileList(){
+	warningcache = [];
 	var parent = document.getElementById("fileTable");
 	
 	var objects = document.querySelectorAll("div.filerow");
@@ -186,6 +273,7 @@ function processFileApiResponse(){
 	
 	files = JSON.parse(this.responseText);
 	createFilterTable();
+	updateFileInfoDetails();
 }
 
 function createFilterTable(){
@@ -229,7 +317,7 @@ function createFilterTable(){
 		 		
 		 		
 		 		var row = tableCreateRow(parent,
-		 				[null, ca, name, type , status, lastModified, uploadedDate, uploadedBy, null], 
+		 				[null, ca, name, type , status, uploadedDate, null], 
 		 				"filerow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
@@ -238,7 +326,7 @@ function createFilterTable(){
 		 		row.dataset.cauuid = caUuid;
 				row.dataset.uploadeddate = files[i].uploadedDate;
 				
-		 		row.onclick = showFilePreview;
+		 		row.onclick = updateFileInfoDetails;
 
 		 		var checkbox = document.createElement("input");
 		 		checkbox.type="checkbox";
@@ -251,29 +339,52 @@ function createFilterTable(){
 		 		
 		 		//TODO - should we check for permissions for update/delete, or assume any data queue permission = all data queue permission
 //		 		if(canupdate){
-	 				var updateicon = document.createElement("a");
-			 		updateicon.className="update-icon marginleftright";
-			 		updateicon.title=i18n("dataqueue.edittooltip")
-			 		updateicon.onclick = updateFile;
-			 		updateicon.href="";
-			 		row.childNodes[row.childNodes.length - 1].appendChild(updateicon);
+	 				var updateiconi = document.createElement("i");
+	 				updateiconi.className = "fa-regular fa-xl fa-pen-to-square icon-btn-default";
+	 				updateiconi.title=i18n("dataqueue.edittooltip")
+			 		updateiconi.onclick = updateFile;
+			 		row.childNodes[row.childNodes.length - 1].appendChild(updateiconi);
 //		 		}
 //		 		if(candelete){
-			 		var deleteicon = document.createElement("a");
-			 		deleteicon.className="delete-icon marginleftright";
+			 		var deleteicon = document.createElement("i");
+			 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
+			 		deleteicon.style.marginLeft = "5px";			
 			 		deleteicon.title=i18n("dataqueue.deletetooltip");
 			 		deleteicon.onclick = deleteFile;
-			 		deleteicon.href="";
 			 		row.childNodes[row.childNodes.length - 1].appendChild(deleteicon);
 //		 		}
 			 	
 
 			 	var downloadicon = document.createElement("a");
-			 	downloadicon.className="download-icon marginleftright";
+			 	downloadicon.className="fa-solid fa-xl fa-download icon-btn-default";
+			 	downloadicon.style.marginLeft = "5px";			 			 	
 			 	downloadicon.title=i18n("dataqueue.downloadtooltip");
 			 	downloadicon.onclick = downloadFile;
-			 	downloadicon.href="";
 			 	row.childNodes[row.childNodes.length - 1].appendChild(downloadicon);
+			 	row.childNodes[row.childNodes.length - 1].style.whiteSpace = "nowrap";
+			 	
+			 	if (status == "COMPLETE_WARN" || (status == "QUEUED" && files[i].statusMessage )){
+				
+					//add a warning icon with tooltip message
+					var img = document.createElement("i");
+			 		img.className = getStatusImage("WARNING");
+			 		img.style.color = getStatusImageColor("WARNING");
+			 		img.style.paddingRight="2px";
+					row.childNodes[4].prepend(img);
+					
+					if (status == "COMPLETE_WARN"){
+						img.title = "Completed but warnings were generated while processing. Click on row to view warnings.";
+					}else{
+						img.title = "Processing was attempted but could not be completed. Item was requeued. Click on row to view details.";
+					}
+				}
+				
+			 	var img = document.createElement("i");
+			 	img.className = getStatusImage(status);
+			 	img.style.color = getStatusImageColor(status);
+			 	img.style.paddingRight="2px";
+				row.childNodes[4].style.whiteSpace = "nowrap";
+			 	row.childNodes[4].prepend(img);
 			 	
 		 	}
 		 	
@@ -332,6 +443,37 @@ function createFilterTable(){
 	}
 }
 
+function getStatusImage(status){
+	if (status == "QUEUED"){
+		return "fa-regular fa-xl fa-circle-dot ";
+	}else if (status == "ERROR"){
+		return "fa-regular fa-xl fa-circle-xmark";
+	}else if (status == "UPLOADING"){
+		return "fa-regular fa-xl fa-circle-up";
+	}else if (status == "PROCESSING"){
+		return "fa-solid fa-xl fa-circle-half-stroke";					
+	}else if (status == "COMPLETE" || status == "COMPLETE_WARN"){
+		return "fa-regular fa-xl fa-circle-check";
+	}else if (status == "WARNING"){
+		return "fa-solid fa-xl fa-triangle-exclamation";
+	}
+}
+
+function getStatusImageColor(status){
+	
+	if (status == "QUEUED"){
+		return "#003366";
+	}else if (status == "ERROR"){
+		return "red";
+	}else if (status == "PROCESSING" || status == "UPLOADING"){
+		return "#003366";
+	}else if (status == "COMPLETE" || status == "COMPLETE_WARN"){
+		return "green";
+	}else if (status == "WARNING"){
+		//return "#E9D502";
+		return "#003366";
+	}
+}
 function sortTable(sortColumn){
 	if(lastSorted == sortColumn){
 		sortColumn = "-" + sortColumn;
@@ -554,20 +696,71 @@ function getFilesize(){
 
 
 /* updates the user info section with the current selected user */
-function showFilePreview(){
+function updateFileInfoDetails(){
 	
-	if (this == null || this.dataset.uuid == null) return;
+	var detailssection = document.getElementById('filedetails_body');
+	detailssection.innerHTML = "";
+	document.getElementById("previewarea").value = "";
+		
+		
+	if (this == null || this.dataset == null || this.dataset.uuid == null){
+		return;	
+	}
+	
 	var itemuuid = this.dataset.uuid;
 	
+	//update details
+	
+	
+	
+	for (var i = 0; i < files.length; i ++){
+		if (files[i].uuid == itemuuid){
+			var status = "<i style='padding-right: 2px; color: " + getStatusImageColor(files[i].status) + "' class='" + getStatusImage(files[i].status) + "'></i>";
+			var inner = "<table>" +
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Status:</td><td>" + status + files[i].status + "</td></tr>"+ 
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Status Message:</td><td>" + (files[i].statusMessage == null ? "" : files[i].statusMessage) + "</td></tr>"+
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Name:</td><td>" + files[i].name + "</td></tr>" +
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Conservation Area:</td><td>" + files[i].caName + "</td></tr>"+
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Type:</td><td>" + files[i].type + "</td></tr>"+
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Uploaded By:</td><td>" + files[i].uploadedBy + "</td></tr>"+
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Uploaded On:</td><td>" + formatDate(files[i].uploadedDate) + "</td></tr>"+
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Modified On:</td><td>" + formatDate(files[i].lastModifiedDate) + "</td></tr>"+						
+			"<tr><td style=\"vertical-align: top; white-space: nowrap; padding: 5px;\">Warnings:</td><td><div style=\"max-width: 200px\" id=\"warn_" + itemuuid + "\"></div></td></tr>"+
+			"</table>";
+			 	
+			detailssection.innerHTML=inner;
+			break;		
+		}
+	}
+	
+	//get warnings: /server/api/dataqueue/items/{uuid}
+	if (warningcache[itemuuid] != null){
+		var id = document.getElementById("warn_" + itemuuid);
+		id.innerHTML = warningcache[itemuuid];
+	}else{
+		var oReq = new XMLHttpRequest();
+	 	oReq.onload = updateDetailWarnings;
+	 	oReq.open("Get", DATAQUEUEURL + "/items/" + encodeURIComponent(itemuuid), true);
+	 	oReq.send();
+	 }
+		
+	//get preview
 	var currentSelection = document.querySelector("#fileTable > .smart-table-selectedrow");
 	if (currentSelection != null){
 		currentSelection.className = currentSelection.className.replace(/(?:^|\s)smart-table-selectedrow(?!\S)/ , '' );
 	}
 	this.className = this.className + " smart-table-selectedrow";
-	var oReq = new XMLHttpRequest();
+	oReq = new XMLHttpRequest();
  	oReq.onload = showPreviewResults;
  	oReq.open("Get", DATAQUEUEURL + "/items/" + encodeURIComponent(itemuuid) + "/preview", true);
  	oReq.send();
+}
+
+function startFileProcessing(){
+	//ask file processing to start
+	var oReq = new XMLHttpRequest();
+	oReq.open("Put", DATAQUEUEURL + "/processing/start", true);
+	oReq.send();
 }
 
 function showPreviewResults(){
@@ -577,4 +770,20 @@ function showPreviewResults(){
 	}
 	
 	document.getElementById("previewarea").value = this.responseText ;
+}
+
+function updateDetailWarnings(){
+	if (this.status != 200){
+		return;
+	}
+	var r = JSON.parse(this.response);
+	var id = document.getElementById("warn_" + r.uuid);
+	
+	let message = "";
+	for (let warn of r.warningMessageList){
+		message += warn;
+		message += "<br>";
+	}
+	id.innerHTML = message;
+	warningcache[r.uuid] = message;
 }

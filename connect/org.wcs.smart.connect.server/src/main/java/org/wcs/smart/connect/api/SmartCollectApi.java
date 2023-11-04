@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,7 +114,7 @@ public class SmartCollectApi {
 				try{
 					s.beginTransaction();
 					for (SmartCollectConnectUser user : QueryFactory.buildQuery(s, SmartCollectConnectUser.class).list()){
-						users.add(toSmartCollectUser(user));
+						users.add(user.toSmartCollectUser());
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
@@ -141,7 +142,7 @@ public class SmartCollectApi {
 							.setMaxResults(thislimit)
 							.list();
 					for (SmartCollectConnectUser user : cus){
-						users.add(toSmartCollectUser(user));
+						users.add(user.toSmartCollectUser());
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
@@ -176,18 +177,11 @@ public class SmartCollectApi {
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_ValidateUserError", request.getLocale()), ex); //$NON-NLS-1$
 			}
 			
-			return Collections.singletonList(toSmartCollectUser(user));
+			return Collections.singletonList(user.toSmartCollectUser());
 		}
 	}
 	
-	private SmartCollectUser toSmartCollectUser(SmartCollectConnectUser user) {
-		SmartCollectUser u = new SmartCollectUser();
-		u.setSource(user.getSource());
-		u.setState(user.getState());
-		u.setUuid(user.getUuid());
-		u.setDeviceId(user.getDeviceId());
-		return u;
-	}
+
 	@GET
     @Path("/source/{uuid: [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}")
 	@Operation(description="get full details about a community user")
@@ -266,43 +260,17 @@ public class SmartCollectApi {
 			
 			
 			if (sendvalidation) {
-				if (SmartCollectUser.isEmailSource(user.getSource())) {
-					user.setState(State.VALIDATION_PENDING);
-					
-					user.setValidateSentDate(LocalDateTime.now());
-					String v1 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
-					String v2 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
-					String key = v1 + v2;
-					user.setValidationKey(key);
-					user.setValidateSentDate(LocalDateTime.now());
-
+				if (SmartCollectUser.isEmailSource(user.getSource())) {			
 					// send email
 					try {
-						javax.naming.Context initCtx = new InitialContext();
-						javax.naming.Context envCtx = (javax.naming.Context) initCtx
-								.lookup("java:comp/env"); //$NON-NLS-1$
-						javax.mail.Session session = (javax.mail.Session) envCtx
-								.lookup("mail/Session"); //$NON-NLS-1$
-						
 						String url = request.getRequestURL().toString();
 						String uri = request.getRequestURI();
 						if (uri != null && uri.length() > 0) {
 							url = url.substring(0, url.indexOf(uri));
 						}
-						String validationUrl = url + request.getContextPath() + "/noa/smartcollect/source/" + key; //$NON-NLS-1$
+						
+						sendValidationRequest(request.getLocale(), user, url);
 								
-						Message message = new MimeMessage(session);
-						InternetAddress to[] = new InternetAddress[1];
-						to[0] = new InternetAddress(user.getSource());			
-						message.setRecipients(Message.RecipientType.TO, to);
-						message.setSubject(Messages.getString("SmartCollectApi_ValidationEmailSubject", request.getLocale())); //$NON-NLS-1$
-						
-						message.setContent(MessageFormat.format(
-								Messages.getString("SmartCollectApi.ValidationMessage", request.getLocale()),//$NON-NLS-1$ 
-								"<a href=\"" + validationUrl + "\">", "</a>", "<br><br>", "<br>" + validationUrl), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
-								"text/html");  //$NON-NLS-1$
-						
-						Transport.send(message);
 					} catch (Exception ex) {
 						logger.log(Level.SEVERE, "Sending validation email failed:" + ex.getMessage(), ex); //$NON-NLS-1$
 						throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
@@ -322,5 +290,45 @@ public class SmartCollectApi {
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_UpdateError", request.getLocale()), ex); //$NON-NLS-1$
 		}
 
+	}
+	
+	private  static String generateValidationKey() {
+		String v1 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
+		String v2 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
+		String key = v1 + v2;
+		return key;
+	}
+	
+	public static void sendValidationRequest(Locale locale,
+			SmartCollectConnectUser user, String url) throws Exception{
+		
+		user.setState(State.VALIDATION_PENDING);					
+		user.setValidateSentDate(LocalDateTime.now());
+		user.setValidationKey(generateValidationKey());
+		user.setValidateSentDate(LocalDateTime.now());
+		
+		if (locale == null) locale = Locale.getDefault();
+		
+		javax.naming.Context initCtx = new InitialContext();
+		javax.naming.Context envCtx = (javax.naming.Context) initCtx
+				.lookup("java:comp/env"); //$NON-NLS-1$
+		javax.mail.Session session = (javax.mail.Session) envCtx
+				.lookup("mail/Session"); //$NON-NLS-1$
+		
+		
+		String validationUrl = url + "/noa/smartcollect/source/" + user.getValidationKey(); //$NON-NLS-1$
+				
+		Message message = new MimeMessage(session);
+		InternetAddress to[] = new InternetAddress[1];
+		to[0] = new InternetAddress(user.getSource());			
+		message.setRecipients(Message.RecipientType.TO, to);
+		message.setSubject(Messages.getString("SmartCollectApi_ValidationEmailSubject", locale)); //$NON-NLS-1$
+		
+		message.setContent(MessageFormat.format(
+				Messages.getString("SmartCollectApi.ValidationMessage", locale),//$NON-NLS-1$ 
+				"<a href=\"" + validationUrl + "\">", "</a>", "<br><br>", "<br>" + validationUrl), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+				"text/html");  //$NON-NLS-1$
+		
+		Transport.send(message);
 	}
 }

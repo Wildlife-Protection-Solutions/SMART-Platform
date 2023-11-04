@@ -675,8 +675,8 @@ function createQueryTable(){
 			row.style.display="none";
 		}
 		if (canExecute(query.typeKey)){
-			var runicon = document.createElement("a");
-			runicon.className="run-icon";
+			var runicon = document.createElement("i");
+			runicon.className="fa-solid fa-xl fa-circle-right icon-btn-default";
 			runicon.title= i18n("query.runquery");
 			runicon.onclick = showQueryOptions;
 			row.childNodes[3].appendChild(runicon);

@@ -209,20 +209,18 @@ function createPackageTable(){
  		row.dataset.packageuuid = packages[i].uuid;
  		
  		
-	 	var downloadca = document.createElement("a");
-	 	downloadca.className="download-icon";
+	 	var downloadca = document.createElement("i");
+	 	downloadca.className="fa-solid fa-xl fa-download icon-btn-default";
 	 	downloadca.title="download package";
 	 	downloadca.dataset.uuid = packages[i].uuid;
 	 	downloadca.onclick = downloadPackage;
-	 	downloadca.href="";
 	 	row.childNodes[8].appendChild(downloadca);
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title="delete package";
  		deleteicon.dataset.uuid = packages[i].uuid;
  		deleteicon.onclick = deletePackageValidate;
- 		deleteicon.href="";
  		row.childNodes[9].appendChild(deleteicon);
  	}
 }
@@ -330,20 +328,18 @@ function createNavigationTable(){
  		row.dataset.packageuuid = packages[i].uuid;
  		
  		
-	 	var downloadca = document.createElement("a");
-	 	downloadca.className="download-icon";
+	 	var downloadca = document.createElement("i");
+	 	downloadca.className="fa-solid fa-xl fa-download icon-btn-default";
 	 	downloadca.title="download package";
 	 	downloadca.dataset.uuid = packages[i].uuid;
 	 	downloadca.onclick = downloadNavigation;
-	 	downloadca.href="";
 	 	row.childNodes[3].appendChild(downloadca);
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title="delete package";
  		deleteicon.dataset.uuid = packages[i].uuid;
  		deleteicon.onclick = deleteNavigationValidate;
- 		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);
  	}
 }
@@ -462,33 +458,29 @@ function collectUserCallback(){
  					
  		row.dataset.sourceuuid = users[i].uuid;
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default icon-btn-spacing";
  		deleteicon.title= "delete user";
- 		deleteicon.style="margin-left: 5px; margin-right:5px";
  		deleteicon.onclick = deleteCollectUserValidate;
-		row.childNodes[2].appendChild(deleteicon);
+		row.childNodes[3].appendChild(deleteicon);
 
-		var sendvalidateicon = document.createElement("a");
-		sendvalidateicon.className="sendvalidate-icon";
+		var sendvalidateicon = document.createElement("i");
+		sendvalidateicon.className="fa-solid fa-xl fa-envelope icon-btn-default icon-btn-spacing";
 		sendvalidateicon.title= "send validation request";
-		sendvalidateicon.style="margin-left: 5px; margin-right:5px";
 		sendvalidateicon.onclick = sendValidationRequest;
-		row.childNodes[2].appendChild(sendvalidateicon);
+		row.childNodes[3].appendChild(sendvalidateicon);
 		
-		var blacklisticon = document.createElement("a");
-		blacklisticon.className="blacklist-icon";
+		var blacklisticon = document.createElement("i");
+		blacklisticon.className="fa-solid fa-xl fa-user-xmark icon-btn-default icon-btn-spacing";
 		blacklisticon.title= "blacklist user";
-		blacklisticon.style="margin-left: 5px; margin-right:5px";
 		blacklisticon.onclick = blacklistUser;
-		row.childNodes[2].appendChild(blacklisticon);
+		row.childNodes[3].appendChild(blacklisticon);
 
-		var validateicon = document.createElement("a");
-		validateicon.className="validate-icon";
+		var validateicon = document.createElement("i");
+		validateicon.className="fa-solid fa-xl fa-user-check icon-btn-default icon-btn-spacing";
 		validateicon.title= "validate user";
-		validateicon.style="margin-left: 5px; margin-right:5px";
 		validateicon.onclick = validateUser;
-		row.childNodes[2].appendChild(validateicon);
+		row.childNodes[3].appendChild(validateicon);
  	}
  	
  	if(users.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out

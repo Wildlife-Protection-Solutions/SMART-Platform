@@ -70,22 +70,20 @@ function createDesktopUserTable(){
  		row.dataset.cauuid = users[i].caUuid;
  		row.onclick = showDesktopUserInfo;
  	
- 		var editicon = document.createElement("a");
- 		editicon.className="update-icon";
+ 		var editicon = document.createElement("i");
+ 		editicon.className="fa-regular fa-xl fa-pen-to-square icon-btn-default";
  		editicon.title="edit user";
  		editicon.dataset.username = users[i].smartUserId;
  		editicon.dataset.caUuid = users[i].caUuid;
  		editicon.onclick = getUserEditDetails;
- 		editicon.href="";
  		row.childNodes[2].appendChild(editicon);
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title="deactivate user";
  		deleteicon.dataset.username = users[i].smartUserId;
  		deleteicon.dataset.caUuid = users[i].caUuid;
  		deleteicon.onclick = deactivateDesktopUser;
- 		deleteicon.href="";
  		row.childNodes[3].appendChild(deleteicon);
  	}
 }

@@ -109,6 +109,7 @@ import org.wcs.smart.connect.model.BasemapBounds;
 import org.wcs.smart.connect.model.BasemapTile;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
+import org.wcs.smart.connect.model.ConnectSetting;
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
@@ -198,6 +199,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 			}
 		}
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, null);
+		SmartContext.INSTANCE.setClass(ExecutorService.class, null);
 		
 		//clean up BIRT
 		BirtEngine.destroyBirtEngine();
@@ -442,6 +444,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartCollectConnectUser.class);
 		config.addAnnotatedClass(BasemapTile.class);
 		config.addAnnotatedClass(BasemapBounds.class);
+		config.addAnnotatedClass(ConnectSetting.class);
 		try{
 			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
 				config.addAnnotatedClass(c);
@@ -482,6 +485,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		}
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(numthreads);
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
+		SmartContext.INSTANCE.setClass(ExecutorService.class, scheduler);
 		
 		initCleanUpJob(sf, scheduler, sce.getServletContext());
 

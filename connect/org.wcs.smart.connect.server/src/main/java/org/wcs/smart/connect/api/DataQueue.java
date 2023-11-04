@@ -61,6 +61,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItemProxy;
@@ -69,9 +70,11 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.ConnectSetting;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
+import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
@@ -161,8 +164,7 @@ public class DataQueue {
 			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 	}
-	
-	
+		
 	/**
 	 * <p>Get details of data queue items that match provided filter</p>
 	 * 
@@ -180,7 +182,8 @@ public class DataQueue {
 	@GET
     @Path("/detailedItems")
 	@Operation(description="Get details of data queue items that match provided filter")
-	public List<ServerDataQueueItemProxy> getDetailedItems(@Parameter(description="only show items from these CAs. A comma separated string of UUIDs") @QueryParam("cafilter") String caFilter,
+	public List<ServerDataQueueItemProxy> getDetailedItems(
+			@Parameter(description="only show items from these CAs. A comma separated string of UUIDs") @QueryParam("cafilter") String caFilter,
 			@Parameter(description="comma separated list of status states to include.") @QueryParam("status") String status){
 		List<ServerDataQueueItem.Status> statusFilter = null;
 		List<ServerDataQueueItemProxy> proxyitems = new ArrayList<ServerDataQueueItemProxy>();
@@ -277,11 +280,7 @@ public class DataQueue {
 								.list();
 					}
 					for (ServerDataQueueItem item : items){
-						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(
-								item.getUuid(), item.getName(), ca.getUuid(), ca.getLabel(),
-								item.getType(), item.getStatus(), 
-								item.getLastModified(), item.getUploadedDate(), 
-								item.getUploadedBy());
+						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(item, ca);
 						proxyitems.add(proxy);
 					}
 				}catch (SmartConnectException ex){
@@ -341,6 +340,11 @@ public class DataQueue {
 				}
 			}
 			s.getTransaction().commit();
+			
+			ServerDataQueueItem i2 = new ServerDataQueueItem();
+			i2.setUuid(item.getUuid());
+			DataQueueEventService.addUpdateToQueue(i2);
+			
 			return item;
 		}catch(Exception ex){
 			s.getTransaction().rollback();
@@ -449,6 +453,9 @@ public class DataQueue {
 			response.setHeader(HttpHeaders.CONTENT_LENGTH, "0"); //$NON-NLS-1$
 			
 			s.getTransaction().commit();
+			
+			DataQueueEventService.addUpdateToQueue(item);
+			
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
@@ -584,6 +591,9 @@ public class DataQueue {
 			
 			item.setStatus(serverStatus);
 			s.getTransaction().commit();
+			
+			DataQueueEventService.addUpdateToQueue(item);
+			
 			return item;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -640,15 +650,141 @@ public class DataQueue {
 			item.setStatus(newItem.getStatus());
 			item.setType(newItem.getType());
 			s.getTransaction().commit();
+			
+			DataQueueEventService.addUpdateToQueue(item);
+			
 			return item;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, "Could not update status. ", ex); //$NON-NLS-1$
 			if (ex instanceof SmartConnectException) throw ex;
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
+		} 
+		
+	}
+	
+
+	/**
+	 *  <p>Get the data queue settings</p>
+	 *  
+	 */
+	@GET
+    @Path("/settings")
+	@Operation(description="Get data queue processing settings")
+    public List<ConnectSetting> getSettings(){
+		
+		String[] keys = new String[ConnectSetting.DQ_SETTINGS.length];
+		for (int i = 0; i < keys.length; i ++) {
+			keys[i] = ConnectSetting.DQ_SETTINGS[i].key;
+		}
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return s.createQuery("FROM ConnectSetting WHERE key IN (:keys)", ConnectSetting.class)
+				.setParameterList("keys", keys)
+				.list();
+			
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Unable to get settings." + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST);  
+		}finally {
+			s.getTransaction().rollback();
 		}
 	}
 	
+	/**
+	 *  <p>Update a data queue settings</p>
+	 *  
+	 */
+	@PUT
+    @Path("/settings/{setting}")
+	@Operation(description="Updates the given setting")
+	@Consumes({ MediaType.TEXT_PLAIN})
+    public void updateSetting(
+    		@Parameter(description="Setting key to update") @PathParam("setting") String settingKey,
+    		String newValue){
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
+				throw new SmartConnectException(Response.Status.FORBIDDEN);
+			}
+			
+			ConnectSetting.Setting key = null;
+			for (ConnectSetting.Setting setting : ConnectSetting.DQ_SETTINGS) {
+				if (setting.key.equalsIgnoreCase(settingKey)) {
+					key = setting;
+					break;
+				}
+			}
+			if (key == null) {
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid setting key");
+			}
+			
+			String updatedValue = null;
+			
+			if (key == ConnectSetting.Setting.DQ_SMART_MOBILE_PROCESSING) {
+				if (newValue.strip().equalsIgnoreCase("true")) {
+					updatedValue = "true";
+				}else {
+					updatedValue = "false";
+				}
+			}else if (key == ConnectSetting.Setting.DQ_SMART_COLLECT_USEROPTION) {
+				for (ConnectSetting.SmartCollectUserOption op : ConnectSetting.SmartCollectUserOption.values()) {
+					if (op.key.equalsIgnoreCase(newValue.strip())) {
+						updatedValue = op.key;
+						break;
+					}
+				}
+			}else {
+				updatedValue = newValue.strip();
+			}
+			
+			if (updatedValue== null) {
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid setting value");
+			}
+			
+			ConnectSetting setting = s.get(ConnectSetting.class, key.key);
+			if (setting == null) {
+				setting = new ConnectSetting();
+				setting.setKey(key.key);
+				s.persist(setting);
+			}
+			setting.setValue(updatedValue);
+			s.getTransaction().commit();
+			
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Unable to update settings." + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST);  
+		}finally {
+			s.getTransaction().rollback();
+		}
+	}
+	
+	/**
+	 *  <p>Update a data queue settings</p>
+	 *  
+	 */
+	@PUT
+    @Path("/processing/start")
+	@Operation(description="Starts data queue processing if not already started")
+	@Consumes({ MediaType.TEXT_PLAIN})
+    public void updateSetting(){
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try {
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
+				throw new SmartConnectException(Response.Status.FORBIDDEN);
+			}
+		}finally {
+			s.getTransaction().rollback();
+		}
+		SmartMobileJsonProcessorManager.INSTANCE.startProcessing(HibernateManager.getSessionFactory(context));
+	}
 	
 	/**
 	 *  <p>Used by SMART Desktop Only - not to be used by api call</p>

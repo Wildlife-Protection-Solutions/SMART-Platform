@@ -8,7 +8,9 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/ca.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
-	
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
 	<title><fmt:message key="ca.pagetitle"/></title>
 	
 </head>
@@ -39,13 +41,17 @@
 					<div data-cauuid ="${ca.getUuid()}" class="carow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 						<div class="table-cell smart-table-cell">${ca.getLabel()}</div>
 						<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
-						<div class="table-cell smart-table-cell"><a href="" class="info-icon" id="infoca" data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.details"/>"></a></div>
+						<div class="table-cell smart-table-cell">
+							<i class="fa-solid fa-xl fa-circle-info icon-btn-default" id="infoca" data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.details"/>"></i>
+						</div>
 						<div class="table-cell smart-table-cell ">
 							<c:if test="${ca.getStatus() == 'DATA'}">
-								<a href="" data-cauuid="${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="downloadca download-icon"></a>
+								<i data-cauuid="${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="fa-solid fa-xl fa-download icon-btn-default"></i>
 							</c:if>
 						</div>
-						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-version = "${ca.getVersion()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
+						<div class="table-cell smart-table-cell ">
+							<i data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-version = "${ca.getVersion()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="fa-solid fa-xl fa-xmark icon-btn-default"></i>
+							</div>
 					</div>
 
 				</c:forEach>
@@ -65,10 +71,6 @@
 			<input id="dmfile" type="file" name="file" class="formtext block" />
 			
 			<label class="block top-spacer"><fmt:message key="ca.dmcafield"/></label>
-			
-			<!-- <div class = warn-icon style="float:left"></div> 
-			<label class="small" ><fmt:message key="ca.dmcawarn"/></label>-->
-			
 			
 			<div id="dm_calist" style="border:1px solid #BBC6F5; height: 150px; overflow-y:scroll">
 					<c:forEach var="ca" items="${cas}" varStatus="count">

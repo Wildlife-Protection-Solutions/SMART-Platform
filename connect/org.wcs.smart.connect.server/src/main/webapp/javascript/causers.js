@@ -176,23 +176,7 @@ function createInactiveUserTable(){
  				"inactiveuserrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].username;
 // 		row.onclick = showUserInfo; //not for inactive users
- 	
-// 		var activateicon = document.createElement("a");
-// 		activateicon.className="activateuser run-icon";
-// 		activateicon.title="Activate User";
-// 		activateicon.dataset.username = users[i].username;
-// 		activateicon.onclick = activateUser;
-// 		activateicon.href="";
-// 		row.childNodes[2].appendChild(activateicon);
-// 		
-// 		var deleteicon = document.createElement("a");
-// 		deleteicon.className="delete-icon";
-// 		deleteicon.title="delete user";
-// 		deleteicon.dataset.username = users[i].username;
-// 		deleteicon.onclick = deleteUser;
-// 		deleteicon.href="";
-// 		row.childNodes[3].appendChild(deleteicon);
- 		
+  		
  	}
 }
 /* activate user */
@@ -336,8 +320,8 @@ function setUserPrivileges(){
 					[privis[i].name, privis[i].resourceName, ""], 
 					 (actionCnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 			actionCnt++;
-			var deleteicon = document.createElement("a");
-			deleteicon.className="delete-icon";
+			var deleteicon = document.createElement("i");
+			deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
 			deleteicon.title="remove action";
 			deleteicon.dataset.username = this.username;
 			deleteicon.dataset.actionKey = privis[i].key;
@@ -345,7 +329,6 @@ function setUserPrivileges(){
 				deleteicon.dataset.resourceKey = privis[i].resource;
 			}
 			deleteicon.onclick = deleteAction;
-			deleteicon.href="";
 			row.childNodes[2].appendChild(deleteicon);
 
 		}	

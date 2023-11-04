@@ -81,32 +81,28 @@ function writeLinkList(){
  		htmllink.target = "_blank";
  		row.childNodes[0].appendChild(htmllink);
  		
-		var upicon = document.createElement("a");
- 		upicon.className="up-icon";
+		var upicon = document.createElement("i");
+ 		upicon.className="fa-solid fa-xl fa-arrow-up icon-btn-default icon-btn-spacing";
  		upicon.title= i18n("quicklinks.reorderhigher");
  		upicon.onclick = updateQuicklinkLowerOrderValue;
-		upicon.href="";
  		row.childNodes[2].appendChild(upicon);
  		
- 		var downicon = document.createElement("a");
- 		downicon.className="down-icon";
+ 		var downicon = document.createElement("i");
+ 		downicon.className="fa-solid fa-xl fa-arrow-down icon-btn-default icon-btn-spacing";
  		downicon.title=i18n("quicklinks.reorderlower");
  		downicon.onclick = updateQuicklinkHigherOrderValue;
-		downicon.href="";
  		row.childNodes[2].appendChild(downicon);
 
-	 	var updateicon = document.createElement("a");
- 		updateicon.className="update-icon";
+	 	var updateicon = document.createElement("i");
+ 		updateicon.className="fa-regular fa-xl fa-pen-to-square icon-btn-default icon-btn-spacing";
  		updateicon.title=i18n("quicklinks.updatequicklink");
  		updateicon.onclick = updateUserQuicklink;
- 		updateicon.href="";
  		row.childNodes[2].appendChild(updateicon);
  		
- 		var deleteicon = document.createElement("a");
-	 	deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+	 	deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default icon-btn-spacing";
 	 	deleteicon.title=i18n("quicklinks.deletequicklink");
 	 	deleteicon.onclick = deleteUserQuicklink;
-	 	deleteicon.href="";
 	 	row.childNodes[2].appendChild(deleteicon);
 
  	}
@@ -363,18 +359,16 @@ function redrawManageAllTable(links){
  		htmllink.target = "_blank";
  		row.childNodes[0].appendChild(htmllink);
 
-	 	var updateicon = document.createElement("a");
- 		updateicon.className="update-icon";
+	 	var updateicon = document.createElement("i");
+ 		updateicon.className="fa-regular fa-xl fa-pen-to-square icon-btn-default icon-btn-spacing";
  		updateicon.title="update Quicklink";
  		updateicon.onclick = updateQuicklink;
- 		updateicon.href="";
  		row.childNodes[3].appendChild(updateicon);
  		
- 		var deleteicon = document.createElement("a");
-	 	deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+	 	deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default icon-btn-spacing";
 	 	deleteicon.title="delete Quicklink";
 	 	deleteicon.onclick = deleteQuicklink;
-	 	deleteicon.href="";
 	 	row.childNodes[3].appendChild(deleteicon);
  	}
 }

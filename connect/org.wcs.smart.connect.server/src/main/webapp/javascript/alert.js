@@ -667,19 +667,18 @@ function createAlertTable(){
 		 		row.dataset.alertid = alerts[i].properties.id;
 	
 		 		if(canupdate){
-		 			var updateicon = document.createElement("a");
-			 		updateicon.className="update-icon";
+		 			var updateicon = document.createElement("i");
+			 		updateicon.className="fa-regular fa-xl fa-pen-to-square icon-btn-default";
 			 		updateicon.title="update alert";
 			 		updateicon.onclick = updateAlert;
-			 		updateicon.href="";
 			 		row.childNodes[8].appendChild(updateicon);
 		 		}
 		 		if(candelete){
-			 		var deleteicon = document.createElement("a");
-			 		deleteicon.className="delete-icon";
+			 		var deleteicon = document.createElement("i");
+			 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
+			 		deleteicon.style.paddingLeft="4px";
 			 		deleteicon.title="delete alert";
 			 		deleteicon.onclick = deleteAlert;
-			 		deleteicon.href="";
 			 		row.childNodes[8].appendChild(deleteicon);
 		 		}
 		 	}

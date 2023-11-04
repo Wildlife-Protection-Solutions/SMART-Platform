@@ -3,6 +3,8 @@ var LAYER_URL = "../api/maplayer/";
 var TYPE_URL = "../api/connectalert/alertTypes/";
 var DEFAULTS_URL = "../api/connectalertfilterdefault/";
 var ACTION_URL = STYLE_URL + "actions/";
+var DATAQUEUE_SETTINGS_URL = "../api/dataqueue/settings";
+
 var allActions = null;
 
 //A selection of icons, the full list, which you can type into the text box is at 
@@ -18,6 +20,7 @@ var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb
 "motorcycle","pause","paw","people group","person","person walking","plane","play","shield halved","ship","star","stop","tent","tree",
 "trophy","truck pickup","user"];
 
+var dataqueuesettings;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -120,12 +123,28 @@ window.onload = function(){
 //	document.getElementById("btnResetDefaults").addEventListener("click", refreshDefaults);
 	document.getElementById("btnUpdateDefaults").addEventListener("click", saveDefaults);
 
+	//data queue settings
+	document.getElementById("dq_smartmobile_connect").onclick = function(){
+		var value = "false";
+		if (document.getElementById("dq_smartmobile_connect").checked){
+			value = "true";
+		}
+		dqUpdateSetting('connect.dataqueue.smartmobile.processing', value);
+	};
+
+	document.getElementById("qd_smartcollect_useroption").onchange = function(){
+		var value = document.getElementById("qd_smartcollect_useroption").value;
+		dqUpdateSetting('connect.dataqueue.smartcollect.useroption', value);
+	};
+	
+	
 	//Layer table and actions
 	refreshLayers();
 
 	refreshStyleConfiguration();
 	loadIconOptions();
 	refreshDefaults();
+	loadDataQueueSettings();
 	
 	setTimeout(refreshTypes, 50); //i don't know why but this table wasn't drawing properly 1 in 10 times without a delay, the delay seems to fix it.
 }
@@ -251,18 +270,17 @@ function createLayerTable(){
  	    scrollable.innerHTML = layers[i].wmsLayerList;
  		row.childNodes[5].appendChild(scrollable);
  		
- 		var updateicon = document.createElement("a");
- 		updateicon.className="update-icon";
- 		updateicon.title= i18n("settings.updatelayer");
+ 		var updateicon = document.createElement("i");
+ 		updateicon.className = "fa-regular fa-xl fa-pen-to-square icon-btn-default";
+	 	updateicon.title= i18n("settings.updatelayer");
  		updateicon.onclick = updateLayer;
- 		updateicon.href="";
  		row.childNodes[6].appendChild(updateicon);
 
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className = "fa-solid fa-xl fa-xmark icon-btn-default";
+ 		deleteicon.style.marginLeft = "5px"; 
  		deleteicon.title= i18n("settings.deletelayer");
  		deleteicon.onclick = deleteLayer;
- 		deleteicon.href="";
  		row.childNodes[6].appendChild(deleteicon);
  	}
 }
@@ -498,19 +516,18 @@ function createTypeTable(){
  		row.childNodes[2].style.opacity = opacity;
  		
  		row.childNodes[3].style.color = color;
- 		 		
- 		var updateicon = document.createElement("a");
- 		updateicon.className="update-icon";
+
+ 		var updateicon = document.createElement("i");
+ 		updateicon.className = "fa-regular fa-xl fa-pen-to-square icon-btn-default";
  		updateicon.title= i18n("settings.updatetype");
  		updateicon.onclick = updateType;
- 		updateicon.href="";
  		row.childNodes[6].appendChild(updateicon);
 
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className = "fa-solid fa-xl fa-xmark icon-btn-default";
+ 		deleteicon.style.marginLeft = "5px"; 
  		deleteicon.title= i18n("settings.deletetype");
  		deleteicon.onclick = deleteType;
- 		deleteicon.href="";
  		row.childNodes[6].appendChild(deleteicon);
  	}
 }
@@ -919,20 +936,18 @@ function createStyleConfigurationTable(){
  	row.id = "stylerow" + i;
  	row.dataset.uuid = style.uuid;
 	
- 	var updateicon = document.createElement("a");
-	updateicon.className="update-icon";
+ 	var updateicon = document.createElement("i");
+	updateicon.className = "fa-regular fa-xl fa-pen-to-square icon-btn-default";
 	updateicon.title= i18n("settings.updatestyle");
 	updateicon.onclick = updateStyle;
-	updateicon.href="";
 	row.childNodes[4].appendChild(updateicon); 	
  	
-	var deleteicon = document.createElement("a");
-	deleteicon.className="delete-icon";
+	var deleteicon = document.createElement("i");
+	deleteicon.className = "fa-solid fa-xl fa-xmark icon-btn-default";
+ 	deleteicon.style.marginLeft = "5px"; 
 	deleteicon.title= i18n("settings.deletestyle");
 	deleteicon.onclick = deleteStyle;
-	deleteicon.href="";
 	row.childNodes[4].appendChild(deleteicon);
-
 }
 
 function deleteStyle(){
@@ -1016,6 +1031,52 @@ function showCurrentStyle() {
 	displayDialogCenter('updateStyleDialog');//'btnNewType');
 }
 
+function loadDataQueueSettings(){
+	var oReq = new XMLHttpRequest();
+	oReq.onload = dqSettingsLoaded;
+	oReq.open("GET", DATAQUEUE_SETTINGS_URL, true);
+	oReq.send();
+	return false;
+} 
+
+
+function dqSettingsLoaded(){
+	if (this.status != 200) {
+		//not ok disable settings
+		displayError(parseError(i18n("settings.errorcreatingstyle"), this.responseText));
+		return;
+	}
+	
+	document.getElementById("dq_smartmobile_connect").checked = false;
+	document.getElementById("qd_smartcollect_useroption").value = 'validaterequeue';
+	var settings= JSON.parse(this.responseText);
+	for (let setting of settings){
+		if (setting.key == 'connect.dataqueue.smartmobile.processing'){
+			if (setting.value.toUpperCase() == "TRUE"){
+				document.getElementById("dq_smartmobile_connect").checked = true;		
+			}else{
+				document.getElementById("dq_smartmobile_connect").checked = false;
+			}
+		}
+		if (setting.key == 'connect.dataqueue.smartcollect.useroption'){
+			document.getElementById("qd_smartcollect_useroption").value = setting.value;
+		}
+	}
+}
+function dqUpdateSetting(key, value){
+	displayInfo(null);
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(){
+		if (this.status != 200 && this.status != 204) {
+			displayError(this.responseText);
+			return;
+		}
+		displayInfo("Data queue setting updated");
+	};
+	oReq.open("PUT", DATAQUEUE_SETTINGS_URL + "/" + key, true);
+	oReq.send(value);
+	return false;
+}
 
 function submitUpdateStyle(){
 	hideInfo();

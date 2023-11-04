@@ -16,12 +16,14 @@ import javax.ws.rs.core.Response.Status;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "dataqueue")
@@ -36,6 +38,7 @@ public class DataQueueServlet extends HttpServlet {
 		List<ConservationAreaInfo> cas = null;
 			
 		boolean canUpload = false;
+		boolean canRun = false;
 		Session s = HibernateManager.getSession(request.getServletContext());
 		try{
 			s.beginTransaction();
@@ -45,6 +48,11 @@ public class DataQueueServlet extends HttpServlet {
 				return;
 			}
 			canUpload = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY);
+			
+			if (SmartMobileJsonProcessorManager.INSTANCE.canProcessOnConnect(s)) {
+				canRun = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY);	
+			}
+			
 			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s, false);
 			for (Iterator<ConservationAreaInfo> iterator = cas.iterator(); iterator.hasNext();) {
 				ConservationAreaInfo conservationAreaInfo = (ConservationAreaInfo) iterator.next();
@@ -98,6 +106,7 @@ public class DataQueueServlet extends HttpServlet {
 		request.setAttribute("uploadtypes", uploadTypes); //$NON-NLS-1$
 		request.setAttribute("statusTypes", statusTypes); //$NON-NLS-1$
 		request.setAttribute("canupload", canUpload); //$NON-NLS-1$
+		request.setAttribute("canrun", canRun); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/dataqueue.jsp").forward(request, response); //$NON-NLS-1$
 		

@@ -373,6 +373,7 @@ function createCaTable(){
 	
 	var parent = document.querySelector("div.catable");
  	var cas = JSON.parse(this.responseText);
+ 	
  	for (var i = 0; i < cas.length; i ++){
  		var row = tableCreateRow(parent, 
  				[cas[i].label, cas[i].status, null, null, null], 
@@ -380,27 +381,26 @@ function createCaTable(){
  		
  		row.dataset.cauuid = cas[i].uuid;
  		
- 		var infoicon = document.createElement("a");
- 		infoicon.className="info-icon";
+ 		var infoicon = document.createElement("i");
+ 		infoicon.className="fa-solid fa-xl fa-circle-info icon-btn-default";
  		infoicon.title="details...";
  		infoicon.dataset.cauuid = cas[i].uuid;
  		infoicon.onclick = showcainfo;
- 		infoicon.href="";
  		row.childNodes[2].appendChild(infoicon);
  		
  		if (cas[i].status == "DATA"){
-	 		var downloadca = document.createElement("a");
-	 		downloadca.className="downloadca download-icon";
-	 		downloadca.title="downloadca";
+	 		var downloadca = document.createElement("i");
+	 		downloadca.className="fa-solid fa-xl fa-download icon-btn-default";
+	 		downloadca.title="Download CA";
 	 		downloadca.dataset.cauuid = cas[i].uuid;
 	 		downloadca.onclick = downloadca;
-	 		downloadca.href="";
+	 		//downloadca.href="";
 	 		row.childNodes[3].appendChild(downloadca);
  		}
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="deleteca delete-icon";
- 		deleteicon.title="delete conservation area";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
+ 		deleteicon.title="Delete Conservation Area";
  		deleteicon.dataset.cauuid = cas[i].uuid;
  		deleteicon.dataset.status = cas[i].status;
  		deleteicon.dataset.label = cas[i].label;
@@ -411,7 +411,7 @@ function createCaTable(){
  		}
  		deleteicon.dataset.version = version;
  		deleteicon.onclick = confirmdeleteca;
- 		deleteicon.href="";
+ 		//deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);
  	}
 }

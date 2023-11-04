@@ -107,10 +107,14 @@
      		<fieldset id="cafilter">
 	     		<legend><fmt:message key="report.cafilters"/></legend>
 	     		<div style="font-size:0.9em; margin-bottom:3px">
-	     			<div class="warn-icon" style="display:inline-block; float:left"></div>
+	     			<div style="display:flex; margin: 4px 0px;" >
+	     			<i class="fa-solid fa-triangle-exclamation icon-btn-default" style="font-size: 1.5em; margin-right:4px;"></i>
 	     			<div style="width: 450px"><fmt:message key="report.ccaabindingwarn"/></div>
-	     			<p><a href="javascript:selectAll();"><fmt:message key="report.selectall"/></a>
-					<a href="javascript:selectNone();"><fmt:message key="report.selectnone"/></a>
+	     			</div>
+	     			<div style="padding: 4px 0px;">
+	     				<a href="javascript:selectAll();"><fmt:message key="report.selectall"/></a>
+						<a href="javascript:selectNone();"><fmt:message key="report.selectnone"/></a>
+					</div>
 	     		</div>
 	     		
 	     		<div id="cafilteroptions"></div>

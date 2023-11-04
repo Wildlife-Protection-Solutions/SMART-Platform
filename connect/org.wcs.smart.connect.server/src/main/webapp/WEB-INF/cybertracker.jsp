@@ -9,9 +9,10 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/cybertracker.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
-<script type="text/javascript"> 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
 
-</script>
 
 
 <title><fmt:message key="cybertracker.packagestitle"/></title>

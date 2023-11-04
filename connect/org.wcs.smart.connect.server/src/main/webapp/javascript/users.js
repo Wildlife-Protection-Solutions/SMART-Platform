@@ -207,8 +207,8 @@ function setUserPrivileges(){
 					[privis[i].name, privis[i].resourceName, ""], 
 					 (actionCnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 			actionCnt++;
-			var deleteicon = document.createElement("a");
-			deleteicon.className="delete-icon";
+			var deleteicon = document.createElement("i");
+			deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
 			deleteicon.title="remove action";
 			deleteicon.dataset.username = this.username;
 			deleteicon.dataset.actionKey = privis[i].key;
@@ -216,7 +216,6 @@ function setUserPrivileges(){
 				deleteicon.dataset.resourceKey = privis[i].resource;
 			}
 			deleteicon.onclick = deleteAction;
-			deleteicon.href="";
 			row.childNodes[2].appendChild(deleteicon);
 			
 		}else if (privis[i].type.toUpperCase() == "ROLE"){
@@ -224,13 +223,12 @@ function setUserPrivileges(){
 					[privis[i].name, ""], 
 					 (roleCnt % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 			roleCnt++;
-			var deleteicon = document.createElement("a");
-			deleteicon.className="delete-icon";
+			var deleteicon = document.createElement("i");
+			deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
 			deleteicon.title="remove action";
 			deleteicon.dataset.username = this.username;
 			deleteicon.dataset.roleKey = privis[i].key;
 			deleteicon.onclick = deleteRoleUser;
-			deleteicon.href="";
 			row.childNodes[1].appendChild(deleteicon);
 		}	
 	}
@@ -308,8 +306,8 @@ function setRoleDetails(){
 					[privis[i].name, privis[i].resourceName, ""], 
 					 (actionCnt % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 			actionCnt++;
-			var deleteicon = document.createElement("a");
-			deleteicon.className="delete-icon";
+			var deleteicon = document.createElement("i");
+			deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
 			deleteicon.title=i18n("users.removeactionrole");
 			deleteicon.dataset.roleid = this.roleid;
 			deleteicon.dataset.actionKey = privis[i].key;
@@ -317,7 +315,6 @@ function setRoleDetails(){
 				deleteicon.dataset.resourceKey = privis[i].resource;
 			}
 			deleteicon.onclick = deleteActionFromRole;
-			deleteicon.href="";
 			row.childNodes[2].appendChild(deleteicon);	
 		}
 	}
@@ -479,17 +476,16 @@ function createUserTable(){
  		row.dataset.username = users[i].username;
  		row.onclick = showUserInfo;
  	
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="update-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-regular fa-xl fa-pen-to-square icon-btn-default";
  		deleteicon.title="edit user";
  		deleteicon.dataset.username = users[i].username;
  		deleteicon.dataset.email = users[i].email;
  		deleteicon.onclick = showEditUserDialog;
- 		deleteicon.href="";
  		row.childNodes[2].appendChild(deleteicon);
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-user-xmark icon-btn-default";
  		deleteicon.title="deactivate user";
  		deleteicon.dataset.username = users[i].username;
  		deleteicon.onclick = deactivateUser;
@@ -551,19 +547,18 @@ function createInactiveUserTable(){
 // 		row.onclick = showUserInfo; //not for inactive users
  	
  		var activateicon = document.createElement("a");
- 		activateicon.className="activateuser run-icon";
+ 		activateicon.className="fa-solid fa-xl fa-user-plus icon-btn-default";
  		activateicon.title="Activate User";
  		activateicon.dataset.username = users[i].username;
  		activateicon.onclick = activateUser;
  		activateicon.href="";
  		row.childNodes[2].appendChild(activateicon);
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title="delete user";
  		deleteicon.dataset.username = users[i].username;
  		deleteicon.onclick = deleteUser;
- 		deleteicon.href="";
  		row.childNodes[3].appendChild(deleteicon);
  		
  	}
@@ -602,21 +597,19 @@ function createRoleTable(){
  		row.dataset.roleid = allRoles[i].key;
  		row.onclick = showRoleInfo;
  	
- 		var editicon = document.createElement("a");
- 		editicon.className="update-icon";
+ 		var editicon = document.createElement("i");
+ 		editicon.className="fa-regular fa-xl fa-pen-to-square icon-btn-default";
  		editicon.title=i18n("users.editrole")
  		editicon.dataset.roleid = allRoles[i].key;
  		editicon.onclick = clearAndShowEditRoleDialog;
- 		editicon.href="";
  		row.childNodes[1].appendChild(editicon);
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title=i18n("users.deleterole")
  		deleteicon.dataset.roleid = allRoles[i].key;
  		deleteicon.dataset.rolename = allRoles[i].name;
  		deleteicon.onclick = deleteRole;
- 		deleteicon.href="";
  		row.childNodes[2].appendChild(deleteicon);
  	}
 }

@@ -39,7 +39,7 @@ import org.wcs.smart.connect.api.ConnectRESTApplication;
  * @author Emily
  *
  */
-@WebFilter(filterName="nocachefilter",urlPatterns={ConnectRESTApplication.SERVLET_PATH + "*", ConnectRESTApplication.ALL_APP_PATH})
+@WebFilter(asyncSupported = true,  filterName="nocachefilter",urlPatterns={ConnectRESTApplication.SERVLET_PATH + "*", ConnectRESTApplication.ALL_APP_PATH})
 public class NoCacheFilter implements Filter {
 
 	@Override

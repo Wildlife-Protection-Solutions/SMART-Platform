@@ -72,6 +72,7 @@ public class ConnectRESTApplication extends Application {
 		resources.add(DataModelApi.class);
 		resources.add(DataApi.class);
 		resources.add(DataQueue.class);
+		resources.add(DataQueueEventService.class);
 		resources.add(DesktopUser.class);
 		resources.add(QueryApi.class);
 		resources.add(CustomQueryApi.class);

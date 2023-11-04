@@ -28,28 +28,48 @@
 <%@include file="menu.jsp" %>
 <div id="main">
   <div class="pageheader"><fmt:message key="settings.pageheader" /></div>
-  <div>
-    <div id="message" class="msgsection"></div>
-   </div>
-<div id="settings-scroller">
-<div><p style="padding-top:3px""><fmt:message key="seetings.connectversion" />: ${connectversion}</p></div>
-<div class="settingsTable">
+  <div><div id="message" class="msgsection"></div></div>
 
-	<div class="block settings-header"><fmt:message key="settings.layerheader" /></div>
-	<button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
+	<div id="settings-scroller">
+		<div><p style="padding-top:3px""><fmt:message key="seetings.connectversion" />: ${connectversion}</p></div>
+		<div class="settingsTable">
+
+			<div class="block settings-header"><fmt:message key="settings.layerheader" /></div>
+			<button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
 	
-	<table id="layertable"  class="top-spacer smart-table" style="width:100%">
-		<tr class="table-row smart-table-header">
-		  <th><fmt:message key="settings.layerorder" /></th>
-		  <th><fmt:message key="settings.layername" /></th>
-		  <th><fmt:message key="settings.type" /></th>
-		  <th><fmt:message key="settings.onbydefault" /></th>
-		  <th><fmt:message key="settings.token" /></th>
-		  <th><fmt:message key="settings.layerlist" /></th>		  
-		  <th><fmt:message key="actions" /></th>
-		</tr>
-	</table>
-</div>
+			<table id="layertable"  class="top-spacer smart-table" style="width:100%">
+				<tr class="table-row smart-table-header">
+		  		<th><fmt:message key="settings.layerorder" /></th>
+		  		<th><fmt:message key="settings.layername" /></th>
+		  		<th><fmt:message key="settings.type" /></th>
+		  		<th><fmt:message key="settings.onbydefault" /></th>
+		  		<th><fmt:message key="settings.token" /></th>
+		  		<th><fmt:message key="settings.layerlist" /></th>		  
+		  		<th><fmt:message key="actions" /></th>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="settingsTable">
+			<div class="block settings-header">Data Queue Processing Options</div>
+			<div style="margin-top: 5px">
+				<input id="dq_smartmobile_connect" type="checkbox"  />
+				<label for="dq_smartmobile_connect" title="Check to enable processing of SMART Mobile data on Connect, otherwise processing must be completed using the Desktop Tools">Process SMART Mobile files on Connect</label>
+			</div>
+			
+			<div style="margin: 10px; display:flex; flex-direction:column">
+				<div style="margin-top: 5px; margin-bottom:5px; font-weight:bold">SMART Collect Data</div>
+				<div style="margin-left: 20px">
+				<div style="margin-bottom:5px; ">Action to take when processing SMART Collect data from an unvalidated user:</div>
+				<select style="width: fit-content" id="qd_smartcollect_useroption">
+					<option value="validaterequeue">Send validation request and requeue data (no data loaded)</option>
+					<option value="load">Load Data (data will be loaded, but user remains unvalidated)</option>
+					<option value="requeue">Requeue File (no data is loaded, and no validation requests sent)</option>
+					<option value="discard">Discard (discard all data, file will not be processed again)</option>
+				</select>
+				</div>
+			</div>
+		</div>
 
 
 <div class="settingsTable">

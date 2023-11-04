@@ -857,8 +857,8 @@ function createReportTable(){
  		row.dataset.isccaa = report.isCcaa;
  		row.dataset.folderid = report.folderid;
 
- 		var runicon = document.createElement("a");
- 		runicon.className="run-icon";
+ 		var runicon = document.createElement("i");
+		runicon.className="fa-solid fa-xl fa-circle-right icon-btn-default";
  		runicon.title= i18n("reports.runreport");
  		runicon.onclick = showReportOptions;
  		row.childNodes[2].appendChild(runicon);

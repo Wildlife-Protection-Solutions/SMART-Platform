@@ -22,9 +22,9 @@
 package org.wcs.smart.connect.dataqueue;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
@@ -46,17 +46,21 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	private ZonedDateTime uploadedDate;
 	private String uploadedBy;
 	
-	public ServerDataQueueItemProxy(UUID uuid, String name, UUID caUuid, String caName, 
-			String type, ServerDataQueueItem.Status status, ZonedDateTime lastModifiedDate, ZonedDateTime uploadDate, String uploadBy){
-		setUuid(uuid);
-		setName(name);
-		setType(type);
-		setConservationArea(caUuid);
-		this.caName = caName;
-		this.status = status;
-		this.uploadedDate = uploadDate;
-		this.uploadedBy = uploadBy;
-		this.lastModifiedDate = lastModifiedDate;
+	private String statusMessage;
+	
+	public ServerDataQueueItemProxy(ServerDataQueueItem item, ConservationAreaInfo ca){
+
+		setUuid(item.getUuid());
+		setName(item.getName());
+		setType(item.getType());
+		setConservationArea(item.getConservationArea());
+		
+		this.caName = ca.getLabel();
+		this.status = item.getStatus();
+		this.uploadedDate = item.getUploadedDate();
+		this.uploadedBy = item.getUploadedBy();
+		this.lastModifiedDate = item.getLastModified();
+		this.statusMessage = item.getStatusMessage();
 	}
 	
 	public String getCaName(){
@@ -65,6 +69,10 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	
 	public ServerDataQueueItem.Status getStatus(){
 		return this.status;
+	}
+	
+	public String getStatusMessage() {
+		return this.statusMessage;
 	}
 	
 	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  

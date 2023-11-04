@@ -141,12 +141,11 @@ function createLinkTable(){
 	 		row.childNodes[0].appendChild(aTag1);
  		}
  		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="deleteca delete-icon";
+ 		var deleteicon = document.createElement("i");
+ 		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title=i18n("sharedlinks.deletesharedlinktitle");
  		deleteicon.dataset.uuid = links[i].uuid;
  		deleteicon.onclick = confirmdeletelink;
- 		deleteicon.href="";
  		row.childNodes[5].appendChild(deleteicon);
  	}
  	

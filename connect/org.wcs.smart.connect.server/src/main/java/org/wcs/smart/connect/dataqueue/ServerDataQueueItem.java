@@ -1,6 +1,8 @@
 package org.wcs.smart.connect.dataqueue;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -9,6 +11,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -17,6 +20,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name="data_queue", schema="connect")
@@ -29,6 +33,7 @@ public class ServerDataQueueItem extends DataQueueItem{
 		QUEUED("ServerDataQueueItem.Queued"), //$NON-NLS-1$
 		PROCESSING("ServerDataQueueItem.Processing"), //$NON-NLS-1$
 		COMPLETE("ServerDataQueueItem.Complete"), //$NON-NLS-1$
+		COMPLETE_WARN("ServerDataQueueItem.CompleteWarn"), //$NON-NLS-1$
 		ERROR("ServerDataQueueItem.Error"); //$NON-NLS-1$
 		
 		private String guiName;
@@ -50,6 +55,8 @@ public class ServerDataQueueItem extends DataQueueItem{
 	private Status status;
 	private String statusMessage;
 	private UUID workItem;
+	
+	private String warningMessage;
 	
 	@Column(name="uploaded_date")
 	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
@@ -112,5 +119,28 @@ public class ServerDataQueueItem extends DataQueueItem{
 	}
 	public void setWorkItem(UUID workItemUuid){
 		this.workItem = workItemUuid;
+	}
+	
+	@JsonIgnore
+	@Column(name="warning_message")
+	public String getWarningMessages() {
+		return this.warningMessage;
+	}
+	public void setWarningMessages(String messages) {
+		this.warningMessage = messages;
+	}
+	
+	@Transient
+	public void addWarningMessage(String message) {
+		if (this.warningMessage == null) {
+			this.warningMessage = message;
+		}else {
+			this.warningMessage = this.warningMessage + "\n" + message;
+		}
+	}
+	@Transient
+	public String[] getWarningMessageList(){
+		if (this.warningMessage == null) return new String[]{};
+		return this.warningMessage.split("\n");
 	}
 }
