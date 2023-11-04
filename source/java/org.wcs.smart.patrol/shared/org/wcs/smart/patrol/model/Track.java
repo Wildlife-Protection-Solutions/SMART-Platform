@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.annotations.Type;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
@@ -69,7 +70,6 @@ public class Track extends UuidItem {
 	}
 	
 	@Column(name="geometry")
-	@Lob
 	@Basic(fetch = FetchType.LAZY)
 	public byte[] getGeom() {
 		return geom;

@@ -39,7 +39,7 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -481,7 +481,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					WaypointAttachment att = new WaypointAttachment();
 					
 					if (attach.getSignatureTypeKey() != null && !attach.getSignatureTypeKey().trim().isEmpty()) {
-						SignatureType stype = SignatureTypeManager.INSTANCE.findType(attach.getSignatureTypeKey(), ca, session);
+						SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(attach.getSignatureTypeKey(), ca, session);
 						if (stype != null) {
 							att.setSignatureType(stype);
 						}else {
@@ -543,7 +543,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
 						if (attachment.getSignatureTypeKey() != null && !attachment.getSignatureTypeKey().trim().isEmpty()) {
-							SignatureType stype = SignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
+							SignatureType stype = LocalSignatureTypeManager.INSTANCE.findType(attachment.getSignatureTypeKey(), ca, session);
 							if (stype != null) {
 								att.setSignatureType(stype);
 							}else {
