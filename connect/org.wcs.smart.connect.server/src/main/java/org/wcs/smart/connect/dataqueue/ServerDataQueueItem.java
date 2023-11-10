@@ -1,8 +1,6 @@
 package org.wcs.smart.connect.dataqueue;
 
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
