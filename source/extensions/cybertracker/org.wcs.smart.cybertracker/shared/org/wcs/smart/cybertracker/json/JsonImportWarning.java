@@ -62,7 +62,7 @@ public class JsonImportWarning {
 
 			case DEFAULT_ATTRIBUTE_NOT_FOUND: return MessageFormat.format("Attribute not found. The default setting for this value will be ignored for the observation. (uuid: {0})", data);
 			
-			case INVALID_CM: return MessageFormat.format("Source configurable model not found. Source configurable model will be full for this waypoint. (mode uuid: {0}).", data);
+			case INVALID_CM: return MessageFormat.format("Source configurable model not found. Source configurable model will be null for this waypoint. (mode uuid: {0}). Ensure your desktop Conservation Area is synchronized with Connect.", data);
 			case INVALID_SIGNATURE: return MessageFormat.format("Signature type not found. The file will be imported as a regular attachment. (signature key: {0}).", data);
 			case INVALID_OBSERVER: return MessageFormat.format("Observer not found found. The observer will be empty for this waypoint. (uuid: {0})", data);
 			case INVALID_PHOTO: return MessageFormat.format("Could not read photo attachment. Photo will not be imported. (photo number: {0})", data);
