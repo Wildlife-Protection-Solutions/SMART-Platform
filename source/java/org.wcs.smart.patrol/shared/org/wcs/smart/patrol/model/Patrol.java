@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolderItem;
 import org.wcs.smart.ca.Station;
@@ -199,7 +199,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrol", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause="start_date")
+	@SQLOrder("start_date")
 	@BatchSize(size=50)
 	public List<PatrolLeg> getLegs(){
 		return this.legs;

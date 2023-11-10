@@ -841,7 +841,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		p.getLegs().removeAll(toDeleteLeg);
 		
 		
-		p.recalculateType();
 		doflush(session);
 		
 		//clean up attachments and orphaned waypoints
@@ -857,7 +856,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		if (isNew) {
 			p.getLegs().addAll(newlegs);
 		}
-		
+				
 		if (!isNew) {
 			
 			for(Patrol p2 : newPatrols){
@@ -948,6 +947,12 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			doRemove(session, session.get(Waypoint.class, u));
 		}
 		doflush(session);
+		
+		//evict patrol object and reload to ensure legs 
+		//are recent before recalculating type
+		//#3630
+		session.evict(p);
+		session.get(Patrol.class, p.getUuid()).recalculateType();
 		return true;			
 	}
 
