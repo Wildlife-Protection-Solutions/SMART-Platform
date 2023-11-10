@@ -68,61 +68,61 @@ window.onload = function(){
      	var source = new EventSource(url);
      	
     	source.addEventListener("dataqueue", function(event) {
-			console.log("Event recieved:" + event.data);
 			var item = JSON.parse(event.data);
         	if (item.status == null){
 				//deleted
+				refreshFileList();
 			}else{
 				//search of item in table and update table
+				let index = -1;
 				for (var i = 0; i < files.length; i ++){
 					if (files[i].uuid == item.uuid){
-						files[i] = item;
-						let tr = document.getElementById("fileRow" + i);
-						if (tr == null){
-							//no row likely new - perhaps initiate full refresh
-							return;
-						}
-
-						//TODO: update these drop downs
-						//caMap.set(caUuid, ca);
-		 				//statusSet.add(files[i].status);		 		
-						//typeSet.add(files[i].type);
-		 		
-		 				tr.dataset.uuid = item.uuid;
-		 				tr.dataset.status = item.status;
-		 				tr.dataset.type = item.type;
-		 				tr.dataset.cauuid = item.conservationArea;
-						tr.dataset.uploadeddate = files[i].uploadedDate;
-						
-						  while (tr.childNodes[4].firstChild) {
-   							 tr.childNodes[4].removeChild(tr.childNodes[4].lastChild);
-  						}
-						tr.childNodes[4].innerHTML = item.status
-						
-						if (item.status == "COMPLETE_WARN" || (item.status == "QUEUED" && files[i].statusMessage )){
-				
-							//add a warning icon with tooltip message
-							var img = document.createElement("i");
-					 		img.className = getStatusImage("WARNING");
-					 		img.style.color = getStatusImageColor("WARNING");
-					 		img.style.paddingRight="2px";
-							tr.childNodes[4].prepend(img);
-							
-							if (item.status == "COMPLETE_WARN"){
-								img.title = "Completed but warnings were generated while processing. Click on row to view warnings.";
-							}else{
-								img.title = "Processing was attempted but could not be completed. Item was requeued. Click on row to view details.";
-							}
-						}
-						
-					 	var img = document.createElement("i");
-					 	img.className = getStatusImage(item.status);
-					 	img.style.color = getStatusImageColor(item.status);
-					 	img.style.paddingRight="2px";
-						tr.childNodes[4].style.whiteSpace = "nowrap";
-					 	tr.childNodes[4].prepend(img);
+						index = i;
 					}
 				}
+				if (index == -1){
+					//no row likely new - perhaps initiate full refresh
+					refreshFileList();
+					return;
+				}
+						
+				files[index] = item;
+				
+				let tr = document.getElementById("fileRow" + index);
+				if (tr == null){
+					//no row likely new - perhaps initiate full refresh
+					refreshFileList();
+					return;
+				}
+				
+				//only the status should be updated
+		 		tr.dataset.status = item.status;
+				while (tr.childNodes[4].firstChild) {
+   					 tr.childNodes[4].removeChild(tr.childNodes[4].lastChild);
+  				}
+				tr.childNodes[4].innerHTML = item.status
+						
+				if (item.status == "COMPLETE_WARN" || (item.status == "QUEUED" && item.statusMessage )){
+					//add a warning icon with tooltip message
+					var img = document.createElement("i");
+					img.className = getStatusImage("WARNING");
+					img.style.color = getStatusImageColor("WARNING");
+					img.style.paddingRight="2px";
+					tr.childNodes[4].prepend(img);
+							
+					if (item.status == "COMPLETE_WARN"){
+						img.title = "Completed but warnings were generated while processing. Click on row to view warnings.";
+					}else{
+						img.title = "Processing was attempted but could not be completed. Item was requeued. Click on row to view details.";
+					}
+				}
+						
+				var img = document.createElement("i");
+				img.className = getStatusImage(item.status);
+				img.style.color = getStatusImageColor(item.status);
+				img.style.paddingRight="2px";
+				tr.childNodes[4].style.whiteSpace = "nowrap";
+				tr.childNodes[4].prepend(img);
 			}
         	
         	
@@ -130,8 +130,6 @@ window.onload = function(){
 
     	
     	source.onerror = function(event) {
-			console.log(event);
-			//displayError(event.data);
 			source.close();
     	};
 
@@ -364,7 +362,7 @@ function createFilterTable(){
 			 	row.childNodes[row.childNodes.length - 1].style.whiteSpace = "nowrap";
 			 	
 			 	if (status == "COMPLETE_WARN" || (status == "QUEUED" && files[i].statusMessage )){
-				
+								
 					//add a warning icon with tooltip message
 					var img = document.createElement("i");
 			 		img.className = getStatusImage("WARNING");
@@ -765,7 +763,7 @@ function startFileProcessing(){
 
 function showPreviewResults(){
 	if (this.status != 200){
-		displayError(parseError(i18n("users.couldnotloaduser"), this.responseText));
+		document.getElementById("previewarea").value = parseError(i18n("dataqueue.error"), this.responseText);
 		return;
 	}
 	

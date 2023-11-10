@@ -22,11 +22,11 @@
 package org.wcs.smart.connect.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,9 +67,11 @@ import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 public class DataQueueEventService {
 
 	private static final Logger logger = Logger.getLogger(DataQueueEventService.class.getName());
-	
-	//TODO: fix threading issues
-	private Set<ServerDataQueueItem> queue = new HashSet<>();
+
+	private static List<DataQueueEventService> services = Collections.synchronizedList(new ArrayList<>());
+
+	//items to send to server
+	private Set<UUID> queue = Collections.synchronizedSet(new HashSet<>());
 	
 	@Context private HttpServletRequest request;
 	@Context private ServletContext context;
@@ -77,13 +79,12 @@ public class DataQueueEventService {
 	public static void addUpdateToQueue(ServerDataQueueItem item) {
 		try {
 			for (DataQueueEventService s : services) {
-				//TODO: why is remove required here
-				s.queue.remove(item);
-				s.queue.add(item);
+				synchronized(s.queue){
+					s.queue.add(item.getUuid());
+				}
 			}
 			for (DataQueueEventService s : services) {
 				synchronized (s) {
-
 					s.notify();	
 				}
 			}
@@ -92,11 +93,9 @@ public class DataQueueEventService {
 		}
 	}
 	
-	private static List<DataQueueEventService> services = new ArrayList<>();
 	
 	public DataQueueEventService() {
 		services.add(this);
-		
 	}
 	
 	private OutboundSseEvent.Builder eventBuilder;
@@ -136,33 +135,44 @@ public class DataQueueEventService {
 				return;
 			}
 			
-			Set<ServerDataQueueItem> unique = new HashSet<>(queue);
-			queue.clear();
-			
-			for (ServerDataQueueItem item : unique) {
-				ConservationAreaInfo info = null;
-				try(Session session = HibernateManager.getSession(context)){
-					session.beginTransaction();
-					try {
-						if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), 
-								DataQueueAction.VIEW_KEY, item.getConservationArea())){
-							continue;
+			//make a copy of the queue data and clear
+			Set<UUID> unique = null;
+			synchronized(queue) {
+				unique = new HashSet<>(queue);
+				queue.clear();
+			}
+			//DataQueueEventService
+			try(Session session = HibernateManager.getSession(context)){
+				
+				session.beginTransaction();
+				try {
+					for (UUID id : unique) {
+						
+						ServerDataQueueItem item = session.get(ServerDataQueueItem.class, id);
+						
+						ConservationAreaInfo info = null;
+						if (item == null) {
+							//deleted always send; we don't know the CA and we only send the uuid so that's ok
+							item = new ServerDataQueueItem();
+							item.setUuid(id);
+						}else {
+							if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), DataQueueAction.VIEW_KEY, item.getConservationArea())){
+								continue;
+							}						
+							info = session.get(ConservationAreaInfo.class, item.getConservationArea());					
 						}
 						
-						info = session.get(ConservationAreaInfo.class, item.getConservationArea());
-					}finally {
-						session.getTransaction().rollback();
+						OutboundSseEvent sseEvent = eventBuilder
+								.name("dataqueue") //$NON-NLS-1$
+								.mediaType(MediaType.APPLICATION_JSON_TYPE)
+								.data(ServerDataQueueItemProxy.class, new ServerDataQueueItemProxy(item, info))
+								.build();
+						sseEventSink.send(sseEvent);
 					}
+				}finally {
+					session.getTransaction().rollback();
 				}
-				
-				OutboundSseEvent sseEvent = eventBuilder
-						.name("dataqueue")
-						.mediaType(MediaType.APPLICATION_JSON_TYPE)
-						.data(ServerDataQueueItemProxy.class, new ServerDataQueueItemProxy(item, info))
-						.build();
-				sseEventSink.send(sseEvent);
 			}
-
 		}
 		//sseEventSink.close();
 	}

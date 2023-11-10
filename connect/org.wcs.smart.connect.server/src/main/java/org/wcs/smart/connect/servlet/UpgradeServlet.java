@@ -1376,8 +1376,8 @@ public class UpgradeServlet extends HttpServlet {
 						//hibernate 6 employee uuid cannot conflict with ccaa uuid
 						"update smart.employee set uuid = '00000000000000000000000000000001' where uuid = '00000000000000000000000000000000'", //$NON-NLS-1$
 						
-						"alter table connect.data_queue drop constraint status_chk",
-						"alter table connect.data_queue add constraint status_chk CHECK (status = ANY (ARRAY['UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR']))",
+						"alter table connect.data_queue drop constraint status_chk", //$NON-NLS-1$
+						"alter table connect.data_queue add constraint status_chk CHECK (status = ANY (ARRAY['UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR']))", //$NON-NLS-1$
 								
 						//warning message for connect processing smart mobile files
 						"alter table connect.data_queue add column warning_message varchar", //$NON-NLS-1$
@@ -1385,6 +1385,11 @@ public class UpgradeServlet extends HttpServlet {
 						"create table connect.settings(key varchar primary key, value varchar)", //$NON-NLS-1$
 						"insert into connect.settings(key, value) values ('connect.dataqueue.smartmobile.processing', 'true')", //$NON-NLS-1$
 						"insert into connect.settings(key, value) values ('connect.dataqueue.smartcollect.useroption', 'validaterequeue')", //$NON-NLS-1$
+						
+						"alter table smart.patrol_leg_day alter column end_time type time(0)", //$NON-NLS-1$
+						"alter table smart.patrol_leg_day alter column start_time type time(0)", //$NON-NLS-1$
+						"alter table smart.mission_day alter column end_time type time(0)", //$NON-NLS-1$
+						"alter table smart.mission_day alter column start_time type time(0)", //$NON-NLS-1$
 						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$

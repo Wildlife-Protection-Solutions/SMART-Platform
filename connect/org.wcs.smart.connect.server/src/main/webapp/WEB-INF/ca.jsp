@@ -46,11 +46,11 @@
 						</div>
 						<div class="table-cell smart-table-cell ">
 							<c:if test="${ca.getStatus() == 'DATA'}">
-								<i data-cauuid="${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="fa-solid fa-xl fa-download icon-btn-default"></i>
+								<i data-cauuid="${ca.getUuid()}" id="downloadca" title="<fmt:message key="ca.downloadtooltip"/>" class="fa-solid fa-xl fa-download icon-btn-default"></i>
 							</c:if>
 						</div>
 						<div class="table-cell smart-table-cell ">
-							<i data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-version = "${ca.getVersion()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="fa-solid fa-xl fa-xmark icon-btn-default"></i>
+							<i data-status = "${ca.getStatus()}" id="deleteca" data-cauuid = "${ca.getUuid()}" data-version = "${ca.getVersion()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="fa-solid fa-xl fa-xmark icon-btn-default"></i>
 							</div>
 					</div>
 

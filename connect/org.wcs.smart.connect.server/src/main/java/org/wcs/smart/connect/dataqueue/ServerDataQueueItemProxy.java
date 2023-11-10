@@ -55,7 +55,7 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 		setType(item.getType());
 		setConservationArea(item.getConservationArea());
 		
-		this.caName = ca.getLabel();
+		this.caName = ca == null ? null : ca.getLabel();
 		this.status = item.getStatus();
 		this.uploadedDate = item.getUploadedDate();
 		this.uploadedBy = item.getUploadedBy();

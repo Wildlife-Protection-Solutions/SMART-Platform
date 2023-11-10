@@ -335,7 +335,7 @@ public class DataQueue {
 			if (item.getWorkItem() != null){
 				WorkItem i = (WorkItem) s.get(WorkItem.class, item.getWorkItem());
 				if (i != null){
-					//might be null if deleted for some other reason
+					//might be null if deleted for somes other reason
 					s.remove(i);
 				}
 			}
@@ -343,6 +343,7 @@ public class DataQueue {
 			
 			ServerDataQueueItem i2 = new ServerDataQueueItem();
 			i2.setUuid(item.getUuid());
+			i2.setConservationArea(item.getConservationArea());
 			DataQueueEventService.addUpdateToQueue(i2);
 			
 			return item;
@@ -681,8 +682,8 @@ public class DataQueue {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return s.createQuery("FROM ConnectSetting WHERE key IN (:keys)", ConnectSetting.class)
-				.setParameterList("keys", keys)
+			return s.createQuery("FROM ConnectSetting WHERE key IN (:keys)", ConnectSetting.class) //$NON-NLS-1$
+				.setParameterList("keys", keys) //$NON-NLS-1$
 				.list();
 			
 		}catch (Exception ex){
@@ -727,10 +728,10 @@ public class DataQueue {
 			String updatedValue = null;
 			
 			if (key == ConnectSetting.Setting.DQ_SMART_MOBILE_PROCESSING) {
-				if (newValue.strip().equalsIgnoreCase("true")) {
-					updatedValue = "true";
+				if (newValue.strip().equalsIgnoreCase("true")) { //$NON-NLS-1$
+					updatedValue = "true"; //$NON-NLS-1$
 				}else {
-					updatedValue = "false";
+					updatedValue = "false"; //$NON-NLS-1$
 				}
 			}else if (key == ConnectSetting.Setting.DQ_SMART_COLLECT_USEROPTION) {
 				for (ConnectSetting.SmartCollectUserOption op : ConnectSetting.SmartCollectUserOption.values()) {

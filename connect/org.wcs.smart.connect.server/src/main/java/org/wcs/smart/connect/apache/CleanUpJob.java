@@ -372,7 +372,7 @@ public class CleanUpJob implements Runnable {
 		try{
 			days = getEnvironmentVariable(EnvironmentVariables.Variable.DATA_QUEUE_CLEAN_UP_DAYS);
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex); //$NON-NLS-1$
+			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.DATA_QUEUE_CLEAN_UP_DAYS.key, ex); //$NON-NLS-1$
 		}
 		if (days != null && days > 0){
 			//remove all items

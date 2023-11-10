@@ -17,12 +17,12 @@ window.onload = function(){
 	}
 	
 	//delete user
-	elements = document.querySelectorAll(".deleteca");
+	elements = document.querySelectorAll("#deleteca");
 	for (var i = 0; i < elements.length; i ++){
 		elements[i].onclick=confirmdeleteca;
 	}
 	
-	elements = document.querySelectorAll(".downloadca");
+	elements = document.querySelectorAll("#downloadca");
 	for (var i = 0; i < elements.length; i ++){
 		elements[i].onclick=downloadca;
 	}
