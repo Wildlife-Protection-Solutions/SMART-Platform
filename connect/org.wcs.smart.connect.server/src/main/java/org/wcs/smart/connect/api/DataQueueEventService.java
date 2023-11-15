@@ -78,14 +78,18 @@ public class DataQueueEventService {
 
 	public static void addUpdateToQueue(ServerDataQueueItem item) {
 		try {
-			for (DataQueueEventService s : services) {
-				synchronized(s.queue){
-					s.queue.add(item.getUuid());
-				}
+			synchronized (services) {
+				for (DataQueueEventService s : services) {
+					synchronized(s.queue){
+						s.queue.add(item.getUuid());
+					}
+				}	
 			}
-			for (DataQueueEventService s : services) {
-				synchronized (s) {
-					s.notify();	
+			synchronized (services) {
+				for (DataQueueEventService s : services) {
+					synchronized (s) {
+						s.notify();	
+					}
 				}
 			}
 		}catch (Throwable t) {
