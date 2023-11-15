@@ -135,7 +135,7 @@ public class WaypointDetailsShell extends SmartShellDialog{
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 						l.setFont(boldFont);
 						
-						for (WaypointObservationAttribute a : o.getAttributes()) {
+						for (WaypointObservationAttribute a : o.getAttributesSorted()) {
 							createInfo(obsinfo, a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()));
 						}
 						createAttachments(owner, session, o.getAttachments());

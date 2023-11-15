@@ -97,9 +97,7 @@ public class ObservationContentProvider implements ITreeContentProvider {
 		
 		if (parentElement instanceof IntelObservation){
 			if (((IntelObservation)parentElement).getObservationAttributes() == null) return null;
-			List<IntelObservationAttribute> a = new ArrayList<>(((IntelObservation)parentElement).getObservationAttributes());
-			a.sort((x,y)->Collator.getInstance().compare(x.getAttribute().getName(), y.getAttribute().getName()));
-			return a.toArray();
+			return ((IntelObservation)parentElement).getObservationAttributesSorted().toArray();
 		};
 		
 		if (parentElement instanceof WaypointObservationGroup) {
@@ -109,6 +107,9 @@ public class ObservationContentProvider implements ITreeContentProvider {
 			return obs.toArray();
 		}
 		if (parentElement instanceof WaypointObservation) {
+			//TODO: this is sorted by name not datamodel attribute order
+			//but I can't find where this is used so for now we leave it along
+			//as if we fix it and the category data isn't loaded we will get an error 
 			List<WaypointObservationAttribute> obs = new ArrayList<>();
 			obs.addAll(  ((WaypointObservation)parentElement).getAttributes() );
 			obs.sort((x,y) -> Collator.getInstance().compare(x.getAttribute().getName(), y.getAttribute().getName()));

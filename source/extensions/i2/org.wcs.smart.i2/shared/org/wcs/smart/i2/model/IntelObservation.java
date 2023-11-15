@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -30,8 +31,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 
 /**
@@ -106,6 +109,22 @@ public class IntelObservation extends UuidItem{
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="observation", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelObservationAttribute> getObservationAttributes() {
 		return this.attributes;
+	}
+	
+	/**
+	 * Gets attribute observation sorted by attribute data model order. 
+	 * Object must be attached to valid session when calling. Returned array
+	 * is not associated with the session.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public List<IntelObservationAttribute> getObservationAttributesSorted(){
+		List<Attribute> order = new ArrayList<>();
+		getCategory().getAllAttribute(order, null);
+		List<IntelObservationAttribute> sorted = new ArrayList<>(getObservationAttributes());
+		sorted.sort((a, b)-> Integer.compare(order.indexOf(a.getAttribute()), order.indexOf(b.getAttribute())) );
+		return sorted;
 	}
 	/**
 	 * Set the set of the i_observation_attribute.

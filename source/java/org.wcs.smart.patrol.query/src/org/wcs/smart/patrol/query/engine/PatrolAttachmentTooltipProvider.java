@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.engine;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -91,6 +92,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 					}
 				}
 				o.getCategory().getFullCategoryName();
+				o.getCategory().getAllAttribute(new ArrayList<>(), null);
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
 				attachment = obw;
@@ -105,6 +107,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 						}
 					}
 					wo.getCategory().getFullCategoryName();
+					wo.getCategory().getAllAttribute(new ArrayList<>(), null);
 				}
 				
 			}
@@ -191,7 +194,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 					l = new Label(other, SWT.SEPARATOR | SWT.HORIZONTAL);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 					
-					for (WaypointObservationAttribute a : fo.getAttributes()) {
+					for (WaypointObservationAttribute a : fo.getAttributesSorted()) {
 						l = new Label(other, SWT.NONE);
 						l.setText(a.getAttribute().getName()+":"); //$NON-NLS-1$
 						l.setBackground(details.getBackground());
@@ -239,7 +242,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 						
 						if (wo.getAttributes() != null) {
-							for (WaypointObservationAttribute a : wo.getAttributes()) {
+							for (WaypointObservationAttribute a : wo.getAttributesSorted()) {
 								l = new Label(c, SWT.NONE);
 								l.setText(a.getAttribute().getName()+":"); //$NON-NLS-1$
 								l.setBackground(details.getBackground());

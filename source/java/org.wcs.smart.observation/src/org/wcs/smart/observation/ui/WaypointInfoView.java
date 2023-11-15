@@ -60,7 +60,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.hibernate.Session;
 import org.locationtech.udig.project.AdaptableFeature;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -251,16 +250,7 @@ public class WaypointInfoView {
 								if (showText) {
 									
 									//need to sort attributes
-									
-									final List<Attribute> attributes = new ArrayList<Attribute>();
-									wo.getCategory().getAllAttribute(attributes, null);
-									
-									List<WaypointObservationAttribute> sortedwo = new ArrayList<>(wo.getAttributes());
-									sortedwo.sort((a,b)->{
-										return Integer.compare(attributes.indexOf(a.getAttribute()),attributes.indexOf(b.getAttribute()));
-									});
-									
-									for (WaypointObservationAttribute woa : sortedwo) {
+									for (WaypointObservationAttribute woa : wo.getAttributesSorted()) {
 										Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(woa.getAttribute().getName() + ":"), SWT.WRAP); //$NON-NLS-1$
 										l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 										((GridData) l.getLayoutData()).widthHint = 100;

@@ -177,7 +177,7 @@ public class MoveAttachmentDialog extends SmartStyledTitleDialog {
 					if (a.observation == null) return ""; //$NON-NLS-1$
 					
 					StringBuilder sb = new StringBuilder();
-					for (WaypointObservationAttribute attribute : a.observation.getAttributes()) {
+					for (WaypointObservationAttribute attribute : a.observation.getAttributesSorted()) {
 						sb.append(attribute.getAttribute().getName());
 						sb.append(": "); //$NON-NLS-1$
 						sb.append(attribute.getAttributeValueAsString(Locale.getDefault()));
