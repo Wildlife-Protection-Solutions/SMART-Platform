@@ -21,28 +21,39 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.user.UserLevelManager;
 
 /**
@@ -148,6 +159,10 @@ public class EmployeeDialog extends SmartStyledDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
+		if (toUpdate != null && toUpdate.getUuid() != null && PermissionManager.INSTANCE.canDelete(Employee.class)){
+			Button btn = createButton(parent, IDialogConstants.STOP_ID, DialogConstants.DELETE_BUTTON_TEXT, false);
+			btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		}
 		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.EmployeeDialog_SaveButton, true);
 		btn.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
@@ -163,8 +178,108 @@ public class EmployeeDialog extends SmartStyledDialog {
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);
 			close();
+		} else if (IDialogConstants.STOP_ID == buttonId) {
+			if (deleteEmployee()) {
+				setReturnCode(CANCEL);
+				close();
+			}
 		}
 	}
+	
+	private boolean deleteEmployee() {
+
+		String message = MessageFormat.format(
+					Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage1, 
+					new Object[]{SmartLabelProvider.getFullLabel(toUpdate)});
+		
+		if (!MessageDialog.openConfirm(getShell(), Messages.EmployeePropertyPage_8, message)){
+			return false;
+		}
+		
+		ProgressMonitorDialog pd = new ProgressMonitorDialog(getShell());
+		final boolean[] restart = {false};
+		final boolean[] ok = {false};
+		
+		try {
+			pd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, 1);
+					
+					try(Session s = HibernateManager.openSession()){					
+						Transaction tx = s.beginTransaction();
+						try{
+							
+							Employee del = (Employee) s.get(Employee.class, toUpdate.getUuid()); //reload employee see #2178
+							if (del == null) {
+								//employee not found cannot remove
+								ok[0] = false;
+								return;
+							}
+								
+							monitor.subTask(SmartLabelProvider.getFullLabel(del));
+							String deleteError = null;
+							try{
+								//first run before delete 
+								ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, s);
+									
+								//validate delete
+								if (!DeleteManager.canDelete(del, s)){
+									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
+								}else{
+									//delete
+									if (del.equals(SmartDB.getCurrentEmployee())){
+										restart[0] = true;
+									}
+									s.remove(del);
+								}
+							}catch (Exception ex){
+								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
+								SmartPlugIn.log(ex.getMessage(), ex);
+							}
+								
+							if (deleteError != null){
+								final String errormsg = deleteError;
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, errormsg);
+									}});
+								ok[0] = false;
+							}else {
+								ok[0] = true;
+							}
+							monitor.worked(1);
+							
+							monitor.subTask(Messages.EmployeePropertyPage_ProgressCommitChanges);
+							tx.commit();
+						}catch ( final Exception ex){
+							try{
+								tx.rollback();
+							}catch (Exception ex2){
+								SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
+							}
+							ok[0] = false;
+							SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$							
+						}	
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(e.getLocalizedMessage(), e);
+			ok[0] = false;
+		}
+			
+		if (restart[0]){
+			//restart
+			PlatformUI.getWorkbench().restart();
+			return false;
+		}
+		return ok[0];
+	}
+	
 	private boolean isSmartIdUnique(){
 		if (eComposite.getSmartUserSelected()){
 			

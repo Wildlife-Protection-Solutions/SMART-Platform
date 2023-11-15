@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -37,6 +38,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -275,5 +277,27 @@ public class ConservationAreaManager {
 		for(IProjectionListener listener : projectionListener){
 			listener.projectionsModified();
 		}
+	}
+	
+	/**
+	 * Returns false if deactivating the selected employees would result in no active administrators. Otherwise
+	 * returns true (an active administrator will still exist after employee is updated)
+	 *  
+	 * @param employees
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public boolean canDisableEmployees(List<Employee> employees, Session session, ConservationArea ca) {
+		
+		List<Employee> remaining = session.createQuery("FROM Employee WHERE conservationArea = :ca and endEmploymentDate is null and uuid not in (:items)", Employee.class) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameterList("items", employees.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
+				.list();
+		//at least one of these needs to be admin
+		for (Employee e : remaining) {
+			if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN)) return true;
+		}
+		return false;
 	}
 }

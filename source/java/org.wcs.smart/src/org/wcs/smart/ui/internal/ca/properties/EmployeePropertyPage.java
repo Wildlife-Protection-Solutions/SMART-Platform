@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -40,9 +40,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -80,9 +78,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
@@ -90,7 +86,6 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
-import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.export.config.impl.EmployeeCsvExportConfig;
 import org.wcs.smart.export.config.impl.EmployeeCsvImportConfig;
@@ -117,6 +112,9 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class EmployeePropertyPage extends SmartStyledTitleDialog{
 
+	public static final String INACTIVATE = "Inactivate";
+	public static final String ACTIVATE = "Activate";
+	
 	private TableViewer tblEmployee;
 	private FilterComposite txtFilter;
 	private TableViewer lstTeams, lstMembers;
@@ -125,8 +123,8 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 	private List<Agency> agencies;
 	private List<EmployeeTeam> teams;
 	
-	private MenuItem mnuDelete;
-	private ToolItem tiDelete;
+	private MenuItem mnuDeactivate, mnuEdit;
+	private ToolItem tiDeactivate, tiEdit;
 	
 	private EmployeeViewSorter sorter = new EmployeeViewSorter();
 	private EmployeeNameFilter nameFilter = new EmployeeNameFilter();
@@ -313,7 +311,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		tiNew.setText(DialogConstants.ADD_BUTTON_TEXT);
 		tiNew.addListener(SWT.Selection,  e->createNewEmployee());
 		
-		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit = new ToolItem(tb, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		tiEdit.setToolTipText(Messages.EmployeePropertyPage_editemployeetooltip);
 		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
@@ -321,12 +319,13 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		tiEdit.setSelection(false);
 		
 		if (PermissionManager.INSTANCE.canDelete(Employee.class)){
-			tiDelete = new ToolItem(tb, SWT.PUSH);
-			tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-			tiDelete.setToolTipText(Messages.EmployeePropertyPage_deleteemployeetooltip);
-			tiDelete.addListener(SWT.Selection,  e->deleteEmployee());
-			tiDelete.setSelection(false);
+			tiDeactivate = new ToolItem(tb, SWT.PUSH);
+			tiDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+			tiDeactivate.setText(INACTIVATE);
+			tiDeactivate.setToolTipText("Make selected employees inactive setting the end employement date to the current date.");
+			tiDeactivate.setData(INACTIVATE);
+			tiDeactivate.addListener(SWT.Selection,  e->inactivateEmployees( (String)tiDeactivate.getData() ));
+			tiDeactivate.setSelection(false);
 		}
 		
 		new ToolItem(tb, SWT.SEPARATOR);
@@ -368,22 +367,20 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 				
-		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
+		mnuEdit = new MenuItem(mnu, SWT.PUSH);
 		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		mnuEdit.addListener(SWT.Selection, e->editEmployee());
 		
-		mnuDelete = null;
+		mnuDeactivate = null;
 		if (PermissionManager.INSTANCE.canDelete(Employee.class)){
-			mnuDelete = new MenuItem(mnu, SWT.PUSH);
-			mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			mnuDelete.addListener(SWT.Selection, e->deleteEmployee());
+			mnuDeactivate = new MenuItem(mnu, SWT.PUSH);
+			mnuDeactivate.setText(INACTIVATE);
+			mnuDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+			mnuDeactivate.setData(INACTIVATE);
+			mnuDeactivate.addListener(SWT.Selection, e->inactivateEmployees((String)mnuDeactivate.getData()));
 		}
 		tblEmployee.getControl().setMenu(mnu);
-		
-		
-		
 		
 		final Button chActive = new Button(area, SWT.CHECK);
 		chActive.setText(Messages.EmployeePropertyPage_Op_IncludeInActive);
@@ -400,17 +397,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 			}
 		});
 		
-		tblEmployee.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				boolean isenabled = !tblEmployee.getStructuredSelection().isEmpty();
-				mnuEdit.setEnabled(isenabled);
-				if (mnuDelete != null) mnuDelete.setEnabled(isenabled);
-				tiEdit.setEnabled(isenabled);
-				if (mnuDelete != null) tiDelete.setEnabled(isenabled);
-			}
-		});
+		tblEmployee.addSelectionChangedListener(e->updateButtons());
 		
 		getShell().setText(Messages.EmployeePropertyPage_PageTitle);
 		setTitle(Messages.EmployeePropertyPage_PageTitle);
@@ -419,6 +406,41 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		return area;
 	}
 	
+	private void updateButtons() {
+		boolean isenabled = !tblEmployee.getStructuredSelection().isEmpty();
+		mnuEdit.setEnabled(isenabled);
+		tiEdit.setEnabled(isenabled);
+		
+		if (mnuDeactivate != null) {
+			mnuDeactivate.setEnabled(isenabled);
+			if (isenabled) {
+				if (((Employee)tblEmployee.getStructuredSelection().getFirstElement()).isActive()) {
+					mnuDeactivate.setText(INACTIVATE);
+					mnuDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+					mnuDeactivate.setData(INACTIVATE);
+				}else {
+					mnuDeactivate.setText(ACTIVATE);
+					mnuDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+					mnuDeactivate.setData(ACTIVATE);
+				}
+			}
+		}
+		if (tiDeactivate != null) {
+			tiDeactivate.setEnabled(isenabled);
+			if (isenabled) {			
+				if (((Employee)tblEmployee.getStructuredSelection().getFirstElement()).isActive()) {
+					tiDeactivate.setText(INACTIVATE);
+					tiDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+					tiDeactivate.setData(INACTIVATE);
+				}else {
+					tiDeactivate.setText(ACTIVATE);
+					tiDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+					tiDeactivate.setData(ACTIVATE);
+				}
+			}
+		
+		}
+	}
 	public Composite createTeamArea(Composite parent) {
 		Composite area = new Composite(parent, SWT.NONE);
 		area.setLayout(new GridLayout(2, true));
@@ -788,108 +810,51 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 	/**
 	 * deletes selected employee
 	 */
-	private void deleteEmployee(){
-		/* get employee to edit */
-		IStructuredSelection sec = (IStructuredSelection)tblEmployee.getSelection();
-		if (sec.isEmpty()){
-			return;
-		}
+	private void inactivateEmployees(String option){
+		
 		@SuppressWarnings("unchecked")
-		final List<Employee> toDelete = sec.toList();
+		List<Employee> toUpdate = tblEmployee.getStructuredSelection().toList();
+		if (toUpdate.isEmpty()) return;
 		
-		String message = null;
-		if (toDelete.size() == 1){
-			message = MessageFormat.format(
-					Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage, 
-					new Object[]{SmartLabelProvider.getFullLabel(toDelete.get(0))});
-		}else{
-			message = MessageFormat.format(Messages.EmployeePropertyPage_ConfirmDeleteMulti, new Object[]{toDelete.size()});
-		}
-		if (!MessageDialog.openConfirm(getShell(), 
-				Messages.EmployeePropertyPage_8,
-				message
-				)){
-			return;
-		}
-		ProgressMonitorDialog pd = new ProgressMonitorDialog(getShell());
-		final boolean[] restart = {false};
 		
-		try {
-			pd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, toDelete.size());
-					try(Session s = HibernateManager.openSession()){					
-						Transaction tx = s.beginTransaction();
-						try{
-							for (Employee del : toDelete){
-								del = (Employee) s.get(Employee.class, del.getUuid()); //reload employee see #2178
-								if (del == null) continue; //employee not found cannot remove
-								
-								monitor.subTask(SmartLabelProvider.getFullLabel(del));
-								String deleteError = null;
-								try{
-									//first run before delete 
-									ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, s);
-									
-									//validate delete
-									if (!DeleteManager.canDelete(del, s)){
-										deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
-									}else{
-										//delete
-										if (del.equals(SmartDB.getCurrentEmployee())){
-											restart[0] = true;
-										}
-										s.remove(del);
-										employees.remove(del);
-									}
-								}catch (Exception ex){
-									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
-									SmartPlugIn.log(ex.getMessage(), ex);
-								}
-								
-								if (deleteError != null){
-									final String errormsg = deleteError;
-									Display.getDefault().syncExec(new Runnable(){
-										@Override
-										public void run() {
-											MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, errormsg);
-										}});
-									
-								}
-								monitor.worked(1);
-							}
-							monitor.subTask(Messages.EmployeePropertyPage_ProgressCommitChanges);
-							tx.commit();
-						}catch ( final Exception ex){
-							try{
-								tx.rollback();
-							}catch (Exception ex2){
-								SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
-							}
-							Display.getDefault().syncExec(new Runnable(){
-	
-								@Override
-								public void run() {
-									SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
-									
-								}});
-						}	
+		try (Session session = HibernateManager.openSession()){
+			if (option == INACTIVATE) {
+				//ensure you can't deactivate all employees
+				if (!ConservationAreaManager.getInstance().canDisableEmployees(toUpdate, session, SmartDB.getCurrentConservationArea())) {
+					SmartPlugIn.displayLog("Deactivating selected employees would leave no active Administrators for this Conservation Area. There must always be one active Conservation Area administrator.", null);
+					return;
+				}
+			}
+			
+			session.beginTransaction();
+			try {
+				for (Employee e : toUpdate) {
+					Employee update = session.get(Employee.class, e.getUuid());
+					if (option == INACTIVATE) {
+						if (update != null && update.getEndEmploymentDate() == null) {
+							update.setEndEmploymentDate(LocalDate.now());
+						}
+					}else {
+						if (update != null && update.getEndEmploymentDate() != null) {
+							update.setEndEmploymentDate(null);
+						}
 					}
 				}
-			});
-		} catch (Exception e) {
-			SmartPlugIn.displayLog(e.getLocalizedMessage(), e);
-		}
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				SmartPlugIn.displayLog("Unable to inactivate selected employees.", ex);
+				return;
+				
+			}
+			//update local objects
+			for (Employee e : toUpdate) {
+				Employee update = session.get(Employee.class, e.getUuid());
+				e.setEndEmploymentDate(update.getEndEmploymentDate());
+			}
 			
-		if (restart[0]){
-			//restart
-			PlatformUI.getWorkbench().restart();
-			return;
 		}
 		tblEmployee.refresh();
+		updateButtons();
 	}
 	
 	private Job loadDetails = new Job(Messages.EmployeePropertyPage_loadingjob) {

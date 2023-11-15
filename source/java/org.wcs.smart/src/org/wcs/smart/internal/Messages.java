@@ -831,7 +831,7 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_CouldNotDeleteEmployee;
 	public static String EmployeePropertyPage_CreateNew_Button;
 	public static String EmployeePropertyPage_createteamtooltip;
-	public static String EmployeePropertyPage_DeleteEmployee_DialogMessage;
+	public static String EmployeePropertyPage_DeleteEmployee_DialogMessage1;
 	public static String EmployeePropertyPage_deleteconfirm;
 	public static String EmployeePropertyPage_deleteemployeetooltip;
 	public static String EmployeePropertyPage_deleteerror;
