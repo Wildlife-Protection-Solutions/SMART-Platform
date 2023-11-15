@@ -43,9 +43,13 @@ public enum MobileProcessingEngine {
 				try(Session s = HibernateManager.openSession()){
 					ConservationAreaProperty prop = MobileProcessingEngine.INSTANCE.getOption(Option.SMART_MOBILE_DESKTOP_PROCESSING, s);
 					
-					if (prop == null) value = Boolean.FALSE;
-					if (prop.getValue() == null) value = Boolean.FALSE;
-					if (!prop.getValue().equalsIgnoreCase(Boolean.TRUE.toString())) value=Boolean.FALSE;
+					if (prop == null) {
+						value = Boolean.FALSE;
+					}else if (prop.getValue() == null) {
+						value = Boolean.FALSE;
+					}else if (!prop.getValue().equalsIgnoreCase(Boolean.TRUE.toString())) {
+						value=Boolean.FALSE;
+					}
 				}
 				canProcessLocallyCache = value;
 			}
