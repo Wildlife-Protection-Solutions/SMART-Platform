@@ -58,7 +58,7 @@ public class IncidentObservationAttributeDatasetResultSet extends AbstractIncide
 		}else {
 			allObservations = new ArrayList<>();
 			for (WaypointObservation wo : incident.getAllObservations()) {
-				allObservations.addAll(wo.getAttributes());
+				allObservations.addAll(wo.getAttributesSorted());
 			}
 			m_maxRows = allObservations.size();
 		}

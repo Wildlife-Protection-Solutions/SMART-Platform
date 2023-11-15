@@ -344,7 +344,7 @@ public class IncidentSummaryPage extends EditorPart {
 					((GridData)attributes.getLayoutData()).horizontalIndent = 64;
 
 					
-					for (WaypointObservationAttribute a : wo.getAttributes()) {
+					for (WaypointObservationAttribute a : wo.getAttributesSorted()) {
 						l = toolkit.createLabel(attributes,SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 	

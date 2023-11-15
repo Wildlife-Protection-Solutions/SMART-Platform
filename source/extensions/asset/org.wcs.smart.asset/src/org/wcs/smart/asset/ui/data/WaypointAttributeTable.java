@@ -393,7 +393,7 @@ public class WaypointAttributeTable {
 			ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			if (observation.getAttributes() != null) {
-				for (WaypointObservationAttribute a : observation.getAttributes()) {
+				for (WaypointObservationAttribute a : observation.getAttributesSorted()) {
 					
 					ll = toolkit.createLabel(c, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

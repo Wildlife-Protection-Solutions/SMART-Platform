@@ -130,6 +130,7 @@ public class ObservationDialog extends SmartStyledDialog {
 			groups.forEach(g->g.getObservations().forEach(o->{
 				o.getCategory().getName();
 				o.getCategory().getFullCategoryName();
+				o.getCategory().getAllAttribute(new ArrayList<>(), null);
 				o.getAttributes().forEach(a->{
 					a.getAttributeValueAsString(Locale.getDefault());
 					a.getAttribute().getName();
@@ -295,7 +296,7 @@ public class ObservationDialog extends SmartStyledDialog {
 				if (element instanceof WaypointObservation){
 					StringBuilder sb = new StringBuilder();
 					WaypointObservation oo = (WaypointObservation)element;
-					for (WaypointObservationAttribute aa : oo.getAttributes()){
+					for (WaypointObservationAttribute aa : oo.getAttributesSorted()){
 						sb.append(aa.getAttribute().getName());
 						sb.append(": "); //$NON-NLS-1$
 						sb.append(aa.getAttributeValueAsString(Locale.getDefault()));

@@ -1174,7 +1174,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 											fpdaydata.add(pw.getWaypoint());
 										} else {
 											pw.getWaypoint().getAllObservations()
-													.forEach(wp -> wp.getCategory().getFullCategoryName());
+													.forEach(wp -> {
+														wp.getCategory().getFullCategoryName();
+														wp.getCategory().getAllAttribute(new ArrayList<>(), null);
+													});
 											List<WaypointObservation> obs = pw.getWaypoint().getAllObservations();
 											obs.forEach(oo -> oo.getAttributes().forEach(a -> {
 												a.getAttribute().getName();
@@ -1269,11 +1272,17 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				
 				sb.append(SmartUtils.formatStringForLabel(wo.getCategory().getFullCategoryName()));
 				
-				if (!wo.getAttributes().isEmpty()) sb.append("\n\n"); //$NON-NLS-1$
-				for (WaypointObservationAttribute a : wo.getAttributes()) {
-					sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
-					sb.append("\n"); //$NON-NLS-1$
-				}
+				if (!wo.getAttributes().isEmpty()) {
+					List<WaypointObservationAttribute> sortedAtts = wo.getAttributesSorted();
+					
+					sb.append("\n\n"); //$NON-NLS-1$
+					for (WaypointObservationAttribute a : sortedAtts) {
+						sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
+						sb.append("\n"); //$NON-NLS-1$
+					}
+					sb.deleteCharAt(sb.length() - 1);
+				}			
+				
 				if (!wo.getAttributes().isEmpty()) sb.deleteCharAt(sb.length() - 1);
 				return sb.toString();
 			}

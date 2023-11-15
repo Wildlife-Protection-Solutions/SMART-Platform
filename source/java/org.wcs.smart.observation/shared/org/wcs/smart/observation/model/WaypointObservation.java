@@ -102,6 +102,23 @@ public class WaypointObservation extends UuidItem {
 	public List<WaypointObservationAttribute> getAttributes(){
 		return this.attributes;
 	}
+	
+	/**
+	 * Gets attribute observation sorted by attribute data model order. 
+	 * Object must be attached to valid session when calling. Returned array
+	 * is not associated with the session.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public List<WaypointObservationAttribute> getAttributesSorted(){
+		List<Attribute> order = new ArrayList<>();
+		getCategory().getAllAttribute(order, null);
+		List<WaypointObservationAttribute> sorted = new ArrayList<>(getAttributes());
+		sorted.sort((a, b)-> Integer.compare(order.indexOf(a.getAttribute()), order.indexOf(b.getAttribute())) );
+		return sorted;
+	}
+	
 	public void setAttributes(List<WaypointObservationAttribute> attributes){
 		this.attributes = attributes;
 	}

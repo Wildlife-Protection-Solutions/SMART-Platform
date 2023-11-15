@@ -110,84 +110,87 @@ public class CreateRecordActionType implements IActionType {
 	public void performAction(EAction action, EFilter filter, WaypointObservation data, Locale l) {
 		//create a new intelligence record
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append(MessageFormat.format( Messages.AdvIntelLabelProvider_CreateActionTypeMsg1, action.getId(), filter.getId()));
-		sb.append("\n\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.CreateRecordActionType_WaypointIdLabel, data.getWaypoint().getId()));
-		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
-		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
-		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment() == null ? "" : data.getWaypoint().getComment())); //$NON-NLS-1$
-		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg5, data.getCategory().getName()));
-		sb.append("\n"); //$NON-NLS-1$
-		for (WaypointObservationAttribute a : data.getAttributes()) {
-			sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-		}
-		
 		IntelRecord newRecord = new IntelRecord();
 		newRecord.setConservationArea(data.getWaypoint().getConservationArea());
 		newRecord.setAttributes(new ArrayList<>());
-		newRecord.setDescription(sb.toString());
 		newRecord.setComment(""); //$NON-NLS-1$
 		newRecord.setLocations(new ArrayList<>());
 		newRecord.setPrimaryDate(data.getWaypoint().getDateTime());
 		newRecord.setStatus(IntelRecord.Status.NEW);
 		
-		EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
-		if (profileParam == null || profileParam.getParameterValue().isEmpty()) {
-			throw new RuntimeException(Messages.CreateRecordActionType_ProfileParameterNotSet);
-		}
-		EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
-		EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
-		if (titleParam != null) {
-			newRecord.setTitle(titleParam.getParameterValue());
-		}else {
-			newRecord.setTitle(""); //$NON-NLS-1$
-		}
-		newRecord.setAttachments(new ArrayList<>());
-		
-		IntelLocation location = new IntelLocation();
-		location.setConservationArea(newRecord.getConservationArea());
-		location.setComment(data.getWaypoint().getComment());
-		location.setDateTime(data.getWaypoint().getDateTime());
-		location.setId( data.getWaypoint().getId() );
-		location.setRecord(newRecord);
-		location.setGeometry(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(data.getWaypoint().getX(),data.getWaypoint().getY())));
-		newRecord.getLocations().add(location);
-
-		location.setObservations(new ArrayList<>());
-		
-		IntelObservation io = new IntelObservation();
-		io.setCategory(data.getCategory());
-		io.setObservationAttributes(new ArrayList<>());
-		io.setLocation(location);
-		for (WaypointObservationAttribute aa : data.getAttributes()) {
-			IntelObservationAttribute cloneAttribute = new IntelObservationAttribute();
-			cloneAttribute.setAttribute(aa.getAttribute());
-			cloneAttribute.setAttributeListItem(aa.getAttributeListItem());
-			cloneAttribute.setAttributeTreeNode(aa.getAttributeTreeNode());
-			cloneAttribute.setNumberValue(aa.getNumberValue());
-			cloneAttribute.setStringValue(aa.getStringValue());
-			cloneAttribute.setObservation(io);
-			
-			if (aa.getAttributeListItems() != null) {
-				cloneAttribute.setAttributeListItems(new ArrayList<>());
-				for (WaypointObservationAttributeList al : aa.getAttributeListItems()) {
-					IntelObservationAttributeList il = new IntelObservationAttributeList();
-					il.setAttributeLisItem(al.getAttributeListItem());
-					il.setObservationAttribute(cloneAttribute);
-					cloneAttribute.getAttributeListItems().add(il);
-				}
-			}
-			io.getObservationAttributes().add(cloneAttribute);
-		}
-		location.getObservations().add(io);
-		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
+			data = session.get(WaypointObservation.class, data.getUuid());
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(MessageFormat.format( Messages.AdvIntelLabelProvider_CreateActionTypeMsg1, action.getId(), filter.getId()));
+			sb.append("\n\n"); //$NON-NLS-1$
+			sb.append(MessageFormat.format(Messages.CreateRecordActionType_WaypointIdLabel, data.getWaypoint().getId()));
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment() == null ? "" : data.getWaypoint().getComment())); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg5, data.getCategory().getName()));
+			sb.append("\n"); //$NON-NLS-1$
+			for (WaypointObservationAttribute a : data.getAttributesSorted()) {
+				sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
+			}
+			
+			newRecord.setDescription(sb.toString());
+			
+			EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+			if (profileParam == null || profileParam.getParameterValue().isEmpty()) {
+				throw new RuntimeException(Messages.CreateRecordActionType_ProfileParameterNotSet);
+			}
+			EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
+			EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
+			if (titleParam != null) {
+				newRecord.setTitle(titleParam.getParameterValue());
+			}else {
+				newRecord.setTitle(""); //$NON-NLS-1$
+			}
+			newRecord.setAttachments(new ArrayList<>());
+			
+			IntelLocation location = new IntelLocation();
+			location.setConservationArea(newRecord.getConservationArea());
+			location.setComment(data.getWaypoint().getComment());
+			location.setDateTime(data.getWaypoint().getDateTime());
+			location.setId( data.getWaypoint().getId() );
+			location.setRecord(newRecord);
+			location.setGeometry(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(data.getWaypoint().getX(),data.getWaypoint().getY())));
+			newRecord.getLocations().add(location);
+	
+			location.setObservations(new ArrayList<>());
+			
+			IntelObservation io = new IntelObservation();
+			io.setCategory(data.getCategory());
+			io.setObservationAttributes(new ArrayList<>());
+			io.setLocation(location);
+			for (WaypointObservationAttribute aa : data.getAttributes()) {
+				IntelObservationAttribute cloneAttribute = new IntelObservationAttribute();
+				cloneAttribute.setAttribute(aa.getAttribute());
+				cloneAttribute.setAttributeListItem(aa.getAttributeListItem());
+				cloneAttribute.setAttributeTreeNode(aa.getAttributeTreeNode());
+				cloneAttribute.setNumberValue(aa.getNumberValue());
+				cloneAttribute.setStringValue(aa.getStringValue());
+				cloneAttribute.setObservation(io);
+				
+				if (aa.getAttributeListItems() != null) {
+					cloneAttribute.setAttributeListItems(new ArrayList<>());
+					for (WaypointObservationAttributeList al : aa.getAttributeListItems()) {
+						IntelObservationAttributeList il = new IntelObservationAttributeList();
+						il.setAttributeLisItem(al.getAttributeListItem());
+						il.setObservationAttribute(cloneAttribute);
+						cloneAttribute.getAttributeListItems().add(il);
+					}
+				}
+				io.getObservationAttributes().add(cloneAttribute);
+			}
+			location.getObservations().add(io);
+		
 			
 			String keyid = profileParam.getParameterValue();
 			IntelProfile ip = QueryFactory.buildQuery(session, IntelProfile.class, 

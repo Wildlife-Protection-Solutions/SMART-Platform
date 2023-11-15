@@ -24,7 +24,6 @@ package org.wcs.smart.i2.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 
 import jakarta.persistence.Embeddable;

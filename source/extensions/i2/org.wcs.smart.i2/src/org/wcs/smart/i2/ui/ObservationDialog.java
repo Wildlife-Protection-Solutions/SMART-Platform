@@ -115,6 +115,8 @@ public class ObservationDialog extends SmartStyledDialog {
 		if (location.getUuid() == null) {
 			//clone observations for editing so we can cancel this dialog
 			for (IntelObservation o : location.getObservations()){
+				o.getCategory().getAllAttribute(new ArrayList<>(), null);
+
 				IntelObservation copy = new IntelObservation();
 				copy.setCategory(o.getCategory());
 				copy.setLocation(o.getLocation());
@@ -153,6 +155,7 @@ public class ObservationDialog extends SmartStyledDialog {
 				observations.forEach(o->{
 					o.getCategory().getName();
 					o.getCategory().getFullCategoryName();
+					o.getCategory().getAllAttribute(new ArrayList<>(), null);
 					o.getObservationAttributes().forEach(a->{
 						a.getStringValue();
 						a.getAttribute().getName();
@@ -287,7 +290,7 @@ public class ObservationDialog extends SmartStyledDialog {
 				if (element instanceof IntelObservation){
 					StringBuilder sb = new StringBuilder();
 					IntelObservation oo = (IntelObservation)element;
-					for (IntelObservationAttribute aa : oo.getObservationAttributes()){
+					for (IntelObservationAttribute aa : oo.getObservationAttributesSorted()){
 						sb.append(aa.getAttribute().getName());
 						sb.append(": "); //$NON-NLS-1$
 						sb.append(aa.getAttributeValueAsString(Locale.getDefault()));
