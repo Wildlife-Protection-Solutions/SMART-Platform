@@ -67,7 +67,6 @@ import org.wcs.smart.connect.api.DataQueueEventService;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
-import org.wcs.smart.connect.dataqueue.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem.Status;
 import org.wcs.smart.connect.datastore.DataStoreManager;

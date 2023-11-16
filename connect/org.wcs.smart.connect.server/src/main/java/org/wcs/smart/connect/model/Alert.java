@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -73,7 +73,7 @@ public class Alert extends ConnectUuidItem{
 	}
 	
 	private String userGeneratedId; 
-	private LocalDateTime date;
+	private OffsetDateTime date;
 	private String description;
 	private String fieldIdentifier;
 	private Integer level;
@@ -88,10 +88,10 @@ public class Alert extends ConnectUuidItem{
 	private ConservationAreaInfo ca;
 	
 	@Column(name="date")
-	public LocalDateTime getDate() {
+	public OffsetDateTime getDate() {
 		return date;
 	}
-	public void setDate(LocalDateTime date) {
+	public void setDate(OffsetDateTime date) {
 		this.date = date;
 	}
 	

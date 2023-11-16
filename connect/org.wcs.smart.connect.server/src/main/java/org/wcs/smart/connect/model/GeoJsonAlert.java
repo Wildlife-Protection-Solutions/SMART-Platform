@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -78,14 +78,14 @@ public class GeoJsonAlert{
 	 * 
 	 * @return
 	 */
-	public LocalDateTime getDateTime() {
-		LocalDateTime date = null;
+	public OffsetDateTime getDateTime() {
+		OffsetDateTime date = null;
 		String dateString = features.get(0).getProperties().getDateTime();
 		if (dateString == null || dateString.isBlank()) return null;
 
 		try {
 			DateTimeFormatter f = DateTimeFormatter.ofPattern(DATE_FORMAT_STR);
-			date = LocalDateTime.parse(dateString,f);
+			date = OffsetDateTime.parse(dateString,f);
 		} catch (DateTimeParseException e) {
 			e.printStackTrace();
 		}
@@ -153,7 +153,7 @@ public class GeoJsonAlert{
     	a.setFieldIdentifier(getFieldIdentifier());
     	//default to now if no date given 
 		if(getDateTime() == null){
-			a.setDate(LocalDateTime.now());
+			a.setDate(OffsetDateTime.now());
 		}else{
 			a.setDate(getDateTime());
 		}

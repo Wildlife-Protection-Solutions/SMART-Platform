@@ -394,8 +394,8 @@ public class ConnectAlert extends HttpServlet {
 	 * @param typeUuidFilter	A comma separated list of which types(uuids) to include. ex:typeUuidFilter=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52, 
 	 * @param statusFilter	A comma separated list of which status option to include, ex: statusFilter=ACTIVE,DISABLED 
 	 * @param caUuidFilter	A comma separated list of which CAs (uuids) to include, ex: caUuidFilter=8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14
-	 * @param startDateFilter	in the form of number of milliseconds since Jan 1, 1970, same as javascript's Date.getTime(), ex: startDateFilter=1455401895908
-	 * @param endDateFilter	in the form of number of milliseconds since Jan 1, 1970, same as javascript's Date.getTime() ex: endDateFilter=1458076695908
+	 * @param startDateFilter	in the form of number of milliseconds since Jan 1, 1970 UTC, same as javascript's Date.getTime(), ex: startDateFilter=1455401895908
+	 * @param endDateFilter	in the form of number of milliseconds since Jan 1, 1970 UTC, same as javascript's Date.getTime() ex: endDateFilter=1458076695908
 	 * @param textSearchFilter	leave blanks to return all text results. Otherwise, any text in this filter must appears in the alert name or description, ex: textSearchFilter=abc123
 	 * @param sortBy	which column name to sort the data on (date, userGeneratedId, description, level, status, x, y) sortBy=userGeneratedId
 	 * @param sortAscending	sort ascending or descending, exs: &sortAscending=true  or   &sortAscending=false 
@@ -851,7 +851,7 @@ public class ConnectAlert extends HttpServlet {
 				properties.put("creatoruuid", obj.getCreatorUuid().toString()); //$NON-NLS-1$
 			}
 			// date is expected to look like: //29 Sep 2020 16:29:54 GMT
-			properties.put("date", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
+			properties.put("date", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(obj.getDate())); //$NON-NLS-1$
 			// properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
 			properties.put("desc", obj.getDescription()); //$NON-NLS-1$
 			properties.put("level", obj.getLevel()); //$NON-NLS-1$

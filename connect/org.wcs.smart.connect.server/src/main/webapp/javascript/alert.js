@@ -917,13 +917,13 @@ function getDateRange(dateSelectId, fromDatePickerId, toDatePickerId) {
 		return null;
 	} else if(dateSelect > 0) { //number of trailing hours from now
 		var now = new Date();
-		now = (new Date(now.getTime() + 86400000)).getTime(); //add 24 hours to time frame
+		var utcnow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
 		
-		var start = new Date();
-		start = start.getTime() - dateSelect*60*60*1000;  
+		var end = utcnow + 86400000; //add 24 hours to time frame
+		var start = utcnow  - dateSelect*60*60*1000;  
 		return {
 			'start': start,  
-			'end': now
+			'end': end
 		};		
 	}
 }

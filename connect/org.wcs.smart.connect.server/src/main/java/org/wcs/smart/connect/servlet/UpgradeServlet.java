@@ -1391,6 +1391,9 @@ public class UpgradeServlet extends HttpServlet {
 						"alter table smart.mission_day alter column end_time type time(0)", //$NON-NLS-1$
 						"alter table smart.mission_day alter column start_time type time(0)", //$NON-NLS-1$
 						
+						//https://app.assembla.com/spaces/smart-cs/tickets/3643
+						"alter table connect.alerts alter column date type timestamp with time zone", //$NON-NLS-1$
+
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
