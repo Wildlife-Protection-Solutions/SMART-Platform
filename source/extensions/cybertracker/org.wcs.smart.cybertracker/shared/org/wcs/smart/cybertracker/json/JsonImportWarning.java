@@ -1,7 +1,34 @@
+/*
+ * Copyright (C) 2023 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.cybertracker.json;
 
 import java.text.MessageFormat;
 
+/**
+ * SMART Mobile processing warnings
+ * 
+ * @author Emily
+ *
+ */
 public class JsonImportWarning {
 	
 
@@ -14,7 +41,8 @@ public class JsonImportWarning {
 		INVALID_CM, // 1 parameter - cm uuid as string
 		INVALID_SIGNATURE, //1 parameter - key
 		INVALID_OBSERVER, //1 parameter - employee uuid as string
-		INVALID_PHOTO, //1 parameter - attachment ordinal
+		INVALID_ATTACHMENT, //1 parameter - attachment ordinal
+		INVALID_PHOTO_ATTACHMENT, //1 parameter - attachment ordinal
 		
 		COULD_NOT_PARSE_BOOLEAN, //1 parameter value being parsed
 		COULD_NOT_PARSE_DATE,  //1 parameter value being parsed
@@ -65,7 +93,9 @@ public class JsonImportWarning {
 			case INVALID_CM: return MessageFormat.format("Source configurable model not found. Source configurable model will be null for this waypoint. (mode uuid: {0}). Ensure your desktop Conservation Area is synchronized with Connect.", data);
 			case INVALID_SIGNATURE: return MessageFormat.format("Signature type not found. The file will be imported as a regular attachment. (signature key: {0}).", data);
 			case INVALID_OBSERVER: return MessageFormat.format("Observer not found found. The observer will be empty for this waypoint. (uuid: {0})", data);
-			case INVALID_PHOTO: return MessageFormat.format("Could not read photo attachment. Photo will not be imported. (photo number: {0})", data);
+			
+			case INVALID_ATTACHMENT: return MessageFormat.format("Could not process attachment. Attachment will not be imported. (attachment number: {0})", data);
+			case INVALID_PHOTO_ATTACHMENT: return MessageFormat.format("Could not determine photo attachment type. Attachment will be imported with an unknown file extension. (attachment number: {0})", data);
 			
 			case COULD_NOT_PARSE_BOOLEAN: return MessageFormat.format("Cannot parse boolean value from ''{0}''. Attribute value will not be set.", data);
 			case COULD_NOT_PARSE_DATE: return MessageFormat.format("Cannot parse date from ''{0}''. Date must be provided in either ''{1}'' or ''{2''} format. Attribute value will not be set.", data[0], CtJsonUtil.JSON_DATE_FORMAT_STR, CtJsonUtil.JSON_ATTRIBUTE_DATE_FORMAT_STR);

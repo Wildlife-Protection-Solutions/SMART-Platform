@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.json;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +39,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -87,6 +90,8 @@ import jakarta.xml.bind.DatatypeConverter;
 //see ImageProcessor.java
 public class CtJsonObservationParser {
 
+	protected Logger logger = Logger.getLogger(CtJsonObservationParser.class.getName());
+
 	public static final String FEATURE_KEY = "feature"; //$NON-NLS-1$
 	public static final String FEATURES_KEY = "features"; //$NON-NLS-1$
 	public static final String SIGHTINGS_KEY = "sighting"; //$NON-NLS-1$
@@ -131,8 +136,7 @@ public class CtJsonObservationParser {
 
 	
 	private void logException(Exception ex) {
-		//TODO:
-		ex.printStackTrace();
+		logger.log(Level.WARNING, ex.getMessage(), ex);
 	}
 	
 	public List<JsonImportWarning> getWarnings(){
@@ -602,14 +606,30 @@ public class CtJsonObservationParser {
 			try (InputStream in = new ByteArrayInputStream(data)) {
 				image = ImageIO.read(in);
 			}
-			
-			String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
-			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
 				
 			if (image == null){
-				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO, info.getImageCount()));
-				return null;
+				String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$	
+				//write bytes to temporary file
+				try {
+					Files.write(temp, data);
+				}catch (IOException ex) {
+					warnings.add(new JsonImportWarning(Type.INVALID_ATTACHMENT, info.getImageCount()));
+					logger.log(Level.WARNING, ex.getMessage(), ex);
+					return null;
+				}
+				
+				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO_ATTACHMENT, info.getImageCount()));
+				
+				WaypointAttachment attachment = new WaypointAttachment();
+				attachment.setCopyFromLocation(temp);
+				attachment.setFilename(fileName);
+				
+				return attachment;
 			} else {
+				String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
+				
 				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
