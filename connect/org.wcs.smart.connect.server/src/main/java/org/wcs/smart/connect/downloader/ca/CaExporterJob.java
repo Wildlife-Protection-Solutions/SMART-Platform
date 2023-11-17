@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -72,15 +73,17 @@ public class CaExporterJob implements Runnable {
 	private SessionFactory factory;
 	private Path destFile = null;
 	private String fileurl;
+	private Locale locale;
 	
 	public CaExporterJob(ConservationAreaInfo info, 
 			WorkItem item, 
 			String fileurl,
-			SessionFactory factory){
+			SessionFactory factory, Locale locale){
 		this.info = info;
 		this.item = item;
 		this.fileurl = fileurl;
 		this.factory = factory;
+		this.locale = locale;
 	}
 
 	private void updateItemStatus(String messagee, int percentComplete) {
@@ -231,7 +234,7 @@ public class CaExporterJob implements Runnable {
 		
 		List<Path> filesToDelete = new ArrayList<>();
 		
-		updateItemStatus("processing filestore", 1);
+		updateItemStatus(Messages.getString("CaExporterJob.progressfilestore", locale), 1); //$NON-NLS-1$
 		//parse hashes from desktop file
 		HashMap<Path, String> filehashes = new HashMap<>();
 		Path desktopdata = DataStoreManager.INSTANCE.getRootDirectory().resolve(data);
@@ -246,7 +249,7 @@ public class CaExporterJob implements Runnable {
 				filehashes.put(thisfile,  hash);
 			}
 		}
-		updateItemStatus("processing filestore", 3);
+		updateItemStatus(Messages.getString("CaExporterJob.progressfilestore", locale), 3); //$NON-NLS-1$
 		
 		final MessageDigest digest = MessageDigest.getInstance(ICaDataExportEngine.RECOVERY_HASH_ALGORITHM);
 
@@ -278,7 +281,7 @@ public class CaExporterJob implements Runnable {
 				filesToDelete.add(p);
 			}
 		}
-		updateItemStatus("processing filestore", 10);
+		updateItemStatus(Messages.getString("CaExporterJob.progressfilestore", locale), 10); //$NON-NLS-1$
 
 		ICaDataExportEngine engine = null; 
 		try{
@@ -294,7 +297,7 @@ public class CaExporterJob implements Runnable {
 				}
 			}
 		
-			updateItemStatus("exporting database", 50);
+			updateItemStatus(Messages.getString("CaExporterJob.progressdatabase", locale), 50); //$NON-NLS-1$
 			//export the data
 			(new PostgresqlExporters()).exportDatabaseOnly(engine);
 			
@@ -303,10 +306,10 @@ public class CaExporterJob implements Runnable {
 				engine.addPath(p.getKey(), p.getValue());
 			}
 			
-			updateItemStatus("creating export file", 80);
+			updateItemStatus(Messages.getString("CaExporterJob.progressfile", locale), 80); //$NON-NLS-1$
 			engine.createExportFile(destFile, null);
 
-			updateItemStatus("export complete", 100);
+			updateItemStatus(Messages.getString("CaExporterJob.progresscomplete", locale), 100); //$NON-NLS-1$
 		}finally{
 			if (engine != null) engine.cleanUp();
 		}

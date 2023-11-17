@@ -1,6 +1,28 @@
+/*
+ * Copyright (C) 2023 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.cybertracker.json.importer;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -9,6 +31,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.api.SmartCollectApi;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectSetting;
 import org.wcs.smart.connect.model.SmartCollectConnectUser;
@@ -18,15 +41,24 @@ import org.wcs.smart.smartcollect.model.SmartCollectUser;
 import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
 import org.wcs.smart.smartcollection.json.SmartCollectJsonProcessor;
 
+/**
+ * Connect processor for SMART Collect data
+ * 
+ * @author Emily
+ *
+ */
 public class ServerSmartCollectJsonProcessor extends SmartCollectJsonProcessor {
 
 	private final Logger logger = Logger.getLogger(ServerSmartCollectJsonProcessor.class.getName());
 
 	private Session session;
+	private Locale locale;
 	
 	public ServerSmartCollectJsonProcessor(ConservationArea ca, Session session) {
 		super(ca);
 		this.session = session;
+		locale = Locale.getDefault();
+		
 	}
 
 	@Override
@@ -72,7 +104,7 @@ public class ServerSmartCollectJsonProcessor extends SmartCollectJsonProcessor {
 		}
 		
 		if (processingOp == ConnectSetting.SmartCollectUserOption.DISCARD) {
-			warnings.add(new JsonImportWarning("User associated with data is not validated, all data will be discared (this setting can be changed in the Settings section on SMART Connect)."));
+			warnings.add(new JsonImportWarning(Messages.getString("ServerSmartCollectJsonProcessor.DataDiscarded", locale))); //$NON-NLS-1$
 			//discard all
 			return true;
 		}else if (processingOp == ConnectSetting.SmartCollectUserOption.LOAD) {
@@ -80,10 +112,10 @@ public class ServerSmartCollectJsonProcessor extends SmartCollectJsonProcessor {
 			for (SmartCollectUser u : notok) u.setState(State.VALIDATED);
 			return false;
 		}else if (processingOp == ConnectSetting.SmartCollectUserOption.REQUEUE) {
-			warnings.add(new JsonImportWarning("User associated with data is not validated. File will be requeued (this setting can be changed in the Settings section on SMART Connect)."));
+			warnings.add(new JsonImportWarning(Messages.getString("ServerSmartCollectJsonProcessor.DataRequeued", locale))); //$NON-NLS-1$
 			return null;
 		}else if (processingOp == ConnectSetting.SmartCollectUserOption.VALIDATE_REQUEUE) {
-			warnings.add(new JsonImportWarning("User associated with data is not validated. Validation request sent and the file requeued (this setting can be changed in the Settings section on SMART Connect)."));
+			warnings.add(new JsonImportWarning(Messages.getString("ServerSmartCollectJsonProcessor.ValidationSent", locale))); //$NON-NLS-1$
 			for (SmartCollectUser u : notok) {
 				try {
 					sendEmailRequest(u);

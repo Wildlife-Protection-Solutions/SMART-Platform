@@ -32,7 +32,8 @@ public class ServerDataQueueItem extends DataQueueItem{
 		PROCESSING("ServerDataQueueItem.Processing"), //$NON-NLS-1$
 		COMPLETE("ServerDataQueueItem.Complete"), //$NON-NLS-1$
 		COMPLETE_WARN("ServerDataQueueItem.CompleteWarn"), //$NON-NLS-1$
-		ERROR("ServerDataQueueItem.Error"); //$NON-NLS-1$
+		ERROR("ServerDataQueueItem.Error"), //$NON-NLS-1$
+		DUPLICATE("DUPLICATE FILE"); //$NON-NLS-1$
 		
 		private String guiName;
 		
@@ -133,12 +134,12 @@ public class ServerDataQueueItem extends DataQueueItem{
 		if (this.warningMessage == null) {
 			this.warningMessage = message;
 		}else {
-			this.warningMessage = this.warningMessage + "\n" + message;
+			this.warningMessage = this.warningMessage + "\n" + message; //$NON-NLS-1$
 		}
 	}
 	@Transient
 	public String[] getWarningMessageList(){
 		if (this.warningMessage == null) return new String[]{};
-		return this.warningMessage.split("\n");
+		return this.warningMessage.split("\n"); //$NON-NLS-1$
 	}
 }

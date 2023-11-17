@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2023 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.cybertracker.json.importer;
 
 import java.io.InputStream;
@@ -27,11 +48,18 @@ import org.wcs.smart.connect.dataqueue.ServerDataQueueItem.Status;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.AttachmentInterceptor;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 
+/**
+ * SMART Mobile json file processor - delegates processing to correct file. 
+ * 
+ * @author Emily
+ *
+ */
 public class SmartMobileJsonFileProcessor {
 	
 	private final Logger logger = Logger.getLogger(SmartMobileJsonFileProcessor.class.getName());
@@ -41,9 +69,10 @@ public class SmartMobileJsonFileProcessor {
 
 	private ServerDataQueueItem item;
 	private SessionFactory factory;
+	private Locale locale;
 	
-	public static SmartMobileJsonFileProcessor create(ServerDataQueueItem item, SessionFactory factory) {
-		return new SmartMobileJsonFileProcessor(item, factory);
+	public static SmartMobileJsonFileProcessor create(ServerDataQueueItem item, SessionFactory factory, Locale locale) {
+		return new SmartMobileJsonFileProcessor(item, factory, locale);
 	}
 
 	public static boolean canProcess(String type) {
@@ -51,9 +80,10 @@ public class SmartMobileJsonFileProcessor {
 				type.toUpperCase(Locale.ROOT).equals(CT_ZIP_TYPE));
 	}
 	
-	private SmartMobileJsonFileProcessor(ServerDataQueueItem item, SessionFactory factory) {
+	private SmartMobileJsonFileProcessor(ServerDataQueueItem item, SessionFactory factory, Locale locale) {
 		this.item = item;
 		this.factory = factory;
+		this.locale = locale;
 	}
 
 	public void process()  {
@@ -89,11 +119,11 @@ public class SmartMobileJsonFileProcessor {
 					return IOUtils.toString(in);
 				}
 			}
-			throw new Exception("No JSON features extracted from file.");
+			throw new Exception(Messages.getString("SmartMobileJsonFileProcessor.NoFeaturesException", locale)); //$NON-NLS-1$
 			
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage(),ex);
-			updateItemStatus(session, Status.ERROR, "Could not extract json data from file. See server log for full details.", null);
+			updateItemStatus(session, Status.ERROR, Messages.getString("SmartMobileJsonFileProcessor.InvalidJsonError", locale), null); //$NON-NLS-1$
 		}
 		return null;
 
@@ -119,7 +149,7 @@ public class SmartMobileJsonFileProcessor {
 			features = CtJsonUtil.parseFeaturesFromJsonString(json);
 		}catch (Exception ex ) {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			updateItemStatus(session,Status.ERROR,MessageFormat.format("Could not parse json data from file: {0}", ex.getMessage()), null);
+			updateItemStatus(session,Status.ERROR,MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.JsonParseError", locale), ex.getMessage()), null); //$NON-NLS-1$
 			return;
 		}
 
@@ -150,16 +180,16 @@ public class SmartMobileJsonFileProcessor {
 				//for later as maybe something else needs to be processed first
 				session.getTransaction().rollback();
 
-				updateItemStatus(session,Status.QUEUED, MessageFormat.format("No data from file could be processed ({0}). Item requeued.", LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)) ),warnings);
+				updateItemStatus(session,Status.QUEUED, MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.NoFeatureProcessedError", locale), LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)) ),warnings); //$NON-NLS-1$
 				return ;
 			}
 
 			if (!notProc.isEmpty()){
 				//not all items have been processed
 				StringBuilder sb = new StringBuilder();
-				sb.append(MessageFormat.format("{0} features were processed. {1} features could not be processed. These features will be dropped: ", features.size(), notProc.size()));
+				sb.append(MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.FeatureProccessedCount", locale), features.size(), notProc.size())); //$NON-NLS-1$
 				for (JSONObject o : notProc){
-					sb.append(o.toJSONString() + "; ");
+					sb.append(o.toJSONString() + "; "); //$NON-NLS-1$
 				}
 				sb.deleteCharAt(sb.length()-1);
 				sb.deleteCharAt(sb.length()-1);
@@ -191,7 +221,7 @@ public class SmartMobileJsonFileProcessor {
 				return;
 			}
 
-			String message = MessageFormat.format("Error processing data in file: {0}", ex.getMessage() );
+			String message = MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.ProcessingError", locale), ex.getMessage() ); //$NON-NLS-1$
 			updateItemStatus(session,  Status.ERROR, message, null);
 		}
 

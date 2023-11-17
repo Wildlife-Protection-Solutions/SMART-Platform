@@ -30,8 +30,8 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.NamedPreparedStatement;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.connect.i18n.Messages;

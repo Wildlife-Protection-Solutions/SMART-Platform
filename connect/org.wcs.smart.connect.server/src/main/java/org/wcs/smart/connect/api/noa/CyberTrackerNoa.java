@@ -64,6 +64,7 @@ import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.DataQueueEventService;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonFileProcessor;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
@@ -494,9 +495,9 @@ public class CyberTrackerNoa {
 			item.setConservationArea(ca);
 			item.setName("CyberTracker " + DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now())); //$NON-NLS-1$
 			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
-				item.setType("JSON_ZLIB_CT"); //$NON-NLS-1$
+				item.setType(SmartMobileJsonFileProcessor.CT_ZIP_TYPE);
 			}else{
-				item.setType("JSON_CT"); //$NON-NLS-1$
+				item.setType(SmartMobileJsonFileProcessor.CT_TYPE);
 			}
 			item.setFile(null);
 			item.setStatus(Status.UPLOADING);

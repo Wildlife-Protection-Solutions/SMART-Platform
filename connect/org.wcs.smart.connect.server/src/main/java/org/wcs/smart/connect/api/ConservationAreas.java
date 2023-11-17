@@ -595,7 +595,7 @@ public class ConservationAreas extends HttpServlet{
 						+ URLEncoder.encode(info.getUuid().toString(), ConnectRESTApplication.UTF8)
 						+ "?data=" + DATA_PARAM_RECOVERY_PACKAGE_VALUE + "&version=" + item.getUuid().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 							ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
-				executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
+				executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context), request.getLocale()));
 					
 				String url = item.getStatusURL(request);
 				return Response
@@ -807,7 +807,7 @@ public class ConservationAreas extends HttpServlet{
 					+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	
 			ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
-			executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
+			executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context), request.getLocale()));
 				
 			String url = item.getStatusURL(request);
 			return Response

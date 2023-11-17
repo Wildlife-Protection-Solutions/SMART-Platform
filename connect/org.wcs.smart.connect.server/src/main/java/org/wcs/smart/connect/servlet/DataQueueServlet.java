@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonFileProcessor;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.DataQueueManager;
@@ -78,10 +79,10 @@ public class DataQueueServlet extends HttpServlet {
 			case "PATROL_XML": //$NON-NLS-1$
 				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.PatrolXmlName",l), type}); //$NON-NLS-1$
 				break;
-			case "JSON_CT": //$NON-NLS-1$
+			case SmartMobileJsonFileProcessor.CT_TYPE: 
 				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtJsonName1",l), type}); //$NON-NLS-1$
 				break;
-			case "JSON_ZLIB_CT": //$NON-NLS-1$
+			case SmartMobileJsonFileProcessor.CT_ZIP_TYPE: 
 				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtZLibJsonName1",l), type}); //$NON-NLS-1$
 				break;
 			case "I2_RECORD_XML": //$NON-NLS-1$

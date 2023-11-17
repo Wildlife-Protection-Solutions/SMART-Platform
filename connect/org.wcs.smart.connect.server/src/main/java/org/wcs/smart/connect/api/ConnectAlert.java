@@ -50,7 +50,6 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.filter.AlertFilter;
@@ -64,7 +63,6 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

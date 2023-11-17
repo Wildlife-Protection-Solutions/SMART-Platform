@@ -25,9 +25,9 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata.PatrolWaypointMetadata;
+import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;

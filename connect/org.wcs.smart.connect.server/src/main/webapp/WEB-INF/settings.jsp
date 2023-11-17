@@ -51,21 +51,21 @@
 		</div>
 		
 		<div class="settingsTable">
-			<div class="block settings-header">Data Queue Processing Options</div>
+			<div class="block settings-header"><fmt:message key="settings.dataqueueprocessing" /></div>
 			<div style="margin-top: 5px">
 				<input id="dq_smartmobile_connect" type="checkbox"  />
-				<label for="dq_smartmobile_connect" title="Check to enable processing of SMART Mobile data on Connect, otherwise processing must be completed using the Desktop Tools">Process SMART Mobile files on Connect</label>
+				<label for="dq_smartmobile_connect" title="<fmt:message key="settings.processconnecttooltip" />"><fmt:message key="settings.processonconnect" /></label>
 			</div>
 			
 			<div style="margin: 10px; display:flex; flex-direction:column">
-				<div style="margin-top: 5px; margin-bottom:5px; font-weight:bold">SMART Collect Data</div>
+				<div style="margin-top: 5px; margin-bottom:5px; font-weight:bold"><fmt:message key="settings.dqcollectop" /></div>
 				<div style="margin-left: 20px">
-				<div style="margin-bottom:5px; ">Action to take when processing SMART Collect data from an unvalidated user:</div>
+				<div style="margin-bottom:5px; "><fmt:message key="settings.dqcollectopmessage" /></div>
 				<select style="width: fit-content" id="qd_smartcollect_useroption">
-					<option value="validaterequeue">Send validation request and requeue data (no data loaded)</option>
-					<option value="load">Load Data (data will be loaded, but user remains unvalidated)</option>
-					<option value="requeue">Requeue File (no data is loaded, and no validation requests sent)</option>
-					<option value="discard">Discard (discard all data, file will not be processed again)</option>
+					<option value="validaterequeue"><fmt:message key="settings.dqcollectopvalidate" /></option>
+					<option value="load"><fmt:message key="settings.dqcollectopload" />)</option>
+					<option value="requeue"><fmt:message key="settings.dqcollectoprequeue" /></option>
+					<option value="discard"><fmt:message key="settings.dqcollectopdiscard" /></option>
 				</select>
 				</div>
 			</div>
@@ -226,7 +226,7 @@ font-size: 40px;</textarea>
 
 
 <div id="updateStyleDialog" style="display: none;width:400px;" class="dialog">
-  <div class="dialog-title">Update Style</div>
+  <div class="dialog-title"><fmt:message key="settings.styleupdate" /></div>
   <div id="dialogerror" class="errorsection"></div>
   <form id="updatestyleform" action="settings" method="POST" enctype="multipart/form-data">
 

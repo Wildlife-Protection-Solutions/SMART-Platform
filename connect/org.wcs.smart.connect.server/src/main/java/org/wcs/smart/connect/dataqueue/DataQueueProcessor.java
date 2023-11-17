@@ -21,12 +21,18 @@
  */
 package org.wcs.smart.connect.dataqueue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonFileProcessor;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
+import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
@@ -52,10 +58,11 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 	@Override
 	public void processItem(WorkItem item, Session session) {
 		//update the status of the data queue item to processing
+		ServerDataQueueItem dqItem = null;
 		try{
 			session.beginTransaction();
 			
-			ServerDataQueueItem dqItem = QueryFactory.buildQuery(session, ServerDataQueueItem.class, "workItem", item.getUuid()).uniqueResult(); //$NON-NLS-1$
+			dqItem = QueryFactory.buildQuery(session, ServerDataQueueItem.class, "workItem", item.getUuid()).uniqueResult(); //$NON-NLS-1$
 			dqItem.setStatus(ServerDataQueueItem.Status.QUEUED);			
 			item.setStatus(Status.COMPLETE);
 			session.merge(item);
@@ -70,6 +77,43 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			session.merge(item);
 			session.getTransaction().commit();
 		}
+		
+		//check for duplicate SMART Mobile file
+		if (dqItem.getType().equals( SmartMobileJsonFileProcessor.CT_TYPE ) || dqItem.getType().equals(SmartMobileJsonFileProcessor.CT_ZIP_TYPE)) {
+			session.beginTransaction();
+			
+			try {
+				List<String> files = session.createQuery("SELECT file FROM ServerDataQueueItem WHERE conservationArea = :ca AND type = :type AND uuid != :uuid", String.class) //$NON-NLS-1$
+				.setParameter("ca", dqItem.getConservationArea()) //$NON-NLS-1$
+				.setParameter("type", dqItem.getType()) //$NON-NLS-1$
+				.setParameter("uuid", dqItem.getUuid()) //$NON-NLS-1$
+				.list();
+				
+				Path thisFile = DataStoreManager.INSTANCE.getFile(dqItem.getFile());
+				
+				for (String file : files) {
+					Path thatFile = DataStoreManager.INSTANCE.getFile(file);
+					if (!Files.exists(thatFile)) continue;
+					try {
+						if (Files.mismatch(thisFile, thatFile) == -1) {
+							//this is a duplicate file
+							dqItem.setStatus(ServerDataQueueItem.Status.DUPLICATE);
+							dqItem.setStatusMessage(Messages.getString("DataQueueProcessor.DuplicateFileMessage", item.getLocale())); //$NON-NLS-1$
+							break;
+						}
+					}catch (IOException ex) {
+						logger.log(Level.WARNING, ex.getMessage(), ex);
+					}
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				logger.log(Level.WARNING, ex.getMessage(), ex);
+			}
+						
+		}
+
+				
 		
 		//immediately start processing json file
 		SmartMobileJsonProcessorManager.INSTANCE.startProcessing(session.getFactory());

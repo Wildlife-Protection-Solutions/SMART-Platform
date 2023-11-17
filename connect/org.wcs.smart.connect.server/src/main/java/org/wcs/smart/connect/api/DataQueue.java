@@ -722,7 +722,7 @@ public class DataQueue {
 				}
 			}
 			if (key == null) {
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid setting key");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingKey", request.getLocale())); //$NON-NLS-1$
 			}
 			
 			String updatedValue = null;
@@ -745,7 +745,7 @@ public class DataQueue {
 			}
 			
 			if (updatedValue== null) {
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid setting value");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingValue", request.getLocale())); //$NON-NLS-1$
 			}
 			
 			ConnectSetting setting = s.get(ConnectSetting.class, key.key);

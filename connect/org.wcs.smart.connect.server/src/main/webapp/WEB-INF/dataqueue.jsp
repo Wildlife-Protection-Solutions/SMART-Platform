@@ -58,7 +58,7 @@
 		  	<div style="display: flex; height: 100%; flex-basis:40%;">
 		  	<div style="display: flex; flex-direction: column; width: 100%; overflow:auto; padding-left:5px; padding-right:5px">
 			  		<div class="tabheader pageheader" style="border-radius: 0px; border-bottom:1px solid #BBBBBB;">
-		  				<a id="filedetails" class="tab ">Details</a>
+		  				<a id="filedetails" class="tab "><fmt:message key="dataqueue.details"/></a>
 		  				<a id="filepreview" class="tab "><fmt:message key="dataqueue.preview"/></a>
 			  		</div>
 			  		<div style="display:flex; flex-grow:1; overflow: auto">
@@ -90,7 +90,7 @@
 			</c:if>
 			<c:if test="${canrun}">
 				<span style="padding-left: 10px; padding-right:10px">|</span>
-				<a id="btnStartProcessing" style="padding-right:5px" href="#" title="initiate connect processing">Launch File Processing</a>
+				<a id="btnStartProcessing" style="padding-right:5px" href="#" title="<fmt:message key="startfileprocessingtooltip"/>"><fmt:message key="dataqueue.startfileprocessing"/></a>
 			</c:if>		
 		</div>
 		

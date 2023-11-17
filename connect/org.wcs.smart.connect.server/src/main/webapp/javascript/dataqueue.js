@@ -111,9 +111,9 @@ window.onload = function(){
 					tr.childNodes[4].prepend(img);
 							
 					if (item.status == "COMPLETE_WARN"){
-						img.title = "Completed but warnings were generated while processing. Click on row to view warnings.";
+						img.title = i18n("dataqueue.processingwarning");
 					}else{
-						img.title = "Processing was attempted but could not be completed. Item was requeued. Click on row to view details.";
+						img.title = i18n("dataqueue.processingrequeued");
 					}
 				}
 						
@@ -371,9 +371,9 @@ function createFilterTable(){
 					row.childNodes[4].prepend(img);
 					
 					if (status == "COMPLETE_WARN"){
-						img.title = "Completed but warnings were generated while processing. Click on row to view warnings.";
+						img.title = i18n("dataqueue.processingwarning");
 					}else{
-						img.title = "Processing was attempted but could not be completed. Item was requeued. Click on row to view details.";
+						img.title = i18n("dataqueue.processingrequeued");
 					}
 				}
 				
@@ -406,7 +406,7 @@ function createFilterTable(){
 		 	while(statusfilter.firstChild) {statusfilter.removeChild(statusfilter.firstChild);}
 		 	var op = document.createElement("option");
 		 	op.value = "all"
-		 	op.innerHTML = "All";
+		 	op.innerHTML = i18n("dataqueue.allfilter");
 		 	statusfilter.appendChild(op);
 		 	for (var stat of statusSet){
 		 		op = document.createElement("option");
@@ -419,7 +419,7 @@ function createFilterTable(){
 		 	while(typefilter.firstChild) {typefilter.removeChild(typefilter.firstChild);}
 		 	var op = document.createElement("option");
 		 	op.value = "all"
-		 	op.innerHTML = "All";
+		 	op.innerHTML = i18n("dataqueue.allfilter");
 		 	typefilter.appendChild(op);
 		 	for (var stat of typeSet){
 		 		op = document.createElement("option");
@@ -446,6 +446,8 @@ function getStatusImage(status){
 		return "fa-regular fa-xl fa-circle-dot ";
 	}else if (status == "ERROR"){
 		return "fa-regular fa-xl fa-circle-xmark";
+	}else if (status == "DUPLICATE"){
+		return "fa-regular fa-xl fa-circle-xmark";
 	}else if (status == "UPLOADING"){
 		return "fa-regular fa-xl fa-circle-up";
 	}else if (status == "PROCESSING"){
@@ -461,7 +463,7 @@ function getStatusImageColor(status){
 	
 	if (status == "QUEUED"){
 		return "#003366";
-	}else if (status == "ERROR"){
+	}else if (status == "ERROR" || status == "DUPLICATE"){
 		return "red";
 	}else if (status == "PROCESSING" || status == "UPLOADING"){
 		return "#003366";
@@ -604,7 +606,7 @@ function deleteSelected(){
 	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]:checked');
 	if (checkedBoxes.length == 0) return false;
 	
-	displayConfirmDialog("Confirm Delete", "Are you sure you want to delete the selected items?", function(){
+	displayConfirmDialog(i18n("dataqueue.deletetitle"), i18n("dataqueue.confirmdelete"), function(){
 		hideInfo();	
 		for (var i = 0; i < checkedBoxes.length; i ++){
 			var uuid = checkedBoxes[i].value;
@@ -651,7 +653,7 @@ function checkAll(){
 function deleteFile(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
 	
-	displayConfirmDialog("Confirm Delete", i18n("dataqueue.areyousuredelete"), function(){
+	displayConfirmDialog(i18n("dataqueue.deletetitle"), i18n("dataqueue.areyousuredelete"), function(){
 		hideInfo();
 		
 		var oReq = new XMLHttpRequest();

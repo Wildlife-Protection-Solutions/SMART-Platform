@@ -1,9 +1,31 @@
+/*
+ * Copyright (C) 2023 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.cybertracker.json.importer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,6 +37,12 @@ import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 
 import jakarta.persistence.Tuple;
 
+/**
+ * Job for processing smart mobile data.
+ * 
+ * @author Emily
+ *
+ */
 public class SmartMobileJsonJob implements Runnable{
 
 	public static final int MAX_TRIES = 5;
@@ -40,7 +68,7 @@ public class SmartMobileJsonJob implements Runnable{
 			
 			try(Session session = factory.openSession()){
 				
-				//1. find all queued data queue items with appropriate type
+				//find all queued data queue items with appropriate type
 				//in order of upload - processed older files first
 				List<String> types = new ArrayList<>();
 				types.add(SmartMobileJsonFileProcessor.CT_TYPE);
@@ -48,14 +76,14 @@ public class SmartMobileJsonJob implements Runnable{
 				
 				Query<ServerDataQueueItem> q = null;
 				if (toSkip.isEmpty()) {
-					q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status order by uploadedDate asc", ServerDataQueueItem.class)
-							.setParameter("types", types)
-							.setParameter("status", ServerDataQueueItem.Status.QUEUED);
+					q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status order by uploadedDate asc", ServerDataQueueItem.class) //$NON-NLS-1$
+							.setParameter("types", types) //$NON-NLS-1$
+							.setParameter("status", ServerDataQueueItem.Status.QUEUED); //$NON-NLS-1$
 				}else {
-					q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status and uuid not in (:toskip) order by uploadedDate asc", ServerDataQueueItem.class)
-							.setParameter("types", types)
-							.setParameter("status", ServerDataQueueItem.Status.QUEUED)
-							.setParameter("toskip", toSkip);
+					q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status and uuid not in (:toskip) order by uploadedDate asc", ServerDataQueueItem.class) //$NON-NLS-1$
+							.setParameter("types", types) //$NON-NLS-1$
+							.setParameter("status", ServerDataQueueItem.Status.QUEUED) //$NON-NLS-1$
+							.setParameter("toskip", toSkip); //$NON-NLS-1$
 							
 				}
 				toProcess = q.list();
@@ -94,12 +122,12 @@ public class SmartMobileJsonJob implements Runnable{
 						toSkip.add(item.getUuid());
 					}
 				
-					//2. check it out
+					//check it out
 					session.beginTransaction();
-					Object x = session.createNativeQuery("UPDATE connect.data_queue SET status = :ps WHERE uuid = :uuid and status = :qu RETURNING *  ", Tuple.class)
-							.setParameter("ps", ServerDataQueueItem.Status.PROCESSING.name())
-							.setParameter("uuid", item.getUuid())
-							.setParameter("qu", ServerDataQueueItem.Status.QUEUED.name())
+					Object x = session.createNativeQuery("UPDATE connect.data_queue SET status = :ps WHERE uuid = :uuid and status = :qu RETURNING *  ", Tuple.class) //$NON-NLS-1$
+							.setParameter("ps", ServerDataQueueItem.Status.PROCESSING.name()) //$NON-NLS-1$
+							.setParameter("uuid", item.getUuid()) //$NON-NLS-1$
+							.setParameter("qu", ServerDataQueueItem.Status.QUEUED.name()) //$NON-NLS-1$
 							.getSingleResult();
 					session.getTransaction().commit();
 					
@@ -115,26 +143,18 @@ public class SmartMobileJsonJob implements Runnable{
 					DataQueueEventService.addUpdateToQueue(item);
 				}
 
-				//3. process it
 				processItem(item);
 			}
-
-			//4. repeat
 		}
-		
-		
 		//TODO: find any items that are old than say 3 months and not processed and set to error ???
-		
-
 	}
 	
 	private void processItem(ServerDataQueueItem item) {
-		
 		if (item == null) return;
-		
 		if (!SmartMobileJsonFileProcessor.canProcess(item.getType())) return;
 		
-		SmartMobileJsonFileProcessor.create(item, factory).process();
+		Locale locale = Locale.getDefault();
+		SmartMobileJsonFileProcessor.create(item, factory, locale).process();
 	}
 
 	

@@ -23,9 +23,9 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
-import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.observation.IObservationLabelProvider;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
 
 /**

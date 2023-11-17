@@ -1,4 +1,10 @@
 labels_en= {
+	"dataqueue.processingwarning":"Completed but warnings were generated while processing. Click on row to view warnings.",
+	"dataqueue.processingrequeued":"Processing was attempted but could not be completed. Item was requeued. Click on row to view details.",
+	"dataqueue.allfilter":"All",
+	
+"dataqueue.deletetitle":"Confirm Delete",
+"dataqueue.confirmdelete":"Are you sure you want to delete the selected items?",
 "cybertracker.reseterror": "Error resetting SMART Mobile API Key: ",
 "cybertracker.unauthorized": "Unauthorized",
 "cybertracker.resetmsg": "API Key Reset.  All SMART Mobile packages for this Conservation Area should be removed and regenerated.",

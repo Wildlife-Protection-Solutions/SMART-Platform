@@ -53,7 +53,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		if (event.getEntity() instanceof Waypoint){
 			wp = (Waypoint)event.getEntity();
 			wp.setLastModified(LocalDateTime.now());
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
 			return false;
 			
 		}else if (event.getEntity() instanceof WaypointAttachment) {
@@ -82,7 +82,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		if (event.getEntity() instanceof Waypoint){
 			wp = (Waypoint)event.getEntity();
 			wp.setLastModified(LocalDateTime.now());
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
 			return false;
 			
 		}else if (event.getEntity() instanceof WaypointAttachment) {

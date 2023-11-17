@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.apache;
 
+import org.apache.catalina.Realm;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class BcryptCredentialHandler implements org.apache.catalina.CredentialHandler {

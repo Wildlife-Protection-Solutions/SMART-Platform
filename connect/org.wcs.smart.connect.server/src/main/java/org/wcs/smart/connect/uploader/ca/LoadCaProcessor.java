@@ -24,6 +24,7 @@ package org.wcs.smart.connect.uploader.ca;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,7 +74,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			}
 			
 			//load data
-			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item);
+			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item, item.getLocale());
 			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
 			session.flush();
 			

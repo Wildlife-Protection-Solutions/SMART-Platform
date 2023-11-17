@@ -138,7 +138,7 @@
      				<fmt:message key="query.sharingDescriptionUsers" />
 					<input id='urllink' type=text name="urllink" class="linkdialog">
 				</fieldset>
-				<center>OR</center>
+				<center><fmt:message key="report.or"/></center>
 				<div id='createcustomlinktitle' style="text-align:center">
 					<a href='' id='createcustomlinklink'><fmt:message key="query.createcustomtitle"/></a>
 				</div>

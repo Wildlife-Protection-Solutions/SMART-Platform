@@ -1377,7 +1377,7 @@ public class UpgradeServlet extends HttpServlet {
 						"update smart.employee set uuid = '00000000000000000000000000000001' where uuid = '00000000000000000000000000000000'", //$NON-NLS-1$
 						
 						"alter table connect.data_queue drop constraint status_chk", //$NON-NLS-1$
-						"alter table connect.data_queue add constraint status_chk CHECK (status = ANY (ARRAY['UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR']))", //$NON-NLS-1$
+						"alter table connect.data_queue add constraint status_chk CHECK (status = ANY (ARRAY['UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR', 'DUPLICATE']))", //$NON-NLS-1$
 								
 						//warning message for connect processing smart mobile files
 						"alter table connect.data_queue add column warning_message varchar", //$NON-NLS-1$

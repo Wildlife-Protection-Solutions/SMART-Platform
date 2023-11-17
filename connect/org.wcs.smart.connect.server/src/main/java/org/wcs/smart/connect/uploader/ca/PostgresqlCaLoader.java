@@ -93,10 +93,12 @@ public class PostgresqlCaLoader {
 	
 	private Session session;
 	private WorkItem item;
+	private Locale locale;
 	
-	public PostgresqlCaLoader(Session session, WorkItem item){
+	public PostgresqlCaLoader(Session session, WorkItem item, Locale locale){
 		this.session = session;
 		this.item = item;
+		this.locale = locale;
 	}
 	
 	private void updatePercentComplete(int percent, String message) {
@@ -116,18 +118,18 @@ public class PostgresqlCaLoader {
 		
 		Path tempDir = ZipUtil.createTemporaryDirectory();
 		try{
-			updatePercentComplete(0, "Extracting uploaded data");
+			updatePercentComplete(0, Messages.getString("PostgresqlCaLoader.progressextracting", locale)); //$NON-NLS-1$
 			ZipUtilCommon.unzipFolder(zipFile, tempDir);
 			
-			updatePercentComplete(20, "Importing into database");
+			updatePercentComplete(20, Messages.getString("PostgresqlCaLoader.progressimportingdb", locale)); //$NON-NLS-1$
 			processDatabaseFiles(tempDir, 20, 40);
 			inportPlugInVersionFile(tempDir, ca);
 			validatePluginVersions(ca);
 			
-			updatePercentComplete(60, "Importing files");
+			updatePercentComplete(60, Messages.getString("PostgresqlCaLoader.progressimportingfiles", locale)); //$NON-NLS-1$
 			processFilestore(tempDir, ca, 60, 39);
 			
-			updatePercentComplete(99, "Processing Complete");
+			updatePercentComplete(99, Messages.getString("PostgresqlCaLoader.progresscomplete", locale)); //$NON-NLS-1$
 		}finally{
 			try{
 				FileUtils.forceDelete(tempDir.toAbsolutePath().normalize().toFile());
