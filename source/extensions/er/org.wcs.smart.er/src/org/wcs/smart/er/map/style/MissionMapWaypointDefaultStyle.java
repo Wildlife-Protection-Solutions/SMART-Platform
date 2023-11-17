@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.map.style;
 
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
@@ -40,12 +41,12 @@ public class MissionMapWaypointDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return "Mission Map";
+		return Messages.MissionMapWaypointDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Waypoint";
+		return Messages.MissionMapWaypointDefaultStyle_LayerName;
 	}
 
 }

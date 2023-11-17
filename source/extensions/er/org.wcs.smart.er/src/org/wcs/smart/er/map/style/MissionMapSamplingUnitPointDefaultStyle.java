@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.map.style;
 
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
@@ -40,12 +41,12 @@ public class MissionMapSamplingUnitPointDefaultStyle implements IMapLayerDefault
 
 	@Override
 	public String getMapName() {
-		return "Mission Map";
+		return Messages.MissionMapSamplingUnitPointDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Sampling Unit - Point";
+		return Messages.MissionMapSamplingUnitPointDefaultStyle_LayerName;
 	}
 
 }

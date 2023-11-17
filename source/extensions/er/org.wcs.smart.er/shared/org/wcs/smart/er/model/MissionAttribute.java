@@ -24,7 +24,7 @@ package org.wcs.smart.er.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
@@ -100,7 +100,7 @@ public class MissionAttribute extends NamedKeyIconItem{
 	 * @return set of valid list elements
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
-	@OrderBy(clause = "list_order")
+	@SQLOrder("list_order")
 	public List<MissionAttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}

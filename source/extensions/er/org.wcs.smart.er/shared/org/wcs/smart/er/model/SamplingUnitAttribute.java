@@ -23,7 +23,7 @@ package org.wcs.smart.er.model;
 
 import java.util.List;
 
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -90,7 +90,7 @@ public class SamplingUnitAttribute extends NamedKeyIconItem{
 	 * @return set of valid list elements
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
-	@OrderBy(clause = "list_order")
+	@SQLOrder("list_order")
 	public List<SamplingUnitAttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}

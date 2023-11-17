@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.UuidItem;
 
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AssociationOverrides;

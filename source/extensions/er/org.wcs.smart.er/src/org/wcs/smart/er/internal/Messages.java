@@ -529,6 +529,26 @@ public class Messages extends NLS {
 	public static String MissionMapPage_UndoError;
 
 	public static String MissionMapPage_WaypointLbl;
+	public static String MissionMapSamplingUnitLinearDefaultStyle_LayerName;
+
+	public static String MissionMapSamplingUnitLinearDefaultStyle_MapName;
+
+	public static String MissionMapSamplingUnitPointDefaultStyle_LayerName;
+
+	public static String MissionMapSamplingUnitPointDefaultStyle_MapName;
+
+	public static String MissionMapTrackDefaultStyle_LayerName;
+
+	public static String MissionMapTrackDefaultStyle_MapName;
+
+	public static String MissionMapWaypointDefaultStyle_LayerName;
+
+	public static String MissionMapWaypointDefaultStyle_MapName;
+
+	public static String MissionMapWaypointRawDefaultStyle_LayerName;
+
+	public static String MissionMapWaypointRawDefaultStyle_MapName;
+
 	public static String MissionMetaConfigDialog_Message;
 
 	public static String MissionMetaConfigDialog_Title;
