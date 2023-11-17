@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.model.AssetDeployment;

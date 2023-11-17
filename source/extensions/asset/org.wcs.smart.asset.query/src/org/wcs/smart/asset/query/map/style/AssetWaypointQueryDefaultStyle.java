@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.query.map.style;
 
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class AssetWaypointQueryDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class AssetWaypointQueryDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return "Field Sensor Query";
+		return Messages.AssetWaypointQueryDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Waypoint";
+		return Messages.AssetWaypointQueryDefaultStyle_LayerName;
 	}
 
 }

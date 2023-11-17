@@ -24,8 +24,6 @@ package org.wcs.smart.asset.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.wcs.smart.ca.UuidItem;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

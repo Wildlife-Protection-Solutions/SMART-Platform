@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.query.map.style;
 
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class AssetSummaryPointQueryDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class AssetSummaryPointQueryDefaultStyle implements IMapLayerDefaultStyle
 
 	@Override
 	public String getMapName() {
-		return "Field Sensor Query";
+		return Messages.AssetSummaryPointQueryDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Summary Point";
+		return Messages.AssetSummaryPointQueryDefaultStyle_LayerName;
 	}
 
 }
