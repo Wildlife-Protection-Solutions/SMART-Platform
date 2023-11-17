@@ -214,7 +214,7 @@ public class RecoverCaEngine {
 	
 	private Path buildFilestoreHash(IProgressMonitor pmonitor) throws IOException, NoSuchAlgorithmException {
 		SubMonitor monitor = SubMonitor.convert(pmonitor, "", 10); //$NON-NLS-1$
-		monitor.subTask("Scanning Local Filestore");
+		monitor.subTask(Messages.RecoverCaEngine_ProgressScanning);
 		
 		Path fsLocation = Paths.get(ca.getFileDataStoreLocation());
 		List<Path> allFiles = new ArrayList<>();

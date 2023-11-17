@@ -33,6 +33,7 @@ import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
 import org.wcs.smart.connect.internal.CaReplicationDeleteHandler;
 import org.wcs.smart.connect.internal.EmployeeDeleteHandler;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -67,7 +68,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public static final String CONNECT_URL_PREF = "org.wcs.smart.connect.url.pref"; //$NON-NLS-1$
 	public static final String CONNECT_ALERT_TYPE_CACHE_PREF = "org.wcs.smart.connect.alert.types"; //$NON-NLS-1$
 	
-	public static final String PERCENT_UPLOAD_PROGRESS_MESSAGE = "Uploading File: {0}% ";
+	public static final String PERCENT_UPLOAD_PROGRESS_MESSAGE = Messages.ConnectPlugIn_UploadPercentage;
 	/**
 	 * The constructor
 	 */

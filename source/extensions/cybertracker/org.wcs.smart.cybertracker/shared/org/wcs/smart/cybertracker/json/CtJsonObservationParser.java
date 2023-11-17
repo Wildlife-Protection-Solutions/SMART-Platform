@@ -579,64 +579,7 @@ public class CtJsonObservationParser {
 		}
 	}
 	
-	
-//	/**
-//	 * Can return null if the tree node is not found
-//	 * @param uuid
-//	 * @param session
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	private AttributeTreeNode findAttributeTreeNode(String uuid, Session session) throws Exception{
-//		return JsonUtils.findAttributeTreeNode(uuid, session);
-//	}	
-//	private List<WaypointAttachment> parseAttachments(List<AttachmentInfo> values) throws Exception{
-//		int imagecnt = 0;
-//		List<WaypointAttachment> attachments = new ArrayList<>();
-//		
-//		for (AttachmentInfo value : values){
-//			
-//			if (value.getType() == AttachmentInfo.AttachmentType.PHOTO || value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
-//				//picture object; create a temporary file add it to waypoint observation
-//				String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
-//					
-//				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT);   //$NON-NLS-1$//$NON-NLS-2$
-//				BufferedImage image = null;
-//				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
-//					image = ImageIO.read(in);					
-//				}
-//				if (image == null){
-//					warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
-//				}else{
-//					ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());	
-//					WaypointAttachment attachment = new WaypointAttachment();
-//					attachment.setCopyFromLocation(temp);
-//					attachment.setFilename(fileName);
-//					attachments.add(attachment);
-//					
-//					if (value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
-//						attachment.setSignatureType(value.getSignatureType());
-//					}
-//				}
-//			}else if (value.getType() == AttachmentInfo.AttachmentType.AUDIO) {
-//				String fileName = AUDIO_KEY + "_" + imagecnt + "." + WAVE_EXT;   //$NON-NLS-1$//$NON-NLS-2$
-//				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT);   //$NON-NLS-1$//$NON-NLS-2$
-//				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
-//					Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
-//				}
-//				WaypointAttachment attachment = new WaypointAttachment();
-//				attachment.setCopyFromLocation(temp);
-//				attachment.setFilename(fileName);
-//				attachments.add(attachment);	
-//				
-//			}else {
-//				throw new IllegalStateException(MessageFormat.format("Attachment type {0} not supported.", value.getType().name() )); //$NON-NLS-1$
-//			}
-//		}
-//		return attachments;
-//	}
-	
-	private WaypointAttachment parseAttachment(AttachmentInfo info) throws Exception{
+		private WaypointAttachment parseAttachment(AttachmentInfo info) throws Exception{
 		if (info.getType() == AttachmentInfo.AttachmentType.PHOTO
 				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 			

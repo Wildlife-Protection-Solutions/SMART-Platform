@@ -113,7 +113,7 @@ public class UploadCaEngine {
 									//can link the two
 									localStatus.setStatus(Status.DONE);
 									saveStatus(localStatus);
-									showMessage("Upload to Smart Connect Complete.");
+									showMessage(Messages.UploadCaEngine_UploadComplete);
 									SmartConnect.UPLOAD_LOCK.release();
 									return;
 								}
@@ -142,7 +142,7 @@ public class UploadCaEngine {
 								WorkItemStatus serverStatus = connect.getWorkItemStatus(localStatus.getUploadUrl());
 								if (serverStatus.getStatus() == WorkItemStatus.Status.COMPLETE) {
 									//should be done try again
-									showMessage("Conservation status is inconsist. Try uploading again. If this message persists, delete Conservation Area from Connect and re-upload.");
+									showMessage(Messages.UploadCaEngine_InconsistantStatus);
 									SmartConnect.UPLOAD_LOCK.release();
 									return;
 								}else if (serverStatus.getStatus() == WorkItemStatus.Status.PROCESSING) {
@@ -218,7 +218,7 @@ public class UploadCaEngine {
 				localStatus.setStatus(Status.CANCEL);
 				saveStatus(localStatus);
 				SmartConnect.UPLOAD_LOCK.release();
-				showMessage("Upload canceled");				
+				showMessage(Messages.UploadCaEngine_CanceledMessage);				
 				return;
 			}catch(Exception ex){
 				throw new Exception(Messages.UploadCaEngine_ConfigureError + (ex.getMessage() == null ? "" : ex.getMessage()), ex); //$NON-NLS-1$

@@ -56,7 +56,6 @@ import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonUtils;
-import org.wcs.smart.cybertracker.patrol.model.PatrolMetadata;
 import org.wcs.smart.cybertracker.patrol.model.PatrolMetadata.JsonPatrolKey;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;

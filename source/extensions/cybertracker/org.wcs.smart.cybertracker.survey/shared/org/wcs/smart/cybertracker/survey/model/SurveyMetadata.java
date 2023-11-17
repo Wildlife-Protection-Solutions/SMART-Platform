@@ -34,13 +34,13 @@ public class SurveyMetadata {
 	}
 	
 	public static enum JsonKey{
-		SURVEY_DESIGN("SMART_SurveyDesign"),
+		SURVEY_DESIGN("SMART_SurveyDesign"), //$NON-NLS-1$
 		MISSION_LEADER("SMART_Leader"), //$NON-NLS-1$
 		MISSION_COMMENTS("SMART_Comments"), //$NON-NLS-1$
 		MISSION_START_SAMPLING_UNIT("SMART_StartSamplingUnit"), //$NON-NLS-1$
 		MISSION_SAMPLING_UNIT("SMART_SamplingUnit"), //$NON-NLS-1$
-		MISSION_PROPERTY_PREFIX("SMART_MP_"),
-		END_MISSION_KEY("SMART_EndMission");
+		MISSION_PROPERTY_PREFIX("SMART_MP_"), //$NON-NLS-1$
+		END_MISSION_KEY("SMART_EndMission"); //$NON-NLS-1$
 		
 		public String key;
 		

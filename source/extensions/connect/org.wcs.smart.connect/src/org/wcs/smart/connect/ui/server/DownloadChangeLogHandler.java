@@ -110,7 +110,7 @@ public class DownloadChangeLogHandler {
 					if (error){
 						if (record.getHasConflictError()) {
 							MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), title,
-									null, message, MessageDialog.ERROR, 0, new String[] {"View Conflict Resolution Options", IDialogConstants.CLOSE_LABEL});
+									null, message, MessageDialog.ERROR, 0, new String[] {Messages.DownloadChangeLogHandler_ButtonTitle, IDialogConstants.CLOSE_LABEL});
 							int rt = md.open();
 							if (rt == 0) {
 								(new RecoverCaHandler()).execute(Display.getDefault().getActiveShell());

@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
@@ -90,7 +91,7 @@ public class RecoverCaDialog extends SmartStyledTitleDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default		
-		createButton(parent, IDialogConstants.OK_ID, "Perform Recovery", true);
+		createButton(parent, IDialogConstants.OK_ID, Messages.RecoverCaDialog_RecoveryButton, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 	
@@ -105,19 +106,19 @@ public class RecoverCaDialog extends SmartStyledTitleDialog {
 		outer.setLayout(new GridLayout());
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		SmartUiUtils.createHeaderLabel(outer, "Connect Download Option");
+		SmartUiUtils.createHeaderLabel(outer, Messages.RecoverCaDialog_DownloadOpSection);
 
 		Composite main = new Composite(outer, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		opRecover = new Button(main, SWT.RADIO | SWT.WRAP);
-		opRecover.setText("Download modifications only");
+		opRecover.setText(Messages.RecoverCaDialog_DownloadOnlyOp);
 		opRecover.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)opRecover.getLayoutData()).widthHint = widthHint;
 		
 		Label lblTemp = new Label(main, SWT.WRAP);
-		lblTemp.setText("This option will download the entire database and modified (or added) files from SMART Connect and merge this data with the local Conservation Area data. This will be faster and transfer less data.");
+		lblTemp.setText(Messages.RecoverCaDialog_DownloadModOp);
 		lblTemp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblTemp.getLayoutData()).horizontalIndent = 15;
 		((GridData)lblTemp.getLayoutData()).widthHint = widthHint;
@@ -126,12 +127,12 @@ public class RecoverCaDialog extends SmartStyledTitleDialog {
 		new Label(main, SWT.NONE);
 		
 		opReplace = new Button (main, SWT.RADIO | SWT.WRAP);
-		opReplace.setText("Download complete Conservation Area");
+		opReplace.setText(Messages.RecoverCaDialog_DonwloadAllSection);
 		opReplace.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)opReplace.getLayoutData()).widthHint = widthHint;
 		
 		lblTemp = new Label(main, SWT.WRAP);
-		lblTemp.setText("This option will download the entire database and filestore from SMART Connect and replace the local Conservation Area with this downloaded data. It is the slowest option and will transfer the all files, but will guarantee your Conservation Area is identical to Connect. Use this option if you have tried downloading only modifications and you still having Connect sync errors.");
+		lblTemp.setText(Messages.RecoverCaDialog_DownloadAllOp);
 		lblTemp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblTemp.getLayoutData()).horizontalIndent = 15;
 		((GridData)lblTemp.getLayoutData()).widthHint = widthHint;
@@ -141,27 +142,27 @@ public class RecoverCaDialog extends SmartStyledTitleDialog {
 		Composite buttonComp = new Composite(composite, SWT.NONE);
 		buttonComp.setLayout(new GridLayout());
 		
-		SmartUiUtils.createHeaderLabel(outer, "Data Recovery Options");
+		SmartUiUtils.createHeaderLabel(outer, Messages.RecoverCaDialog_RecoveryOpSection);
 		
 		Composite recoverOps = new Composite(outer, SWT.NONE);
 		recoverOps.setLayout(new GridLayout());
 		recoverOps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnApplyNew = new Button(recoverOps, SWT.CHECK | SWT.WRAP);
-		btnApplyNew.setText("Retain new data and re-apply to database after local Conservation Area updated from Connect" );
+		btnApplyNew.setText(Messages.RecoverCaDialog_RetainNewDataOp );
 		btnApplyNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)btnApplyNew.getLayoutData()).widthHint = widthHint;
 		
 		Label lblRecoverDetails = new Label(recoverOps, SWT.WRAP);
-		lblRecoverDetails.setText("This option will set aside any data that was been added to your Conservation Area but not yet synchronized to Connect, then once the local copy has been reset to match Connect, the new data will be re-added to your local database. The feature does not retain modifications to data that had already been synchronzied to Connect. Examples of new data include new patrols, new employees, new queries, and new observations added to an existing waypoint. Examples of modifications (which are not retained) include updating a patrol's type, changing employee details, editing waypoint locations, and updating observation attributes.");
+		lblRecoverDetails.setText(Messages.RecoverCaDialog_RetainNewDataInfo);
 		lblRecoverDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblRecoverDetails.getLayoutData()).horizontalIndent = 15;
 		((GridData)lblRecoverDetails.getLayoutData()).widthHint = widthHint;
 
 		
-		getShell().setText("Conservation Area Recovery Options");
-		setTitle("Conservation Area Recover Options");
-		setMessage("Options for recovering data when Connect data conflict or other data issues arise.");
+		getShell().setText(Messages.RecoverCaDialog_ShellTitle);
+		setTitle(Messages.RecoverCaDialog_ShellTitle);
+		setMessage(Messages.RecoverCaDialog_ShellMessage);
 		
 		return composite; 
 	}

@@ -23,10 +23,8 @@ package org.wcs.smart.connect.replication;
 
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -34,9 +32,6 @@ import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-
-import jakarta.persistence.Tuple;
 
 /**
  * Metadata packager which accompanies all upload and downloads from the server.

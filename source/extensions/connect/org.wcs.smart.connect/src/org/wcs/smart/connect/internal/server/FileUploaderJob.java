@@ -91,7 +91,7 @@ public abstract class FileUploaderJob extends Job {
 			SubMonitor uploadProgress = progress.split(30);
 			uploadProgress.beginTask(MessageFormat.format(ConnectPlugIn.PERCENT_UPLOAD_PROGRESS_MESSAGE, 0),  100);
 			while(maxRetry == -1 || cnt < maxRetry){
-				progress.setTaskName(MessageFormat.format("uploading files (attempt {0})", (cnt+1)));
+				progress.setTaskName(MessageFormat.format(Messages.FileUploaderJob_AttemptStatusMessage, (cnt+1)));
 
 				//upload file
 				try{
@@ -138,7 +138,7 @@ public abstract class FileUploaderJob extends Job {
 			
 			progress.setWorkRemaining(30);
 			if (!checkServerStatus(serverStatus, progress.split(30))){
-				throw new Exception("Unknown error occurred");
+				throw new Exception(Messages.FileUploaderJob_UnknownErrorMessage);
 			}
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
@@ -243,13 +243,13 @@ public abstract class FileUploaderJob extends Job {
 					WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 				
 					if(serverStatus.getStatus() == Status.COMPLETE){
-						monitor.setTaskName("Upload Complete");
+						monitor.setTaskName(Messages.FileUploaderJob_CompleteTaskName);
 						monitor.worked(100 - last);
 						monitor.done();
 						onProcessingComplete(serverStatus);
 						return true;
 					}else if (serverStatus.getStatus() == Status.ERROR){
-						monitor.setTaskName("Upload Error");
+						monitor.setTaskName(Messages.FileUploaderJob_ErrorTaskName);
 						monitor.worked(100 - last);
 						monitor.done();
 						onError(serverStatus.getMessage());

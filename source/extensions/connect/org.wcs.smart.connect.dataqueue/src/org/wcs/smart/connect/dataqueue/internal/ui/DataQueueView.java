@@ -178,7 +178,7 @@ public class DataQueueView{
 					if (item.getCanProcessLocally()) {
 						return Messages.DataQueueView_OnServerStatus;
 					}else {
-						return "Queued on Server - cannot process locally";
+						return Messages.DataQueueView_ProcessingOnServerMessage;
 					}
 				}
 			}
@@ -280,7 +280,7 @@ public class DataQueueView{
 				
 					serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
 					if (serverItems == null) {
-						throw new Exception("Cannot load data queue items from Connect.");
+						throw new Exception(Messages.DataQueueView_LoadError);
 					}
 				}
 				
@@ -558,8 +558,8 @@ public class DataQueueView{
 		Label l = new Label(filterWarningComp, SWT.NONE);
 		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
 		l = new Label(filterWarningComp, SWT.WRAP);
-		l.setText("Items shown here are filtered to only includes items that can be processed on the Desktop.");
-		l.setToolTipText("These settings are managed on the 'SMART Mobile Data Queue Settings' SMART Connect server configuration.");
+		l.setText(Messages.DataQueueView_FilteredMessage);
+		l.setToolTipText(Messages.DataQueueView_FilteredTooltip);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 200;
 		

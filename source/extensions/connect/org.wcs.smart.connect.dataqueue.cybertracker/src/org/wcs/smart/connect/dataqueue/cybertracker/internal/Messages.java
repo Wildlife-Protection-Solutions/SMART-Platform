@@ -14,6 +14,12 @@ public class Messages extends NLS {
 	public static String CybertrackerItemProcessor_ProcessedMsg;
 	public static String CybertrackerItemProcessor_TaskName;
 	public static String CybertrackerItemProcessor_WarningTitle;
+	public static String SmartMobileDataQueueOptionPanel_Description;
+	public static String SmartMobileDataQueueOptionPanel_Name;
+	public static String SmartMobileDataQueueOptionPanel_OptionsSection;
+	public static String SmartMobileDataQueueOptionPanel_ProcessingOp;
+	public static String SmartMobileDataQueueOptionPanel_ProcessingOpTooltip;
+	public static String SmartMobileDataQueueOptionPanel_SettingsInfo;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

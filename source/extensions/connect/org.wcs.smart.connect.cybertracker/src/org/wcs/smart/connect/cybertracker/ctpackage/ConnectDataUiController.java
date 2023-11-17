@@ -50,7 +50,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
-import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectHibernateManager;
@@ -64,7 +63,6 @@ import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -280,24 +278,24 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			((GridLayout)idComp.getLayout()).marginWidth = 0;
 			((GridLayout)idComp.getLayout()).marginHeight = 0;
 			
-			SmartUiUtils.createHeaderLabel(idComp, "Alert Field Identifier");
+			SmartUiUtils.createHeaderLabel(idComp, Messages.ConnectDataUiController_AlertFieldIdSection);
 			
 			core = new Composite(idComp, SWT.FLAT);
 			core.setLayout(new GridLayout(1, false));
 			core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			Label lblInfo = new Label(core, SWT.WRAP);
-			lblInfo.setText("Optional configuration for an identifier to be included in all alerts sent to Connect by SMART Mobile. Tokens are identified by { } and will be replaced by the values selected by the user on the device. If left blank no field identifier will be inlcuded with alerts.");
+			lblInfo.setText(Messages.ConnectDataUiController_Message);
 			lblInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)lblInfo.getLayoutData()).widthHint = 600;
 			
-			StringJoiner sj = new StringJoiner(", ");
-			for (String s : ctpackage.getFieldIdentifierKeys()) sj.add("{" + s + "}");
+			StringJoiner sj = new StringJoiner(", "); //$NON-NLS-1$
+			for (String s : ctpackage.getFieldIdentifierKeys()) sj.add("{" + s + "}"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			Text validMetadataField= new Text(core, SWT.WRAP);
 			validMetadataField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)validMetadataField.getLayoutData()).widthHint = 600;
-			validMetadataField.setText("Valid tokens for this package include: " + sj.toString());
+			validMetadataField.setText(Messages.ConnectDataUiController_ValidTokensMessage + sj.toString());
 			validMetadataField.setEditable(false);
 			
 			txtFieldIdStr = new Text(core, SWT.BORDER);
@@ -423,7 +421,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				if (txtFieldIdStr != null) {
 					data = findCreateMetadataField(ICtPackage.FIELD_IDENTIFIER_KEY, (AbstractCtPackage)ctpackage, null);
 					if (data == null || data.getStringValue() == null) {
-						txtFieldIdStr.setText("");
+						txtFieldIdStr.setText(""); //$NON-NLS-1$
 					}else {
 						txtFieldIdStr.setText(data.getStringValue());
 					}
@@ -516,12 +514,12 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			String id = txtFieldIdStr.getText();
 			if (!id.isBlank()) {
 				for (String key : this.ctpackage.getFieldIdentifierKeys()) {
-					id = id.replace("{" + key + "}", ""); //$NON-NLS-1$
+					id = id.replace("{" + key + "}", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
 				if (!id.isBlank() && !SmartUtils.isSimpleString(id.trim(), 
 						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, MetadataFieldValue.MAX_STRING_LENGTH) ) {
-					return MessageFormat.format("Invalid pattern. Pattern must be fewer than {0} characters and can only contain valid tokens and {1}", MetadataFieldValue.MAX_STRING_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					return MessageFormat.format(Messages.ConnectDataUiController_InvalidPattern, MetadataFieldValue.MAX_STRING_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 				}
 				
 			}

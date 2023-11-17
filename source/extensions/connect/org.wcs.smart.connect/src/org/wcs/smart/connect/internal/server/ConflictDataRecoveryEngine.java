@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.DerbyChangeLogDeserializer;
 import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.model.ChangeLogItem;
@@ -44,11 +45,11 @@ public class ConflictDataRecoveryEngine {
 	}
 
 	public void showRecoveryError(Exception ex) {
-		ConnectPlugIn.displayLog("Unable to re-apply 'new' records. The Conservaiton Area has been updated with the data from Connect, but the new records could were not added to the local Conservation Area. You will have to re-create these records manually." + "\n\n" + ex.getMessage(), ex);
+		ConnectPlugIn.displayLog(Messages.ConflictDataRecoveryEngine_ReApplyError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 	}
 
 	public void throwPackageException(Exception ex) throws Exception{
-		throw new Exception(MessageFormat.format("Cannot download Conservation Area - could not set aside new records: {0}", ex.getMessage()), ex);
+		throw new Exception(MessageFormat.format(Messages.ConflictDataRecoveryEngine_DownloadError, ex.getMessage()), ex);
 	}
 	
 	public void cleanUp() {
@@ -66,7 +67,6 @@ public class ConflictDataRecoveryEngine {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				if (true) throw new Exception("This is a test");
 				processor.processFile(session);	
 				session.getTransaction().commit();
 			}catch (Exception ex) {

@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.RecoverCaEngine;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -65,9 +66,9 @@ public class RecoverCaHandler {
 		ConnectDialog cdialog = new ConnectDialog(activeShell, true) {
 			@Override
 			protected Control createDialogArea(Composite parent) {
-				setTitle("SMART Connect Conservation Area Recovery");
-				setMessage("Configure SMART Connect Connection");
-				getShell().setText("SMART Connect Recovery");
+				setTitle(Messages.RecoverCaHandler_Title);
+				setMessage(Messages.RecoverCaHandler_Message);
+				getShell().setText(Messages.RecoverCaHandler_Shell);
 			
 				return super.createDialogArea(parent);
 			}	

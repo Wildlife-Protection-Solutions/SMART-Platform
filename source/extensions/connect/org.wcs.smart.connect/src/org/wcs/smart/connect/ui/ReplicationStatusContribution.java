@@ -223,7 +223,7 @@ public class ReplicationStatusContribution implements
 			Boolean state = DerbyReplicationManager.INSTANCE.getCachedReplicationState();
 			if (state == null) {
 				status = ServerStatus.CONNECTING;
-				message = "Replication state not known";
+				message = Messages.ReplicationStatusContribution_UnknownState;
 			}else if (!state) {
 				status = ServerStatus.DISABLED;
 				message = Messages.ReplicationStatusContribution_notenabled;

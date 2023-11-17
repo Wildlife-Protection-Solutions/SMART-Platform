@@ -157,7 +157,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 	@Override
 	protected void onUploadCancelled() {
 		this.item.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-		this.item.setErrorString("Sync cancelled by user");
+		this.item.setErrorString(Messages.UploadChangeLogJob_SyncCancelledMessage);
 		saveHistoryRecord();
 		deleteLocalFile();
 		

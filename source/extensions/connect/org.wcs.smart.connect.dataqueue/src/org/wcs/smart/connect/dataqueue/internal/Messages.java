@@ -106,6 +106,9 @@ public class Messages extends NLS {
 	public static String DataQueueView_DeleteItemsInfoMessage;
 	public static String DataQueueView_DeleteItemsTitle;
 	public static String DataQueueView_ErrorDialogTitle;
+	public static String DataQueueView_FilteredMessage;
+	public static String DataQueueView_FilteredTooltip;
+	public static String DataQueueView_LoadError;
 	public static String DataQueueView_LoadingLabel;
 	public static String DataQueueView_LocalDataQueueLabel;
 	public static String DataQueueView_NameColumnName;
@@ -113,6 +116,7 @@ public class Messages extends NLS {
 	public static String DataQueueView_ProcessAll;
 	public static String DataQueueView_ProcessAllLabel;
 	public static String DataQueueView_ProcessCheckedLabel;
+	public static String DataQueueView_ProcessingOnServerMessage;
 	public static String DataQueueView_processingInProgress;
 	public static String DataQueueView_ProcessItem;
 	public static String DataQueueView_ProcessorDialogMessage;

@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.ui.server.configure.IServerOptionsPanel;
 
@@ -61,12 +62,12 @@ public class SmartMobileDataQueueOptionPanel implements IServerOptionsPanel{
 	
 	@Override
 	public String getName(){
-		return "SMART Mobile Data Queue Settings";
+		return Messages.SmartMobileDataQueueOptionPanel_Name;
 	}
 	
 	@Override
 	public String getDescription(){
-		return "Configure settings for processing SMART Mobile data";
+		return Messages.SmartMobileDataQueueOptionPanel_Description;
 	}
 	
 	@Override
@@ -81,17 +82,17 @@ public class SmartMobileDataQueueOptionPanel implements IServerOptionsPanel{
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 100;
 		l.setLayoutData(gd);
-		l.setText("These settings are replicated with the Conservation Area so they should only be changed on one desktop system at a time");
+		l.setText(Messages.SmartMobileDataQueueOptionPanel_SettingsInfo);
 		
-		SmartUiUtils.createSubHeaderLabel(main, "Processing Options");
+		SmartUiUtils.createSubHeaderLabel(main, Messages.SmartMobileDataQueueOptionPanel_OptionsSection);
 		
 		Composite s1 = new Composite(main, SWT.NONE);
 		s1.setLayout(new GridLayout());
 		s1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnEnableDesktopProcessing = new Button(s1, SWT.CHECK);
-		btnEnableDesktopProcessing.setText("Allow Desktop Processing of SMART Mobile data on Connect");
-		btnEnableDesktopProcessing.setToolTipText("Check to allow desktop to process SMART Mobile data files on Connect. Uncheck to disable local processing.");
+		btnEnableDesktopProcessing.setText(Messages.SmartMobileDataQueueOptionPanel_ProcessingOp);
+		btnEnableDesktopProcessing.setToolTipText(Messages.SmartMobileDataQueueOptionPanel_ProcessingOpTooltip);
 
 		if (isEditable){
 			Listener ml = e->fireChange(null);

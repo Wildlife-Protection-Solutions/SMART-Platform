@@ -84,7 +84,7 @@ public class UploadCaJob extends FileUploaderJob {
 				}else if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.CANCEL){
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
 							Messages.UploadCaJob_InfoDialogTitle, 
-							"The upload was cancelled by the user. You will need to log into SMART Connect and delete the Conservation Area from Connect before you can attempt to upload again." +
+							Messages.UploadCaJob_CancelledMessage +
 							(msg != null ? "\n" + msg : "")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}});
@@ -171,7 +171,7 @@ public class UploadCaJob extends FileUploaderJob {
 		Display.getDefault().syncExec(()->
 			MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
 				Messages.UploadCaJob_InfoDialogTitle,
-				"Time out occurred while waiting for processing to complete on Connect. Wait for processing to finish on Connect then re-upload the Conservation Area to link it to Connect."
+				Messages.UploadCaJob_TimeOutMessage
 			)
 		);
 	}
