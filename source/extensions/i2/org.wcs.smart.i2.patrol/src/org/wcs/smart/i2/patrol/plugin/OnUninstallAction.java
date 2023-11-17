@@ -71,7 +71,7 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 		//drop the tables
 		for (String table : TABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
-				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+				session.createNativeMutationQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 			}
 		}		
 

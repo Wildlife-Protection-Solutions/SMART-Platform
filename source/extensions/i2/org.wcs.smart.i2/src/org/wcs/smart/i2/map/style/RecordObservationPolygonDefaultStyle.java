@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.map.style;
 
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class RecordObservationPolygonDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class RecordObservationPolygonDefaultStyle implements IMapLayerDefaultSty
 
 	@Override
 	public String getMapName() {
-		return "Profile - Record Observation Query";
+		return Messages.RecordObservationPolygonDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Polygon";
+		return Messages.RecordObservationPolygonDefaultStyle_LayerName;
 	}
 
 }

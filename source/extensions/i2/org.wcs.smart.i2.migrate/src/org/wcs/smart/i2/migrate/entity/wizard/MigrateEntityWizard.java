@@ -133,9 +133,9 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
      */
 	public void addPages() {
     	
-    	setWindowTitle("Migrate SMART Entity Data");
+    	setWindowTitle(Messages.MigrateEntityWizard_WindowTitle);
     	
-    	page1 = new Smart6WizardPage("SMART Backup", "Select the SMART 6 or 7 backup to import data from", "SMART Backup File:");
+    	page1 = new Smart6WizardPage(Messages.MigrateEntityWizard_WizardPageTitle, Messages.MigrateEntityWizard_WizardPageMessage, Messages.MigrateEntityWizard_FileOption);
     	page2 = new CaListWizardPage();
     	page3 = new EntityTypeMappingPage();
     	
@@ -185,7 +185,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 						}
 						
 						String version = db3.getVersion("org.wcs.smart.entity"); //$NON-NLS-1$
-						throw new SQLException(MessageFormat.format("No support for migrating from this version of entity plugin (database model version: {0}).", version));						
+						throw new SQLException(MessageFormat.format(Messages.MigrateEntityWizard_MigrationNotSupport, version));						
 					}
 
 					@Override
@@ -204,7 +204,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 			}
 			
 			if (toProcess == null || toProcess.isEmpty()) {
-				MessageDialog.openError(getShell(), Messages.MigrateIntelligenceWizard_NoCas, "No matching Conservation Areas found with profile data.");
+				MessageDialog.openError(getShell(), Messages.MigrateIntelligenceWizard_NoCas, Messages.MigrateEntityWizard_NoCaFound);
 				event.doit = false;
 			}else {
 				page2.setConservationArea(toProcess);

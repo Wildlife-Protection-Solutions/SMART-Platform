@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.map.style;
 
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class EntityPointRecordObservationDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class EntityPointRecordObservationDefaultStyle implements IMapLayerDefaul
 
 	@Override
 	public String getMapName() {
-		return "Profile - Entity";
+		return Messages.EntityPointRecordObservationDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Record Point Observation";
+		return Messages.EntityPointRecordObservationDefaultStyle_LayerName;
 	}
 
 }

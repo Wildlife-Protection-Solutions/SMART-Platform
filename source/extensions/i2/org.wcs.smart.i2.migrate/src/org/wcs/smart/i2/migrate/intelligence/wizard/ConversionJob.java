@@ -126,7 +126,7 @@ public class ConversionJob implements IRunnableWithProgress {
 										PatrolMotivatedRecord mr = new PatrolMotivatedRecord();
 										mr.getId().setIntelRecord(r);
 										mr.getId().setPatrol(p);
-										session.save(mr);
+										session.persist(mr);
 									}		
 								}
 							}
@@ -228,7 +228,7 @@ public class ConversionJob implements IRunnableWithProgress {
 			}
 		}
 		
-		session.save(record);
+		session.persist(record);
 		
 		
 		for (Path p : item.getAttachments()) {
@@ -238,7 +238,7 @@ public class ConversionJob implements IRunnableWithProgress {
 			ia.setFilename(p.getFileName().toString());
 			ia.setDateCreated(LocalDateTime.now());
 			ia.setCreatedBy(record.getCreatedBy());
-			session.save(ia);
+			session.persist(ia);
 			
 			IntelRecordAttachment recordattachment = new IntelRecordAttachment();
 			recordattachment.setAttachment(ia);

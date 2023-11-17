@@ -23,7 +23,7 @@ package org.wcs.smart.i2.patrol.plugin;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.i2.patrol.internal.Messages;
@@ -53,8 +53,7 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		
 		monitor.subTask(Messages.DeleteCaHandler_tasktitle); 
-		
-		Query<?>  q = session.createQuery("DELETE from PatrolMotivatedRecord where id.patrol in (FROM Patrol WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		MutationQuery q = session.createMutationQuery("DELETE from PatrolMotivatedRecord where id.patrol in (FROM Patrol WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}

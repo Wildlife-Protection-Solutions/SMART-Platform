@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.map.style;
 
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class WsEntityPositionAttributeDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class WsEntityPositionAttributeDefaultStyle implements IMapLayerDefaultSt
 
 	@Override
 	public String getMapName() {
-		return "Profile - Working Set";
+		return Messages.WsEntityPositionAttributeDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Entity Position Attribute";
+		return Messages.WsEntityPositionAttributeDefaultStyle_LayerName;
 	}
 
 }

@@ -67,6 +67,12 @@ public class Messages extends NLS {
 	public static String MigrateEntityWizard_CompleteMessage;
 	public static String MigrateEntityWizard_CompleteTitle;
 	public static String MigrateEntityWizard_ConversionError;
+	public static String MigrateEntityWizard_FileOption;
+	public static String MigrateEntityWizard_MigrationNotSupport;
+	public static String MigrateEntityWizard_NoCaFound;
+	public static String MigrateEntityWizard_WindowTitle;
+	public static String MigrateEntityWizard_WizardPageMessage;
+	public static String MigrateEntityWizard_WizardPageTitle;
 	public static String MigrateIntelligenceWizard_NoCas;
 	public static String MigrateIntelligenceWizard_NoMatchingCas;
 	public static String MigrateIntelligenceWizard_Title;

@@ -453,7 +453,7 @@ public class EntityList extends Composite {
 						return;
 					}
 				
-					s.save(newRelationship);
+					s.persist(newRelationship);
 					
 					if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
 						RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(getShell(), newRelationship);

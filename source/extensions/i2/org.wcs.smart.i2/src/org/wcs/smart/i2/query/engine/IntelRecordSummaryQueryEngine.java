@@ -331,22 +331,16 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
 		
-		NativeQuery<?> query = session.createNativeQuery(sb.toString());
-		List<?> dataItems = query.list();
-		for (Object item : dataItems) {
-			if (item instanceof Number) {
-				item = new Object[] {item};
-			}
-			Object[] rowdata = (Object[])item;
-			
-			//now what?
+		NativeQuery<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
+		List<Tuple> dataItems = query.list();
+		for (Tuple rowdata: dataItems) {
 			int column = 0;
 			
 			String[] groupBys = new String[groupByItems.size()];
 			int index = 0;
 			for (GroupByItem groupBy : groupByItems) {
 				String colkey = EntitySummaryQueryHeaderEngine.INSTANCE.computeColumnKey(groupBy);
-				Object value = rowdata[column++];
+				Object value = rowdata.get(column++);
 				
 				if (groupBy.getAttributeType() != null && groupBy.getAttributeType() == AttributeType.EMPLOYEE && value != null) {
 					value = UuidUtils.uuidToString( UuidUtils.byteToUUID((byte[])value) );
@@ -364,7 +358,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			
 			SummaryResultKey temp = new SummaryResultKey(definition.getValuePart().getValueOption().getKey(), groupBys);
 			//last column is value
-			Number value = (Number) rowdata[column++];
+			Number value = (Number) rowdata.get(column++);
 			data.put(temp, value.doubleValue());
 		}
 		results.setData(data);

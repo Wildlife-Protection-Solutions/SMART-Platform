@@ -54,6 +54,8 @@ import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.Tuple;
+
 /**
  * Entity locations dataset result set
  * 
@@ -71,8 +73,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private EntityLocationDatasetResultSetMetadata metadata;
-	private ScrollableResults locationResults;
-	private ScrollableResults wpResults;
+	private ScrollableResults<?> locationResults;
+	private ScrollableResults<?> wpResults;
 	private Locale l;
 	
 	private IntelEntity entity = null;
@@ -140,8 +142,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			values.put("end", endDate); //$NON-NLS-1$
 		}
 		
-		Query<?> query1 = connection.getSession().createQuery(q1);
-		Query<?> query2 = connection.getSession().createQuery(q2);
+		Query<?> query1 = connection.getSession().createQuery(q1, Long.class);
+		Query<?> query2 = connection.getSession().createQuery(q2, IntelEntityLocation.class);
 		query1.setParameterList("profiles", profiles); //$NON-NLS-1$
 		query2.setParameterList("profiles", profiles); //$NON-NLS-1$
 		for (Entry<String,Object> e : values.entrySet()){
@@ -175,7 +177,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 						qb.setParameter("d1", startDate).setParameter("d2", endDate); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					
-					ScrollableResults rs = qb.scroll();
+					ScrollableResults<?> rs = qb.scroll();
 					while(rs.next()) m_maxRows ++;
 					wpResults = qb.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);					
 				}
@@ -193,13 +195,13 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 					sb.append(" AND wp.dateTime BETWEEN :d1 AND :d2 "); //$NON-NLS-1$
 				}
 				
-				Query<?> qb = connection.getSession().createQuery(sb.toString())
+				Query<Tuple> qb = connection.getSession().createQuery(sb.toString(), Tuple.class)
 						.setParameter("type", type); //$NON-NLS-1$
 				if (hasDate) {
 					qb.setParameter("d1", startDate).setParameter("d2", endDate); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
-				ScrollableResults r = qb.scroll();
+				ScrollableResults<?> r = qb.scroll();
 				while(r.next()) m_maxRows++;
 				wpResults = qb.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);		
 			}	

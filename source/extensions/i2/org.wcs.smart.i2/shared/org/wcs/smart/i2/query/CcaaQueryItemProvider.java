@@ -420,7 +420,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public int getMaxDmCategoryDepth(Session session) {
-		Integer cnt = (Integer) session.createNativeQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid in (:ca)") //$NON-NLS-1$
+		Integer cnt = session.createNativeQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid in (:ca)", Integer.class) //$NON-NLS-1$
 				.setParameterList("ca",  getConservationAreas().stream().map(c->c.getUuid()).collect(Collectors.toList())).uniqueResult(); //$NON-NLS-1$
 		return cnt.intValue();
 	}

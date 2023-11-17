@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.map.style;
 
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class RecordPointObservationDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class RecordPointObservationDefaultStyle implements IMapLayerDefaultStyle
 
 	@Override
 	public String getMapName() {
-		return "Profile - Record";
+		return Messages.RecordPointObservationDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Point Observations";
+		return Messages.RecordPointObservationDefaultStyle_LayerName;
 	}
 
 }
