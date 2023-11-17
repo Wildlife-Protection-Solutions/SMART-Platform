@@ -166,6 +166,10 @@ public class Messages extends NLS {
 	public static String IncidentMapPage_reprojectionError;
 	public static String IncidentMapPage_SaveError;
 	public static String IncidentMapPage_UndonError;
+	public static String IncidentMapWaypointDefaultStyle_LayerName;
+	public static String IncidentMapWaypointDefaultStyle_MapName;
+	public static String IncidentMapWaypointRawDefaultStyle_LayerName;
+	public static String IncidentMapWaypointRawDefaultStyle_MapName;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_booleanvaluecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_datevaluecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_namecolumnname;
@@ -279,6 +283,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_StringValueNotFound;
 	public static String XmlToIncident_TooManyAttributes;
 	public static String XmlToIncident_TreeNodeNotFound;
+	public static String XmlToIncident_TypeNotSupported;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

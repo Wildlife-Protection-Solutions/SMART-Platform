@@ -610,8 +610,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		tblIcons.setInput(DialogConstants.LOADING_TEXT);
 		
 		TableViewerColumn colIsCa = new TableViewerColumn(tblIcons, SWT.NONE);
-		colIsCa.getColumn().setText("Conservation Area Icon");
-		colIsCa.getColumn().setToolTipText("Yes if the icon is configured for the Conservation Area, no if the icon is from the SMART System Library");
+		colIsCa.getColumn().setText(Messages.IconSelectionDialog_CaColumnName);
+		colIsCa.getColumn().setToolTipText(Messages.IconSelectionDialog_CaColumnTooltip);
 		colIsCa.getColumn().setWidth(50);
 		colIsCa.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -694,9 +694,9 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			Collections.sort(systemIcons);
 			
 			List<Object> allIcons = new ArrayList<>();
-			allIcons.add("Conservation Area Icons");
+			allIcons.add(Messages.IconSelectionDialog_CaIconsLbl);
 			allIcons.addAll(caIcons);
-			allIcons.add("SMART Library Icons");
+			allIcons.add(Messages.IconSelectionDialog_SMARTIconLbl);
 			allIcons.addAll(systemIcons);
 			
 			Display.getDefault().syncExec(()->{

@@ -64,5 +64,5 @@ public class DialogConstants {
 	
 	public static final String ICON_TEXT = Messages.DialogConstants_IconText;
 	
-	public static final String CLEAR_IMAGE_TEXT = "Clear Image";
+	public static final String CLEAR_IMAGE_TEXT = Messages.DialogConstants_ClearImageText;
 }

@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLOrder;
+import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -92,8 +92,8 @@ public class ConfigurableModel extends NamedItem {
     }
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="model", orphanRemoval=true, cascade={CascadeType.ALL})
-	@Where(clause = "parent_node_uuid is null")
-	@OrderBy(clause = "node_order")
+	@SQLRestriction("parent_node_uuid is null")
+	@SQLOrder("node_order")
 	public List<CmNode> getNodes() {
 		if (nodes == null)
 			nodes = new ArrayList<CmNode>();
@@ -171,7 +171,7 @@ public class ConfigurableModel extends NamedItem {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="model")
 	@MapKey(name="attribute")
-	@Where(clause = "is_default")
+	@SQLRestriction("is_default")
 	public Map<Attribute, CmAttributeConfig> getDefaultConfigs() {
 		if (defaultConfigs == null)
 			defaultConfigs = new HashMap<>();

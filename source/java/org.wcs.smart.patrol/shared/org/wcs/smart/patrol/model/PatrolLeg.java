@@ -32,7 +32,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 
@@ -130,7 +130,7 @@ public class PatrolLeg extends UuidItem {
 	}
 	
 	@OneToMany(fetch= FetchType.LAZY, mappedBy="patrolLeg", orphanRemoval=true, cascade={CascadeType.ALL})
-	@OrderBy(clause = "patrol_day")
+	@SQLOrder("patrol_day")
 	@BatchSize(size=50)
 	public List<PatrolLegDay> getPatrolLegDays(){
 		return this.days;

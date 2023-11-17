@@ -214,7 +214,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		if (PermissionManager.INSTANCE.canConfigureDefaultStyles()) {
 			ToolItem defaults = new ToolItem(comptool, SWT.FLAT);
 			defaults.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DEFAULT_STYLE_ICON));
-			defaults.setToolTipText("Configure Default Map Layer Styles");
+			defaults.setToolTipText(Messages.SmartStyleEditorDialog_DefaultsTooltip);
 			defaults.addListener(SWT.Selection,  e->{
 				(new DefaultMapLayerStylesDialog(getShell())).open();
 			});
@@ -290,7 +290,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem miDefault = new MenuItem(menu, SWT.CASCADE);
-		miDefault.setText("Set As Default For...");
+		miDefault.setText(Messages.SmartStyleEditorDialog_SetDefaultMenu);
 		try {
 			List<IMapLayerDefaultStyle> styles = StyleManager.INSTANCE.getDefaultStyleMapLayers();
 			Map<String, List<IMapLayerDefaultStyle>> stylesByMap = new HashMap<>();
@@ -309,7 +309,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			miDefault.setMenu(mapMenu);
 			for (String map : sortedMaps) {
 				MenuItem mi = new MenuItem(mapMenu, SWT.CASCADE);
-				mi.setText(map + "...");
+				mi.setText(map + "..."); //$NON-NLS-1$
 				
 				Menu subMenu = new Menu(mi);
 				mi.setMenu(subMenu);

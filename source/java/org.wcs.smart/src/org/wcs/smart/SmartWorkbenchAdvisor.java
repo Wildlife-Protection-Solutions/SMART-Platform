@@ -37,6 +37,7 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * This workbench advisor creates the window advisor, and specifies the
@@ -109,7 +110,7 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 			try {
 				h.onLogin();
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog("Error occured during start-up. Please restart SMART, if error presists contact your SMART Administrator." + "\n\n" + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(Messages.SmartWorkbenchAdvisor_LoginError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}
 	}

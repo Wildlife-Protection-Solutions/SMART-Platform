@@ -28,7 +28,7 @@ import java.util.List;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.util.UuidUtils;
@@ -79,7 +79,7 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	}
 	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause = "node_order")
+	@SQLOrder("node_order")
 	@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<CmAttributeTreeNode> getChildren(){

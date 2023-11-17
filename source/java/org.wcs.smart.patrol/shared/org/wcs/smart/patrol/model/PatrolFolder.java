@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolder;
 import org.wcs.smart.ca.NamedItem;
@@ -96,7 +96,7 @@ public class PatrolFolder extends NamedItem implements IFolder {
 	 */
 //	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy="parentFolder", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause = "folder_order")
+	@SQLOrder("folder_order")
 	public List<PatrolFolder> getChildFolders() {
 		if (this.childFolders == null) {
 			this.childFolders = new ArrayList<>();

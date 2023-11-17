@@ -99,6 +99,8 @@ public class Messages extends NLS {
 	public static String PatrolContributionFactory_ParseContribution_Error;
 	public static String PatrolDropItemFactory_AgencyNotFound;
 	public static String PatrolDropItemFactory_InvalidTypes;
+	public static String PatrolDropItemFactory_ModelNotFound;
+	public static String PatrolDropItemFactory_ParseError;
 	public static String PatrolDropItemFactory_ProcessError;
 	public static String PatrolDropItemFactory_RankNotFound;
 	public static String PatrolFilter_EmployeeNotFound;
@@ -117,6 +119,8 @@ public class Messages extends NLS {
 	public static String PatrolGridNoDataFilterPanel_NoneTooltip;
 	public static String PatrolGridNoDataFilterPanel_OptionRequired;
 	public static String PatrolGridNoDataFilterPanel_TabName;
+	public static String PatrolGridQueryDefaultStyle_LayerName;
+	public static String PatrolGridQueryDefaultStyle_MapName;
 	public static String PatrolGridQueryType_PatrolGriddedQueryTypeName;
 	public static String PatrolGroupBy_CouldNotParse;
 	public static String PatrolGroupBy_CouldNotResolveFilter;
@@ -136,6 +140,8 @@ public class Messages extends NLS {
 	public static String PatrolListDropItem_LoadingJobName;
 	public static String PatrolListDropItem_LoadingLabel;
 	public static String PatrolQueryDataSource_SchemaError;
+	public static String PatrolQueryDefaultStyle_LayerName;
+	public static String PatrolQueryDefaultStyle_MapName;
 	public static String PatrolQueryEditorTableContent_edittooltip;
 	public static String PatrolQueryEditorTableContent_NALabel;
 	public static String PatrolQueryEditorTableContent_NumberOfPatrolsLabel;
@@ -143,6 +149,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
 	public static String PatrolQueryEditorTableContent_RunQueryLink;
 	public static String PatrolQueryLabelProvider_AgencyLabel;
+	public static String PatrolQueryLabelProvider_ConfigurableModel;
 	public static String PatrolQueryLabelProvider_InvalidBufferValue;
 	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
@@ -193,6 +200,8 @@ public class Messages extends NLS {
 	public static String PatrolQueryType_PatrolQueryTypeName;
 	public static String PatrolQueryValidator_CouldNotMatchFilter;
 	public static String PatrolEndDateField_PatrolEndDatefilter;
+	public static String PatrolObservationQueryDefaultStyle_LayerName;
+	public static String PatrolObservationQueryDefaultStyle_MapName;
 	public static String PatrolObservationQueryType_PatrolObservationQueryTypeName;
 	public static String PatrolStartDateField_PatrolStartDate;
 	public static String PatrolSummaryGroupByValuePanel_GroupByPanelTitle;
@@ -205,6 +214,8 @@ public class Messages extends NLS {
 	public static String PatrolValueItemLabelProvider_AllLabel;
 	public static String PatrolValueItemLabelProvider_DataOnlyLabel;
 	public static String PatrolValueTreeItem_PatrolValuesNodeLabel;
+	public static String PatrolWaypointQueryDefaultStyle_LayerName;
+	public static String PatrolWaypointQueryDefaultStyle_MapName;
 	public static String PatrolWaypointQueryType_WaypointQueryTypeName;
 	public static String PatrolZoomToResultProvider_TrackGeomNotFound;
 	public static String Query_DefaultQueryName;

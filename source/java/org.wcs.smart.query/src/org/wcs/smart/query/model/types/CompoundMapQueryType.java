@@ -41,8 +41,8 @@ import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**

@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -114,7 +114,7 @@ public class PatrolAttribute extends NamedKeyIconItem{
 	 * @return set to list items
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
-	@OrderBy(clause = "list_order")
+	@SQLOrder("list_order")
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<PatrolAttributeListItem> getAttributeList(){
 		return this.attributeList;

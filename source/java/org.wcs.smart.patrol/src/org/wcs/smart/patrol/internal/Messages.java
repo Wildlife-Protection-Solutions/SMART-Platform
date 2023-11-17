@@ -664,6 +664,18 @@ public class Messages extends NLS {
 	public static String PatrolMapPageEditor_UndoError;
 	public static String PatrolMapPageEditor_UnknownError;
 	public static String PatrolMapPageEditor_WaypointLbl;
+	public static String PatrolMapTrackDefaultStyle_LayerName;
+
+	public static String PatrolMapTrackDefaultStyle_MapName;
+
+	public static String PatrolMapWaypointDefaultStyle_LayerName;
+
+	public static String PatrolMapWaypointDefaultStyle_MapName;
+
+	public static String PatrolMapWaypointRawDefaultStyle_LayerName;
+
+	public static String PatrolMapWaypointRawDefaultStyle_MapName;
+
 	public static String PatrolMemberWizardPage_Error_NoEmployees;
 	public static String PatrolMemberWizardPage_PageMessage;
 	public static String PatrolMemberWizardPage_SelectEmployees_Label;
@@ -759,6 +771,18 @@ public class Messages extends NLS {
 	public static String PatrolPresentationPart_ycolumn;
 
 	public static String PatrolPresentationPart_ZoomToMenu;
+
+	public static String PatrolReviewTrackDefaultStyle_LayerName;
+
+	public static String PatrolReviewTrackDefaultStyle_MapName;
+
+	public static String PatrolReviewWaypointDefaultStyle_LayerName;
+
+	public static String PatrolReviewWaypointDefaultStyle_MapName;
+
+	public static String PatrolReviewWaypointRawDefaultStyle_LayerName;
+
+	public static String PatrolReviewWaypointRawDefaultStyle_MapName;
 
 	public static String PatrolSummaryEditor_Armed_Label;
 	public static String PatrolSummaryEditor_Button_UpdateTime;

@@ -24,7 +24,6 @@ package org.wcs.smart.incident.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 

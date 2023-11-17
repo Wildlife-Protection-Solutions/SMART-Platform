@@ -35,11 +35,11 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.filter.BooleanFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
@@ -691,13 +691,13 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
 				}else {
 					ConfigurableModel cm = session.get(ConfigurableModel.class, UuidUtils.stringToUuid(value1));
-					if (cm == null) throw new Exception("Configurable model not found");
+					if (cm == null) throw new Exception(Messages.PatrolDropItemFactory_ModelNotFound);
 					ListItem m = new ListItem(cm.getUuid(), cm.getName());
 					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
 				}
 			}catch (Exception ex) {
 				it = new ErrorDropItem(MessageFormat.format(
-						"Error parsing configurable model filter: {0}",
+						Messages.PatrolDropItemFactory_ParseError,
 						new Object[] { value1 }));
 			}
 			

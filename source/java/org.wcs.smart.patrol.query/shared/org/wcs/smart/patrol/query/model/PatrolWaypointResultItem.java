@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 

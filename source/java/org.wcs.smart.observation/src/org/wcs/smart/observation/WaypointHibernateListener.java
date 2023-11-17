@@ -56,8 +56,9 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			
 			wp.setLastModified(LocalDateTime.now());
 			wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
+			
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
 			
 			return false;
 			
@@ -90,8 +91,8 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			wp.setLastModified(LocalDateTime.now());
 			wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
 		
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
 			
 			return false;
 			

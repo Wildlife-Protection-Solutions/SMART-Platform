@@ -102,7 +102,11 @@ public class Messages extends NLS {
 	public static String ObservationDropItemFactory_CmError;
 	public static String ObservationDropItemFactory_CmNotFound;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
+	public static String ObservationGridQueryDefaultStyle_LayerName;
+	public static String ObservationGridQueryDefaultStyle_MapName;
 	public static String ObservationGridQueryType_QueryName;
+	public static String ObservationObservationQueryDefaultStyle_LayerName;
+	public static String ObservationObservationQueryDefaultStyle_MapName;
 	public static String ObservationQueryLabelProvider_LastModified_ColumnName;
 	public static String ObservationQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String ObservationQueryLabelProvider_ObsGroupColumnName;
@@ -115,6 +119,8 @@ public class Messages extends NLS {
 	public static String ObservationQueryTemplateCloner_TaskName;
 	public static String ObservationQueryType_QueryName;
 	public static String ObservationSummaryQueryType_QueryName;
+	public static String ObservationWaypointQueryDefaultStyle_LayerName;
+	public static String ObservationWaypointQueryDefaultStyle_MapName;
 	public static String ObservationWaypointQueryType_QueryName;
 
 	static {

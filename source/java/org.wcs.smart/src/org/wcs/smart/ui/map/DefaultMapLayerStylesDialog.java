@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -79,9 +80,9 @@ public class DefaultMapLayerStylesDialog extends SmartStyledTitleDialog {
 		 layerComp.addListener(SWT.Modify, e->{
 			 getButton(IDialogConstants.OK_ID).setEnabled(true);
 		 });
-		 getShell().setText("Default Map Layer Styles");
-		 setTitle("Default Map Layer Styles");
-		 setMessage("Configure the default styles for specific map layers");
+		 getShell().setText(Messages.DefaultMapLayerStylesDialog_Title);
+		 setTitle(Messages.DefaultMapLayerStylesDialog_Title);
+		 setMessage(Messages.DefaultMapLayerStylesDialog_Message);
 		 return composite;
 	 }
 	

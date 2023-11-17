@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.observation.query.map.style;
 
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class ObservationObservationQueryDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class ObservationObservationQueryDefaultStyle implements IMapLayerDefault
 
 	@Override
 	public String getMapName() {
-		return "Observation Query";
+		return Messages.ObservationObservationQueryDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Observations";
+		return Messages.ObservationObservationQueryDefaultStyle_LayerName;
 	}
 
 }

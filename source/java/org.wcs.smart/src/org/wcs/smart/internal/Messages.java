@@ -668,6 +668,11 @@ public class Messages extends NLS {
 	public static String DateFilterDropDownComposite_And;
 	public static String DateFilterDropDownComposite_Between;
 	public static String DateFilterDropDownComposite_InvalidDate;
+	public static String DefaultMapLayerStylesComposite_LayerLabel;
+	public static String DefaultMapLayerStylesComposite_MapLabel;
+	public static String DefaultMapLayerStylesComposite_StyleLayer;
+	public static String DefaultMapLayerStylesDialog_Message;
+	public static String DefaultMapLayerStylesDialog_Title;
 	public static String DeleteConservationArea_Confirm_Delete;
 	public static String DeleteConservationArea_Delete_DialogTitle;
 	public static String DeleteConservationArea_DeleteError;
@@ -725,6 +730,7 @@ public class Messages extends NLS {
 	public static String DesktopSmartServiceLabelProvider_ConnectionProvider;
 	public static String DialogConstants_AddButton_Label;
 	public static String DialogConstants_allfiles;
+	public static String DialogConstants_ClearImageText;
 	public static String DialogConstants_csvfiles;
 	public static String DialogConstants_DeleteButton_Label;
 	public static String DialogConstants_DisableAllButton_Label;
@@ -824,6 +830,7 @@ public class Messages extends NLS {
 	public static String EmployeeDialog_SaveButton;
 	public static String EmployeePropertyPage_8;
 	public static String EmployeePropertyPage_ActiveFlag;
+	public static String EmployeePropertyPage_ActiveLabel;
 	public static String EmployeePropertyPage_addemployeetooltip;
 	public static String EmployeePropertyPage_addmemberserror;
 	public static String EmployeePropertyPage_addmembertooltip;
@@ -848,11 +855,14 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_editteamtooltip;
 	public static String EmployeePropertyPage_exportemployeetooltip;
 	public static String EmployeePropertyPage_EmployeeTabLbl;
+	public static String EmployeePropertyPage_Error;
 	public static String EmployeePropertyPage_Error_CannotDeleteEmployee;
 	public static String EmployeePropertyPage_importemployeetooltip;
 	public static String EmployeePropertyPage_InActiveFlag;
+	public static String EmployeePropertyPage_InactiveLabel;
 	public static String EmployeePropertyPage_loadingjob;
 	public static String EmployeePropertyPage_loadingjob2;
+	public static String EmployeePropertyPage_MakeInactiveTooltip;
 	public static String EmployeePropertyPage_Membersheader;
 	public static String EmployeePropertyPage_MembersHeader;
 	public static String EmployeePropertyPage_newteamerror;
@@ -860,6 +870,7 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_newteamtext;
 	public static String EmployeePropertyPage_NewTeamName;
 	public static String EmployeePropertyPage_NewTeamTitle;
+	public static String EmployeePropertyPage_NoAdminsError;
 	public static String EmployeePropertyPage_Op_IncludeInActive;
 	public static String EmployeePropertyPage_PageTitle;
 	public static String EmployeePropertyPage_ProgessDeleteEmployee;
@@ -1034,6 +1045,9 @@ public class Messages extends NLS {
 	public static String IconPreferencePage_newiconsettooltip;
 	public static String IconPreferencePage_TemplateIconLabel;
 	public static String IconSelectionDialog_15;
+	public static String IconSelectionDialog_CaColumnName;
+	public static String IconSelectionDialog_CaColumnTooltip;
+	public static String IconSelectionDialog_CaIconsLbl;
 	public static String IconSelectionDialog_DefaultName;
 	public static String IconSelectionDialog_DialogMsg;
 	public static String IconSelectionDialog_DialogTitle;
@@ -1044,9 +1058,12 @@ public class Messages extends NLS {
 	public static String IconSelectionDialog_NameColumn;
 	public static String IconSelectionDialog_NameLabel;
 	public static String IconSelectionDialog_NewSrc;
+	public static String IconSelectionDialog_SMARTIconLbl;
 	public static String IconSelectionDialog_SmartSrc;
 	public static String IconSelectionDialog_SourceOp;
 	public static String IconSelectionDialog_SystemGenerated;
+	public static String IconsetPropertyPage_AddToCaBtn;
+	public static String IconsetPropertyPage_CAIconTabl;
 	public static String IconsetPropertyPage_Closedialog;
 	public static String IconsetPropertyPage_CloseMessage;
 	public static String IconsetPropertyPage_CSVFile;
@@ -1057,6 +1074,7 @@ public class Messages extends NLS {
 	public static String IconsetPropertyPage_FileExists;
 	public static String IconsetPropertyPage_IconImportError;
 	public static String IconsetPropertyPage_IconImportWarn;
+	public static String IconsetPropertyPage_IconInCa;
 	public static String IconsetPropertyPage_IconsImportedMsg;
 	public static String IconsetPropertyPage_ImportCustomICons;
 	public static String IconsetPropertyPage_ImportIconsTitle;
@@ -1064,6 +1082,7 @@ public class Messages extends NLS {
 	public static String IconsetPropertyPage_NoIconsFound;
 	public static String IconsetPropertyPage_SaveError;
 	public static String IconsetPropertyPage_SaveRequired;
+	public static String IconsetPropertyPage_SMARTIconTab;
 	public static String IconsetPropertyPage_Title;
 	public static String IconsetPropertyPage_ZilFile;
 	public static String IdGeneratorManager_DayToken;
@@ -1362,6 +1381,7 @@ public class Messages extends NLS {
 	public static String SmartDataSourceFactory_SmartDataSourceDescription;
 	public static String SmartDataSourceFactory_SmartDataSourceName;
 	public static String SmartDB_Error_NoSmartDatabase;
+	public static String SmartDefaultStylesPreferencePage_Message;
 	public static String SmartFilterDialog_Apply_Button;
 	public static String SmartFilterDialog_Reset_Button;
 	public static String SmartGenerateIconSymbolizer_CCAANotSupported;
@@ -1469,6 +1489,7 @@ public class Messages extends NLS {
 	public static String SmartStyleEditorDialog_ApplyButton;
 	public static String SmartStyleEditorDialog_CustomConfigLabel;
 	public static String SmartStyleEditorDialog_CustomStyleLabel;
+	public static String SmartStyleEditorDialog_DefaultsTooltip;
 	public static String SmartStyleEditorDialog_DeleteCompleteMessage;
 	public static String SmartStyleEditorDialog_DeleteMessage;
 	public static String SmartStyleEditorDialog_DeleteShell;
@@ -1486,6 +1507,7 @@ public class Messages extends NLS {
 	public static String SmartStyleEditorDialog_SaveShell;
 	public static String SmartStyleEditorDialog_SaveStylesLabel;
 	public static String SmartStyleEditorDialog_SaveTitle;
+	public static String SmartStyleEditorDialog_SetDefaultMenu;
 	public static String SmartStyleEditorDialog_saveTooltip;
 	public static String SmartStyleEditorDialog_ShellTitle;
 	public static String SmartStyleEditorDialog_StyleLabel;
@@ -1499,6 +1521,7 @@ public class Messages extends NLS {
 	public static String SmartUtils_ValidationMessage_1;
 	public static String SmartUtils_ValidationMessage_2;
 	public static String SmartUtils_ValidationMessage_3a;
+	public static String SmartWorkbenchAdvisor_LoginError;
 	public static String SmartWorkbenchWindowAdvisor_WindowTitle;
 	public static String SplitTrackTool_Error;
 	public static String StartUpAdvancedDialog_DialogContent_Label;

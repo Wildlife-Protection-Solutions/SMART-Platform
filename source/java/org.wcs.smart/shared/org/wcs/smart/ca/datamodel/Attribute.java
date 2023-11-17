@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -326,7 +326,7 @@ public class Attribute extends DmObject{
 	 * @return  set of root tree nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@Where(clause = "parent_uuid is null")
+	@SQLRestriction("parent_uuid is null")
 	@OrderBy("node_order")
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;
@@ -346,7 +346,7 @@ public class Attribute extends DmObject{
 	 * @return  set of root tree nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute")
-	@Where(clause = "parent_uuid is null and is_active")
+	@SQLRestriction("parent_uuid is null and is_active")
 	@OrderBy("node_order")
 	public List<AttributeTreeNode> getActiveTreeNodes(){
 		return this.activeTootTreeNodes;

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.icon.Icon;
@@ -212,7 +212,7 @@ RETURNS NULL ON NULL INPUT;
 	 * @return all children categories; <code>null</code> if leaf node
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent")
-	@Where(clause = "is_active")
+	@SQLRestriction("is_active")
 	@OrderBy("cat_order")
 	public List<Category> getActiveChildren(){
 		return this.activeChildren;

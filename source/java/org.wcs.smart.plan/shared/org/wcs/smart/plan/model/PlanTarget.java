@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
-import org.wcs.smart.ca.UuidItem;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;

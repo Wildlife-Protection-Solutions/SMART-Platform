@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.map.style;
 
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class PatrolObservationQueryDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class PatrolObservationQueryDefaultStyle implements IMapLayerDefaultStyle
 
 	@Override
 	public String getMapName() {
-		return "Patrol Query";
+		return Messages.PatrolObservationQueryDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Observations";
+		return Messages.PatrolObservationQueryDefaultStyle_LayerName;
 	}
 
 }

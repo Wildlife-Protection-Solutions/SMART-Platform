@@ -119,7 +119,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case MANDATE: return Messages.PatrolQueryOptions_QueryOpMandate;
 				case MANDATE_KEY: return Messages.PatrolQueryOptions_QueryOpMandate;
 				case PATROL_TYPE: return Messages.PatrolQueryOptions_QueryOpType;
-				case CM: return "Configurable Model";
+				case CM: return Messages.PatrolQueryLabelProvider_ConfigurableModel;
 				case PATROL_TRANSPORT_TYPE: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case CONSERVATION_AREA: return Messages.PatrolQueryOptions_CaGroupByOptionName;

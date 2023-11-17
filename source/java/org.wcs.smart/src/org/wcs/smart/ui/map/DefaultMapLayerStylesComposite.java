@@ -58,6 +58,7 @@ import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 import org.wcs.smart.udig.style.StyleImageProducer;
 import org.wcs.smart.udig.style.StyleManager;
@@ -124,13 +125,13 @@ public class DefaultMapLayerStylesComposite extends Composite {
 		((GridLayout) header.getLayout()).horizontalSpacing = 15;
 
 		Label h1 = new Label(header, SWT.NONE);
-		h1.setText("Map");
+		h1.setText(Messages.DefaultMapLayerStylesComposite_MapLabel);
 		h1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		Label h2 = new Label(header, SWT.NONE);
-		h2.setText("Layer");
+		h2.setText(Messages.DefaultMapLayerStylesComposite_LayerLabel);
 		h2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		Label h3 = new Label(header, SWT.NONE);
-		h3.setText("Style");
+		h3.setText(Messages.DefaultMapLayerStylesComposite_StyleLayer);
 		h3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		FontData fd = h1.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);

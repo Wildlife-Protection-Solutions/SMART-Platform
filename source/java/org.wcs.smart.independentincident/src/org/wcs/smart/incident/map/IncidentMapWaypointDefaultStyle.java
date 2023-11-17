@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident.map;
 
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
@@ -40,12 +41,12 @@ public class IncidentMapWaypointDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return "Independent Incident";
+		return Messages.IncidentMapWaypointDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Waypoint";
+		return Messages.IncidentMapWaypointDefaultStyle_LayerName;
 	}
 
 }

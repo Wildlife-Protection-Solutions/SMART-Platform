@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.DefaultMapLayerStylesComposite;
 /**
  * Preference page for configuring auto-backups
@@ -97,7 +98,7 @@ public class SmartDefaultStylesPreferencePage extends PreferencePage implements
 		layersComp = new DefaultMapLayerStylesComposite(main, SWT.NONE, isEditable());
 		layersComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		setMessage("Map Layer Default Styles");
+		setMessage(Messages.SmartDefaultStylesPreferencePage_Message);
 		
 		validate();
 		

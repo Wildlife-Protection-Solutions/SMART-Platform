@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.map.style;
 
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class PatrolGridQueryDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,12 +38,12 @@ public class PatrolGridQueryDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return "Patrol Query";
+		return Messages.PatrolGridQueryDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Grid";
+		return Messages.PatrolGridQueryDefaultStyle_LayerName;
 	}
 
 }

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.SignatureType;
@@ -142,7 +142,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	 * @return all children nodes; empty list if leaf node
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause = "node_order")
+	@SQLOrder("node_order")
 	public List<CmNode> getChildren() {
 		if (this.children == null)
 			this.children = new ArrayList<CmNode>();
@@ -153,7 +153,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="node", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@OrderBy(clause = "attribute_order")
+	@SQLOrder("attribute_order")
 	public List<CmAttribute> getCmAttributes() {
 		if (cmAttributes == null)
 			cmAttributes = new ArrayList<CmAttribute>();

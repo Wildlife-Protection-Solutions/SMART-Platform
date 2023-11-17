@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
 
@@ -145,7 +145,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	}
 	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL})
-	@Where(clause = "is_active")
+	@SQLRestriction("is_active")
 	@OrderBy("node_order")
 	@BatchSize(size=200)
 	public List<AttributeTreeNode> getActiveChildren(){

@@ -112,8 +112,8 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class EmployeePropertyPage extends SmartStyledTitleDialog{
 
-	public static final String INACTIVATE = "Inactivate";
-	public static final String ACTIVATE = "Activate";
+	public static final String INACTIVATE = Messages.EmployeePropertyPage_InactiveLabel;
+	public static final String ACTIVATE = Messages.EmployeePropertyPage_ActiveLabel;
 	
 	private TableViewer tblEmployee;
 	private FilterComposite txtFilter;
@@ -322,7 +322,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 			tiDeactivate = new ToolItem(tb, SWT.PUSH);
 			tiDeactivate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			tiDeactivate.setText(INACTIVATE);
-			tiDeactivate.setToolTipText("Make selected employees inactive setting the end employement date to the current date.");
+			tiDeactivate.setToolTipText(Messages.EmployeePropertyPage_MakeInactiveTooltip);
 			tiDeactivate.setData(INACTIVATE);
 			tiDeactivate.addListener(SWT.Selection,  e->inactivateEmployees( (String)tiDeactivate.getData() ));
 			tiDeactivate.setSelection(false);
@@ -821,7 +821,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 			if (option == INACTIVATE) {
 				//ensure you can't deactivate all employees
 				if (!ConservationAreaManager.getInstance().canDisableEmployees(toUpdate, session, SmartDB.getCurrentConservationArea())) {
-					SmartPlugIn.displayLog("Deactivating selected employees would leave no active Administrators for this Conservation Area. There must always be one active Conservation Area administrator.", null);
+					SmartPlugIn.displayLog(Messages.EmployeePropertyPage_NoAdminsError, null);
 					return;
 				}
 			}
@@ -842,7 +842,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				SmartPlugIn.displayLog("Unable to inactivate selected employees.", ex);
+				SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error, ex);
 				return;
 				
 			}

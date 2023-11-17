@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.internal.ui;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -32,22 +31,18 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconManager;
-import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -57,7 +52,6 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  *  Patrol item composite for selecting patrol transport type. 

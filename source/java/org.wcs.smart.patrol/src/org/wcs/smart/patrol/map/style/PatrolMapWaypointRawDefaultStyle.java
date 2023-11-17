@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.map.style;
 
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
@@ -40,12 +41,12 @@ public class PatrolMapWaypointRawDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return "Patrol Map";
+		return Messages.PatrolMapWaypointRawDefaultStyle_MapName;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Waypoint (Raw Points)";
+		return Messages.PatrolMapWaypointRawDefaultStyle_LayerName;
 	}
 
 }

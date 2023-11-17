@@ -141,7 +141,7 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 		incident= new Waypoint();
 		
 		IIncidentProvider provider = IncidentManager.getInstance().getIncidentProvider(xml.getType());
-		if (provider == null) throw new Exception(MessageFormat.format("Incident type {0} not supported", xml.getType()));
+		if (provider == null) throw new Exception(MessageFormat.format(Messages.XmlToIncident_TypeNotSupported, xml.getType()));
 		incident.setSourceId(provider.getWaypointSourceKey());
 		
 		incident.setConservationArea(ca);

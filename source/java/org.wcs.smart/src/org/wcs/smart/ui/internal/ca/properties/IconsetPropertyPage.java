@@ -255,14 +255,14 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		CTabItem itemIcons = new CTabItem(tabs, SWT.NONE);
 //		itemIcons.setText(Messages.IconPreferencePage_IconsTab);
-		itemIcons.setText("Conservation Area Icons");
+		itemIcons.setText(Messages.IconsetPropertyPage_CAIconTabl);
 		iconComp = createIconsTab(tabs);
 		itemIcons.setControl(iconComp);
 
 		
 		CTabItem libraryIcons = new CTabItem(tabs, SWT.NONE);
 //		itemIcons.setText(Messages.IconPreferencePage_IconsTab);
-		libraryIcons.setText("SMART Library Icons");
+		libraryIcons.setText(Messages.IconsetPropertyPage_SMARTIconTab);
 		libraryIconComp = createLibraryIconsTab(tabs);
 		libraryIcons.setControl(libraryIconComp);
 		
@@ -628,13 +628,13 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		tblLibraryIcons.setInput(icons);
 
 		Label lbl = new Label(panel, SWT.NONE);
-		lbl.setText("** icon exists in Conservation Area icons");
+		lbl.setText(Messages.IconsetPropertyPage_IconInCa);
 		libraryIconComp.layout(true);
 		
 		Menu tmp = new Menu(tblIcons.getControl());
 		
 		MenuItem miAddIcon = new MenuItem(tmp, SWT.PUSH);
-		miAddIcon.setText("Add to Conservation Area Icons");
+		miAddIcon.setText(Messages.IconsetPropertyPage_AddToCaBtn);
 		miAddIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miAddIcon.addListener(SWT.Selection, e->addIcon(tblLibraryIcons.getStructuredSelection()));
 				
