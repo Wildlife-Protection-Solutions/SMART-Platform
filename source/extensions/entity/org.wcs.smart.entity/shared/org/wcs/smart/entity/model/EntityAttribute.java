@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.entity.model;
 
-import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
