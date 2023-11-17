@@ -4,8 +4,12 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.internal.messages"; //$NON-NLS-1$	public static String CloseMsgDialog_Msg;
+	public static String JsonCtParser_AttachmentNotImported;
+	public static String JsonCtParser_AttachmentTypeUnknown;
 	public static String JsonCtParser_AttributeNotFound;
 	public static String JsonCtParser_CatAttributeNotFound;
+	public static String JsonCtParser_CMInvalid;
+	public static String JsonCtParser_CMNotFound;
 	public static String JsonCtParser_CouldNotImportPhoto;
 	public static String JsonCtParser_CouldNotParseValue;
 	public static String JsonCtParser_latlongnotfound;

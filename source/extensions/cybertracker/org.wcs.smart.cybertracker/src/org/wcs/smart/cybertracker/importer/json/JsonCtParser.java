@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.importer.json;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -390,11 +391,11 @@ public class JsonCtParser {
 			try {
 				cmUuid = UuidUtils.stringToUuid(cmuuid);
 			}catch (Exception ex) {
-				warnings.add(MessageFormat.format("Invalid configurable model uuid {0}. The source configurable model for this waypoint will be null.", cmuuid));
+				warnings.add(MessageFormat.format(Messages.JsonCtParser_CMInvalid, cmuuid));
 			}
 			ConfigurableModel cm = session.getReference(ConfigurableModel.class, cmUuid);
 			if (cm == null) {
-				warnings.add("The configurable referenced in the source data could not be found. The source configurable model for this waypoint will be null");
+				warnings.add(Messages.JsonCtParser_CMNotFound);
 			}
 			newWaypoint.setSourceConfigurableModel(cm);
 		}
@@ -777,13 +778,31 @@ public class JsonCtParser {
 				image = ImageIO.read(in);
 			}
 			
-			String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
-			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
-				
 			if (image == null) {
-				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, info));
-				return null;
+				
+				String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$	
+				//write bytes to temporary file
+				try {
+					Files.write(temp, data);
+				}catch (IOException ex) {
+					warnings.add(Messages.JsonCtParser_AttachmentNotImported);
+					CyberTrackerPlugIn.log(ex.getMessage(), ex);
+					return null;
+				}
+				
+				warnings.add(Messages.JsonCtParser_AttachmentTypeUnknown);
+				
+				WaypointAttachment attachment = new WaypointAttachment();
+				attachment.setCopyFromLocation(temp);
+				attachment.setFilename(fileName);
+				
+				return attachment;
+				
 			} else {
+				String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
+				  
 				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
