@@ -356,6 +356,7 @@ public class JsonCtParser {
 		//parse x and y may be null
 		
 		Waypoint newWaypoint = new Waypoint();
+		newWaypoint.setConservationArea(ca);
 		Coordinate c = readXYFromProperties(feature);
 		if (c == null) {
 			throw new Exception(Messages.JsonCtParser_latlongnotfound);
@@ -758,11 +759,8 @@ public class JsonCtParser {
 		if (info.getType() == AttachmentInfo.AttachmentType.PHOTO
 				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 			
-			// picture object; create a temporary file add it to waypoint observation
-			BufferedImage image = null;
-			
 			//determine file extension; assume jpeg by default
-			String ext = JPEG_EXT;
+			String ext = null;
 			byte[] data = DatatypeConverter.parseBase64Binary(info.getData());
 			
 			try(ByteArrayInputStream bis = new ByteArrayInputStream(data);
@@ -773,16 +771,15 @@ public class JsonCtParser {
 					ext = ir.getFormatName();
 				}
 			}
-							
-			try (InputStream in = new ByteArrayInputStream(data)) {
-				image = ImageIO.read(in);
-			}
-			
-			if (image == null) {
+
+			if (ext == null) {
+				//don't know the image format so write without an extension and generate a warning
+				
+				warnings.add(Messages.JsonCtParser_AttachmentTypeUnknown);
 				
 				String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
 				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$	
-				//write bytes to temporary file
+				
 				try {
 					Files.write(temp, data);
 				}catch (IOException ex) {
@@ -791,19 +788,26 @@ public class JsonCtParser {
 					return null;
 				}
 				
-				warnings.add(Messages.JsonCtParser_AttachmentTypeUnknown);
-				
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
-				
+				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+					attachment.setSignatureType(info.getSignatureType());
+				}
 				return attachment;
 				
 			} else {
 				String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
 				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
 				  
-				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
+				try {
+					Files.write(temp, data);
+				}catch (IOException ex) {
+					warnings.add(Messages.JsonCtParser_AttachmentNotImported);
+					CyberTrackerPlugIn.log(ex.getMessage(), ex);
+					return null;
+				}
+				
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
