@@ -16,6 +16,12 @@
                icon="images/etool16/cybertracker16.png"
                id="org.wcs.smart.cybertracker.menu"
                label="%cybertracker.menu.label1">
+            <command
+                  commandId="org.wcs.smart.cybertracker.deprecated.message"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/obj16/warn.png"
+                  label="!! CyberTracker Classic To Be Removed ... !!"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.cybertracker.patrolseparator"
                   visible="false">
@@ -185,6 +191,10 @@
             id="org.wcs.smart.cybertracker.navigation.show"
             name="%command.ctnavigationlayers.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.deprecated.message"
+            name="CyberTracker Classic Deprecated Message">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -215,6 +225,10 @@
       <handler
             class="org.wcs.smart.cybertracker.navigation.ui.ShowCtNavigationHandler$ShowCtNavigationHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.navigation.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.CtClassicDeprecatedHandler$CtClassicDeprecatedHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.deprecated.message">
       </handler>
    </extension>
    <extension
