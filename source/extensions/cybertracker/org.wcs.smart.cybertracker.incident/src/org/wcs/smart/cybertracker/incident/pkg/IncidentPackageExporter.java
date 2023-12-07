@@ -241,7 +241,7 @@ public class IncidentPackageExporter {
 				new Object[] {"isDefault", true}).getSingleResult(); //$NON-NLS-1$
 		
 		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentCtPackage.TYPE_NAME.toUpperCase()));
+		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentCtPackage.TYPE_NAME.toLowerCase()));
 		
 		//observer employee options
 		MetadataFieldValue md = null;

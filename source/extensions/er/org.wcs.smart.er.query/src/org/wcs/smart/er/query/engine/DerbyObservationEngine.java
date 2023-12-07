@@ -66,6 +66,7 @@ import org.wcs.smart.query.common.engine.ObservationQueryEngine;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
@@ -171,6 +172,9 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine  implements O
 					try(ResultSet rs = c.createStatement().executeQuery("select distinct a.keyid from "+queryDataTable+" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid")) { //$NON-NLS-1$ //$NON-NLS-2$
 						while (rs.next()) { 
 							dataColumns.add(AttributeQueryColumn.KEY_PREFIX + rs.getString(1));
+							for (GeometryProperty prop : GeometryProperty.values()) {
+								dataColumns.add(AttributeQueryColumn.KEY_PREFIX + prop.generateKey(rs.getString(1)));	
+							}
 						}
 					}
 					//looking for fixed columns that have at least one value

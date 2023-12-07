@@ -502,6 +502,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			Button btnVisible = (Button)item.getValue()[0];
 			if (!btnVisible.getSelection() && pa.getType() == AttributeType.NUMERIC) {
 				Text txt = (Text) item.getValue()[2];
+				if (txt.getText().isBlank()) return null;
 				try {
 					Double.parseDouble(txt.getText());
 				}catch (Exception ex) {

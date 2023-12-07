@@ -44,6 +44,7 @@ import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeGeometryDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeMListDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
@@ -81,6 +82,7 @@ public enum DropItemFactory {
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"keyId", ff.getAttributeKey()}).uniqueResult(); //$NON-NLS-1$
 			if (aa == null) throw new Exception(MessageFormat.format(Messages.DropItemFactory_attributeNotFound, ff.getAttributeKey()));
+			
 			DropItem di = createDropItem(aa)[0];
 			
 			if (aa.getType() == AttributeType.DATE) {
@@ -134,6 +136,8 @@ public enum DropItemFactory {
 				}
 				di.initializeData(treenode);
 			}else if (aa.getType() == AttributeType.BOOLEAN) {
+			}else if (aa.getType().isGeometry()) {
+				di.initializeData(new String[] {ff.getGeometryProperty().name(), ff.getOperator().asSmartValue(), ff.getValue().toString()});
 			}else {
 				String[] initData = new String[] {ff.getOperator().getGuiValue(), ff.getValue().toString()};
 				di.initializeData(initData);
@@ -222,6 +226,8 @@ public enum DropItemFactory {
 				}
 				di.initializeData(treenode);
 			}else if (aa.getType() == AttributeType.BOOLEAN) {
+			}else if (aa.getType().isGeometry()) {
+				di.initializeData(new String[] {ff.getAttributeFilter().getGeometryProperty().name(), ff.getAttributeFilter().getOperator().asSmartValue(), ff.getAttributeFilter().getValue().toString()});
 			}else {
 				String[] initData = new String[] {ff.getAttributeFilter().getOperator().getGuiValue(), ff.getAttributeFilter().getValue().toString()};
 				di.initializeData(initData);
@@ -262,6 +268,8 @@ public enum DropItemFactory {
 				return new DropItem[] {new AttributeMListDropItem((Attribute)element) };
 			}else if (a.getType() == Attribute.AttributeType.TREE) {
 				return new DropItem[] {new AttributeTreeDropItem((Attribute)element) };
+			}else if (a.getType().isGeometry()) {
+				return new DropItem[] {new AttributeGeometryDropItem((Attribute) element) };
 			}else {
 				return new DropItem[] {new AttributeDropItem((Attribute)element) };	
 			}
@@ -274,6 +282,8 @@ public enum DropItemFactory {
 				return new DropItem[] {new AttributeMListDropItem((CategoryAttribute)element) };
 			}else if (a.getAttribute().getType() == Attribute.AttributeType.TREE) {
 				return new DropItem[] {new AttributeTreeDropItem((CategoryAttribute)element) };
+			}else if (a.getAttribute().getType().isGeometry()) {
+				return new DropItem[] {new AttributeGeometryDropItem((Attribute) element) };
 			}else {
 				return new DropItem[] {new AttributeDropItem((CategoryAttribute)element) };	
 			}

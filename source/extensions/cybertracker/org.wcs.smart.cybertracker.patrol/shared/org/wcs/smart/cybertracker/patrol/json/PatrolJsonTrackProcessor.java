@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -47,6 +48,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * For processing track log points.  This attempts to find a patrol
@@ -98,6 +100,8 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			Double y = ((Number) pntArray.get(1)).doubleValue();
 			LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 
+			
+			
 			String deviceId = (String) properties.get(CtJsonObservationParser.DEVICE_ID);
 			 
 			List<CtPatrolLink> links = linkmap.get(deviceId);

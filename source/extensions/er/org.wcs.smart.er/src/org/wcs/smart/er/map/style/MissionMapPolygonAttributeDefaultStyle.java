@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2023 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,42 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.query.ui;
+package org.wcs.smart.er.map.style;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.entity.query.model.EntityObservationResultItem;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 /**
- * An table column in the results table that represents an attribute.
- * <p>
- * There should be one column for each attribute defined in the data model
- * </p>
+ * Patrol map page default waypoint style
  * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class AttributeColumnLabelProvider extends ColumnLabelProvider {
+public class MissionMapPolygonAttributeDefaultStyle implements IMapLayerDefaultStyle {
 
-	private QueryColumn column;
-
-	public AttributeColumnLabelProvider(QueryColumn column) {
-		this.column = column;
+	public static final String KEY = "org.wcs.smart.mission.map.attribute.polygon";  //$NON-NLS-1$
+	
+	@Override
+	public String getKey() {
+		return KEY;
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-	 */
-	public String getText(Object element) {
-		if (element instanceof EntityObservationResultItem) {
-			Object value = column.getValue((EntityObservationResultItem) element);
-			if (value == null) {
-				return ""; //$NON-NLS-1$
-			} else {
-				return value.toString();
-			}
-		}
-		return element == null ? "" : element.toString();//$NON-NLS-1$
+	@Override
+	public String getMapName() {
+		return Messages.MissionMapWaypointDefaultStyle_MapName;
+	}
+
+	@Override
+	public String getLayerName() {
+		return "Polygon Attributes";
 	}
 
 }

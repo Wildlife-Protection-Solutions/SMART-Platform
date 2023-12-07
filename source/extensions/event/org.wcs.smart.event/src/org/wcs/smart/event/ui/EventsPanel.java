@@ -444,7 +444,7 @@ public class EventsPanel extends Composite {
 			session.beginTransaction();
 			try {
 				for(EActionEvent event : toDelete) {
-					HibernateManager.saveOrMerge(session, event);
+					session.remove(event);
 				}
 				session.getTransaction().commit();
 				((List<?>)tblEvents.getInput()).removeAll(toDelete);

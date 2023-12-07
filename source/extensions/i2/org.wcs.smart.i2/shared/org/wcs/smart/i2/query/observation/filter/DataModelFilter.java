@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.filter.AttributeFilter;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.util.SharedUtils;
 
@@ -58,6 +59,15 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 		DataModelFilter filter = createCore(key);
 		filter.operator = operator;
 		filter.numberValue = value;
+		return filter;
+	}
+	
+	//geometry
+	public static DataModelFilter create(String key, AttributeFilter.GeometryProperty geometryProperty, Operator operator, Double value){
+		DataModelFilter filter = createCore(key);
+		filter.operator = operator;
+		filter.numberValue = value;
+		filter.geometryProperty = geometryProperty;
 		return filter;
 	}
 	
@@ -114,6 +124,8 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	}
 	
 	private Attribute.AttributeType attributeType = null;
+	private AttributeFilter.GeometryProperty geometryProperty = null;
+	
 	private String attributeKey = null;
 	private String categoryKey = null;
 	
@@ -139,6 +151,14 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 		this.operator = operator;
 		this.numberValue = numberValue;
 	}
+	
+	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, AttributeFilter.GeometryProperty geometryProperty, Operator operator, Double numberValue){
+		this(type, attributeKey, categoryKey);
+		this.geometryProperty = geometryProperty;
+		this.operator = operator;
+		this.numberValue = numberValue;
+	}
+	
 	
 	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, Operator operator, String stringValue){
 		this(type, attributeKey, categoryKey);
@@ -172,6 +192,9 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	
 	public String getCategoryKey(){
 		return this.categoryKey;
+	}
+	public AttributeFilter.GeometryProperty getGeometryProperty(){
+		return this.geometryProperty;
 	}
 	
 	public Operator getOperator(){
@@ -230,6 +253,14 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 					sb.append(operator.name());
 					sb.append("_"); //$NON-NLS-1$
 					sb.append(stringValue);
+					break;
+				case LINE:
+				case POLYGON:
+					sb.append(geometryProperty.name());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(operator.name());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(numberValue);
 					break;
 			}
 		}
@@ -299,6 +330,13 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 			sb.append(Operator.AND.getKey());
 			sb.append(" "); //$NON-NLS-1$
 			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR).format(dateValues[1]));
+		} else if (attributeType.isGeometry()) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(geometryProperty.name());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(operator.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(numberValue);
 		}
 		return sb.toString();
 	}

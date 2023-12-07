@@ -163,7 +163,11 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(query);
+				if (isNew) {
+					s.persist(query);
+				}else {
+					s.merge(query);
+				}
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

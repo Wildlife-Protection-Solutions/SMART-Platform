@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2023 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,37 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.query.ui;
+package org.wcs.smart.i2.map.style;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.entity.query.model.EntityObservationResultItem;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
-/**
- * 
- * A column in the results table that contains a category from the datamodel.
- * 
- * <p>
- * There should be one column for each "level" in the datamodel category tree.
- * </p>
- * 
- * @author Emily
- * @since 1.0.0
- */
-public class CategoryColumnLabelProvider extends ColumnLabelProvider {
-	private QueryColumn column;
+public class ObservationPolygonAttributeDefaultStyle implements IMapLayerDefaultStyle {
 
-	public CategoryColumnLabelProvider(QueryColumn column) {
-		this.column = column;
+	public static final String KEY = "org.wcs.smart.i2.map.observation.attribute.polygon"; //$NON-NLS-1$
+	
+	public ObservationPolygonAttributeDefaultStyle() {
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-	 */
-	public String getText(Object element) {
-		if (element instanceof EntityObservationResultItem) {
-			return (String) column.getValue((EntityObservationResultItem) element);
-		}
-		return element == null ? "" : element.toString();//$NON-NLS-1$
+	@Override
+	public String getKey() {
+		return KEY;
 	}
+
+	@Override
+	public String getMapName() {
+		return "Profile - Observation Attributes";
+	}
+
+	@Override
+	public String getLayerName() {
+		return "Polygon Observation Attributes";
+	}
+
 }

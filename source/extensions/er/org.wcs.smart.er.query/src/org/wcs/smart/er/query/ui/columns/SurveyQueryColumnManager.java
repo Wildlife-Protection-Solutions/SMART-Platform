@@ -52,6 +52,7 @@ import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.model.AttributeQueryColumn;
@@ -250,29 +251,8 @@ public class SurveyQueryColumnManager {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
-						
-						int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
-						for (int i = 0; i < numCategory; i++) {
-							cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.SurveyQueryColumnManager_CategoryColumnLabel, new Object[]{i}), i));
-						}
-							
-						//sort attributes alphabetically
-						List<Attribute> atts = new ArrayList<Attribute>();
-						atts.addAll( dataModel.getAttributes() );
-						Collections.sort(atts, new Comparator<Attribute>(){
-							@Override
-							public int compare(Attribute o1, Attribute o2) {
-								return Collator.getInstance().compare(o1.getName(),o2.getName());
-							}});
-							
-						for (Attribute att : atts) {
-							String name = att.getName();
-							cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex()));
-						}
-						dataModelColumns = cols.toArray(new QueryColumn[cols.size()]);
-						
-						
+						List<QueryColumn> cols = DataModelQueryColumns.generateDataModelQueryColumns(dataModel, false); 
+						dataModelColumns = cols.toArray(new QueryColumn[cols.size()]);					
 						return Status.OK_STATUS;
 					}
 					};

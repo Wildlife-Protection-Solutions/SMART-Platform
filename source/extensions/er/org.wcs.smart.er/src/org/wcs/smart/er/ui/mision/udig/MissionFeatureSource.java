@@ -32,6 +32,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 
 /**
  * Data source for mission observations and tracks.
@@ -53,6 +54,8 @@ public class MissionFeatureSource extends ContentFeatureSource{
 	public boolean getDefaultVisibility() {
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)) return true;
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return true;
+		if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING)) return true;
+		if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) return true;
 		return false;
 	}
 	
@@ -60,6 +63,8 @@ public class MissionFeatureSource extends ContentFeatureSource{
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)) return Messages.MissionFeatureSource_TrackLayerName;
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return Messages.MissionFeatureSource_WaypointLayerName;
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) return Messages.MissionFeatureSource_RawWaypointLayerName;
+		if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING)) return "LineString Attributes";
+		if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) return "Polygon Attributes";
 		return entry.getTypeName();
 	}
 	
@@ -81,6 +86,10 @@ public class MissionFeatureSource extends ContentFeatureSource{
 			return new MissionTrackFeatureReader(getSource().getMission(), getSchema());
 		}else if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)){
 			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
+		}else if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING)){
+			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
+		}else if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)){
+			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
 		}
 		
 		return null;
@@ -95,6 +104,10 @@ public class MissionFeatureSource extends ContentFeatureSource{
 				return  SurveyFeatureFactory.createTrackSchema();
 			}else if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) {
 				return SurveyFeatureFactory.createWaypointPrjSchema();
+			}else if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING)) {
+				return ObservationAttributeFeatureFactory.createObservationLineStringSchema(MissionDataSource.OBS_ATTRIBUTE_LINESTRING);
+			}else if (entry.getTypeName().equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
+				return ObservationAttributeFeatureFactory.createObservationPolygonSchema(MissionDataSource.OBS_ATTRIBUTE_POLYGON);
 			}
 		}catch(SchemaException ex){
 			throw new IOException(Messages.MissionDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);

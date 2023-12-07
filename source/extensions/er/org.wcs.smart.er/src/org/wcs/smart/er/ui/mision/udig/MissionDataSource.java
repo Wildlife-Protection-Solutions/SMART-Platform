@@ -47,6 +47,10 @@ public class MissionDataSource extends ContentDataStore{
 	public static final String MISSIONTRACK_TYPE = "MissionTrack"; //$NON-NLS-1$
 	public static final String MISSIONRAWWAYPOINT_TYPE = "MissionPointRaw"; //$NON-NLS-1$
 	
+	public static final String OBS_ATTRIBUTE_LINESTRING = "LineStringAttribute"; //$NON-NLS-1$
+	public static final String OBS_ATTRIBUTE_POLYGON = "PolygonAttribute"; //$NON-NLS-1$
+	
+	
 	private MissionService service;
 	
 	public MissionDataSource(MissionService service){
@@ -71,6 +75,8 @@ public class MissionDataSource extends ContentDataStore{
 		List<Name> names = new ArrayList<>();
 		names.add(new NameImpl(MISSIONWAYPOINT_TYPE));
 		names.add(new NameImpl(MISSIONTRACK_TYPE));
+		names.add(new NameImpl(OBS_ATTRIBUTE_LINESTRING));
+		names.add(new NameImpl(OBS_ATTRIBUTE_POLYGON));
 		if (dd) names.add(new NameImpl(MISSIONRAWWAYPOINT_TYPE));
 		return names;
 	}

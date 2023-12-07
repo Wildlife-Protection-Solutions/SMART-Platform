@@ -33,6 +33,7 @@ import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.i2.udig.IntelObservationAttributeFeatureFactory;
 import org.wcs.smart.i2.udig.LocationLayerType;
 
 /**
@@ -52,19 +53,29 @@ public class IntelRecordFeatureSource extends ContentFeatureSource {
 		this.recordUuid = recordUuid;
 	}
 
-	public static String getFeatureSchemaString(LocationLayerType geomType){
+	public static SimpleFeatureType getFeatureSchemaString(String namespace, String name, String typeName, LocationLayerType geomType) throws SchemaException{
+		if (geomType == LocationLayerType.OBS_ATTRIBUTE_LINE ) {
+			return IntelObservationAttributeFeatureFactory.createObservationLineStringSchema(typeName);
+		}else if (geomType == LocationLayerType.OBS_ATTRIBUTE_POLYGON) {
+			return IntelObservationAttributeFeatureFactory.createObservationPolygonSchema(typeName);
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:"); //$NON-NLS-1$
 		sb.append(geomType.getGeomType());
 		sb.append(":srid=4326," + FID_FIELD + ":String,id:String,date:Date,time:Date,comment:String,system_id:String"); //$NON-NLS-1$ //$NON-NLS-2$
-		return sb.toString();
+		
+		if (namespace != null && name != null) {
+			return DataUtilities.createType(namespace, name, sb.toString());
+		}else {
+			return DataUtilities.createType(typeName, sb.toString());
+		}
 	}
 	
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
 		try {
 			LocationLayerType geomType = LocationLayerType.valueOf(entry.getName().getLocalPart());	
-			return DataUtilities.createType(entry.getTypeName(), getFeatureSchemaString(geomType));
+			return getFeatureSchemaString(null, null, entry.getTypeName(), geomType);
 		} catch (SchemaException e) {
 			throw new IOException(e);
 		}

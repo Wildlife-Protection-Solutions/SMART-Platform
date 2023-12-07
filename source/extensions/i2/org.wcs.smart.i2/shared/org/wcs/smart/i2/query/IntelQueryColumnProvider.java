@@ -65,6 +65,7 @@ import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
+
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -270,6 +271,13 @@ public class IntelQueryColumnProvider {
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		for (Attribute attribute : attributes){
 			columns.add(new DataModelColumn(attribute));
+			if (attribute.getType().isGeometry()) {			
+				columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.SOURCE,MessageFormat.format("{0} - Source", attribute.getName())));
+				columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.PERIMETER,MessageFormat.format("{0} - Perimeter", attribute.getName())));
+				if (attribute.getType() == Attribute.AttributeType.POLYGON) {
+					columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.AREA,MessageFormat.format("{0} - Area", attribute.getName())));	
+				}
+			}
 		}
 		
 		return columns;

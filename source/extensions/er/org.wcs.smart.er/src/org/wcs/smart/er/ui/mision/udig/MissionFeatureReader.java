@@ -25,14 +25,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
+import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 
 /**
  * Feature reader for mission observation points.
@@ -44,17 +51,56 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType featureType;
-	private Iterator<SurveyWaypoint> iterator;
+	private Iterator<?> iterator;
 	private String typename;
 	
 	public MissionFeatureReader(Mission mission, SimpleFeatureType type, String typename){
-		List<SurveyWaypoint> me = new ArrayList<SurveyWaypoint>();
-		for (MissionDay md : mission.getMissionDays()){
-			me.addAll(md.getWaypoints());
-		}
-		iterator = me.iterator();
+
 		this.featureType = type;
 		this.typename = typename;
+		
+		if (typename.equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE) || 
+			(typename.equals(MissionDataSource.MISSIONWAYPOINT_TYPE))){ 	
+		
+			List<SurveyWaypoint> me = new ArrayList<SurveyWaypoint>();
+			
+			for (MissionDay md : mission.getMissionDays()){
+				me.addAll(md.getWaypoints());
+			}
+			iterator = me.iterator();
+		}else if (typename.equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING) ||
+				typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
+			
+			AttributeType matching = AttributeType.LINE;
+			if (typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
+				matching = AttributeType.POLYGON;
+			}
+			
+			try(Session session = HibernateManager.openSession()){
+				
+				mission= session.get(Mission.class, mission.getUuid());
+				
+				List<WaypointObservationAttribute> attributes = new ArrayList<>();
+				for (MissionDay l : mission.getMissionDays()) {
+					for (SurveyWaypoint wp : l.getWaypoints()) {
+						
+						for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+							for (WaypointObservationAttribute a : wo.getAttributes()) {
+								if (a.getGeom() != null && a.getAttribute().getType() == matching) {
+									attributes.add(a);
+									a.getAttributeValueAsString(Locale.getDefault());
+									a.getObservation().getCategory().getName();
+								}
+							}
+						}
+					}
+				}
+				iterator = attributes.iterator();
+			}
+		}else{
+			iterator = null;
+		}
+		
 	}
 	
 	@Override
@@ -71,7 +117,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 
 	@Override
 	public boolean hasNext() throws IOException {
-		return iterator.hasNext();
+		return iterator != null && iterator.hasNext();
 	}
 
 	@Override
@@ -80,11 +126,14 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	
 	//String spec = 
 	//"fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
-	private SimpleFeature createFeature(SurveyWaypoint point){
+	private SimpleFeature createFeature(Object feature){
 		if (typename.equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)){
-			return SurveyFeatureFactory.createWaypointPrjFeature(featureType, point);
+			return SurveyFeatureFactory.createWaypointPrjFeature(featureType, (SurveyWaypoint)feature);
 		}else if (typename.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){ 	
-			return SurveyFeatureFactory.createWaypointFeature(featureType, point);
+			return SurveyFeatureFactory.createWaypointFeature(featureType, (SurveyWaypoint)feature);
+		}else if (typename.equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING) || typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
+			boolean hasArea = typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON); 
+			return new SurveyFeature(ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(featureType, hasArea, (WaypointObservationAttribute)feature ));
 		}
 		return null;
 	}

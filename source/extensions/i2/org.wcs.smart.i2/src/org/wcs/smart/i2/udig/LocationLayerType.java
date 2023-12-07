@@ -44,7 +44,9 @@ public enum LocationLayerType {
 	DM_OBS("Point"), //$NON-NLS-1$
 	POINT("Point"),  //$NON-NLS-1$
 	POLYGON("Polygon"), //$NON-NLS-1$
-	ATTRIBUTE("Point"); //$NON-NLS-1$
+	ATTRIBUTE("Point"), //$NON-NLS-1$
+	OBS_ATTRIBUTE_LINE("LineStringAttributes"), //$NON-NLS-1$
+	OBS_ATTRIBUTE_POLYGON("PolygonAttributes"); //$NON-NLS-1$
 	
 	private String geomType;
 	

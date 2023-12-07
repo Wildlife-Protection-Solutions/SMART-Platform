@@ -28,6 +28,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,7 +56,6 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.hibernate.Session;
@@ -73,10 +73,15 @@ import org.opengis.filter.FilterFactory;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.map.style.ObservationLinestringAttributeDefaultStyle;
+import org.wcs.smart.i2.map.style.ObservationPolygonAttributeDefaultStyle;
 import org.wcs.smart.i2.map.style.RecordPointObservationDefaultStyle;
 import org.wcs.smart.i2.map.style.RecordPolygonObservationDefaultStyle;
 import org.wcs.smart.i2.map.style.RecordPositionAttributeDefaultStyle;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelObservation;
+import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.record.IntelRecordDataSource;
@@ -112,6 +117,15 @@ public class RecordMapPage extends SmartMapEditorPart {
 	private IGeoResource polygonResource;
 	private SimpleFeatureType polygonFeatureType = null;
 	private SimpleFeatureType pointFeatureType = null;
+	
+	private ILayer attPolygonLayer;
+	private ILayer attLinestringLayer;
+	private IGeoResource attPolygonResource;
+	private IGeoResource attLinestringResource;
+	private SimpleFeatureType attPolygonFeatureType = null;
+	private SimpleFeatureType attLinestringFeatureType = null;
+	
+	
 	private LocationAttributeMapLayer attributeLayer;
 	private LocationListComposite locationPanel;
 	private ToolItem importItem ;
@@ -120,6 +134,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 	static {
 		defaultStyles.put(LocationLayerType.POINT.name(), RecordPointObservationDefaultStyle.KEY);
 		defaultStyles.put(LocationLayerType.POLYGON.name(), RecordPolygonObservationDefaultStyle.KEY);
+		defaultStyles.put(LocationLayerType.OBS_ATTRIBUTE_LINE.name(), ObservationLinestringAttributeDefaultStyle.KEY);
+		defaultStyles.put(LocationLayerType.OBS_ATTRIBUTE_POLYGON.name(), ObservationPolygonAttributeDefaultStyle.KEY);
 	}
 	
 	private Job localMapLayerJob = new Job(Messages.RecordMapPage_jobname) { 
@@ -139,9 +155,10 @@ public class RecordMapPage extends SmartMapEditorPart {
 			boolean added = false;
 			try {
 				if (polygonFeatureType == null || polygonResource == null){
-					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POLYGON);
+					
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POLYGON, recordEditor.getRecord().getUuid());
-					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(), formatString);
+					polygonFeatureType = IntelRecordFeatureSource.getFeatureSchemaString(name.getNamespaceURI(), name.getLocalPart(), null, LocationLayerType.POLYGON);
+					
 					synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
 						polygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(polygonFeatureType);
 					}
@@ -165,9 +182,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 					added = true;
 				}
 				if (pointFeatureType == null || pointResource == null){
-					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POINT);
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POINT, recordEditor.getRecord().getUuid());
-					pointFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
+					pointFeatureType  = IntelRecordFeatureSource.getFeatureSchemaString(name.getNamespaceURI(), name.getLocalPart(), null, LocationLayerType.POINT);
 					synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
 						pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pointFeatureType);
 					}
@@ -188,9 +204,55 @@ public class RecordMapPage extends SmartMapEditorPart {
 					getMap().sendCommandASync(command);
 					added = true;
 				}
+				if (attPolygonFeatureType == null || attPolygonResource == null) {
+					attPolygonFeatureType  = IntelRecordFeatureSource.getFeatureSchemaString(null, null, LocationLayerType.OBS_ATTRIBUTE_POLYGON.name(), LocationLayerType.OBS_ATTRIBUTE_POLYGON);
+					synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
+						attPolygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(attPolygonFeatureType);
+					}
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(attPolygonResource), getMap().getLayersInternal().size()){
+						 public void run( IProgressMonitor monitor ) throws Exception {
+							 super.run(monitor);
+							 if (getLayers() != null &&  !getLayers().isEmpty()){
+								 attPolygonLayer = getLayers().get(0);
+								 ((Layer)attPolygonLayer).setName("Polygon Observation Attributes");
+//								 attPolygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POINT.getDefaultLayerStyle()); //$NON-NLS-1$
+								 try(Session session = HibernateManager.openSession()){
+									 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+										 recordEditor.getRecord().getConservationArea(), 
+										 (Layer)attPolygonLayer, defaultStyles, session, monitor);
+								 }
+							 }
+						 }
+					};
+					getMap().sendCommandASync(command);
+					added = true;
+				}
+				if (attLinestringFeatureType == null || attLinestringResource == null) {
+					attLinestringFeatureType  = IntelRecordFeatureSource.getFeatureSchemaString(null, null, LocationLayerType.OBS_ATTRIBUTE_LINE.name(), LocationLayerType.OBS_ATTRIBUTE_LINE);
+					synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
+						attLinestringResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(attLinestringFeatureType);
+					}
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(attLinestringResource), getMap().getLayersInternal().size()){
+						 public void run( IProgressMonitor monitor ) throws Exception {
+							 super.run(monitor);
+							 if (getLayers() != null &&  !getLayers().isEmpty()){
+								 attLinestringLayer = getLayers().get(0);
+								 ((Layer)attLinestringLayer).setName("Linestring Observation Attributes");
+//								 attPolygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POINT.getDefaultLayerStyle()); //$NON-NLS-1$
+								 try(Session session = HibernateManager.openSession()){
+									 StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+										 recordEditor.getRecord().getConservationArea(), 
+										 (Layer)attLinestringLayer, defaultStyles, session, monitor);
+								 }
+							 }
+						 }
+					};
+					getMap().sendCommandASync(command);
+					added = true;
+				}
 				
-				IGeoResource toUpdate[] = new IGeoResource[]{polygonResource, pointResource};
-				SimpleFeatureType typesToUpdate[] = new SimpleFeatureType[]{polygonFeatureType, pointFeatureType};
+				IGeoResource toUpdate[] = new IGeoResource[]{polygonResource, pointResource, attPolygonResource, attLinestringResource};
+				SimpleFeatureType typesToUpdate[] = new SimpleFeatureType[]{polygonFeatureType, pointFeatureType, attPolygonFeatureType, attLinestringFeatureType};
 				for (int i = 0; i < toUpdate.length; i ++){
 					List<SimpleFeature> features = new ArrayList<SimpleFeature>();
 					try(IntelRecordFeatureReader featureReader = new IntelRecordFeatureReader(recordEditor.getRecord(), typesToUpdate[i])){
@@ -411,6 +473,8 @@ public class RecordMapPage extends SmartMapEditorPart {
         try {
 			if (pointResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(pointResource.service(null));
 			if (polygonResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(polygonResource.service(null));
+			if (attLinestringResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(attLinestringResource.service(null));
+			if (attPolygonResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(attPolygonResource.service(null));
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
@@ -419,6 +483,8 @@ public class RecordMapPage extends SmartMapEditorPart {
         this.polygonResource = null;
         this.locationPanel = null;
         this.recordEditor = null;
+        this.attLinestringResource = null;
+        this.attPolygonResource = null;
         
         super.dispose();
         

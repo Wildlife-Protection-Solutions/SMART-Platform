@@ -175,6 +175,8 @@ public class CreateRecordActionType implements IActionType {
 				cloneAttribute.setAttributeListItem(aa.getAttributeListItem());
 				cloneAttribute.setAttributeTreeNode(aa.getAttributeTreeNode());
 				cloneAttribute.setNumberValue(aa.getNumberValue());
+				cloneAttribute.setGeom(aa.getGeom());
+				cloneAttribute.setNumberValue2(aa.getNumberValue());
 				cloneAttribute.setStringValue(aa.getStringValue());
 				cloneAttribute.setObservation(io);
 				

@@ -106,6 +106,7 @@ import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.ObserverGroupBy;
 import org.wcs.smart.query.model.summary.ValuePart;
+import org.wcs.smart.query.model.summary.AttributeValueItem.GeometryProperty;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
@@ -653,7 +654,14 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			AttributeValueItem attributeItem, Query query) throws SQLException{
 		
 		clearParameters();
-		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
+		if (attributeItem.getAttributeType() == AttributeType.NUMERIC || 
+				attributeItem.getAttributeType().isGeometry()) {
+			
+			String field = "number_value"; //$NON-NLS-1$
+			if (attributeItem.getAttributeType().isGeometry() &&
+				attributeItem.getGeometryProperty() == GeometryProperty.AREA) {
+				field = "number_value_2"; //$NON-NLS-1$
+			}
 			StringBuilder fromSql = new StringBuilder();
 
 			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
@@ -672,7 +680,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
-			valueAggSql.append(".number_value)"); //$NON-NLS-1$
+			valueAggSql.append("." + field  + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$
@@ -707,7 +715,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 
 			sql.append(" WHERE "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append(".number_value is not null and "); //$NON-NLS-1$
+			sql.append("." + field + " is not null and "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			String p1 = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$

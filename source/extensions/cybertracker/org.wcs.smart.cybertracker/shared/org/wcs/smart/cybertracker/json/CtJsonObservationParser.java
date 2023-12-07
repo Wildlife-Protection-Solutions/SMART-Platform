@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.json;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -112,7 +110,6 @@ public class CtJsonObservationParser {
 	
 	public static final String DEVICE_ID = "deviceId"; //$NON-NLS-1$
 	
-	private static final String JPEG_EXT = "jpeg"; //$NON-NLS-1$
 	private static final String PHOTO_KEY = "ct_photo"; //$NON-NLS-1$
 	
 	private static final String WAVE_EXT = "wav"; //$NON-NLS-1$
@@ -208,6 +205,7 @@ public class CtJsonObservationParser {
 		//parse x and y may be null
 		
 		Waypoint newWaypoint = new Waypoint();
+		newWaypoint.setConservationArea(ca);
 		Coordinate c = readXYFromProperties(feature);
 		if (c == null) {
 			throw new Exception((new JsonError(JsonError.Type.LAT_LONG_NOT_FOUND)).getMessage());
@@ -588,10 +586,9 @@ public class CtJsonObservationParser {
 				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 			
 			// picture object; create a temporary file add it to waypoint observation
-			BufferedImage image = null;
 			
-			//determine file extension; assume jpeg by default
-			String ext = JPEG_EXT;
+			//determine file extension
+			String ext = null;
 			byte[] data = DatatypeConverter.parseBase64Binary(info.getData());
 			
 			try(ByteArrayInputStream bis = new ByteArrayInputStream(data);
@@ -602,15 +599,13 @@ public class CtJsonObservationParser {
 					ext = ir.getFormatName();
 				}
 			}
-							
-			try (InputStream in = new ByteArrayInputStream(data)) {
-				image = ImageIO.read(in);
-			}
+								
+			if (ext == null){
+				//don't know the image format so write without an extension and generate a warning
+				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO_ATTACHMENT, info.getImageCount()));
 				
-			if (image == null){
 				String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
 				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$	
-				//write bytes to temporary file
 				try {
 					Files.write(temp, data);
 				}catch (IOException ex) {
@@ -619,18 +614,25 @@ public class CtJsonObservationParser {
 					return null;
 				}
 				
-				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO_ATTACHMENT, info.getImageCount()));
 				
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
-				
+				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+					attachment.setSignatureType(info.getSignatureType());
+				}
 				return attachment;
 			} else {
 				String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
 				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
 				
-				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
+				try {
+					Files.write(temp, data);
+				}catch (IOException ex) {
+					warnings.add(new JsonImportWarning(Type.INVALID_ATTACHMENT, info.getImageCount()));
+					logger.log(Level.WARNING, ex.getMessage(), ex);
+					return null;
+				}
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);

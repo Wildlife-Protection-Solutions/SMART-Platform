@@ -326,7 +326,30 @@ public class EventProcessingJob extends Job {
 					}else {
 						equation.add(Boolean.FALSE);
 					}
-					break;				
+					break;
+				case POLYGON:
+				case LINE:
+					double obsvalue = attributeValue.getNumberValue();					
+					if (afilter.getGeometryProperty() == AttributeFilter.GeometryProperty.AREA) {
+						obsvalue = attributeValue.getNumberValue2();
+					}
+					boolean gvalue = false;
+					Double gFilterValue = (Double) afilter.getValue();
+					if (afilter.getOperator() == Operator.EQUALS) {
+						gvalue = obsvalue == gFilterValue;
+					}else if (afilter.getOperator() == Operator.NOTEQUALS) {
+						gvalue = obsvalue != gFilterValue;
+					}else if (afilter.getOperator() == Operator.LESSTHAN) {
+						gvalue = obsvalue < gFilterValue;
+					}else if (afilter.getOperator() == Operator.LESSTHANEQUALS) {
+						gvalue = obsvalue <= gFilterValue;
+					}else if (afilter.getOperator() == Operator.GREATERTHAN) {
+						gvalue = obsvalue > gFilterValue;
+					}else if (afilter.getOperator() == Operator.GREATERTHANEQUALS) {
+						gvalue = obsvalue >= gFilterValue;
+					}
+					equation.add(gvalue);
+					break;
 				}
 				
 			}else {

@@ -61,6 +61,8 @@ import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
+import org.wcs.smart.er.map.style.MissionMapLineStringAttributeDefaultStyle;
+import org.wcs.smart.er.map.style.MissionMapPolygonAttributeDefaultStyle;
 import org.wcs.smart.er.map.style.MissionMapSamplingUnitLinearDefaultStyle;
 import org.wcs.smart.er.map.style.MissionMapSamplingUnitPointDefaultStyle;
 import org.wcs.smart.er.map.style.MissionMapTrackDefaultStyle;
@@ -77,6 +79,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
@@ -106,6 +110,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
+	private List<IGeoResource> dmAttributeGeoResources = new ArrayList<>();
+	
 	private Job addLayerJob = new Job(Messages.MissionMapPage_AddLayersJob_Title) {
 		
 		@SuppressWarnings("unchecked")
@@ -117,6 +123,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 
 			
 			try {
+				
+				
 				List<IGeoResource> allLayers = new ArrayList<IGeoResource>();
 				List<IGeoResource> tmp = (List<IGeoResource>) suService.resources(monitor);
 				for (IGeoResource r : tmp){
@@ -130,11 +138,21 @@ public class MissionMapPage extends SmartMapEditorPart {
 				}
 				
 				List<IGeoResource> sortedLayers = new ArrayList<>();
-				List<? extends IGeoResource> layers = missionService.resources(monitor);
-	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONTRACK_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) sortedLayers.add(l);
-	    		
+	    		Map<String, IGeoResource> toAdd = new HashMap<>();
+	    		List<? extends IGeoResource> layers = missionService.resources(monitor);
+	    		for (IGeoResource l : layers) toAdd.put(  ((MissionGeoResource)l).getType(), l );
+	    			
+	    		String[] orderedLayers = new String[] {
+	    				MissionDataSource.OBS_ATTRIBUTE_POLYGON,
+	    				MissionDataSource.OBS_ATTRIBUTE_LINESTRING,	    
+	    				MissionDataSource.MISSIONTRACK_TYPE, 
+	    				MissionDataSource.MISSIONRAWWAYPOINT_TYPE, 
+	    				MissionDataSource.MISSIONWAYPOINT_TYPE,				
+	    		};
+	    		for (String name : orderedLayers) sortedLayers.add(toAdd.get(name));
+	    		dmAttributeGeoResources.add(toAdd.get(MissionDataSource.OBS_ATTRIBUTE_POLYGON));
+	    		dmAttributeGeoResources.add(toAdd.get(MissionDataSource.OBS_ATTRIBUTE_LINESTRING));
+				
 				allLayers.addAll(sortedLayers);
 				
 	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0) {
@@ -149,6 +167,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 		    				geoIdToStyle.put(MissionDataSource.MISSIONTRACK_TYPE,  MissionMapTrackDefaultStyle.KEY);
 		    				geoIdToStyle.put(MissionDataSource.MISSIONRAWWAYPOINT_TYPE,  MissionMapWaypointRawDefaultStyle.KEY);
 		    				geoIdToStyle.put(MissionDataSource.MISSIONWAYPOINT_TYPE,  MissionMapWaypointDefaultStyle.KEY);
+		    				geoIdToStyle.put(MissionDataSource.OBS_ATTRIBUTE_LINESTRING,  MissionMapLineStringAttributeDefaultStyle.KEY);
+		    				geoIdToStyle.put(MissionDataSource.OBS_ATTRIBUTE_POLYGON,  MissionMapPolygonAttributeDefaultStyle.KEY);
 		    				geoIdToStyle.put(SamplingUnit.GeometryType.TRANSECT.name(),  MissionMapSamplingUnitLinearDefaultStyle.KEY);
 		    				geoIdToStyle.put(SamplingUnit.GeometryType.PLOT.name(),  MissionMapSamplingUnitPointDefaultStyle.KEY);
 
@@ -483,9 +503,24 @@ public class MissionMapPage extends SmartMapEditorPart {
 							}
 						}
 						
-						if (waypoints.isEmpty()) return null;
-						Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
-						return new InfoPoint(vm.worldToPixel(px), waypoints, null);	
+						if (!waypoints.isEmpty()) {
+							Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+							return new InfoPoint(vm.worldToPixel(px), waypoints, null);
+						}
+						
+						//search observation attributes
+					
+						Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, dmAttributeGeoResources.toArray(new IGeoResource[dmAttributeGeoResources.size()]));
+						List<WaypointObservationAttribute> matched = (List<WaypointObservationAttribute>) found[0];
+						Coordinate c = (Coordinate) found[1];
+						
+						if (!matched.isEmpty()) {						
+							Coordinate px = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, vm.getCRS());
+							return new InfoPoint(vm.worldToPixel(px), matched, null);
+						}
+						
+						return null;
+						
 					}catch (Exception ex) {
 						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);					
 					}

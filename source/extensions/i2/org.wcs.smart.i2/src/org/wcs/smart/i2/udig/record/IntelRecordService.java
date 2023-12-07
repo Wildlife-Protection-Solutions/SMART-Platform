@@ -36,6 +36,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
@@ -169,6 +171,9 @@ public class IntelRecordService extends IService {
 					//two resources per entity one for points and one for polygons
 					list.add(new IntelRecordGeoResource(this, LocationLayerType.POINT));
 					list.add(new IntelRecordGeoResource(this, LocationLayerType.POLYGON));
+					
+					list.add(new IntelRecordGeoResource(this, LocationLayerType.OBS_ATTRIBUTE_LINE));
+					list.add(new IntelRecordGeoResource(this, LocationLayerType.OBS_ATTRIBUTE_POLYGON));
 					members = list;
 				}
 			}
@@ -176,6 +181,20 @@ public class IntelRecordService extends IService {
 		return members;
 	}
 
+	public boolean canAddToWorkingSet(IGeoResource resource) {
+		if (resource.canResolve(IntelRecordGeoResource.class)) {
+			try {
+				LocationLayerType type = resource.resolve(IntelRecordGeoResource.class, null).getType();
+				if (type == LocationLayerType.OBS_ATTRIBUTE_LINE || type == LocationLayerType.OBS_ATTRIBUTE_POLYGON) return false;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			
+		}
+		return true;
+	}
 	/**
 	 * @see org.locationtech.udig.catalog.IService#createInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -218,5 +237,16 @@ public class IntelRecordService extends IService {
             }
         }
         return this.ds;
+    }
+	
+	public <T> boolean canResolve(Class<T> adaptee) {
+		if (adaptee != null && (adaptee.isAssignableFrom(IntelRecordService.class)))
+			return true;
+		return super.canResolve(adaptee);
+	}
+	
+    public <T> T resolve( Class<T> adaptee, IProgressMonitor monitor ) throws IOException {
+    	if (adaptee.isAssignableFrom(IntelRecordService.class)) return adaptee.cast(this);
+    	return super.resolve(adaptee, monitor);
     }
 }

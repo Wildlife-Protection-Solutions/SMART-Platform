@@ -66,6 +66,10 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
 		
 	}
 	
+	public LocationLayerType getType() {
+		return this.type;
+	}
+	
 	@Override
 	public boolean canFilter(){
 		return type == LocationLayerType.POINT || type == LocationLayerType.POLYGON;

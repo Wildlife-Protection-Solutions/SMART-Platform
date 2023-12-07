@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2023 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,45 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.engine.visitors;
+package org.wcs.smart.i2.map.style;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
-import org.wcs.smart.er.query.filter.MissionPropertyFilter;
-import org.wcs.smart.filter.IFilter;
-import org.wcs.smart.filter.IFilterVisitor;
-import org.wcs.smart.query.model.filter.AttributeInfo;
+public class ObservationLinestringAttributeDefaultStyle implements IMapLayerDefaultStyle {
 
-/**
- * Finds all mission property filters and combines them
- * into a set of AttributeInfo classes.
- * 
- * @author Emily
- *
- */
-public class MissionPropertyFilterCollectorVisitor implements IFilterVisitor{
-
-	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
+	public static final String KEY = "org.wcs.smart.i2.map.observation.attribute.linestring"; //$NON-NLS-1$
+	
+	public ObservationLinestringAttributeDefaultStyle() {
+	}
 
 	@Override
-	public void visit(IFilter filter) {
-		if (filter instanceof MissionPropertyFilter){
-			MissionPropertyFilter f = (MissionPropertyFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getAttributeKey(), f.getAttributeType(), null);
-			if (!filters.contains(in)){
-				filters.add(in);
-			}
-			
-		}
+	public String getKey() {
+		return KEY;
 	}
-	
-	/**
-	 * 
-	 * @return list of attribute filters found
-	 */
-	public Set<AttributeInfo> getAttributeInfo(){
-		return this.filters;
-	}
-}
 
+	@Override
+	public String getMapName() {
+		return "Profile - Observation Attributes";
+	}
+
+	@Override
+	public String getLayerName() {
+		return "LineString Observation Attributes";
+	}
+
+}

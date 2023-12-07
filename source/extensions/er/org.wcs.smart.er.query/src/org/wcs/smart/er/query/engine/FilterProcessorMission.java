@@ -354,7 +354,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		sql.append(missionTable);
 		sql.append("(mission_uuid char(16) for bit data,"); //$NON-NLS-1$
 		for (AttributeInfo key : keys){
-			sql.append("ma_" + key.getKey() + " " + engine.getDataType(key.getType())); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(key.getColumnName("ma_") + " " + engine.getDataType(key)); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(",");	 //$NON-NLS-1$
 		}
 		sql.deleteCharAt(sql.length()-1);
@@ -367,14 +367,14 @@ public class FilterProcessorMission implements IFilterProcessor {
 		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
 			progress.split(1);
-			progress.subTask(Messages.FilterProcessor_progress5  + key.getKey());
+			progress.subTask(Messages.FilterProcessor_progress5  + key.getAttributeKey());
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(lTempTable); 
 			sql.append("(mission_uuid char(16) for bit data, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -394,10 +394,10 @@ public class FilterProcessorMission implements IFilterProcessor {
 					sql.append("t.hkey "); //$NON-NLS-1$
 				} else {
 					sql.append(prefix(MissionPropertyValue.class)
-							+ "." + key.getColumn()); //$NON-NLS-1$						
+							+ "." + key.getTableColumn()); //$NON-NLS-1$						
 				}
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append("ma_" + key.getKey()); //$NON-NLS-1$
+				sql.append("ma_" + key.getColumnName()); //$NON-NLS-1$
 				sql.append(" "); //$NON-NLS-1$
 
 				sql.append("FROM "); //$NON-NLS-1$
@@ -443,7 +443,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 					sql.append(" l on l.uuid = " + prefix(MissionPropertyValue.class) + ".list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.append("WHERE "); //$NON-NLS-1$
-				String p1 = engine.addParameterValue(key.getKey());
+				String p1 = engine.addParameterValue(key.getAttributeKey());
 				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				QueryPlugIn.logSql(sql.toString());
@@ -467,7 +467,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(missionTable);
 				sql.append(" set ma_"); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(" = "); //$NON-NLS-1$
 				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
 				sql.append(lTempTable);
@@ -482,7 +482,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append("INSERT INTO "); //$NON-NLS-1$
 				sql.append(missionTable);
 				sql.append("(mission_uuid, ma_"); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(")"); //$NON-NLS-1$
 				sql.append("(SELECT  mission_uuid, value FROM "); //$NON-NLS-1$
 				sql.append(lTempTable);
@@ -516,7 +516,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		sql.append(suAttributeTable);
 		sql.append("(sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		for (AttributeInfo key : keys){
-			sql.append("sua_" + key.getKey() + " " + engine.getDataType(key.getType())); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(key.getColumnName("sua_") + " " + engine.getDataType(key)); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(",");	 //$NON-NLS-1$
 		}
 		sql.deleteCharAt(sql.length()-1);
@@ -529,14 +529,14 @@ public class FilterProcessorMission implements IFilterProcessor {
 		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
 			progress.split(1);
-			progress.subTask(Messages.FilterProcessor_progress5  + key.getKey());
+			progress.subTask(Messages.FilterProcessor_progress5  + key.getAttributeKey());
 
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(lTempTable); 
 			sql.append("(sampling_unit_uuid char(16) for bit data, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -552,11 +552,11 @@ public class FilterProcessorMission implements IFilterProcessor {
 				if (key.getType() == AttributeType.LIST) {
 					sql.append("l.keyid "); //$NON-NLS-1$
 				} else {
-					sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
+					sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getTableColumn()); //$NON-NLS-1$						
 				}
 				
 				sql.append(" as col_"); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(" "); //$NON-NLS-1$
 				
 				sql.append("FROM "); //$NON-NLS-1$
@@ -565,7 +565,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append(namePrefix(SamplingUnitAttribute.class));
 				sql.append(" ON " + prefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = ");  //$NON-NLS-1$//$NON-NLS-2$
 				sql.append(prefix(SamplingUnitAttribute.class) + ".uuid AND "); //$NON-NLS-1$
-				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = '" + key.getKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = '" + key.getAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(namePrefix(SamplingUnit.class));
@@ -613,7 +613,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				}
 				
 				sql.append("WHERE "); //$NON-NLS-1$
-				String p1 = engine.addParameterValue(key.getKey());
+				String p1 = engine.addParameterValue(key.getAttributeKey());
 				sql.append(" " + prefix(SamplingUnitAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				QueryPlugIn.logSql(sql.toString());
@@ -637,7 +637,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(suAttributeTable);
 				sql.append(" set sua_"); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(" = "); //$NON-NLS-1$
 				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
 				sql.append(lTempTable);
@@ -652,7 +652,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append("INSERT INTO "); //$NON-NLS-1$
 				sql.append(suAttributeTable);
 				sql.append("(sampling_unit_uuid, sua_"); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(")"); //$NON-NLS-1$
 				sql.append("(SELECT  sampling_unit_uuid, value FROM "); //$NON-NLS-1$
 				sql.append(lTempTable);
