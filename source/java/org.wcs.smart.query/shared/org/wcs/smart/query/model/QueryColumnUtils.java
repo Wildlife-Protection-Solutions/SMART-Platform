@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.opengis.feature.type.AttributeDescriptor;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -99,6 +100,15 @@ public abstract class QueryColumnUtils implements Cloneable{
 			}
 			
 			
+		}else if (column.getType() == QueryColumn.ColumnType.BLOB) {
+			if (x == null) return x;
+			if (descriptor.getType().getBinding().equals(String.class)){
+				if (column instanceof AttributeQueryColumn ac) {
+					if (ac.getAttributeType() == AttributeType.POLYGON) return "POLYGON";
+					if (ac.getAttributeType() == AttributeType.LINE) return "LINESTRING";
+				}
+				return "";
+			}
 		}
 		return x;
 	}
@@ -146,6 +156,8 @@ public abstract class QueryColumnUtils implements Cloneable{
 			}else if (columns.get(i).getType() == ColumnType.DATETIME && !supportsTime) {
 				//datetime is not supported so convert to string
 				sb.append(ColumnType.TIME_STR.geotoolsType);
+			}else if (columns.get(i).getType() == ColumnType.BLOB) {
+				sb.append(ColumnType.STRING.geotoolsType);
 			}else{
 				sb.append(columns.get(i).getType().geotoolsType);
 			}

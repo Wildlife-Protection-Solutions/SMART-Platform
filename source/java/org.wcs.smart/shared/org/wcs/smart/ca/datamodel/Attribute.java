@@ -104,7 +104,9 @@ public class Attribute extends DmObject{
 		MLIST("m"), //$NON-NLS-1$
 		TREE("t"), //$NON-NLS-1$
 		BOOLEAN("b"), //$NON-NLS-1$
-		DATE("d"); //$NON-NLS-1$
+		DATE("d"), //$NON-NLS-1$
+		POLYGON("p"), //$NON-NLS-1$
+		LINE("i"); //$NON-NLS-1$
 		
 		/**
 		 * type key is used in the queries
@@ -119,10 +121,28 @@ public class Attribute extends DmObject{
 			return this == LIST || this == MLIST;
 		}
 		
+		public boolean isGeometry() {
+			return this == POLYGON || this == LINE;
+		}
+		
 		public String getName(Locale locale) {
 			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getAttributeTypeLabel(this, locale);
 		}
 	}
+	
+	/**
+	 * For geometry attributes we also track the source
+	 * of the geometry in the string field
+	 * 
+	 * @author Emily
+	 *
+	 */
+	public enum GeometrySource{
+		MANUAL_DRAW,
+		MANUAL_POINT,
+		GPS,
+		UNKNOWN
+	};
 	
 	/**
 	 * Parses the attribute type key (n, l etc.) into an attribute type.

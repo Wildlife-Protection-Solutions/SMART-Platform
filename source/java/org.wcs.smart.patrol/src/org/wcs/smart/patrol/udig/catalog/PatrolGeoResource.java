@@ -46,6 +46,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.util.SmartUtils;
 
@@ -157,6 +158,9 @@ public class PatrolGeoResource extends IGeoResource {
         	if (dataType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return adaptee.cast(getWaypointPrjStyle());
         	if (dataType.equals(PatrolDataSource.WAYPOINT_TYPE)) return adaptee.cast(getWaypointStyle());
         	if (dataType.equals(PatrolDataSource.TRACK_PART_TYPE)) return adaptee.cast(getTrackStyle());
+        	
+        	if (dataType.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return adaptee.cast(SmartUtils.getDefaultAttributeStyle(Attribute.AttributeType.POLYGON, "attribute_key"));
+        	if (dataType.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return adaptee.cast(SmartUtils.getDefaultAttributeStyle(Attribute.AttributeType.LINE, "attribute_key"));
 
         }
         return super.resolve(adaptee, monitor);

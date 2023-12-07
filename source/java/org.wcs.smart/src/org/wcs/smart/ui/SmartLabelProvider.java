@@ -293,6 +293,8 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			case NUMERIC: return Messages.SmartLabelProvider_NumericAttributeType;
 			case TEXT: return Messages.SmartLabelProvider_TextAttributeType;
 			case TREE: return Messages.SmartLabelProvider_TreeAttributeType;
+			case POLYGON: return "POLYGON";
+			case LINE: return "LINE";
 		}
 		return ""; //$NON-NLS-1$
 	}

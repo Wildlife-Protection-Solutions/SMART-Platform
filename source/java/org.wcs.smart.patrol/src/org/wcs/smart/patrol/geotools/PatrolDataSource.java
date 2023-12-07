@@ -47,7 +47,17 @@ public class PatrolDataSource extends ContentDataStore{
 	public static final String TRACK_PART_TYPE = "Track"; //$NON-NLS-1$
 	public static final String WAYPOINT_PRJ_TYPE = "WaypointRawPoints"; //$NON-NLS-1$
 	
+	public static final String OBS_ATTRIBUTE_LINESTRING = "LineStringAttribute"; //$NON-NLS-1$
+	public static final String OBS_ATTRIBUTE_POLYGON = "PolygonAttribute"; //$NON-NLS-1$
+	
 	private Patrol patrol;
+	
+	private static final String[] ALL_NAMES = {
+			WAYPOINT_TYPE, 
+			TRACK_PART_TYPE, 
+			OBS_ATTRIBUTE_LINESTRING, 
+			OBS_ATTRIBUTE_POLYGON
+	};
 	
 	public PatrolDataSource(Patrol patrol){
 		this.patrol = patrol;
@@ -73,8 +83,9 @@ public class PatrolDataSource extends ContentDataStore{
 		}
 		
 		List<Name> names = new ArrayList<Name>();
-		names.add(new NameImpl(WAYPOINT_TYPE));
-		names.add(new NameImpl(TRACK_PART_TYPE));
+		for (String name : ALL_NAMES) {
+			names.add(new NameImpl(name));
+		}
 		if (dd) {
 			names.add(new NameImpl(WAYPOINT_PRJ_TYPE));
 		}

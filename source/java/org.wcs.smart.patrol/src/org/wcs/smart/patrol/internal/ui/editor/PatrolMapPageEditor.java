@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.Notification;
@@ -45,10 +46,14 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.data.FeatureSource;
+import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -56,10 +61,17 @@ import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
+import org.opengis.feature.Feature;
+import org.opengis.feature.FeatureVisitor;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
@@ -69,6 +81,8 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.patrol.geotools.PatrolFeatureSource;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.map.style.PatrolMapLineStringAttributeDefaultStyle;
+import org.wcs.smart.patrol.map.style.PatrolMapPolygonAttributeDefaultStyle;
 import org.wcs.smart.patrol.map.style.PatrolMapTrackDefaultStyle;
 import org.wcs.smart.patrol.map.style.PatrolMapWaypointDefaultStyle;
 import org.wcs.smart.patrol.map.style.PatrolMapWaypointRawDefaultStyle;
@@ -89,8 +103,11 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.ui.map.tool.IInfoToolShellProvider;
+import org.wcs.smart.ui.map.tool.IInfoToolProvider.InfoPoint;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Page for the editor for displaying a map
@@ -106,7 +123,9 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	
 	private PatrolService patrolService = null;
 	private LoadDefaultLayersJob loadDefaultLayers;
-		
+	
+	private List<IGeoResource> dmAttributeResources = new ArrayList<>();
+	
 	private Job addLayerJob = new Job(Messages.PatrolMapPageEditor_AddLayersJobName) {
 		
 		@SuppressWarnings("unchecked")
@@ -117,9 +136,21 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
 	    		
 	    		List<IGeoResource> sortedLayers = new ArrayList<>();
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) sortedLayers.add(l);
+	    		Map<String, IGeoResource> toAdd = new HashMap<>();
+	    		
+	    		for (IGeoResource l : layers) toAdd.put(  ((PatrolGeoResource)l).getType(), l );
+	    			
+	    		String[] orderedLayers = new String[] {
+	    				PatrolDataSource.OBS_ATTRIBUTE_POLYGON,
+	    				PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,
+	    				PatrolDataSource.TRACK_PART_TYPE, 
+	    				PatrolDataSource.WAYPOINT_PRJ_TYPE, 
+	    				PatrolDataSource.WAYPOINT_TYPE,
+	    		};
+	    		for (String name : orderedLayers) sortedLayers.add(toAdd.get(name));
+	    		
+	    		dmAttributeResources.add(toAdd.get(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING));
+	    		dmAttributeResources.add(toAdd.get(PatrolDataSource.OBS_ATTRIBUTE_POLYGON));
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
@@ -132,6 +163,8 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolMapTrackDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolMapWaypointRawDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolMapWaypointDefaultStyle.KEY);
+	    				geoIdToStyle.put(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,  PatrolMapLineStringAttributeDefaultStyle.KEY);
+	    				geoIdToStyle.put(PatrolDataSource.OBS_ATTRIBUTE_POLYGON,  PatrolMapPolygonAttributeDefaultStyle.KEY);
 	    				
 	    				try(Session session = HibernateManager.openSession()){
 		    				for (Layer l : getLayers()) {
@@ -520,9 +553,23 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 						}
 					}
 					
-					if (waypoints.isEmpty()) return null;
-					Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
-					return new InfoPoint(vm.worldToPixel(px), waypoints, null);	
+					if (!waypoints.isEmpty()) {
+						Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+						return new InfoPoint(vm.worldToPixel(px), waypoints, null);
+					}
+					
+					//search observation attributes
+				
+					Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, dmAttributeResources.toArray(new IGeoResource[dmAttributeResources.size()]));
+					List<WaypointObservationAttribute> matched = (List<WaypointObservationAttribute>) found[0];
+					Coordinate c = (Coordinate) found[1];
+					
+					if (!matched.isEmpty()) {						
+						Coordinate px = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, vm.getCRS());
+						return new InfoPoint(vm.worldToPixel(px), matched, null);
+					}
+					
+					return null;
 				}catch (Exception ex) {
 					SmartPatrolPlugIn.log(ex.getMessage(), ex);					
 				}

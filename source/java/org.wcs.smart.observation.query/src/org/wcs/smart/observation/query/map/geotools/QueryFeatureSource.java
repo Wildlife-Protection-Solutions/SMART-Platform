@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.query.map.geotools;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,13 +35,16 @@ import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 public class QueryFeatureSource  extends ContentFeatureSource {
 
-	private List<QueryColumn> cachedColumns;
+	private List<QueryColumn> cachedColumns = null;
 
 
 	public QueryFeatureSource(ContentEntry entry) {
@@ -53,6 +57,10 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 		try {
 			if (entry.getTypeName().equals(QueryDataSource.WAYPOINT_TYPE)) {
 				return createWaypointSchema();
+			}else if (entry.getTypeName().equals(QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE)) {
+				return createGeometryAttributeSchema();
+			}else if (entry.getTypeName().equals(QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE)) {
+				return createGeometryAttributeSchema();
 			}
 		} catch (SchemaException ex) {
 			throw new IOException(Messages.QueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
@@ -73,15 +81,51 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
-		return new QueryFeatureReader( ((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), cachedColumns);
+		if (entry.getTypeName().equals(QueryDataSource.WAYPOINT_TYPE)) {
+			return new QueryFeatureReader( ((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), getCachedColumns());
+		}
+		if (entry.getTypeName().equals(QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE)) {
+			return new GeometryAttributeQueryFeatureReader(((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), getCachedColumns());
+		}
+		if (entry.getTypeName().equals(QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE)) {
+			return new GeometryAttributeQueryFeatureReader(((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), getCachedColumns());
+		}
+		return null;
 
 	}
 	
+	private synchronized List<QueryColumn> getCachedColumns(){
+		if (this.cachedColumns != null) return this.cachedColumns;
+		this.cachedColumns = ((QueryDataSource)entry.getDataStore()).getQuery().computeQueryColumns(Locale.getDefault(), null, ((QueryDataSource)entry.getDataStore()).getProjectionProvider());
+		return this.cachedColumns;
+	}
+	
+	private SimpleFeatureType createGeometryAttributeSchema() throws SchemaException {
+		ArrayList<QueryColumn> nonAttributeColumns = new ArrayList<>();
+		for (QueryColumn qc : getCachedColumns()) {
+			if (!(qc instanceof AttributeQueryColumn ac)) {
+				nonAttributeColumns.add(qc);
+			}
+		}
+		if (entry.getTypeName().equals(QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE)) {
 
+			SimpleFeatureType type = DataUtilities.createType("smart." + entry.getTypeName(), //$NON-NLS-1$
+					getFeatureSchemaDef(Attribute.AttributeType.POLYGON, nonAttributeColumns, true, false));
+			return type;
+		}
+		if (entry.getTypeName().equals(QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE)) {
+
+			SimpleFeatureType type = DataUtilities.createType("smart." + entry.getTypeName(), //$NON-NLS-1$
+					getFeatureSchemaDef(Attribute.AttributeType.LINE, nonAttributeColumns, true, false));
+			return type;
+		}
+		return null;
+	}
+		
+	
 	private SimpleFeatureType createWaypointSchema() throws SchemaException {
-		cachedColumns = ((QueryDataSource)entry.getDataStore()).getQuery().computeQueryColumns(Locale.getDefault(), null, ((QueryDataSource)entry.getDataStore()).getProjectionProvider());
 		SimpleFeatureType type = DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, //$NON-NLS-1$
-				getFeatureSchemaDef(cachedColumns, true, false));
+				getFeatureSchemaDef(getCachedColumns(), true, false));
 		return type;
 	}
 
@@ -95,6 +139,46 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
+		return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @param columns
+	 * @param supportsTime if the defintion supports the Time datatype or if Time
+	 *                     datatype needs to be converted to string
+	 * @return
+	 */
+	public static String getFeatureSchemaDef(Attribute.AttributeType type,  List<QueryColumn> columns, boolean supportsTime, boolean forShape) {
+		if (!type.isGeometry()) throw new IllegalStateException();
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("the_geom:");
+		if (type == Attribute.AttributeType.POLYGON) {
+			sb.append("MultiPolygon");
+		}else if (type == Attribute.AttributeType.LINE) {
+			sb.append("MultiLineString");
+		}
+		sb.append(":srid=4326,fid:String,"); //$NON-NLS-1$
+		sb.append("Attribute:");
+		sb.append(ColumnType.STRING.geotoolsType);
+		sb.append(",");
+		sb.append("attribute_key:");
+		sb.append(ColumnType.STRING.geotoolsType);
+		sb.append(",");
+		sb.append("Geometry Source:");
+		sb.append(ColumnType.STRING.geotoolsType);
+		sb.append(",");
+		if (type == Attribute.AttributeType.POLYGON) {
+			sb.append("Geometry Area_km2:");
+			sb.append(ColumnType.NUMBER.geotoolsType);
+			sb.append(",");
+		}
+		sb.append("Geometry Perimeter_km:");
+		sb.append(ColumnType.NUMBER.geotoolsType);
+		
+		
 		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		return sb.toString();
 	}

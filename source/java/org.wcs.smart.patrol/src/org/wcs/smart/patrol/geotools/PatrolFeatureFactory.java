@@ -30,6 +30,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
@@ -39,6 +41,14 @@ import org.wcs.smart.util.UuidUtils;
 public class PatrolFeatureFactory {
 	
 	private static final DateTimeFormatter TRACK_DT_FORMAT = DateTimeFormatter.ofPattern("MMMddyyyy");  //$NON-NLS-1$
+	
+	public static SimpleFeatureType createObservationPolygonSchema() throws SchemaException{
+		return ObservationAttributeFeatureFactory.createObservationPolygonSchema(PatrolDataSource.OBS_ATTRIBUTE_POLYGON);
+	}
+	
+	public static SimpleFeatureType createObservationLineStringSchema() throws SchemaException{
+		return ObservationAttributeFeatureFactory.createObservationLineStringSchema(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING);		
+	}
 	
 	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
 		StringBuilder sb = new StringBuilder();
@@ -85,6 +95,11 @@ public class PatrolFeatureFactory {
 		return type;
 	}
 
+	public static SimpleFeature getObservationAttributeAsGeometry(SimpleFeatureType ftype, WaypointObservationAttribute value) {
+		boolean hasArea = ftype.getName().getLocalPart().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON);
+		return ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(ftype, hasArea, value);
+	}
+	
 	public static SimpleFeature getWaypointAsFeature(SimpleFeatureType ftype, PatrolWaypoint waypoint){
 		//
 		Object data[] = new Object[8];

@@ -514,20 +514,16 @@ public class DataModel extends SimpleDataModel {
 	 * @return the image associated with a given attribute type
 	 */
 	public static Image getAttributeImage(AttributeType type){
-		if (type == Attribute.AttributeType.BOOLEAN){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
-		}else if (type == Attribute.AttributeType.TEXT){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
-		}else if (type == Attribute.AttributeType.LIST){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
-		}else if (type == Attribute.AttributeType.MLIST){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_MULTI_LIST_ICON);
-		}else if (type == Attribute.AttributeType.NUMERIC){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
-		}else if (type == Attribute.AttributeType.TREE){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
-		}else if (type == Attribute.AttributeType.DATE){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+		switch(type) {
+		case BOOLEAN:return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
+		case DATE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+		case LINE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LINE_ICON);
+		case LIST: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
+		case MLIST: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_MULTI_LIST_ICON);
+		case NUMERIC: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
+		case POLYGON: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_POLYGON_ICON);
+		case TEXT: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
+		case TREE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
 		}
 		return null;
 	}

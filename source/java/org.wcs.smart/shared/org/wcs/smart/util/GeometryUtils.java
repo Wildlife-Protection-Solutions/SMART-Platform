@@ -44,6 +44,11 @@ package org.wcs.smart.util;
 
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.MessageFormat;
+import java.text.NumberFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sql.rowset.serial.SerialBlob;
 
@@ -55,6 +60,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
@@ -71,7 +77,11 @@ import org.locationtech.jts.linearref.LinearLocation;
 import org.locationtech.jts.linearref.LocationIndexedLine;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.map.GeometryFactoryProvider;
+
+import jakarta.persistence.Transient;
 
 /**
  * A collection of geometry functions for
@@ -485,6 +495,16 @@ public class GeometryUtils {
 		
 	}
 	
+	public static Polygon envelopeToGeometry(final Envelope env) {
+		
+		Coordinate c1 = new Coordinate(env.getMinX(), env.getMinY());
+		Coordinate c2 = new Coordinate(env.getMinX(), env.getMaxY());
+		Coordinate c3 = new Coordinate(env.getMaxX(), env.getMinY());
+		Coordinate c4 = new Coordinate(env.getMinX(), env.getMaxY());
+		
+		return GeometryFactoryProvider.getFactory().createPolygon(new Coordinate[] {c1, c2, c3, c4, c1});
+	}
+	
 	/**
 	 * Computes the distance in meter of the given
 	 * linestring.
@@ -524,6 +544,35 @@ public class GeometryUtils {
 			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
 			
 			distance +=cal.getOrthodromicDistance();
+		}
+		return distance;
+	}
+
+	/**
+	 * Computes the perimeter in  meters of the given polygon
+	 * in 4326 projections.
+	 * @param ls
+	 * @return
+	 * @throws TransformException
+	 */
+	public static double perimeterInMeters(Polygon p) {
+		GeodeticCalculator cal = new GeodeticCalculator();
+		double distance = 0;
+		LinearRing outer = p.getExteriorRing();
+		Coordinate[] c = outer.getCoordinates();
+		for (int i = 1; i < c.length; i ++){
+			cal.setStartingGeographicPoint(c[i-1].x, c[i-1].y);
+			cal.setDestinationGeographicPoint(c[i].x, c[i].y);			
+			distance +=cal.getOrthodromicDistance();
+		}
+		for (int k = 0; k < p.getNumInteriorRing(); k++) {
+			LinearRing inner = p.getInteriorRingN(k);
+			c = inner.getCoordinates();
+			for (int i = 1; i < c.length; i ++){
+				cal.setStartingGeographicPoint(c[i-1].x, c[i-1].y);
+				cal.setDestinationGeographicPoint(c[i].x, c[i].y);			
+				distance +=cal.getOrthodromicDistance();
+			}
 		}
 		return distance;
 	}
@@ -653,4 +702,56 @@ public class GeometryUtils {
 		return new Float[] {(float)d, (float)brng};
 	}
 
+	
+	public static String getAttributeGeometryLabel(GeometryAttributeValue value) {
+		if (value == null) return "";
+		
+//		if (g instanceof LineString) g = GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[] {(LineString)g});
+//		if (g instanceof Polygon) g = GeometryFactoryProvider.getFactory().createMultiPolygon(new Polygon[] {(Polygon)g});
+		
+		if (value.isPolygon()) {
+			return MessageFormat.format("POLYGON Area: {0,number,#.##} km\u00B2, Perimeter: {1,number,#.##} km, Source: {2} ", value.getArea(), value.getPerimeter(), value.getSource().name());
+		}
+		if (value.isLineString()) {
+			return MessageFormat.format("LINESTRING Length: {0,number,#.##} km, Source: {1}", value.getPerimeter(), value.getSource().name());
+		}
+		return "";
+	}	
+
+	public static double getAreaInKm(MultiPolygon mp) {
+		if (mp == null) return 0;
+		try {
+			Coordinate c = mp.getCentroid().getCoordinate();
+			CoordinateReferenceSystem targetCRS = CRS.decode("AUTO2:42001," + c.x + "," + c.y); //$NON-NLS-1$ //$NON-NLS-2$
+			Geometry t = JTS.transform(mp, ReprojectUtils.findMathTransform(targetCRS));
+			return t.getArea() / (1_000_000.0);
+		}catch (Exception ex) {
+			Logger.getLogger(GeometryUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+			return Double.NaN;
+		}
+	}
+
+	public static double getGeometryPerimeterInKm(Geometry g) {
+		if (g == null) return 0.0;
+		if (g instanceof LineString) return distanceInMeters( (LineString)g) / 1000.0;
+		if (g instanceof MultiLineString) {
+			MultiLineString mp = (MultiLineString)g;
+			double length = 0;
+			for (int i = 0; i < mp.getNumGeometries(); i++) {
+				length += GeometryUtils.distanceInMeters((LineString)mp.getGeometryN(i));
+			}
+			return length / 1000.0;
+		}
+		if (g instanceof Polygon) g = GeometryFactoryProvider.getFactory().createMultiPolygon(new Polygon[] {(Polygon)g});
+
+		if (g instanceof MultiPolygon) {
+			MultiPolygon mp = (MultiPolygon)g;
+			double outside = 0.0;
+			for (int i = 0; i < mp.getNumGeometries(); i ++) {
+				outside += GeometryUtils.perimeterInMeters((Polygon)mp.getGeometryN(i));
+			}
+			return outside / 1000.0;
+		}
+		return 0;
+	}
 }

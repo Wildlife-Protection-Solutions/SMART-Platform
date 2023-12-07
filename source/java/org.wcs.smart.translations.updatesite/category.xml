@@ -6,9 +6,6 @@
    <feature id="org.wcs.smart.independentincident.feature.nl">
       <category name="independentincident"/>
    </feature>
-   <feature id="org.wcs.smart.entity.feature.nl">
-      <category name="entity"/>
-   </feature>
    <feature id="org.wcs.smart.er.feature.nl">
       <category name="ecologicalrecords"/>
    </feature>
@@ -74,11 +71,6 @@
    <category-def name="independentincident" label="SMART Independent Incident Plug-in">
       <description>
          The SMART Independent Incident plug-in provides the ability to record observations (using the data model) that are not associated with a patrol (or any other data collection object within SMART).
-      </description>
-   </category-def>
-   <category-def name="entity" label="SMART Entity Tracking Plug-in">
-      <description>
-         The SMART Entity Tracking plug-in provides the ability to record and track specific entities that move (such as individual animals) or fixed entities (such as a gate or bridge), record their attributes, and record observations associated with the entities.
       </description>
    </category-def>
    <category-def name="ecologicalrecords" label="SMART Ecological Records Plug-in">

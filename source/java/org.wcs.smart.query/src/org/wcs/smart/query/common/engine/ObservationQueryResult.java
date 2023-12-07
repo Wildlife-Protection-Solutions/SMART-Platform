@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.geotools.geometry.jts.WKBReader;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -372,10 +374,15 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		if (obs.isEmpty()) return;
 		
 		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, "); //$NON-NLS-1$
+		attrSql.append("SELECT r.ob_uuid, "); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(Attribute.class) + ".keyid,"); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(Attribute.class) + ".att_type,"); //$NON-NLS-1$
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".number_value,"); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".number_value_2,"); //$NON-NLS-1$
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".string_value,"); //$NON-NLS-1$
-		attrSql.append(" ll.value as label_value, r.ca_uuid "); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".geom,"); //$NON-NLS-1$
+		attrSql.append(" ll.value as label_value, "); //$NON-NLS-1$
+		attrSql.append(" r.ca_uuid "); //$NON-NLS-1$
 		attrSql.append(" FROM "); //$NON-NLS-1$
 		attrSql.append(queryTempTable);
 		attrSql.append(" r join "); //$NON-NLS-1$
@@ -394,15 +401,28 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".tree_node_uuid end "); //$NON-NLS-1$
 		attrSql.append(" WHERE ("); //$NON-NLS-1$
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".number_value is not null or "); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".number_value_2 is not null or "); //$NON-NLS-1$
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".string_value is not null or "); //$NON-NLS-1$
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".list_element_uuid is not null or "); //$NON-NLS-1$
 		attrSql.append(engine.tablePrefix(WaypointObservationAttribute.class) + ".tree_node_uuid is not null ) "); //$NON-NLS-1$
 		attrSql.append(" AND r.ob_uuid IN ("); //$NON-NLS-1$
 		attrSql.append(obs);
-		attrSql.append(") UNION "); //$NON-NLS-1$
+		attrSql.append(") "); //$NON-NLS-1$
 
-		attrSql.append("SELECT r.ob_uuid, a.keyid, cast(null as double precision), "); //$NON-NLS-1$
-		attrSql.append("cast(null as varchar(500)), cast(smart.concatagg(ll.value) as varchar(32000)), r.ca_uuid "); //$NON-NLS-1$
+		String query1 = attrSql.toString();
+		
+		attrSql = new StringBuilder();
+		attrSql.append("SELECT ob_uuid,"); //$NON-NLS-1$
+		attrSql.append("keyid, att_type,"); //$NON-NLS-1$
+		attrSql.append(" cast(null as double precision), cast(null as double precision), cast(null as varchar(1)),"); //$NON-NLS-1$
+		attrSql.append(" cast(null as blob),listvalues, ca_uuid"); //$NON-NLS-1$
+		attrSql.append(" FROM ("); //$NON-NLS-1$
+		
+		attrSql.append("SELECT r.ob_uuid,"); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(Attribute.class) + ".keyid,"); //$NON-NLS-1$
+		attrSql.append(engine.tablePrefix(Attribute.class) + ".att_type,"); //$NON-NLS-1$		
+		attrSql.append("cast(smart.concatagg(ll.value) as varchar(32000)) as listvalues, "); //$NON-NLS-1$
+		attrSql.append("r.ca_uuid "); //$NON-NLS-1$
 		attrSql.append(" FROM "); //$NON-NLS-1$
 		attrSql.append(queryTempTable);
 		attrSql.append(" r join "); //$NON-NLS-1$
@@ -422,35 +442,70 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		attrSql.append(" WHERE r.ob_uuid in ("); //$NON-NLS-1$
 		attrSql.append(obs);
 		attrSql.append(") "); //$NON-NLS-1$
-		attrSql.append(" GROUP BY r.ob_uuid, a.keyid, r.ca_uuid"); //$NON-NLS-1$
-		
-		QueryPlugIn.logSql(attrSql.toString());
-		
+		attrSql.append(" GROUP BY r.ob_uuid, a.keyid, a.att_type, r.ca_uuid"); //$NON-NLS-1$
+		attrSql.append(") as foo");
+
+		String query2 = attrSql.toString();
+
 		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
-		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-			while (rs.next()) {
-				UUID obUuid = UuidUtils.byteToUUID(rs.getBytes(1));
-				
-				if (obUuid == null)
-					continue;
-				HashMap<String, Object> attributes = attrMap.get(obUuid);
-				if (attributes == null) {
-					attributes = new HashMap<String, Object>();
-					attrMap.put(obUuid, attributes);
-				}
-				String key = rs.getString(2);
-				if (key != null) {
-					Object value = null;
+		
+		WKBReader reader = new WKBReader();
+		for (String query : new String[]{query1, query2}) {
+			QueryPlugIn.logSql(query);
+		
+			
+			try(ResultSet rs = c.createStatement().executeQuery(query)) {
+				while (rs.next()) {
+					UUID obUuid = UuidUtils.byteToUUID(rs.getBytes(1));
 					
-					if (rs.getObject(3) != null) value = rs.getDouble(3); //double
-					if (rs.getObject(4) != null) value = rs.getString(4); //string
-					if (rs.getObject(5) != null) value = rs.getString(5); //list/tree
+					String keyid = rs.getString(2);
+					String atttype = rs.getString(3);
+					Double number1 = rs.getObject(4) == null ? null : rs.getDouble(4);
+					Double number2 = rs.getObject(5) == null ? null : rs.getDouble(5);
+					String string = rs.getObject(6) == null ? null : rs.getString(6);
+					byte[] geom = rs.getBytes(7);
+					String listValues = rs.getObject(8) == null ? null : rs.getString(8);
+					//UUID caUuid = UuidUtils.byteToUUID(rs.getBytes(9));
+									
+					if (obUuid == null || keyid == null) continue;
+					
+					HashMap<String, Object> attributes = attrMap.get(obUuid);
+					if (attributes == null) {
+						attributes = new HashMap<String, Object>();
+						attrMap.put(obUuid, attributes);
+					}
+					
+					if (atttype.equals(Attribute.AttributeType.POLYGON.name())) {
+						attributes.put(AttributeQueryColumn.GeometryProperty.PERIMETER.generateKey(keyid), number1);
+						attributes.put(AttributeQueryColumn.GeometryProperty.AREA.generateKey(keyid), number2);
+						attributes.put(AttributeQueryColumn.GeometryProperty.SOURCE.generateKey(keyid), string);
+						try {
+							attributes.put(keyid, reader.read(geom));
+						}catch (Exception ex) {
+							//TODO: 
+							ex.printStackTrace();
+						}
 						
-					attributes.put(key, value);
+					}else if (atttype.equals(Attribute.AttributeType.LINE.name())) {
+						attributes.put(AttributeQueryColumn.GeometryProperty.PERIMETER.generateKey(keyid), number1);
+						attributes.put(AttributeQueryColumn.GeometryProperty.SOURCE.generateKey(keyid), string);				
+						try {
+							attributes.put(keyid, reader.read(geom));
+						}catch (Exception ex) {
+							//TODO: 
+							ex.printStackTrace();
+						}
+						
+					}else {
+						if (number1 != null) attributes.put(keyid, number1);
+						if (number2 != null) attributes.put(keyid, number2);
+						if (string != null) attributes.put(keyid, string);
+						if (listValues != null) attributes.put(keyid, listValues);
+					}
+					
 				}
 			}
 		}
-		
 		for (IObservationQueryResultItem it : result){
 			if (it.getObservationUuid() == null) continue;
 			HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());

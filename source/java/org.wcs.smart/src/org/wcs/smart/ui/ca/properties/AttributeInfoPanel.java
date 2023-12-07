@@ -126,6 +126,7 @@ public class AttributeInfoPanel extends Composite {
 	private Composite listComposite;
 	private Composite textComposite;
 	private Composite numericComposite;
+	private Composite geometryComposite;
 
 	private ComboViewer cmbType;
 	private Button chRequired;
@@ -758,6 +759,11 @@ public class AttributeInfoPanel extends Composite {
 		dateComposite.setLayout(new GridLayout(1, false));
 		dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
+		/* Geometry Options */
+		geometryComposite = new Composite(optionComposite, SWT.NONE);
+		geometryComposite.setLayout(new GridLayout(1, false));
+		geometryComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		
 		selectOption();
 		if (canEdit){
 			validate();
@@ -931,6 +937,11 @@ public class AttributeInfoPanel extends Composite {
 					cdAttTree.hide();
 				}
 			}
+		}else if (type.isGeometry()) {
+			cdMaxValue.hide();
+			cdMaxValue.hide();
+			cdAttList.hide();
+			if (cdAttTree != null) cdAttTree.hide();
 		}
 		
 		for (IValidationListener listener: listeners){
@@ -971,6 +982,8 @@ public class AttributeInfoPanel extends Composite {
 			((StackLayout)optionComposite.getLayout()).topControl = treeComposite;
 		}else if (type.equals(AttributeType.DATE)){
 			((StackLayout)optionComposite.getLayout()).topControl = dateComposite;
+		}else if (type.isGeometry()){
+			((StackLayout)optionComposite.getLayout()).topControl = geometryComposite;
 		}
 		optionComposite.layout();
 	}

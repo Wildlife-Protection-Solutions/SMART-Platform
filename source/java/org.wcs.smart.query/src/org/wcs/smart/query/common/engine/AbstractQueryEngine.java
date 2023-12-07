@@ -43,10 +43,10 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -60,6 +60,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -259,8 +260,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return the database datatype for the observation
 	 * temporary table
 	 */
-	public String getDataType(AttributeType type) {
-		switch (type) {
+	public String getDataType(AttributeInfo type) {
+		switch (type.getType()) {
 		case LIST:
 			return "varchar(128)"; //keyid //$NON-NLS-1$
 		case TREE:
@@ -274,6 +275,11 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
 		case MLIST: throw new UnsupportedOperationException("Multi-List attribute type not support for column type"); //$NON-NLS-1$
+		case LINE:
+		case POLYGON:
+			if (type.getGeometryProperty() == GeometryProperty.AREA || type.getGeometryProperty() == GeometryProperty.PERIMETER)
+				return "double"; //$NON-NLS-1$
+			throw new UnsupportedOperationException("Geometry property not support in queries"); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 

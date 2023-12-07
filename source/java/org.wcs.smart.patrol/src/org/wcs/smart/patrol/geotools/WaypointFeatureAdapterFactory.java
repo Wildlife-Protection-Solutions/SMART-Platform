@@ -59,6 +59,22 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 					wp.setUuid(wpuuid);
 					return (T)wp;
 				}
+				if (sf.getFeatureType().getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) || 
+						sf.getFeatureType().getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON) ){
+					
+					String uuid = sf.getAttribute("wp_uuid").toString();
+					UUID wpuuid;
+					try {
+						wpuuid = UuidUtils.stringToUuid(uuid);
+					} catch (Exception e) {
+						SmartPatrolPlugIn
+							.log("Could not determine waypoint for uuid " + uuid, e); //$NON-NLS-1$
+						return null;
+					}
+					Waypoint wp = new Waypoint();
+					wp.setUuid(wpuuid);
+					return (T)wp;
+				}
 			}else if (adaptableObject instanceof PatrolWaypoint){
 				return (T)((PatrolWaypoint)adaptableObject).getWaypoint();
 				

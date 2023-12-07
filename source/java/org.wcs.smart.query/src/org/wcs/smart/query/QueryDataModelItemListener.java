@@ -217,7 +217,7 @@ public enum QueryDataModelItemListener implements IDataModelItemListener {
 						}
 						afilter.updateValues(afilter.getAttributeKey(), 
 								Attribute.AttributeType.MLIST, 
-								Operator.OR, value, null);
+								Operator.OR, value, null, null);
 					}
 				}
 			}

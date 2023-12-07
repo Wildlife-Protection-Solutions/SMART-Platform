@@ -14,10 +14,12 @@ import org.apache.commons.collections.comparators.NullComparator;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -698,7 +700,15 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 						}
 					}
 				}
-				break;	
+				break;
+			case LINE:
+			case POLYGON:
+				if (newValue instanceof Geometry geom) {
+					//setting source to null will ensure the source is not changed
+					GeometryAttributeValue geomValue = new GeometryAttributeValue(geom, null);
+					toUpdate.setGeometry(geomValue);
+					updated = true;
+				}
 		}
 		return updated;
 	}

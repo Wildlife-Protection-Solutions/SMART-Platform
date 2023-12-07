@@ -1590,6 +1590,16 @@
             toolCursorId="org.wcs.smart.cross"
             tooltip="%DrawAreaTooltip">
       </modalTool>
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.DrawEditPolygonTool"
+            icon="images/icons/obj16/polygon_add.png"
+            id="org.wcs.smart.polygon.drawedit"
+            name="Edit Polygon"
+            onToolbar="false"
+            toolCursorId="org.wcs.smart.cross"
+            tooltip="Draw/Edit polygon">
+      </modalTool>
    </extension>
    <extension
          point="org.wcs.smart.caExport">

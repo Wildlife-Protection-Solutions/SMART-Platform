@@ -50,6 +50,7 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 
 	private ComboBoxViewerCellEditor listCellEditor;
 	private TreeViewerCellEditor treeCellEditor;
+	private GeometryAttributeDialogCellEditor geometryCellEditor;
 	
 	private CheckBoxDropDownCellEditor multiListCellEditor;
 	
@@ -105,6 +106,10 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 			return getTextCellEditor();
 		case TREE:
 			return getTreeCellEditor();
+		case LINE:
+		case POLYGON:
+			return getGeometryCellEditor();
+				
 		}
 		return null;
 	}
@@ -141,5 +146,12 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 			treeCellEditor = CellEditorFactory.newAttributeTreeCellEditor((Composite) getViewer().getControl(), ((AttributeQueryColumn)queryColumn).getAttributeId());
 		}
 		return treeCellEditor;
+	}
+	
+	private CellEditor getGeometryCellEditor() {
+		if (geometryCellEditor == null) {
+			geometryCellEditor = CellEditorFactory.newGeometryCellEditor((Composite) getViewer().getControl(), ((AttributeQueryColumn)queryColumn).getAttributeType());
+		}
+		return geometryCellEditor;
 	}
 }

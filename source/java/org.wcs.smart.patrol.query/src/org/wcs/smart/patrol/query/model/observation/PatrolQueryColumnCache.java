@@ -30,6 +30,7 @@ import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
+import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -172,28 +173,7 @@ public class PatrolQueryColumnCache {
 				}
 				
 				// add data model category columns
-				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
-				for (int i = 0; i < numCategory; i++) {
-					QueryColumn toAdd = new CategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader1, i), i);
-					toAdd.setEdit(true);
-					cols.add(toAdd);
-				}
-					
-				//sort attributes alphabetically
-				List<Attribute> atts = new ArrayList<Attribute>();
-				atts.addAll( dataModel.getAttributes() );
-				Collections.sort(atts, new Comparator<Attribute>(){
-					@Override
-					public int compare(Attribute o1, Attribute o2) {
-						return Collator.getInstance().compare(o1.getName(),o2.getName());
-					}});
-					
-				for (Attribute att : atts) {
-					String name = att.getName();
-					QueryColumn toAdd = new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex());
-					toAdd.setEdit(true);
-					cols.add(toAdd);
-				}
+				cols.addAll(DataModelQueryColumns.generateDataModelQueryColumns(dataModel, true));
 				
 				//observation group 
 				QueryColumn toAdd = new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault());

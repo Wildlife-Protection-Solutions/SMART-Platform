@@ -42,10 +42,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
  */
 public class ObservationDialogCellEditor extends CellEditor {
 
-	/**
-	 * The custom combo box control.
-	 */
-	protected EditObservationDialog observationDialog;
 
 	protected Object inputValue;
 

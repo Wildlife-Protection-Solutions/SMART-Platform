@@ -25,6 +25,9 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.Collection;
 
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.opengis.feature.GeometryAttribute;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.internal.Messages;
@@ -62,6 +65,8 @@ public class AttributeValidator {
 			return validateTree(attribute, value);
 		}else if (attribute.getType() == AttributeType.DATE){
 			return validateDate(attribute, value);
+		}else if (attribute.getType().isGeometry()) {
+			return validateGeometry(attribute, value);
 		}
 		throw new IllegalStateException("Attribute type not supported."); //$NON-NLS-1$
 	}
@@ -69,6 +74,26 @@ public class AttributeValidator {
 	public static String validateBooean(Attribute attribute, Object value){
 		if (attribute.getIsRequired() && value == null){
 			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		return null;
+	}
+	
+	public static String validateGeometry(Attribute attribute, Object value){
+		if (attribute.getIsRequired() && value == null){
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		if (value == null) return null;
+		
+		if (!attribute.getType().isGeometry()) return null;
+		
+		if (!(value instanceof GeometryAttributeValue)) {
+			return MessageFormat.format("Attribute value for {0} must be a Geometry.", new Object[]{ attribute.getName() });
+		}
+		if (attribute.getType() == AttributeType.POLYGON && !((GeometryAttributeValue)value).isPolygon()) {
+			return MessageFormat.format("Geometry for attribute {0} must be a MultiPolygon.", new Object[]{ attribute.getName() });
+		}
+		if (attribute.getType() == AttributeType.LINE && value != null && !((GeometryAttributeValue)value).isLineString()) {
+			return MessageFormat.format("Geometry for attribute {0} must be a MultiLineString.", new Object[]{ attribute.getName() });
 		}
 		return null;
 	}

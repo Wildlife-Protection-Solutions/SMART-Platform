@@ -47,6 +47,9 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 	public boolean getDefaultVisibility() {
 		if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) return true;
 		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return true;
+		
+		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return true;
+		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return true;
 		return false;
 	}
 	
@@ -54,6 +57,9 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 		if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) return Messages.PatrolFeatureSource_TrackLayerName;
 		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return Messages.PatrolFeatureSource_WaypointLayerName;
 		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return Messages.PatrolFeatureSource_ProjectedWaypointLayerName;
+		
+		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return "LineString Attributes";
+		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return "Polygon Attributes";
 		return entry.getTypeName();
 	}
 	
@@ -67,6 +73,10 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 				return PatrolFeatureFactory.createTrackPartSchema();
 			} else if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
 				return PatrolFeatureFactory.createWaypointPrjSchema();
+			} else if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) {
+				return PatrolFeatureFactory.createObservationLineStringSchema();
+			} else if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+				return PatrolFeatureFactory.createObservationPolygonSchema();
 			}
 		}catch(SchemaException ex){
 			throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);

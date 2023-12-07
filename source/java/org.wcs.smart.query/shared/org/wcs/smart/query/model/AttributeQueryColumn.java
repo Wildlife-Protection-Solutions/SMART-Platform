@@ -42,6 +42,18 @@ public class AttributeQueryColumn extends QueryColumn {
 	
 	public static final String KEY_PREFIX = "attribute:"; //$NON-NLS-1$
 
+	public enum GeometryProperty{
+		SOURCE, AREA, PERIMETER;
+		
+		public String getKey() {
+			return name().toLowerCase();
+		}
+		
+		public String generateKey(String attributeId) {
+			return attributeId + "." + getKey(); //$NON-NLS-1$
+		}
+	}
+	
 	protected String attributeKey = null;
 	protected AttributeType attributeType;
 	
@@ -66,6 +78,30 @@ public class AttributeQueryColumn extends QueryColumn {
 			ctype = ColumnType.BOOLEAN;
 		}else if (type == AttributeType.DATE) {
 			ctype = ColumnType.DATE;
+		}else if (type.isGeometry()) {
+			ctype = ColumnType.BLOB;
+		}else {
+			ctype = ColumnType.STRING;
+		}
+		super.setType(ctype);
+	}
+	
+	public AttributeQueryColumn(String name, String attributeId, GeometryProperty prop, AttributeType type){
+		super(name, KEY_PREFIX + attributeId + "." + prop.getKey(), null);
+		if (prop == GeometryProperty.AREA || prop == GeometryProperty.PERIMETER) {
+			this.formatString = "2";
+		}
+		this.attributeKey = attributeId;
+		this.attributeType = type;
+		ColumnType ctype = ColumnType.STRING;
+		if (type == AttributeType.NUMERIC ){
+			ctype = ColumnType.NUMBER;
+		}else if (type == AttributeType.BOOLEAN){
+			ctype = ColumnType.BOOLEAN;
+		}else if (type == AttributeType.DATE) {
+			ctype = ColumnType.DATE;
+		}else if (type.isGeometry()) {
+			ctype = ColumnType.BLOB;
 		}else {
 			ctype = ColumnType.STRING;
 		}
@@ -87,11 +123,19 @@ public class AttributeQueryColumn extends QueryColumn {
 
 	@Override
 	public String getValueAsString(Object value, boolean formatted){
+
 		if (value == null) return ""; //$NON-NLS-1$
 		
 		if (formatted && this.attributeType == Attribute.AttributeType.NUMERIC) {
 			return Attribute.formatNumberAsString(value, formatString);
 		}
+		if (getAttributeType() == Attribute.AttributeType.POLYGON) {
+			return "POLYGON";
+		}
+		if (getAttributeType() == Attribute.AttributeType.LINE) {
+			return "LINE";
+		}
+		
 		return super.getValueAsString(value, formatted);
 	}
 	

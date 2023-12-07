@@ -67,10 +67,11 @@
 		<module>./org.wcs.smart.patrol.query.report/pom-shared.xml</module>
 		<module>./org.wcs.smart.reporttable/pom-shared.xml</module>
 		
-		
+		<!-- removed in smart8
 		<module>../extensions/entity/org.wcs.smart.entity/pom-shared.xml</module>
 		<module>../extensions/entity/org.wcs.smart.entity.query/pom-shared.xml</module>
 		<module>../extensions/entity/org.wcs.smart.entity.query.report/pom-shared.xml</module>
+		-->
 		<module>../extensions/er/org.wcs.smart.er/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query.report/pom-shared.xml</module>

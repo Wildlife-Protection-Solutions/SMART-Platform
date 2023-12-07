@@ -156,9 +156,14 @@ public class QueryService extends IService implements IQueryService {
 			synchronized (this) {
 				if (members == null){
 					ArrayList<QueryGeoResource> temp = new ArrayList<>();
-					if (query.getTypeKey().equals(ObsObservationQuery.KEY) || 
-							query.getTypeKey().equals(ObservationWaypointQuery.KEY) ){
+					if (query.getTypeKey().equals(ObsObservationQuery.KEY)) {
 						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
+						temp.add(new QueryGeoResource(this, QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE));
+						temp.add(new QueryGeoResource(this, QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE));
+						
+					}else if (query.getTypeKey().equals(ObservationWaypointQuery.KEY) ){
+						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
+					
 					}else if (query.getTypeKey().equals(ObservationGriddedQuery.KEY) ){
 						temp.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}

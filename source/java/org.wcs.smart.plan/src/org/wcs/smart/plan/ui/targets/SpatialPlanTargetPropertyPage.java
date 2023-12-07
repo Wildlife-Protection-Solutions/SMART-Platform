@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.plan.ui.targets;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +42,16 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.Graphic;
+import org.geotools.styling.Mark;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
 import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
+import org.opengis.filter.FilterFactory;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
@@ -166,7 +176,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		targetDesc.addListener(SWT.Modify, changeListener);
 		
         //location selection
-        locationSelect = new LocationSelectComposite<SpatialPlanTargetPoint>(main, SWT.NONE, getStyleSld()) {
+        locationSelect = new LocationSelectComposite<SpatialPlanTargetPoint>(main, SWT.NONE, getLayerStyle()) {
 			@Override
 			protected SpatialPlanTargetPoint createNewPoint() {
 				return new SpatialPlanTargetPoint();
@@ -315,65 +325,32 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		}
 	}
 
-	private String getStyleSld(){
-		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
-				"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
-				"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
-				"	&lt;sld:UserStyle xmlns=\"http://www.opengis.net/sld\""+ //$NON-NLS-1$
-				"		xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\""+ //$NON-NLS-1$
-				"		xmlns:gml=\"http://www.opengis.net/gml\"&gt;"+ //$NON-NLS-1$
-				"		&lt;sld:Name&gt;Default Styler&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-				"		&lt;sld:Title /&gt;"+ //$NON-NLS-1$
-				"		&lt;sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-				"			&lt;sld:Name&gt;simple&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-				"			&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;"+ //$NON-NLS-1$
-				"			&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-				"			&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-
-				//rule for not selected points (same as default)
-				"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
-				"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
-				"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-				"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
-				"                            &lt;ogc:Literal&gt;false&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
-				"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-				"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
-				"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-				"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
-				"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-				"							&lt;sld:WellKnownName&gt;circle&lt;/sld:WellKnownName&gt;" + //$NON-NLS-1$
-				"							&lt;sld:Fill&gt;" + //$NON-NLS-1$
-		    	"							&lt;sld:CssParameter name=\"fill\"&gt;#004080&lt;/sld:CssParameter&gt;" + //$NON-NLS-1$
-		    	"							&lt;/sld:Fill&gt;" + //$NON-NLS-1$
-				"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-				"						&lt;sld:Size&gt;10.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
-				"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
-				"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-				"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
-					
-				//rule for selected points
-				"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
-				"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
-				"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-				"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
-				"                            &lt;ogc:Literal&gt;true&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
-				"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-				"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
-				"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-				"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
-				"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-				"							&lt;sld:WellKnownName&gt;circle&lt;/sld:WellKnownName&gt;" + //$NON-NLS-1$
-				"							&lt;sld:Fill&gt;" + //$NON-NLS-1$
-		    	"							&lt;sld:CssParameter name=\"fill\"&gt;#FFFF00&lt;/sld:CssParameter&gt;" + //$NON-NLS-1$
-		    	"							&lt;/sld:Fill&gt;" + //$NON-NLS-1$
-				"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-				"						&lt;sld:Size&gt;10.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
-				"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
-				"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-				"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$	
-				"		&lt;/sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-				"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
-				"</styleEntry>"; //$NON-NLS-1$
+	private Style getLayerStyle() {
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		StyleBuilder sb = new StyleBuilder();
 		
+		//not selected
+		Mark mark = sb.createMark("circle",  new Color(0, 64, 128), new Color(0, 64, 128), 1); //$NON-NLS-1$ 
+		Graphic graph2 = sb.createGraphic(null, mark, null, 1, 10, 0);
+        PointSymbolizer notselected = sb.createPointSymbolizer(graph2);
+        
+        Rule rnotselected = sb.createRule(notselected);
+        rnotselected.setFilter(ff.equals(ff.property("selected"), ff.literal(Boolean.FALSE))); //$NON-NLS-1$
+        rnotselected.setName("Not Selected");
+        
+        //selected
+        mark = sb.createMark("circle",  new Color(255, 255, 0), new Color(255, 255, 0), 1); //$NON-NLS-1$
+		graph2 = sb.createGraphic(null, mark, null, 1, 10, 0);
+        PointSymbolizer selected = sb.createPointSymbolizer(graph2);
+        
+        Rule rselected = sb.createRule(selected);
+        rselected.setFilter(ff.equals(ff.property("selected"), ff.literal(Boolean.TRUE))); //$NON-NLS-1$
+        rselected.setName("Selected");
+        
+        FeatureTypeStyle fs = sb.createFeatureTypeStyle(null, rselected, rnotselected);
+        Style s = sb.createStyle();
+        s.featureTypeStyles().add(fs);
+        return s;
 	}
+
 }

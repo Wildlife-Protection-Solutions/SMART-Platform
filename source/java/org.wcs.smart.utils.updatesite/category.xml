@@ -3,9 +3,10 @@
    <feature id="org.wcs.smart.paws.feature">
       <category name="paws"/>
    </feature>
-   <feature id="org.wcs.smart.paws.feature.nl">
+   <!--<feature id="org.wcs.smart.paws.feature.nl">
       <category name="paws"/>
    </feature>
+   -->
    <feature id="org.wcs.smart.datagenerator.er.feature">
       <category name="datagenerator"/>
    </feature>

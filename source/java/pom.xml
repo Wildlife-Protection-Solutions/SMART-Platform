@@ -345,6 +345,7 @@
 			</modules>
 		</profile>
 		
+		<!-- removed in smart8 
 		<profile>
 			<id>entity</id>
 			<modules>
@@ -357,7 +358,7 @@
 				<module>../extensions/entity/org.wcs.smart.entity.feature</module>
 			</modules>
 		</profile>
-		
+		-->
 		<profile>
 			<id>er</id>
 			<modules>
@@ -503,11 +504,12 @@
 				<module>org.wcs.smart.independentincident.feature</module>
 				<module>../extensions/qa/org.wcs.smart.qa.incident</module>
 				
+				<!-- remove in smart 8
 				<module>../extensions/entity/org.wcs.smart.entity</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query.report</module>
 				<module>../extensions/entity/org.wcs.smart.entity.feature</module>
-				
+				-->
 				
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.feature</module>
@@ -668,10 +670,12 @@
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.survey.feature.nl</module>
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.survey.nl</module>				
 				
+				<!-- remove in smart8 
 				<module>../extensions/entity/translations/org.wcs.smart.entity.feature.nl</module>
 				<module>../extensions/entity/translations/org.wcs.smart.entity.nl</module>
 				<module>../extensions/entity/translations/org.wcs.smart.entity.query.nl</module>
 				<module>../extensions/entity/translations/org.wcs.smart.entity.query.report.nl</module>
+				-->
 				
 				<module>../extensions/er/translations/org.wcs.smart.er.feature.nl</module>
 				<module>../extensions/er/translations/org.wcs.smart.er.nl</module>

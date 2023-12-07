@@ -25,12 +25,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
+import org.hibernate.Session;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -88,6 +94,38 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 				}
 			}
 			fIterator = pnts.iterator();
+		}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) ||
+				type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)
+				) {
+			
+			AttributeType matching = AttributeType.LINE;
+			if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+				matching = AttributeType.POLYGON;
+			}
+			
+
+			try(Session session = HibernateManager.openSession()){
+				
+				patrol = session.get(Patrol.class, patrol.getUuid());
+				
+				List<WaypointObservationAttribute> attributes = new ArrayList<>();
+				for (PatrolLeg l : patrol.getLegs()) {
+					for (PatrolLegDay d : l.getPatrolLegDays()) {
+						for (PatrolWaypoint pw:d.getWaypoints()) {
+							for (WaypointObservation wo : pw.getWaypoint().getAllObservations()) {
+								for (WaypointObservationAttribute a : wo.getAttributes()) {
+									if (a.getGeom() != null && a.getAttribute().getType() == matching) {
+										attributes.add(a);
+										a.getAttributeValueAsString(Locale.getDefault());
+										a.getObservation().getCategory().getName();
+									}
+								}
+							}
+						}
+					}
+				}
+				fIterator = attributes.iterator();
+			}
 		}else{
 			fIterator = null;
 		}
@@ -132,6 +170,8 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 			return new PatrolFeature(PatrolFeatureFactory.getTrackPartAsFeature(ftype, (TrackPart)this.fIterator.next()));
 		}else if (thisType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
 			return new PatrolFeature(PatrolFeatureFactory.getWaypointAsPrjFeature(ftype, (PatrolWaypoint)this.fIterator.next()));
+		}else if (thisType.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) || thisType.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+			return new PatrolFeature(PatrolFeatureFactory.getObservationAttributeAsGeometry(ftype, (WaypointObservationAttribute)this.fIterator.next() ));
 		}
 		return null;
 	}

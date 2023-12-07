@@ -30,6 +30,8 @@ TOKEN :
 | < NOT_CONTAINS : "notcontains" >
 | < STREQUALS : "equals" >
 | < BETWEEN : "between" >
+| < AREA : "area" >
+| < PERIMETER : "perimeter" >
 }TOKEN : /* Numeric Constants */{  < NUMBER :
   	(["-","+"])?< FLOAT >  | (["-","+"])?< FLOAT >    (      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >    )?     >| < #FLOAT :    < INTEGER >  | < INTEGER > ("." < INTEGER >)?  | "." < INTEGER >     >| < #INTEGER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}TOKEN : /* Literal Constants */{  < S_CONST_LITERAL :    "true"  | "false"  | "null" >}
 /* Query Filters */
@@ -43,6 +45,7 @@ TOKEN :
  | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+ | < ATT_GEOM_KEY : "attribute:"("p" | "i")":"< DM_KEY > >
  | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
@@ -50,6 +53,7 @@ TOKEN :
  | <CAT_ATT_MLIST_KEY : "category:"<DM_KEY>":attribute:m:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
+ | <CAT_ATT_GEOM_KEY : "category:"<DM_KEY>":attribute:" ("p" | "i") ":"<DM_KEY>> 
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < BYTE_STRING : (< DIGIT > | < LETTER > )+ (< DIGIT > | < LETTER > )* > 
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
@@ -68,7 +72,9 @@ TOKEN :
 {
     < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
 |   < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
-|   < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
+|   < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > >
+|   < SUM_ATTRIBUTE_GEOMETRY_KEY : "attribute:" ("i" | "p") ":" < AGG > ":" < DM_KEY > ":" (< AREA >|< PERIMETER >)>
+|   < SUM_CAT_ATT_GEOMETRY_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_GEOMETRY_KEY > > 
 |   < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l" | "m") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
 |   < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
 |   < AGG  : ("sum" | "avg" | "min" | "max" | "stddev_samp" | "var_samp") >
@@ -223,6 +229,17 @@ IValueItem SingleValueItem() :
 		{
 			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		}
+	| 
+		< SUM_ATTRIBUTE_GEOMETRY_KEY >
+		{
+			item = AttributeValueItem.createAttributeItem( token.image );
+		}
+	| 
+		< SUM_CAT_ATT_GEOMETRY_KEY >
+		{
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
+		}
+		
 	| 
 		< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
 		{
@@ -412,6 +429,42 @@ IFilter NumberExpression():
 }
 
 
+IFilter GeometryFilterExpression():
+{
+  IFilter filter = null;
+  AttributeFilter.GeometryProperty property;
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	(
+		( 
+			< ATT_GEOM_KEY > {key = token.image;}
+			property = GeometryProperty()
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = AttributeFilter.createGeometryFilter(key, property, op, value);
+		}
+	| 
+		(
+			< CAT_ATT_GEOM_KEY> {key = token.image;}
+			property = GeometryProperty()
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = CategoryAttributeFilter.createGeometryFilter(key, property, op, value);
+		}
+	)
+
+	{
+  		return filter;
+	}
+}
+
 IFilter AttributeExpression():
 {
 	IFilter filter = null;
@@ -425,6 +478,9 @@ IFilter AttributeExpression():
 	|
 	/* Numeric comparison */
 	filter = NumberExpression()
+	| 
+	/* Geometry */
+	filter = GeometryFilterExpression()
 	| 
 	/* boolean */
 	filter = BooleanItemExpression()
@@ -672,3 +728,17 @@ Operator DateOp() :
     return Operator.parseOperator(fulltoken);
   }
 }
+
+  
+AttributeFilter.GeometryProperty GeometryProperty() :
+{}
+{
+   (
+     < AREA > | 
+     < PERIMETER >
+   )
+  {
+    return AttributeFilter.GeometryProperty.valueOfKey(token.image);
+  }
+}
+

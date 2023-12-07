@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.filter;
 
+import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -72,6 +73,25 @@ public class CategoryAttributeFilter implements IFilter{
 		
 		CategoryFilter cat = CategoryFilter.createFilter(catPart);
 		AttributeFilter att = AttributeFilter.createStringFilter(attPart, op, value);
+		
+		return new CategoryAttributeFilter(cat, att);
+	}
+	
+	/**
+	 * Creates a new value attribute filter
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:g:<key>"
+	 * @param property the geometry property
+	 * @param op the operator
+	 * @param Double value the filter value
+	 * @return
+	 */
+	public static CategoryAttributeFilter createGeometryFilter(String catAttributeIdentifier, GeometryProperty property, Operator op, Double value){
+		String bits[] = catAttributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
+		
+		CategoryFilter cat = CategoryFilter.createFilter(catPart);
+		AttributeFilter att = AttributeFilter.createGeometryFilter(attPart, property, op, value);
 		
 		return new CategoryAttributeFilter(cat, att);
 	}

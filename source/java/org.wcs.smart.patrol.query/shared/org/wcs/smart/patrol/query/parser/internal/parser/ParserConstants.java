@@ -59,157 +59,169 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int COLON = 28;
   /** RegularExpression Id. */
-  int NUMBER = 29;
+  int AREA = 29;
   /** RegularExpression Id. */
-  int FLOAT = 30;
+  int PERIMETER = 30;
   /** RegularExpression Id. */
-  int INTEGER = 31;
+  int NUMBER = 31;
   /** RegularExpression Id. */
-  int DIGIT = 32;
+  int FLOAT = 32;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 33;
+  int INTEGER = 33;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 34;
+  int DIGIT = 34;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 35;
+  int S_CONST_LITERAL = 35;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 36;
+  int CATEGORY_KEY = 36;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 37;
+  int ATT_STR_KEY = 37;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 38;
+  int ATT_VALUE_KEY = 38;
   /** RegularExpression Id. */
-  int ATT_MLIST_KEY = 39;
+  int ATT_BOOL_KEY = 39;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 40;
+  int ATT_LIST_KEY = 40;
   /** RegularExpression Id. */
-  int ATT_DATE_KEY = 41;
+  int ATT_MLIST_KEY = 41;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 42;
+  int ATT_TREE_KEY = 42;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 43;
+  int ATT_DATE_KEY = 43;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 44;
+  int ATT_GEOM_KEY = 44;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 45;
+  int CAT_ATT_STR_KEY = 45;
   /** RegularExpression Id. */
-  int CAT_ATT_MLIST_KEY = 46;
+  int CAT_ATT_VALUE_KEY = 46;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 47;
+  int CAT_ATT_BOOL_KEY = 47;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 48;
+  int CAT_ATT_LIST_KEY = 48;
   /** RegularExpression Id. */
-  int DATE_STRING = 49;
+  int CAT_ATT_MLIST_KEY = 49;
   /** RegularExpression Id. */
-  int DM_KEY = 50;
+  int CAT_ATT_TREE_KEY = 50;
   /** RegularExpression Id. */
-  int HEX_STRING = 51;
+  int CAT_ATT_DATE_KEY = 51;
   /** RegularExpression Id. */
-  int LETTER = 52;
+  int CAT_ATT_GEOM_KEY = 52;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 53;
+  int DATE_STRING = 53;
   /** RegularExpression Id. */
-  int PATROL_ARMED_KEY = 54;
+  int DM_KEY = 54;
   /** RegularExpression Id. */
-  int PATROL_ID_KEY = 55;
+  int HEX_STRING = 55;
   /** RegularExpression Id. */
-  int PATROL_UUID_KEY = 56;
+  int LETTER = 56;
   /** RegularExpression Id. */
-  int PATROL_STATION_KEY = 57;
+  int SPECIAL_CHARS = 57;
   /** RegularExpression Id. */
-  int PATROL_TEAM_KEY = 58;
+  int PATROL_ARMED_KEY = 58;
   /** RegularExpression Id. */
-  int PATROL_TEAM_KEY_KEY = 59;
+  int PATROL_ID_KEY = 59;
   /** RegularExpression Id. */
-  int PATROL_MANDATE_KEY = 60;
+  int PATROL_UUID_KEY = 60;
   /** RegularExpression Id. */
-  int PATROL_MANDATE_KEY_KEY = 61;
+  int PATROL_STATION_KEY = 61;
   /** RegularExpression Id. */
-  int PATROL_TYPE_KEY = 62;
+  int PATROL_TEAM_KEY = 62;
   /** RegularExpression Id. */
-  int PATROL_CA_KEY = 63;
+  int PATROL_TEAM_KEY_KEY = 63;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY = 64;
+  int PATROL_MANDATE_KEY = 64;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY_KEY = 65;
+  int PATROL_MANDATE_KEY_KEY = 65;
   /** RegularExpression Id. */
-  int PATROLLEG_LEADER_KEY = 66;
+  int PATROL_TYPE_KEY = 66;
   /** RegularExpression Id. */
-  int PATROLLEG_PILOT_KEY = 67;
+  int PATROL_CA_KEY = 67;
   /** RegularExpression Id. */
-  int PATROLLEG_MEMBER_KEY = 68;
+  int PATROLLEG_TRANSPORT_KEY = 68;
   /** RegularExpression Id. */
-  int PATROLLEG_AGENCY_KEY = 69;
+  int PATROLLEG_TRANSPORT_KEY_KEY = 69;
   /** RegularExpression Id. */
-  int PATROLLEG_AGENCY_KEY_KEY = 70;
+  int PATROLLEG_LEADER_KEY = 70;
   /** RegularExpression Id. */
-  int PATROLLEG_RANK_KEY = 71;
+  int PATROLLEG_PILOT_KEY = 71;
   /** RegularExpression Id. */
-  int WAYPOINT_CM_KEY = 72;
+  int PATROLLEG_MEMBER_KEY = 72;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_BOOLEAN_KEY = 73;
+  int PATROLLEG_AGENCY_KEY = 73;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_STRING_KEY = 74;
+  int PATROLLEG_AGENCY_KEY_KEY = 74;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_LIST_KEY = 75;
+  int PATROLLEG_RANK_KEY = 75;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_NUMBER_KEY = 76;
+  int WAYPOINT_CM_KEY = 76;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_DATE_KEY = 77;
+  int PATROL_ATTRIBUTE_BOOLEAN_KEY = 77;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION = 78;
+  int PATROL_ATTRIBUTE_STRING_KEY = 78;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_BOOL_KEY = 79;
+  int PATROL_ATTRIBUTE_LIST_KEY = 79;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_STRING_KEY = 80;
+  int PATROL_ATTRIBUTE_NUMBER_KEY = 80;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 81;
+  int PATROL_ATTRIBUTE_DATE_KEY = 81;
   /** RegularExpression Id. */
-  int AREA_KEY = 82;
+  int PATROL_CONTRIBUTION = 82;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 83;
+  int PATROL_CONTRIBUTION_BOOL_KEY = 83;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 84;
+  int PATROL_CONTRIBUTION_STRING_KEY = 84;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 85;
+  int AREA_TYPE_KEY = 85;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 86;
+  int AREA_KEY = 86;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ENCOUNTERRATE_KEY = 87;
+  int OBSERVATION_FILTER_TYPE_KEY = 87;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 88;
+  int WAYPOINT_FILTER_TYPE_KEY = 88;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 89;
+  int PATROL_VALUE_ITEM = 89;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 90;
+  int PATROL_VALUE_KEY = 90;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 91;
+  int PATROL_VALUE_ENCOUNTERRATE_KEY = 91;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 92;
+  int SUM_CAT_VALUE_KEY = 92;
   /** RegularExpression Id. */
-  int AGG = 93;
+  int SUM_ATTRIBUTE_VALUE_KEY = 93;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 94;
+  int SUM_CAT_ATT_VALUE_KEY = 94;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 95;
+  int SUM_ATTRIBUTE_GEOMETRY_KEY = 95;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 96;
+  int SUM_CAT_ATT_GEOMETRY_KEY = 96;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 97;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 97;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 98;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 98;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 99;
+  int AGG = 99;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 100;
+  int DATE_GROUPBY_ITEM = 100;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 101;
+  int QUERY_SPLITTER = 101;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 102;
+  int PATROL_UUID_GROUPBY_OPTION = 102;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_LIST_GROUPBYITEM = 103;
+  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 103;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 104;
+  int PATROL_STRING_GROUPBY_OPTION = 104;
+  /** RegularExpression Id. */
+  int CATEGORY_GROUPBY_ITEM = 105;
+  /** RegularExpression Id. */
+  int AREA_GROUPBY_ITEM = 106;
+  /** RegularExpression Id. */
+  int ATTRIBUTE_GROUPBY_ITEM = 107;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 108;
+  /** RegularExpression Id. */
+  int PATROL_ATTRIBUTE_LIST_GROUPBYITEM = 109;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 110;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -245,6 +257,8 @@ public interface ParserConstants {
     "\"equals\"",
     "\"between\"",
     "\":\"",
+    "\"area\"",
+    "\"perimeter\"",
     "<NUMBER>",
     "<FLOAT>",
     "<INTEGER>",
@@ -258,6 +272,7 @@ public interface ParserConstants {
     "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ATT_GEOM_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
     "<CAT_ATT_BOOL_KEY>",
@@ -265,6 +280,7 @@ public interface ParserConstants {
     "<CAT_ATT_MLIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
+    "<CAT_ATT_GEOM_KEY>",
     "<DATE_STRING>",
     "<DM_KEY>",
     "<HEX_STRING>",
@@ -307,6 +323,8 @@ public interface ParserConstants {
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",
     "<SUM_CAT_ATT_VALUE_KEY>",
+    "<SUM_ATTRIBUTE_GEOMETRY_KEY>",
+    "<SUM_CAT_ATT_GEOMETRY_KEY>",
     "<SUM_ATTRIBUTE_VALUE_LISTTREE_KEY>",
     "<SUM_CAT_ATT_VALUE_LISTTREE_KEY>",
     "<AGG>",

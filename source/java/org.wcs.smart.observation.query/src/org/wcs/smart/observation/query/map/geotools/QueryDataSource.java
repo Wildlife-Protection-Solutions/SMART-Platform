@@ -47,6 +47,8 @@ public class QueryDataSource extends ContentDataStore{
 	 * waypoint query data source
 	 */
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
+	public static final String POLYGON_GEOM_ATTRIBUTE_TYPE  = "PolygonAttributes"; //$NON-NLS-1$
+	public static final String LINESTRING_GEOM_ATTRIBUTE_TYPE  = "LineStringAttributes"; //$NON-NLS-1$
 	
 	private SimpleQuery query;
 	private IProjectionProvider prjProvider;
@@ -91,7 +93,10 @@ public class QueryDataSource extends ContentDataStore{
 
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
-		return Collections.singletonList(new NameImpl(WAYPOINT_TYPE));
+		return List.of(new NameImpl(WAYPOINT_TYPE), 
+				new NameImpl(POLYGON_GEOM_ATTRIBUTE_TYPE), 
+				new NameImpl(LINESTRING_GEOM_ATTRIBUTE_TYPE));
+		
 	}
 	
 	@Override

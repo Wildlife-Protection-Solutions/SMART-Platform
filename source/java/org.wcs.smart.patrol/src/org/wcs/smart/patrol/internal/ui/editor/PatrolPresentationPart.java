@@ -86,6 +86,9 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.data.DataStore;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
@@ -196,6 +199,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	
 	private Layer waypointLayer = null;
 	private Layer trackLayer = null;
+
+	private Layer attributePolygonLayer = null;
+	private Layer attributeLineStringLayer = null;
+	
 	private Object currentSelection = null;
 	
 	private boolean autoZoom = true;
@@ -207,12 +214,19 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			patrolService = new PatrolService(parentEditor.getPatrol());
 	    	try {
+	    		Map<String, IGeoResource> toAdd = new HashMap<>();
 	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
-	    		
 	    		List<IGeoResource> sortedLayers = new ArrayList<>();
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) sortedLayers.add(l);
+
+	    		for (IGeoResource l : layers) toAdd.put(  ((PatrolGeoResource)l).getType(), l );
+    			
+	    		String[] orderedLayers = new String[] {PatrolDataSource.TRACK_PART_TYPE, 
+	    				PatrolDataSource.WAYPOINT_PRJ_TYPE, 
+	    				PatrolDataSource.WAYPOINT_TYPE,
+	    				PatrolDataSource.OBS_ATTRIBUTE_POLYGON,
+	    				PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,	    				
+	    		};
+	    		for (String name : orderedLayers) sortedLayers.add(toAdd.get(name));
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
@@ -225,6 +239,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolReviewTrackDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolReviewWaypointRawDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolReviewWaypointDefaultStyle.KEY);
+//	    				geoIdToStyle.put(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,  PatrolReview.KEY);
 
 	    				//if a default style is not specified we'll use this style instead
 	    				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
@@ -251,13 +266,24 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		    					}
 		    					
 		    					if (l.getGeoResource().canResolve(PatrolGeoResource.class)) {
-		    						if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) {
+		    						
+		    						
+		    						String type = l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor()).getType();
+		    						if (type.equals(PatrolDataSource.TRACK_PART_TYPE)) {
 		    							trackLayer = l;
-		    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
+		    						}else if (type.equals(PatrolDataSource.WAYPOINT_TYPE)) {
 		    							waypointLayer = l;
 		    							waypointLayer.setStyleBlackboard(new WaypointLayerStyleBlackboard(waypointLayer.getStyleBlackboard()));
 		    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
 		    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
+		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) {
+		    							attributeLineStringLayer = l;
+		    							//attributeLineStringLayer.setFilter(Filter.EXCLUDE);
+		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+		    							attributePolygonLayer = l;
+		    							
+		    							//DataStore src = attributePolygonLayer.getGeoResource().resolve(PatrolGeoResource.class, null).resolve(DataStore.class, null);
+		    							//attributePolygonLayer.setFilter(Filter.EXCLUDE);
 		    						}
 		    					 }
 		    				}
