@@ -40,6 +40,16 @@ import org.wcs.smart.util.GeometryUtils;
  */
 public class GeometryAttributeValue {
 
+	/**
+	 * The column name from the WaypointObservationAttribute where the
+	 * properties of the geometry are stored. Should only be used by the query
+	 * implementations that don't use hibernate.
+	 * 
+	 */
+	public static final String DB_FIELD_AREA = "number_value_2"; //$NON-NLS-1$
+	public static final String DB_FIELD_PERIMETER = "number_value"; //$NON-NLS-1$
+	public static final String DB_FIELD_SOURCE = "string_value"; //$NON-NLS-1$
+	
 	private Attribute.GeometrySource source;
 	private Double area;
 	private Double perimeter;

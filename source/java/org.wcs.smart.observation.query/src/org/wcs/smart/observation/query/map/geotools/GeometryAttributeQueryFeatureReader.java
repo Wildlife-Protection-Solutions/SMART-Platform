@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -44,7 +45,6 @@ import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Feature reader for waypoint/observation query.
@@ -155,14 +155,24 @@ public class GeometryAttributeQueryFeatureReader implements FeatureReader<Simple
 		QueryColumn areaColumn = null;
 		QueryColumn perimeterColumn = null;
 		for (QueryColumn c : columns) {
-			if (c.getKey().equals(currentColumn.getKey() + ".source")) {
-				srcColumn = c;
-			}else if (c.getKey().equals(currentColumn.getKey() + ".area")) {
-				areaColumn = c;
-			}else if (c.getKey().equals(currentColumn.getKey() + ".perimeter")) {
-				perimeterColumn = c;
+			if (c instanceof AttributeQueryColumn aqc && aqc.getGeometryProperty() != null) {
+				switch(aqc.getGeometryProperty()) {
+				case AREA:
+					areaColumn = c;
+					break;
+				case PERIMETER:
+					perimeterColumn = c;
+					break;
+				case SOURCE:
+					srcColumn = c;
+					break;
+				default:
+					break;
+				
+				}
 			}
 		}
+		
 		List<Object> data = new ArrayList<Object>();
 		data.add(geometryValue);
 		data.add(current.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$
@@ -176,7 +186,7 @@ public class GeometryAttributeQueryFeatureReader implements FeatureReader<Simple
 		int i = data.size()-1;
 		for (QueryColumn c : this.nonAttributeColumns){
 			if (c.isVisible()){
-				data.add(QueryColumnUtils.getValue(current, c, ftype.getDescriptor(i++)));
+				data.add(QueryColumnUtils.getValue(current, c, ftype.getDescriptor(i++), Locale.getDefault()));
 			}
 		}
 		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), current.getWaypointUuid());

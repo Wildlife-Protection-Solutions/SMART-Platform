@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -50,7 +52,7 @@ public class DataModelQueryColumns {
 		// add data model category columns
 		int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 		for (int i = 0; i < numCategory; i++) {
-			QueryColumn toAdd = new CategoryQueryColumn(MessageFormat.format("Category {0}", i), i);
+			QueryColumn toAdd = new CategoryQueryColumn(MessageFormat.format(Messages.DataModelQueryColumns_CategoryColumnHeader, i), i);
 			toAdd.setEdit(supportsEditing);
 			cols.add(toAdd);
 		}
@@ -71,10 +73,10 @@ public class DataModelQueryColumns {
 			cols.add(toAdd);
 			
 			if (att.getType().isGeometry()) {
-				cols.add(new AttributeQueryColumn(MessageFormat.format("{0} - Source", name), att.getKeyId(), GeometryProperty.SOURCE, Attribute.AttributeType.TEXT));	
-				cols.add(new AttributeQueryColumn(MessageFormat.format("{0} - Perimeter", name), att.getKeyId(), GeometryProperty.PERIMETER, Attribute.AttributeType.NUMERIC));
+				cols.add(new AttributeQueryColumn(GeometryProperty.SOURCE.getColumnName(name, Locale.getDefault()), att.getKeyId(), GeometryProperty.SOURCE, Attribute.AttributeType.TEXT));	
+				cols.add(new AttributeQueryColumn(GeometryProperty.PERIMETER.getColumnName(name, Locale.getDefault()), att.getKeyId(), GeometryProperty.PERIMETER, Attribute.AttributeType.NUMERIC));
 				if (att.getType() == Attribute.AttributeType.POLYGON) {
-					cols.add(new AttributeQueryColumn(MessageFormat.format("{0} - Area", name), att.getKeyId(), GeometryProperty.AREA, Attribute.AttributeType.NUMERIC));
+					cols.add(new AttributeQueryColumn(GeometryProperty.AREA.getColumnName(name, Locale.getDefault()), att.getKeyId(), GeometryProperty.AREA, Attribute.AttributeType.NUMERIC));
 				}
 			}
 		}

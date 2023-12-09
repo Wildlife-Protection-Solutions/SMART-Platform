@@ -340,9 +340,11 @@ public abstract class QueryResultsTable {
 			IQueryColumnSorter sorter = getColumnSorter();
 		
 			QueryColumn c = columns.get(i);
-			if (c instanceof AttributeQueryColumn 
-					&& ((AttributeQueryColumn)c).getAttributeType() == AttributeType.MLIST) {
-				//no sorting on multi-list query columns
+			if (c instanceof AttributeQueryColumn ac
+					&& (ac.getAttributeType() == AttributeType.MLIST || 
+					ac.getAttributeType().isGeometry())) {
+				//no sorting on multi-list or geometry
+				//query columns
 				sorter = null;
 			}
 			

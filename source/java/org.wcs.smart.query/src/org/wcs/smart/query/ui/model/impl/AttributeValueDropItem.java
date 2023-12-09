@@ -208,8 +208,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			propertySelector.setContentProvider(ArrayContentProvider.getInstance());
 			propertySelector.setLabelProvider(new LabelProvider() {
 				public String getText(Object element) {
-					//TODO:
-					return ((GeometryProperty)element).name();
+					return ((GeometryProperty)element).getLabel(Locale.getDefault());
 				}
 			});
 			GeometryProperty[] options = GeometryProperty.values();

@@ -42,7 +42,6 @@ import org.wcs.smart.filter.CategoryFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.filter.Operator;
-import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -590,14 +589,10 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 				sql.append(" CAST(" + p3 + " as date) "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(") "); //$NON-NLS-1$
 			}else if (attfilter.getAttributeType().isGeometry()){
-				String field = "number_value"; //$NON-NLS-1$
-				if (attfilter.getGeometryProperty() == GeometryProperty.AREA) {
-					field = "number_value_2";					 //$NON-NLS-1$
-				}
 				sql.append("("); //$NON-NLS-1$
 				sql.append(prefix(WaypointObservationAttribute.class));
 				sql.append("."); //$NON-NLS-1$
-				sql.append(field);
+				sql.append(attfilter.getGeometryProperty().getDbField());
 				sql.append(" "); //$NON-NLS-1$
 				sql.append(getSqlGenerator().asSql(attfilter.getOperator()));
 				String p2 = engine.addParameterValue((Double)attfilter.getValue());

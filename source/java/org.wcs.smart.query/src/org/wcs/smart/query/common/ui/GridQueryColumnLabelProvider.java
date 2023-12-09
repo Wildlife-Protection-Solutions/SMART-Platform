@@ -41,6 +41,11 @@ public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvid
 		if (key.equals(GRID_TO_BIG_KEY)){
 			return Messages.Grid_GridToLargeError;
 		}
+		
+		if (key == GEOM_SOURCE_COLUMN_NAME ) return "{0} - Source";
+		if (key == GEOM_PERIMETER_COLUMN_NAME ) return "{0} - Perimeter";
+		if (key == GEOM_AREA_COLUMN_NAME ) return "{0} - Area";
+					
 		return null;
 	}
 }

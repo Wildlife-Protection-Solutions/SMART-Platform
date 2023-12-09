@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.ui;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.SWT;
@@ -62,7 +64,7 @@ public class QueryColumnLabelProvider extends ColumnLabelProvider implements ICo
 	public String getText(Object element){
 		if (element == null) return ""; //$NON-NLS-1$
 		if (element instanceof IResultItem){
-			return column.getValueAsString( column.getValue((IResultItem)element));
+			return column.getValueAsString( column.getValue((IResultItem)element), Locale.getDefault());
 		}
 		return element.toString();
 	}

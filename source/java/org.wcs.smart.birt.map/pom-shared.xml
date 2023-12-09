@@ -53,6 +53,7 @@
 			<artifactId>org.mozilla.javascript</artifactId>
 			<version>${mozilla.javascript.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.ui.workbench</artifactId>
@@ -75,7 +76,12 @@
 					<groupId>javax.annotation</groupId>
 					<artifactId>javax.annotation-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis-ext</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
+		
 	</dependencies>
 </project>

@@ -43,17 +43,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.MultiPageEditorPart;
-import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.CRS;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -63,8 +59,6 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
-import org.opengis.feature.Feature;
-import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.FeatureType;
@@ -90,15 +84,14 @@ import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.udig.style.StyleManager;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.ui.map.tool.IInfoToolShellProvider;
-import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Incident editor map page
@@ -106,6 +99,9 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class IncidentMapPage extends SmartMapEditorPart {
+
+	private static final String LINESTRING_TYPE_NAME = "LINESTRING"; //$NON-NLS-1$
+	private static final String POLYGON_TYPE_NAME = "POLYGON"; //$NON-NLS-1$
 
 	private IncidentEditor parent;
 
@@ -242,12 +238,12 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				layers.add(0, prjResource);
 			}
 		
-			attPolygonType = ObservationAttributeFeatureFactory.createObservationPolygonSchema("POLYGON");
+			attPolygonType = ObservationAttributeFeatureFactory.createObservationPolygonSchema(POLYGON_TYPE_NAME);
 			attPolygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(attPolygonType);
 			attPolygonStore = attPolygonResource.resolve(FeatureStore.class, null);
 			layers.add(0, attPolygonResource);
 			
-			attLinestringType = ObservationAttributeFeatureFactory.createObservationLineStringSchema("LINESTRING");
+			attLinestringType = ObservationAttributeFeatureFactory.createObservationLineStringSchema(LINESTRING_TYPE_NAME);
 			attLinestringResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(attLinestringType);
 			attLinestringStore = attLinestringResource.resolve(FeatureStore.class, null);
 			layers.add(0, attLinestringResource);
@@ -279,8 +275,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					Map<String,String> geoIdToStyle = new HashMap<>();
     				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_TYEPNAME,  IncidentMapWaypointDefaultStyle.KEY);
     				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_PRJ_TYEPNAME,  IncidentMapWaypointRawDefaultStyle.KEY);
-    				geoIdToStyle.put("POLYGON",  IncidentMapPolygonAttributeDefaultStyle.KEY);
-    				geoIdToStyle.put("LINESTRING",  IncidentMapLineStringAttributeDefaultStyle.KEY);
+    				geoIdToStyle.put(POLYGON_TYPE_NAME,  IncidentMapPolygonAttributeDefaultStyle.KEY);
+    				geoIdToStyle.put(LINESTRING_TYPE_NAME,  IncidentMapLineStringAttributeDefaultStyle.KEY);
 
     				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
     				defaultStyles.put(IncidentMapWaypointDefaultStyle.KEY, (l)->{
@@ -294,6 +290,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
     					FeatureType type = l.getGeoResource().resolve(FeatureType.class, null);
     					if (type.getName().equals(featureType.getName())) {
     						pointLayer = l;
+    						pointLayer.setName(Messages.IncidentMapPage_MapLayerName);
+    						pointLayer.setVisible(true);
     					}else if (prjFeatureType != null && type.getName().equals(prjFeatureType.getName())) {
     						prjLayer = l;
     					}else if (type.getName().equals(attPolygonType.getName())) {
@@ -303,23 +301,22 @@ public class IncidentMapPage extends SmartMapEditorPart {
     					}
     				}
     				
-					pointLayer.setName(Messages.IncidentMapPage_MapLayerName);
-					pointLayer.setVisible(true);
+					
 
 					try(Session session = HibernateManager.openSession()){
 	   					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), pointLayer, geoIdToStyle, defaultStyles, session, monitor);
 						
 						if (prjLayer != null) {
-							prjLayer.setName("Independent Incident - Raw Points");
+							prjLayer.setName(Messages.IncidentMapPage_RawPointLayerName);
 							prjLayer.setVisible(false);
 							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), prjLayer, geoIdToStyle, defaultStyles, session, monitor);
 						}
 						if (attPolygonLayer != null) {
-							attPolygonLayer.setName("Polygon Attributes");
+							attPolygonLayer.setName(SmartLabelProvider.POLYGON_ATTRIBUTE_LAYER);
 							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), attPolygonLayer, geoIdToStyle, defaultStyles, session, monitor);
 						}
 						if (attLinestringLayer != null) {
-							attLinestringLayer.setName("LineString Attributes");
+							attLinestringLayer.setName(SmartLabelProvider.LINESTRING_ATTRIBUTE_LAYER);
 							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), attLinestringLayer, geoIdToStyle, defaultStyles, session, monitor);
 						}
 					}						
@@ -638,7 +635,6 @@ public class IncidentMapPage extends SmartMapEditorPart {
 							SmartDB.DATABASE_CRS, vm.getCRS());
 						return new InfoPoint(vm.worldToPixel(px), waypoints, null);
 					}
-					
 					
 					//check observation details
 					Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, new IGeoResource[]{attLinestringResource, attPolygonResource});

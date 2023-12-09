@@ -197,6 +197,20 @@ public class Messages extends NLS {
 
 	public static String ObservationAttachmentLabelProvider_SignatureTypeLabel;
 
+	public static String ObservationAttributeDetailsShell_AreaLabel;
+
+	public static String ObservationAttributeDetailsShell_AreaWithUnits;
+
+	public static String ObservationAttributeDetailsShell_DateTimeLabel;
+
+	public static String ObservationAttributeDetailsShell_PerimeterLabel;
+
+	public static String ObservationAttributeDetailsShell_PerimeterWithUnits;
+
+	public static String ObservationAttributeDetailsShell_SourceLabel;
+
+	public static String ObservationAttributeDetailsShell_WpIdLabel;
+
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;
 	public static String ObservationCloner_ProgressName;

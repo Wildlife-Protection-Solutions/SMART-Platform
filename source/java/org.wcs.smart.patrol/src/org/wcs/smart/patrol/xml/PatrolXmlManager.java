@@ -44,7 +44,7 @@ import jakarta.xml.bind.Marshaller;
  */
 public class PatrolXmlManager {
 	
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.patrol.xml.model.v13"; //$NON-NLS-1$
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.patrol.xml.model.v14"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 		
@@ -58,14 +58,14 @@ public class PatrolXmlManager {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	public static void writeDataModel(org.wcs.smart.patrol.xml.model.v13.PatrolType patrol, OutputStream file) throws JAXBException, IOException{
+	public static void writeDataModel(org.wcs.smart.patrol.xml.model.v14.PatrolType patrol, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
-		org.wcs.smart.patrol.xml.model.v13.ObjectFactory objFactor = new org.wcs.smart.patrol.xml.model.v13.ObjectFactory();
+		org.wcs.smart.patrol.xml.model.v14.ObjectFactory objFactor = new org.wcs.smart.patrol.xml.model.v14.ObjectFactory();
 		
-		JAXBElement<org.wcs.smart.patrol.xml.model.v13.PatrolType> element = objFactor.createPatrol(patrol);
+		JAXBElement<org.wcs.smart.patrol.xml.model.v14.PatrolType> element = objFactor.createPatrol(patrol);
 		marshaller.marshal(element, file);
 	}
 
@@ -92,6 +92,8 @@ public class PatrolXmlManager {
 				return new org.wcs.smart.patrol.xml.model.v12.XmlToPatrolConverter();
 			}else if (version.equals(org.wcs.smart.patrol.xml.model.v13.ObjectFactory._Patrol_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.patrol.xml.model.v13.XmlToPatrolConverter();
+			}else if (version.equals(org.wcs.smart.patrol.xml.model.v14.ObjectFactory._Patrol_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.patrol.xml.model.v14.XmlToPatrolConverter();				
 			}
 		}catch (Exception ex){
 			//invalid xml file

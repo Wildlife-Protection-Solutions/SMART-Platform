@@ -972,6 +972,8 @@ public class Messages extends NLS {
 	public static String GenerateSmartThemeDialog_ObsCategoryLabel;
 	public static String GenerateSmartThemeDialog_Title;
 	public static String GenerateSmartThemeDialog_ValidSizeRequired;
+	public static String GeometryAttributeField_ClearButton;
+	public static String GeometryAttributeField_ClearButtonTooltip;
 	public static String GpsBabelPreferencePage_CouldNotUpdate;
 	public static String GpsBabelPreferencePage_FileNotFound;
 	public static String GpsBabelPreferencePage_ProgramLocLabel;

@@ -32,6 +32,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Patrol feature source
@@ -58,8 +59,8 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return Messages.PatrolFeatureSource_WaypointLayerName;
 		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return Messages.PatrolFeatureSource_ProjectedWaypointLayerName;
 		
-		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return "LineString Attributes";
-		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return "Polygon Attributes";
+		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return SmartLabelProvider.LINESTRING_ATTRIBUTE_LAYER;
+		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return SmartLabelProvider.POLYGON_ATTRIBUTE_LAYER;
 		return entry.getTypeName();
 	}
 	

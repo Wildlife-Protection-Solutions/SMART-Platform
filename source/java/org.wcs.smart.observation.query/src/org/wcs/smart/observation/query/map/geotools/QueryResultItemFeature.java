@@ -23,6 +23,7 @@ package org.wcs.smart.observation.query.map.geotools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
@@ -59,7 +60,7 @@ public class QueryResultItemFeature {
 		int i = 2;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){
-				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
+				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++), Locale.getDefault()));
 			}
 		}
 		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), it.getWaypointUuid());

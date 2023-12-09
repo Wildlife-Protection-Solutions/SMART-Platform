@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2023 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.ui.ca.datamodel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -14,13 +36,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPolygon;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.ui.DrawOnMapDialog;
@@ -28,6 +48,9 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Field editor for geometry attributes. 
+ */
 public class GeometryAttributeField implements IAttributeField<GeometryAttributeValue>{
 
 	private Attribute attribute;
@@ -60,7 +83,6 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 
 	@Override
 	public void createComposite(Composite parent) {
-		// TODO Auto-generated method stub
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -85,8 +107,8 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 
 		btnClear = new Button(editorpart, SWT.PUSH);
 		btnClear.setBackground(btnClear.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnClear.setText("Clear");
-		btnClear.setToolTipText("remove all geometries associated with this attribute");
+		btnClear.setText(Messages.GeometryAttributeField_ClearButton);
+		btnClear.setToolTipText(Messages.GeometryAttributeField_ClearButtonTooltip);
 		btnClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnClear.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnClear.addListener(SWT.Selection,e->setValue(null));
@@ -171,9 +193,9 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 
 	private void updateLabel() {
 		if (this.value == null) {
-			this.lblinfo.setText("");
+			this.lblinfo.setText(""); //$NON-NLS-1$
 		}else {
-			this.lblinfo.setText(GeometryUtils.getAttributeGeometryLabel(this.value));
+			this.lblinfo.setText(GeometryUtils.getAttributeGeometryLabel(this.value, Locale.getDefault()));
 		}
 		this.btnClear.setEnabled(this.value != null);
 	}

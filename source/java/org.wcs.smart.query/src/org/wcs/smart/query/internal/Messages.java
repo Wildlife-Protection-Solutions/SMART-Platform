@@ -109,6 +109,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaGroupByDropItem_FiltersLabel;
 	public static String ConservationAreaGroupByDropItem_IncludedLabel;
 	public static String ConservationAreaGroupByDropItem_Name;
+	public static String DataModelQueryColumns_CategoryColumnHeader;
 	public static String DataModelTreeNode_DataModelFiltersLabel;
 	public static String DataModelTreeNode_DmGroupByLabel;
 	public static String DataModelTreeNode_DmValuesLabel;

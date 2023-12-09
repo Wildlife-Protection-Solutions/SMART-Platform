@@ -26,20 +26,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.geotools.geometry.jts.WKBReader;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
-import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
@@ -125,7 +124,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 	
 	@Override
 	protected void updateSortColumn(Session session, Connection c) throws SQLException{
-		if (sortColumn instanceof AttributeQueryColumn){
+		if (sortColumn instanceof AttributeQueryColumn aqc){
 			if (!hasSortColumns){
 				//add the sort columns
 				c.createStatement().execute("ALTER TABLE " + getResultsTable() + " add column " + NUMBER_SORT + " double"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -133,20 +132,13 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 				c.commit();
 				hasSortColumns = true;
 			}
-			String key = sortColumn.getKey();
-			key = key.split(":")[1]; //$NON-NLS-1$
-			Attribute attribute = null;
 			
-			session.beginTransaction();
-			try{
-				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
-			}finally{
-				session.getTransaction().rollback();
-			}
-			
-			switch (attribute.getType()) {
+			switch (aqc.getAttributeType()) {
 			case MLIST: 
 				throw new UnsupportedOperationException("Sorting not supported on multi-list attribute"); //$NON-NLS-1$
+			case LINE:
+			case POLYGON:
+				throw new UnsupportedOperationException("Sorting not supported on polygon attribute"); //$NON-NLS-1$
 			case BOOLEAN:
 			case NUMERIC:
 				// nullify first
@@ -172,21 +164,29 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 				break;
 			}
 			
-			switch (attribute.getType()) {
-			case MLIST: 
+			switch (aqc.getAttributeType()) {
+			case MLIST:
 				throw new UnsupportedOperationException("Sorting not supported on multi-list attribute"); //$NON-NLS-1$
+			case LINE:
+			case POLYGON:
+				throw new UnsupportedOperationException("Sorting not supported on geometry attribute"); //$NON-NLS-1$
 			case BOOLEAN:
 			case NUMERIC:
+				String field = "NUMBER_VALUE"; //$NON-NLS-1$
+				if (aqc.getGeometryProperty() != null) {
+					field = aqc.getGeometryProperty().getDbField();
+				}
+				
 				StringBuilder sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(getResultsTable());
 				sql.append(" SET "); //$NON-NLS-1$
 				sql.append(NUMBER_SORT);
 				sql.append(" = "); //$NON-NLS-1$
-				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa." + field + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
 				sql.append("and a.keyid = '"); //$NON-NLS-1$
-				sql.append(key);
+				sql.append(aqc.getAttributeId());
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append( getResultsTable() );
@@ -204,7 +204,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
 				sql.append("and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
+				sql.append(aqc.getAttributeId());
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append( getResultsTable() );
@@ -222,13 +222,13 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 				sql.append(" = "); //$NON-NLS-1$
 				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
 				sql.append( getEngineInternal().getObservationLabelTable() );
-				if (attribute.getType() == AttributeType.TREE) {
+				if (aqc.getAttributeType() == AttributeType.TREE) {
 					sql.append(" rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$
-				}else if (attribute.getType() == AttributeType.LIST) {
+				}else if (aqc.getAttributeType() == AttributeType.LIST) {
 					sql.append(" rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
 				}
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
+				sql.append(aqc.getAttributeId());
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append( getResultsTable() );
@@ -443,7 +443,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		attrSql.append(obs);
 		attrSql.append(") "); //$NON-NLS-1$
 		attrSql.append(" GROUP BY r.ob_uuid, a.keyid, a.att_type, r.ca_uuid"); //$NON-NLS-1$
-		attrSql.append(") as foo");
+		attrSql.append(") as foo"); //$NON-NLS-1$
 
 		String query2 = attrSql.toString();
 
@@ -477,23 +477,21 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 					
 					if (atttype.equals(Attribute.AttributeType.POLYGON.name())) {
 						attributes.put(AttributeQueryColumn.GeometryProperty.PERIMETER.generateKey(keyid), number1);
-						attributes.put(AttributeQueryColumn.GeometryProperty.AREA.generateKey(keyid), number2);
-						attributes.put(AttributeQueryColumn.GeometryProperty.SOURCE.generateKey(keyid), string);
+						attributes.put(AttributeQueryColumn.GeometryProperty.AREA.generateKey(keyid), number2);			
+						attributes.put(AttributeQueryColumn.GeometryProperty.SOURCE.generateKey(keyid), Attribute.GeometrySource.valueOf(string).getLabel(Locale.getDefault()));
 						try {
 							attributes.put(keyid, reader.read(geom));
 						}catch (Exception ex) {
-							//TODO: 
-							ex.printStackTrace();
+							QueryPlugIn.log(ex.getMessage(), ex);
 						}
 						
 					}else if (atttype.equals(Attribute.AttributeType.LINE.name())) {
 						attributes.put(AttributeQueryColumn.GeometryProperty.PERIMETER.generateKey(keyid), number1);
-						attributes.put(AttributeQueryColumn.GeometryProperty.SOURCE.generateKey(keyid), string);				
+						attributes.put(AttributeQueryColumn.GeometryProperty.SOURCE.generateKey(keyid), Attribute.GeometrySource.valueOf(string).getLabel(Locale.getDefault()));				
 						try {
 							attributes.put(keyid, reader.read(geom));
 						}catch (Exception ex) {
-							//TODO: 
-							ex.printStackTrace();
+							QueryPlugIn.log(ex.getMessage(), ex);
 						}
 						
 					}else {

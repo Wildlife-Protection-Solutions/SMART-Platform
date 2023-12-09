@@ -541,7 +541,7 @@ public class WaypointObservationAttribute extends UuidItem{
 			break;
 		case POLYGON:
 		case LINE:
-			text = GeometryUtils.getAttributeGeometryLabel(getGeometry());
+			text = GeometryUtils.getAttributeGeometryLabel(getGeometry(), l);
 			break;
 		}
 		return text;

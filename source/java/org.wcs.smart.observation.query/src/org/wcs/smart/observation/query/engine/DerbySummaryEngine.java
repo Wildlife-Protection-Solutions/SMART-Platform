@@ -74,7 +74,6 @@ import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
-import org.wcs.smart.query.model.summary.AttributeValueItem.GeometryProperty;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.ConservationAreaGroupBy;
@@ -425,9 +424,8 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 				|| attributeItem.getAttributeType().isGeometry()) {
 			
 			String field = "number_value"; //$NON-NLS-1$
-			if (attributeItem.getAttributeType().isGeometry() &&
-				attributeItem.getGeometryProperty() == GeometryProperty.AREA) {
-				field = "number_value_2"; //$NON-NLS-1$
+			if (attributeItem.getGeometryProperty() != null) {
+				field = attributeItem.getGeometryProperty().getDbField();
 			}
 			
 			StringBuilder fromSql = new StringBuilder();

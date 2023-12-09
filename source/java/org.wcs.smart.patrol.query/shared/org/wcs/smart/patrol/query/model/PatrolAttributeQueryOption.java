@@ -92,6 +92,8 @@ public class PatrolAttributeQueryOption implements IPatrolQueryOption {
 		case TEXT: return PatrolQueryOptionType.STRING;
 		case MLIST:
 		case TREE:
+		case LINE:
+		case POLYGON:
 		}
 		throw new UnsupportedOperationException();
 	}

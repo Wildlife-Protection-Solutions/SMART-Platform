@@ -48,9 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.Thumbnail;
 
@@ -118,14 +116,14 @@ public class ObservationAttributeDetailsShell extends SmartShellDialog{
 				obsinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 				Label l = new Label(obsinfo, SWT.NONE);
-				l.setText("Waypoint ID:");
+				l.setText(Messages.ObservationAttributeDetailsShell_WpIdLabel);
 				
 				l = new Label(obsinfo, SWT.NONE);
 				l.setText(wp.getId());
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 				l = new Label(obsinfo, SWT.NONE);
-				l.setText("Date/Time:");
+				l.setText(Messages.ObservationAttributeDetailsShell_DateTimeLabel);
 				
 				l = new Label(obsinfo, SWT.NONE);
 				l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime()));
@@ -133,26 +131,26 @@ public class ObservationAttributeDetailsShell extends SmartShellDialog{
 
 				if (attribute.getAttribute().getType() == AttributeType.POLYGON) {
 					l = new Label(obsinfo, SWT.NONE);
-					l.setText("Area:");
+					l.setText(Messages.ObservationAttributeDetailsShell_AreaLabel);
 					
 					l = new Label(obsinfo, SWT.NONE);
-					l.setText( MessageFormat.format("{0} km\u00B2", attribute.getGeometry().getArea() ));
+					l.setText( MessageFormat.format(Messages.ObservationAttributeDetailsShell_AreaWithUnits, attribute.getGeometry().getArea() ));
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	
 				}
 				if (attribute.getAttribute().getType().isGeometry()) {
 					l = new Label(obsinfo, SWT.NONE);
-					l.setText("Perimeter:");
+					l.setText(Messages.ObservationAttributeDetailsShell_PerimeterLabel);
 					
 					l = new Label(obsinfo, SWT.NONE);
-					l.setText( MessageFormat.format("{0} km", attribute.getGeometry().getPerimeter() ));
+					l.setText( MessageFormat.format(Messages.ObservationAttributeDetailsShell_PerimeterWithUnits, attribute.getGeometry().getPerimeter() ));
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					
 					l = new Label(obsinfo, SWT.NONE);
-					l.setText("Source:");
+					l.setText(Messages.ObservationAttributeDetailsShell_SourceLabel);
 					
 					l = new Label(obsinfo, SWT.NONE);
-					l.setText( MessageFormat.format("{0}", attribute.getGeometry().getSource().name() )); //$NON-NLS-1$
+					l.setText( attribute.getGeometry().getSource().getLabel(Locale.getDefault()) );
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}
 				

@@ -21,14 +21,16 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import java.util.Locale;
 import java.util.function.Function;
 
 import org.hibernate.Session;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 
@@ -60,12 +62,26 @@ public class AttributeValueItem implements IValueItem {
 			return null;
 		}
 		
+		public String getLabel(Locale l) {
+			if (this == AREA) 
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.AREA_KM2_KEY, l);
+			if (this == PERIMETER) 
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.PERIMETER_KM_KEY, l);
+			return ""; //$NON-NLS-1$
+		}
+		
 		public Aggregation[] getAggregations() {
-			Aggregation sum = DataModel.getAggregation("sum"); //$NON-NLS-1$
-			Aggregation max = DataModel.getAggregation("max"); //$NON-NLS-1$
-			Aggregation min = DataModel.getAggregation("min"); //$NON-NLS-1$
-			Aggregation avg = DataModel.getAggregation("avg"); //$NON-NLS-1$
+			Aggregation sum = new Aggregation("sum"); //$NON-NLS-1$
+			Aggregation max = new Aggregation("max"); //$NON-NLS-1$
+			Aggregation min = new Aggregation("min"); //$NON-NLS-1$
+			Aggregation avg = new Aggregation("avg"); //$NON-NLS-1$
 			return new Aggregation[] {sum, avg, max, min}; 
+		}
+		
+		public String getDbField() {
+			if (this == AREA) return GeometryAttributeValue.DB_FIELD_AREA;
+			if (this == PERIMETER) return GeometryAttributeValue.DB_FIELD_PERIMETER;
+			throw new IllegalStateException();
 		}
 	}
 	

@@ -1,11 +1,6 @@
 package org.wcs.smart.observation.query.model.columns;
 
-import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,7 +8,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -28,11 +22,8 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.model.AttributeQueryColumn;
-import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * Query column cache.

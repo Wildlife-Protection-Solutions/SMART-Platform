@@ -22,16 +22,17 @@
 package org.wcs.smart.incident.xml;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.incident.xml.model.v22.AttachmentType;
-import org.wcs.smart.incident.xml.model.v22.EmployeeType;
-import org.wcs.smart.incident.xml.model.v22.WaypointObservationAttributeType;
-import org.wcs.smart.incident.xml.model.v22.WaypointObservationGroupType;
-import org.wcs.smart.incident.xml.model.v22.WaypointObservationType;
-import org.wcs.smart.incident.xml.model.v22.WaypointType;
+import org.wcs.smart.incident.xml.model.v23.AttachmentType;
+import org.wcs.smart.incident.xml.model.v23.EmployeeType;
+import org.wcs.smart.incident.xml.model.v23.WaypointObservationAttributeType;
+import org.wcs.smart.incident.xml.model.v23.WaypointObservationGroupType;
+import org.wcs.smart.incident.xml.model.v23.WaypointObservationType;
+import org.wcs.smart.incident.xml.model.v23.WaypointType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -133,6 +134,10 @@ public class IncidentToXml {
 								xml2.getItemKey().add(ali.getAttributeListItem().getKeyId());
 							}
 						}
+					}else if (att.getAttribute().getType().isGeometry()) {					
+						xml2.setSValue(att.getStringValue());
+						xml2.setGeomValue( Base64.getEncoder().encodeToString(att.getGeom()) );
+						add = true;
 					}
 					
 					if (add){

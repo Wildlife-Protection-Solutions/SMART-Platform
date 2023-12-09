@@ -21,7 +21,12 @@
  */
 package org.wcs.smart.filter;
 
+import java.util.Locale;
+
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.util.SharedUtils;
 
@@ -40,6 +45,7 @@ public class AttributeFilter implements IFilter {
 		AREA("area"), PERIMETER("perimeter"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private String key;
+		
 		GeometryProperty(String key){
 			this.key = key;
 		}
@@ -47,11 +53,25 @@ public class AttributeFilter implements IFilter {
 			return this.key;
 		}
 		
+		public String getLabel(Locale l) {
+			if (this == AREA) 
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.AREA_KM2_KEY, l);
+			if (this == PERIMETER) 
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.PERIMETER_KM_KEY, l);
+			return ""; //$NON-NLS-1$
+		}
+		
 		public static GeometryProperty valueOfKey(String key) {
 			for (GeometryProperty p : GeometryProperty.values()) {
 				if (p.getKey().equalsIgnoreCase(key)) return p;
 			}
 			return null;
+		}
+		
+		public String getDbField() {
+			if (this == AREA) return GeometryAttributeValue.DB_FIELD_AREA;
+			if (this == PERIMETER) return GeometryAttributeValue.DB_FIELD_PERIMETER;
+			throw new IllegalStateException();
 		}
 	}
 	

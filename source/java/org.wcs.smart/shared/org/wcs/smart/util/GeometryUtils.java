@@ -44,9 +44,8 @@ package org.wcs.smart.util;
 
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,11 +76,10 @@ import org.locationtech.jts.linearref.LinearLocation;
 import org.locationtech.jts.linearref.LocationIndexedLine;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.map.GeometryFactoryProvider;
-
-import jakarta.persistence.Transient;
 
 /**
  * A collection of geometry functions for
@@ -268,7 +266,7 @@ public class GeometryUtils {
 			Geometry g3 = g2.intersection(g1);
 			return new SerialBlob(wkbwriter().write(g3));
 		}catch(TopologyException te) {
-			throw new RuntimeException ("A topology exception occured - try checking track geometries for cases where GPS units were not turned off at rest points and cleaning these tracks", te );
+			throw new RuntimeException ("A topology exception occured - try checking track geometries for cases where GPS units were not turned off at rest points and cleaning these tracks", te ); //$NON-NLS-1$
 		}catch (Throwable e){
  			throw new RuntimeException ( e );
 		}
@@ -703,19 +701,18 @@ public class GeometryUtils {
 	}
 
 	
-	public static String getAttributeGeometryLabel(GeometryAttributeValue value) {
-		if (value == null) return "";
-		
-//		if (g instanceof LineString) g = GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[] {(LineString)g});
-//		if (g instanceof Polygon) g = GeometryFactoryProvider.getFactory().createMultiPolygon(new Polygon[] {(Polygon)g});
+	public static String getAttributeGeometryLabel(GeometryAttributeValue value, Locale l) {
+		if (value == null) return ""; //$NON-NLS-1$
 		
 		if (value.isPolygon()) {
-			return MessageFormat.format("POLYGON Area: {0,number,#.##} km\u00B2, Perimeter: {1,number,#.##} km, Source: {2} ", value.getArea(), value.getPerimeter(), value.getSource().name());
+			String msg = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.POLYGON_GEOM_ATTRIBUTE_LABEL, l);
+			return MessageFormat.format(msg, value.getArea(), value.getPerimeter(), value.getSource().getLabel(l));
 		}
 		if (value.isLineString()) {
-			return MessageFormat.format("LINESTRING Length: {0,number,#.##} km, Source: {1}", value.getPerimeter(), value.getSource().name());
+			String msg = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.LINESTRING_GEOM_ATTRIBUTE_LABEL, l);
+			return MessageFormat.format(msg, value.getPerimeter(), value.getSource().getLabel(l));
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}	
 
 	public static double getAreaInKm(MultiPolygon mp) {

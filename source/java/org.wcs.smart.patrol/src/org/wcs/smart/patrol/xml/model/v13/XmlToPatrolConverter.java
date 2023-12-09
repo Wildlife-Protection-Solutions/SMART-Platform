@@ -249,6 +249,8 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					break;
 				case TREE:
 				case MLIST:
+				case LINE:
+				case POLYGON:
 					//not supported
 					break;
 					

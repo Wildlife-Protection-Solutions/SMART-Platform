@@ -23,6 +23,7 @@ package org.wcs.smart.incident.map;
 
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Patrol map page default waypoint style
@@ -46,7 +47,8 @@ public class IncidentMapLineStringAttributeDefaultStyle implements IMapLayerDefa
 
 	@Override
 	public String getLayerName() {
-		return "LineString Attributes";
+		return SmartLabelProvider.LINESTRING_ATTRIBUTE_LAYER;
+
 	}
 
 }

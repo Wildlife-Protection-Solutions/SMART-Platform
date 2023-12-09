@@ -64,7 +64,7 @@ public class Attribute extends DmObject{
 	
 	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 8200;
 	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
-	
+		
 	/**
 	 * Conservation are associated with attribute
 	 */
@@ -141,7 +141,11 @@ public class Attribute extends DmObject{
 		MANUAL_DRAW,
 		MANUAL_POINT,
 		GPS,
-		UNKNOWN
+		UNKNOWN;
+		
+		public String getLabel(Locale l) {
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(this, l);
+		}
 	};
 	
 	/**

@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.map.style;
 
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Patrol map page default waypoint style
@@ -46,7 +47,7 @@ public class PatrolMapPolygonAttributeDefaultStyle implements IMapLayerDefaultSt
 
 	@Override
 	public String getLayerName() {
-		return "Polygon Attributes";
+		return SmartLabelProvider.POLYGON_ATTRIBUTE_LAYER;
 	}
 
 }

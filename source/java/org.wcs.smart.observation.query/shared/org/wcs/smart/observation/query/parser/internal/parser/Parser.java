@@ -3,7 +3,7 @@
 package org.wcs.smart.observation.query.parser.internal.parser;
 
 import java.util.*;
-import org.wcs.smart.observation.query.parser.internal.*;
+import org.wcs.smart.observation.query.parser.internal.parser.*;
 import org.wcs.smart.filter.*;
 import org.wcs.smart.observation.query.model.filter.*;
 import org.wcs.smart.query.model.filter.*;

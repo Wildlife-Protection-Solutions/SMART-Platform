@@ -35,7 +35,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.filter.AttributeFilter;
-import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.filter.CategoryAttributeFilter;
 import org.wcs.smart.filter.CategoryFilter;
 import org.wcs.smart.filter.IFilter;
@@ -574,14 +573,10 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}else if (attfilter.getAttributeType() == AttributeType.MLIST) {
 				//nothing to do; dealt with as join above
 			}else if (attfilter.getAttributeType().isGeometry()){
-				String field = "number_value"; //$NON-NLS-1$
-				if (attfilter.getGeometryProperty() == GeometryProperty.AREA) {
-					field = "number_value_2";					 //$NON-NLS-1$
-				}
 				sql.append("("); //$NON-NLS-1$
 				sql.append(prefix(WaypointObservationAttribute.class));
 				sql.append("."); //$NON-NLS-1$
-				sql.append(field);
+				sql.append(attfilter.getGeometryProperty().getDbField());
 				sql.append(" "); //$NON-NLS-1$
 				sql.append(getSqlGenerator().asSql(attfilter.getOperator()));
 				String p1 = engine.addParameterValue((Double)attfilter.getValue());

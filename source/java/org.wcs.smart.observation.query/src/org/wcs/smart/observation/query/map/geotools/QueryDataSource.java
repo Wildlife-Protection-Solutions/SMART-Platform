@@ -22,7 +22,6 @@
 package org.wcs.smart.observation.query.map.geotools;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.geotools.data.store.ContentDataStore;

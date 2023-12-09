@@ -39,8 +39,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 public class QueryFeatureSource  extends ContentFeatureSource {
 
@@ -154,28 +154,28 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 		if (!type.isGeometry()) throw new IllegalStateException();
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:");
+		sb.append("the_geom:"); //$NON-NLS-1$
 		if (type == Attribute.AttributeType.POLYGON) {
-			sb.append("MultiPolygon");
+			sb.append("MultiPolygon"); //$NON-NLS-1$
 		}else if (type == Attribute.AttributeType.LINE) {
-			sb.append("MultiLineString");
+			sb.append("MultiLineString"); //$NON-NLS-1$
 		}
 		sb.append(":srid=4326,fid:String,"); //$NON-NLS-1$
-		sb.append("Attribute:");
+		sb.append("attribute:"); //$NON-NLS-1$
 		sb.append(ColumnType.STRING.geotoolsType);
-		sb.append(",");
-		sb.append("attribute_key:");
+		sb.append(","); //$NON-NLS-1$
+		sb.append("attribute_key:"); //$NON-NLS-1$
 		sb.append(ColumnType.STRING.geotoolsType);
-		sb.append(",");
-		sb.append("Geometry Source:");
+		sb.append(","); //$NON-NLS-1$
+		sb.append("geometry_source:"); //$NON-NLS-1$
 		sb.append(ColumnType.STRING.geotoolsType);
-		sb.append(",");
+		sb.append(","); //$NON-NLS-1$
 		if (type == Attribute.AttributeType.POLYGON) {
-			sb.append("Geometry Area_km2:");
+			sb.append("geometry_area_km2:"); //$NON-NLS-1$
 			sb.append(ColumnType.NUMBER.geotoolsType);
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 		}
-		sb.append("Geometry Perimeter_km:");
+		sb.append("geometry_perimeter_km:"); //$NON-NLS-1$
 		sb.append(ColumnType.NUMBER.geotoolsType);
 		
 		

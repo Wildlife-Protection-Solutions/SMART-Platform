@@ -78,6 +78,9 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	public static final String STATION_ID = Messages.Station_Id_Label;
 	public static final String STATION_NAME = Messages.Station_Name_Label;
 	public static final String STATION_DESCRIPTION = Messages.Station_Description_Label;
+	
+	public static final String POLYGON_ATTRIBUTE_LAYER = "Polygon Attributes";
+	public static final String LINESTRING_ATTRIBUTE_LAYER = "LineString Attributes";
 
 	@Override
 	public String getLabel(Object value, Locale l) {
@@ -91,6 +94,13 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			return SmartLabelProvider.getFullLabel((Employee)value);
 		}else if (value instanceof AreaType){
 			return getAreaTypeName((AreaType)value);
+		}else if (value instanceof Attribute.GeometrySource src) {
+			switch(src) {
+				case GPS: return "GPS";
+				case MANUAL_DRAW: return "Drawn On Map";
+				case MANUAL_POINT: return "Manually Input of Coordinates";
+				case UNKNOWN: return "Unknown";		
+			}
 		}
 		if (value.equals(GEOMETRY_LABEL)) return Messages.SmartLabelProvider_GeometryLabel;
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.Agency_AgencyName;
@@ -126,6 +136,16 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(CA_POINTOFCONTACT_KEY)) return Messages.SmartLabelProvider_pointofcontactcolumnname;
 		if (value.equals(CA_COUNTRY_KEY)) return Messages.SmartLabelProvider_countrycolumnname;
 		if (value.equals(CA_OWNER_KEY)) return Messages.SmartLabelProvider_ownercolumnname;
+		
+		if (value.equals(AREA_KM2_KEY)) return "Area (km\u00B2)";
+		if (value.equals(PERIMETER_KM_KEY)) return "Perimeter (km)";
+		if (value.equals(POLYGON_KEY)) return "Polygon";
+		if (value.equals(LINESTRING_KEY)) return "LineString";
+		
+		if (value.equals(POLYGON_GEOM_ATTRIBUTE_LABEL)) return "Polygon Area: {0,number,#.##} km\u00B2, Perimeter: {1,number,#.##} km, Source: {2} ";
+		if (value.equals(LINESTRING_GEOM_ATTRIBUTE_LABEL)) return "LineString Length: {0,number,#.##} km, Source: {1}";
+
+				
 		
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_NOT_FOUND)) return Messages.SmartLabelProvider_MergeDmAttNotFound;
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_TYPE_MISMATCH)) return Messages.SmartLabelProvider_MergeDmTypeMismatch;

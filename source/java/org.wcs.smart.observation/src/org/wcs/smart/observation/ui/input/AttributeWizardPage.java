@@ -769,7 +769,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				att.setAttribute(field.getAttribute());
 				att.setObservation(wo);
 				att.setAttributeValue(field.getValue());
-				att.setAttributeListItems(new ArrayList<>());
+				if (att.getAttribute().getType() == Attribute.AttributeType.MLIST &&
+						att.getAttributeListItems() == null) {
+					att.setAttributeListItems(new ArrayList<>());
+				}
 				wo.getAttributes().add(att);
 			}
 		}

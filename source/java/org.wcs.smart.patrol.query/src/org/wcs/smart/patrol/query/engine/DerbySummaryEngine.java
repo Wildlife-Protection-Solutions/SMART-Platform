@@ -114,7 +114,6 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
-import org.wcs.smart.query.model.summary.AttributeValueItem.GeometryProperty;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
@@ -836,9 +835,8 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 			|| attributeItem.getAttributeType().isGeometry()) {
 				
 			String field = "number_value"; //$NON-NLS-1$
-			if (attributeItem.getAttributeType().isGeometry() &&
-				attributeItem.getGeometryProperty() == GeometryProperty.AREA) {
-				field = "number_value_2"; //$NON-NLS-1$
+			if (attributeItem.getGeometryProperty() != null) {
+				field = attributeItem.getGeometryProperty().getDbField();
 			}
 			
 			StringBuilder fromSql = new StringBuilder();

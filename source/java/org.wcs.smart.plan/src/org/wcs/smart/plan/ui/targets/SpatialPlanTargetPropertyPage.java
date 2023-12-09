@@ -336,7 +336,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
         
         Rule rnotselected = sb.createRule(notselected);
         rnotselected.setFilter(ff.equals(ff.property("selected"), ff.literal(Boolean.FALSE))); //$NON-NLS-1$
-        rnotselected.setName("Not Selected");
+        rnotselected.setName("Not Selected"); //$NON-NLS-1$
         
         //selected
         mark = sb.createMark("circle",  new Color(255, 255, 0), new Color(255, 255, 0), 1); //$NON-NLS-1$
@@ -345,7 +345,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
         
         Rule rselected = sb.createRule(selected);
         rselected.setFilter(ff.equals(ff.property("selected"), ff.literal(Boolean.TRUE))); //$NON-NLS-1$
-        rselected.setName("Selected");
+        rselected.setName("Selected"); //$NON-NLS-1$
         
         FeatureTypeStyle fs = sb.createFeatureTypeStyle(null, rselected, rnotselected);
         Style s = sb.createStyle();

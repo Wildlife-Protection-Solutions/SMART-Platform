@@ -59,6 +59,15 @@ public class Aggregation implements Serializable {
 	 */
 	public Aggregation(){
 
+	} 
+	
+	/**
+	 * Create new aggregation with given name
+	 * @param name
+	 */
+	public Aggregation(String name) {
+		this();
+		setName(name);
 	}
 	
 	/**

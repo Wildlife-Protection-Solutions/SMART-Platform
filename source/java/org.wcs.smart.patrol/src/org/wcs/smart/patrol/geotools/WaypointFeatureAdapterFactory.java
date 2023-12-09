@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.util.UuidUtils;
@@ -62,7 +63,7 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 				if (sf.getFeatureType().getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) || 
 						sf.getFeatureType().getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON) ){
 					
-					String uuid = sf.getAttribute("wp_uuid").toString();
+					String uuid = sf.getAttribute(ObservationAttributeFeatureFactory.WP_UUID_FIELD).toString();
 					UUID wpuuid;
 					try {
 						wpuuid = UuidUtils.stringToUuid(uuid);

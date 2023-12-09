@@ -107,7 +107,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		String data[] = new String[queryColumns.size()]; 
 		for (int i = 0; i < data.length; i ++){
 			QueryColumn qc = queryColumns.get(i);
-			data[i] = qc.getValueAsString(qc.getValue(row), false);
+			data[i] = qc.getValueAsString(qc.getValue(row), Locale.getDefault(), false);
 		}
 		ICsvDataExporter.removeLineFeeds(data);
 		writer.writeNext(data);

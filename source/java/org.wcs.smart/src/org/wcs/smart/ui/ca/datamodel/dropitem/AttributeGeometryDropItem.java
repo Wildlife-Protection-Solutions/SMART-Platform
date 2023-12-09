@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.ca.datamodel.dropitem;
 
+import java.util.Locale;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -215,8 +217,7 @@ public class AttributeGeometryDropItem extends DropItem {
 			};
 		}
 		for (AttributeFilter.GeometryProperty prop : propertyOptions) {
-			//TODO:
-			fields.add(prop.name());
+			fields.add(prop.getLabel(Locale.getDefault()));
 			if (prop == currentProperty) {
 				fields.select(fields.getItemCount() - 1);
 			}

@@ -213,8 +213,8 @@ public abstract class QueryColumn implements Cloneable{
 	 * the formatted string representation of the object associated 
 	 * with this column
 	 */
-	public String getValueAsString(Object value){
-		return getValueAsString(value, true);
+	public String getValueAsString(Object value, Locale l){
+		return getValueAsString(value, l, true);
 	}
 	/**
 	 * @param value 
@@ -223,16 +223,16 @@ public abstract class QueryColumn implements Cloneable{
 	 * the string representation of the object associated 
 	 * with this column
 	 */
-	public String getValueAsString(Object value, boolean formatted){
+	public String getValueAsString(Object value, Locale l, boolean formatted){
 		if (value == null) return ""; //$NON-NLS-1$
 		if (type == ColumnType.BOOLEAN) {
 			if (value instanceof Double){
 				if ((Double)value < 0.5){
 					//false
-					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());	
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);	
 				}else{
 					//true
-					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());	
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);	
 				}
 			}
 			if ((Boolean) value) {

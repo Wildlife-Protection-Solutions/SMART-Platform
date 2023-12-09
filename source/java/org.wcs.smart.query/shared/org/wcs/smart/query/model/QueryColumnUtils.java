@@ -28,8 +28,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import org.opengis.feature.type.AttributeDescriptor;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
@@ -53,7 +56,7 @@ public abstract class QueryColumnUtils implements Cloneable{
 	 * @param descriptor output feature type column descriptor 
 	 * @return
 	 */
-	public static Object getValue(IResultItem item, QueryColumn column, AttributeDescriptor descriptor){
+	public static Object getValue(IResultItem item, QueryColumn column, AttributeDescriptor descriptor, Locale l){
 		Object x =  column.getValue(item);
 		
 		if (x instanceof Boolean){
@@ -104,10 +107,10 @@ public abstract class QueryColumnUtils implements Cloneable{
 			if (x == null) return x;
 			if (descriptor.getType().getBinding().equals(String.class)){
 				if (column instanceof AttributeQueryColumn ac) {
-					if (ac.getAttributeType() == AttributeType.POLYGON) return "POLYGON";
-					if (ac.getAttributeType() == AttributeType.LINE) return "LINESTRING";
+					if (ac.getAttributeType() == AttributeType.POLYGON) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.POLYGON_KEY, l);
+					if (ac.getAttributeType() == AttributeType.LINE) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.LINESTRING_KEY, l);
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		}
 		return x;
