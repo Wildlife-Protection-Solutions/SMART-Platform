@@ -29,8 +29,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.wcs.smart.er.xml.model.missions.v12.MissionType;
-import org.wcs.smart.er.xml.model.missions.v12.ObjectFactory;
+import org.wcs.smart.er.xml.model.missions.v13.MissionType;
+import org.wcs.smart.er.xml.model.missions.v13.ObjectFactory;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
@@ -45,7 +45,7 @@ import jakarta.xml.bind.Marshaller;
  */
 public class MissionXmlManager {
 	
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions.v12"; //$NON-NLS-1$
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions.v13"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 	
@@ -93,7 +93,8 @@ public class MissionXmlManager {
 				return new org.wcs.smart.er.xml.model.missions.v11.XMLtoMissionConverter();
 			}else if (version.equals(org.wcs.smart.er.xml.model.missions.v10.ObjectFactory._Mission_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.er.xml.model.missions.v10.XMLtoMissionConverter();
-				
+			}else if (version.equals(org.wcs.smart.er.xml.model.missions.v13.ObjectFactory._Mission_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.er.xml.model.missions.v13.XMLtoMissionConverter();	
 			}
 		}catch (Exception ex){
 			//invalid xml file

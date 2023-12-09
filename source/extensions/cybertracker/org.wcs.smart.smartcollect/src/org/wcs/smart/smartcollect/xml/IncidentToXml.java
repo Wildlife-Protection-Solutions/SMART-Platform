@@ -22,6 +22,7 @@
 package org.wcs.smart.smartcollect.xml;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -126,6 +127,10 @@ public class IncidentToXml {
 							xml2.getItemKey().add(att.getAttributeTreeNode().getHkey());
 							add = true;
 						}
+					}else if (att.getAttribute().getType().isGeometry()) {	
+						xml2.setSValue(att.getStringValue());
+						xml2.setGeomValue( Base64.getEncoder().encodeToString(att.getGeom()) );
+						add = true;
 					}
 					
 					if (add){

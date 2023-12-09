@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.map.style;
 
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class MissionTrackQueryDefaultStyle implements IMapLayerDefaultStyle {
@@ -37,11 +38,11 @@ public class MissionTrackQueryDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return "Ecological Records Query";
+		return Messages.MissionGridQueryDefaultStyle_ErQueryMap;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Mission Track";
+		return Messages.MissionTrackQueryDefaultStyle_tracklayer;
 	}
 }

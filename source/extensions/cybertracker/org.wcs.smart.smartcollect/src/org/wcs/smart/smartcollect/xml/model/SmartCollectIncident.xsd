@@ -58,6 +58,8 @@ elementFormDefault="qualified">
  		<element name="bValue" type="boolean" maxOccurs="1"
  			minOccurs="0">
  		</element>
+ 		<element name="geomValue" type="string" maxOccurs="1" minOccurs="0"></element>
+ 		
  	</sequence>
  	<attribute name="attributeKey" type="string"></attribute>
  </complexType>

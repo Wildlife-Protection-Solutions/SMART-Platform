@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,7 +38,9 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.geotools.geometry.jts.WKBReader;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -63,6 +66,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -363,7 +368,27 @@ public class DeploymentFromXml {
 									}
 									if (items.isEmpty()) throw new Exception(MessageFormat.format(Messages.DeploymentFromXml_NoListItemsFound, woa.getAttribute().getName()));
 									woa.setAttributeListItems(items);
-									
+								case LINE:
+								case POLYGON:
+									if (xmla.getGeomValue() != null) {
+										GeometrySource src = GeometrySource.UNKNOWN;
+										try {
+											src = GeometrySource.valueOf(xmla.getStringValue().get(0));	
+										}catch (Exception ex) {
+											warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", xmla.getStringValue().get(0), xmla.getAttributeKey()));
+										}
+										
+										try {
+											byte[] geom = Base64.getDecoder().decode(xmla.getGeomValue());
+											Geometry g = (new WKBReader()).read(geom);
+											GeometryAttributeValue value = new GeometryAttributeValue(g, src);
+											woa.setGeometry(value);	
+										}catch (Exception ex) {
+											warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", xmla.getAttributeKey()));
+										}
+										
+									}
+									break;
 								}
 							}catch (Exception ex) {
 								warnings.add(Messages.DeploymentFromXml_AttributeNotImported + ex.getMessage());

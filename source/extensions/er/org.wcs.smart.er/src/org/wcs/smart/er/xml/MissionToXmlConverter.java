@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.xml;
 	
+import java.util.Base64;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -32,18 +34,18 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.xml.model.missions.v12.AttachmentType;
-import org.wcs.smart.er.xml.model.missions.v12.MembersType;
-import org.wcs.smart.er.xml.model.missions.v12.MissionDayType;
-import org.wcs.smart.er.xml.model.missions.v12.MissionPropertyValuesType;
-import org.wcs.smart.er.xml.model.missions.v12.MissionType;
-import org.wcs.smart.er.xml.model.missions.v12.SurveyType;
-import org.wcs.smart.er.xml.model.missions.v12.SurveyWaypointsType;
-import org.wcs.smart.er.xml.model.missions.v12.TracksType;
-import org.wcs.smart.er.xml.model.missions.v12.WaypointObservationAttributeType;
-import org.wcs.smart.er.xml.model.missions.v12.WaypointObservationGroupType;
-import org.wcs.smart.er.xml.model.missions.v12.WaypointObservationType;
-import org.wcs.smart.er.xml.model.missions.v12.WaypointType;
+import org.wcs.smart.er.xml.model.missions.v13.AttachmentType;
+import org.wcs.smart.er.xml.model.missions.v13.MembersType;
+import org.wcs.smart.er.xml.model.missions.v13.MissionDayType;
+import org.wcs.smart.er.xml.model.missions.v13.MissionPropertyValuesType;
+import org.wcs.smart.er.xml.model.missions.v13.MissionType;
+import org.wcs.smart.er.xml.model.missions.v13.SurveyType;
+import org.wcs.smart.er.xml.model.missions.v13.SurveyWaypointsType;
+import org.wcs.smart.er.xml.model.missions.v13.TracksType;
+import org.wcs.smart.er.xml.model.missions.v13.WaypointObservationAttributeType;
+import org.wcs.smart.er.xml.model.missions.v13.WaypointObservationGroupType;
+import org.wcs.smart.er.xml.model.missions.v13.WaypointObservationType;
+import org.wcs.smart.er.xml.model.missions.v13.WaypointType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -273,6 +275,10 @@ public class MissionToXmlConverter {
 						xml2.getItemKey().add(li.getAttributeListItem().getKeyId());
 					}
 				}
+			}else if (att.getAttribute().getType().isGeometry()) {					
+				xml2.setSValue(att.getStringValue());
+				xml2.setGeomValue( Base64.getEncoder().encodeToString(att.getGeom()) );
+				add = true;
 			}
 			if (add){
 				xml.getAttributes().add(xml2);

@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -255,6 +256,13 @@ public class DeploymentToXml {
 						case TREE:
 							if (woa.getAttributeTreeNode() != null) xmlaa.getStringValue().add(woa.getAttributeTreeNode().getHkey());
 							break;
+						case LINE:
+						case POLYGON:
+							if (woa.getGeom() != null) {
+								xmlaa.getStringValue().add(woa.getStringValue());
+								xmlaa.setGeomValue( Base64.getEncoder().encodeToString(woa.getGeom()) );
+								
+							}
 						}
 						
 					

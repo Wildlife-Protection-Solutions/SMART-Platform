@@ -422,16 +422,16 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 								}
 							}
 						}else if (qc.getKey().equals("su:length") || qc.getKey().contentEquals("su:effort")) { //$NON-NLS-1$ //$NON-NLS-2$
-							data[i] = qc.getValueAsString(qc.getValue(ri));
+							data[i] = qc.getValueAsString(qc.getValue(ri), Locale.getDefault());
 						}else if (qc instanceof SurveyQueryColumn
 								&& ((SurveyQueryColumn)qc).getKey().equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())) {
-							data[i] = qc.getValueAsString(qc.getValue(ri));
+							data[i] = qc.getValueAsString(qc.getValue(ri), Locale.getDefault());
 						}
 					}
 				}else {
 					for (int i = 0; i < data.length; i ++){
 						QueryColumn qc = columns.get(i);
-						data[i] = qc.getValueAsString(qc.getValue(ri));
+						data[i] = qc.getValueAsString(qc.getValue(ri), Locale.getDefault());
 					}
 				}
 				writer.writeNext(data);

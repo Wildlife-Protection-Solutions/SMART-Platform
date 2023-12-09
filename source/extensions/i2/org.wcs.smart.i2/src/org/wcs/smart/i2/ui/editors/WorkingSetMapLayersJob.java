@@ -43,8 +43,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.ui.WorkbenchException;
-import org.geotools.data.FeatureSource;
-import org.geotools.data.FeatureStore;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;

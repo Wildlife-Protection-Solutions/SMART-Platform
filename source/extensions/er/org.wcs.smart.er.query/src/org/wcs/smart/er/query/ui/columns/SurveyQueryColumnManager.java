@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.ui.columns;
 
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,7 +35,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -55,8 +53,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
-import org.wcs.smart.query.model.AttributeQueryColumn;
-import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 

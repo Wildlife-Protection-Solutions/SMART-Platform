@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.map.geotools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.locationtech.jts.geom.Geometry;
@@ -58,7 +59,7 @@ public class SurveyResultItemFeature {
 		int i = 2;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){
-				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
+				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++), Locale.getDefault()));
 			}
 		}
 	}

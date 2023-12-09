@@ -30,7 +30,6 @@ import java.util.Locale;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 

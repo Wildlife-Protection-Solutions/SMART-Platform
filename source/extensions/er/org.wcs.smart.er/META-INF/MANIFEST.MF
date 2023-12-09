@@ -32,6 +32,7 @@ Export-Package: org.wcs.smart.er,
  org.wcs.smart.er.xml.model.missions.v10,
  org.wcs.smart.er.xml.model.missions.v11,
  org.wcs.smart.er.xml.model.missions.v12,
+ org.wcs.smart.er.xml.model.missions.v13,
  org.wcs.smart.er.xml.model.surveydesign
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.er

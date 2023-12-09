@@ -3,6 +3,7 @@ package org.wcs.smart.i2.udig;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -45,13 +46,13 @@ public class IntelObservationAttributeFeatureFactory {
 		int i = 0;
 		data[i++] = value.getGeometry().getGeometry();
 		data[i++] = value.getUuid() == null ? UUID.randomUUID().toString() : value.getUuid().toString();
-		data[i++] = value.getObservation().getUuid() == null ? "" : value.getObservation().getUuid().toString();
-		data[i++] = value.getObservation().getLocation().getUuid() == null ? "" : value.getObservation().getLocation().getUuid().toString();
+		data[i++] = value.getObservation().getUuid() == null ? "" : value.getObservation().getUuid().toString(); //$NON-NLS-1$
+		data[i++] = value.getObservation().getLocation().getUuid() == null ? "" : value.getObservation().getLocation().getUuid().toString(); //$NON-NLS-1$
 		data[i++] = value.getAttribute().getName();
 		data[i++] = value.getAttribute().getKeyId();
 		data[i++] = value.getGeometry().getPerimeter();
 		if (hasArea)  data[i++] = value.getGeometry().getArea();
-		data[i++] = value.getGeometry().getSource().name();
+		data[i++] = value.getGeometry().getSource().getLabel(Locale.getDefault());
 		data[i++] = value.getObservation().getLocation().getId();
 		data[i++] = value.getObservation().getLocation().getDateTime().toLocalDate();
 		data[i++] = value.getObservation().getLocation().getDateTime().toLocalTime();

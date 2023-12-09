@@ -73,6 +73,7 @@ public class Messages extends NLS {
 	public static String AttributeFieldEditor_ReprojectionError;
 	public static String AttributeFieldEditor_ReprojectionError2;
 	public static String AttributeFieldEditor_ReprojectionError3;
+	public static String AttributeGeometryDropItem_numericvaluerequired;
 	public static String AttributeListDialog_deleteDialogMsg;
 	public static String AttributeListDialog_DeleteDialogTitle;
 	public static String AttributeListDialog_DeleteError;

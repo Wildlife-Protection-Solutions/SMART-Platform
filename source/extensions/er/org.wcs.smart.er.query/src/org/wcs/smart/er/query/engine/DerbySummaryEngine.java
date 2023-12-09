@@ -715,7 +715,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 
 			sql.append(" WHERE "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append("." + field + " is not null and "); //$NON-NLS-1$
+			sql.append("." + field + " is not null and "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(tablePrefix(Attribute.class));
 			String p1 = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$

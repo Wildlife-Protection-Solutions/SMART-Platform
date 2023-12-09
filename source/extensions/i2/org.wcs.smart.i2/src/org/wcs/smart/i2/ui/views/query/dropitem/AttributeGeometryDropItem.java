@@ -39,6 +39,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
 
 
@@ -212,7 +213,6 @@ public class AttributeGeometryDropItem extends DropItem {
 			};
 		}
 		for (AttributeFilter.GeometryProperty prop : propertyOptions) {
-			//TODO:
 			fields.add(prop.name());
 			if (prop == currentProperty) {
 				fields.select(fields.getItemCount() - 1);
@@ -262,7 +262,7 @@ public class AttributeGeometryDropItem extends DropItem {
 				
 		cd = new ControlDecoration(value, SWT.LEFT);
 		cd.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
-		cd.setDescriptionText("valid numeric valid not provided");
+		cd.setDescriptionText(Messages.AttributeGeometryDropItem_numericvaluerequired);
 		cd.show();
 				
 		for (int i = 0; i < operatorOptions.length; i++) {

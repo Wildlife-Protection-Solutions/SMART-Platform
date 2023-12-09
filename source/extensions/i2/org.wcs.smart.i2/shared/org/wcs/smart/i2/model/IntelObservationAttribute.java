@@ -41,13 +41,11 @@ import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
-import org.opengis.feature.GeometryAttribute;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
@@ -355,7 +353,7 @@ public class IntelObservationAttribute extends UuidItem{
 			break;
 		case POLYGON:
 		case LINE:
-			text = GeometryUtils.getAttributeGeometryLabel(getGeometry());
+			text = GeometryUtils.getAttributeGeometryLabel(getGeometry(), l);
 			break;
 		
 		}

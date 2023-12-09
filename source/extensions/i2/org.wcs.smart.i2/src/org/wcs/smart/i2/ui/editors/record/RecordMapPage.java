@@ -28,7 +28,6 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -79,9 +78,6 @@ import org.wcs.smart.i2.map.style.RecordPointObservationDefaultStyle;
 import org.wcs.smart.i2.map.style.RecordPolygonObservationDefaultStyle;
 import org.wcs.smart.i2.map.style.RecordPositionAttributeDefaultStyle;
 import org.wcs.smart.i2.model.IntelLocation;
-import org.wcs.smart.i2.model.IntelObservation;
-import org.wcs.smart.i2.model.IntelObservationAttribute;
-import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.record.IntelRecordDataSource;

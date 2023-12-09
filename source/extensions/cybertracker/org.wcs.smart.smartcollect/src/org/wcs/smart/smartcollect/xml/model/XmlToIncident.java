@@ -29,19 +29,24 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
+import org.geotools.geometry.jts.WKBReader;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.xml.IncidentXmlManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -357,6 +362,22 @@ public class XmlToIncident {
 					return null;
 				}else {
 					attribute.setAttributeListItems(items);
+				}
+			}else if (dmAttribute.getType().isGeometry()) {
+				GeometrySource src = GeometrySource.UNKNOWN;
+				try {
+					src = GeometrySource.valueOf(type.getSValue());	
+				}catch (Exception ex) {
+					warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", type.getSValue(), type.getAttributeKey()));
+				}
+				
+				try {
+					byte[] geom = Base64.getDecoder().decode(type.getGeomValue());
+					Geometry g = (new WKBReader()).read(geom);
+					GeometryAttributeValue value = new GeometryAttributeValue(g, src);
+					attribute.setGeometry(value);	
+				}catch (Exception ex) {
+					warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", type.getAttributeKey()));
 				}
 			}
 			

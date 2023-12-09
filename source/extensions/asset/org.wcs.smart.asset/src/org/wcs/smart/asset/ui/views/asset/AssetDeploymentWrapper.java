@@ -46,6 +46,10 @@ class AssetDeploymentWrapper {
 	public AssetDeployment getDeployment() {
 		return deployment;
 	}
+	
+	public void updateDeployment(AssetDeployment deployment) {
+		this.deployment = deployment;
+	}
 	/**
 	 * 
 	 * @param stat
