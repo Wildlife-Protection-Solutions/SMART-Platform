@@ -17,6 +17,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<smart.version>7.5.7</smart.version>
+		<smart.version.758>7.5.8</smart.version.758>
 
 		<birt.version>4.18.0-SNAPSHOT</birt.version>
 		<geotools.version>23.0</geotools.version>
