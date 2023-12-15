@@ -170,7 +170,7 @@ public class DataModelXmlToSmartConverter {
 			a.setConservationArea(targetCa);
 			
 			List<Aggregation> newAggregations = new ArrayList<>();
-			for (Aggregation c : newAggregations) {
+			for (Aggregation c : a.getAggregations()) {
 				Aggregation newAgg = lookUpAggregation(c.getName());
 				if (newAgg != null) newAggregations.add(newAgg);
 			}
