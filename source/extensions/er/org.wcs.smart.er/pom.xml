@@ -13,6 +13,6 @@
 	<name>SMART Ecological Records Module</name>
 	<artifactId>org.wcs.smart.er</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.7-SNAPSHOT</version>
+	<version>7.5.8-SNAPSHOT</version>
 	
 </project>

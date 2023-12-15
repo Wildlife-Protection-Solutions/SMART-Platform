@@ -13,6 +13,7 @@
 	<artifactId>org.wcs.smart.core.er</artifactId>
 	<name>Survey Module</name>
 	<packaging>bundle</packaging>
+	<version>7.5.8</version>
 	
 	<dependencies>
 		<dependency>
