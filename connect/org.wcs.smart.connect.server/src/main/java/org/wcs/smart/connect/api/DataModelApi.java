@@ -64,6 +64,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -79,6 +80,7 @@ import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.database.FastDataModelLoader;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.AttachmentInterceptor;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -180,8 +182,10 @@ public class DataModelApi extends HttpServlet{
 	@Produces({ MediaType.APPLICATION_XML })
 	public Response getDataModel(
 			@Parameter(description="uuid of the conservation area to get the data model for") @PathParam("cauuid") String uuid) {
-		
+		//https://localhost:8443/server/api/metadata/datamodel/843b2707-8821-4604-82f4-326e3d436637
 		UUID caUuid = parseUuid(uuid);
+		
+		SimpleDataModel caDataModel = null;
 		
 		try(Session s = HibernateManager.getSession(context)){
 			s.beginTransaction();
@@ -197,41 +201,37 @@ public class DataModelApi extends HttpServlet{
 				
 				ConservationArea ca = s.get(ConservationArea.class, caUuid);
 				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
-					
+				Hibernate.initialize(ca);
+		
+				//load data model using the fast loader
+				caDataModel = (new FastDataModelLoader()).loadDataModel(s, ca);
 				
-				List<Attribute> attributes = QueryFactory.buildQuery(s, Attribute.class, 
-						new Object[] {"conservationArea",ca}).list(); //$NON-NLS-1$
-				
-				List<Category> roots = QueryFactory.buildQuery(s, Category.class, 
-						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-						new Object[] {"parent", null}).list(); //$NON-NLS-1$
-						
-				SimpleDataModel caDataModel = new SimpleDataModel(ca, roots, attributes);
-				
-				DataModelToXmlConverter converter = new DataModelToXmlConverter(IconOption.NONE);
-				DataModel xml = converter.convert(caDataModel);
-				
-				StreamingOutput stream = new StreamingOutput() {
-					@Override
-					public void write(OutputStream output) throws IOException {
-						try {
-							DataModelToXmlConverter.writeDataModel(xml, output);
-						} catch (JAXBException e) {
-							throw new IOException(e);
-						}
-					}
-			    };
-				
-			    String filename = "datamodel." + uuid + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
-			    
-				return Response.status(Response.Status.PARTIAL_CONTENT)
-						.entity(stream)
-						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
-						.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
-						.build();
 			}finally {
-				s.getTransaction().commit();
+				s.getTransaction().rollback();
 			}
+				
+			DataModelToXmlConverter converter = new DataModelToXmlConverter(IconOption.NONE);
+			DataModel xml = converter.convert(caDataModel);
+				
+			StreamingOutput stream = new StreamingOutput() {
+				@Override
+				public void write(OutputStream output) throws IOException {
+					try {
+						DataModelToXmlConverter.writeDataModel(xml, output);
+					} catch (JAXBException e) {
+						throw new IOException(e);
+					}
+				}
+			 };
+				
+			String filename = "datamodel." + uuid + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
+			    
+			return Response.status(Response.Status.PARTIAL_CONTENT)
+					.entity(stream)
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+					.build();
+			
 		}
 		
 	}
