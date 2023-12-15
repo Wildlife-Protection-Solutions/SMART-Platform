@@ -91,7 +91,7 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 	}
 
 	@Override
-	public MissionAttributeListItem getMissionAttributeListItenByKey(
+	public MissionAttributeListItem getMissionAttributeListItenByKey(String missionAttributeKeyId,
 			String key, Session session) {
 		// TODO Auto-generated method stub
 		return null;
