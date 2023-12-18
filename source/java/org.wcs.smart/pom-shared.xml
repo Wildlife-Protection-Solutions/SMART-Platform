@@ -169,6 +169,11 @@
 
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.jface</artifactId>
+			<version>3.29.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.ui.workbench</artifactId>
 			<version>3.122.0</version>
 			<scope>provided</scope>
@@ -188,6 +193,14 @@
 				<exclusion>
 					<groupId>javax.annotation</groupId>
 					<artifactId>javax.annotation-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis-ext</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.jface</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
