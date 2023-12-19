@@ -226,7 +226,7 @@ public class DataModelApi extends HttpServlet{
 				
 			String filename = "datamodel." + uuid + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
 			    
-			return Response.status(Response.Status.PARTIAL_CONTENT)
+			return Response.status(Response.Status.OK)
 					.entity(stream)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
@@ -481,7 +481,7 @@ public class DataModelApi extends HttpServlet{
 					};
 					String filename = "cm." + uuid + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
 	
-					return Response.status(Response.Status.PARTIAL_CONTENT).entity(stream)
+					return Response.status(Response.Status.OK).entity(stream)
 							.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
 							.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 							.build();
@@ -499,7 +499,7 @@ public class DataModelApi extends HttpServlet{
 				};
 				String filename = "cm." + uuid + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
 
-				return Response.status(Response.Status.PARTIAL_CONTENT).entity(stream)
+				return Response.status(Response.Status.OK).entity(stream)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.build();
