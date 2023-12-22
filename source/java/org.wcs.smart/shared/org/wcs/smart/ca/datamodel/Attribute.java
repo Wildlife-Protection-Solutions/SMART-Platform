@@ -269,9 +269,10 @@ public class Attribute extends DmObject{
 	}
 
 	/**
-	 * Only valid for text attributes.
+	 * Used as regex expression for string attributes and 
+	 * formatting information for other attribute types
 	 * 
-	 * @return a regex pattern for validating string values
+	 * @return 
 	 */
 	public String getRegex() {
 		return regex;
@@ -279,9 +280,10 @@ public class Attribute extends DmObject{
 
 
 	/**
-	 * Only valid for text attributes.
+	 * Used as regex expression for string attributes and 
+	 * formatting information for other attribute types
 	 * 
-	 * @param regex the regex pattern for validating string values
+	 * @param 
 	 */
 	public void setRegex(String regex) {
 		this.regex = regex;
@@ -501,5 +503,15 @@ public class Attribute extends DmObject{
 			}
 		}
 		return text;
+	}
+	
+	@Transient
+	public AttributeGeometryStyle getAttributeGeometryStyle() {
+		return AttributeGeometryStyle.fromAttribute(this);
+	}
+	
+	@Transient
+	public void setAttributeGeometryStyle(AttributeGeometryStyle style) {
+		setRegex(style.getAttributeValue());
 	}
 }

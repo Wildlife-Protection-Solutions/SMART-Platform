@@ -152,6 +152,8 @@ public class AttributeInfoPanel extends Composite {
 	
 	private Button btnConvert;
 	
+	private SimpleGeometryStyleComposite geomStylePanel;
+	
 	private List<NamedKeyItem> attributeList = new ArrayList<NamedKeyItem>();
 	
 	private AttributeTree attTree = null;
@@ -764,6 +766,12 @@ public class AttributeInfoPanel extends Composite {
 		geometryComposite.setLayout(new GridLayout(1, false));
 		geometryComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
+		geomStylePanel = new SimpleGeometryStyleComposite(geometryComposite, SWT.NONE, canEdit);
+		if (!canEdit){
+			geomStylePanel.setEditable(false);
+		}else {
+			geomStylePanel.addListener(SWT.Modify, e->validate());
+		}
 		selectOption();
 		if (canEdit){
 			validate();
@@ -942,6 +950,8 @@ public class AttributeInfoPanel extends Composite {
 			cdMaxValue.hide();
 			cdAttList.hide();
 			if (cdAttTree != null) cdAttTree.hide();
+			
+			error = geomStylePanel.validate();
 		}
 		
 		for (IValidationListener listener: listeners){
@@ -1095,6 +1105,9 @@ public class AttributeInfoPanel extends Composite {
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
 				
+			}else if (att.getType().isGeometry()) {
+				geomStylePanel.setType(att.getType());
+				geomStylePanel.initValues(att.getAttributeGeometryStyle());
 			}
 		}
 		
@@ -1353,6 +1366,8 @@ public class AttributeInfoPanel extends Composite {
 					}
 					
 				}
+			}else if (att.getType().isGeometry()) {
+				att.setAttributeGeometryStyle(geomStylePanel.getValue());
 			}
 			session.flush();
 			

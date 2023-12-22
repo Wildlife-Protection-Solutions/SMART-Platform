@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.BatchSize;
 import org.wcs.smart.util.I18nUtil;
 
 import jakarta.persistence.CascadeType;
@@ -68,6 +69,7 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 */
 	@OneToMany(targetEntity = Label.class, fetch = FetchType.EAGER,
 			mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
+	@BatchSize(size=10)
 	public Set<Label> getNames() {
 		if (names == null){
 			names = new HashSet<Label>();
@@ -84,9 +86,6 @@ public class NamedItem extends UuidItem implements Comparable<NamedItem>{
 	 * @return the names associated with the list element in the
 	 * language the platform is running in.
 	 */
-	
-//	@Column(name="uuid", insertable=false, updatable=false)
-//	@Type(LabelUserType.class)
 	@Transient
 	public String getName() {
 		return this.name;

@@ -459,4 +459,11 @@ public enum DataModelManager {
 		if (prop == null) return Instant.ofEpochMilli(0).toString();
 		return prop.getValue();
 	}
+	
+	public List<Attribute> getGeometryAttributes(Session session){
+		return session.createQuery("FROM Attribute WHERE conservationArea = :ca and type in (:types)", Attribute.class) //$NON-NLS-1$
+				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				.setParameterList("types", List.of(Attribute.AttributeType.POLYGON, Attribute.AttributeType.LINE)) //$NON-NLS-1$
+				.list();
+	}
 }

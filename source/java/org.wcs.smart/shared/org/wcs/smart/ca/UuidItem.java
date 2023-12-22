@@ -29,6 +29,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -75,7 +76,6 @@ public class UuidItem implements Serializable{
 	 * @return the uuid for the list element
 	 */
 	@Id
-	@GeneratedValue
 	@UuidGenerator(style = UuidGenerator.Style.RANDOM)
 	public UUID getUuid() {
 		return uuid;

@@ -477,12 +477,11 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 						
 						
 						dm = dmToClone.clone(ca, code, caIcons, progress.split(1));
-						
 					}else if (isBlank){
-						progress = SubMonitor.convert(monitor);
+						progress = SubMonitor.convert(monitor, 1);
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
 					}else {
-						progress = SubMonitor.convert(monitor);
+						progress = SubMonitor.convert(monitor, 1);
 					}
 					
 					if (dm == null){
