@@ -44,7 +44,7 @@ public class PatrolGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public PatrolGeoResourceInfo( PatrolGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.dataType;
+		this.title = resource.name;
 		computeBounds(resource, monitor);
 	}
 	

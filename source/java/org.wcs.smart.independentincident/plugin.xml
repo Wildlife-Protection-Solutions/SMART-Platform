@@ -1213,12 +1213,6 @@
       <defaultmaplayerstyle
             class="org.wcs.smart.incident.map.IncidentMapWaypointRawDefaultStyle">
       </defaultmaplayerstyle>
-      <defaultmaplayerstyle
-            class="org.wcs.smart.incident.map.IncidentMapLineStringAttributeDefaultStyle">
-      </defaultmaplayerstyle>
-      <defaultmaplayerstyle
-            class="org.wcs.smart.incident.map.IncidentMapPolygonAttributeDefaultStyle">
-      </defaultmaplayerstyle>
    </extension>
 
 </plugin>

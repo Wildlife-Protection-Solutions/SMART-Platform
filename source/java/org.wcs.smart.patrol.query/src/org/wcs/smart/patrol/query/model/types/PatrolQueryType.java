@@ -35,19 +35,19 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.patrol.query.map.style.PatrolQueryDefaultStyle;
-import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
+import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.editor.DeletePatrolResultInfoProvider;
 import org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.map.QueryService;
 import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
@@ -74,7 +74,7 @@ public class PatrolQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put( PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDefaultStyle.KEY);
+		styleMappings.put( TrackGeometryQueryColumn.KEY, PatrolQueryDefaultStyle.KEY);
 	}
 	
 	/**

@@ -36,6 +36,7 @@ import org.opengis.feature.simple.SimpleFeature;
  * this feature and say the feature from a different plug-in
  */
 public class PatrolFeature extends DecoratingFeature{
+	
 	public PatrolFeature(SimpleFeature wrapper){
 		super(wrapper);
 	}

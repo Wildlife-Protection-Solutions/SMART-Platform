@@ -71,7 +71,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
@@ -90,6 +89,7 @@ import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
+import org.wcs.smart.query.map.QueryService;
 import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
@@ -691,7 +691,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						org.locationtech.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
 						for (IPatrolQueryResultItem ri : results.getData()){
 							if (!(ri instanceof PatrolQueryResultItem)) continue;
-							Geometry g = ((PatrolQueryResultItem)ri).asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+							Geometry g = ((PatrolQueryResultItem)ri).asGeometry();
 							if (g.getEnvelopeInternal().contains(db)){
 								double d = g.distance(toTest);
 								if (d < distance){
@@ -702,7 +702,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						}
 
 						if (nearest == null) return null;
-						Geometry g = ((PatrolQueryResultItem)nearest).asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+						Geometry g = ((PatrolQueryResultItem)nearest).asGeometry();
 						Coordinate[] c = DistanceOp.nearestPoints(g, toTest);
 						if (c.length == 0) return null;
 		

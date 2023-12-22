@@ -99,7 +99,8 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @param key the attribute id key
 	 * @param type the type of the attribute column
 	 */
-	public AttributeQueryColumn(String name, String attributeId, AttributeType type, String formatString){
+	public AttributeQueryColumn(String name, String attributeId, 
+			AttributeType type, String formatString){
 		super(name, KEY_PREFIX + attributeId, null);
 		this.formatString = formatString;
 		this.attributeId = attributeId;
@@ -112,14 +113,15 @@ public class AttributeQueryColumn extends QueryColumn {
 		}else if (type == AttributeType.DATE) {
 			ctype = ColumnType.DATE;
 		}else if (type.isGeometry()) {
-			ctype = ColumnType.BLOB;
+			ctype = ColumnType.GEOMETRY;
 		}else {
 			ctype = ColumnType.STRING;
 		}
 		super.setType(ctype);
 	}
 	
-	public AttributeQueryColumn(String name, String attributeId, GeometryProperty prop, AttributeType type){
+	public AttributeQueryColumn(String name, String attributeId,
+			GeometryProperty prop, AttributeType type){
 		super(name, KEY_PREFIX + prop.generateKey(attributeId), null); 
 		if (prop == GeometryProperty.AREA || prop == GeometryProperty.PERIMETER) {
 			this.formatString = String.valueOf(prop.displayDecimalPlaces());
@@ -135,7 +137,7 @@ public class AttributeQueryColumn extends QueryColumn {
 		}else if (type == AttributeType.DATE) {
 			ctype = ColumnType.DATE;
 		}else if (type.isGeometry()) {
-			ctype = ColumnType.BLOB;
+			ctype = ColumnType.GEOMETRY;
 		}else {
 			ctype = ColumnType.STRING;
 		}

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.map.udig;
+package org.wcs.smart.query.map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
@@ -44,8 +44,11 @@ import org.wcs.smart.query.model.IPagedQuery;
 public class QueryGeoResourceInfo extends IGeoResourceInfo {
 
 	
-	public QueryGeoResourceInfo( QueryGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.getDataType();
+	public QueryGeoResourceInfo( QueryGeoResource resource, String name, IProgressMonitor monitor){
+		this.title = name;
+		if(name == null) {
+			this.title = resource.getDataType();
+		}
 		computeBounds(resource, monitor);
 	}
 	

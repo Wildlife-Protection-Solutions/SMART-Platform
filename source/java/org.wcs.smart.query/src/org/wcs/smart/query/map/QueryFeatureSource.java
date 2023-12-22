@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.map.geotools;
+package org.wcs.smart.query.map;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,16 +36,16 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.model.IGeometryColumn;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.QueryColumnUtils;
 
-public class QueryFeatureSource  extends ContentFeatureSource {
+public class QueryFeatureSource extends ContentFeatureSource {
 
-	private List<QueryColumn> cachedColumns = null;
-
+	protected List<QueryColumn> cachedColumns = null;
 
 	public QueryFeatureSource(ContentEntry entry) {
 		super(entry, null);
@@ -53,19 +53,22 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
-
-		try {
-			if (entry.getTypeName().equals(QueryDataSource.WAYPOINT_TYPE)) {
-				return createWaypointSchema();
-			}else if (entry.getTypeName().equals(QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE)) {
-				return createGeometryAttributeSchema();
-			}else if (entry.getTypeName().equals(QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE)) {
-				return createGeometryAttributeSchema();
+		String querycolunnkey = entry.getName().getLocalPart();
+		
+		QueryColumn geomColumn = null;
+		
+		for (QueryColumn c : getCachedColumns()) {
+			if (c.getKey().equalsIgnoreCase(querycolunnkey)) {
+				geomColumn = c;
 			}
-		} catch (SchemaException ex) {
-			throw new IOException(Messages.QueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
 		}
-		return null;
+		if (geomColumn == null) return null;
+		
+		try {
+			return createWaypointSchema(geomColumn);
+		} catch (SchemaException ex) {
+			throw new IOException(ex.getMessage(), ex);
+		}
 	}
 
 	@Override
@@ -81,51 +84,35 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
-		if (entry.getTypeName().equals(QueryDataSource.WAYPOINT_TYPE)) {
-			return new QueryFeatureReader( ((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), getCachedColumns());
+		if (((QueryDataSource)entry.getDataStore()).getQuery() instanceof SummaryQuery sq) {
+			return new SummaryQueryFeatureReader(sq, getSchema(), getCachedColumns());
+		}else {
+			String geometryColumn = entry.getName().getLocalPart();
+			for (QueryColumn c : getCachedColumns()) {
+				if (c.getKey().equalsIgnoreCase(geometryColumn)){
+					return new QueryFeatureReader(
+						((QueryDataSource)entry.getDataStore()).getQuery(), 
+						c, getSchema(), getCachedColumns());
+						
+				}
+			}
 		}
-		if (entry.getTypeName().equals(QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE)) {
-			return new GeometryAttributeQueryFeatureReader(((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), getCachedColumns());
-		}
-		if (entry.getTypeName().equals(QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE)) {
-			return new GeometryAttributeQueryFeatureReader(((QueryDataSource)entry.getDataStore()).getQuery(), getSchema(), getCachedColumns());
-		}
+			
 		return null;
 
 	}
 	
 	private synchronized List<QueryColumn> getCachedColumns(){
 		if (this.cachedColumns != null) return this.cachedColumns;
-		this.cachedColumns = ((QueryDataSource)entry.getDataStore()).getQuery().computeQueryColumns(Locale.getDefault(), null, ((QueryDataSource)entry.getDataStore()).getProjectionProvider());
+		this.cachedColumns = ((IStyledQuery)((QueryDataSource)entry.getDataStore()).getQuery()).computeQueryColumns(Locale.getDefault(), null, ((QueryDataSource)entry.getDataStore()).getProjectionProvider());
 		return this.cachedColumns;
 	}
 	
-	private SimpleFeatureType createGeometryAttributeSchema() throws SchemaException {
-		ArrayList<QueryColumn> nonAttributeColumns = new ArrayList<>();
-		for (QueryColumn qc : getCachedColumns()) {
-			if (!(qc instanceof AttributeQueryColumn ac)) {
-				nonAttributeColumns.add(qc);
-			}
-		}
-		if (entry.getTypeName().equals(QueryDataSource.POLYGON_GEOM_ATTRIBUTE_TYPE)) {
-
-			SimpleFeatureType type = DataUtilities.createType("smart." + entry.getTypeName(), //$NON-NLS-1$
-					getFeatureSchemaDef(Attribute.AttributeType.POLYGON, nonAttributeColumns, true, false));
-			return type;
-		}
-		if (entry.getTypeName().equals(QueryDataSource.LINESTRING_GEOM_ATTRIBUTE_TYPE)) {
-
-			SimpleFeatureType type = DataUtilities.createType("smart." + entry.getTypeName(), //$NON-NLS-1$
-					getFeatureSchemaDef(Attribute.AttributeType.LINE, nonAttributeColumns, true, false));
-			return type;
-		}
-		return null;
-	}
 		
 	
-	private SimpleFeatureType createWaypointSchema() throws SchemaException {
-		SimpleFeatureType type = DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, //$NON-NLS-1$
-				getFeatureSchemaDef(getCachedColumns(), true, false));
+	private SimpleFeatureType createWaypointSchema(QueryColumn geomColumn) throws SchemaException {
+		SimpleFeatureType type = DataUtilities.createType("smart." + geomColumn.getKey(), //$NON-NLS-1$
+				getFeatureSchemaDef(getCachedColumns(), geomColumn, true, false));
 		return type;
 	}
 
@@ -136,10 +123,22 @@ public class QueryFeatureSource  extends ContentFeatureSource {
 	 *                     datatype needs to be converted to string
 	 * @return
 	 */
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape) {
+	public static String getFeatureSchemaDef(List<QueryColumn> columns, 
+			QueryColumn geomColumn,
+			boolean supportsTime, boolean forShape) {
+		
+		if (!(geomColumn instanceof IGeometryColumn igeom)) throw new IllegalStateException();
+		
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
+		
+		sb.append("the_geom:"); //$NON-NLS-1$
+		sb.append(igeom.getGeometryType().geoToolsType);
+		sb.append(":srid="); //$NON-NLS-1$
+		sb.append(igeom.getSRID());
+		sb.append(",fid:String"); //$NON-NLS-1$
+		List<QueryColumn> copy = new ArrayList<>(columns);
+		copy.remove(geomColumn);
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(copy, supportsTime, forShape));
 		return sb.toString();
 	}
 	

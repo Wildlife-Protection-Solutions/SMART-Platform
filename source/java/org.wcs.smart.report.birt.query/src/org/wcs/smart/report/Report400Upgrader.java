@@ -550,12 +550,14 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 									&& n.getParentNode().getParentNode().getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("boundDataColumns") //$NON-NLS-1$
 									&& n.getTextContent().equalsIgnoreCase("dataSetRow[\"Status\"]")){ //$NON-NLS-1$
 								n.setTextContent("dataSetRow[\"targetStatus\"]"); //$NON-NLS-1$
-							}
-									
+							}			
 						}
-						
-						
 					}
+					
+					//TODO: FIX THIS
+					//GeometryColumn was removed in SMART8 to support
+					//multiple columns in a query
+					//probably need to hard code this instead
 					if (queryText != null) {
 						GeometryColumn[] columns = null;
 						if (dataSetType == Type.QUERY) {

@@ -53,6 +53,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -64,14 +65,12 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentFeatureFactory;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.map.IncidentMapLineStringAttributeDefaultStyle;
-import org.wcs.smart.incident.map.IncidentMapPolygonAttributeDefaultStyle;
 import org.wcs.smart.incident.map.IncidentMapWaypointDefaultStyle;
 import org.wcs.smart.incident.map.IncidentMapWaypointRawDefaultStyle;
 import org.wcs.smart.observation.events.WaypointEventManager;
@@ -84,7 +83,6 @@ import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.udig.style.StyleManager;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -99,9 +97,6 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public class IncidentMapPage extends SmartMapEditorPart {
-
-	private static final String LINESTRING_TYPE_NAME = "LINESTRING"; //$NON-NLS-1$
-	private static final String POLYGON_TYPE_NAME = "POLYGON"; //$NON-NLS-1$
 
 	private IncidentEditor parent;
 
@@ -118,15 +113,9 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private Layer prjLayer = null;
 	private IGeoResource prjResource = null;
 	
-	private FeatureStore<SimpleFeatureType,SimpleFeature> attPolygonStore;
-	private Layer attPolygonLayer = null;
-	private IGeoResource attPolygonResource;
-	private SimpleFeatureType attPolygonType;
+	private List<IGeoResource> attributeResources = new ArrayList<>();
+	private List<ILayer> attributeLayers = new ArrayList<>();
 	
-	private FeatureStore<SimpleFeatureType,SimpleFeature> attLinestringStore;
-	private Layer attLinestringLayer = null;
-	private IGeoResource attLinestringResource;
-	private SimpleFeatureType attLinestringType;
 	/**
 	 * Creates a new map page
 	 * @param e parent editor
@@ -237,16 +226,28 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				prjStore = prjResource.resolve(FeatureStore.class, null);
 				layers.add(0, prjResource);
 			}
-		
-			attPolygonType = ObservationAttributeFeatureFactory.createObservationPolygonSchema(POLYGON_TYPE_NAME);
-			attPolygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(attPolygonType);
-			attPolygonStore = attPolygonResource.resolve(FeatureStore.class, null);
-			layers.add(0, attPolygonResource);
+
+			HashMap<String, Attribute> resourceNames = new HashMap<>();
+			try(Session session = HibernateManager.openSession()){
+				List<Attribute> attributes = DataModelManager.INSTANCE.getGeometryAttributes(session);
 			
-			attLinestringType = ObservationAttributeFeatureFactory.createObservationLineStringSchema(LINESTRING_TYPE_NAME);
-			attLinestringResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(attLinestringType);
-			attLinestringStore = attLinestringResource.resolve(FeatureStore.class, null);
-			layers.add(0, attLinestringResource);
+				attributes.sort((a,b)->a.getName().compareTo(b.getName()));
+				for (Attribute attribute : attributes) {
+					String type = attribute.getType().name() + "." + attribute.getKeyId(); //$NON-NLS-1$
+					SimpleFeatureType featuretype = null; 
+					if (attribute.getType() == Attribute.AttributeType.POLYGON) {
+						featuretype = ObservationAttributeFeatureFactory.createObservationPolygonSchema(type);
+					}else if (attribute.getType() == Attribute.AttributeType.LINE) {
+						featuretype = ObservationAttributeFeatureFactory.createObservationLineStringSchema(type);
+					}
+					
+					resourceNames.put(attribute.getKeyId(), attribute);
+					IGeoResource attResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featuretype);
+					layers.add(0, attResource);
+					attributeResources.add(attResource);
+
+				}
+			}
 			
 			//dispose of temporary layer when composite is disposed
 			super.mapViewer.getControl().addDisposeListener(new DisposeListener() {
@@ -275,8 +276,6 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					Map<String,String> geoIdToStyle = new HashMap<>();
     				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_TYEPNAME,  IncidentMapWaypointDefaultStyle.KEY);
     				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_PRJ_TYEPNAME,  IncidentMapWaypointRawDefaultStyle.KEY);
-    				geoIdToStyle.put(POLYGON_TYPE_NAME,  IncidentMapPolygonAttributeDefaultStyle.KEY);
-    				geoIdToStyle.put(LINESTRING_TYPE_NAME,  IncidentMapLineStringAttributeDefaultStyle.KEY);
 
     				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
     				defaultStyles.put(IncidentMapWaypointDefaultStyle.KEY, (l)->{
@@ -294,15 +293,15 @@ public class IncidentMapPage extends SmartMapEditorPart {
     						pointLayer.setVisible(true);
     					}else if (prjFeatureType != null && type.getName().equals(prjFeatureType.getName())) {
     						prjLayer = l;
-    					}else if (type.getName().equals(attPolygonType.getName())) {
-    						attPolygonLayer = l;
-    					}else if (type.getName().equals(attLinestringType.getName())) {
-    						attLinestringLayer = l;
+    					}else if (type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.POLYGON.name()) || 
+    							type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.LINE.name()) ) {
+    						Attribute a = resourceNames.get(type.getName().getLocalPart());
+    						l.setName(a.getName());
+    						l.getStyleBlackboard().put(SLDContent.ID, a.getAttributeGeometryStyle().toStyle());
+    						attributeLayers.add(l);
     					}
     				}
     				
-					
-
 					try(Session session = HibernateManager.openSession()){
 	   					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), pointLayer, geoIdToStyle, defaultStyles, session, monitor);
 						
@@ -311,14 +310,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
 							prjLayer.setVisible(false);
 							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), prjLayer, geoIdToStyle, defaultStyles, session, monitor);
 						}
-						if (attPolygonLayer != null) {
-							attPolygonLayer.setName(SmartLabelProvider.POLYGON_ATTRIBUTE_LAYER);
-							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), attPolygonLayer, geoIdToStyle, defaultStyles, session, monitor);
-						}
-						if (attLinestringLayer != null) {
-							attLinestringLayer.setName(SmartLabelProvider.LINESTRING_ATTRIBUTE_LAYER);
-							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), attLinestringLayer, geoIdToStyle, defaultStyles, session, monitor);
-						}
+						
+						
 					}						
 					pointLayer.eNotify(new ENotificationImpl(
 							(InternalEObject) pointLayer, Notification.SET,
@@ -334,47 +327,43 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	}
 	
 	public void updateObservationLayers() {
-		if (this.attLinestringLayer == null || this.attPolygonLayer == null) return;
-		List<SimpleFeature> polys = new ArrayList<>();
-		List<SimpleFeature> lines = new ArrayList<>();
-		try(Session session = HibernateManager.openSession()){
-			Waypoint wp = session.get(Waypoint.class, parent.getIncident().getUuid());
-			for (WaypointObservation wo : wp.getAllObservations()) {
-				for (WaypointObservationAttribute a : wo.getAttributes()) {
-					if (a.getGeom() == null) continue;
-					if (!a.getAttribute().getType().isGeometry()) continue;
-					
-					boolean hasArea = a.getAttribute().getType() == Attribute.AttributeType.POLYGON;
-					SimpleFeatureType type = a.getAttribute().getType() == AttributeType.POLYGON ? attPolygonType : attLinestringType;
-					SimpleFeature sf = ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(type, hasArea, a);
-					if (hasArea) {
-						polys.add(sf);
-					}else {
-						lines.add(sf);
+		if (this.attributeResources.isEmpty()) return;
+		
+		for (IGeoResource r : this.attributeResources) {
+			List<SimpleFeature> features = new ArrayList<>();
+			try {
+				FeatureStore<SimpleFeatureType, SimpleFeature> store = r.resolve(FeatureStore.class, null);
+				String attributeKey = store.getName().getLocalPart();
+				
+				try(Session session = HibernateManager.openSession()){
+					Waypoint wp = session.get(Waypoint.class, parent.getIncident().getUuid());
+					for (WaypointObservation wo : wp.getAllObservations()) {
+						for (WaypointObservationAttribute a : wo.getAttributes()) {
+							if (a.getGeom() == null) continue;
+							if (!a.getAttribute().getType().isGeometry()) continue;
+							if (!a.getAttribute().getKeyId().equalsIgnoreCase(attributeKey)) continue;
+							
+							boolean hasArea = a.getAttribute().getType() == Attribute.AttributeType.POLYGON;
+							SimpleFeatureType type = store.getSchema();
+							SimpleFeature sf = ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(type, hasArea, a);
+							features.add(sf);
+						}
 					}
 				}
+				doTwice(()->{
+					try {
+						store.removeFeatures(Filter.INCLUDE);
+						store.addFeatures(new ListFeatureCollection(store.getSchema(), features));
+					}catch (IOException ex) {
+						IncidentPlugIn.log(ex.getMessage(), ex);
+					}
+				});
+			}catch(Exception ex) {
+				IncidentPlugIn.log(ex.getMessage(), ex);
 			}
 		}
-		doTwice(()->{
-			try {
-				attLinestringStore.removeFeatures(Filter.INCLUDE);
-				attLinestringStore.addFeatures(new ListFeatureCollection(attLinestringType, lines));
-			}catch (IOException ex) {
-				IncidentPlugIn.log(ex.getMessage(), ex);
-			}
-		});
+		for (ILayer layer: attributeLayers) layer.refresh(null);
 		
-		doTwice(()->{
-			try {
-				attPolygonStore.removeFeatures(Filter.INCLUDE);
-				attPolygonStore.addFeatures(new ListFeatureCollection(attPolygonType, polys));
-			}catch (IOException ex) {
-				IncidentPlugIn.log(ex.getMessage(), ex);
-			}
-		});
-		
-		if (attLinestringLayer != null) attLinestringLayer.refresh(null);
-		if (attPolygonLayer != null) attPolygonLayer.refresh(null);
 	}
 
 	private void doTwice(Runnable r) {
@@ -637,7 +626,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					}
 					
 					//check observation details
-					Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, new IGeoResource[]{attLinestringResource, attPolygonResource});
+					Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, attributeResources.toArray(new IGeoResource[attributeResources.size()]));
 					List<WaypointObservationAttribute> matched = (List<WaypointObservationAttribute>) found[0];
 					Coordinate c = (Coordinate) found[1];
 					

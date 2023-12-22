@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.query.model;
 
+import java.util.List;
+import java.util.Locale;
+
+import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
+
 import jakarta.persistence.Entity;
 
 /**
@@ -48,4 +54,11 @@ public interface IStyledQuery {
 	 */
 	public void setStyle(String style);
 		
+	//TODO:
+	//investigate moving this elsewhere
+	//uesd by asset summary queries
+	public default List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider){
+		return null;
+	}
+
 }

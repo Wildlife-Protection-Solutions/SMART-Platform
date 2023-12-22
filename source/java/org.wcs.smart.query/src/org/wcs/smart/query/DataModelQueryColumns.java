@@ -35,6 +35,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.CategoryQueryColumn;
+import org.wcs.smart.query.model.GeometryAttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -68,7 +69,13 @@ public class DataModelQueryColumns {
 			
 		for (Attribute att : atts) {
 			String name = att.getName();
-			QueryColumn toAdd = new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex());
+			QueryColumn toAdd;
+			if (att.getType().isGeometry()) {
+				toAdd = new GeometryAttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex());
+			}else {
+				toAdd = new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex());	
+			}
+			
 			toAdd.setEdit(supportsEditing);
 			cols.add(toAdd);
 			

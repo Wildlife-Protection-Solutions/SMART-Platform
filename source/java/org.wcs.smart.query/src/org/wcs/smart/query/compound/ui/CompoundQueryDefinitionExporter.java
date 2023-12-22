@@ -27,8 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -92,7 +92,7 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 	
 	@Override
 	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, Path file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor)
+			Map<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, "", 3); //$NON-NLS-1$
 		Path tempDir = Files.createTempDirectory("smart" + UuidUtils.uuidToString(query.getUuid())); //$NON-NLS-1$

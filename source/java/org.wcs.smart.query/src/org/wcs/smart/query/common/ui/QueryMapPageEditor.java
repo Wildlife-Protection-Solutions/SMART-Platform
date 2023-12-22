@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.ui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,6 +37,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.ILayer;
@@ -51,6 +53,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.map.QueryService;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
@@ -139,7 +142,8 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 										IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(parentEditor.getQueryProxy().getQuery().getTypeKey());
 										
 										try(Session session = HibernateManager.openSession()){
-											StyleManager.INSTANCE.applyDefaultStyleToMapLayer(parentEditor.getQueryProxy().getQuery().getConservationArea(),  
+											StyleManager.INSTANCE.applyDefaultStyleToMapLayer(
+													parentEditor.getQueryProxy().getQuery().getConservationArea(),  
 													layer, qtype.getDefaultStyleMappings(), session, monitor);
 										}
 
@@ -181,18 +185,26 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 				try {
 					((IQueryService)queryService).refresh(null);
 					List<? extends IGeoResource> layers = queryService.resources(monitor);
-					boolean found = false;
-					for (IGeoResource w : layers){
-						for( ILayer layer : getMap().getLayersInternal() ) {
-							if(layer.getID().equals(w.getIdentifier())){
-								found = true;
-								break;
-							}
-	                	}
+					
+					HashMap<ID, ILayer> currentLayers = new HashMap<>();
+					
+					for( ILayer layer : getMap().getLayersInternal() ) {
+						if (layer.getGeoResource().canResolve(QueryService.class)) {
+							currentLayers.put(layer.getGeoResource().getID(), layer);
+						}
 					}
-					if (!found){
-						addLayerJob.schedule();
+					getMap().getLayersInternal().removeAll(currentLayers.values());
+					getMap().sendCommandSync(new AddLayersCommand(layers));
+					for( ILayer newlayer : getMap().getLayersInternal() ) {
+						ILayer oldlayer = currentLayers.get(newlayer.getGeoResource().getID());
+						if (oldlayer != null) {
+							newlayer.getStyleBlackboard().clear();
+							newlayer.getStyleBlackboard().addAll(oldlayer.getStyleBlackboard());
+							newlayer.getBlackboard().clear();
+							newlayer.getBlackboard().addAll(oldlayer.getBlackboard());
+						}
 					}
+					
 				
 				} catch (IOException e) {
 					QueryPlugIn.log(Messages.QueryMapPageEditor_ErrorRefreshing, e);

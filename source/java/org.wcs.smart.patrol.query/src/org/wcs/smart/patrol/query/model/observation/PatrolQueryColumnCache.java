@@ -30,6 +30,7 @@ import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Query column cache.
@@ -174,6 +175,7 @@ public class PatrolQueryColumnCache {
 				toAdd.setEdit(false);
 				cols.add(toAdd);
 				
+				cols.add(new WaypointGeometryQueryColumn());
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
 				
@@ -270,6 +272,8 @@ public class PatrolQueryColumnCache {
 				try (Session session = HibernateManager.openSession()){
 					cols.addAll(getPatrolAttributeQueryColumns(session));
 				}
+				cols.add(new WaypointGeometryQueryColumn());
+				
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}
@@ -356,6 +360,8 @@ public class PatrolQueryColumnCache {
 									
 							}
 							cols.addAll(getPatrolAttributeQueryColumns(session));
+							cols.add(new TrackGeometryQueryColumn());
+							
 							patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 						
 						} finally {

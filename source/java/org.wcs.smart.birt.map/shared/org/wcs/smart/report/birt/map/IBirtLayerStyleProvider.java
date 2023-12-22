@@ -38,5 +38,6 @@ public interface IBirtLayerStyleProvider {
 	 * @param s the current session
 	 * @return
 	 */
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s);
+	public StyleBlackboard getStyle(String extensionId, String queryText,
+			MapLayerInfo info, Session s);
 }

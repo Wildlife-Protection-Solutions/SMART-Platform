@@ -42,12 +42,12 @@ public class PatrolFeatureFactory {
 	
 	private static final DateTimeFormatter TRACK_DT_FORMAT = DateTimeFormatter.ofPattern("MMMddyyyy");  //$NON-NLS-1$
 	
-	public static SimpleFeatureType createObservationPolygonSchema() throws SchemaException{
-		return ObservationAttributeFeatureFactory.createObservationPolygonSchema(PatrolDataSource.OBS_ATTRIBUTE_POLYGON);
+	public static SimpleFeatureType createObservationPolygonSchema(String typeName) throws SchemaException{
+		return ObservationAttributeFeatureFactory.createObservationPolygonSchema(typeName);
 	}
 	
-	public static SimpleFeatureType createObservationLineStringSchema() throws SchemaException{
-		return ObservationAttributeFeatureFactory.createObservationLineStringSchema(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING);		
+	public static SimpleFeatureType createObservationLineStringSchema(String typeName) throws SchemaException{
+		return ObservationAttributeFeatureFactory.createObservationLineStringSchema(typeName);		
 	}
 	
 	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
@@ -96,7 +96,7 @@ public class PatrolFeatureFactory {
 	}
 
 	public static SimpleFeature getObservationAttributeAsGeometry(SimpleFeatureType ftype, WaypointObservationAttribute value) {
-		boolean hasArea = ftype.getName().getLocalPart().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON);
+		boolean hasArea = PatrolDataSource.isPolgyonAttribute(ftype.getName().getLocalPart());
 		return ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(ftype, hasArea, value);
 	}
 	

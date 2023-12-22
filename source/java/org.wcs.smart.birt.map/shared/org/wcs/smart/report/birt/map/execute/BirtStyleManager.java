@@ -47,7 +47,9 @@ public enum BirtStyleManager {
 	
 	private volatile List<IBirtLayerStyleProvider> styleProviders = null;
 	
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session session) throws Exception{
+	public StyleBlackboard getStyle(String extensionId, String queryText,
+			MapLayerInfo info, Session session) throws Exception{
+		
 		if (styleProviders == null){
 			synchronized (INSTANCE) {
 				styleProviders = getProviders();
@@ -55,7 +57,7 @@ public enum BirtStyleManager {
 		}
 		
 		for (IBirtLayerStyleProvider p : styleProviders){
-			StyleBlackboard style = p.getStyle(extensionId, queryText, layerType, session);
+			StyleBlackboard style = p.getStyle(extensionId, queryText, info, session);
 			if (style != null) return style;
 		}
 		return null;

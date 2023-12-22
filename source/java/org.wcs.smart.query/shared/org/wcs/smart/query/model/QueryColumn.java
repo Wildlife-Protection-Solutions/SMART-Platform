@@ -57,7 +57,8 @@ public abstract class QueryColumn implements Cloneable{
 		DATETIME("java.time.LocalDateTime", java.sql.Types.TIMESTAMP), //$NON-NLS-1$ 
 		TIME("java.time.LocalTime", java.sql.Types.TIME), //$NON-NLS-1$
 		TIME_STR("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		BLOB("Blob", java.sql.Types.BLOB); //$NON-NLS-1$
+		BLOB("Blob", java.sql.Types.BLOB), //$NON-NLS-1$
+		GEOMETRY("Blob", java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
 		
 		public String geotoolsType;
 		public int sqlType;
@@ -295,5 +296,9 @@ public abstract class QueryColumn implements Cloneable{
 	 */
 	public String getFormatString() {
 		return null;
+	}
+	
+	public boolean isDefaultGeometryColumn() {
+		return false;
 	}
 }

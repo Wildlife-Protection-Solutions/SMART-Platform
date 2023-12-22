@@ -100,7 +100,7 @@ public class MemoryQueryResultSet extends AbstractQueryResultSet {
 		
 		IResultItem item = items.get(getRow());
 		if (item instanceof IGeometryResultItem){
-			return ((IGeometryResultItem)item).asGeometry(getMetaData().getColumnName(colIndex));
+			return ((IGeometryResultItem)item).asGeometry();
 		}
 		return null;
 	}

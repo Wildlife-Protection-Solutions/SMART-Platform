@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -71,8 +72,6 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.patrol.geotools.PatrolFeatureSource;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.map.style.PatrolMapLineStringAttributeDefaultStyle;
-import org.wcs.smart.patrol.map.style.PatrolMapPolygonAttributeDefaultStyle;
 import org.wcs.smart.patrol.map.style.PatrolMapTrackDefaultStyle;
 import org.wcs.smart.patrol.map.style.PatrolMapWaypointDefaultStyle;
 import org.wcs.smart.patrol.map.style.PatrolMapWaypointRawDefaultStyle;
@@ -125,19 +124,29 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    		List<IGeoResource> sortedLayers = new ArrayList<>();
 	    		Map<String, IGeoResource> toAdd = new HashMap<>();
 	    		
-	    		for (IGeoResource l : layers) toAdd.put(  ((PatrolGeoResource)l).getType(), l );
+	    		for (IGeoResource l : layers) {
+	    			String typeName = ((PatrolGeoResource)l).getType();
+	    			
+	    			if (PatrolDataSource.isGeometryAttribute(typeName)) {
+	    				dmAttributeResources.add(l);
+	    			}
+	    			toAdd.put( ((PatrolGeoResource)l).getType(), l );
+	    		}
 	    			
 	    		String[] orderedLayers = new String[] {
-	    				PatrolDataSource.OBS_ATTRIBUTE_POLYGON,
-	    				PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,
 	    				PatrolDataSource.TRACK_PART_TYPE, 
 	    				PatrolDataSource.WAYPOINT_PRJ_TYPE, 
 	    				PatrolDataSource.WAYPOINT_TYPE,
 	    		};
-	    		for (String name : orderedLayers) sortedLayers.add(toAdd.get(name));
+	    		for (String name : orderedLayers) {
+	    			sortedLayers.add(toAdd.get(name));
+	    			toAdd.remove(name);
+	    		}
+	    		List<IGeoResource> othersorted = new ArrayList<>();
+	    		othersorted.addAll(toAdd.values());
+	    		othersorted.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
+	    		sortedLayers.addAll(0,othersorted);
 	    		
-	    		dmAttributeResources.add(toAdd.get(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING));
-	    		dmAttributeResources.add(toAdd.get(PatrolDataSource.OBS_ATTRIBUTE_POLYGON));
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
@@ -150,8 +159,6 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolMapTrackDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolMapWaypointRawDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolMapWaypointDefaultStyle.KEY);
-	    				geoIdToStyle.put(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,  PatrolMapLineStringAttributeDefaultStyle.KEY);
-	    				geoIdToStyle.put(PatrolDataSource.OBS_ATTRIBUTE_POLYGON,  PatrolMapPolygonAttributeDefaultStyle.KEY);
 	    				
 	    				try(Session session = HibernateManager.openSession()){
 		    				for (Layer l : getLayers()) {
@@ -160,7 +167,6 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		    					
 		    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
 		    					if (fs != null) {
-		    						l.setName(fs.getLayerName());
 		    						l.setVisible(fs.getDefaultVisibility());
 		    						l.eNotify(new ENotificationImpl(
 		    								(InternalEObject) l, Notification.SET,

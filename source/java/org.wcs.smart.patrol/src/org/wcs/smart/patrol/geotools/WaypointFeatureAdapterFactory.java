@@ -60,8 +60,7 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 					wp.setUuid(wpuuid);
 					return (T)wp;
 				}
-				if (sf.getFeatureType().getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) || 
-						sf.getFeatureType().getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON) ){
+				if (PatrolDataSource.isGeometryAttribute(sf.getFeatureType().getTypeName()) ){
 					
 					String uuid = sf.getAttribute(ObservationAttributeFeatureFactory.WP_UUID_FIELD).toString();
 					UUID wpuuid;

@@ -69,12 +69,15 @@ public class LayerItem extends ReportItem {
 	
 	private ExtendedItemHandle handle;
 	
+	private String geometryColumnId;
+	
 	/**
 	 * Creates a new smart map item
 	 * @param item
 	 */
 	public LayerItem(ExtendedItemHandle item) {		
 		this.handle = item;
+		this.geometryColumnId = getGeometryColumn();
 	}
  
 	public ExtendedItemHandle getHandle(){
@@ -114,6 +117,9 @@ public class LayerItem extends ReportItem {
 		return handle.getStringProperty(SMART_LAYERSTYLE_PROP);
 	}
 	
+	public String getGeometryColumnId() {
+		return this.geometryColumnId;
+	}
 	/**
 	 * Sets the layer styles
 	 * @param layers

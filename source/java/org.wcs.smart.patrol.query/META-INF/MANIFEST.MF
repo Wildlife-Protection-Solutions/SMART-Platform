@@ -11,8 +11,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.wcs.smart.patrol.query,
  org.wcs.smart.patrol.query.engine,
- org.wcs.smart.patrol.query.map.udig,
- org.wcs.smart.patrol.query.model,
+  org.wcs.smart.patrol.query.model,
  org.wcs.smart.patrol.query.model.observation,
  org.wcs.smart.patrol.query.model.types,
  org.wcs.smart.patrol.query.ext,

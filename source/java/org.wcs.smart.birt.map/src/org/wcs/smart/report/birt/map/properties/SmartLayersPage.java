@@ -870,7 +870,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		if (start >= 0 && end >= 0 && start < end){
 			name = name.substring(0, start);
 		}
-		ld.getInfo().setLayerName(name);
+		if (ld.getInfo().getLayerName() == null) {
+			ld.getInfo().setLayerName(name);
+		}else {
+			ld.getInfo().setLayerName(name + " - " + ld.getInfo().getLayerName()); //$NON-NLS-1$
+		}
 		try{
 			ExtendedItemHandle eihandle = itemHandle.getModuleHandle().getElementFactory().newExtendedItem(null, LayerItem.EXTENSION_NAME);
 			LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);

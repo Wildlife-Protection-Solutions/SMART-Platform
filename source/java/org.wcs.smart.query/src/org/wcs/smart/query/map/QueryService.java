@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.map.udig;
+package org.wcs.smart.query.map;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,18 +37,10 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
-import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
-import org.wcs.smart.patrol.query.map.geotools.QueryDataSourceFactory;
-import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
-import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
-import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -65,26 +57,36 @@ public class QueryService extends IService implements IQueryService {
 	 */
 	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.queryService"; //$NON-NLS-1$
 	
-	private Map<String, Serializable> params;
+	protected Map<String, Serializable> params;
 	private URL url;	
-	private volatile List<QueryGeoResource> members;
-	private DataStore ds = null;
-	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
+	protected volatile List<QueryGeoResource> members;
+	protected DataStore ds = null;
+	protected Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
-	private Query query = null;
-	private IProjectionProvider prjProvider;
+	protected Query query = null;
+	protected IProjectionProvider prjProvider = null;
+	/**
+	 * Creates a new query service 
+	 * @param params service parameters
+	 */
+	public QueryService(Map<String, Serializable> params) {
+		this.params = params;
+		this.url = QueryServiceExtension.createURL(this.params);
+		this.query = null;
+	}
 	
 	/**
 	 * Creates a new query service .
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(SimpleQuery query, IProjectionProvider prjProvider){
+	public QueryService(Query query, IProjectionProvider projProvider){
 		this.query = query;
-		this.prjProvider = prjProvider;
+		this.prjProvider = projProvider;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
-		this.url = QueryServiceExtension.createURL(this.params);		
+		this.url = QueryServiceExtension.createURL(this.params);
+		
 	}
 
 	/**
@@ -102,20 +104,14 @@ public class QueryService extends IService implements IQueryService {
 	 * @throws IOException
 	 */
 	public void refresh(IProgressMonitor monitor) throws IOException{
+		if (ds != null){
+			ds.dispose();
+			this.ds = null;
+		}
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
-//		if (ds != null){
-//			members.clear();
-//			members = null;
-//			ds.dispose();
-//			ds = null;
-////			for (String name : ds.getTypeNames()){
-////				ds.removeSchema(name);
-////			}
-//		}
 	}	
-	
 	
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
@@ -138,8 +134,6 @@ public class QueryService extends IService implements IQueryService {
 	 */
 	@Override
 	public URL getIdentifier() {
-		//if we create a new service it needs to have a unique
-		//identifier
 		return this.url;
 	}
 
@@ -155,14 +149,15 @@ public class QueryService extends IService implements IQueryService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					ArrayList<QueryGeoResource> temp = new ArrayList<QueryGeoResource>();
-					if (query.getTypeKey().equals(PatrolObservationQuery.KEY) || 
-							query.getTypeKey().equals(PatrolWaypointQuery.KEY) ){
-						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getTypeKey().equals(PatrolQuery.KEY) ){
-						temp.add(new QueryGeoResource(this, PatrolQueryDataSource.PATROL_TYPE));
-					}else if (query.getTypeKey().equals(PatrolGriddedQuery.KEY) ){
-						temp.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
+					
+					QueryDataSource ds = (QueryDataSource) getDataStore(monitor);
+					
+					ArrayList<QueryGeoResource> temp = new ArrayList<>();
+					for (Name n : ds.getNames()) {
+						String name = ds.getLayerName(n);
+						QueryGeoResource r = new QueryGeoResource(this, n.getLocalPart(), name);
+						
+						temp.add(r);
 					}
 					this.members = temp;
 				}
@@ -193,10 +188,11 @@ public class QueryService extends IService implements IQueryService {
 	 */
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
-		this.prjProvider = null;
+		
         if (members == null)
             return;
         SubMonitor progress = SubMonitor.convert(monitor);
+        
         int steps = (int) ((double) 99 / (double) members.size());
         for( QueryGeoResource resolve : members ) {
             try {
@@ -209,6 +205,7 @@ public class QueryService extends IService implements IQueryService {
         	this.ds.dispose();
         }
     }
+	
 	
 	/**
 	 * Gets the query data source.
@@ -223,13 +220,8 @@ public class QueryService extends IService implements IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) ){
-                			ds = new QueryDataSource((PatrolObservationQuery)query, prjProvider);
-                		}else if (query.getTypeKey().equals(PatrolWaypointQuery.KEY) ){
-                    		ds = new QueryDataSource((PatrolWaypointQuery)query, prjProvider);
-                		}else if (query.getTypeKey().equals(PatrolQuery.KEY) ){
-                			ds = new PatrolQueryDataSource((PatrolQuery)query, prjProvider);
-                		}
+                		ds = new QueryDataSource(query, prjProvider);
+                		
                 	}else{
                 		//use factory
                 		QueryDataSourceFactory dsf = new QueryDataSourceFactory();

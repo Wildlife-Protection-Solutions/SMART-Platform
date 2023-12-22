@@ -19,8 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.map.geotools;
+package org.wcs.smart.query.map;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -29,48 +30,56 @@ import java.util.NoSuchElementException;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.model.IMemoryQuery;
+import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * A patrol query geotools feature reader.
+ * Feature reader for waypoint/observation query.
  * 
- * @author egouge
+ * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
+public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private Iterator<PatrolQueryResultItem> fIterator;
+	private Iterator<? extends IResultItem> fIterator;
 	private List<QueryColumn> columns;
-	
+	private QueryColumn geometrycolumn;
+		
 	/**
 	 * Creates a new feature reader.
 	 * 
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	@SuppressWarnings("unchecked")
-	public PatrolQueryFeatureReader(PatrolQuery query,
+	public QueryFeatureReader(Query query, QueryColumn geometryColumn, 
 			SimpleFeatureType ftype, List<QueryColumn> columns) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
 		this.columns = columns;
+		this.geometrycolumn = geometryColumn;
 		
-		try {
-			IQueryResult cachedResults = query.getCachedResults();
-			if (cachedResults != null){
-				fIterator = ((MemoryQueryResult<PatrolQueryResultItem>)cachedResults).getData().iterator();
-			}
-		} catch (Exception e) {
-			QueryPlugIn.log(e.getMessage(), e);
+		if (query instanceof IPagedQuery){
+			try {
+				IQueryResult cachedResults = query.getCachedResults();
+				if (cachedResults != null){
+					fIterator = ((IPagedQueryResultSet<?>)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
+				}
+			} catch (Exception e) {
+				QueryPlugIn.log(e.getMessage(), e);
+			}	
+		}else if (query instanceof IMemoryQuery) {
+			fIterator = ((MemoryQueryResult<IResultItem>)query.getCachedResults()).getData().iterator();
 		}
-		
 	}
 	
 
@@ -79,6 +88,7 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 	 */
 	@Override
 	public void close() throws IOException {
+		if (fIterator != null && fIterator instanceof Closeable c) c.close();
 	}
 
 	/**
@@ -104,14 +114,12 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 	 * @see org.geotools.data.FeatureReader#next()
 	 */
 	@Override
-	public SimpleFeature next() throws IOException, IllegalArgumentException,
-			NoSuchElementException {
-		
-		PatrolQueryResultItem next = (PatrolQueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createTrackFeature(next, columns, ftype);
-		return f;
+	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
+		IResultItem next = this.fIterator.next();
+		if (next instanceof IGeometryResultItem gi) {
+			return gi.toSimpleFeature(ftype, geometrycolumn, columns);
+		}
+		return null;
 	}
-	
-	
 
 }

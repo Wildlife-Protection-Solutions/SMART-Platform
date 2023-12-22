@@ -1362,11 +1362,5 @@
       <defaultmaplayerstyle
             class="org.wcs.smart.patrol.map.style.PatrolReviewWaypointRawDefaultStyle">
       </defaultmaplayerstyle>
-      <defaultmaplayerstyle
-            class="org.wcs.smart.patrol.map.style.PatrolMapPolygonAttributeDefaultStyle">
-      </defaultmaplayerstyle>
-      <defaultmaplayerstyle
-            class="org.wcs.smart.patrol.map.style.PatrolMapLineStringAttributeDefaultStyle">
-      </defaultmaplayerstyle>
    </extension>
 </plugin>

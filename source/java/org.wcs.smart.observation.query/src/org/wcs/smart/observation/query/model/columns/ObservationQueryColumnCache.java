@@ -22,6 +22,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -129,6 +130,7 @@ public class ObservationQueryColumnCache {
 				
 				cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
 			
+				cols.add(new WaypointGeometryQueryColumn());
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}
@@ -194,6 +196,8 @@ public class ObservationQueryColumnCache {
 						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 					}
 				}
+				cols.add(new WaypointGeometryQueryColumn());
+
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}

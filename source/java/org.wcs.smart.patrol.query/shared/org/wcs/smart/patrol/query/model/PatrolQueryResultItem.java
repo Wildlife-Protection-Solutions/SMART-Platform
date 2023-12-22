@@ -25,12 +25,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -38,9 +40,13 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * A class to hold the results of a waypoint 
@@ -374,9 +380,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	 * Converts the result item to a geometry in the database projection (4326)
 	 */
 	@Override
-	public Geometry asGeometry(String columnName) {
-		GeometryFactory gf = GeometryFactoryProvider.getFactory();
-		if (columnName.equalsIgnoreCase(TRACK_GEOMCOLUMN_KEY)){
+	public Geometry asGeometry() {
+		
+		
+			GeometryFactory gf = GeometryFactoryProvider.getFactory();
 			if (getTrack() == null || getTrack().isEmpty()){
 				return gf.createMultiLineString(new LineString[]{});
 			}else {
@@ -414,8 +421,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 					return gf.createMultiLineString(new LineString[]{});
 				}
 			}
-		}
-		return null;
 	}
 	
 	public Object getPatrolAttribute(String keyId) {
@@ -430,6 +435,34 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	public int hashCode(){
 		return Objects.hash(patrolUuid, patrolLegUuid);
 		
+	}
+	
+	/**
+	 * Converts a query result item to a feature.
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	@Override
+	public SimpleFeature toSimpleFeature(SimpleFeatureType ftype, 
+			QueryColumn geometryColumn,
+			List<QueryColumn> columns) {
+		
+		List<Object> data = new ArrayList<Object>();
+		data.add(geometryColumn.getValue(this));
+		data.add(getPatrolId() + "." + System.nanoTime()); //$NON-NLS-1$
+		int i = 2;
+		for (QueryColumn c : columns){
+			if (c.getKey().equalsIgnoreCase(geometryColumn.getKey())) continue;
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(this, c, ftype.getDescriptor(i++), Locale.getDefault()));
+			}
+		}
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));		
 	}
 	
 	@Override

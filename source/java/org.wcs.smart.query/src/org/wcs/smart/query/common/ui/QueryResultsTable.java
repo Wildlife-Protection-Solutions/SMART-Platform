@@ -334,12 +334,13 @@ public abstract class QueryResultsTable {
 	 * @return list of table viewer columns
 	 */
 	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<QueryColumn> columns) {
-		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
+		
+		List<QueryTableViewerColumn> viewers = new ArrayList<>(columns.size());
 		for (int i = 0; i < columns.size(); i++) {
-		
-			IQueryColumnSorter sorter = getColumnSorter();
-		
 			QueryColumn c = columns.get(i);
+			if (c.isDefaultGeometryColumn()) continue; //skip this column
+			
+			IQueryColumnSorter sorter = getColumnSorter();
 			if (c instanceof AttributeQueryColumn ac
 					&& (ac.getAttributeType() == AttributeType.MLIST || 
 					ac.getAttributeType().isGeometry())) {
@@ -348,9 +349,9 @@ public abstract class QueryResultsTable {
 				sorter = null;
 			}
 			
-			viewers[i] = new QueryTableViewerColumn(viewer,c, sorter, getLabelProvider(c, columns));
+			viewer.add(new QueryTableViewerColumn(viewer,c, sorter, getLabelProvider(c, columns)));
 		}
-		return viewers;
+		return viewers.toArray(new QueryTableViewerColumn[viewers.size()]);
 	}
 
 	/**

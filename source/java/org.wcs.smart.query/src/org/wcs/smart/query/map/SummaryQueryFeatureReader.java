@@ -19,58 +19,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.map.geotools;
+package org.wcs.smart.query.map;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import org.geotools.data.FeatureReader;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
-import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
-import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.Query;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
- * Feature reader for waypoint/observation query.
+ * Feature reader for the results of an
+ * asset summary query.  The assumption is
+ * the first column is the station/location id
+ * the result of the columns contain the results data.
+ *  
  * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
+public class SummaryQueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private IQueryResultSetIterator<? extends IResultItem> fIterator;
 	private List<QueryColumn> columns;
-		
+	int currentIndex = -1;
+	
+	private GeometrySummaryQueryResult results;
+	
 	/**
 	 * Creates a new feature reader.
 	 * 
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public QueryFeatureReader(Query query, SimpleFeatureType ftype, List<QueryColumn> columns) {
-		
+	public SummaryQueryFeatureReader(SummaryQuery query, SimpleFeatureType ftype, List<QueryColumn> columns) {
 		this.ftype = ftype;
-		this.fIterator = null;
-		this.columns = columns;
-		if (query instanceof IPagedQuery){
-			try {
-				IQueryResult cachedResults = query.getCachedResults();
-				if (cachedResults != null){
-					fIterator = ((IPagedQueryResultSet<?>)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
-				}
-			} catch (Exception e) {
-				QueryPlugIn.log(e.getMessage(), e);
-			}	
+		this.columns = new ArrayList<>(columns);
+		for (Iterator<QueryColumn> iterator = this.columns.iterator(); iterator.hasNext();) {
+			QueryColumn queryColumn = iterator.next();
+			if (queryColumn.isDefaultGeometryColumn()) iterator.remove();
 		}
+	
+		this.results = (GeometrySummaryQueryResult)query.getCachedResults();
+		currentIndex = 0;
 	}
 	
 
@@ -79,7 +80,6 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public void close() throws IOException {
-		if (fIterator != null) fIterator.close();
 	}
 
 	/**
@@ -95,10 +95,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public boolean hasNext() throws IOException {
-		if (fIterator == null){
-			return false;
-		}
-		return fIterator.hasNext();
+		return currentIndex < results.getNumDataRows();
 	}
 
 	/**
@@ -106,11 +103,22 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
-		WaypointQueryResultItem next = (WaypointQueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, columns, ftype);
-		return f;
+		int thisIndex = currentIndex;
+		currentIndex ++;
+		
+		String id = results.getRowHeaderValues()[thisIndex][0].getFullName();
+		UUID uuid = UuidUtils.stringToUuid(results.getRowHeaderValues()[thisIndex][0].getIdentifier());
+		
+		List<Object> data = new ArrayList<Object>();
+		data.add(GeometryFactoryProvider.getFactory().createPoint(results.getCoordinate(uuid)));
+		data.add(id.trim().toLowerCase() + "." + System.nanoTime()); //$NON-NLS-1$
+		data.add(id);
+		
+		for (int i = 0; i < columns.size() - 1; i ++) {
+			data.add(results.getData()[thisIndex][i]);
+		}
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
+		
 	}
 	
-	
-
 }

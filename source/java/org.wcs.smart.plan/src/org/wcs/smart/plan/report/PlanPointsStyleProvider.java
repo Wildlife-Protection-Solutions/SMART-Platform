@@ -40,7 +40,7 @@ public class PlanPointsStyleProvider implements IBirtLayerStyleProvider {
 
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, 
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, 
 			Session s) {
 		if (extensionId.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();

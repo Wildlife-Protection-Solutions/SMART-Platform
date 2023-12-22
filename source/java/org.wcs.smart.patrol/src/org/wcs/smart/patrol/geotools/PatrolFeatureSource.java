@@ -48,22 +48,10 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 	public boolean getDefaultVisibility() {
 		if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) return true;
 		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return true;
-		
-		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return true;
-		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return true;
+		if (PatrolDataSource.isGeometryAttribute(entry.getTypeName())) return true;
 		return false;
 	}
-	
-	public String getLayerName() {
-		if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) return Messages.PatrolFeatureSource_TrackLayerName;
-		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return Messages.PatrolFeatureSource_WaypointLayerName;
-		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return Messages.PatrolFeatureSource_ProjectedWaypointLayerName;
-		
-		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return SmartLabelProvider.LINESTRING_ATTRIBUTE_LAYER;
-		if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return SmartLabelProvider.POLYGON_ATTRIBUTE_LAYER;
-		return entry.getTypeName();
-	}
-	
+
 	
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
@@ -74,10 +62,10 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 				return PatrolFeatureFactory.createTrackPartSchema();
 			} else if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
 				return PatrolFeatureFactory.createWaypointPrjSchema();
-			} else if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) {
-				return PatrolFeatureFactory.createObservationLineStringSchema();
-			} else if (entry.getTypeName().equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
-				return PatrolFeatureFactory.createObservationPolygonSchema();
+			} else if (PatrolDataSource.isLineAttribute(entry.getTypeName())) {
+				return PatrolFeatureFactory.createObservationLineStringSchema(entry.getTypeName());
+			} else if (PatrolDataSource.isPolgyonAttribute(entry.getTypeName())) {
+				return PatrolFeatureFactory.createObservationPolygonSchema(entry.getTypeName());
 			}
 		}catch(SchemaException ex){
 			throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);
@@ -98,7 +86,11 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
-		return new PatrolFeatureReader( ((PatrolDataSource)entry.getDataStore()).getPatrol() , entry.getTypeName(), getSchema());
+		
+		return new PatrolFeatureReader( 
+				((PatrolDataSource)entry.getDataStore()).getPatrol() , 
+				entry.getTypeName(), 
+				getSchema());
 	}
 
 }

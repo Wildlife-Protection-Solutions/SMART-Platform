@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.map.geotools;
+package org.wcs.smart.query.map;
 
 import java.awt.RenderingHints.Key;
 import java.io.IOException;
@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
-import org.wcs.smart.observation.query.internal.Messages;
 
 /**
  * Smart query data source factor.  
@@ -42,7 +41,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	/**
 	 * query uuid parameter
 	 */
-	public static final Param QUERY_UUID = new Param("queryuuid", UUID.class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  //$NON-NLS-1$
+	public static final Param QUERY_UUID = new Param("queryuuid", UUID.class, "Query", true);  //$NON-NLS-1$ //$NON-NLS-2$
 	  
 	/**
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -60,7 +59,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return Messages.QueryDataSourceFactory_Description;
+		return "SMART Query Results";
 	}
 
 	/**
@@ -68,7 +67,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return Messages.QueryDataSourceFactory_DisplayName;
+		return "SMART Query";
 	}
 
 	/**
@@ -111,7 +110,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, ?> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException(Messages.QueryDataSourceFactory_ReadOnlyError);
+		throw new UnsupportedOperationException("This is a read-only data store."); //$NON-NLS-1$
 	}
 
 }

@@ -46,8 +46,6 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.util.SmartUtils;
 
@@ -60,10 +58,12 @@ public class PatrolGeoResource extends IGeoResource {
 	
 	private URL url = null;
 	protected String dataType;
+	protected String name;
 	
-	public PatrolGeoResource(PatrolService service, String dataType){
+	public PatrolGeoResource(PatrolService service, String dataType, String name){
 		this.service = service;
 		this.dataType = dataType;
+		this.name = name;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
@@ -71,8 +71,13 @@ public class PatrolGeoResource extends IGeoResource {
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
+		
 	}
 	
+	@Override
+	public String getTitle() {
+		return this.name;		
+	}
 	
 	public String getType(){
 		return dataType;
@@ -160,10 +165,13 @@ public class PatrolGeoResource extends IGeoResource {
         	if (dataType.equals(PatrolDataSource.WAYPOINT_TYPE)) return adaptee.cast(getWaypointStyle());
         	if (dataType.equals(PatrolDataSource.TRACK_PART_TYPE)) return adaptee.cast(getTrackStyle());
         	
-        	if (dataType.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) return adaptee.cast(SmartUtils.getDefaultAttributeStyle(Attribute.AttributeType.POLYGON, ObservationAttributeFeatureFactory.ATTRIBUTE_ID_FIELD));
-        	if (dataType.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) return adaptee.cast(SmartUtils.getDefaultAttributeStyle(Attribute.AttributeType.LINE, ObservationAttributeFeatureFactory.ATTRIBUTE_ID_FIELD));
+        	if (PatrolDataSource.isGeometryAttribute(dataType)) {
+           	 	PatrolDataSource ds = ((PatrolService)service).getDataStore(monitor);
+           	 	return adaptee.cast(ds.getAttribute(dataType).getAttributeGeometryStyle().toStyle());
 
+        	}
         }
+        
         return super.resolve(adaptee, monitor);
     }
     

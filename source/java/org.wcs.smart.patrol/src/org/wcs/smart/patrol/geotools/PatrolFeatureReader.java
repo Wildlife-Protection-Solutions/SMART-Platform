@@ -56,11 +56,11 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private Iterator<?> fIterator;
 
 	public PatrolFeatureReader(Patrol patrol,
-			String type, SimpleFeatureType ftype) {
+			String typeName, SimpleFeatureType ftype) {
 		this.ftype = ftype;
-		this.thisType = type;
+		this.thisType = typeName;
 	
-		if (type.equals(PatrolDataSource.WAYPOINT_TYPE)){
+		if (thisType.equals(PatrolDataSource.WAYPOINT_TYPE)){
 			List<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
 			for (PatrolLeg l : patrol.getLegs()){
 				for (PatrolLegDay d : l.getPatrolLegDays()){
@@ -70,7 +70,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 				}
 			}
 			fIterator = pnts.iterator();
-		}else if (type.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)){
+		}else if (thisType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)){
 			List<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
 			for (PatrolLeg l : patrol.getLegs()){
 				for (PatrolLegDay d : l.getPatrolLegDays()){
@@ -80,7 +80,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 				}
 			}
 			fIterator = pnts.iterator();
-		}else if (type.equals(PatrolDataSource.TRACK_PART_TYPE)){
+		}else if (thisType.equals(PatrolDataSource.TRACK_PART_TYPE)){
 			List<TrackPart> pnts = new ArrayList<>();
 			for (PatrolLeg l : patrol.getLegs()){
 				for (PatrolLegDay d : l.getPatrolLegDays()){
@@ -94,16 +94,14 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 				}
 			}
 			fIterator = pnts.iterator();
-		}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) ||
-				type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)
-				) {
+		}else if (PatrolDataSource.isGeometryAttribute(thisType)) {
 			
 			AttributeType matching = AttributeType.LINE;
-			if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+			if (PatrolDataSource.isPolgyonAttribute(thisType)) {
 				matching = AttributeType.POLYGON;
 			}
 			
-
+			String attributeKey = thisType.split("\\.")[1];
 			try(Session session = HibernateManager.openSession()){
 				
 				patrol = session.get(Patrol.class, patrol.getUuid());
@@ -114,7 +112,8 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 						for (PatrolWaypoint pw:d.getWaypoints()) {
 							for (WaypointObservation wo : pw.getWaypoint().getAllObservations()) {
 								for (WaypointObservationAttribute a : wo.getAttributes()) {
-									if (a.getGeom() != null && a.getAttribute().getType() == matching) {
+									if (a.getAttribute().getKeyId().equals(attributeKey) &&
+											a.getGeom() != null && a.getAttribute().getType() == matching) {
 										attributes.add(a);
 										a.getAttributeValueAsString(Locale.getDefault());
 										a.getObservation().getCategory().getName();
@@ -170,7 +169,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 			return new PatrolFeature(PatrolFeatureFactory.getTrackPartAsFeature(ftype, (TrackPart)this.fIterator.next()));
 		}else if (thisType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
 			return new PatrolFeature(PatrolFeatureFactory.getWaypointAsPrjFeature(ftype, (PatrolWaypoint)this.fIterator.next()));
-		}else if (thisType.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING) || thisType.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+		}else if (PatrolDataSource.isGeometryAttribute(thisType)) {
 			return new PatrolFeature(PatrolFeatureFactory.getObservationAttributeAsGeometry(ftype, (WaypointObservationAttribute)this.fIterator.next() ));
 		}
 		return null;

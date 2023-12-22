@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.map.udig;
+package org.wcs.smart.query.map;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.IProjectionProvider;

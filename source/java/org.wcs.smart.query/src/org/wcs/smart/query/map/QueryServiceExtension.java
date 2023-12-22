@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.map.udig;
+package org.wcs.smart.query.map;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -39,13 +39,13 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public class QueryServiceExtension implements ServiceExtension {
-	
     public static final String KEY = "org.wcs.smart.udig.catalog.SmartQueryService"; //$NON-NLS-1$
    
     /**
      * Service parameter conservation area uuid key
      */
-    public static final String QUERY_UUID_KEY = "queryuuid"; //$NON-NLS-1$ 
+    public static final String QUERY_UUID_KEY = "queryuuid"; //$NON-NLS-1$
+   
 	
     /**
      * @see org.locationtech.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
@@ -54,7 +54,15 @@ public class QueryServiceExtension implements ServiceExtension {
 	public IService createService(URL id, Map<String, Serializable> params) {
         if (params == null)
             return null;
-        throw new UnsupportedOperationException("Cannot create query service from parameters"); //$NON-NLS-1$
+            
+        //check for the property service key
+        if (params.containsKey(QUERY_UUID_KEY) && 
+        		params.get(QUERY_UUID_KEY) instanceof UUID) {
+            //found it, create the service handle
+        	return  new QueryService(params);
+        }
+        
+		return null;
 	}
 
 	/**
@@ -78,10 +86,11 @@ public class QueryServiceExtension implements ServiceExtension {
 			return null;
 		}
 		int pos = quuid.lastIndexOf('/');
-		if (pos < 0) pos = 0;
+		if (pos < 0){
+			pos = 0;
+		}
 		
 		quuid = quuid.substring(pos);
-		
 		UUID buuid = UuidUtils.stringToUuid(quuid);
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(QUERY_UUID_KEY, buuid);
@@ -96,14 +105,14 @@ public class QueryServiceExtension implements ServiceExtension {
 	 */
 	public static URL createURL(Map<String, Serializable> params){
 		String url = "smart://smartdb/query/"; //$NON-NLS-1$
-		if (params.get(QUERY_UUID_KEY) == null || !(params.get(QUERY_UUID_KEY) instanceof UUID)){
+		if (params.get(QUERY_UUID_KEY) == null 
+				|| !(params.get(QUERY_UUID_KEY) instanceof UUID)){
 			url += System.nanoTime();
 		}else{
 			url += UuidUtils.uuidToString((UUID)params.get(QUERY_UUID_KEY)) ;
 			//we want each service to have a unique identifier
 			url += "/" + System.nanoTime(); //$NON-NLS-1$
 		}
-		
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

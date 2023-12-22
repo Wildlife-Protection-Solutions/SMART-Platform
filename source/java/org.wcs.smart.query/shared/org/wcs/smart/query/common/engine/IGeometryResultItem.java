@@ -21,7 +21,12 @@
  */
 package org.wcs.smart.query.common.engine;
 
+import java.util.List;
+
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * A query result item that includes at least one geometry column.
@@ -33,9 +38,24 @@ public interface IGeometryResultItem extends IResultItem{
 	
 	/**
 	 * 
-	 * @return The geometry associated with the result item.  This
+	 * @return The default geometry associated with the result item.  This
 	 * geometry should always be in the default (4326) projection.
+	 * 
+	 * The result can contain other geometry columns as well. This is the
+	 * default column
+	 * 
 	 */
-	public Geometry asGeometry(String columnName);
+	public Geometry asGeometry();
 
+	
+	/**
+	 * Converts the result item to a simple feature
+	 * @param type the type
+	 * @param geometryColumn the query column which represents the geometry 
+	 * @param columns all query columns 
+	 * @return
+	 */
+	public SimpleFeature toSimpleFeature(SimpleFeatureType type, 
+			QueryColumn geometryColumn,
+			List<QueryColumn> columns);
 }

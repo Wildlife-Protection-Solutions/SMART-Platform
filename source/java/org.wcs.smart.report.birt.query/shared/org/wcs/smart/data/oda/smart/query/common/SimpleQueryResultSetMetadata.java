@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.data.oda.smart.query.common;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,11 +32,11 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.IGeometryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -51,18 +50,12 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 
 	protected QueryColumn[] queryColumns;
-	protected GeometryColumn[] geometryColumns;
 	
 	/**
 	 * Creates a new metadata object
 	 * @param query the query to gather metadata for
 	 */
-	public SimpleQueryResultSetMetadata(SimpleQuery query, boolean hasAttachment, GeometryColumn[] geometryColumns, SmartConnection connection){
-		this(query, hasAttachment, connection);
-		this.geometryColumns = geometryColumns;
-	}
-	
-	protected SimpleQueryResultSetMetadata(SimpleQuery query, boolean hasAttachment, SmartConnection connection){
+	public SimpleQueryResultSetMetadata(SimpleQuery query, boolean hasAttachment, SmartConnection connection){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		
 		IProjectionProvider provider = null;
@@ -142,7 +135,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return queryColumns.length + (geometryColumns == null ? 0 : geometryColumns.length);
+		return queryColumns.length ;
 	}
 
 	/**
@@ -159,9 +152,6 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (geometryColumns != null && index > queryColumns.length){
-			return geometryColumns[index - queryColumns.length - 1].getLabel();  
-		}
 		return queryColumns[index-1].getName();		
 	}
 
@@ -170,9 +160,6 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		if (geometryColumns != null && index > queryColumns.length){
-			return geometryColumns[index - queryColumns.length - 1].getKey();  
-		}
 		return queryColumns[index-1].getKey();
 	}
 
@@ -181,7 +168,9 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		if (geometryColumns != null && index > queryColumns.length) return Types.JAVA_OBJECT;
+		if (queryColumns[index-1] instanceof IGeometryColumn ig) {
+			return ig.getGeometryType().birtDataType;
+		}
 		return queryColumns[index-1].getType().getSqlType();
 	}
 
@@ -191,7 +180,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return SmartConnection.getNativeDataTypeName( nativeTypeCode, AbstractSmartBirtQuery.SMART_DATASET_TYPE );
+	     return SmartConnection.getNativeDataTypeName( nativeTypeCode, AbstractSmartBirtQuery.SMART_DATASET_TYPE );	     
 	}
 
 	/**
@@ -199,9 +188,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 * @return -1;
 	 */
 	@Override
-	public int getPrecision(int index) throws OdaException {
-		if (geometryColumns != null && index > queryColumns.length) return -1;
-		
+	public int getPrecision(int index) throws OdaException {	
 		QueryColumn qc = queryColumns[index-1];
 		if (qc.getType() == ColumnType.NUMBER ||
 				qc.getType() == ColumnType.LONG ||

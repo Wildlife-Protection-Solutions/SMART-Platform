@@ -22,7 +22,6 @@
 package org.wcs.smart.data.oda.smart.impl;
 
 import java.sql.SQLException;
-import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
@@ -74,14 +73,6 @@ public abstract class AbstractSmartQuery {
 	}
 	
 	/**
-	 * These columns will be available for adding to a SMART map.
-	 * 
-	 * @param query
-	 * @return the set of columns that represent geometry columns in the query results
-	 */
-	public abstract GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l);
-	
-	/**
 	 * Prepares the query but loading and ensure it exists.
 	 * @param smartQuery
 	 * @throws OdaException
@@ -108,7 +99,7 @@ public abstract class AbstractSmartQuery {
 	 * users the metadata provider to create the metadata
 	 */
 	protected IResultSetMetaData getMetaDataInternal(AbstractSmartBirtQuery smartQuery, SmartConnection connection) throws OdaException{
-		return metadataProvider.createMetadata(smartQuery.getQuery(), smartQuery.isAttachment, getGeometryColumns(smartQuery.getQuery().getTypeKey(), connection.getCurrentLocale()), connection);
+		return metadataProvider.createMetadata(smartQuery.getQuery(), smartQuery.isAttachment, connection);
 	}
 	
 	public void dispose(SmartConnection connection) throws SQLException{

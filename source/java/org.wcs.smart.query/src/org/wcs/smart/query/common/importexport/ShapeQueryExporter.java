@@ -53,8 +53,8 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IColumnInfoProvider;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -64,7 +64,7 @@ import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.map.QueryFeatureSource;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -81,8 +81,8 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
     protected Query query;
     protected Projection outputPrj;
     
-    private IQueryType cachedQueryType;
-    protected SimpleFeatureType cachedFeatureType;
+    
+    protected SimpleFeatureType featureType;
     protected Charset cs;
     
     /**
@@ -113,10 +113,8 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 */
 	@Override
 	protected void init() throws Exception {
-		cachedQueryType = QueryTypeManager.INSTANCE.findQueryType(this.query.getTypeKey());
 		features = new ArrayList<SimpleFeature>();
-		
-		cachedFeatureType = createSchema(cachedQueryType);
+		featureType = createSchema();
 	}
 
 	/**
@@ -124,7 +122,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 */
 	@Override
 	protected void writeRow(IResultItem row) throws Exception {
-		features.add(createFeature(row, cachedQueryType, cachedFeatureType));
+		features.add(createFeature(row));
 	}
 
 	/**
@@ -146,9 +144,9 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
 		if (outputPrj == null || CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, outputPrj.getParsedCoordinateReferenceSystem())){
 			reprojected = features;
-			shapefile.createSchema(cachedFeatureType);
+			shapefile.createSchema(featureType);
 		}else{
-			SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(cachedFeatureType, outputPrj.getParsedCoordinateReferenceSystem());
+			SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(featureType, outputPrj.getParsedCoordinateReferenceSystem());
 			shapefile.createSchema(reprojectedType);
 			MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, outputPrj.getParsedCoordinateReferenceSystem(), true);
 			for (SimpleFeature f : features){
@@ -194,17 +192,29 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 * @param it
 	 * @return
 	 */
-	protected abstract SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception;
-	
+	protected SimpleFeature createFeature(IResultItem it) throws Exception{
+		if (it instanceof IGeometryResultItem git) {
+			return git.toSimpleFeature(featureType, geometryColumn, queryColumns);
+		}
+		return null;
+	}
+
 	/**
 	 * Creates the feature type
 	 * @return
 	 */
-	protected abstract SimpleFeatureType createSchema(IQueryType queryType) throws Exception;
-	
-
+	protected SimpleFeatureType createSchema() throws Exception{
+		return DataUtilities.createType("smart." + geometryColumn.getKey(),  //$NON-NLS-1$
+				QueryFeatureSource.getFeatureSchemaDef(this.queryColumns, geometryColumn, false, true));
+		
+	}
 	@Override
-	public void export(Query query, IQueryResult results, Path file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult results, 
+			Path file, 
+			Map<String, Object> parameters, 
+			IProgressMonitor monitor) throws Exception {
+		
+		
 		this.query = ((SimpleQuery)query);
 		outputPrj = (Projection) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
 		IProjectionProvider provider = new IProjectionProvider() {
@@ -218,25 +228,42 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		if (parameters.containsKey(IQueryExporter.ENCODING_KEY)){
 			cs = (Charset)parameters.get(IQueryExporter.ENCODING_KEY);
 		}
-			
-		List<QueryColumn> columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+		
+		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
+		if (columns == null) {
+			columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+		}
+		
+		this.geometryColumn = (QueryColumn) parameters.get(IQueryExporter.GEOMETRY_COLUMN_KEY);
+		if (this.geometryColumn == null) {
+			for (QueryColumn qc : columns) {
+				if (qc.isDefaultGeometryColumn()) {
+					this.geometryColumn = qc;
+					break;
+				}
+			}
+			if (this.geometryColumn == null) {
+				throw new Exception("A geometry column to export must be specified.");
+			}
+		}
+		
 		boolean isDataFiltering = query instanceof IColumnAutoConfigQuery && results instanceof IColumnInfoProvider && ((IColumnAutoConfigQuery)query).isShowDataColumnsOnly();
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			QueryColumn column = iterator.next();
 			boolean isVisibleColumn = isDataFiltering ? ((IColumnInfoProvider)results).isDataColumn(column) : column.isVisible();
 			if (!isVisibleColumn){
-				iterator.remove();
+				iterator.remove();		
 			}else{
 				column.setVisible(true);
 			}
 		}
 		//get all data in default projection and reproject when we write out features
 		if (results instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet<?>)results, columns, file);
+			super.setData((IPagedQueryResultSet<?>)results, geometryColumn, columns, file);
 		}else if (results instanceof MemoryQueryResult){
-			super.setData(((MemoryQueryResult<?>)results).getData(), columns, file);
+			super.setData(((MemoryQueryResult<?>)results).getData(), geometryColumn, columns, file);
 		}else if (results instanceof GridQueryResult){
-			super.setData(((GridQueryResult)results).getData(), columns, file);
+			super.setData(((GridQueryResult)results).getData(), geometryColumn, columns, file);
 		}
 		super.export(monitor);
 		

@@ -22,15 +22,24 @@
 package org.wcs.smart.query.common.engine;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.udig.WaypointSimpleFeature;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -41,10 +50,10 @@ import org.wcs.smart.util.ReprojectUtils;
  * @since 1.0.0
  */
 public class WaypointQueryResultItem implements IGeometryResultItem, IWaypointQueryResultItem, IAdaptable{
-	/**
-	 * Waypoint geometry field name
-	 */
-	public static final String GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
+//	/**
+//	 * Waypoint geometry field name
+//	 */
+//	public static final String GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
 		
 	private String caId;
 	private String caName;
@@ -318,10 +327,8 @@ public class WaypointQueryResultItem implements IGeometryResultItem, IWaypointQu
 	}
 	
 	@Override
-	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(GEOMCOLUMN_KEY))
-			return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
-		return null;
+	public Geometry asGeometry() {		
+		return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -333,6 +340,36 @@ public class WaypointQueryResultItem implements IGeometryResultItem, IWaypointQu
 			return (T)wp;
 		}
 		return null;
+	}
+	
+	
+	/**
+	 * Converts a query result item to a feature.
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	@Override
+	public SimpleFeature toSimpleFeature(SimpleFeatureType ftype, 
+			QueryColumn geometryColumn,
+			List<QueryColumn> columns) {
+		
+		List<Object> data = new ArrayList<Object>();
+		data.add(geometryColumn.getValue(this));
+		data.add(getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ 
+		int i = 2;
+		for (QueryColumn c : columns){
+			if (c.getKey().equalsIgnoreCase(geometryColumn.getKey())) continue;
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(this, c, ftype.getDescriptor(i++), Locale.getDefault()));
+			}
+		}
+		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), getWaypointUuid());
+		
 	}
 	
 	@Override

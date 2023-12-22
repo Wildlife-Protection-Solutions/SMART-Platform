@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.map.udig;
+package org.wcs.smart.query.map;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,15 +31,17 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.feature.NameImpl;
+import org.geotools.styling.Style;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.query.model.Query;
+import org.wcs.smart.ca.datamodel.AttributeGeometryStyle;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.AttributeQueryColumn;
 
 /**
  * Georesource for a smart waypoint query.
@@ -51,6 +53,7 @@ public class QueryGeoResource extends IGeoResource {
 	
 	private URL url = null;
 	private String dataType;
+	private String name;
 	
 	/**
 	 * Creates a new query georesource.
@@ -58,9 +61,10 @@ public class QueryGeoResource extends IGeoResource {
 	 * @param service the query service
 	 * @param dataType data type
 	 */
-	public QueryGeoResource(QueryService service, String dataType){
+	public QueryGeoResource(QueryService service, String dataType, String name){
 		this.service = service;
 		this.dataType = dataType;
+		this.name = name;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
@@ -68,7 +72,7 @@ public class QueryGeoResource extends IGeoResource {
 				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 			}
 		 } catch (MalformedURLException e) {
-             throw new IllegalArgumentException(Messages.QueryGeoResource_ServiceError, e);
+             throw new IllegalArgumentException(e.getMessage(), e);
          }	
 	}
 
@@ -101,7 +105,7 @@ public class QueryGeoResource extends IGeoResource {
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
-		return new QueryGeoResourceInfo(this, monitor);
+		return new QueryGeoResourceInfo(this,this.name, monitor);
 	}
 
 	/**
@@ -121,12 +125,13 @@ public class QueryGeoResource extends IGeoResource {
 			return false;
 
 		return adaptee.isAssignableFrom(IGeoResourceInfo.class)
+				|| adaptee.isAssignableFrom(QueryService.class)
 				|| adaptee.isAssignableFrom(IService.class)
 				|| adaptee.isAssignableFrom(FeatureSource.class)
 				|| adaptee.isAssignableFrom(FeatureStore.class)
 				|| adaptee.isAssignableFrom(SimpleFeatureStore.class)
 	            || adaptee.isAssignableFrom(SimpleFeatureSource.class)
-	            || adaptee.isAssignableFrom(Query.class)
+	            || adaptee.isAssignableFrom(Style.class)
 				|| super.canResolve(adaptee);
 	}
 
@@ -136,16 +141,23 @@ public class QueryGeoResource extends IGeoResource {
 	@Override
 	public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)
 			throws IOException {
-		if (adaptee.isAssignableFrom(((QueryService)service).getQuery().getClass())){
-			return adaptee.cast(((QueryService)service).getQuery());
-		}
 		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {
 			return adaptee.cast(super.getInfo(monitor));
+		}
+		if (adaptee.isAssignableFrom(QueryService.class)) {
+			return adaptee.cast(this.service);
 		}
 		if (adaptee.isAssignableFrom(IService.class)) {
 			return adaptee.cast(this.service);
 		}
 
+		if (adaptee.isAssignableFrom(Style.class)) {
+			QueryDataSource ds = (QueryDataSource)((QueryService) service).getDataStore(monitor);
+			if (ds.getQueryColumn(new NameImpl(dataType)) instanceof AttributeQueryColumn ac) {
+				return adaptee.cast(new AttributeGeometryStyle(ac.getAttributeType(), ac.getFormatString()).toStyle());
+			}
+		}
+		
 		if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ) {
 			DataStore ds = ((QueryService) service).getDataStore(monitor);
 			if (ds != null) {
@@ -154,7 +166,7 @@ public class QueryGeoResource extends IGeoResource {
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
-				PatrolQueryPlugIn.log(Messages.QueryGeoResource_Error_NoDatasource, null);
+				QueryPlugIn.log("Query waypoint data source not created", null); //$NON-NLS-1$
 				return null;
 			}
 		}

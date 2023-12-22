@@ -197,8 +197,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	private Layer waypointLayer = null;
 	private Layer trackLayer = null;
 
-	private Layer attributePolygonLayer = null;
-	private Layer attributeLineStringLayer = null;
 	
 	private Object currentSelection = null;
 	
@@ -216,14 +214,21 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    		List<IGeoResource> sortedLayers = new ArrayList<>();
 
 	    		for (IGeoResource l : layers) toAdd.put(  ((PatrolGeoResource)l).getType(), l );
-    			
-	    		String[] orderedLayers = new String[] {PatrolDataSource.TRACK_PART_TYPE, 
+    
+	    		String[] orderedLayers = new String[] {
+	    				PatrolDataSource.TRACK_PART_TYPE, 
 	    				PatrolDataSource.WAYPOINT_PRJ_TYPE, 
 	    				PatrolDataSource.WAYPOINT_TYPE,
-	    				PatrolDataSource.OBS_ATTRIBUTE_POLYGON,
-	    				PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,	    				
 	    		};
-	    		for (String name : orderedLayers) sortedLayers.add(toAdd.get(name));
+	    		for (String name : orderedLayers) {
+	    			sortedLayers.add(toAdd.get(name));
+	    			toAdd.remove(name);
+	    		}
+	    		List<IGeoResource> othersorted = new ArrayList<>();
+	    		othersorted.addAll(toAdd.values());
+	    		othersorted.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
+	    		sortedLayers.addAll(0,othersorted);
+    		
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
@@ -236,7 +241,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	    				geoIdToStyle.put(PatrolDataSource.TRACK_PART_TYPE,  PatrolReviewTrackDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_PRJ_TYPE,  PatrolReviewWaypointRawDefaultStyle.KEY);
 	    				geoIdToStyle.put(PatrolDataSource.WAYPOINT_TYPE,  PatrolReviewWaypointDefaultStyle.KEY);
-//	    				geoIdToStyle.put(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING,  PatrolReview.KEY);
 
 	    				//if a default style is not specified we'll use this style instead
 	    				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
@@ -255,7 +259,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		    					
 		    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
 		    					if (fs != null) {
-		    						l.setName(fs.getLayerName());
 		    						l.setVisible(fs.getDefaultVisibility());
 		    						l.eNotify(new ENotificationImpl(
 		    								(InternalEObject) l, Notification.SET,
@@ -273,14 +276,14 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		    							waypointLayer.setStyleBlackboard(new WaypointLayerStyleBlackboard(waypointLayer.getStyleBlackboard()));
 		    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
 		    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
-		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) {
-		    							attributeLineStringLayer = l;
-		    							//attributeLineStringLayer.setFilter(Filter.EXCLUDE);
-		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
-		    							attributePolygonLayer = l;
-		    							
-		    							//DataStore src = attributePolygonLayer.getGeoResource().resolve(PatrolGeoResource.class, null).resolve(DataStore.class, null);
-		    							//attributePolygonLayer.setFilter(Filter.EXCLUDE);
+//		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) {
+//		    							attributeLineStringLayer = l;
+//		    							//attributeLineStringLayer.setFilter(Filter.EXCLUDE);
+//		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+//		    							attributePolygonLayer = l;
+//		    							
+//		    							//DataStore src = attributePolygonLayer.getGeoResource().resolve(PatrolGeoResource.class, null).resolve(DataStore.class, null);
+//		    							//attributePolygonLayer.setFilter(Filter.EXCLUDE);
 		    						}
 		    					 }
 		    				}

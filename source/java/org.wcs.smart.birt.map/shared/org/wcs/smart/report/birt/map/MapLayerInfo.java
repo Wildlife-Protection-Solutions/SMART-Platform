@@ -61,6 +61,7 @@ public class MapLayerInfo {
 	private LayerType layerType;
 	
 	private String geometryColumn;
+	private String geometryColumnId;
 	
 	private StyleBlackboard blackboard;
 		
@@ -70,6 +71,10 @@ public class MapLayerInfo {
 	
 	public MapLayerInfo(LayerItem item) {
 		this(item.getLayerName(), item.getLayerStyle(), item.getLayerType(), item.getGeometryColumn(), item.getZoomTo());
+		this.geometryColumnId = item.getGeometryColumnId();
+		if(this.layerType == LayerType.RASTER) {
+			this.geometryColumnId = "raster"; //$NON-NLS-1$
+		}
 	}
 	
 	public MapLayerInfo(String layerName, String mapStyle, LayerType type, String geometryColumn){
@@ -81,7 +86,11 @@ public class MapLayerInfo {
 		this.mapStyle = mapStyle;
 		this.layerType = type;
 		this.geometryColumn = geometryColumn;
+		this.geometryColumnId = this.geometryColumn;
 		this.zoomTo = zoomTo;
+		if(this.layerType == LayerType.RASTER) {
+			this.geometryColumnId = "raster"; //$NON-NLS-1$
+		}
 	}
 
 	public boolean getIncludeZoom() {
@@ -120,6 +129,10 @@ public class MapLayerInfo {
 		this.layerType = layerType;
 	}
 
+	public String getGeometryColumnId() {
+		return geometryColumnId;
+	}
+	
 	public String getGeometryColumn() {
 		return geometryColumn;
 	}

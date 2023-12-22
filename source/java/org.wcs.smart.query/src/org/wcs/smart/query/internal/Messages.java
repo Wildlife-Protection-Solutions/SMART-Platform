@@ -389,6 +389,12 @@ public class Messages extends NLS {
 	public static String QueryPropertiesDialog_TranslateLink;
 	public static String QueryTemplateCloner_ProgressCopyFolders;
 	public static String QueryTemplateCloner_ProgressQuery;
+	public static String QueryServiceInfo_Keyword1;
+	public static String QueryServiceInfo_Keyword2;
+	public static String QueryServiceInfo_Keyword3;
+	public static String QueryServiceInfo_Keyword4;
+	public static String QueryServiceInfo_Keyword5;
+	public static String QueryServiceInfo_Keyword6;			
 	public static String QueryTypeDialog_CreateButton;
 	public static String QueryTypeDialog_DialogText;
 	public static String QueryTypeDialog_Message;

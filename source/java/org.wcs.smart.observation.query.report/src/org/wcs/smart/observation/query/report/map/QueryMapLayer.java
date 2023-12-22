@@ -27,7 +27,6 @@ import java.util.List;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
-import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
@@ -52,16 +51,11 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
-		if (queryTypeKey.equals(ObsObservationQuery.KEY) ||
-				queryTypeKey.equals(ObservationWaypointQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, ObservationQueryResultItem.GEOMCOLUMN_KEY);
-			return Collections.singletonList(def);
-		}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
+		if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, null);
 			return Collections.singletonList(def);
 		}
-		return null;
-		
+		return super.getGeometryOptions(queryTypeKey);		
 	}
 
 }

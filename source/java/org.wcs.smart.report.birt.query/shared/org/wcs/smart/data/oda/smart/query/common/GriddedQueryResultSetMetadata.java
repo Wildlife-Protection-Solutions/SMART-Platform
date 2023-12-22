@@ -49,7 +49,7 @@ public class GriddedQueryResultSetMetadata extends SimpleQueryResultSetMetadata 
 	
 	public GriddedQueryResultSetMetadata(GriddedQuery query, SmartConnection connection) throws OdaException{
 		super(query, connection);
-		this.geometryColumns = null;
+		
 		try{
 			this.crs = query.getCoordinateReferenceSystem();
 		}catch (Exception ex){

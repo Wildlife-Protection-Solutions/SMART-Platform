@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,35 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.map;
+package org.wcs.smart.query.map;
 
-import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
-import org.wcs.smart.ui.SmartLabelProvider;
+import java.text.MessageFormat;
+
+import org.locationtech.udig.catalog.IServiceInfo;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 
 /**
- * Patrol map page default waypoint style
- * 
+ * Smart service information.
  * @author Emily
- *
+ * @since 1.0.0
  */
-public class IncidentMapPolygonAttributeDefaultStyle implements IMapLayerDefaultStyle {
+public class QueryServiceInfo extends IServiceInfo{
 
-	public static final String KEY = "org.wcs.smart.incident.map.attribute.polygon";  //$NON-NLS-1$
+	public QueryServiceInfo(QueryService service){
+		this.description = "Connects to SMART Query";
+		this.icon = QueryPlugIn.getDefault().getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
+		this.keywords = new String[]{Messages.QueryServiceInfo_Keyword1, Messages.QueryServiceInfo_Keyword2, Messages.QueryServiceInfo_Keyword3, Messages.QueryServiceInfo_Keyword4, Messages.QueryServiceInfo_Keyword5, Messages.QueryServiceInfo_Keyword6};
+		this.title = MessageFormat.format("SMART Query {0}", service.getQuery().getName());
+	}
 	
-	@Override
-	public String getKey() {
-		return KEY;
-	}
-
-	@Override
-	public String getMapName() {
-		return Messages.IncidentMapWaypointDefaultStyle_MapName;
-	}
-
-	@Override
-	public String getLayerName() {
-		return SmartLabelProvider.POLYGON_ATTRIBUTE_LAYER;
-	}
-
 }

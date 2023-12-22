@@ -21,18 +21,9 @@
  */
 package org.wcs.smart.observation.query.exportimport;
 
-import org.geotools.data.DataUtilities;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
-import org.wcs.smart.observation.query.map.geotools.QueryFeatureSource;
-import org.wcs.smart.observation.query.map.geotools.QueryResultItemFeature;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -56,16 +47,7 @@ public class ObsShapeQueryExporter extends ShapeQueryExporter{
 		return false;
 	}
 
-	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
-		return QueryResultItemFeature.createObservationFeature((ObservationQueryResultItem) it, queryColumns, type);
-	}
 
-	@Override
-	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryFeatureSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		
-	}
 		
 }
 

@@ -33,4 +33,5 @@ import org.wcs.smart.query.common.engine.IResultItem;
  */
 public class QueryGridResultItem extends GridResultItem implements IResultItem{
 
+
 }

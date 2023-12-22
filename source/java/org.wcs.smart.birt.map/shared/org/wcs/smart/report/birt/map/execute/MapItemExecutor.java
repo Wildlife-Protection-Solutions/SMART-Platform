@@ -325,7 +325,7 @@ public class MapItemExecutor implements IReportItemExecutor {
 				// no style is provided; so lets try to load the default style from the query
 				Session session = (Session) context.getAppContext().get(BirtConstants.SESSION_PARAM);
 				String xid = ((OdaDataSetHandle) layer.getHandle().getDataSet()).getExtensionID();
-				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, def.getLayerType(), session);
+				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, def, session);
 			} else {
 				// parse provided style
 				String styleString = def.getMapStyle();
