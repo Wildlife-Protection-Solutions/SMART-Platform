@@ -108,6 +108,7 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.rec
     		<element name="number_value" type="double" maxOccurs="1" minOccurs="0"></element>
     		<element name="list_value" type="tns:LabelUuid" maxOccurs="unbounded" minOccurs="0"></element>
     		<element name="tree_value" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
+    		<element name="geom_value" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 

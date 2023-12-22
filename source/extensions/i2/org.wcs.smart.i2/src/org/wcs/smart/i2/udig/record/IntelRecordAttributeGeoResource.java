@@ -24,7 +24,6 @@ package org.wcs.smart.i2.udig.record;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
@@ -38,9 +37,8 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
-import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.udig.IFilteringResource;
 
 /**
@@ -48,30 +46,35 @@ import org.wcs.smart.udig.IFilteringResource;
  * 
  * @author Emily
  */
-public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetResource, IFilteringResource {
+public class IntelRecordAttributeGeoResource extends IGeoResource implements IFilteringResource {
 
 	private URL url = null;
-	private LocationLayerType type;
+	private Attribute attribute;
 	
-	public IntelRecordGeoResource(IntelRecordService service, LocationLayerType type){
+	public IntelRecordAttributeGeoResource(IntelRecordService service, Attribute attribute){
 		this.service = service;
-		this.type = type;
+		this.attribute = attribute;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + type.name(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + attribute.getKeyId(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
 	}
 	
-	public LocationLayerType getType() {
-		return this.type;
+	public Attribute getAttribute() {
+		return this.attribute;
+	}
+	
+	@Override
+	public String getTitle() {
+		return this.attribute.getName();
 	}
 	
 	@Override
 	public boolean canFilter(){
-		return type == LocationLayerType.POINT || type == LocationLayerType.POLYGON;
+		return true;
 	}
 	
 	/**
@@ -114,7 +117,7 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
 	            return false;
 
 	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
-	        		|| adaptee.isAssignableFrom(IntelRecordGeoResource.class)
+	        		|| adaptee.isAssignableFrom(IntelRecordAttributeGeoResource.class)
 	                || adaptee.isAssignableFrom(IService.class)
 	                || adaptee.isAssignableFrom(IntelRecordService.class)
 	                || adaptee.isAssignableFrom(FeatureSource.class)
@@ -141,14 +144,14 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
         if( adaptee.isAssignableFrom(IntelRecordService.class) ){
             return adaptee.cast( this.service );
         }
-        if (adaptee.isAssignableFrom(IWorkingSetResource.class)){
-        	return adaptee.cast( this );
-        }
+        
         if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ){
         	 DataStore ds = ((IntelRecordService)service).getDataStore(monitor);
              if (ds != null) {
+            	 
+            	 
                  FeatureSource<SimpleFeatureType, SimpleFeature> fs = 
-                		 ds.getFeatureSource(IntelRecordDataSource.generateTypeName(type, ((IntelRecordService)service).getRecordUuid()));
+                		 ds.getFeatureSource(IntelRecordDataSource.generateTypeName(this.attribute));
                  if (fs != null)
                      return adaptee.cast(fs);
              }else{
@@ -165,14 +168,5 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
         }
         return super.resolve(adaptee, monitor);
     }
-
-	@Override
-	public UUID getResourceId() {
-		return ((IntelRecordService)service).getRecordUuid();
-	}
-
-	@Override
-	public IntelWorkingSetCategory getResourceType() {
-		return IntelWorkingSetCategory.RECORD;
-	}
+    
 }

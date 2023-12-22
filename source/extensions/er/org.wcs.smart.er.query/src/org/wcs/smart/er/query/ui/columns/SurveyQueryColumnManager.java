@@ -47,6 +47,7 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
+import org.wcs.smart.er.query.model.column.TrackGeometryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -54,7 +55,9 @@ import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.model.GridQueryColumn;
+import org.wcs.smart.query.model.IGeometryColumn.Type;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Survey query column manager for creating
@@ -168,7 +171,7 @@ public class SurveyQueryColumnManager {
 			cols.add(q.clone());
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
-
+		cols.add(new WaypointGeometryQueryColumn());
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 
@@ -229,6 +232,7 @@ public class SurveyQueryColumnManager {
 		}catch (Exception ex){
 			throw new IllegalStateException(ex);
 		}
+		cols.add(new WaypointGeometryQueryColumn());
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
@@ -313,7 +317,8 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
 		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
-		
+		cols.add(new TrackGeometryQueryColumn(Type.MULTILINESTRING));
+
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
@@ -357,17 +362,15 @@ public class SurveyQueryColumnManager {
 			}
 		};
 		
-//		LoadMissionPropertiesJob j = new LoadMissionPropertiesJob(sd);
 		j.schedule();
 		try {
 			j.join();
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
-//		cols.addAll(j.getColumns());
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		
+		cols.add(new TrackGeometryQueryColumn(Type.LINESTRING));
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}

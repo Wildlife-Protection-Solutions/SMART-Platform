@@ -23,29 +23,21 @@ package org.wcs.smart.er.query.report.query;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
-import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
-import org.wcs.smart.er.query.model.SurveyObservationQuery;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
-import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -140,22 +132,5 @@ public class SurveyReportQuery extends AbstractSmartQuery {
 		//the result set
 		return super.executeQueryInternal(query, connection);
 	}
-
-	@Override
-	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
-		if (queryTypeKey.equals(SurveyObservationQuery.KEY) ||
-				queryTypeKey.equals(SurveyWaypointQuery.KEY)){		
-			return new GeometryColumn[]{
-					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),WaypointQueryResultItem.GEOMCOLUMN_KEY)};
-		}else if (queryTypeKey.equals(MissionQuery.KEY)){
-			return new GeometryColumn[]{
-					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY)};
-		}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
-			return new GeometryColumn[]{
-					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY)};
-		}
-		return null;
-	}
-	
 	
 }

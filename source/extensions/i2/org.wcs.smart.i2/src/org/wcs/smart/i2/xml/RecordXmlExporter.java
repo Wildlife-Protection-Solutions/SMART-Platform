@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -439,7 +440,10 @@ public class RecordXmlExporter {
 								xmlTree.setName(attribute.getAttributeTreeNode().getHkey());
 								xmlObsAttribute.setTreeValue(xmlTree);
 							}
-							
+							if (attribute.getGeom() != null) {
+								xmlObsAttribute.setStringValue(attribute.getStringValue());
+								xmlObsAttribute.setGeomValue(Base64.getEncoder().encodeToString(attribute.getGeom()));
+							}
 							xmlObservation.getAttributes().add(xmlObsAttribute);
 						}
 						

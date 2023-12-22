@@ -59,10 +59,12 @@ public class MissionGeoResource extends IGeoResource {
 	
 	private URL url = null;
 	protected String dataType;
+	protected String name;
 	
-	public MissionGeoResource(MissionService service, String dataType){
+	public MissionGeoResource(MissionService service, String dataType, String name){
 		this.service = service;
 		this.dataType = dataType;
+		this.name = name;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
@@ -73,6 +75,10 @@ public class MissionGeoResource extends IGeoResource {
 		
 	}
 	
+	@Override
+	public String getTitle() {
+		return this.name;
+	}
 	
 	public String getType(){
 		return dataType;
@@ -100,7 +106,7 @@ public class MissionGeoResource extends IGeoResource {
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
-		return new MissionGeoResourceInfo(this, monitor);
+		return new MissionGeoResourceInfo(this, monitor, this.name);
 	}
 
 	/**
@@ -164,7 +170,10 @@ public class MissionGeoResource extends IGeoResource {
         		s = createPointPrjStyle();
         	}else if (dataType.equals(MissionDataSource.MISSIONTRACK_TYPE)){
         		s = createLineStyle();
+        	}else if (MissionDataSource.isGeometryAttribute(dataType)) {
+        		s = ((MissionService)service).getDataStore(monitor).getAttribute(dataType).getAttributeGeometryStyle().toStyle();
         	}
+        	
         	if (s != null){
         		return adaptee.cast(s);
         	}

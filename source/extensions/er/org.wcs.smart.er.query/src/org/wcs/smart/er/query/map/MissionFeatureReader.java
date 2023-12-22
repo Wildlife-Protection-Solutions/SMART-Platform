@@ -19,27 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.map.geotools;
+package org.wcs.smart.er.query.map;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.engine.ISurveyQueryMissionResult;
-import org.wcs.smart.er.query.model.MissionTrackResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -55,9 +59,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	private Iterator<?> fIterator;
 	
 	private Session session = null;
-	private List<QueryColumn> columns;
 	
-	private boolean isWaypointMissionTrack= false;
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -65,23 +67,16 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	 * @param ftype the feature type
 	 */
 	public MissionFeatureReader(SimpleQuery query,
-			SimpleFeatureType ftype, List<QueryColumn> columns) {
+			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
-		this.columns = columns;
 		
-		Object cachedResults;
+		
 		try {
-			cachedResults = query.getCachedResults();
-			if (ftype.getTypeName().equals(SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE) && 
-			 (cachedResults instanceof ISurveyQueryMissionResult)){
-				fIterator = ((ISurveyQueryMissionResult) cachedResults).getMissionUuids().iterator();
-				isWaypointMissionTrack = true;
-			}else if (ftype.getTypeName().equals(SurveyQueryDataSource.TRACKS_TYPE)){
-				fIterator = ((IPagedQueryResultSet)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
-				isWaypointMissionTrack = false;
-			}
+			Object cachedResults = query.getCachedResults();
+			fIterator = ((ISurveyQueryMissionResult) cachedResults).getMissionUuids().iterator();
+			
 		} catch (Exception e) {
 			QueryPlugIn.log(e.getMessage(), e);
 		}
@@ -132,24 +127,42 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	 */
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
-		if (isWaypointMissionTrack){
-			byte[] next = (byte[]) this.fIterator.next();
-			Mission mission = (Mission) getSession().get(Mission.class, UuidUtils.byteToUUID(next));
-			SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
-			return f;
-		}else{
-			Object n = this.fIterator.next();
-			if (n instanceof SurveyQueryResultItem){
-				SurveyQueryResultItem next = (SurveyQueryResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, columns, ftype);
-				return f;
-			}else if (n instanceof MissionTrackResultItem){
-				MissionTrackResultItem next = (MissionTrackResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, columns, ftype);
-				return f;
-			}
-		}
-		return null;
+		byte[] next = (byte[]) this.fIterator.next();
+		Mission mission = (Mission) getSession().get(Mission.class, UuidUtils.byteToUUID(next));
+		SimpleFeature f = createObservationFeature(mission, ftype);
+		return f;
+		
 	}
 
+	public static SimpleFeature createObservationFeature(Mission mission, SimpleFeatureType  ftype){
+		//"fid:String,id:String,start:Date,end:Date,comment:String,geom:LineString:srid=4326"
+		
+		Object[] data = new Object[6];
+		List<LineString> geoms = new ArrayList<LineString>();
+		for (MissionDay md : mission.getMissionDays()){
+			for (MissionTrack mt : md.getTracks()){
+				try{
+					geoms.add(mt.getLineString());
+				}catch (Exception ex){
+					ERQueryPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+		
+		if (geoms.size() > 0){
+			Geometry g = GeometryFactoryProvider.getFactory().createMultiLineString(geoms.toArray(new LineString[geoms.size()]));
+			data[0] = g;
+		}else{
+			data[0] = null;
+		}
+		
+		data[1] = mission.getId() + "." + UuidUtils.uuidToString(mission.getUuid()); //$NON-NLS-1$
+		data[2] = mission.getId();
+		data[3] = mission.getStartDate();
+		data[4] = mission.getEndDate();
+		data[5] = mission.getComment();
+		
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+	}
 }

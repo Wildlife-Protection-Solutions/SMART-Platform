@@ -21,22 +21,11 @@
  */
 package org.wcs.smart.er.query.importexport;
 
-import org.geotools.data.DataUtilities;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
-import org.wcs.smart.er.query.map.geotools.SurveyQueryFeatureSource;
-import org.wcs.smart.er.query.map.geotools.SurveyResultItemFeature;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
-import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -60,54 +49,6 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
-		if (queryType.getKey().equals(MissionQuery.KEY)){
-			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, type);
-		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
-				    query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-			return SurveyResultItemFeature.createObservationFeature((WaypointQueryResultItem)it, queryColumns, type);
-		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, queryColumns, type);
-		}
-		return null;
-	}
-	
-	@Override
-	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		if (queryType.getKey().equals(MissionQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryFeatureSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryFeatureSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		}else if (query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryFeatureSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryFeatureSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		}
-		return null;
-		
-	}
-		
-	/**
-	 * Executes any tasks required before data is 
-	 * written.  Here writers can be initialized
-	 * and header lines written.
-	 * 
-	 * @throws Exception
-	 */
-	protected void init() throws Exception{
-		super.init();
-	}
-	
-	/**
-	 * Executes any  tasks required after all
-	 * data is written.
-	 * @throws Exception
-	 */
-	protected void finish() throws Exception{
-		super.finish();
 	}
 }
 

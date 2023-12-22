@@ -211,7 +211,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	}
 
 	@Override
-	public MissionAttributeListItem getMissionAttributeListItenByKey(String key, Session session) {
+	public MissionAttributeListItem getMissionAttributeListItenByKey(String missionAttributeKeyId, String key, Session session) {
 		
 		//get all
 		CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -220,7 +220,8 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		c.select(from);
 		c.where(cb.and(
 				cb.equal(from.get("keyId"), key), //$NON-NLS-1$
-				cb.equal(from.join("attribute").get("conservationArea"), ca) //$NON-NLS-1$ //$NON-NLS-2$
+				cb.equal(from.join("attribute").get("conservationArea"), ca), //$NON-NLS-1$ //$NON-NLS-2$
+				cb.equal(from.join("attribute").get("keyId"), missionAttributeKeyId) //$NON-NLS-1$ //$NON-NLS-2$
 				));
 		return session.createQuery(c).uniqueResult();
 	}

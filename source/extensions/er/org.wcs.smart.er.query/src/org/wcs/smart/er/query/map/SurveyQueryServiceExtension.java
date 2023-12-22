@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.map.udig;
+package org.wcs.smart.er.query.map;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -38,7 +38,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryServiceExtension implements ServiceExtension {
+public class SurveyQueryServiceExtension implements ServiceExtension {
     public static final String KEY = "org.wcs.smart.udig.catalog.SmartQueryService"; //$NON-NLS-1$
    
     /**
@@ -58,7 +58,7 @@ public class QueryServiceExtension implements ServiceExtension {
         //check for the property service key
         if (params.containsKey(QUERY_UUID_KEY) && params.get(QUERY_UUID_KEY) instanceof UUID) {
             //found it, create the service handle
-        	return  new QueryService(params);
+        	return  new SurveyQueryService(params);
         }
         
 		return null;

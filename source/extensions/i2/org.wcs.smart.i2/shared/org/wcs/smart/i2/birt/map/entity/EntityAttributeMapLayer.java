@@ -74,7 +74,7 @@ public class EntityAttributeMapLayer implements IBirtMapLayerManager, IBirtLayer
 	}
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, Session s) {
 		if (extensionId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
 			//return red star style
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();

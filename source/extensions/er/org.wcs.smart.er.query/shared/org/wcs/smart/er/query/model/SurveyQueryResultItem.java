@@ -25,12 +25,18 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * A class to hold the results of a survey waypoint 
@@ -248,14 +254,40 @@ public class SurveyQueryResultItem implements ISurveyQueryResultItem, IGeometryR
 	}
 
 	@Override
-	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(TRACK_GEOMCOLUMN_KEY)){
-			if (getTracks() == null){
-				return GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[]{});
-			}
-			return GeometryFactoryProvider.getFactory().createMultiLineString(getTracks().toArray(new LineString[getTracks().size()]));
+	public Geometry asGeometry() {
+		if (getTracks() == null){
+			return GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[]{});
 		}
-		return null;
+		return GeometryFactoryProvider.getFactory().createMultiLineString(getTracks().toArray(new LineString[getTracks().size()]));
+	}
+
+	/**
+	 * Converts a query result item to a feature.
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	
+	@Override
+	public SimpleFeature toSimpleFeature(SimpleFeatureType type, QueryColumn geometryColumn,
+			List<QueryColumn> columns) {
+		
+		List<Object> data = new ArrayList<Object>();
+			
+		data.add(geometryColumn.getValue(this));
+		data.add(getMissionId() + "." + System.nanoTime()); //$NON-NLS-1$
+		int i = 2;
+		for (QueryColumn c : columns){
+			if (c.isVisible() && !c.getKey().equalsIgnoreCase(geometryColumn.getKey())){
+				data.add(QueryColumnUtils.getValue(this, c, type.getDescriptor(i++), Locale.getDefault()));
+			}
+		}			
+		return SimpleFeatureBuilder.build(type, data, (String)data.get(1));
+		
 	}
 	
 	

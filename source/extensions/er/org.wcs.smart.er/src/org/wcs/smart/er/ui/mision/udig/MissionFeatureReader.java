@@ -68,14 +68,13 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 				me.addAll(md.getWaypoints());
 			}
 			iterator = me.iterator();
-		}else if (typename.equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING) ||
-				typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
+		}else if (MissionDataSource.isGeometryAttribute(typename)) {
 			
 			AttributeType matching = AttributeType.LINE;
-			if (typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
+			if (MissionDataSource.isPolygonAttribute(typename)) {
 				matching = AttributeType.POLYGON;
 			}
-			
+			String attributeKey = typename.split("\\.")[1]; //$NON-NLS-1$
 			try(Session session = HibernateManager.openSession()){
 				
 				mission= session.get(Mission.class, mission.getUuid());
@@ -86,7 +85,8 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 						
 						for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
 							for (WaypointObservationAttribute a : wo.getAttributes()) {
-								if (a.getGeom() != null && a.getAttribute().getType() == matching) {
+								if (a.getAttribute().getKeyId().equalsIgnoreCase(attributeKey) &&
+										a.getGeom() != null && a.getAttribute().getType() == matching) {
 									attributes.add(a);
 									a.getAttributeValueAsString(Locale.getDefault());
 									a.getObservation().getCategory().getName();
@@ -131,8 +131,8 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 			return SurveyFeatureFactory.createWaypointPrjFeature(featureType, (SurveyWaypoint)feature);
 		}else if (typename.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){ 	
 			return SurveyFeatureFactory.createWaypointFeature(featureType, (SurveyWaypoint)feature);
-		}else if (typename.equals(MissionDataSource.OBS_ATTRIBUTE_LINESTRING) || typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON)) {
-			boolean hasArea = typename.equals(MissionDataSource.OBS_ATTRIBUTE_POLYGON); 
+		}else if (MissionDataSource.isGeometryAttribute(typename)) {
+			boolean hasArea = MissionDataSource.isPolygonAttribute(typename); 
 			return new SurveyFeature(ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(featureType, hasArea, (WaypointObservationAttribute)feature ));
 		}
 		return null;

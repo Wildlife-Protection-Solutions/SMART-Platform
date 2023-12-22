@@ -23,7 +23,6 @@ package org.wcs.smart.er.query.report.query;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
@@ -45,7 +44,7 @@ import org.wcs.smart.query.model.filter.date.WaypointDateField;
 public class SummaryMetadataProvider implements IMetadataProvider {
 
 	@Override
-	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geometryColumns, SmartConnection c) throws OdaException {
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, SmartConnection c) throws OdaException {
 		SurveySummaryQuery q = (SurveySummaryQuery)query;
 		
 		//set a default date filter for parsing

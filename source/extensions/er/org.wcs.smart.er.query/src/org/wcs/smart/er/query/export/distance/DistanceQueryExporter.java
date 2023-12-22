@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -128,6 +129,11 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		if (SmartDB.getCurrentConservationArea().getIsCcaa()) return false;
 		return query.getTypeKey().equalsIgnoreCase(SurveyObservationQuery.KEY);
 	}
+	
+	@Override
+	public boolean canExport(QueryColumn qc) {
+		return qc.isDefaultGeometryColumn();
+	}
 
 	private void init(Path file, List<QueryColumn> columns) throws IOException {
 		writer = new CSVWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8),
@@ -145,7 +151,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 	}
 	
 	@Override
-	public void export(Query query, IQueryResult results, Path file, HashMap<String, Object> parameters,
+	public void export(Query query, IQueryResult results, Path file, Map<String, Object> parameters,
 			IProgressMonitor monitor) throws Exception {
 		
 		try {
@@ -164,7 +170,8 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		}
 	}
 	
-	private void exportInternal(Query query, IQueryResult results, Path file, HashMap<String, Object> parameters,
+	private void exportInternal(Query query, IQueryResult results, 
+			Path file, Map<String, Object> parameters,
 			IProgressMonitor monitor) throws Exception {
 		SurveyObservationQuery suquery = (SurveyObservationQuery)query;
 		SurveyDesign sd = null;
@@ -199,6 +206,9 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 			QueryColumn column = iterator.next();
 			boolean isVisibleColumn = isDataFiltering ? true : column.isVisible();
 			if (!isVisibleColumn){
+				iterator.remove();
+			}
+			if (column.isDefaultGeometryColumn()) {
 				iterator.remove();
 			}
 		}

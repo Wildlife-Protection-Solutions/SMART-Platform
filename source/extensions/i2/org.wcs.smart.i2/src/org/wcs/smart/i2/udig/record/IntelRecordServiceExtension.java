@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
@@ -91,10 +92,12 @@ public class IntelRecordServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(RECORD_UUID_KEY) == null || !(params.get(RECORD_UUID_KEY) instanceof String)){
-			return null;
-		}
-		String url = "smart://smartdb/intel2/record/" + (String)params.get(RECORD_UUID_KEY); //$NON-NLS-1$
+		Object x = params.get(RECORD_UUID_KEY);
+		if (x == null) return null;
+		if (x instanceof UUID uuid) x = uuid.toString();
+		if (!String.class.isAssignableFrom(x.getClass())) return null;
+		
+		String url = "smart://smartdb/intel2/record/" + (String)x; //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

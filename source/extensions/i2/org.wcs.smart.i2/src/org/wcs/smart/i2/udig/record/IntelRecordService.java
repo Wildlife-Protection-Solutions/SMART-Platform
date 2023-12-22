@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,8 +41,8 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -57,10 +58,12 @@ public class IntelRecordService extends IService {
 	private Map<String, Serializable> params;
 	private URL url;
 	
-	private volatile List<IntelRecordGeoResource> members;
+	private volatile List<IGeoResource> members;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
 	private UUID recordUuid;
+	private IntelRecord record;
+	
 	private Exception error;
 	
 	private IntelRecordDataSource ds = null;
@@ -93,7 +96,7 @@ public class IntelRecordService extends IService {
 		}
 	};
 	
-
+	
 	public IntelRecordService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = IntelRecordServiceExtension.createURL(this.params);
@@ -106,6 +109,14 @@ public class IntelRecordService extends IService {
 		configureResourceNames.schedule();
 	}
 	
+	public IntelRecordService(IntelRecord record) {
+		this.record = record;
+		this.recordUuid = record.getUuid();
+		params = new HashMap<>();
+		params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, this.record.getUuid());
+		this.url = IntelRecordServiceExtension.createURL(this.params);
+	}
+	
 	/**
 	 * The record uuid represented by this service.
 	 * 
@@ -113,6 +124,10 @@ public class IntelRecordService extends IService {
 	 */
 	public UUID getRecordUuid(){
 		return this.recordUuid;
+	}
+	
+	public IntelRecord getRecord() {
+		return this.record;
 	}
 	
 	/**
@@ -166,13 +181,17 @@ public class IntelRecordService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					List<IntelRecordGeoResource> list = new ArrayList<>();
+					IntelRecordDataSource source = getDataStore(monitor);
+					source.getTypeNames();
+					
+					List<IGeoResource> list = new ArrayList<>();
 					//two resources per entity one for points and one for polygons
 					list.add(new IntelRecordGeoResource(this, LocationLayerType.POINT));
 					list.add(new IntelRecordGeoResource(this, LocationLayerType.POLYGON));
 					
-					list.add(new IntelRecordGeoResource(this, LocationLayerType.OBS_ATTRIBUTE_LINE));
-					list.add(new IntelRecordGeoResource(this, LocationLayerType.OBS_ATTRIBUTE_POLYGON));
+					for (Attribute a : source.getAttributes()) {
+						list.add(new IntelRecordAttributeGeoResource(this, a));
+					}
 					members = list;
 				}
 			}
@@ -181,17 +200,7 @@ public class IntelRecordService extends IService {
 	}
 
 	public boolean canAddToWorkingSet(IGeoResource resource) {
-		if (resource.canResolve(IntelRecordGeoResource.class)) {
-			try {
-				LocationLayerType type = resource.resolve(IntelRecordGeoResource.class, null).getType();
-				if (type == LocationLayerType.OBS_ATTRIBUTE_LINE || type == LocationLayerType.OBS_ATTRIBUTE_POLYGON) return false;
-			} catch (IOException e) {
-				Intelligence2PlugIn.log(e.getMessage(),  e);
-				return false;
-			}
-			
-		}
-		return true;
+		return  (resource.canResolve(IntelRecordGeoResource.class));
 	}
 	/**
 	 * @see org.locationtech.udig.catalog.IService#createInfo(org.eclipse.core.runtime.IProgressMonitor)
@@ -225,7 +234,11 @@ public class IntelRecordService extends IService {
             try {
                 if (ds == null) {
                 	if (recordUuid != null){
-                		ds = new IntelRecordDataSource(recordUuid);
+                		if (this.record == null) { 
+                			ds = new IntelRecordDataSource(recordUuid);
+                		}else {
+                			ds = new IntelRecordDataSource(this.record);
+                		}
                     }else{
                     	//broken
                     }

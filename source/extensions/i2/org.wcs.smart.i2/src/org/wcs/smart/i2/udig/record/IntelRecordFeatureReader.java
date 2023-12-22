@@ -37,7 +37,9 @@ import org.hibernate.Session;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.GeometryType;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
@@ -57,21 +59,37 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 	private Iterator<?> fIterator= null;
 	
 	private LocationLayerType type;
+	private String attributeKey;
+	private Attribute.AttributeType attributeType;
 	
-	public IntelRecordFeatureReader(IntelRecord record, SimpleFeatureType ftype) {
+	public IntelRecordFeatureReader(SimpleFeatureType ftype) {
 		this.ftype = ftype;
-		this.type = LocationLayerType.valueOf(ftype.getName().getLocalPart());
+		if (IntelRecordDataSource.isGeometryAttribute(ftype.getName())) {
+			this.type = null;
+			
+			this.attributeKey = IntelRecordDataSource.getAttributeKeyFromType(ftype.getName());
+			this.attributeType = IntelRecordDataSource.getAttributeTypeFromType(ftype.getName());
+			
+		}else {
+			this.type = LocationLayerType.valueOf(ftype.getName().getLocalPart().substring(ftype.getName().getLocalPart().lastIndexOf(";") + 1)); //$NON-NLS-1$
+
+			this.attributeKey = null;
+			this.attributeType = null;
+		}
+		
+	}
+	public IntelRecordFeatureReader(IntelRecord record, SimpleFeatureType ftype) {
+		this(ftype);
 		this.initData(record, record.getUuid());		
 	}
 	
 	public IntelRecordFeatureReader(UUID recordUuid, SimpleFeatureType ftype) {
-		this.ftype = ftype;
-		this.type = LocationLayerType.valueOf(ftype.getName().getLocalPart());
+		this(ftype);
 		this.initData(null, recordUuid);	
 	}
 	
 	private void initData(IntelRecord record, UUID recordUuid) {
-		if (type == LocationLayerType.POINT || type == LocationLayerType.POLYGON) {
+		if (type != null && (type == LocationLayerType.POINT || type == LocationLayerType.POLYGON)) {
 			Session session = null;
 			try {
 				if (record == null) {
@@ -92,7 +110,7 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 				if (session != null) session.close();
 			}
 			
-		}else if (type == LocationLayerType.OBS_ATTRIBUTE_LINE || type == LocationLayerType.OBS_ATTRIBUTE_POLYGON) {
+		}else if (type == null && this.attributeKey != null) {
 			Session session = null;
 			try {
 				if (record == null) {
@@ -103,15 +121,14 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 				for (IntelLocation l : record.getLocations()) {
 					for (IntelObservation obs : l.getObservations()) {
 						for (IntelObservationAttribute a : obs.getObservationAttributes()) {
+							if (!a.getAttribute().getKeyId().equals(this.attributeKey)) continue;
 							if (a.getGeom() == null || !a.getAttribute().getType().isGeometry()) continue;
-							if ((type == LocationLayerType.OBS_ATTRIBUTE_LINE && a.getAttribute().getType() == Attribute.AttributeType.LINE) || 
-									(type == LocationLayerType.OBS_ATTRIBUTE_POLYGON && a.getAttribute().getType() == Attribute.AttributeType.POLYGON)) {
-								if (session != null) {
-									Hibernate.initialize(a.getObservation());
-									Hibernate.initialize(a.getObservation().getCategory());
-								}
-								items.add(a);
+							
+							if (session != null) {
+								Hibernate.initialize(a.getObservation());
+								Hibernate.initialize(a.getObservation().getCategory());
 							}
+							items.add(a);
 						}
 					}
 				}
@@ -159,10 +176,9 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 	
 	private SimpleFeature getIntelLocationAsFeature(Object object){
 		
-		if (this.type == LocationLayerType.OBS_ATTRIBUTE_LINE) {
-			return IntelObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(this.ftype, false, (IntelObservationAttribute)object);
-		}else if (this.type == LocationLayerType.OBS_ATTRIBUTE_POLYGON) {
-			return IntelObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(this.ftype, true, (IntelObservationAttribute)object);
+		if (this.attributeKey != null) {
+			boolean hasPolygon = this.attributeType == AttributeType.POLYGON;
+			return IntelObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(this.ftype, hasPolygon, (IntelObservationAttribute)object);
 		}else {
 			IntelLocation location = (IntelLocation) object;
 			Object data[] = new Object[7];

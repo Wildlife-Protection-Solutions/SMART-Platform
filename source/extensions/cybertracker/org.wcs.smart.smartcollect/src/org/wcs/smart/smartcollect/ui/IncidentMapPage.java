@@ -25,7 +25,10 @@ import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,6 +53,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -57,14 +61,24 @@ import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentFeatureFactory;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.map.IncidentMapWaypointDefaultStyle;
+import org.wcs.smart.incident.map.IncidentMapWaypointRawDefaultStyle;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.smartcollect.SmartCollectIncidentFeatureFactory;
+import org.wcs.smart.smartcollect.SmartCollectPlugIn;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.udig.EditPointTool;
@@ -100,6 +114,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private Layer prjLayer = null;
 	private IGeoResource prjResource = null;
 	
+	private List<IGeoResource> attributeResources = new ArrayList<>();
+	private List<ILayer> attributeLayers = new ArrayList<>();
 	/**
 	 * Creates a new map page
 	 * @param e parent editor
@@ -162,6 +178,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				Display.getDefault().asyncExec(()->{
 					addPointsLayer();
 					updatePointsLayer();	
+					updateObservationLayers();
 				});
 				return s;
 			}
@@ -200,7 +217,27 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				prjStore = prjResource.resolve(FeatureStore.class, null);
 				layers.add(0, prjResource);
 			}
-		
+			HashMap<String, Attribute> resourceNames = new HashMap<>();
+			try(Session session = HibernateManager.openSession()){
+				List<Attribute> attributes = DataModelManager.INSTANCE.getGeometryAttributes(session);
+			
+				attributes.sort((a,b)->a.getName().compareTo(b.getName()));
+				for (Attribute attribute : attributes) {
+					String type = attribute.getType().name() + "." + attribute.getKeyId(); //$NON-NLS-1$
+					SimpleFeatureType featuretype = null; 
+					if (attribute.getType() == Attribute.AttributeType.POLYGON) {
+						featuretype = ObservationAttributeFeatureFactory.createObservationPolygonSchema(type);
+					}else if (attribute.getType() == Attribute.AttributeType.LINE) {
+						featuretype = ObservationAttributeFeatureFactory.createObservationLineStringSchema(type);
+					}
+					
+					resourceNames.put(attribute.getKeyId(), attribute);
+					IGeoResource attResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featuretype);
+					layers.add(0, attResource);
+					attributeResources.add(attResource);
+
+				}
+			}
 			//dispose of temporary layer when composite is disposed
 			super.mapViewer.getControl().addDisposeListener(new DisposeListener() {
 				@Override
@@ -225,23 +262,44 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				public void run(IProgressMonitor monitor) throws Exception {
 					super.run(monitor);
 					//set custom style for points layer
-					int index = getLayers().size() == 1 ? 0 : 1;
-					pointLayer = getLayers().get(index);
-					pointLayer.setName(Messages.IncidentMapPage_IncidentLayerName);
-					pointLayer.getStyleBlackboard().put(SLDContent.ID, getStylingConfig());
-					pointLayer.setVisible(true);
-					
-					if (getLayers().size() > 1) {
-						prjLayer = getLayers().get(0);
-						prjLayer.setName("SMART Collect Incident - Raw Points"); //$NON-NLS-1$
-						prjLayer.setVisible(false);
-						prjLayer.getStyleBlackboard().put(SLDContent.ID, getPrjStylingConfig());
-					}
-					
+
+					//set custom style for points layer
+					Map<String,String> geoIdToStyle = new HashMap<>();
+    				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_TYEPNAME,  IncidentMapWaypointDefaultStyle.KEY);
+    				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_PRJ_TYEPNAME,  IncidentMapWaypointRawDefaultStyle.KEY);
+
+    				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
+    				defaultStyles.put(IncidentMapWaypointDefaultStyle.KEY, (l)->{
+    					l.getStyleBlackboard().put(SLDContent.ID, getStylingConfig());
+   					});
+    				defaultStyles.put(IncidentMapWaypointRawDefaultStyle.KEY, (l)->{
+    					l.getStyleBlackboard().put(SLDContent.ID, getPrjStylingConfig());
+   					});
+
+    				for (Layer l : getLayers()) {
+    					FeatureType type = l.getGeoResource().resolve(FeatureType.class, null);
+    					if (type.getName().equals(featureType.getName())) {
+    						pointLayer = l;
+    						pointLayer.setName(Messages.IncidentMapPage_IncidentLayerName);
+    						pointLayer.setVisible(true);
+    					}else if (prjFeatureType != null && type.getName().equals(prjFeatureType.getName())) {
+    						prjLayer = l;
+    						prjLayer.setName("SMART Collect Incident - Raw Points"); 
+    						prjLayer.setVisible(false);
+
+    					}else if (type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.POLYGON.name()) || 
+    							type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.LINE.name()) ) {
+    						Attribute a = resourceNames.get(type.getName().getLocalPart());
+    						l.setName(a.getName());
+    						l.getStyleBlackboard().put(SLDContent.ID, a.getAttributeGeometryStyle().toStyle());
+    						attributeLayers.add(l);
+    					}
+    				}
+    				
+									
 					pointLayer.eNotify(new ENotificationImpl(
 							(InternalEObject) pointLayer, Notification.SET,
 							ProjectPackage.LAYER__VISIBLE, false, true));
-					
 				}
 			};
 			getMap().sendCommandASync(command);
@@ -254,6 +312,46 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		
 	}
 
+	public void updateObservationLayers() {
+		if (this.attributeResources.isEmpty()) return;
+		
+		for (IGeoResource r : this.attributeResources) {
+			List<SimpleFeature> features = new ArrayList<>();
+			try {
+				FeatureStore<SimpleFeatureType, SimpleFeature> store = r.resolve(FeatureStore.class, null);
+				String attributeKey = store.getName().getLocalPart();
+				
+				try(Session session = HibernateManager.openSession()){
+					Waypoint wp = session.get(Waypoint.class, parent.getIncident().getWaypoint().getUuid());
+					for (WaypointObservation wo : wp.getAllObservations()) {
+						for (WaypointObservationAttribute a : wo.getAttributes()) {
+							if (a.getGeom() == null) continue;
+							if (!a.getAttribute().getType().isGeometry()) continue;
+							if (!a.getAttribute().getKeyId().equalsIgnoreCase(attributeKey)) continue;
+							
+							boolean hasArea = a.getAttribute().getType() == Attribute.AttributeType.POLYGON;
+							SimpleFeatureType type = store.getSchema();
+							SimpleFeature sf = ObservationAttributeFeatureFactory.getObservationAttributeAsGeometry(type, hasArea, a);
+							features.add(sf);
+						}
+					}
+				}
+				doTwice(()->{
+					try {
+						store.removeFeatures(Filter.INCLUDE);
+						store.addFeatures(new ListFeatureCollection(store.getSchema(), features));
+					}catch (IOException ex) {
+						IncidentPlugIn.log(ex.getMessage(), ex);
+					}
+				});
+			}catch(Exception ex) {
+				IncidentPlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		for (ILayer layer: attributeLayers) layer.refresh(null);
+		
+	}
+	
 	/**
 	 * Updates the incident layer
 	 */
@@ -261,42 +359,52 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		if (store == null) {
 			return; //most likely we failed to add points layer
 		}
-		try {
+		
 			featureCollection.clear();
 			featureCollection.add(SmartCollectIncidentFeatureFactory.createSimpleIncidentFeature(featureType, parent.getIncident().getWaypoint()));
-			try{
-				store.removeFeatures(Filter.INCLUDE);
-				store.addFeatures(featureCollection);
-			}catch (ConcurrentModificationException ex){
+			doTwice(()->{
 				//try again - this should only happen once (udig removes listener)
 				//see SMART bug 1672
-				store.removeFeatures(Filter.INCLUDE);
-				store.addFeatures(featureCollection);
-			}
+				try{
+					store.removeFeatures(Filter.INCLUDE);
+					store.addFeatures(featureCollection);
+				}catch (IOException ex){
+					SmartCollectPlugIn.log(ex.getMessage(), ex);
+				}
+			});
 			
 			if (prjFeatureCollection != null) {
 				prjFeatureCollection.clear();
 				prjFeatureCollection.add(SmartCollectIncidentFeatureFactory.createSimpleIncidentFeature(prjFeatureType, parent.getIncident().getWaypoint()));
-				try{
-					prjStore.removeFeatures(Filter.INCLUDE);
-					prjStore.addFeatures(prjFeatureCollection);
-				}catch (ConcurrentModificationException ex){
+				doTwice(()->{
 					//try again - this should only happen once (udig removes listener)
 					//see SMART bug 1672
-					prjStore.removeFeatures(Filter.INCLUDE);
-					prjStore.addFeatures(prjFeatureCollection);
-				}
+					try{
+						prjStore.removeFeatures(Filter.INCLUDE);
+						prjStore.addFeatures(prjFeatureCollection);
+					}catch (IOException ex){
+						SmartCollectPlugIn.log(ex.getMessage(), ex);
+					}
+				});
+				
 				
 			}
-			
-		} catch (IOException e) {
-			IncidentPlugIn.displayLog(Messages.IncidentMapPage_UpdateFailed, e);
-		}
+		
 		
 		//refresh map - only refresh point layer 
 		if (pointLayer != null) pointLayer.refresh(null);
 		if (prjLayer != null) prjLayer.refresh(null);
 		return;
+	}
+
+	private void doTwice(Runnable r) {
+		try {
+			r.run();
+		}catch (ConcurrentModificationException ex) {
+			r.run();
+			//try again - this should only happen once (udig removes listener)
+			//see SMART bug 1672
+		}
 	}
 	
 	

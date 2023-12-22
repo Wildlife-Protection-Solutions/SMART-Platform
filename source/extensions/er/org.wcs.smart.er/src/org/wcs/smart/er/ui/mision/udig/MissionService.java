@@ -139,9 +139,10 @@ public class MissionService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
+					MissionDataSource source = getDataStore(monitor);
 					ArrayList<MissionGeoResource> temp = new ArrayList<MissionGeoResource>();
-					for (String tt : getDataStore(monitor).getTypeNames()) {
-						temp.add(new MissionGeoResource(this, tt));
+					for (String tt : source.getTypeNames()) {
+						temp.add(new MissionGeoResource(this, tt, source.getName(tt)));
 					}
 					this.members = temp;
 				}

@@ -36,7 +36,7 @@ public class SurveyZoomToResultProvider extends ZoomToInfoProvider {
 	public void doWork(IResultItem resultItem) {
 		
 		if (resultItem instanceof MissionTrackResultItem){
-			zoomTo(((MissionTrackResultItem) resultItem).asGeometry(MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY));
+			zoomTo(((MissionTrackResultItem) resultItem).asGeometry());
 			return;
 		}
 		super.doWork(resultItem);

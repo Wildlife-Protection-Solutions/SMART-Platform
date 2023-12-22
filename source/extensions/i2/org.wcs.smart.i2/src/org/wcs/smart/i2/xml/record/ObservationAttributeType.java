@@ -37,6 +37,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *         &lt;element name="number_value" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="list_value" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="tree_value" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
+ *         &lt;element name="geom_value" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -51,7 +52,8 @@ import jakarta.xml.bind.annotation.XmlType;
     "stringValue",
     "numberValue",
     "listValue",
-    "treeValue"
+    "treeValue",
+    "geomValue"
 })
 public class ObservationAttributeType {
 
@@ -65,7 +67,8 @@ public class ObservationAttributeType {
     protected List<LabelUuid> listValue;
     @XmlElement(name = "tree_value")
     protected LabelUuid treeValue;
-
+    @XmlElement(name = "geom_value")
+    protected String geomValue;
     /**
      * Gets the value of the attribute property.
      * 
@@ -112,6 +115,31 @@ public class ObservationAttributeType {
      */
     public void setStringValue(String value) {
         this.stringValue = value;
+    }
+    
+
+    /**
+     * Gets the value of the geomValue property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getGeomValue() {
+        return geomValue;
+    }
+
+    /**
+     * Sets the value of the geomValue property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setGeomValue(String value) {
+        this.geomValue = value;
     }
 
     /**

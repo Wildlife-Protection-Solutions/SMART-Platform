@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -61,8 +62,6 @@ import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
-import org.wcs.smart.er.map.style.MissionMapLineStringAttributeDefaultStyle;
-import org.wcs.smart.er.map.style.MissionMapPolygonAttributeDefaultStyle;
 import org.wcs.smart.er.map.style.MissionMapSamplingUnitLinearDefaultStyle;
 import org.wcs.smart.er.map.style.MissionMapSamplingUnitPointDefaultStyle;
 import org.wcs.smart.er.map.style.MissionMapTrackDefaultStyle;
@@ -140,19 +139,29 @@ public class MissionMapPage extends SmartMapEditorPart {
 				List<IGeoResource> sortedLayers = new ArrayList<>();
 	    		Map<String, IGeoResource> toAdd = new HashMap<>();
 	    		List<? extends IGeoResource> layers = missionService.resources(monitor);
-	    		for (IGeoResource l : layers) toAdd.put(  ((MissionGeoResource)l).getType(), l );
+	    		for (IGeoResource l : layers) {
+	    			String typeName = ((MissionGeoResource)l).getType();
+	    			
+	    			if (MissionDataSource.isGeometryAttribute(typeName)) {
+	    				dmAttributeGeoResources.add(l);
+	    			}
+	    			toAdd.put(  ((MissionGeoResource)l).getType(), l );
+	    		}
 	    			
 	    		String[] orderedLayers = new String[] {
-	    				MissionDataSource.OBS_ATTRIBUTE_POLYGON,
-	    				MissionDataSource.OBS_ATTRIBUTE_LINESTRING,	    
 	    				MissionDataSource.MISSIONTRACK_TYPE, 
 	    				MissionDataSource.MISSIONRAWWAYPOINT_TYPE, 
-	    				MissionDataSource.MISSIONWAYPOINT_TYPE,				
+	    				MissionDataSource.MISSIONWAYPOINT_TYPE
 	    		};
-	    		for (String name : orderedLayers) sortedLayers.add(toAdd.get(name));
-	    		dmAttributeGeoResources.add(toAdd.get(MissionDataSource.OBS_ATTRIBUTE_POLYGON));
-	    		dmAttributeGeoResources.add(toAdd.get(MissionDataSource.OBS_ATTRIBUTE_LINESTRING));
-				
+	    		for (String name : orderedLayers) {
+	    			sortedLayers.add(toAdd.get(name));
+	    			toAdd.remove(name);
+	    		}
+	    		List<IGeoResource> othersorted = new ArrayList<>();
+	    		othersorted.addAll(toAdd.values());
+	    		othersorted.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
+	    		sortedLayers.addAll(0,othersorted);
+	    		
 				allLayers.addAll(sortedLayers);
 				
 	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0) {
@@ -167,8 +176,6 @@ public class MissionMapPage extends SmartMapEditorPart {
 		    				geoIdToStyle.put(MissionDataSource.MISSIONTRACK_TYPE,  MissionMapTrackDefaultStyle.KEY);
 		    				geoIdToStyle.put(MissionDataSource.MISSIONRAWWAYPOINT_TYPE,  MissionMapWaypointRawDefaultStyle.KEY);
 		    				geoIdToStyle.put(MissionDataSource.MISSIONWAYPOINT_TYPE,  MissionMapWaypointDefaultStyle.KEY);
-		    				geoIdToStyle.put(MissionDataSource.OBS_ATTRIBUTE_LINESTRING,  MissionMapLineStringAttributeDefaultStyle.KEY);
-		    				geoIdToStyle.put(MissionDataSource.OBS_ATTRIBUTE_POLYGON,  MissionMapPolygonAttributeDefaultStyle.KEY);
 		    				geoIdToStyle.put(SamplingUnit.GeometryType.TRANSECT.name(),  MissionMapSamplingUnitLinearDefaultStyle.KEY);
 		    				geoIdToStyle.put(SamplingUnit.GeometryType.PLOT.name(),  MissionMapSamplingUnitPointDefaultStyle.KEY);
 
@@ -180,7 +187,6 @@ public class MissionMapPage extends SmartMapEditorPart {
 			    					MissionFeatureSource fs = l.getGeoResource().resolve(MissionFeatureSource.class, monitor);
 			    					if (fs == null) continue;
 			    					
-			    					l.setName(fs.getLayerName());
 			    					l.setVisible(fs.getDefaultVisibility());
 			    					l.eNotify(new ENotificationImpl(
 			    							(InternalEObject) l, Notification.SET,

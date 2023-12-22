@@ -27,12 +27,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.birt.map.AbstractQueryStyleProvider;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.udig.style.StyleManager;
+
+import jakarta.persistence.Tuple;
 
 /**
  * Query style provider for asset queries.
@@ -43,32 +47,34 @@ import org.wcs.smart.udig.style.StyleManager;
 public class QueryStyleProvider  extends AbstractQueryStyleProvider{
 
 	@Override
-	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo.LayerType layerType,  Session s) {
+	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo info,  Session s) {
 		if (queryUuid == null) return null;
 		String tableName = null;
-		String resourceKey = null;
 		if (queryType.equals(AssetObservationQuery.KEY)){
 			tableName = AssetObservationQuery.class.getSimpleName(); 
-			resourceKey = "Waypoint"; //$NON-NLS-1$
 		}else if (queryType.equals(AssetWaypointQuery.KEY)){	
 			tableName = AssetWaypointQuery.class.getSimpleName(); 
-			resourceKey = "Waypoint"; //$NON-NLS-1$
 		}else{
 			return null;
 		}
 		
-		List<String> results = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid", String.class) //$NON-NLS-1$ //$NON-NLS-2$
-				.setParameter("uuid", queryUuid) //$NON-NLS-1$
-				.list();
+		Query<Tuple> query = s.createQuery("SELECT style, conservationArea FROM " + tableName + " WHERE uuid = :uuid", Tuple.class); //$NON-NLS-1$ //$NON-NLS-2$
+		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
+		List<Tuple> results = query.list();
+		if (results.size() == 0 || results.get(0) == null) return null;
 		
-		if (results.size() == 0 ) return null;
-		String stylemap = (String)results.get(0);
+		String stylemap = (String) results.get(0).get(0);
+		ConservationArea ca = (ConservationArea) results.get(0).get(1);
+		
 		try {
-			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
+			StyleBlackboard x = StyleManager.INSTANCE.fromStringMap(stylemap).get(info.getGeometryColumnId());
+			if (x != null) return x;
 		} catch (Exception e) {
-			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Could not parse query style.", e); //$NON-NLS-1$
+			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing SMART Query style.", e); //$NON-NLS-1$
 		}
-		return null;
+		
+		return super.findDataModelAttributeStyle(s, ca, info.getGeometryColumnId());
+		
 
 	}
 

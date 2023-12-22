@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.map.geotools;
+package org.wcs.smart.er.query.map;
 
 import java.awt.RenderingHints.Key;
 import java.io.IOException;

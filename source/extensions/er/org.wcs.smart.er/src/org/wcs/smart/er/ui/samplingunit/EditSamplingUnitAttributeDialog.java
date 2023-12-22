@@ -492,6 +492,10 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 	}
 	
 	private void addListItem(){
+		if (toUpdate.getAttributeList() == null) {
+			toUpdate.setAttributeList(new ArrayList<>());
+			lstViewer.setInput(toUpdate.getAttributeList());
+		}
 		SamplingUnitAttributeListItem item = new SamplingUnitAttributeListItem();
 		item.setAttribute(toUpdate);
 		AttributeItemDialog dialog = new AttributeItemDialog(getShell(), item, toUpdate.getAttributeList(),nameKeyControls.getSelectedLanguage());

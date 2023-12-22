@@ -35,7 +35,6 @@ import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.query.QueryPlugIn;
@@ -65,7 +64,7 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 
 	private SummaryEditor page1 = null;
 	private SummaryMapPagePart page2 = null;
-
+	
 	private Job runQueryJob = new Job(Messages.AssetSummaryEditor_runjobname) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -183,7 +182,7 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 
 	@Override
 	public IQueryService createQueryService() {
-		return new QueryService((AssetSummaryQuery)getQueryProxy().getQuery());
+		return new org.wcs.smart.query.map.QueryService((AssetSummaryQuery)getQueryProxy().getQuery(), null);
 	}
 
 	@Override

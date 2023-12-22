@@ -34,9 +34,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.map.geotools.QueryDataSource;
 import org.wcs.smart.asset.query.map.style.AssetWaypointQueryDefaultStyle;
-import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
@@ -47,10 +45,12 @@ import org.wcs.smart.observation.query.model.types.ZoomToInfoProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.map.QueryService;
 import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -71,7 +71,7 @@ public class AssetWaypointQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, AssetWaypointQueryDefaultStyle.KEY);
+		styleMappings.put(WaypointGeometryQueryColumn.KEY, AssetWaypointQueryDefaultStyle.KEY);
 	}
 	
 	/**

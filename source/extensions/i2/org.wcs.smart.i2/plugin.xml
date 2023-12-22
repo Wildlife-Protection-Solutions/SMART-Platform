@@ -2695,12 +2695,6 @@
       <defaultmaplayerstyle
             class="org.wcs.smart.i2.map.style.WsRecordObservationQueryPolygonDefaultStyle">
       </defaultmaplayerstyle>
-      <defaultmaplayerstyle
-            class="org.wcs.smart.i2.map.style.ObservationPolygonAttributeDefaultStyle">
-      </defaultmaplayerstyle>
-      <defaultmaplayerstyle
-            class="org.wcs.smart.i2.map.style.ObservationLinestringAttributeDefaultStyle">
-      </defaultmaplayerstyle>
    </extension>
 
 </plugin>

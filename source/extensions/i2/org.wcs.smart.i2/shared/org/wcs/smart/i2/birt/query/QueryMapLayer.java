@@ -94,7 +94,7 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 	}
 	
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, Session s) {
 		if (!extensionId.equals(IntelQueryDataset.DATASET_TYPE)) return null;
 	
 		UUID uuid = null;
@@ -125,16 +125,16 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 			for (FeatureTypeStyle fts: ss.featureTypeStyles()) {
 				for (Rule r : fts.rules()) {
 					for (Symbolizer sym : r.symbolizers()) {
-						if (sym instanceof PointSymbolizer && layerType == MapLayerInfo.LayerType.POINT) return sb;
-						if (sym instanceof PointSymbolizer && layerType == MapLayerInfo.LayerType.MULTIPOINT) return sb;
+						if (sym instanceof PointSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.POINT) return sb;
+						if (sym instanceof PointSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.MULTIPOINT) return sb;
 						
-						if (sym instanceof LineSymbolizer && layerType == MapLayerInfo.LayerType.LINE) return sb;
-						if (sym instanceof LineSymbolizer && layerType == MapLayerInfo.LayerType.MULTILINE) return sb;
+						if (sym instanceof LineSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.LINE) return sb;
+						if (sym instanceof LineSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.MULTILINE) return sb;
 						
-						if (sym instanceof PolygonSymbolizer && layerType == MapLayerInfo.LayerType.POLYGON) return sb;
-						if (sym instanceof PolygonSymbolizer && layerType == MapLayerInfo.LayerType.MULTIPOLYGON) return sb;
+						if (sym instanceof PolygonSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.POLYGON) return sb;
+						if (sym instanceof PolygonSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.MULTIPOLYGON) return sb;
 						
-						if (sym instanceof RasterSymbolizer && layerType == MapLayerInfo.LayerType.RASTER) return sb;
+						if (sym instanceof RasterSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.RASTER) return sb;
 					}
 				}
 			}

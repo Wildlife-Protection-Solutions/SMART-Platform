@@ -224,7 +224,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 			mpv.setNumberValue(xmlMpv.getNumberValue());
 			mpv.setStringValue(xmlMpv.getStringValue());
 			
-			mpv.setAttributeListItem( getMissionListItem(xmlMpv.getListElementKeyId()) );
+			mpv.setAttributeListItem( getMissionListItem(xmlMpv.getMissionAttributeKeyId(), xmlMpv.getListElementKeyId()) );
 			
 			m.getMissionPropertyValues().add(mpv);
 		}		
@@ -690,8 +690,8 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		return SurveyHibernateManager.getInstance().getMissionAttributeByKey(missionAttributeKeyId, session);
 	}
 	
-	private MissionAttributeListItem getMissionListItem(String key) {
-		return SurveyHibernateManager.getInstance().getMissionAttributeListItenByKey(key, session);
+	private MissionAttributeListItem getMissionListItem(String attributeKey, String key) {
+		return SurveyHibernateManager.getInstance().getMissionAttributeListItenByKey(attributeKey, key, session);
 	}
 	
 	private SamplingUnit findSamplingUnit(String key, Session session) {
