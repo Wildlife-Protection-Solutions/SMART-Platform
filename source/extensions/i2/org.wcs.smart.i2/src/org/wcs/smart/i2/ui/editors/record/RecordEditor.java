@@ -254,29 +254,34 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			}else {
 				//need to ensure any entities are properly loaded
-				try(Session s = HibernateManager.openSession()){
-					for (IntelEntityRecord ier : temp.getEntities()) {
-						IntelEntity ie = ier.getEntity();
-						if (ie.getUuid() != null) {
-							ie = s.get(IntelEntity.class, ie.getUuid());
-							ier.setEntity(ie);
-							ie.getIdAttributeAsText();
-							Hibernate.initialize(ie);
-							Hibernate.initialize(ie.getProfile());
-							for (IntelEntityAttachment a : ie.getEntityAttachments()){
-								try{
-									a.getAttachment().computeFileLocation(s);
-								}catch (Exception ex){
-									Intelligence2PlugIn.log(ex.getMessage(), ex);
+				if (temp.getEntities() != null) {
+					try(Session s = HibernateManager.openSession()){
+				
+						for (IntelEntityRecord ier : temp.getEntities()) {
+							IntelEntity ie = ier.getEntity();
+							if (ie.getUuid() != null) {
+								ie = s.get(IntelEntity.class, ie.getUuid());
+								ier.setEntity(ie);
+								ie.getIdAttributeAsText();
+								Hibernate.initialize(ie);
+								Hibernate.initialize(ie.getProfile());
+								for (IntelEntityAttachment a : ie.getEntityAttachments()){
+									try{
+										a.getAttachment().computeFileLocation(s);
+									}catch (Exception ex){
+										Intelligence2PlugIn.log(ex.getMessage(), ex);
+									}
+								}	
+								if (ie.getPrimaryAttachment() != null) {
+									try{
+										ie.getPrimaryAttachment().computeFileLocation(s);
+									}catch (Exception ex){
+										Intelligence2PlugIn.log(ex.getMessage(), ex);
+									}
 								}
-							}		
-							try{
-								ie.getPrimaryAttachment().computeFileLocation(s);
-							}catch (Exception ex){
-								Intelligence2PlugIn.log(ex.getMessage(), ex);
 							}
+						
 						}
-					
 					}
 				}
 			}
