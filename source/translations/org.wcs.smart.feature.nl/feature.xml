@@ -3,9 +3,7 @@
       id="org.wcs.smart.feature.nl"
       label="SMART Language Pack"
       version="7.5.8"
-      provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.4.0.qualifier">
+      provider-name="org.wcs.smart">
 
    <description>
       Language pack for core SMART features.  This includes the BIRT and Eclipse language packs.
@@ -14,6 +12,7 @@
    <copyright>
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
+
 
    <includes
          id="org.eclipse.babel.nls_birt_es"
