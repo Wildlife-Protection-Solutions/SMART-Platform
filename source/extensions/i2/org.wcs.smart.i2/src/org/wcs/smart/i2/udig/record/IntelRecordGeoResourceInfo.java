@@ -37,6 +37,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Georesource Information for enitity record location
@@ -70,15 +71,7 @@ public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			fs.getFeatures().accepts(new FeatureVisitor() {
-				@Override
-				public void visit(Feature f) {
-					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
-				}
-			}, null);
-			this.bounds = env;
+			this.bounds = SharedUtils.computeBounds(fs);
 		} catch (IOException e) {
 			logger.log(Level.WARNING,"Could not determine bounds for smart inelligence record resource.", e); //$NON-NLS-1$
 		}

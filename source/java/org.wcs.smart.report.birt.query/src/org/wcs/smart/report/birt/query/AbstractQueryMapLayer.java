@@ -113,6 +113,8 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 						
 					if (c.getNativeDataType() == IGeometryColumn.Type.POINT.birtDataType) {
 						type = MapLayerInfo.LayerType.POINT;
+					}else if (c.getNativeDataType() == IGeometryColumn.Type.MULTIPOINT.birtDataType) {
+						type = MapLayerInfo.LayerType.MULTIPOINT;
 					}else if (c.getNativeDataType() == IGeometryColumn.Type.LINESTRING.birtDataType) { 
 						type = MapLayerInfo.LayerType.LINE;
 					}else if (c.getNativeDataType() == IGeometryColumn.Type.MULTILINESTRING.birtDataType) {
@@ -124,7 +126,7 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 					}
 					if (type != null) {
 						String name = names.get(c.getColumnName());
-						if (c == null) name = c.getColumnName();
+						if (name == null) name = c.getColumnName();
 						MapLayerInfo cc = new MapLayerInfo(name, null, type, c.getColumnName());
 						maplayers.add(cc);
 					}					

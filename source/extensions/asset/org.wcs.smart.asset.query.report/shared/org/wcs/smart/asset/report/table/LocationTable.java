@@ -36,6 +36,7 @@ import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.query.model.IGeometryColumn;
 
 /**
  * BIRT table for displaying all asset station locations in the system
@@ -142,7 +143,7 @@ public class LocationTable extends SmartBirtTable {
 		int i = 0;
 		for (Column c : Column.values()) {
 			if (c == Column.POSITION) {
-				names[i++] = Types.JAVA_OBJECT;
+				names[i++] = IGeometryColumn.Type.POINT.birtDataType;
 			}else {
 				names[i++] = Types.VARCHAR;
 			}

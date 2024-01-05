@@ -78,10 +78,10 @@ public class ErLabelProvider implements IErLabelProvider{
 
 	public static Image getImage(Object item){
 		if (item == SamplingUnit.GeometryType.PLOT){
-			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON);
+			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON);
 		}
 		if (item == SamplingUnit.GeometryType.TRANSECT){
-			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON); 
+			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON); 
 		}
 		return null;
 	}

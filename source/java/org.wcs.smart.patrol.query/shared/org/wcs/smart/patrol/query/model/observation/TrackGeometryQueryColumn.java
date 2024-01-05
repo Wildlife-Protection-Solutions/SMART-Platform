@@ -9,8 +9,7 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 public class TrackGeometryQueryColumn extends QueryColumn implements IGeometryColumn{
 
-	
-	public static final String KEY = "geometry.default";
+	public static final String KEY = "track:geometry"; //$NON-NLS-1$
 	
 	public TrackGeometryQueryColumn() {
 		super("Track", KEY, ColumnType.GEOMETRY);

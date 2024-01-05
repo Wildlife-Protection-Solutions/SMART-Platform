@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -135,6 +136,7 @@ public class ReportPlan {
 			PlatformUI.getWorkbench().showPerspective(PlanReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			ReportPlanEditorInput input = new ReportPlanEditorInput(getCustomPlanTemplateLocation());
 			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
+			
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ReportPlan_ErrorEditingPlanTemplate + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;

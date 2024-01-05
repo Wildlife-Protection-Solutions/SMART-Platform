@@ -42,6 +42,7 @@ import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.query.model.IGeometryColumn;
 
 
 /**
@@ -131,6 +132,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == GeometryType.PLOT || 
 				type == GeometryType.TRANSECT){
+			
 			int length = sd.getSamplingUnitAttributes().size() + 3;
 			if (type == GeometryType.TRANSECT){
 				length ++;
@@ -150,7 +152,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 					names[i++] = java.sql.Types.DOUBLE;
 				}
 			}
-			names[i++] = java.sql.Types.JAVA_OBJECT;
+			if (type == GeometryType.PLOT) {
+				names[i++] = IGeometryColumn.Type.POINT.birtDataType;
+			}else if (type == GeometryType.TRANSECT) {
+				names[i++] = IGeometryColumn.Type.LINESTRING.birtDataType;	
+			}
+			
 		}
 		return names;
 	}

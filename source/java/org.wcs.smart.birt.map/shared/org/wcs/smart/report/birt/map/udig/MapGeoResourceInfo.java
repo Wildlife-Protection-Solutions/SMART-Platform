@@ -36,6 +36,7 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  *  Georesource info for BIRT SMART Map Layer
@@ -61,22 +62,7 @@ public class MapGeoResourceInfo extends IGeoResourceInfo {
 			if (resource.canResolve(FeatureSource.class)){
 				@SuppressWarnings("unchecked")
 				FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, new NullProgressMonitor());
-				final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-				this.bounds = env;
-				env.setToNull();
-				fs.getFeatures().accepts(new FeatureVisitor() {
-					@Override
-					public void visit(Feature f) {
-						BoundingBox bb = f.getBounds();
-						if (!bb.isEmpty()){
-							if (env.isNull()){
-								env.init(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY());
-							}else{
-								env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
-							}
-						}
-					}
-				}, null);
+				this.bounds = SharedUtils.computeBounds(fs);
 			}else if (resource.canResolve(AbstractGridCoverage2DReader.class)){
 				AbstractGridCoverage2DReader reader = resource.resolve(AbstractGridCoverage2DReader.class, new NullProgressMonitor());
 				GeneralEnvelope ge = reader.getOriginalEnvelope();

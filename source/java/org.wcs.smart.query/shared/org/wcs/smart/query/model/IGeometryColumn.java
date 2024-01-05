@@ -6,6 +6,7 @@ public interface IGeometryColumn {
 		
 		POINT("Point", 8200),
 		LINESTRING("LineString", 8201),
+		MULTIPOINT("MultiLineString", 8202),
 		MULTILINESTRING("MultiLineString", 8203),
 		POLYGON("Polygon", 8204),
 		MULTIPOLYGON("MultiPolygon", 8205);

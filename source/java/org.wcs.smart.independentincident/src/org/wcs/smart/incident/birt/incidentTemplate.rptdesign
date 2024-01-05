@@ -325,7 +325,7 @@
                     <property name="name">wp:geometry</property>
                     <property name="nativeName">wp:geometry</property>
                     <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
+                    <property name="nativeDataType">8200</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[]]></xml-property>

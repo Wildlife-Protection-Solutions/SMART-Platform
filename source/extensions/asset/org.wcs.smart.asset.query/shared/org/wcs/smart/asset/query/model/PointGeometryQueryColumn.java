@@ -6,10 +6,10 @@ import org.wcs.smart.query.model.QueryColumn;
 
 public class PointGeometryQueryColumn extends QueryColumn implements IGeometryColumn{
 
-	public static final String KEY = "geometry.point"; //$NON-NLS-1$
+	public static final String KEY = "wp:geometry"; //$NON-NLS-1$
 	
 	public PointGeometryQueryColumn() {
-		super("Point", KEY, ColumnType.GEOMETRY);
+		super("Waypoint", KEY, ColumnType.GEOMETRY);
 	}
 
 	public boolean isDefaultGeometryColumn() {

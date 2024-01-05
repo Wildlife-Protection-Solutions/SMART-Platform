@@ -36,7 +36,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -57,7 +56,6 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.QueryDatasetExtensionManager;
 import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -554,8 +552,6 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 						}
 					}
 					
-					//TODO: FIX THIS
-					//GeometryColumn was removed in SMART8 to support
 					//multiple columns in a query
 					//probably need to hard code this instead
 					if (queryText != null) {
@@ -568,8 +564,7 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 							}
 							
 							queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(queryType);
-							AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
-							columns = qq.getGeometryColumns(queryType, Locale.getDefault());
+							columns = getGeometryColumns(queryType);
 
 							//gridded queries we need to add aliases to hints as
 							//we renamed the tile_x columns
@@ -782,6 +777,36 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 
 				}
 	}
+	
+	private static GeometryColumn[] getGeometryColumns(String queryTypeKey){
+		if (queryTypeKey.equals("assetobservation") || queryTypeKey.equals("assetwaypoint")){		 //$NON-NLS-1$ //$NON-NLS-2$
+			return new GeometryColumn[]{new GeometryColumn("Geometry","wp:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (queryTypeKey.equals("entitywaypoint") || queryTypeKey.equals("entityobservation")){		 //$NON-NLS-1$ //$NON-NLS-2$
+			return new GeometryColumn[]{new GeometryColumn("Geometry","wp:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (queryTypeKey.equals("observationobservation") || queryTypeKey.equals("observationwaypoint")){		 //$NON-NLS-1$ //$NON-NLS-2$
+			return new GeometryColumn[]{new GeometryColumn("Geometry", "wp:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}		
+		if (queryTypeKey.equals("patrolobservation") || queryTypeKey.equals("patrolwaypoint")){		 //$NON-NLS-1$ //$NON-NLS-2$
+			return new GeometryColumn[]{new GeometryColumn("Geometry", "wp:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}		
+		if (queryTypeKey.equals("patrolquery")){		 //$NON-NLS-1$
+			return new GeometryColumn[]{new GeometryColumn("Geometry","track:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}		
+		if (queryTypeKey.equals("surveyobservation") || //$NON-NLS-1$
+				queryTypeKey.equals("surveywaypoint")){		 //$NON-NLS-1$
+			return new GeometryColumn[]{new GeometryColumn("Geometry","wp:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}		
+		if (queryTypeKey.equals("surveymission")){		 //$NON-NLS-1$
+			return new GeometryColumn[]{new GeometryColumn("Geometry","track:geometry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (queryTypeKey.equals("surveymissiontrack")){		 //$NON-NLS-1$
+			return new GeometryColumn[]{new GeometryColumn("Geometry","TrackGeomtry")}; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return new GeometryColumn[] {};
+	}
+	
 	private static String parseQueryType(String queryText, String datasetExtId) {
 		if (queryText.trim().isEmpty()){
 			if (datasetExtId.equalsIgnoreCase("org.wcs.smart.intelligence.report.oda.SmartIntelligencePointst")){ //$NON-NLS-1$
@@ -833,12 +858,13 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 		if (queryText.trim().isEmpty()){
 			if (datasetExtId.equalsIgnoreCase("org.wcs.smart.intelligence.report.oda.SmartIntelligencePoints")){ //$NON-NLS-1$
 				return "geometry"; //$NON-NLS-1$
-			}else if (datasetExtId.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartQueryDataset")){ //$NON-NLS-1$
-				AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler("patrolquery"); //$NON-NLS-1$
-				GeometryColumn[] columns = qq.getGeometryColumns("patrolquery", Locale.getDefault()); //$NON-NLS-1$
-				if (columns == null)
-					return null;
-				return columns[0].getKey();
+			}else if (datasetExtId.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartQueryDataset")){ //$NON-NLS-1$				
+				return "track:geometry"; //$NON-NLS-1$
+//				AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler("patrolquery"); //$NON-NLS-1$
+//				GeometryColumn[] columns = qq.getGeometryColumns("patrolquery", Locale.getDefault()); //$NON-NLS-1$
+//				if (columns == null)
+//					return null;
+//				return columns[0].getKey();
 			}
 		}
 		
@@ -862,7 +888,7 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 		AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
 		if (qq == null) return null; //this is not a valid query type;likely a table with no geometry column (employee)
 		
-		GeometryColumn[] columns = qq.getGeometryColumns(queryType, Locale.getDefault());
+		GeometryColumn[] columns = getGeometryColumns(queryType);
 		if (columns == null)
 			return null;
 		return columns[0].getKey();
@@ -878,4 +904,23 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 		return null;
 	}
 	
+	private static class GeometryColumn {
+
+		private String label;
+		
+		private String key;
+		
+		public GeometryColumn(String label, String key){
+			this.label = label;
+			this.key = key;
+		}
+		
+		public String getKey(){
+			return this.key;
+		}
+		
+		public String getLabel(){
+			return this.label;
+		}
+	}
 }

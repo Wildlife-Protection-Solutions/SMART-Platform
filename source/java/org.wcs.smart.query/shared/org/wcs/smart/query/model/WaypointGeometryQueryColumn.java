@@ -6,8 +6,7 @@ import org.wcs.smart.query.common.engine.IWaypointQueryResultItem;
 
 public class WaypointGeometryQueryColumn extends QueryColumn implements IGeometryColumn{
 
-	
-	public static final String KEY = "geometry.default";
+	public static final String KEY = "wp:geometry"; //$NON-NLS-1$
 	
 	public WaypointGeometryQueryColumn() {
 		super("Waypoint", KEY, ColumnType.GEOMETRY);

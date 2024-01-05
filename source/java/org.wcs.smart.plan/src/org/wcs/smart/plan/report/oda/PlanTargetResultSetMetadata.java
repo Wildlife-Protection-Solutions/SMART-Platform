@@ -31,6 +31,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
+import org.wcs.smart.query.model.IGeometryColumn;
 
 /**
  * SMART plan target result set metadata.
@@ -50,9 +51,9 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 		TARGE_TNAME(Messages.PlanTargetResultSetMetadata_TargetNameColumnLabel, "TargetName", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		TARGET_DESCRIPTION(Messages.PlanTargetResultSetMetadata_TargetDescriptionColumnLabel, "TargetDescription", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		STATUS_DESCRIPTION(Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel, "StatusDescription", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		STATUS_KEY(Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel, "targetStatus", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		STATUS_KEY("targetStatus", "targetStatus", java.sql.Types.VARCHAR), //$NON-NLS-1$ //$NON-NLS-2$
 		PLAN_ID(Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel, "PlanId", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		GEOMETRY(Messages.PlanTargetResultSetMetadata_TargetPointsGeomColumnName, GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT),
+		GEOMETRY(Messages.PlanTargetResultSetMetadata_TargetPointsGeomColumnName, GEOM_COLUMN_NAME, IGeometryColumn.Type.MULTIPOINT.birtDataType),
 	
 		PLAN_START_DATE(Messages.PlanTargetResultSetMetadata_StartDateColumnName, "PlanStartDate", java.sql.Types.DATE), //$NON-NLS-1$
 		PLAN_END_DATE(Messages.PlanTargetResultSetMetadata_EndDateColumnName, "PlanEndDate", java.sql.Types.DATE); //$NON-NLS-1$

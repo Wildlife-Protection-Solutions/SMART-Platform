@@ -27,14 +27,12 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
-import org.opengis.feature.Feature;
-import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Georesource Information for a smart area resource 
@@ -62,24 +60,20 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			this.bounds = env;
 			QueryService service = (QueryService) resource.resolve(IService.class, monitor);
 			if (service.getQuery() instanceof IPagedQuery){
+				final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
+				env.setToNull();
+				
 				IPagedQueryResultSet<?> rs = (IPagedQueryResultSet<?>) service.getQuery().getCachedResults();
 				if (rs != null){
 					Envelope local = rs.getEnvelope();
 					env.expandToInclude(local.getMinX(), local.getMinY());
 					env.expandToInclude(local.getMaxX(), local.getMaxY());
 				}
+				this.bounds = env;
 			}else{
-				fs.getFeatures().accepts(new FeatureVisitor() {
-					@Override
-					public void visit(Feature f) {
-						BoundingBox bb = f.getBounds();
-						env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
-					}
-				}, null);
+				this.bounds = SharedUtils.computeBounds(fs);				
 			}
 		} catch (Exception e) {
 			QueryPlugIn.log(e.getMessage(), e);

@@ -8,8 +8,8 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 public class TrackGeometryQueryColumn extends QueryColumn implements IGeometryColumn{
 
+	public static final String KEY = "track:geometry"; //$NON-NLS-1$
 	
-	public static final String KEY = "geometry.default";
 	private IGeometryColumn.Type type;
 	
 	public TrackGeometryQueryColumn(IGeometryColumn.Type type) {
