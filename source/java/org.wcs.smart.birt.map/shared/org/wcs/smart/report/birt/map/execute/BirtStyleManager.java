@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.birt.map.ExtensionManager;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
@@ -48,7 +49,7 @@ public enum BirtStyleManager {
 	private volatile List<IBirtLayerStyleProvider> styleProviders = null;
 	
 	public StyleBlackboard getStyle(String extensionId, String queryText,
-			MapLayerInfo info, Session session) throws Exception{
+			MapLayerInfo info, ConservationArea ca, Session session) throws Exception{
 		
 		if (styleProviders == null){
 			synchronized (INSTANCE) {
@@ -57,7 +58,7 @@ public enum BirtStyleManager {
 		}
 		
 		for (IBirtLayerStyleProvider p : styleProviders){
-			StyleBlackboard style = p.getStyle(extensionId, queryText, info, session);
+			StyleBlackboard style = p.getStyle(extensionId, queryText, info, ca, session);
 			if (style != null) return style;
 		}
 		return null;

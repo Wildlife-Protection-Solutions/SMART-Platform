@@ -36,11 +36,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -230,7 +233,7 @@ public class GriddedTableContent {
 		
 		// --- Query Properties ----
 		Composite queryProp = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
-		layout = new GridLayout(2, false);
+		layout = new GridLayout(3, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 10;
 		layout.horizontalSpacing = 0;
@@ -247,6 +250,13 @@ public class GriddedTableContent {
 		if (editor.getInputInternal().getDateFilter() != null) {
 			dateComposite.setDateFilter(editor.getInputInternal().getDateFilter());
 		}
+		
+		ToolBar headerToolbar = new ToolBar(queryProp, SWT.FLAT);
+		ToolItem runItem = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
+		runItem.addListener(SWT.Selection, e->editor.refreshQuery());
+		runItem.setToolTipText("Run query");
+		headerToolbar.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.GriddedTableContent_QueryProperties,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));

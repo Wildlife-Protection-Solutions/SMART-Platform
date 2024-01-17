@@ -343,7 +343,7 @@
       <coreUpgrader
             fromVersion="7.5.7"
             toVersion="8.0.0"
-            upgrader="org.wcs.smart.report.Report800Upgrader">
+            upgrader="org.wcs.smart.report.Report800UpgraderDesktop">
       </coreUpgrader>
    </extension>
    <extension

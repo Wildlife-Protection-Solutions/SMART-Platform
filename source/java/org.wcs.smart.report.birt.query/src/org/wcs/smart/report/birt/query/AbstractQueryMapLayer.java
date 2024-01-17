@@ -23,16 +23,12 @@ package org.wcs.smart.report.birt.query;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
-import org.eclipse.birt.report.model.api.elements.structures.OdaResultSetColumn;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
-import org.wcs.smart.query.model.IGeometryColumn;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 
@@ -94,43 +90,8 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 			if (canAddToMap(odaHandle)) {
 				
 				String queryTypeKey = odaHandle.getQueryText().split(":")[0]; //$NON-NLS-1$
-				maplayers.addAll(getGeometryOptions(queryTypeKey));
-				
-				HashMap<String,String> names = new HashMap<>();
-				List<ColumnHint> hints = odaHandle.getListProperty("columnHints");
-				if (hints != null) {
-					for (ColumnHint h : hints) {
-						String column = h.getStringProperty(odaHandle.getModule(), "columnName");
-						String display = h.getStringProperty(odaHandle.getModule(), "displayName");
-						names.put(column, display);
-					}
-				}
-				
-				List<OdaResultSetColumn> items = (List<OdaResultSetColumn>)odaHandle.getListProperty("resultSet");
-				for (OdaResultSetColumn c : items) {
-					
-					MapLayerInfo.LayerType type = null;
-						
-					if (c.getNativeDataType() == IGeometryColumn.Type.POINT.birtDataType) {
-						type = MapLayerInfo.LayerType.POINT;
-					}else if (c.getNativeDataType() == IGeometryColumn.Type.MULTIPOINT.birtDataType) {
-						type = MapLayerInfo.LayerType.MULTIPOINT;
-					}else if (c.getNativeDataType() == IGeometryColumn.Type.LINESTRING.birtDataType) { 
-						type = MapLayerInfo.LayerType.LINE;
-					}else if (c.getNativeDataType() == IGeometryColumn.Type.MULTILINESTRING.birtDataType) {
-						type = MapLayerInfo.LayerType.MULTILINE;
-					}else if (c.getNativeDataType() == IGeometryColumn.Type.POLYGON.birtDataType) {
-						type = MapLayerInfo.LayerType.POLYGON;
-					}else if (c.getNativeDataType() == IGeometryColumn.Type.MULTIPOLYGON.birtDataType) {
-						type = MapLayerInfo.LayerType.MULTIPOLYGON;
-					}
-					if (type != null) {
-						String name = names.get(c.getColumnName());
-						if (name == null) name = c.getColumnName();
-						MapLayerInfo cc = new MapLayerInfo(name, null, type, c.getColumnName());
-						maplayers.add(cc);
-					}					
-				}
+				maplayers.addAll(getGeometryOptions(queryTypeKey));				
+				maplayers.addAll(this.findGeometryColumnsInResultSet(odaHandle));
 			}
 		}
 		return maplayers;

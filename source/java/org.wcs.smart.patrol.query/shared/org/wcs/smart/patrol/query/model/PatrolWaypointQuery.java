@@ -50,7 +50,8 @@ public class PatrolWaypointQuery extends WaypointQuery{
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "patrolwaypoint"; //$NON-NLS-1$
-	
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.patrol.query.map.waypoint"; //$NON-NLS-1$
+
 	/**
 	 * 
 	 * @see java.lang.Object#clone()

@@ -34,6 +34,7 @@ import org.eclipse.birt.report.model.api.elements.structures.OdaResultSetColumn;
 
 public class BirtSmartUtils {
 
+	@SuppressWarnings("unchecked")
 	public static void updateDatasetConfiguration(OdaDataSetHandle dataset) {
 		try{
 			HashMap<String, String> name2key = new HashMap<String, String>();

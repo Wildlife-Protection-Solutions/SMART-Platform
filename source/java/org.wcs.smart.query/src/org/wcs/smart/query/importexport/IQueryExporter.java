@@ -25,8 +25,8 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IGeometryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 

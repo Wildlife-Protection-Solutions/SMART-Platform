@@ -26,12 +26,12 @@ import java.util.Locale;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
-import org.wcs.smart.query.model.IGeometryColumn;
 
 /**
  * SMART plan target result set metadata.

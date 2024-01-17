@@ -33,9 +33,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
-import org.wcs.smart.query.model.IGeometryColumn;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**

@@ -22,18 +22,14 @@
 package org.wcs.smart.patrol.query.map.style;
 
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class PatrolWaypointQueryDefaultStyle implements IMapLayerDefaultStyle {
 
-	public static final String KEY = "org.wcs.smart.patrol.query.map.waypoint"; //$NON-NLS-1$
-
-	public PatrolWaypointQueryDefaultStyle() {
-	}
-
 	@Override
 	public String getKey() {
-		return KEY;
+		return PatrolWaypointQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

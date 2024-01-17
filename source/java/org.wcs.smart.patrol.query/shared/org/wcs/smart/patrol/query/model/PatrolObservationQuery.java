@@ -51,6 +51,8 @@ public class PatrolObservationQuery extends ObservationQuery{
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "patrolobservation"; //$NON-NLS-1$
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.patrol.query.map.observation"; //$NON-NLS-1$
+
 
 	/**
 	 * 

@@ -35,6 +35,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -46,6 +48,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -425,7 +428,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		createNameHeader(main, toolkit);
 
 		Composite queryProp = toolkit.createComposite(main, SWT.NONE);
-		layout = new GridLayout(2, false);
+		layout = new GridLayout(3, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 10;
 		layout.horizontalSpacing = 0;
@@ -438,10 +441,17 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(getQuery().getTypeKey());
 		dateFilterComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
 		dateFilterComposite.adapt(toolkit);
-		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (getInputInternal().getDateFilter() != null) {
 			dateFilterComposite.setDateFilter(getInputInternal().getDateFilter());
 		}
+		
+		ToolBar headerToolbar = new ToolBar(queryProp, SWT.FLAT);
+		ToolItem runItem = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
+		runItem.addListener(SWT.Selection, e->refreshQuery());
+		runItem.setToolTipText("Run query");
+		headerToolbar.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.SummaryEditor_PropertiesLabel,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));

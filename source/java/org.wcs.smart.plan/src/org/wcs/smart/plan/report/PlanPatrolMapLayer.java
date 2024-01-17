@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -33,11 +32,9 @@ import org.geotools.styling.Rule;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
 import org.opengis.filter.FilterFactory;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Converts Patrol Plan Query into a map layer
@@ -67,7 +64,10 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
-		return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY));
+		if (handle instanceof OdaDataSetHandle){
+			return this.findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
+		}
+		return null;
 	}
 
 	/**

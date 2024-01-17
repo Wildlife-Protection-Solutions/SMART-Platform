@@ -19,51 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.reporttable.ca;
+package org.wcs.smart.report;
 
 import java.util.List;
 
-import org.eclipse.birt.report.model.api.DataSetHandle;
-import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
-import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
-import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.data.oda.smart.internal.Messages;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 
 /**
- * Map Layers for asset station and asset station location BIRT tables.
+ * Script to upgrade report files from the "old" map report structure to the new
+ * map report structure implemented in 4.0
  * 
  * @author Emily
  *
  */
-public class AreaTableMapLayer implements IBirtMapLayerManager {
-
-	public AreaTableMapLayer() {
-	}
-
+public class Report800UpgraderDesktop extends AbstractInteralDatabaseUpgrader {
 	
 	@Override
-	public boolean canAddToMap(DataSetHandle handle) {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return false;
-		}
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (odaHandle.getExtensionID().equals(SmartTableQuery.SMART_DATASET_TYPE)) {
-			if (odaHandle.getQueryText().startsWith("smartareas:")){ //$NON-NLS-1$
-				return true;
+	public void upgrade(IProgressMonitor monitor) throws Exception {
+		try (Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			
+			List<String> warnings = (new Report800Upgrader()).upgrade(session);
+			if (warnings.size() > 0){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.Report400Upgrader_ErrorTitle, Messages.Report400Upgrader_ErrorMessage, warnings);
+						wd.open();
+					}});
 			}
+			
+			session.getTransaction().commit();
 		}
-		return false;
-	}
-
-
-
-	@Override
-	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
-			throws Exception {
-		if (handle instanceof OdaDataSetHandle){
-			return this.findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
-		}
-		return null;
 	}
 
 }

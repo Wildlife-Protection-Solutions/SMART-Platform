@@ -175,7 +175,7 @@ public class PatrolQueryColumnCache {
 				toAdd.setEdit(false);
 				cols.add(toAdd);
 				
-				cols.add(new WaypointGeometryQueryColumn());
+				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
 				
@@ -272,7 +272,7 @@ public class PatrolQueryColumnCache {
 				try (Session session = HibernateManager.openSession()){
 					cols.addAll(getPatrolAttributeQueryColumns(session));
 				}
-				cols.add(new WaypointGeometryQueryColumn());
+				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
@@ -360,7 +360,7 @@ public class PatrolQueryColumnCache {
 									
 							}
 							cols.addAll(getPatrolAttributeQueryColumns(session));
-							cols.add(new TrackGeometryQueryColumn());
+							cols.add(new TrackGeometryQueryColumn(Locale.getDefault()));
 							
 							patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 						

@@ -48,14 +48,14 @@ public abstract class AbstractQueryStyleProvider implements IBirtLayerStyleProvi
 	 * @param s
 	 * @return
 	 */
-	public abstract StyleBlackboard getStyle(String queryType, UUID uuid, MapLayerInfo info, Session s);
+	public abstract StyleBlackboard getStyle(String queryType, UUID uuid, MapLayerInfo info, ConservationArea ca, Session s);
 	
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, ConservationArea ca, Session s) {
 		if (!extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) return null;
 		
 		ParsedQuery pquery = AbstractSmartBirtQuery.parseQueryText(queryText);
-		return getStyle(pquery.getType(), pquery.getUuid(), info, s);
+		return getStyle(pquery.getType(), pquery.getUuid(), info, ca, s);
 	}
 	
 	protected StyleBlackboard findDataModelAttributeStyle(Session session, ConservationArea ca, String columnKey) {

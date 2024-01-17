@@ -22,18 +22,18 @@
 package org.wcs.smart.observation.query.map.style;
 
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class ObservationObservationQueryDefaultStyle implements IMapLayerDefaultStyle {
 
-	public static final String KEY = "org.wcs.smart.observation.query.map.observation"; //$NON-NLS-1$
-
+	
 	public ObservationObservationQueryDefaultStyle() {
 	}
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return ObsObservationQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.wcs.smart.query.model;
 
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 

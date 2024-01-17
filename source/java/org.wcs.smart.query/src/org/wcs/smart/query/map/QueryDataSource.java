@@ -34,7 +34,7 @@ import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.query.model.IGeometryColumn;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;

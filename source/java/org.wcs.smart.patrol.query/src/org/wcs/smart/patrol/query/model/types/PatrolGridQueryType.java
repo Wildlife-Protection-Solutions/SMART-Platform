@@ -35,7 +35,6 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.map.style.PatrolGridQueryDefaultStyle;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
@@ -79,7 +78,7 @@ public class PatrolGridQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String,String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(RasterService.GRIDDED_TYPE, PatrolGridQueryDefaultStyle.KEY);
+		styleMappings.put(RasterService.GRIDDED_TYPE, PatrolGriddedQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	/**

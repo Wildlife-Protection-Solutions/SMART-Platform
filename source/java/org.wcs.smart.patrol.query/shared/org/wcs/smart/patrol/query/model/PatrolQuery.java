@@ -48,6 +48,7 @@ public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "patrolquery"; //$NON-NLS-1$
+	public static final String DEAFULT_STYLE_KEY = "org.wcs.smart.patrol.query.map.patrol"; //$NON-NLS-1$
 
 	/**
 	 * 

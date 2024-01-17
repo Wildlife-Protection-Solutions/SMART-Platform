@@ -25,6 +25,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.plan.map.udig.PlanTargetGeoResource;
 import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
@@ -40,8 +41,8 @@ public class PlanPointsStyleProvider implements IBirtLayerStyleProvider {
 
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, 
-			Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info,
+			ConservationArea ca, Session s) {
 		if (extensionId.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
 			sb.put(SLDContent.ID, PlanTargetGeoResource.createStyle(!queryText.equals("plan"))); //$NON-NLS-1$		

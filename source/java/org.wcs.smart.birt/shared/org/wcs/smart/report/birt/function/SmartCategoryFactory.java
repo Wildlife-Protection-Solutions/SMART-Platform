@@ -48,6 +48,11 @@ public class SmartCategoryFactory implements IScriptFunctionFactory {
 			throws BirtException {
 		
 		return new IScriptFunctionExecutor() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Object execute(Object[] arguments, IScriptFunctionContext context)
 					throws BirtException {
