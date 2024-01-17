@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,10 +61,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.EntityAttribute;
-import org.wcs.smart.entity.model.EntityAttributeValue;
-import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -170,11 +165,11 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(PatrolAttributeListItem.class, "spal"); //$NON-NLS-1$
 		tablePrefix.put(PatrolAttributeValue.class, "spav"); //$NON-NLS-1$
 		
-		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
-		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
-		tablePrefix.put(EntityAttribute.class, "ea"); //$NON-NLS-1$
-		tablePrefix.put(EntityAttributeValue.class, "eav"); //$NON-NLS-1$
-		
+//		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
+//		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
+//		tablePrefix.put(EntityAttribute.class, "ea"); //$NON-NLS-1$
+//		tablePrefix.put(EntityAttributeValue.class, "eav"); //$NON-NLS-1$
+//		
 		tablePrefix.put(SurveyDesign.class, "sd"); //$NON-NLS-1$
 		tablePrefix.put(Survey.class, "s"); //$NON-NLS-1$
 		tablePrefix.put(Mission.class, "m"); //$NON-NLS-1$
@@ -234,10 +229,10 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(PatrolAttributeListItem.class, "smart.patrol_attribute_list"); //$NON-NLS-1$
 		tableNames.put(PatrolAttributeValue.class, "smart.patrol_attribute_value"); //$NON-NLS-1$
 		
-		tableNames.put(Entity.class, "smart.entity"); //$NON-NLS-1$
-		tableNames.put(EntityType.class, "smart.entity_type"); //$NON-NLS-1$
-		tableNames.put(EntityAttribute.class, "smart.entity_attribute"); //$NON-NLS-1$
-		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value"); //$NON-NLS-1$
+//		tableNames.put(Entity.class, "smart.entity"); //$NON-NLS-1$
+//		tableNames.put(EntityType.class, "smart.entity_type"); //$NON-NLS-1$
+//		tableNames.put(EntityAttribute.class, "smart.entity_attribute"); //$NON-NLS-1$
+//		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value"); //$NON-NLS-1$
 		
 		tableNames.put(SurveyDesign.class, "smart.survey_design"); //$NON-NLS-1$
 		tableNames.put(Survey.class, "smart.survey"); //$NON-NLS-1$
@@ -542,43 +537,43 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		}
 		
 	}
-	public String getEntityDmAttributeKey(String entityKey, ConservationAreaFilter caFilter, Connection c){
-		String dmEntityTypeAttributeKey;
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT " + tablePrefix(Attribute.class) + ".keyid"); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(EntityType.class));
-		sql.append(" join "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(Attribute.class));
-		sql.append(" on "); //$NON-NLS-1$
-		sql.append(tablePrefix(EntityType.class) + ".dm_attribute_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix(Attribute.class) + ".uuid "); //$NON-NLS-1$
-		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix(EntityType.class));
-		sql.append(".keyid = '" + entityKey + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" AND "); //$NON-NLS-1$
-		sql.append(tablePrefix(EntityType.class));
-		sql.append(".ca_uuid IN ("); //$NON-NLS-1$
-		for (UUID uuid : caFilter.getConservationAreaFilterIds()){
-			sql.append("'" + uuid.toString() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		sql.deleteCharAt(sql.length() - 1);
-		sql.append(")"); //$NON-NLS-1$
-		try{
-			logger.finest(sql.toString());
-			ResultSet rs = c.createStatement().executeQuery(sql.toString());
-			if (rs.next()){
-				dmEntityTypeAttributeKey = rs.getString(1);
-			}else{
-				throw new RuntimeException(MessageFormat.format("Entity not found for entity attribute key {0}.", new Object[]{entityKey})); //$NON-NLS-1$
-			}
-			rs.close();
-		}catch (Exception ex){
-			throw new RuntimeException(ex);
-		}
-		
-		return dmEntityTypeAttributeKey;
-	}
+//	public String getEntityDmAttributeKey(String entityKey, ConservationAreaFilter caFilter, Connection c){
+//		String dmEntityTypeAttributeKey;
+//		StringBuilder sql = new StringBuilder();
+//		sql.append("SELECT " + tablePrefix(Attribute.class) + ".keyid"); //$NON-NLS-1$ //$NON-NLS-2$
+//		sql.append(" FROM "); //$NON-NLS-1$
+//		sql.append(tableNamePrefix(EntityType.class));
+//		sql.append(" join "); //$NON-NLS-1$
+//		sql.append(tableNamePrefix(Attribute.class));
+//		sql.append(" on "); //$NON-NLS-1$
+//		sql.append(tablePrefix(EntityType.class) + ".dm_attribute_uuid = "); //$NON-NLS-1$
+//		sql.append(tablePrefix(Attribute.class) + ".uuid "); //$NON-NLS-1$
+//		sql.append(" WHERE "); //$NON-NLS-1$
+//		sql.append(tablePrefix(EntityType.class));
+//		sql.append(".keyid = '" + entityKey + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+//		sql.append(" AND "); //$NON-NLS-1$
+//		sql.append(tablePrefix(EntityType.class));
+//		sql.append(".ca_uuid IN ("); //$NON-NLS-1$
+//		for (UUID uuid : caFilter.getConservationAreaFilterIds()){
+//			sql.append("'" + uuid.toString() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+//		}
+//		sql.deleteCharAt(sql.length() - 1);
+//		sql.append(")"); //$NON-NLS-1$
+//		try{
+//			logger.finest(sql.toString());
+//			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+//			if (rs.next()){
+//				dmEntityTypeAttributeKey = rs.getString(1);
+//			}else{
+//				throw new RuntimeException(MessageFormat.format("Entity not found for entity attribute key {0}.", new Object[]{entityKey})); //$NON-NLS-1$
+//			}
+//			rs.close();
+//		}catch (Exception ex){
+//			throw new RuntimeException(ex);
+//		}
+//		
+//		return dmEntityTypeAttributeKey;
+//	}
 	
 	/**
 	 * Finds the srid from the spatial_ref_sys table that matches

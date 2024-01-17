@@ -33,6 +33,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.InflaterInputStream;
@@ -167,9 +168,9 @@ public class SmartMobileJsonFileProcessor {
 			
 			IJsonProcessor[] processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
 			for (IJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session);
+				List<JSONObject> processed = p.processJson(features, session, this.locale);
 				notProc.removeAll(processed);
-				String msg = p.getStatusMessage();
+				String msg = p.getStatusMessage(this.locale);
 				if (msg != null) statusMsg.append(msg);
 				
 				warnings.addAll(p.getWarnings());
@@ -186,15 +187,19 @@ public class SmartMobileJsonFileProcessor {
 
 			if (!notProc.isEmpty()){
 				//not all items have been processed
-				StringBuilder sb = new StringBuilder();
-				sb.append(MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.FeatureProccessedCount", locale), features.size(), notProc.size())); //$NON-NLS-1$
-				for (JSONObject o : notProc){
-					sb.append(o.toJSONString() + "; "); //$NON-NLS-1$
-				}
-				sb.deleteCharAt(sb.length()-1);
-				sb.deleteCharAt(sb.length()-1);
+				final int fsize = features.size();
+				Function<Locale,String> warn = (l)->{ 
+					StringBuilder sb = new StringBuilder();
+					sb.append(MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.FeatureProccessedCount", l), fsize, notProc.size())); //$NON-NLS-1$
+					for (JSONObject o : notProc){
+						sb.append(o.toJSONString() + "; "); //$NON-NLS-1$
+					}
+					sb.deleteCharAt(sb.length()-1);
+					sb.deleteCharAt(sb.length()-1);
+					return sb.toString();
+				};
 				
-				warnings.add(new JsonImportWarning(sb.toString()));
+				warnings.add(new JsonImportWarning(warn));
 			}
 			
 			if (warnings.isEmpty()) {
@@ -205,7 +210,7 @@ public class SmartMobileJsonFileProcessor {
 			item.setStatusMessage(statusMsg.toString());
 			item.setWarningMessages(null);
 			for (JsonImportWarning warn : warnings) {
-				item.addWarningMessage(warn.getMessage());
+				item.addWarningMessage(warn.getMessage(this.locale));
 			}
 			
 			session.getTransaction().commit();
@@ -241,7 +246,7 @@ public class SmartMobileJsonFileProcessor {
 			item.setWarningMessages(null);
 			if (warnings != null) {
 				for (JsonImportWarning warn : warnings) {
-					item.addWarningMessage(warn.getMessage());
+					item.addWarningMessage(warn.getMessage(this.locale));
 				}
 			}
 			

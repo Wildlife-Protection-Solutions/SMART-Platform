@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.cybertracker.json.importer;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -52,13 +51,10 @@ public class ServerSmartCollectJsonProcessor extends SmartCollectJsonProcessor {
 	private final Logger logger = Logger.getLogger(ServerSmartCollectJsonProcessor.class.getName());
 
 	private Session session;
-	private Locale locale;
 	
 	public ServerSmartCollectJsonProcessor(ConservationArea ca, Session session) {
 		super(ca);
 		this.session = session;
-		locale = Locale.getDefault();
-		
 	}
 
 	@Override
@@ -104,7 +100,7 @@ public class ServerSmartCollectJsonProcessor extends SmartCollectJsonProcessor {
 		}
 		
 		if (processingOp == ConnectSetting.SmartCollectUserOption.DISCARD) {
-			warnings.add(new JsonImportWarning(Messages.getString("ServerSmartCollectJsonProcessor.DataDiscarded", locale))); //$NON-NLS-1$
+			warnings.add(new JsonImportWarning(l->Messages.getString("ServerSmartCollectJsonProcessor.DataDiscarded", l))); //$NON-NLS-1$
 			//discard all
 			return true;
 		}else if (processingOp == ConnectSetting.SmartCollectUserOption.LOAD) {
@@ -112,10 +108,10 @@ public class ServerSmartCollectJsonProcessor extends SmartCollectJsonProcessor {
 			for (SmartCollectUser u : notok) u.setState(State.VALIDATED);
 			return false;
 		}else if (processingOp == ConnectSetting.SmartCollectUserOption.REQUEUE) {
-			warnings.add(new JsonImportWarning(Messages.getString("ServerSmartCollectJsonProcessor.DataRequeued", locale))); //$NON-NLS-1$
+			warnings.add(new JsonImportWarning(l->Messages.getString("ServerSmartCollectJsonProcessor.DataRequeued", l))); //$NON-NLS-1$
 			return null;
 		}else if (processingOp == ConnectSetting.SmartCollectUserOption.VALIDATE_REQUEUE) {
-			warnings.add(new JsonImportWarning(Messages.getString("ServerSmartCollectJsonProcessor.ValidationSent", locale))); //$NON-NLS-1$
+			warnings.add(new JsonImportWarning(l->Messages.getString("ServerSmartCollectJsonProcessor.ValidationSent", l))); //$NON-NLS-1$
 			for (SmartCollectUser u : notok) {
 				try {
 					sendEmailRequest(u);

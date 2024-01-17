@@ -49,10 +49,6 @@ import org.wcs.smart.connect.query.engine.asset.AssetDeploymentSummaryEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetObservationEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetSummaryEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetWaypointEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntityWaypointEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErGridEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErMissionEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
@@ -68,10 +64,6 @@ import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
-import org.wcs.smart.entity.query.model.EntityGriddedQuery;
-import org.wcs.smart.entity.query.model.EntityObservationQuery;
-import org.wcs.smart.entity.query.model.EntitySummaryQuery;
-import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.MissionTrackDateField;
@@ -136,10 +128,10 @@ public enum QueryManager {
 			ObservationSummaryQuery.KEY,
 			ObservationGriddedQuery.KEY,
 
-			EntityObservationQuery.KEY,
-			EntityWaypointQuery.KEY,
-			EntitySummaryQuery.KEY,
-			EntityGriddedQuery.KEY,
+//			EntityObservationQuery.KEY,
+//			EntityWaypointQuery.KEY,
+//			EntitySummaryQuery.KEY,
+//			EntityGriddedQuery.KEY,
 
 			SurveyObservationQuery.KEY,
 			SurveyWaypointQuery.KEY,
@@ -172,10 +164,10 @@ public enum QueryManager {
 		queryClasses.add(ObservationSummaryQuery.class);
 		queryClasses.add(ObservationGriddedQuery.class);
 		
-		queryClasses.add(EntityObservationQuery.class);
-		queryClasses.add(EntityWaypointQuery.class);
-		queryClasses.add(EntitySummaryQuery.class);
-		queryClasses.add(EntityGriddedQuery.class);
+//		queryClasses.add(EntityObservationQuery.class);
+//		queryClasses.add(EntityWaypointQuery.class);
+//		queryClasses.add(EntitySummaryQuery.class);
+//		queryClasses.add(EntityGriddedQuery.class);
 		
 		queryClasses.add(SurveyObservationQuery.class);
 		queryClasses.add(SurveyWaypointQuery.class);
@@ -215,10 +207,10 @@ public enum QueryManager {
 		new PsqlObsWaypointEngine(),
 		new PsqlObsSummaryEngine(),
 		new PsqlObsGridEngine(),
-		new PsqlEntityGridEngine(),
-		new PsqlEntityObservationEngine(),
-		new PsqlEntitySummaryEngine(),
-		new PsqlEntityWaypointEngine(),
+//		new PsqlEntityGridEngine(),
+//		new PsqlEntityObservationEngine(),
+//		new PsqlEntitySummaryEngine(),
+//		new PsqlEntityWaypointEngine(),
 		new PsqlErGridEngine(),
 		new PsqlErMissionEngine(),
 		new PsqlErMissionTrackEngine(),
@@ -268,10 +260,10 @@ public enum QueryManager {
 		DATE_FILTERS.put(ObservationSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(ObservationWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(EntityGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(EntityObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(EntitySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntityGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntityObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntitySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
 		
 //		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 //		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
