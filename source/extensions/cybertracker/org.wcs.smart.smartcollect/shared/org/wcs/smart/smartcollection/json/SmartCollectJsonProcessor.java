@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -34,6 +35,7 @@ import java.util.Set;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
@@ -44,6 +46,7 @@ import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.smartcollect.model.SmartCollectUser;
 import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
@@ -61,6 +64,8 @@ import org.wcs.smart.smartcollection.json.SmartCollectJsonImportWarning.WarningT
  *
  */
 public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
+	
+	public static final Object FINISH_MESSAGE = new Object();
 	
 	protected List<JsonImportWarning> warnings;
 
@@ -123,7 +128,7 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	protected abstract Boolean processNotOkUsers(Set<SmartCollectUser> notok) throws Exception;
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception {
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception {
 	
 		warnings = new ArrayList<>();
 		waypoints = new HashSet<>();
@@ -292,12 +297,12 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		if (waypoints.isEmpty() ) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		if (!waypoints.isEmpty()){
-			sb.append(MessageFormat.format("Created {0} SMARTCollect Incidents", waypoints.size()));
+			sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(ISmartCollectLabelProvider.class).getLabel(FINISH_MESSAGE, l), waypoints.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : waypoints){
 				sb.append(p.getId());

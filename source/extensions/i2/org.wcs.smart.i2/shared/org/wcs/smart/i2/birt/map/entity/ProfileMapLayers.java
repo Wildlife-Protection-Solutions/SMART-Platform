@@ -21,31 +21,28 @@
  */
 package org.wcs.smart.i2.birt.map.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.hibernate.Session;
-import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.wcs.smart.i2.StyleUtil;
+import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
-import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDatasetResultSetMetadata;
-import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationObservationAttributeDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
- * Map layer for entity location attributes
+ * Record locations map layer
  * 
  * @author Emily
  *
  */
-public class EntityAttributeMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvider {
+public class ProfileMapLayers implements IBirtMapLayerManager {
 
-	public EntityAttributeMapLayer() {
+	public ProfileMapLayers() {
 	}
 
 	@Override
@@ -54,7 +51,22 @@ public class EntityAttributeMapLayer implements IBirtMapLayerManager, IBirtLayer
 			return false;
 		}
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
+		if (odaHandle.getExtensionID().equals(RecordLocationDataset.DATASET_TYPE)) {
+			return true;
+		}
+		if (odaHandle.getExtensionID().equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)) {
+			return true;
+		}
+		if (odaHandle.getExtensionID().equals(EntityLocationDataset.DATASET_TYPE)) {
+			return true;
+		}
+		if (odaHandle.getExtensionID().equals(EntityDataset.DATASET_TYPE)) {
+			return true;
+		}
 		if (odaHandle.getExtensionID().equals(EntityLocationAttributeDataset.DATASET_TYPE)) {
+			return true;
+		}
+		if (odaHandle.getExtensionID().equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) {
 			return true;
 		}
 		return false;
@@ -63,23 +75,8 @@ public class EntityAttributeMapLayer implements IBirtMapLayerManager, IBirtLayer
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
-		if (odaHandle.getExtensionID().equals(EntityLocationAttributeDataset.DATASET_TYPE)) {
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, EntityLocationAttributeDatasetResultSetMetadata.Column.GEOMETRY.getId());
-			List<MapLayerInfo> layers = new ArrayList<MapLayerInfo>();
-			layers.add(def);
-			return layers;
-		}
-		return null;
-	}
-
-	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, Session s) {
-		if (extensionId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
-			//return red star style
-			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
-			sb.put("org.locationtech.udig.style.sld", StyleUtil.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
-			return sb;
+		if (handle instanceof OdaDataSetHandle){
+			return this.findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
 		}
 		return null;
 	}

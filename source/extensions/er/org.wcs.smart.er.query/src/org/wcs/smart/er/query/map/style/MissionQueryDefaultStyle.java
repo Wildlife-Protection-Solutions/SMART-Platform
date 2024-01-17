@@ -22,18 +22,14 @@
 package org.wcs.smart.er.query.map.style;
 
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class MissionQueryDefaultStyle implements IMapLayerDefaultStyle {
 	
-	public static final String KEY = "org.wcs.smart.er.query.map.mission"; //$NON-NLS-1$
-
-	public MissionQueryDefaultStyle() {
-	}
-
 	@Override
 	public String getKey() {
-		return KEY;
+		return MissionQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

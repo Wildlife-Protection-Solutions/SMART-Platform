@@ -29,7 +29,8 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Employee;
@@ -37,7 +38,6 @@ import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
-import org.wcs.smart.query.model.IGeometryColumn;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
@@ -162,15 +162,19 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 			//add a row for the station id or station location id
 			try {
 				if (!AssetSummaryQuery.canAddGeometry(getQueryDefinition())) {
-					throw new Exception(Messages.QueryDataSource_CannotCreateMapLayer);
+					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location");
 				}
 				AssetGroupBy assetGp = (AssetGroupBy)getQueryDefinition().getRowGroupByPart().getGroupBys().get(0);
 				if (assetGp.getOption() == AssetFilterOption.STATION) {
-					columns.add(new EmptyQueryColumn(Messages.QueryDataSource_StationIDColumnName, "assetstationid", ColumnType.STRING));  //$NON-NLS-1$
+					columns.add(new EmptyQueryColumn(
+							(new FixedQueryColumn(FixedColumns.STATION, l).getName()),
+							"assetstationid", ColumnType.STRING));  //$NON-NLS-1$
 				}else if (assetGp.getOption() == AssetFilterOption.STATIONLOCATION) {
-					columns.add(new EmptyQueryColumn(Messages.QueryDataSource_LocationIdTableName, "assetlocationid", ColumnType.STRING));  //$NON-NLS-1$
+					columns.add(new EmptyQueryColumn(
+							(new FixedQueryColumn(FixedColumns.LOCATION, l).getName()),
+							"assetlocationid", ColumnType.STRING));  //$NON-NLS-1$
 				}else {
-					throw new Exception(Messages.QueryDataSource_CannotCreateMapLayer);
+					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location");
 				}
 			}catch (Exception ex) {
 				throw new RuntimeException(ex);
@@ -195,7 +199,7 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 				columns.add(new EmptyQueryColumn(sb.toString(), sbkey.toString(), ColumnType.NUMBER ));
 			}
 			
-			columns.add(new PointGeometryQueryColumn());
+			columns.add(new PointGeometryQueryColumn(l));
 			
 			return columns;
 		

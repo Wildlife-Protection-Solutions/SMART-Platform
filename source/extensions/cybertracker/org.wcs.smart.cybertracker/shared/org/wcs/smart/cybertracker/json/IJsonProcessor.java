@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.json;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -46,14 +47,14 @@ public interface IJsonProcessor {
 	 * @param features
 	 * @return a list of objects that have been processed
 	 */
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception;
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception;
 		
 	/**
 	 * 
 	 * @return an optional status message to include in the processing items
 	 * status message
 	 */
-	public String getStatusMessage();
+	public String getStatusMessage(Locale l);
 	
 	/**
 	 * 

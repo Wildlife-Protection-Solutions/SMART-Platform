@@ -41,7 +41,8 @@ public interface IQueryExporter {
 		DELIMITER,
 		PROJECTION,
 		ENCODING,
-		LOCALE;
+		LOCALE,
+		GEOMETRY_COLUMN;
 	}
 
 	/**

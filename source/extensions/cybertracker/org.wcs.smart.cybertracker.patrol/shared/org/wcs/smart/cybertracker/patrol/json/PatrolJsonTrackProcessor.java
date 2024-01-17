@@ -30,8 +30,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -48,7 +48,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * For processing track log points.  This attempts to find a patrol
@@ -81,7 +80,7 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
 		warnings = new ArrayList<>();
 		
@@ -189,7 +188,7 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		return null;
 	}
 	

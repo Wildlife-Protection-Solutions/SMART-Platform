@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.patrol.json;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
@@ -105,7 +106,7 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 	 */
 	private void displayWarnings(List<JsonImportWarning> warnings) throws UserCancelledException{
 		 if (!warnings.isEmpty()){
-		 	List<String> allWarnings = warnings.stream().map(e->e.getMessage()).toList();
+		 	List<String> allWarnings = warnings.stream().map(e->e.getMessage(Locale.getDefault())).toList();
 		 	final boolean[] cont = {false};
 			Display.getDefault().syncExec(new Runnable(){
 				@Override

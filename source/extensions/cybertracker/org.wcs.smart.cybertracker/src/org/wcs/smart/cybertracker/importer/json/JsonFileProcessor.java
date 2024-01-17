@@ -30,6 +30,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -198,9 +199,9 @@ public class JsonFileProcessor {
 			
 			StringBuilder statusMsg = new StringBuilder();
 			for (IDesktopJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session);
+				List<JSONObject> processed = p.processJson(features, session, Locale.getDefault());
 				notProc.removeAll(processed);
-				String msg = p.getStatusMessage();
+				String msg = p.getStatusMessage(Locale.getDefault());
 				if (msg != null){
 					statusMsg.append(msg);
 				}

@@ -65,7 +65,6 @@ import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
-
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -199,7 +198,7 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.LOC_DATE,
 					FixedQueryColumn.Column.LOC_TIME,
 					FixedQueryColumn.Column.LOC_COMMENT,
-					FixedQueryColumn.Column.LOC_GEOMTRY,
+				
 				};
 		}else {
 			thiscolumns = new FixedQueryColumn.Column[]{
@@ -211,7 +210,6 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.LOC_DATE,
 					FixedQueryColumn.Column.LOC_TIME,
 					FixedQueryColumn.Column.LOC_COMMENT,
-					FixedQueryColumn.Column.LOC_GEOMTRY,
 				};
 		}
 		
@@ -272,12 +270,23 @@ public class IntelQueryColumnProvider {
 		for (Attribute attribute : attributes){
 			columns.add(new DataModelColumn(attribute));
 			if (attribute.getType().isGeometry()) {			
-				columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.SOURCE,MessageFormat.format("{0} - Source", attribute.getName())));
-				columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.PERIMETER,MessageFormat.format("{0} - Perimeter", attribute.getName())));
+				columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.SOURCE,MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(DataModelColumn.GeometryProperty.SOURCE, l), attribute.getName())));
+				columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.PERIMETER,MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(DataModelColumn.GeometryProperty.PERIMETER, l), attribute.getName())));
 				if (attribute.getType() == Attribute.AttributeType.POLYGON) {
-					columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.AREA,MessageFormat.format("{0} - Area", attribute.getName())));	
+					columns.add(new DataModelColumn(attribute, DataModelColumn.GeometryProperty.AREA,MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(DataModelColumn.GeometryProperty.AREA, l), attribute.getName())));	
 				}
 			}
+		}
+		
+		//add location geometry columns
+		
+		thiscolumns = new FixedQueryColumn.Column[]{
+				FixedQueryColumn.Column.LOC_POINT,
+				FixedQueryColumn.Column.LOC_POLYGON,
+		};
+	
+		for (FixedQueryColumn.Column c : thiscolumns){
+			columns.add(new FixedQueryColumn(c, l));
 		}
 		
 		return columns;

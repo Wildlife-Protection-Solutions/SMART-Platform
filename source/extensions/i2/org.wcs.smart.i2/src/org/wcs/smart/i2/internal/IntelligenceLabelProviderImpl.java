@@ -24,6 +24,7 @@ package org.wcs.smart.i2.internal;
 import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
@@ -34,6 +35,8 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDatasetResultSetMetadata;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationObservationAttributeDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationObservationAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetMetadata;
@@ -51,10 +54,13 @@ import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDatasetResultSetMetadata;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDatasetResultSetMetadata;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
+import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
@@ -119,6 +125,10 @@ public class IntelligenceLabelProviderImpl implements
 			return Messages.IntelligenceLabelProviderImpl_RecordLocationsDatasetName;
 		}else if (dataSetType.equals(RecordAttachmentDataset.DATASET_TYPE)){
 			return Messages.IntelligenceLabelProviderImpl_RecordAttachmentsDatasetName;
+		}else if (dataSetType.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)){
+			return "Record Location Geometry Attributes";
+		}else if (dataSetType.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)){
+			return "Entity Observation Geometry Attributes";
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -143,9 +153,20 @@ public class IntelligenceLabelProviderImpl implements
 			case TEXT:
 				return Messages.IntelligenceLabelProviderImpl_TextAttributeName;
 			case EMPLOYEE:
-				return Messages.IntelligenceLabelProviderImpl_EmployeeAttributeName;
+				return Messages.IntelligenceLabelProviderImpl_EmployeeAttributeName;			
 			}
 		}
+		
+		if (item == Attribute.AttributeType.POLYGON) return "POLYGON";
+		if (item == Attribute.AttributeType.LINE) return "LINE";
+		
+		if (item == DataModelColumn.GeometryProperty.SOURCE) return "{0} - Source";
+		if (item == DataModelColumn.GeometryProperty.PERIMETER) return "{0} - Perimeter";
+		if (item == DataModelColumn.GeometryProperty.AREA) return "{0} - Area";
+		
+		if (item == SRC_PROFILES) return "Profile Record Location";
+		if (item == SRC_WPS) return "Waypoint Observation";
+		
 		if (item == DM_SOURCE_LABEL) return Messages.IntelligenceLabelProviderImpl_CoreObservationSrc;
 		if (item == PROFILE_SOURCE_LABEL) return Messages.IntelligenceLabelProviderImpl_ProfileObservationSrc;
 		if (item == INSUFFICIENT_PRIVILEGES_LABEL) return INSUFFICIENT_PRIVILEGES;
@@ -159,7 +180,8 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.LOC_COMMENT) return Messages.IntelligenceLabelProviderImpl_CommentColumnLabel;
 		if (item == FixedQueryColumn.Column.LOC_DATE) return Messages.IntelligenceLabelProviderImpl_DateColumnLabel;
 		if (item == FixedQueryColumn.Column.LOC_TIME) return Messages.IntelligenceLabelProviderImpl_TimeColumnLabel;
-		if (item == FixedQueryColumn.Column.LOC_GEOMTRY) return Messages.IntelligenceLabelProviderImpl_GeomColumnLabel;
+		if (item == FixedQueryColumn.Column.LOC_POINT) return "Location Point";
+		if (item == FixedQueryColumn.Column.LOC_POLYGON) return "Location Polygon";
 		if (item == FixedQueryColumn.Column.LOC_ID) return Messages.IntelligenceLabelProviderImpl_IDColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.IntelligenceLabelProviderImpl_StatusColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.IntelligenceLabelProviderImpl_TitleColumnLabel;
@@ -213,7 +235,8 @@ public class IntelligenceLabelProviderImpl implements
 		
 		if (item == RecordLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsCommentColumn;
 		if (item == RecordLocationDatasetResultSetMetadata.Column.DATE) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsDateColumn;
-		if (item == RecordLocationDatasetResultSetMetadata.Column.GEOM) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsGeometryColumn;
+		if (item == RecordLocationDatasetResultSetMetadata.Column.POINT) return "Point Locations";
+		if (item == RecordLocationDatasetResultSetMetadata.Column.POLYGON) return "Polygon Locations";
 		if (item == RecordLocationDatasetResultSetMetadata.Column.ID) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsIdColumn;
 		if (item == RecordLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsObsColumn;
 		if (item == RecordLocationDatasetResultSetMetadata.Column.RECORD_UUID) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsRecordUuidColumn;
@@ -259,13 +282,12 @@ public class IntelligenceLabelProviderImpl implements
 				
 		if (item == EntityLocationDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsEntityUuidColumn;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.ID) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsEntityIdColumn;
-		if (item == EntityLocationDatasetResultSetMetadata.Column.GEOM) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsGeometryColumn;
+		if (item == EntityLocationDatasetResultSetMetadata.Column.POINT) return "Point Geometry";
+		if (item == EntityLocationDatasetResultSetMetadata.Column.POLYGON) return "Polygon Geometry";
 		if (item == EntityLocationDatasetResultSetMetadata.Column.DATE) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsDateColumn;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsObservationColumn;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCE) return Messages.IntelligenceLabelProviderImpl_SourceColumnName;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCELINK) return Messages.IntelligenceLabelProviderImpl_SourceLinkColumnName;
-		
-				
 
 		if (item == EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityRecordRsEntityUuidColumn;
 		if (item == EntityRecordDatasetResultSetMetadata.Column.TITLE) return Messages.IntelligenceLabelProviderImpl_EntityRecordRsTitleColumn;
@@ -310,8 +332,39 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnSource;
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnSourceImage;
 		if (item == RecordDatasetResultSetMetadata.Column.PROFILE) return Messages.IntelligenceLabelProviderImpl_RecordQueryColumnName;
+
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE) return "Attribute";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return "Attribute Key";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.BOOLEAN_VALUE) return "Boolean Value";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.DATE_VALUE) return "Date Value";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LINESTRING_VALUE) return "LineString Value";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LOCATIONID) return "Location ID";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.NUMBER_VALUE) return "Number Value";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.OBSERVATION_UUID) return "Observation UUID";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.POLYGON_VALUE) return "Polygon Value";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.RECORD_UUID) return "Record UUID";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.STRING_VALUE) return "String Value";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.GEOM_AREA_VALUE) return "Geometry Area";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.GEOM_PERIMETER_VALUE) return "Geometry Perimeter";
 		
-		
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE) return "Attribute";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTEKEY) return "Attribute Key";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.CATEGORY) return "Category";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.CATEGORYHKEY) return "Category Key";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.DATE) return "DateTime";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_AREA) return "Geometry Area (km2)";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_PERIMETER) return "Geometry Perimeter (km)";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_SOURCE) return "Geometry Source";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.LINESTRING) return "LineString Geometry";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.POLYGON) return "Polygon Geometry";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.OBSERVATION_UUID) return "Observation UUID";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.UUID) return "UUID";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION) return "Source";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION_ID) return "ID";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION_UUID) return "Waypoint/Location UUID";
+			
+			
 		if (item.equals(EntityDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityDatasetName;
 		if (item.equals(EntityLocationAttributeDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityLocaitonAttributeDatasetName;
 		if (item.equals(EntityAttachmentDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityAttachmentDsName;
@@ -319,6 +372,8 @@ public class IntelligenceLabelProviderImpl implements
 		if (item.equals(EntityRecordDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityRecordDsName;
 		if (item.equals(EntityRelationDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityRelationDsName;
 		if (item.equals(RecordMetadata.class)) return Messages.IntelligenceLabelProviderImpl_DefaultRecordDatasetName;
+		
+		if (item.equals(EntityLocationObservationAttributeDataset.class)) return "Entity Observation Geometry Attributes";
 	
 		if (item.equals(AdvancedEntitySearch.Error.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchParseError;
 		if (item.equals(AdvancedEntitySearch.Error.PARSE_ERROR)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchRunError;

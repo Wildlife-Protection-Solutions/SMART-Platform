@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -53,6 +54,7 @@ import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
+import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.patrol.model.JsonPatrol;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -86,6 +88,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	//TODO: patrols without transport type cannot be saved
 	//at this point those are warning in the JsonPatrol but nothing
 	//is done yet
+	public static final Object CA_ERROR = new Object();
 	
 	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -97,18 +100,16 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	protected HashMap<UUID, CtPatrolLink> newPatrolLinks;
 	
 	protected ConservationArea ca;
+	protected Locale locale;
 	
 	protected boolean duplicateWarningGenerated = false;
 	
 	public enum StatusMessage{
 		ADDED, MODIFIED;
 		
-		public String getMessage() {
-			switch(this) {
-			case ADDED: return "Created {0} Patrols";
-			case MODIFIED: return "Modified {0} Patrols";
-			}
-			return "";
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(IPatrolCyberTrackerLabelProvider.class)
+					.getLabel(this, l);
 		}
 	}
 	
@@ -118,9 +119,10 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	}
 
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
 		newPatrolLinks = new HashMap<UUID, CtPatrolLink>();
+		this.locale = locale;
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();
 		
@@ -158,8 +160,9 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 					link = newPatrolLinks.get(ctPatrolUuid);
 				}else if (!link.getPatrolLeg().getPatrol().getConservationArea().equals(this.ca)) {
 					//error data in file is being loaded into a patrol in a different ca
-					//this is an error 
-					throw new SmartMobileProcessingError(MessageFormat.format("The Conservation Area associated with the file ({0}), does not match the Conservation Area of the patrol currently linked to this data ({1})", this.ca.getNameLabel(), link.getPatrolLeg().getPatrol().getConservationArea().getNameLabel()));
+					//this is an error
+					String message = SmartContext.INSTANCE.getClass(IPatrolCyberTrackerLabelProvider.class).getLabel(CA_ERROR, locale);
+					throw new SmartMobileProcessingError(MessageFormat.format(message, this.ca.getNameLabel(), link.getPatrolLeg().getPatrol().getConservationArea().getNameLabel()));
 				}
 				
 				//ensure valid observation id
@@ -214,7 +217,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 						
 						//start a new leg
 						String defaultValues = (String)sighting.get(CtJsonUtil.JsonKey.DEFAULT_METADATA_VALUES.key);
-						JsonPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
+						JsonPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session, this.locale);
 						warnings.addAll(ct.getWarnings());
 						
 						PatrolLeg newLeg = addLegFromSighting(link.getPatrolLeg().getPatrol(), ct, sighting, deviceId, ctPatrolUuid, observationCounter, dt, session);
@@ -618,7 +621,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		
 		//try processing track features
 		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
-		processedFeatures.addAll(trackProcessor.processJson(features, session));
+		processedFeatures.addAll(trackProcessor.processJson(features, session, locale));
 		modifiedPatrols.addAll(trackProcessor.getModifiedPatrols());
 		processTrackWarnings(trackProcessor.getWarnings());
 		
@@ -810,7 +813,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		Patrol p = new Patrol();
 		p.setConservationArea(ca);
 		String defaultValues = (String)sighting.get(CtJsonUtil.JsonKey.DEFAULT_METADATA_VALUES.key);
-		JsonPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
+		JsonPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session, this.locale);
 		warnings.addAll(ct.getWarnings());
 		
 		String startDate = (String)sighting.get(MetadataFieldValue.START_DATE_METADATA_KEY);		
@@ -1014,12 +1017,12 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		if (newPatrols.isEmpty() && modifiedPatrols.isEmpty()) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newPatrols.isEmpty()){
-			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(), newPatrols.size()));
+			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(l), newPatrols.size()));
 			sb.append(" ("); //$NON-NLS-1$
 			for(Patrol p : newPatrols){
 				sb.append(p.getId());
@@ -1031,7 +1034,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		HashSet<Patrol> tmp = new HashSet<Patrol>(modifiedPatrols);
 		tmp.removeAll(newPatrols);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(), tmp.size()));
+			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(l), tmp.size()));
 			sb.append(" ("); //$NON-NLS-1$
 			for(Patrol p : tmp){
 				sb.append(p.getId());

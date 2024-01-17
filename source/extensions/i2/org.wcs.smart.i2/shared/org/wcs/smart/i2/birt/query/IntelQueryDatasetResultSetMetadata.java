@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
@@ -132,7 +133,11 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 		switch (columns.get(index-1).getDataType()) {
 		case BOOLEAN: return java.sql.Types.BOOLEAN;
 		case DATE: return java.sql.Types.DATE;
-		case GEOMETRY: return java.sql.Types.JAVA_OBJECT;
+		case POINT: return IGeometryColumn.Type.POINT.birtDataType;
+		case MULTILINESTRING: return IGeometryColumn.Type.MULTILINESTRING.birtDataType;
+		case MULTIPOLYGON: return IGeometryColumn.Type.MULTIPOLYGON.birtDataType;
+		case LINESTRING: return IGeometryColumn.Type.LINESTRING.birtDataType;
+		case POLYGON: return IGeometryColumn.Type.POLYGON.birtDataType;
 		case NUMERIC: return java.sql.Types.DOUBLE;
 		case STRING: return java.sql.Types.VARCHAR;
 		case TIME: return java.sql.Types.TIME;

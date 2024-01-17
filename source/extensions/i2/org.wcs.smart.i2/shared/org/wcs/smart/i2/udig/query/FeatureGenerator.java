@@ -37,9 +37,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.i2.model.IntelRecordSource;
-import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.IQueryColumn;
-import org.wcs.smart.i2.query.IQueryColumn.Type;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.util.UuidUtils;
@@ -69,10 +67,13 @@ public class FeatureGenerator {
 	 * @param columns the query columns in the query results
 	 * @return
 	 */
-	public static SimpleFeature toFeature(SimpleFeatureType ftype, IResultItem item, List<IQueryColumn> columns){
+	public static SimpleFeature toFeature(SimpleFeatureType ftype, IResultItem item, 
+			IQueryColumn geometryColumn,
+			List<IQueryColumn> columns){
+		
 		List<Object> data = new ArrayList<Object>();
-		data.add(((IGeometryResultItem)item).getGeometry());
-
+		data.add(geometryColumn.getValue(item));
+				
 		if (item instanceof IntelObservationResultItem){
 			IntelObservationResultItem ii = (IntelObservationResultItem)item;
 			
@@ -89,7 +90,7 @@ public class FeatureGenerator {
 		
 		int i = 0;
 		for (IQueryColumn c : columns){
-			if (c.getDataType() != Type.GEOMETRY){
+			if (c != geometryColumn) {
 				if (c.isVisible()){
 					data.add(convertValue(item, c, ftype.getDescriptor(i++)));
 				}
@@ -138,7 +139,9 @@ public class FeatureGenerator {
 	 * @return
 	 * @throws SchemaException
 	 */
-	public static SimpleFeatureType generateFeatureType(String geometryType, Name typeName, List<IQueryColumn> columns, boolean forShape) throws SchemaException{
+	public static SimpleFeatureType generateFeatureType(String typeName,
+			IQueryColumn geometryColumn,
+			List<IQueryColumn> columns, boolean forShape) throws SchemaException{
 
 		Set<String> usedNames = new HashSet<>();
 		usedNames.add("name");//not a valid column name //$NON-NLS-1$
@@ -146,10 +149,10 @@ public class FeatureGenerator {
 		usedNames.add("fid"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:" + geometryType + ":srid=4326,"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("the_geom:" + geometryColumn.getDataType().getFeatureType() + ":srid=4326,"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("fid:String,"); //$NON-NLS-1$
 		for (IQueryColumn c : columns){
-			if (c.getDataType() != Type.GEOMETRY && c.isVisible()){
+			if (c != geometryColumn && c.isVisible()){
 				String name = generateFieldName(c.getColumnName(), usedNames, forShape);
 				usedNames.add(name.toLowerCase());
 				sb.append(name);
@@ -159,11 +162,11 @@ public class FeatureGenerator {
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
-		return DataUtilities.createType(typeName.getNamespaceURI(), typeName.getLocalPart(), sb.toString());
+		return DataUtilities.createType(typeName, sb.toString());
 	}
 	
-	public static SimpleFeatureType generateFeatureType(String geometryType, Name typeName, List<IQueryColumn> columns) throws SchemaException{
-		return generateFeatureType(geometryType, typeName, columns, false);
+	public static SimpleFeatureType generateFeatureType(String typeName, IQueryColumn geometryColumn, List<IQueryColumn> columns) throws SchemaException{
+		return generateFeatureType(typeName, geometryColumn, columns, false);
 	}
 	
 	

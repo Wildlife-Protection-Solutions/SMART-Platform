@@ -46,12 +46,13 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
- * Intelligence record wizard page.  A wizard page with no options. 
- * 
+ * Intelligence record wizard page.  A wizard page with no options.
+ *  
  * @author Emily
  *
  */
 public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
+
 
 	public IntelRecordDetailsWizardPage(String pageName) {
 		super(pageName);

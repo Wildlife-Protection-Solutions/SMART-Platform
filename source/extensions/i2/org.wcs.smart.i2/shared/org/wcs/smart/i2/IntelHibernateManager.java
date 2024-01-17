@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -94,7 +95,7 @@ public class IntelHibernateManager {
 		case NUMERIC:
 			return java.sql.Types.DOUBLE;
 		case POSITION:
-			return java.sql.Types.VARCHAR;
+			return IGeometryColumn.Type.POINT.birtDataType;
 		case LIST:
 		case EMPLOYEE:
 		case TEXT:

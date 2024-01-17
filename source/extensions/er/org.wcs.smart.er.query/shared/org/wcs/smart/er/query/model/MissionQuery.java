@@ -51,7 +51,8 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "surveymission"; //$NON-NLS-1$
-	
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.er.query.map.mission"; //$NON-NLS-1$
+
 	protected String surveyDesignKey;
 	
 	

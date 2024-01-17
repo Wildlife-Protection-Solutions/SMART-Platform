@@ -349,7 +349,7 @@ public abstract class AbstractSmartImporter {
 						ParseResult results = CtJsonUtil.parseDefaultAttributeValues((JSONObject)(new JSONParser()).parse(defaultData), session);
 						for (JsonImportWarning x : results.getWarnings()){
 							//TODO:
-							addWarning(x.getMessage());
+							addWarning(x.getMessage(Locale.getDefault()));
 						}
 						for (WaypointObservationAttribute aa : results.getAttributes()){
 							aa.setObservation(obs);

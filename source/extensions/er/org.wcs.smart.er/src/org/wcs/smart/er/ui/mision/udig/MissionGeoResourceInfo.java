@@ -34,7 +34,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.er.internal.Messages;
 
 /**
  * Mission geo resource info 

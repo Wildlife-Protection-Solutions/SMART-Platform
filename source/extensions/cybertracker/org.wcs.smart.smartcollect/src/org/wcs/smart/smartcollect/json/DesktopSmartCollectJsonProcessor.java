@@ -24,6 +24,7 @@ package org.wcs.smart.smartcollect.json;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,7 +108,7 @@ public class DesktopSmartCollectJsonProcessor extends SmartCollectJsonProcessor 
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						List<String> all = warnings.stream().map(e->e.getMessage()).toList();
+						List<String> all = warnings.stream().map(e->e.getMessage(Locale.getDefault())).toList();
 						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
 								Messages.SmartCollectDataProcessor_WarningsTitle, 
 								Messages.SmartCollectDataProcessor_WarningsMessage,

@@ -25,9 +25,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -70,6 +72,7 @@ public class PatrolCyberTrackerPlugIn extends AbstractUIPlugin {
 			}
 		};
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, 1);
+		SmartContext.INSTANCE.setClass(IPatrolCyberTrackerLabelProvider.class, new PatrolCyberTrackerLabelProvider());
 	}
 
 	/*

@@ -39,7 +39,6 @@ import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
-import org.wcs.smart.er.query.map.style.MissionQueryDefaultStyle;
 import org.wcs.smart.er.query.model.column.TrackGeometryQueryColumn;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
@@ -66,7 +65,7 @@ public class MissionQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put( TrackGeometryQueryColumn.KEY, MissionQueryDefaultStyle.KEY);
+		styleMappings.put( TrackGeometryQueryColumn.KEY, MissionQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	public MissionQueryType() {

@@ -53,13 +53,30 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 	public IntelEntityFeatureSource(ContentEntry entry, UUID entityUuid) {
 		super(entry, null);
 		this.entityUuid = entityUuid;
-		geomType = LocationLayerType.valueOf(entry.getName().getLocalPart());
+		
+		if (IntelEntityDataSource.isGeometryAttribute(entry.getTypeName()) ||
+				IntelEntityDataSource.isObservationGeometryAttribute(entry.getTypeName()) ) {
+			geomType = null;
+		}else {
+			geomType = LocationLayerType.valueOf(entry.getName().getLocalPart());
+		}
 	}
 
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
 		try {
-			return DataUtilities.createType(entry.getTypeName(), getFeatureSchemaString(geomType));
+			if (IntelEntityDataSource.isLineAttribute(entry.getTypeName())) {
+				return createObservationLineStringSchema(true, entry.getTypeName());
+			} else if (IntelEntityDataSource.isPolgyonAttribute(entry.getTypeName())) {
+				return createObservationPolygonSchema(true, entry.getTypeName());
+			}else if (IntelEntityDataSource.isObservationLineAttribute(entry.getTypeName())) {
+					return createObservationLineStringSchema(false, entry.getTypeName());
+			} else if (IntelEntityDataSource.isObservationPolgyonAttribute(entry.getTypeName())) {
+				return createObservationPolygonSchema(false, entry.getTypeName());				
+			}else if (geomType != null) {
+				return DataUtilities.createType(entry.getTypeName(), getFeatureSchemaString(geomType));
+			}
+			return null;
 		} catch (SchemaException e) {
 			throw new IOException(e);
 		}
@@ -86,29 +103,74 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 			}catch (Exception ex){
 				throw new IOException (ex);
 			}
-		}
+		}else if (geomType != null) {
 		
-		IntelEntityFeatureReader[] reader = new IntelEntityFeatureReader[1];
-		
-		
-		query.getFilter().accept(new AbstractFilterVisitor() {
-			@Override
-			public Object visit(PropertyIsBetween filter, Object object) {
-				PropertyIsBetween betweenFilter = (PropertyIsBetween) filter;
-				if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){ //$NON-NLS-1$
-					LocalDateTime startDate = (LocalDateTime) betweenFilter.getLowerBoundary().evaluate(null);
-					LocalDateTime endDate = (LocalDateTime) betweenFilter.getUpperBoundary().evaluate(null);
-					if (startDate != null && endDate != null){
-						reader[0] =  new IntelEntityFeatureReader(entityUuid, getSchema(), new LocalDateTime[]{startDate, endDate});			
-					}
-				}
-				return null;
-			}
+			IntelEntityFeatureReader[] reader = new IntelEntityFeatureReader[1];
 			
-		}, null);
-		
-		if (reader[0] != null) return reader[0];
-		return new IntelEntityFeatureReader(entityUuid, getSchema());
+			
+			query.getFilter().accept(new AbstractFilterVisitor() {
+				@Override
+				public Object visit(PropertyIsBetween filter, Object object) {
+					PropertyIsBetween betweenFilter = (PropertyIsBetween) filter;
+					if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){ //$NON-NLS-1$
+						LocalDateTime startDate = (LocalDateTime) betweenFilter.getLowerBoundary().evaluate(null);
+						LocalDateTime endDate = (LocalDateTime) betweenFilter.getUpperBoundary().evaluate(null);
+						if (startDate != null && endDate != null){
+							reader[0] =  new IntelEntityFeatureReader(entityUuid, getSchema(), new LocalDateTime[]{startDate, endDate});			
+						}
+					}
+					return null;
+				}
+				
+			}, null);
+			
+			if (reader[0] != null) return reader[0];
+			return new IntelEntityFeatureReader(entityUuid, getSchema());
+		}else if (IntelEntityDataSource.isGeometryAttribute(entry.getTypeName())) {
+			IntelEntityRecordObservationAttributeFeatureReader[] reader = new IntelEntityRecordObservationAttributeFeatureReader[1];
+			
+			query.getFilter().accept(new AbstractFilterVisitor() {
+				@Override
+				public Object visit(PropertyIsBetween filter, Object object) {
+					PropertyIsBetween betweenFilter = (PropertyIsBetween) filter;
+					if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){ //$NON-NLS-1$
+						LocalDateTime startDate = (LocalDateTime) betweenFilter.getLowerBoundary().evaluate(null);
+						LocalDateTime endDate = (LocalDateTime) betweenFilter.getUpperBoundary().evaluate(null);
+						if (startDate != null && endDate != null){
+							reader[0] =  new IntelEntityRecordObservationAttributeFeatureReader(entityUuid, entry.getTypeName(), getSchema(), new LocalDateTime[]{startDate, endDate});			
+						}
+					}
+					return null;
+				}
+				
+			}, null);
+			
+			if (reader[0] != null) return reader[0];
+			return new IntelEntityRecordObservationAttributeFeatureReader(entityUuid, entry.getTypeName(), getSchema());
+			
+		}else if (IntelEntityDataSource.isObservationGeometryAttribute(entry.getTypeName())) {
+			IntelEntityObservationAttributeFeatureReader[] reader = new IntelEntityObservationAttributeFeatureReader[1];
+			
+			query.getFilter().accept(new AbstractFilterVisitor() {
+				@Override
+				public Object visit(PropertyIsBetween filter, Object object) {
+					PropertyIsBetween betweenFilter = (PropertyIsBetween) filter;
+					if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){ //$NON-NLS-1$
+						LocalDateTime startDate = (LocalDateTime) betweenFilter.getLowerBoundary().evaluate(null);
+						LocalDateTime endDate = (LocalDateTime) betweenFilter.getUpperBoundary().evaluate(null);
+						if (startDate != null && endDate != null){
+							reader[0] =  new IntelEntityObservationAttributeFeatureReader(entityUuid, entry.getTypeName(), getSchema(), new LocalDateTime[]{startDate, endDate});			
+						}
+					}
+					return null;
+				}
+				
+			}, null);
+			
+			if (reader[0] != null) return reader[0];
+			return new IntelEntityObservationAttributeFeatureReader(entityUuid, entry.getTypeName(), getSchema());
+		}
+		return null;
 	}
 
 	
@@ -135,5 +197,58 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 				return sb.toString();
 		}
 		return null;
+	}
+	
+	public static SimpleFeatureType createObservationPolygonSchema(boolean isRecordObservation, String typeName) throws SchemaException{
+		StringBuilder sb = new StringBuilder();
+		sb.append("the_geom:MultiPolygon:srid=4326,"); //$NON-NLS-1$
+		sb.append("uuid:String,"); //$NON-NLS-1$
+		sb.append("obs_uuid:String,"); //$NON-NLS-1$
+		if (isRecordObservation) {
+			sb.append("location_uuid:String,"); //$NON-NLS-1$
+		}else {
+			sb.append("wp_uuid:String,"); //$NON-NLS-1$
+		}
+		sb.append("attribute:String,"); //$NON-NLS-1$
+		sb.append("attribute_key:String,"); //$NON-NLS-1$
+		sb.append("perimeter_km:Double,"); //$NON-NLS-1$
+		sb.append("area_km2:Double,"); //$NON-NLS-1$
+		sb.append("source:String,"); //$NON-NLS-1$
+		if (isRecordObservation) {
+			sb.append("location_id:String,"); //$NON-NLS-1$
+		}else {
+			sb.append("wp_id:String,"); //$NON-NLS-1$
+		}
+		sb.append("date:java.time.LocalDateTime,"); //$NON-NLS-1$
+		sb.append("category:String,"); //$NON-NLS-1$
+		sb.append("category_hkey:String"); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType(typeName, sb.toString());
+		return type;
+	}
+	
+	public static SimpleFeatureType createObservationLineStringSchema(boolean isRecordObservation, String typeName) throws SchemaException{
+		StringBuilder sb = new StringBuilder();
+		sb.append("the_geom:MultiLineString:srid=4326,"); //$NON-NLS-1$
+		sb.append("uuid:String,"); //$NON-NLS-1$
+		sb.append("obs_uuid:String,"); //$NON-NLS-1$
+		if (isRecordObservation) {
+			sb.append("location_uuid:String,"); //$NON-NLS-1$
+		}else {
+			sb.append("wp_uuid:String,"); //$NON-NLS-1$
+		}
+		sb.append("attribute:String,"); //$NON-NLS-1$
+		sb.append("attribute_key:String,"); //$NON-NLS-1$
+		sb.append("perimeter_km:Double,"); //$NON-NLS-1$
+		sb.append("source:String,"); //$NON-NLS-1$
+		if (isRecordObservation) {
+			sb.append("location_id:String,"); //$NON-NLS-1$
+		}else {
+			sb.append("wp_id:String,"); //$NON-NLS-1$
+		}
+		sb.append("date:java.time.LocalDateTime,"); //$NON-NLS-1$
+		sb.append("category:String,"); //$NON-NLS-1$
+		sb.append("category_hkey:String"); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType(typeName, sb.toString());
+		return type;
 	}
 }

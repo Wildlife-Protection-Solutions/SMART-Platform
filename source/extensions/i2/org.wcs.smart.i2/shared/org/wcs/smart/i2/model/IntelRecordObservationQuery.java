@@ -48,7 +48,9 @@ public class IntelRecordObservationQuery extends AbstractIntelQuery {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "i2_obs_query"; //$NON-NLS-1$
-	
+	public static final String POINT_DEFAULT_STYLE_KEY = "org.wcs.smart.i2.query.map.record.point"; //$NON-NLS-1$
+	public static final String POLYGON_DEFAULT_STYLE_KEY  = "org.wcs.smart.i2.query.map.record.polygon"; //$NON-NLS-1$
+
 	private String style;
 	private String columnFilter;
 

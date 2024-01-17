@@ -39,7 +39,6 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.map.SurveyQueryDataSource;
 import org.wcs.smart.er.query.map.SurveyQueryService;
-import org.wcs.smart.er.query.map.style.MissionWaypointQueryDefaultStyle;
 import org.wcs.smart.er.query.map.style.MissionWaypointTrackQueryDefaultStyle;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
@@ -67,7 +66,7 @@ public class SurveyWaypointQueryType implements IMappableQueryType {
 
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put( WaypointGeometryQueryColumn.KEY, MissionWaypointQueryDefaultStyle.KEY);
+		styleMappings.put( WaypointGeometryQueryColumn.KEY, SurveyWaypointQuery.DEFAULT_STYLE_KEY);
 		styleMappings.put( SurveyQueryDataSource.MISSION_TRACK.getLocalPart(), MissionWaypointTrackQueryDefaultStyle.KEY);
 	}
 	

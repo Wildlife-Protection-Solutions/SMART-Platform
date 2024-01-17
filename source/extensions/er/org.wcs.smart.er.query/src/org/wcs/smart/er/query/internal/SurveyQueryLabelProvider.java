@@ -30,6 +30,7 @@ import org.wcs.smart.er.query.filter.MissionTrackDateField;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
+import org.wcs.smart.er.query.model.column.TrackGeometryQueryColumn;
 
 /**
  * Survey label provider implementation.
@@ -86,6 +87,8 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item instanceof MissionEndDateField) return Messages.MissionEndDateField_Name;
 		if (item instanceof MissionStartDateField) return Messages.MissionStartDateField_Name;
 		if (item instanceof MissionTrackDateField) return Messages.MissionTrackDateField_Name;
+		
+		if (item == TrackGeometryQueryColumn.KEY) return "Track";
 		return null;
 	}
 

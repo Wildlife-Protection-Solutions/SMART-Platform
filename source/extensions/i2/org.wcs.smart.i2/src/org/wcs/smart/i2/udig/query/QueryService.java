@@ -37,6 +37,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 
 
@@ -164,9 +165,15 @@ public class QueryService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					ArrayList<QueryGeoResource> temp = new ArrayList<QueryGeoResource>();
-					temp.add(new QueryGeoResource(this, QueryDataSource.POINT_TYPE.getLocalPart()));
-					temp.add(new QueryGeoResource(this, QueryDataSource.POLYGON_TYPE.getLocalPart()));
+					
+					QueryDataSource ds = (QueryDataSource) getDataStore(monitor);
+					
+					ArrayList<QueryGeoResource> temp = new ArrayList<>();
+					for (Name n : ds.getNames()) {
+						String name = ds.getLayerName(n);
+						QueryGeoResource r = new QueryGeoResource(this, n.getLocalPart(), name);
+						temp.add(r);
+					}
 					this.members = temp;
 				}
 			}

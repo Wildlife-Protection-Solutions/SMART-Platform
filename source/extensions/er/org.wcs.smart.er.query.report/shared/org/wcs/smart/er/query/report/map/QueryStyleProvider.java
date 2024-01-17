@@ -34,6 +34,7 @@ import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.ParsedQuery;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
@@ -49,8 +50,6 @@ import org.wcs.smart.report.birt.map.AbstractQueryStyleProvider;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.udig.style.StyleManager;
 
-import jakarta.persistence.Tuple;
-
 /**
  * Query style provider for survey queries.
  * 
@@ -60,11 +59,12 @@ import jakarta.persistence.Tuple;
 public class QueryStyleProvider extends AbstractQueryStyleProvider{
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, ConservationArea ca, Session s) {
+		
 		if (extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)){
 		
 			ParsedQuery pquery = AbstractSmartBirtQuery.parseQueryText(queryText);
-			return getStyle(pquery.getType(), pquery.getUuid(), info, s);
+			return getStyle(pquery.getType(), pquery.getUuid(), info, ca, s);
 			
 		}else if (extensionId.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 			Style style = null;
@@ -84,39 +84,59 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 	}
 	
 	@Override
-	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo info, Session s) {
+	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo info, ConservationArea ca, Session s) {
 		if (queryUuid == null) return null;
+		
 		String tableName = null;
+		String defaultStyle = null;
 		
 		if (queryType.equals(SurveyObservationQuery.KEY)){
-			tableName = SurveyObservationQuery.class.getSimpleName(); 
+			tableName = SurveyObservationQuery.class.getSimpleName();
+			defaultStyle = SurveyObservationQuery.DEFAULT_STYLE_KEY;
 		}else if (queryType.equals(SurveyWaypointQuery.KEY)){
-			tableName = SurveyWaypointQuery.class.getSimpleName(); 
+			tableName = SurveyWaypointQuery.class.getSimpleName();
+			defaultStyle = SurveyWaypointQuery.DEFAULT_STYLE_KEY;
 		}else if (queryType.equals(MissionQuery.KEY)){	
-			tableName = MissionQuery.class.getSimpleName(); 
-		}else if (queryType.equals(MissionTrackQuery.KEY)){	
-			tableName = MissionTrackQuery.class.getSimpleName(); 
+			tableName = MissionQuery.class.getSimpleName();
+			defaultStyle = MissionQuery.DEFAULT_STYLE_KEY;
+		}else if (queryType.equals(MissionTrackQuery.KEY)){
+			tableName = MissionTrackQuery.class.getSimpleName();
+			defaultStyle = MissionTrackQuery.DEFAULT_STYLE_KEY;
 		}else if (queryType.equals(SurveyGriddedQuery.KEY)){	
 			tableName = SurveyGriddedQuery.class.getSimpleName(); 
+			defaultStyle = SurveyGriddedQuery.DEFAULT_STYLE_KEY;
 		}else{
 			return null;
 		}
-		
-		Query<Tuple> query = s.createQuery("SELECT style, conservationArea FROM " + tableName + " WHERE uuid = :uuid", Tuple.class); //$NON-NLS-1$ //$NON-NLS-2$
+		//attribute style
+		StyleBlackboard sb = super.findDataModelAttributeStyle(s, ca, info.getGeometryColumnId());
+		if (sb != null) return sb;
+				
+		//query style
+		Query<String> query = s.createQuery("SELECT style  FROM " + tableName + " WHERE uuid = :uuid", String.class); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
-		List<Tuple> results = query.list();
-		if (results.size() == 0 || results.get(0) == null) return null;
-		
-		String stylemap = (String) results.get(0).get(0);
-		ConservationArea ca = (ConservationArea) results.get(0).get(1);
-		
-		try {
-			StyleBlackboard x = StyleManager.INSTANCE.fromStringMap(stylemap).get(info.getGeometryColumnId());
-			if (x != null) return x;
-		} catch (Exception e) {
-			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing SMART Query style.", e); //$NON-NLS-1$
+		List<String> results = query.list();
+				
+		if (results.size() > 0 && results.get(0) != null) {
+			String stylemap = (String) results.get(0);
+				
+			try {
+				StyleBlackboard x = StyleManager.INSTANCE.fromStringMap(stylemap).get(info.getGeometryColumnId());
+				if (x != null) return x;
+			} catch (Exception e) {
+				Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing SMART Query style.", e); //$NON-NLS-1$
+			}
+		}else {
+			//default style
+			SmartStyle style = StyleManager.INSTANCE.getMapLayerDefaultStyle(ca, defaultStyle, s);
+			if (style != null) {
+				try {
+					return StyleManager.INSTANCE.fromString(style.getStyleString());
+				} catch (Exception e) {
+					Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing default SMART Query style.", e); //$NON-NLS-1$
+				}
+			}
 		}
-		
-		return super.findDataModelAttributeStyle(s, ca, info.getGeometryColumnId());
+		return null;
 	}
 }

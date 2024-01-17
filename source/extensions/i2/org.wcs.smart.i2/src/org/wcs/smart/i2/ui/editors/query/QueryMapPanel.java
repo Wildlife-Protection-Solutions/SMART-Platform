@@ -45,8 +45,8 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.map.style.RecordObservationPointDefaultStyle;
 import org.wcs.smart.i2.map.style.RecordObservationPolygonDefaultStyle;
+import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
-import org.wcs.smart.i2.udig.query.QueryDataSource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.ui.editors.MapComposite;
 import org.wcs.smart.udig.style.StyleManager;
@@ -69,14 +69,15 @@ public class QueryMapPanel extends MapComposite {
 	
 	private static HashMap<String,String> defaultStyles = new HashMap<>();
 	static {
-		defaultStyles.put(QueryDataSource.POINT_TYPE.getLocalPart(), RecordObservationPointDefaultStyle.KEY);
-		defaultStyles.put(QueryDataSource.POLYGON_TYPE.getLocalPart(), RecordObservationPolygonDefaultStyle.KEY);
+		defaultStyles.put(FixedQueryColumn.Column.LOC_POINT.key, RecordObservationPointDefaultStyle.KEY);
+		defaultStyles.put(FixedQueryColumn.Column.LOC_POLYGON.key, RecordObservationPolygonDefaultStyle.KEY);
 	}
 	
 	
 	public void updateQueryLayers(IPagedQueryResultSet results){
 		if (isDisposed()) return;
 		if (getMap() == null) return;
+		
 		
 		int layerIndex = getMap().getLayersInternal().size();
 		
@@ -104,15 +105,17 @@ public class QueryMapPanel extends MapComposite {
 						mapLayers = getLayers();
 						
 						String style = ((IntelRecordObservationQueryEditor)editor).getQuery().getStyle();
-						Map<String, StyleBlackboard> styles = null;;
+						Map<String, StyleBlackboard> styles = null;
 						
 						if (style != null){
 							styles = StyleManager.INSTANCE.fromStringMap(style);
 						}
 						for (Layer l : mapLayers){
+							
 							if (styles != null){
 								StyleBlackboard sb = styles.get(l.getGeoResource().getIdentifier().getRef());
 								if (sb != null) l.setStyleBlackboard(sb);
+								
 							}else {
 								try(Session session = HibernateManager.openSession()){
 									StyleManager.INSTANCE.applyDefaultStyleToMapLayer(

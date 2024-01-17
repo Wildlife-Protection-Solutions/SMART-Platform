@@ -29,8 +29,12 @@ import java.util.logging.Logger;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -53,7 +57,8 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 		DATE("location:date",  java.sql.Types.TIMESTAMP), //$NON-NLS-1$
 		SOURCELINK("location:sourcelink", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		OBSERVATION("location:observation", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		GEOM("location:geom", java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
+		POINT("location:point", IGeometryColumn.Type.POINT.birtDataType), //$NON-NLS-1$
+		POLYGON("location:polygon", IGeometryColumn.Type.POLYGON.birtDataType); //$NON-NLS-1$
 		
 		String id;
 		int type;
@@ -84,9 +89,12 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			if (this == DATE) return location.getLocation().getDateTime();
 			if (this == SOURCELINK) return location.getLocation().getRecord().getTitle();
 			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), location.getLocation().getObservations().size());
-			if (this == GEOM) {
+			if (this == POINT || this == POLYGON) {
 				try{
-					return location.getLocation().getGeometry();
+					Geometry g = location.getLocation().getGeometry();
+					if (this == POINT && g instanceof Point) return g;
+					if (this == POLYGON && g instanceof Polygon) return g;
+					return null;
 				}catch (ParseException e){
 					Logger.getLogger(EntityLocationDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
@@ -101,7 +109,7 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			if (this == DATE) return wp.getDateTime();
 			if (this == SOURCELINK) return wp.getSourceId();
 			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), wp.getAllObservations().size());
-			if (this == GEOM) {
+			if (this == POINT) {
 				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getX(), wp.getY()));
 			}
 			return null;

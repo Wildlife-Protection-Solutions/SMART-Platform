@@ -22,6 +22,8 @@
 package org.wcs.smart.cybertracker.json;
 
 import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.function.Function;
 
 /**
  * SMART Mobile processing warnings
@@ -58,7 +60,7 @@ public class JsonImportWarning {
 	}
 	
 	private Type type;
-	private String message;
+	private Function<Locale, String> message;
 	private Object[] data;
 	
 	public JsonImportWarning(Type type) {
@@ -70,16 +72,16 @@ public class JsonImportWarning {
 		this.data = data;
 	}
 	
-	public JsonImportWarning(String message, Object... data) {
+	public JsonImportWarning(Function<Locale, String> message, Object... data) {
 		this.data = data;
 		this.message = message;
 	}
 	
 	
-	public String getMessage() {
+	public String getMessage(Locale l) {
 		if (type == null) { 
-			if (data == null || data.length == 0) return message;
-			return MessageFormat.format(message, data);
+			if (data == null || data.length == 0) return message.apply(l);
+			return MessageFormat.format(message.apply(l), data);
 		}	
 		switch(type) {
 			case CATEGORY_NOT_FOUND: return MessageFormat.format("Category not found. Observation data will not be imported for this waypoint. (category uuid: {0})", data);

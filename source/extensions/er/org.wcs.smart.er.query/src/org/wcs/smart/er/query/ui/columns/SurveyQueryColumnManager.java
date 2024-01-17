@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -55,7 +56,6 @@ import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.model.GridQueryColumn;
-import org.wcs.smart.query.model.IGeometryColumn.Type;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
@@ -171,7 +171,7 @@ public class SurveyQueryColumnManager {
 			cols.add(q.clone());
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
-		cols.add(new WaypointGeometryQueryColumn());
+		cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 
@@ -232,7 +232,7 @@ public class SurveyQueryColumnManager {
 		}catch (Exception ex){
 			throw new IllegalStateException(ex);
 		}
-		cols.add(new WaypointGeometryQueryColumn());
+		cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
@@ -317,7 +317,7 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
 		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
-		cols.add(new TrackGeometryQueryColumn(Type.MULTILINESTRING));
+		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.MULTILINESTRING, Locale.getDefault()));
 
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
@@ -370,7 +370,7 @@ public class SurveyQueryColumnManager {
 		}
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		cols.add(new TrackGeometryQueryColumn(Type.LINESTRING));
+		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.LINESTRING, Locale.getDefault()));
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}

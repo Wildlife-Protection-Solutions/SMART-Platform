@@ -22,18 +22,14 @@
 package org.wcs.smart.asset.query.map.style;
 
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class AssetWaypointQueryDefaultStyle implements IMapLayerDefaultStyle {
 
-	public static final String KEY = "org.wcs.smart.asset.query.map.waypoint"; //$NON-NLS-1$
-
-	public AssetWaypointQueryDefaultStyle() {
-	}
-
 	@Override
 	public String getKey() {
-		return KEY;
+		return AssetWaypointQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

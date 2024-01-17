@@ -34,6 +34,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.styling.Style;
 import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
@@ -41,7 +42,9 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.AttributeGeometryStyle;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.util.UuidUtils;
@@ -58,7 +61,8 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 	
 	private URL url = null;
 	private URL fixedURL = null;
-	private String dataType;
+	private String typeName;
+	private String name;
 	
 	/**
 	 * Creates a new query georesource.
@@ -66,15 +70,16 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 	 * @param service the query service
 	 * @param dataType data type
 	 */
-	public QueryGeoResource(QueryService service, String dataType){
+	public QueryGeoResource(QueryService service, String typeName, String name){
 		this.service = service;
-		this.dataType = dataType;
+		this.typeName = typeName;
+		this.name = name;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
 			if (serviceIdentifer != null){
-				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
-				String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString((UUID)service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY)) + "#" + dataType; //$NON-NLS-1$ //$NON-NLS-2$
+				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+				String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString((UUID)service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY)) + "#" + typeName; //$NON-NLS-1$ //$NON-NLS-2$
 				this.fixedURL = new URL(null, part, CorePlugin.RELAXED_HANDLER);
 			}
 		 } catch (MalformedURLException e) {
@@ -103,12 +108,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 	public ID getFixedID(){
 		return new ID(fixedURL);
 	}
-	/**
-	 * @return the query data type
-	 */
-	public String getDataType(){
-		return this.dataType;
-	}
+
 	
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
@@ -132,7 +132,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
-		return new QueryGeoResourceInfo(this, monitor);
+		return new QueryGeoResourceInfo(this, name, monitor);
 	}
 
 	/**
@@ -159,6 +159,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 				|| adaptee.isAssignableFrom(SimpleFeatureStore.class)
 	            || adaptee.isAssignableFrom(SimpleFeatureSource.class)
 	            || adaptee.isAssignableFrom(IPagedQueryResultSet.class)
+	            || adaptee.isAssignableFrom(Style.class)
 				|| super.canResolve(adaptee);
 	}
 
@@ -185,7 +186,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 			DataStore ds = ((QueryService) service).getDataStore(monitor);
 			if (ds != null) {
 				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
-						.getFeatureSource(dataType);
+						.getFeatureSource(this.typeName);
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
@@ -200,7 +201,15 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 			if (fs != null && fs instanceof FeatureStore) {
 				return adaptee.cast(fs);
 			}
-		}		
+		}	
+		
+		if (adaptee.isAssignableFrom(Style.class)) {
+			QueryDataSource ds = (QueryDataSource)((QueryService) service).getDataStore(monitor);
+			if (ds.findQueryColumn(this.typeName) instanceof DataModelColumn dc) {
+				return adaptee.cast(new AttributeGeometryStyle(dc.getAttributeType(), dc.getFormatString()).toStyle());
+			}
+		}
+		
 		return super.resolve(adaptee, monitor);
 	}
 

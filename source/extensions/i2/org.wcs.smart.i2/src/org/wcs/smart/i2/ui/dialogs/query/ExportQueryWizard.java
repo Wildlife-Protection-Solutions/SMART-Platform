@@ -24,11 +24,14 @@ package org.wcs.smart.i2.ui.dialogs.query;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -38,13 +41,17 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.export.IQueryExporter;
+import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
 
 /**
  * Export query wizard.
@@ -61,9 +68,12 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	
 	private QueryFormatPage page1;
 	private QueryFormatOptionPage page2;
+	private ExportQueryGeometryColumnPage page2a;
 	
 	private List<Projection> supportedProjections = null;
 	private Projection defaultProjection = null;
+	
+	private List<IQueryColumn> queryColumns = null;
 	
 	public ExportQueryWizard(AbstractIntelQuery query, IQueryResult results) {
 		this.query = query;
@@ -75,10 +85,25 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			supportedProjections = HibernateManager.getCaProjectionList(s);
 			defaultProjection = HibernateManager.getCurrentViewProjection(s);
 		}
+		if (results instanceof IPagedQueryResultSet) {
+			queryColumns = ((IPagedQueryResultSet)results).getQueryColumns();
+			
+		}
 		super.setNeedsProgressMonitor(true);
 	}
 
-
+	public List<IQueryColumn> getGeometryColumns(IQueryExporter exporter){
+		if (queryColumns == null) return null;
+		if (exporter == null) return null;
+		
+		List<IQueryColumn> geomColumns = queryColumns.stream()
+				.filter(e-> e.getDataType().isGeometry())
+				.collect(Collectors.toList());
+		geomColumns .sort((a,b)->Collator.getInstance().compare(a.getColumnName(), b.getColumnName()));
+		
+		return geomColumns;
+	}
+	
     /*
      * (non-Javadoc) Method declared on IWizard.
      */
@@ -109,6 +134,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 		page2 = new QueryFormatOptionPage();
 		super.addPage(page2);
+		
+		page2a = new ExportQueryGeometryColumnPage();
+		super.addPage(page2a);
 
 	}
 	/**
@@ -127,6 +155,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		return this.query;
 	}
 	
+	public List<IQueryColumn> getGeometryColumnsForExport(){
+		if (this.queryColumns == null) return null;
+		if (!getQueryExporter().supportsOption(ExportOption.GEOMETRY_COLUMN)) return null;
+		if (this.getGeometryColumns(getQueryExporter()).size() == 1) return  Collections.singletonList(this.getGeometryColumns(getQueryExporter()).get(0));
+		return page2a.getGeometryColumns();	
+	}
+	
 	/**
 	 * Runs the export process
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
@@ -141,27 +176,61 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			if (exporter == null){
 				throw new Exception("No exporter selected"); //$NON-NLS-1$
 			}
-			final HashMap<IQueryExporter.ExportOption, Object> options = page2.getOptions();
+			
+			HashMap<IQueryExporter.ExportOption, Object> options = page2.getOptions();
+			if (options == null) options = new HashMap<>();
 			final Path output = page2.getFile();
-			getDialogSettings().put(LAST_DIR_KEY, output.getParent().toString());
-			if (Files.exists(output)){
-				if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMsg, output.toString()))){
-					return false;
+			
+			if (getGeometryColumnsForExport() == null || getGeometryColumnsForExport().size() == 1) {
+				getDialogSettings().put(LAST_DIR_KEY, output.getParent().toString());
+			
+				if (Files.exists(output)){
+					if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMsg, output.toString()))){
+						return false;
+					}
+				}else if (!Files.exists(output.getParent())){
+					if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_CreateDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_CreateDialogMessage, output.getParent().toString()))){
+						return false;
+					}
+					Files.createDirectories(output.getParent());
 				}
-			}else if (!Files.exists(output.getParent())){
-				if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_CreateDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_CreateDialogMessage, output.getParent().toString()))){
-					return false;
+			}else if (getGeometryColumnsForExport() != null) {
+				getDialogSettings().put(LAST_DIR_KEY, output.toString());
+				
+				if (!Files.exists(output)){
+					if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_CreateDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_CreateDialogMessage, output.getParent().toString()))){
+						return false;
+					}
+					Files.createDirectories(output);
 				}
-				Files.createDirectories(output.getParent());
 			}
-			getContainer().run(false, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					Collection<Path> results = exportQuery(monitor, output, exporter, options);
-					if (results != null) exportFiles.addAll(results);
-				}
-			});
+			final HashMap<IQueryExporter.ExportOption, Object> foptions = options;
+
+				getContainer().run(false, true, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor)
+							throws InvocationTargetException, InterruptedException {
+						if (getGeometryColumnsForExport() == null) {
+							Collection<Path> results = exportQuery(monitor, output, exporter, foptions);
+							if (results != null) exportFiles.addAll(results);
+						}else {
+							for (IQueryColumn qc : getGeometryColumnsForExport()) {
+								foptions.put(IQueryExporter.ExportOption.GEOMETRY_COLUMN, qc);
+								String name = URLUtils.cleanFilename(query.getName() + "_" + qc.getColumnName()); //$NON-NLS-1$
+								name += "." + exporter.getExtension(); //$NON-NLS-1$
+								Path output2 = output.resolve(name);
+								if(Files.exists(output2)) {
+									if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMsg, output2.toString()))){
+										continue;
+									}
+								}
+								Collection<Path> results = exportQuery(monitor, output2, exporter, foptions);
+								if (results != null) exportFiles.addAll(results);
+								
+							}
+						}
+					}
+				});
 		} catch (Exception ex) {
 			displayError(ex);
 			return false;
@@ -206,6 +275,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		if (event.getTargetPage() == page2){
 			page2.initValues();
 			page2.setPageComplete(true);
+		}else if (event.getTargetPage() == page2a){
+			page2a.initValues();				
 		}
 	}
 

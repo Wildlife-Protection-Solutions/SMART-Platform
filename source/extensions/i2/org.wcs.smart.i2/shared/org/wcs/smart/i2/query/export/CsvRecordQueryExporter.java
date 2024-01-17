@@ -49,7 +49,6 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
-import org.wcs.smart.i2.query.IQueryColumn.Type;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
@@ -106,7 +105,7 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 			
 			List<String> data = new ArrayList<>();
 			for (int i = 0; i < dataSize; i ++){
-				if (results.getQueryColumns().get(i).getDataType() == Type.GEOMETRY) {
+				if (results.getQueryColumns().get(i).getDataType().isGeometry()) {
 					data.add( MessageFormat.format("{0} X", results.getQueryColumns().get(i).getColumnName() )); //$NON-NLS-1$
 					data.add( MessageFormat.format("{0} Y", results.getQueryColumns().get(i).getColumnName() )); //$NON-NLS-1$
 					data.add( MessageFormat.format("{0} Geometry", results.getQueryColumns().get(i).getColumnName() )); //$NON-NLS-1$
@@ -123,7 +122,7 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 				data.clear();
 				for (int i = 0; i < dataSize; i ++){
 					IQueryColumn cc = results.getQueryColumns().get(i);
-					if (cc.getDataType() == Type.GEOMETRY && transform != null){
+					if (cc.getDataType().isGeometry() && transform != null){
 						try{
 							Object v = results.getQueryColumns().get(i).getValue(item);
 							

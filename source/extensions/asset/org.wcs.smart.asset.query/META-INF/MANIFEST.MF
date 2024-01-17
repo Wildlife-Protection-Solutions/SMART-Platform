@@ -13,6 +13,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.wcs.smart.asset.query,
  org.wcs.smart.asset.query.engine,
+ org.wcs.smart.asset.query.map.style,
  org.wcs.smart.asset.query.model,
  org.wcs.smart.asset.query.model.observation,
  org.wcs.smart.asset.query.model.types,

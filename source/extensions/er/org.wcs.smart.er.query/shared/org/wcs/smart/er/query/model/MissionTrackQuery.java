@@ -53,7 +53,8 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 	protected String surveyDesignKey;
 	
 	public static final String KEY = "surveymissiontrack"; //$NON-NLS-1$
-	
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.er.query.map.missiontrack"; //$NON-NLS-1$
+
 
 	/**
 	 * 

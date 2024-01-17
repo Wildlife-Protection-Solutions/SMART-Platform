@@ -93,7 +93,7 @@ public class IntelRecordServiceExtension implements ServiceExtension {
 	 */
 	public static URL createURL(Map<String, Serializable> params){
 		Object x = params.get(RECORD_UUID_KEY);
-		if (x == null) return null;
+		if (x == null) x = "new" + UUID.randomUUID().toString();
 		if (x instanceof UUID uuid) x = uuid.toString();
 		if (!String.class.isAssignableFrom(x.getClass())) return null;
 		

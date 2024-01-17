@@ -27,6 +27,7 @@ import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetFormatOption;
 import org.wcs.smart.asset.query.model.AssetValueOption;
+import org.wcs.smart.asset.query.model.PointGeometryQueryColumn;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
@@ -86,6 +87,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 		
 		if (item instanceof AssetDeploymentDateField) return Messages.AssetQueryLabelProvider_DeploymentDateFilter;
 
+		if (item == PointGeometryQueryColumn.KEY) return "Waypoint";
+		
 		return null;
 	}
 

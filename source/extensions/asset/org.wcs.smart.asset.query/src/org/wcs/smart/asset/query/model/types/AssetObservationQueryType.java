@@ -34,7 +34,6 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.map.style.AssetObservationQueryDefaultStyle;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
@@ -73,7 +72,7 @@ public class AssetObservationQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(WaypointGeometryQueryColumn.KEY, AssetObservationQueryDefaultStyle.KEY);
+		styleMappings.put(WaypointGeometryQueryColumn.KEY, AssetObservationQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	/**

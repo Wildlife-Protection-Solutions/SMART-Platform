@@ -51,6 +51,7 @@ public class AssetObservationQuery extends ObservationQuery{
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "assetobservation"; //$NON-NLS-1$
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.asset.query.map.observation"; //$NON-NLS-1$
 
 	/**
 	 * 

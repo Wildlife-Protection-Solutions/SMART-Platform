@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,6 +52,7 @@ import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
+import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -95,16 +97,13 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 	protected HashMap<UUID, CtMissionLink> newMissionLinks;
 	
 	protected ConservationArea ca;
+	protected Locale locale;
 	
 	public enum StatusMessage{
 		ADDED, MODIFIED;
 		
-		public String getMessage() {
-			switch(this) {
-			case ADDED: return "Created {0} missions";
-			case MODIFIED: return "Modified {0} missions";
-			}
-			return "";
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(ISurveyCyberTrackerLabelProvider.class).getLabel(this, l);
 		}
 	}
 	
@@ -138,7 +137,8 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception{
+		this.locale = locale;
 		modifiedMissions = new HashSet<Mission>();
 		newMissionLinks = new HashMap<UUID, CtMissionLink>();
 		
@@ -586,7 +586,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		
 		//try processing track features
 		MissionJsonTrackProcessor trackProcessor = new MissionJsonTrackProcessor();
-		processedFeatures.addAll(trackProcessor.processJson(features, session));
+		processedFeatures.addAll(trackProcessor.processJson(features, session, locale));
 		modifiedMissions.addAll(trackProcessor.getModifiedMissions());
 		processTrackWarnings(trackProcessor.getWarnings());
 		
@@ -752,7 +752,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 				(JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
 		
 		if (ct.getSurveyDesign() == null) {
-			String msg = (new MissionJsonImportWarning(MissionJsonImportWarning.WarningType.SURVEY_DESIGN_NOTFOUND, ct.getSurveyDesignKey())).getMessage();
+			String msg = (new MissionJsonImportWarning(MissionJsonImportWarning.WarningType.SURVEY_DESIGN_NOTFOUND, ct.getSurveyDesignKey())).getMessage(locale);
 			throw new Exception(msg);
 		}
 		
@@ -963,26 +963,26 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		return md;
 	}
 	
-	public static final void addPointToTrack(MissionDay missionDay, SamplingUnit su, Coordinate pnt, LocalDateTime time) throws Exception{
+	public final void addPointToTrack(MissionDay missionDay, SamplingUnit su, Coordinate pnt, LocalDateTime time) throws Exception{
 		if (pnt == null) return;
 		if (missionDay == null) return;
 		if (missionDay.getTracks() == null) missionDay.setTracks(new ArrayList<MissionTrack>());
-		MissionJsonTrackProcessor.addSuPointToMisisonTracks(missionDay, su, pnt, time);
+		MissionJsonTrackProcessor.addSuPointToMisisonTracks(missionDay, su, pnt, time, locale);
 	}
 	
-	public static final void addPointToTrack(Mission mission, SamplingUnit su, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
+	public final void addPointToTrack(Mission mission, SamplingUnit su, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
 		if (pnt == null) return;
 		MissionDay pld = findDay(mission, time.toLocalDate(), true, null, session);
 		addPointToTrack(pld, su, pnt, time);
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		if (newMissions.isEmpty() && modifiedMissions.isEmpty()) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newMissions.isEmpty()){
-			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(), newMissions.size()));
+			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(l), newMissions.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Mission p : newMissions){
 				sb.append(p.getId());
@@ -994,7 +994,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		HashSet<Mission> tmp = new HashSet<Mission>(modifiedMissions);
 		tmp.removeAll(newMissions);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(), tmp.size()));
+			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(l), tmp.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Mission p : tmp){
 				sb.append(p.getId());

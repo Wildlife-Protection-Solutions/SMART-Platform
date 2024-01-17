@@ -38,7 +38,12 @@ public interface IQueryColumn {
 		TIME("java.time.LocalTime"), //$NON-NLS-1$
 		NUMERIC("Double"), //$NON-NLS-1$
 		BOOLEAN("Integer"), //$NON-NLS-1$
-		GEOMETRY("Geometry"); //$NON-NLS-1$
+		POINT("Point"), //$NON-NLS-1$
+		MULTILINESTRING("MultiLineString"), //$NON-NLS-1$
+		MULTIPOLYGON("MultiPolygon"), //$NON-NLS-1$
+		LINESTRING("LineString"), //$NON-NLS-1$
+		POLYGON("Polygon"); //$NON-NLS-1$
+		
 		
 		private String geoToolsType;
 		
@@ -48,6 +53,14 @@ public interface IQueryColumn {
 		
 		public String getFeatureType(){
 			return geoToolsType;
+		}
+		
+		public boolean isGeometry() {
+			return this == POINT ||
+				this == MULTILINESTRING || 
+				this == MULTIPOLYGON ||
+				this == POLYGON ||
+				this == LINESTRING;
 		}
 	}
 	
@@ -110,3 +123,4 @@ public interface IQueryColumn {
 		return true;
 	}
 }
+

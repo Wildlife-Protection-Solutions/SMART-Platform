@@ -57,6 +57,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 	private String attributeKey;
 	private Attribute.AttributeType type;
 	private DataModelColumn.GeometryProperty property;
+	private String formatString = null;
 	
 	/**
 	 * Creates a new category data model column
@@ -75,6 +76,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 		super(attribute.getName(), "attribute:" + attribute.getKeyId()); //$NON-NLS-1$
 		this.attributeKey = attribute.getKeyId();
 		this.type = attribute.getType();
+		this.formatString = attribute.getRegex();
 	}
 	
 	/**
@@ -86,6 +88,15 @@ public class DataModelColumn extends AbstractQueryColumn{
 		this.attributeKey = attribute.getKeyId();
 		this.type = attribute.getType();
 		this.property = property;
+		this.formatString = attribute.getRegex();
+	}
+	
+	/**
+	 * The format string for attribute columns. May be null.
+	 * @return
+	 */
+	public String getFormatString() {
+		return this.formatString;
 	}
 	
 	/**
@@ -142,8 +153,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 			case LINE:
 			case POLYGON:
 				if (this.property == null) {
-					if (this.type == Attribute.AttributeType.POLYGON) return "POLYGON";
-					return "LINE";
+					return value;
 				}else if (this.property == GeometryProperty.SOURCE ) {
 					return ((Attribute.GeometrySource)value).name();
 				}
@@ -168,6 +178,12 @@ public class DataModelColumn extends AbstractQueryColumn{
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());
 			}
 		}
+		if (getDataType().isGeometry()) {
+			if (this.property == null) {
+				if (this.type.isGeometry()) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this.type, l);
+				return getDataType().name();
+			}
+		}
 		return toFormat.toString();
 	}
 	
@@ -187,9 +203,12 @@ public class DataModelColumn extends AbstractQueryColumn{
 			case MLIST:
 				return Type.STRING;
 			case LINE:
+				if (this.property == GeometryProperty.SOURCE) return Type.STRING;
+				if (this.property == null) return Type.MULTILINESTRING;
+				return Type.NUMERIC;
 			case POLYGON:
 				if (this.property == GeometryProperty.SOURCE) return Type.STRING;
-				if (this.property == null) return Type.STRING;
+				if (this.property == null) return Type.MULTIPOLYGON;
 				return Type.NUMERIC;
 		}
 		return Type.STRING;

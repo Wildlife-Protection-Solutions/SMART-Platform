@@ -78,8 +78,6 @@ import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetResultSetMetadata;
-import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
-import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
@@ -89,11 +87,11 @@ import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetResultSetMetadata
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.item.LayerItem;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
@@ -153,15 +151,7 @@ public enum EntityReportGenerator {
 		datasets.add(EntityAttachmentDataset.DATASET_TYPE);
 		datasets.add(EntityLocationDataset.DATASET_TYPE);
 		datasets.add(EntityRelationDataset.DATASET_TYPE);
-		boolean hasPosition = false;
-		for (IntelEntityTypeAttribute a : entityType.getAttributes()){
-			if (a.getAttribute().getType() == AttributeType.POSITION){
-				datasets.add(EntityLocationAttributeDataset.DATASET_TYPE);
-				hasPosition = true;
-				break;
-			}
-		}
-	
+		
 		
 		HashMap<String, OdaDataSetHandle> datasetHandles = new HashMap<>();
 		for (String d : datasets){
@@ -229,13 +219,13 @@ public enum EntityReportGenerator {
 			datasetHandles.put(d,  dataset);
 		}
 		
-		initializeValue(rdh, datasetHandles, entityType, hasPosition);
+		initializeValue(rdh, datasetHandles, entityType);
 		rdh.save();
 		rdh.close();
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void initializeValue(ReportDesignHandle rdh, HashMap<String,OdaDataSetHandle> datasetHandles, IntelEntityType type, boolean hasPosition) throws Exception{
+	private void initializeValue(ReportDesignHandle rdh, HashMap<String,OdaDataSetHandle> datasetHandles, IntelEntityType type) throws Exception{
 		ElementFactory factory = rdh.getElementFactory();
 		
 		StyleHandle headerStyle = factory.newStyle("HeaderStyle"); //$NON-NLS-1$
@@ -627,28 +617,31 @@ public enum EntityReportGenerator {
 		DataSetHandle layersHandle = datasetHandles.get(EntityLocationDataset.DATASET_TYPE);
 		ExtendedItemHandle pointLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		pointLayer.setDataSet(layersHandle);
-		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
+		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getName() + " - " + EntityLocationDatasetResultSetMetadata.Column.POINT.getColumnName(Locale.getDefault()));
 		pointLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POINT.toString());
-		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, EntityLocationDatasetResultSetMetadata.Column.GEOM.getId());
+		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, EntityLocationDatasetResultSetMetadata.Column.POINT.getId());
 		
 		ExtendedItemHandle polyLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		polyLayer.setDataSet(layersHandle);
-		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
+		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getName() + " - " + EntityLocationDatasetResultSetMetadata.Column.POLYGON.getColumnName(Locale.getDefault()));
 		polyLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POLYGON.toString());
-		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP,EntityLocationDatasetResultSetMetadata.Column.GEOM.getId());
+		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP,EntityLocationDatasetResultSetMetadata.Column.POLYGON.getId());
 		
 		PropertyHandle layershandle = map.getPropertyHandle(SmartMapItem.SMART_LAYER_PROP2);
 		layershandle.add(pointLayer);
 		layershandle.add(polyLayer);
 		
-		if (hasPosition){
-			layersHandle = datasetHandles.get(EntityLocationAttributeDataset.DATASET_TYPE);
-			pointLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
-			pointLayer.setDataSet(layersHandle);
-			pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
-			pointLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POINT.toString());
-			pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, EntityLocationAttributeDatasetResultSetMetadata.Column.GEOMETRY.getId());
-			layershandle.add(pointLayer);
+		//find geometry attributes in dataset handle and add to map
+		
+		layersHandle = datasetHandles.get(EntityDataset.DATASET_TYPE);
+		layersHandle.getProperty("resultSet");
+		for (MapLayerInfo ml : IBirtMapLayerManager.geometryColumnsInResultSet((OdaDataSetHandle) layersHandle)) {
+			ExtendedItemHandle attributeLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
+			attributeLayer.setDataSet(layersHandle);
+			attributeLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, ml.getLayerName());
+			attributeLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, ml.getLayerType().name());
+			attributeLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, ml.getGeometryColumnId());
+			layershandle.add(attributeLayer);
 		}
 	
 		/* footer */

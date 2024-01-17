@@ -22,18 +22,14 @@
 package org.wcs.smart.er.query.map.style;
 
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class MissionWaypointQueryDefaultStyle implements IMapLayerDefaultStyle {
-	
-	public static final String KEY = "org.wcs.smart.er.query.map.waypoint"; //$NON-NLS-1$
-
-	public MissionWaypointQueryDefaultStyle() {
-	}
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return SurveyWaypointQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

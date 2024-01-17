@@ -117,6 +117,7 @@ import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelValueItem;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.udig.DefaultVisibilityProperty;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
@@ -288,6 +289,11 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 							 locationLayers.clear();
 							 try(Session session = HibernateManager.openSession()){
 								 for (Layer layer : getLayers()){
+									 
+									 if (layer.getGeoResource().canResolve(DefaultVisibilityProperty.class)){
+										 layer.setVisible(layer.getGeoResource().resolve(DefaultVisibilityProperty.class, monitor).isVisibleByDefault());
+									 }
+									 
 									 if (layer instanceof ContentFilterLayerImpl){
 										 locationLayers.add((ContentFilterLayerImpl) layer);
 										 layer.addListener(layerStyleChanged);

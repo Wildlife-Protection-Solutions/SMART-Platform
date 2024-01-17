@@ -1666,6 +1666,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Entity Location Dataset"
@@ -1718,6 +1748,36 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -1774,6 +1834,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Entity Attachments"
@@ -1828,6 +1918,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Entity Relationships"
@@ -1880,6 +2000,36 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -1941,6 +2091,36 @@
                nativeDataTypeCode="2004"
                odaScalarDataType="Blob">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Record Entity Links"
@@ -1993,6 +2173,36 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -2049,6 +2259,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Record Locations"
@@ -2101,6 +2341,36 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -2157,6 +2427,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Entity Attribute Locations "
@@ -2209,6 +2509,36 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -2265,6 +2595,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Saved Entity Search"
@@ -2317,6 +2677,210 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
+            defaultDisplayName="Record Location Observation Details"
+            id="org.wcs.smart.i2.birt.dataset.record.observations.details">
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Blob"
+               nativeDataTypeCode="2004"
+               odaScalarDataType="Blob">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
+            defaultDisplayName="Entity Observation Geometry Attributes "
+            id="org.wcs.smart.i2.birt.dataset.entity.observation.geometry.attribute">
+            
+            <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -2506,20 +3070,41 @@
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntitySearchWizardPage">
           </dataSetPage>
        </dataSetUI>
+       <dataSetUI
+             id="org.wcs.smart.i2.birt.dataset.record.observations.details"
+             supportsInParameters="true"
+             supportsOutParameters="false">
+          <dataSetWizard
+                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+                windowTitle="Record Location Observation Details"></dataSetWizard>
+          <dataSetPage
+                displayName="Record Location Observation Details"
+                id="org.wcs.smart.i2.birt.ui.dataset.record.observation.details.wizard.page.list"
+                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordObservationDetailsWizardPage">
+          </dataSetPage>
+       </dataSetUI>
+       <dataSetUI
+             id="org.wcs.smart.i2.birt.dataset.entity.observation.geometry.attribute"
+             supportsInParameters="true"
+             supportsOutParameters="false">
+          <dataSetWizard
+                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+                windowTitle="Entity Observation Geometry Attributes">
+          </dataSetWizard>
+          <dataSetPage
+                displayName="Entity Observation Geometry Attributes"
+                id="org.wcs.smart.i2.birt.ui.dataset.entity.record.wizard.page.list"
+                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntityObservationGeometryAttributeWizardPage">
+          </dataSetPage>
+       </dataSetUI>
    </extension>
    <extension
          point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
-            maplayer="org.wcs.smart.i2.birt.map.entity.EntityMapLayer">
-      </MapLayer>
-      <MapLayer
-            maplayer="org.wcs.smart.i2.birt.map.entity.RecordMapLayer">
-      </MapLayer>
-      <MapLayer
-            maplayer="org.wcs.smart.i2.birt.map.entity.EntityAttributeMapLayer">
+            maplayer="org.wcs.smart.i2.birt.map.entity.ProfileMapLayers">
       </MapLayer>
       <StyleProvider
-            styleprovider="org.wcs.smart.i2.birt.map.entity.EntityAttributeMapLayer">
+            styleprovider="org.wcs.smart.i2.birt.map.entity.ProfileMapLayersStyleProvider">
       </StyleProvider>
       <MapLayer
             maplayer="org.wcs.smart.i2.birt.query.QueryMapLayer">

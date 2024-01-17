@@ -233,13 +233,12 @@ public class IntelRecordService extends IService {
             dsInstantiationLock.lock();
             try {
                 if (ds == null) {
-                	if (recordUuid != null){
-                		if (this.record == null) { 
-                			ds = new IntelRecordDataSource(recordUuid);
-                		}else {
-                			ds = new IntelRecordDataSource(this.record);
-                		}
-                    }else{
+                	if (this.record == null && this.recordUuid != null) {
+                		ds = new IntelRecordDataSource(recordUuid);
+                	}else if (this.record != null) {
+                		ds = new IntelRecordDataSource(this.record);
+                	}else{
+                		throw new IllegalStateException("Cannot create IntelRecordDataSource"); //$NON-NLS-1$
                     	//broken
                     }
                 }

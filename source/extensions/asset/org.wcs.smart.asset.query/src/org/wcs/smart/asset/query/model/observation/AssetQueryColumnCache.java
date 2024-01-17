@@ -147,7 +147,7 @@ public class AssetQueryColumnCache {
 				qc.setEdit(false);
 				cols.add(qc);
 
-				cols.add(new WaypointGeometryQueryColumn());
+				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
@@ -219,7 +219,7 @@ public class AssetQueryColumnCache {
 						}
 					}
 				}
-				cols.add(new WaypointGeometryQueryColumn());
+				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}

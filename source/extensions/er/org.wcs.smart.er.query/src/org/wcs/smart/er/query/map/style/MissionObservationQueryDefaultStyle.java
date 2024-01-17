@@ -22,18 +22,14 @@
 package org.wcs.smart.er.query.map.style;
 
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class MissionObservationQueryDefaultStyle implements IMapLayerDefaultStyle {
-	
-	public static final String KEY = "org.wcs.smart.er.query.map.observation"; //$NON-NLS-1$
-
-	public MissionObservationQueryDefaultStyle() {
-	}
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return SurveyObservationQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

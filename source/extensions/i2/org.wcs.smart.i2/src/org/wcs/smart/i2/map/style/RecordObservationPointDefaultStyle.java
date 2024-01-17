@@ -22,18 +22,14 @@
 package org.wcs.smart.i2.map.style;
 
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class RecordObservationPointDefaultStyle implements IMapLayerDefaultStyle {
 
-	public static final String KEY = "org.wcs.smart.i2.query.map.record.point"; //$NON-NLS-1$
-	
-	public RecordObservationPointDefaultStyle() {
-	}
-
 	@Override
 	public String getKey() {
-		return KEY;
+		return IntelRecordObservationQuery.POINT_DEFAULT_STYLE_KEY;
 	}
 
 	@Override

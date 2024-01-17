@@ -56,6 +56,7 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 	protected SurveyDesign surveyDesign;
 	
 	public static final String KEY = "surveyobservation"; //$NON-NLS-1$
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.er.query.map.observation"; //$NON-NLS-1$
 
 	@Transient
 	public List<byte[]> getMissions() throws Exception{

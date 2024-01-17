@@ -26,13 +26,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
@@ -67,12 +70,8 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	public enum StatusMessage{
 		ADDED, MODIFIED;
 		
-		public String getMessage() {
-			switch(this) {
-			case ADDED: return "Created {0} Incidents";
-			case MODIFIED: return "Modified {0} Incidents";
-			}
-			return "";
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(IIncidentCyberTrackerLabelProvider.class).getLabel(this, l);
 		}
 	}
 	
@@ -93,7 +92,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
 		newIncidents = new HashSet<>();
 		modifiedIncidents = new HashSet<>();
 		groupMappings = new ArrayList<>();
@@ -317,12 +316,12 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		if (newIncidents.isEmpty() && modifiedIncidents.isEmpty()) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newIncidents.isEmpty()){
-			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(), newIncidents.size()));
+			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(l), newIncidents.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : newIncidents){
 				sb.append(p.getId());
@@ -335,7 +334,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 		HashSet<Waypoint> tmp = new HashSet<>(modifiedIncidents);
 		for (Waypoint w : newIncidents) tmp.remove(w);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(), tmp.size()));
+			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(l), tmp.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : tmp){
 				sb.append(p.getId());
