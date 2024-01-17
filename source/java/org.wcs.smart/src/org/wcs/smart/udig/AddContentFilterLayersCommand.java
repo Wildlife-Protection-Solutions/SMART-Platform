@@ -101,11 +101,13 @@ public class AddContentFilterLayersCommand extends AbstractCommand implements Un
 	                        }else{
 	                        	layer = defaultFactory.createLayer(resource);
 	                        }
+	                        layer.setName(resource.getTitle());	  
 	                    }
 	                    if (o instanceof Layer) {
 	                        // leave as is; may not be a ContentFilterLayerImpl but add anyways
 	                        layer = (Layer) o;
 	                    }
+	                    
 	                    if (layer != null) layers.add(layer);
 	                }
 	                catch (Throwable t){

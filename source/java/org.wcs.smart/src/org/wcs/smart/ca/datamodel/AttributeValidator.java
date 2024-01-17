@@ -25,9 +25,6 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.Collection;
 
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.opengis.feature.GeometryAttribute;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.internal.Messages;

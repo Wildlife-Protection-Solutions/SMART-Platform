@@ -334,7 +334,7 @@ public class StyleManager {
 						XMLMemento memento = null;
 						try{
 							memento = XMLMemento.createReadRoot(new StringReader(value));
-						}catch (WorkbenchException ex) {
+						}catch (Exception ex) {
 							throw new IOException(ex.getMessage(), ex);
 						}
 						if (sc != null){
@@ -391,7 +391,7 @@ public class StyleManager {
 	 * @throws IOException
 	 * @throws WorkbenchException
 	 */
-	public StyleBlackboard fromString(String string) throws IOException, WorkbenchException{
+	public StyleBlackboard fromString(String string) throws IOException {
 		StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
 		try(JsonReader reader = new JsonReader(new StringReader(string))){
 		
@@ -419,13 +419,15 @@ public class StyleManager {
 				reader.endObject();
 				if (styleId != null && value != null){
 					StyleContent sc = loadStyleContent(styleId);
-					 XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
-					 if (sc != null){
-						 Object style = sc.load(memento);
-						 sb.put(styleId, style);
-					 }
-					
-					 
+					try {
+						XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
+						 if (sc != null){
+							 Object style = sc.load(memento);
+							 sb.put(styleId, style);
+						 }
+					}catch (WorkbenchException we) {
+						throw new IOException(we);
+					}
 				}
 			}
 			reader.endArray();
@@ -501,7 +503,7 @@ public class StyleManager {
 	public void applyDefaultStyleToMapLayer(ConservationArea ca, Layer l, 
 			Map<String,String> geoIdToMapStyle, 
 			Map<String,Consumer<Layer>> defaultStyles, 
-			Session session, IProgressMonitor monitor) throws WorkbenchException, IOException {
+			Session session, IProgressMonitor monitor) throws IOException {
 		
 		String styleKey = null;
 		for (Entry<String,String> item: geoIdToMapStyle.entrySet()) {
@@ -526,7 +528,7 @@ public class StyleManager {
 	}
 	
 	public void applyDefaultStyleToMapLayer(ConservationArea ca, Layer l, Map<String,String> geoIdToMapStyle, Session session,
-			IProgressMonitor monitor) throws WorkbenchException, IOException {
+			IProgressMonitor monitor) throws IOException {
 		this.applyDefaultStyleToMapLayer(ca, l, geoIdToMapStyle, Collections.emptyMap(), session, monitor);	
 	}
 }

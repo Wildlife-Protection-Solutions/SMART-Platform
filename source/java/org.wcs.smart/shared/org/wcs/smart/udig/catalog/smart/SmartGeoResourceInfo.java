@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
 import org.opengis.feature.FeatureVisitor;

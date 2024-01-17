@@ -26,8 +26,8 @@ import java.util.Locale;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.util.SharedUtils;
 
 /**
