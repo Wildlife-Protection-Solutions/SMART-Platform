@@ -627,6 +627,7 @@
 		<profile>
 			<id>languagepacks</id>
 			<modules>
+				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.translations.updatesite</module>
 				
 				<module>../translations/org.wcs.smart.birt.map.nl</module>
@@ -712,7 +713,8 @@
 				<module>../extensions/qa/translations/org.wcs.smart.qa.patrol.nl</module>
 
 				<module>../extensions/r/translations/org.wcs.smart.r.nl</module>
-				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>		
+				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>
+					
 			</modules>
 		</profile>
 	</profiles>
