@@ -23,10 +23,12 @@
 package org.wcs.smart.patrol.internal.ui.views;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -49,6 +51,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
@@ -60,6 +68,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 
@@ -70,6 +79,9 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
  */
 public class MergePatrolsDialog extends SmartStyledTitleDialog {
 
+	private static final PatrolWaypointSource PATROL_WP_SRC = (PatrolWaypointSource) SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
+			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+	
 	private Session session;
 	private ArrayList<Patrol> patrolsToMerge;
 	private ComboViewer patrolId;
@@ -235,6 +247,31 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 			return;
 		}
 		
+		//compute all attachment locations
+		try {
+			for(Patrol p : patrolsToMerge) {
+				for(PatrolLeg pd : p.getLegs()) {
+					for(PatrolLegDay pld : pd.getPatrolLegDays()) {
+						if (pld.getWaypoints() == null) continue;
+						for (PatrolWaypoint pw : pld.getWaypoints()) {
+							for(WaypointAttachment wa : pw.getWaypoint().getAttachments()) {
+								wa.computeFileLocation(session);
+							}
+							for (WaypointObservation wo : pw.getWaypoint().getAllObservations()) { 
+								for (ObservationAttachment attachment : wo.getAttachments()) {
+									attachment.computeFileLocation(session);
+								}
+							}
+						}
+					}
+				}
+				
+			}
+		}catch (Exception ex) {
+			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+			return;
+		}
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -275,6 +312,69 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 										newPw.setPatrolLegDay(legdayClone);
 										allWaypoints.add(newPw);
 										
+										try {
+											//ok to resue waypoints but we need to copy attachments to new file location
+											//create new waypoint attachments
+											//then delete the old ones - we do
+											//this because the files need to move to a new folder
+											List<WaypointAttachment> copiedAttachments = new ArrayList<>();
+											for (WaypointAttachment attachment : newPw.getWaypoint().getAttachments()) {
+												WaypointAttachment clone = new WaypointAttachment();
+												clone.setWaypoint(newPw.getWaypoint());
+												
+												
+												clone.setCopyFromLocation(attachment.getAttachmentFile());
+												clone.setFilename(attachment.getFilename());
+												clone.setSignatureType(attachment.getSignatureType());
+												
+												clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+													.resolve(PATROL_WP_SRC.getDatastoreFileLocation(newPatrol, session))
+													.resolve(clone.getFilename()));
+												
+												session.persist(clone);
+												copiedAttachments.add(clone);
+												
+											}
+											
+											for (WaypointAttachment attachment : newPw.getWaypoint().getAttachments()) {
+												session.remove(attachment);
+											}
+											newPw.getWaypoint().getAttachments().clear();
+											newPw.getWaypoint().getAttachments().addAll(copiedAttachments);
+											
+											//do the same thing for observation attachments
+											for (WaypointObservationGroup group : newPw.getWaypoint().getObservationGroups()) {
+												for (WaypointObservation wo : group.getObservations()) {
+													
+													List<ObservationAttachment> copiedAttachments2 = new ArrayList<>();
+													for (ObservationAttachment attachment : wo.getAttachments()) {
+														ObservationAttachment clone = new ObservationAttachment();
+														clone.setObservation(wo);
+																											
+														clone.setCopyFromLocation(attachment.getAttachmentFile());
+														clone.setFilename(attachment.getFilename());
+														clone.setSignatureType(attachment.getSignatureType());
+														
+														clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+															.resolve(PATROL_WP_SRC.getDatastoreFileLocation(newPatrol, session))
+															.resolve(clone.getFilename()));
+														
+														session.persist(clone);
+														copiedAttachments2.add(clone);
+													}
+													
+													for (ObservationAttachment attachment : wo.getAttachments()) {
+														session.remove(attachment);
+													}
+													wo.getAttachments().clear();
+													wo.getAttachments().addAll(copiedAttachments2);
+												}
+											}
+											
+										}catch (Exception ex) {
+											throw new InvocationTargetException(ex);
+										}
+									
 									}
 									legdayClone.setWaypoints(allWaypoints);
 									legdayClone.setPatrolLeg(legClone);
