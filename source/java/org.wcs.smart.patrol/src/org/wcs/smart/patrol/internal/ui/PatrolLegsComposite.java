@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,15 +57,21 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolLegStartDateComparator;
 import org.wcs.smart.patrol.PatrolUtils;
-import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolDateLegsDialog;
 import org.wcs.smart.patrol.model.Patrol;
@@ -74,6 +81,7 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -116,6 +124,9 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private ArrayList<Patrol> newPatrols = new ArrayList<Patrol>();
 	private HashSet<UUID> movedPoints = new HashSet<UUID>();
 
+	private static final PatrolWaypointSource PATROL_WP_SRC = (PatrolWaypointSource) SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
+			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+	
 	/**
 	 * Creates a new patrol legs composite
 	 * @param canEditDates true if the patrol dates can be changed, false if only legs can be modified
@@ -539,6 +550,43 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		if (session.getTransaction().isActive()) session.flush();
 		
+		
+		//load attachments
+		for(Patrol p2 : newPatrols){
+			for(PatrolLeg pl : p2.getLegs()){
+				for(PatrolLegDay pld : pl.getPatrolLegDays()) {
+					if (pld.getWaypoints() != null) {
+			
+			for (PatrolWaypoint ps : pld.getWaypoints()) {
+				if (ps.getWaypoint().getAttachments() != null) {
+					for (WaypointAttachment wa : ps.getWaypoint().getAttachments()) {
+						try {
+							wa.computeFileLocation(session);
+						}catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				}
+				if (ps.getWaypoint().getAllObservations() != null) {
+					for(WaypointObservation wo : ps.getWaypoint().getAllObservations()) {
+						if (wo.getAttachments() != null) {
+							for (ObservationAttachment aa : wo.getAttachments()) {
+								try {
+									aa.computeFileLocation(session);
+								}catch (Exception ex) {
+									ex.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		}
+			}
+		}
+		
+		
 		HashSet<PatrolLeg> currentLegs = new HashSet<PatrolLeg>(p.getLegs());
 		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>(legs);
 		
@@ -663,8 +711,53 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					for(PatrolLegDay pld : pl.getPatrolLegDays()) {
 						if (pld.getWaypoints() != null) {
 							for(PatrolWaypoint pwp : pld.getWaypoints()) {
-								//pwp.setPatrolLegDay(pld);
+								
 								session.saveOrUpdate(pwp);
+								session.flush();
+								
+								//see: #3667
+								//re-create attachments as files need to move
+								List<WaypointAttachment> newAttachments = new ArrayList<>();
+								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
+									WaypointAttachment clone = new WaypointAttachment();
+									clone.setCopyFromLocation(ws.getAttachmentFile());
+									clone.setFilename(ws.getFilename());
+									clone.setWaypoint(pwp.getWaypoint());
+									clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+											.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
+											.resolve(clone.getFilename()));
+									newAttachments.add(clone);
+									session.persist(clone);
+								}
+								for (WaypointAttachment ws : pwp.getWaypoint().getAttachments()) {
+									session.remove(ws);								
+								}
+								pwp.getWaypoint().getAttachments().clear();
+								pwp.getWaypoint().getAttachments().addAll(newAttachments);
+									
+								//do the same thing for observation attachments
+								for (WaypointObservationGroup group : pwp.getWaypoint().getObservationGroups()) {
+									for (WaypointObservation wo : group.getObservations()) {
+										List<ObservationAttachment> newAttachments2 = new ArrayList<>();
+										for (ObservationAttachment ws : wo.getAttachments()) {
+											ObservationAttachment clone = new ObservationAttachment();
+											clone.setCopyFromLocation(ws.getAttachmentFile());
+											clone.setFilename(ws.getFilename());
+											clone.setObservation(wo);
+											clone.computeFileLocation(Paths.get(p.getConservationArea().getFileDataStoreLocation())
+													.resolve(PATROL_WP_SRC.getDatastoreFileLocation(p2))
+													.resolve(clone.getFilename()));
+											newAttachments2.add(clone);
+											
+											session.persist(clone);
+										}
+										for (ObservationAttachment ws : wo.getAttachments()) {
+											session.remove(ws);										
+										}
+										wo.getAttachments().clear();
+										wo.getAttachments().addAll(newAttachments2);
+									}
+								}
 							}
 						}
 					}

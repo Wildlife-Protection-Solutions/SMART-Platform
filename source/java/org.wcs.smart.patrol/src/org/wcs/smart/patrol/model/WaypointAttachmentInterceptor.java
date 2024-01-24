@@ -22,7 +22,11 @@
 package org.wcs.smart.patrol.model;
 
 import java.io.Serializable;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -62,6 +66,20 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 	}
 	
 	
+	@Override
+	public void afterTransactionCompletion(Transaction tx){
+		//see: #3667
+		//remove duplicate files before completing transation
+		//the better solution would be to make toDelete a hashset but
+		//I didn't do that hear as this is a patch release and that may
+		//have other implications that won't get tested for these release
+		Set<Path> items = new HashSet<>();
+		items.addAll(toDelete);
+		toDelete.clear();
+		toDelete.addAll(items);
+		
+		super.afterTransactionCompletion(tx);
+	}
 	/**
 	 * When a parent object is deleted it also deletes the file on disk.
 	 */

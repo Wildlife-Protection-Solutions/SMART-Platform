@@ -149,7 +149,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	}
 
 	private boolean savePatrolInternal() {
-		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor(false))){
 			s.beginTransaction();
 			try{
 				s.saveOrUpdate(patrol);
