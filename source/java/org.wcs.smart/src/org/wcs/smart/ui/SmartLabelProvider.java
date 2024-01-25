@@ -145,8 +145,6 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(POLYGON_GEOM_ATTRIBUTE_LABEL)) return "Polygon Area: {0,number,#.##} km\u00B2, Perimeter: {1,number,#.##} km, Source: {2} ";
 		if (value.equals(LINESTRING_GEOM_ATTRIBUTE_LABEL)) return "LineString Length: {0,number,#.##} km, Source: {1}";
 
-				
-		
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_NOT_FOUND)) return Messages.SmartLabelProvider_MergeDmAttNotFound;
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_TYPE_MISMATCH)) return Messages.SmartLabelProvider_MergeDmTypeMismatch;
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_ATT_TASKNAME)) return Messages.SmartLabelProvider_MergeDmProcessingAtt;

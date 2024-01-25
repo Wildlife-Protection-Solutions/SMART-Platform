@@ -74,11 +74,11 @@ public class Report800Upgrader {
 
 	private enum Type {TABLE, QUERY, PLAN, INTEL};
 
-	public List<String> upgrade(Session session) throws Exception {
+	public List<String> upgrade(Session session) throws SQLException {
 		return upgradeReportFiles(session);		
 	}
 	
-	private List<String> upgradeReportFiles(Session session) throws Exception {
+	private List<String> upgradeReportFiles(Session session) throws SQLException {
 		List<String> warnings = new ArrayList<>();
 
 		session.doWork(new Work() {

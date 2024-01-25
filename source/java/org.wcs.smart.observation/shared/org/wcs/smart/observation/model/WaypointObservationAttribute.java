@@ -171,7 +171,7 @@ public class WaypointObservationAttribute extends UuidItem{
 	
 	@Column(name="geom")
 	@Lob
-	public byte[] getGeom() {
+	 public byte[] getGeom() {
 		return geom;
 	}
 

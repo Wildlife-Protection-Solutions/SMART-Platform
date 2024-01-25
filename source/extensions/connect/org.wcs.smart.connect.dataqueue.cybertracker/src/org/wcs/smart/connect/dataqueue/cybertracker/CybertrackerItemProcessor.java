@@ -220,9 +220,9 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				StringBuilder statusMsg = new StringBuilder();
 				List<IDesktopJsonProcessor> processors = getProcessors();
 				for (IDesktopJsonProcessor p : processors){
-					List<JSONObject> processed = p.processJson(features, session);
+					List<JSONObject> processed = p.processJson(features, session, Locale.getDefault());
 					notProc.removeAll(processed);
-					String msg = p.getStatusMessage();
+					String msg = p.getStatusMessage(Locale.getDefault());
 					if (msg != null){
 						statusMsg.append(msg);
 					}

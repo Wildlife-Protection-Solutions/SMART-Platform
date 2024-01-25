@@ -227,7 +227,7 @@ public class DerbyPagedMissionResult extends AbstractPagedQueryResultSet<ISurvey
 					sb.append(" )"); //$NON-NLS-1$
 				}else{
 					sb.append("SELECT geometry FROM smart.mission_track "); //$NON-NLS-1$
-					sb.append("where missionday_uuid in (SELECT mission_day_uuid FROM "); //$NON-NLS-1$
+					sb.append("where mission_day_uuid in (SELECT missionday_uuid FROM "); //$NON-NLS-1$
 					sb.append(engine2.getQueryDataTable());
 					sb.append(" )"); //$NON-NLS-1$
 				}

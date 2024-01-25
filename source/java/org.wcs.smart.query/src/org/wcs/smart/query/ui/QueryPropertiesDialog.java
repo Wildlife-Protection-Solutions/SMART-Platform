@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -56,6 +57,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -250,6 +252,22 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(SmartLabelProvider.getFullLabel(query.getOwner()));
 		
+		if (query instanceof IStyledQuery) {
+			Label lblStyle = new Label(main, SWT.NONE);
+			lblStyle.setText("Style:");
+			
+			Button btn = new Button(main, SWT.PUSH);
+			btn.setText("Clear");
+			btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			btn.setToolTipText("Clear all map layer style information associated with this query.");
+			btn.setBackground(btn.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btn.addListener(SWT.Selection, e->{
+				((IStyledQuery) query).setStyle(null);
+				btn.setEnabled(((IStyledQuery) query).getStyle() != null);
+				setChangesMade(true);				
+			});
+			btn.setEnabled(((IStyledQuery) query).getStyle() != null);
+		}
 		List<AbstractQueryPropertyProvider> allProps = new ArrayList<AbstractQueryPropertyProvider>();
 		allProps.addAll(QueryPlugIn.getPropertyProviders());
 		

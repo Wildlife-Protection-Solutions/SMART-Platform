@@ -303,7 +303,9 @@ public class IncidentMapPage extends SmartMapEditorPart {
     				}
     				
 					try(Session session = HibernateManager.openSession()){
-	   					StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), pointLayer, geoIdToStyle, defaultStyles, session, monitor);
+						if (pointLayer != null) {
+							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), pointLayer, geoIdToStyle, defaultStyles, session, monitor);
+						}
 						
 						if (prjLayer != null) {
 							prjLayer.setName(Messages.IncidentMapPage_RawPointLayerName);

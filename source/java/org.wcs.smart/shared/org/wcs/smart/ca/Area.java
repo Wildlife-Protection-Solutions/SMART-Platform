@@ -42,6 +42,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -103,6 +104,7 @@ public class Area extends NamedItem{
 	}
 
 	@Column(name="geom")
+	@Lob
 	public byte[] getGeom() {
 		return geom;
 	}

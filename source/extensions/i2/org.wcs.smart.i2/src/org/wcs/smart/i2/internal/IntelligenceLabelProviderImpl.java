@@ -227,11 +227,11 @@ public class IntelligenceLabelProviderImpl implements
 		if (item instanceof CsvRecordQueryExporter) return Messages.IntelligenceLabelProviderImpl_CSVLabel;
 		if (item instanceof CsvEntitySummaryQueryExporter) return Messages.IntelligenceLabelProviderImpl_CSVLabel;
 		if (item instanceof ShpRecordQueryExporter) return Messages.IntelligenceLabelProviderImpl_ShapefileLabel;
+		
 		if (item == IntelQueryColumnProvider.ANY_ITEM) return Messages.IntelligenceLabelProviderImpl_AnyLabel;
+		
 		if (item == Boolean.TRUE) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 		if (item == Boolean.FALSE) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
-		
-		
 		
 		if (item == RecordLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsCommentColumn;
 		if (item == RecordLocationDatasetResultSetMetadata.Column.DATE) return Messages.IntelligenceLabelProviderImpl_RecordLocationRsDateColumn;

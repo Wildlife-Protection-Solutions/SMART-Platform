@@ -39,6 +39,7 @@ public class TrackGeometryQueryColumn extends QueryColumn implements IGeometryCo
 	
 	private IGeometryColumn.Type type;
 	private Locale l;
+	
 	public TrackGeometryQueryColumn(IGeometryColumn.Type type, Locale l) {
 		super(SmartContext.INSTANCE.getClass(ISurveyQueryLabelProvider.class).getLabel(KEY, l), KEY, ColumnType.GEOMETRY);
 		this.type = type;

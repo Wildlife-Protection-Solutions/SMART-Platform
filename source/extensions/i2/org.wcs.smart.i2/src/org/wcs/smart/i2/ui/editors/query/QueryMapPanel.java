@@ -43,8 +43,7 @@ import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.map.style.RecordObservationPointDefaultStyle;
-import org.wcs.smart.i2.map.style.RecordObservationPolygonDefaultStyle;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.udig.query.QueryService;
@@ -69,15 +68,14 @@ public class QueryMapPanel extends MapComposite {
 	
 	private static HashMap<String,String> defaultStyles = new HashMap<>();
 	static {
-		defaultStyles.put(FixedQueryColumn.Column.LOC_POINT.key, RecordObservationPointDefaultStyle.KEY);
-		defaultStyles.put(FixedQueryColumn.Column.LOC_POLYGON.key, RecordObservationPolygonDefaultStyle.KEY);
+		defaultStyles.put(FixedQueryColumn.Column.LOC_POINT.key, IntelRecordObservationQuery.POINT_DEFAULT_STYLE_KEY);
+		defaultStyles.put(FixedQueryColumn.Column.LOC_POLYGON.key, IntelRecordObservationQuery.POLYGON_DEFAULT_STYLE_KEY);
 	}
 	
 	
 	public void updateQueryLayers(IPagedQueryResultSet results){
 		if (isDisposed()) return;
 		if (getMap() == null) return;
-		
 		
 		int layerIndex = getMap().getLayersInternal().size();
 		

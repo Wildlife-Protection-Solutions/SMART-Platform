@@ -44,6 +44,12 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -52,6 +58,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.IObservationLabelProvider;
@@ -149,6 +156,10 @@ public abstract class IJsonFeatureProcessor {
 		INVALID_MLIST_ATTRIBUTE,
 		INVALID_MLIST2_ATTRIBUTE,
 		INVALID_TREE_ATTRIBUTE,
+		INVALID_GEOMETRY_ATTRIBUTE,
+		INVALID_POLYGON_ATTRIBUTE,
+		INVALID_LINE_ATTRIBUTE,
+		INVALID_GEOMETRY_SRC_ATTRIBUTE,
 		INVALID_NUMBER_ATTRIBUTE,
 		SIGNATURE_TYPE_NOT_FOUND,
 		CM_MISSING,
@@ -322,6 +333,7 @@ public abstract class IJsonFeatureProcessor {
 			JSONObject obatts = (JSONObject) properties.get("attributes"); //$NON-NLS-1$
 			for (Object s : obatts.keySet()) {
 				String attributeKey = s.toString();
+				
 				Object attributeValue = obatts.get(s);
 				if (attributeValue == null) continue;
 				
@@ -709,8 +721,45 @@ public abstract class IJsonFeatureProcessor {
 						tkey,a.getAttribute().getName()));
 			}
 			break;
-		default:
-			break;
+		case LINE:
+		case POLYGON:
+			JSONObject jvalue = (JSONObject) value;
+			
+			Geometry geom = null;
+			try {
+				String wkb = jvalue.get("geometry").toString();
+				geom = (new WKBReader()).read(WKBReader.hexToBytes(wkb));
+			}catch (Exception ex) {
+				throw new Exception(MessageFormat.format(
+						Messages.INVALID_GEOMETRY_ATTRIBUTE.getMessage(locale),
+						a.getAttribute().getName()));
+			}
+			if (a.getAttribute().getType() == Attribute.AttributeType.LINE) {
+				if ( !(geom instanceof LineString || geom instanceof MultiLineString) ) {
+					throw new Exception(MessageFormat.format(
+							Messages.INVALID_LINE_ATTRIBUTE.getMessage(locale),
+							a.getAttribute().getName()));
+				}
+			}else if (a.getAttribute().getType() == Attribute.AttributeType.POLYGON) {
+				if ( !(geom instanceof Polygon || geom instanceof MultiPolygon) ) {
+					throw new Exception(MessageFormat.format(
+							Messages.INVALID_POLYGON_ATTRIBUTE.getMessage(locale),
+							a.getAttribute().getName()));
+				} 
+			}
+			
+			Attribute.GeometrySource source = Attribute.GeometrySource.UNKNOWN;
+			String src = jvalue.get("source").toString();
+				 
+			try {
+				source = Attribute.GeometrySource.valueOf(src.toUpperCase());
+			}catch (Exception ex) {
+				warnings.add(MessageFormat.format(
+						Messages.INVALID_GEOMETRY_SRC_ATTRIBUTE.getMessage(locale),
+						src, a.getAttribute().getName()));
+			}
+			a.setGeometry(new GeometryAttributeValue(geom,source));
+			break;			
 		}
 	}
 	
