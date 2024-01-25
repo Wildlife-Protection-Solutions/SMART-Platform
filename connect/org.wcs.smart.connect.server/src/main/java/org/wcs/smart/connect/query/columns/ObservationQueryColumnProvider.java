@@ -40,6 +40,7 @@ import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProv
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Column provider implementation for all data queries.
@@ -102,7 +103,8 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 			keys.add(cq);
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
-		
+		keys.add(new WaypointGeometryQueryColumn(l));
+
 		return keys;
 	}
 	
@@ -129,6 +131,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				keys.add(new FixedQueryColumn(item, l));
 			}
 		}
+		keys.add(new WaypointGeometryQueryColumn(l));
 		return keys;
 	}
 	

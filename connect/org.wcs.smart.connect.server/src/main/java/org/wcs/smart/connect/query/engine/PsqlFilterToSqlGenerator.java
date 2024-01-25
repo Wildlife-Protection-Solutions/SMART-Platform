@@ -48,7 +48,6 @@ import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
-import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
@@ -407,6 +406,9 @@ public enum PsqlFilterToSqlGenerator {
 		}else if (filter.getAttributeType() == AttributeType.TREE){
 			String p1 = engine.addParameterValue(filter.getValue() + "%");   //$NON-NLS-1$
 			return "( qa." + filter.getAttributeKey() + " like " + p1 + " ) ";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		}else if (filter.getAttributeType().isGeometry()){
+			return " (qa.\"" + filter.getAttributeKey() + "_" + filter.getGeometryProperty().name() + "\" " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		
 		}
 		return ""; //$NON-NLS-1$

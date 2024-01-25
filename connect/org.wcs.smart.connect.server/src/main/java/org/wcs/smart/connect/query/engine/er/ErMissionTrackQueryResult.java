@@ -56,7 +56,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<MissionTrackResultItem>{
 
-	private static final String TRACK_PROP_KEY = "org.wcs.smart.track"; //$NON-NLS-1$
 	
 	private WKBReader reader = new WKBReader();
 	private boolean includeUuids = false;
@@ -143,12 +142,12 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 
 	@Override
 	public String getGeometryType() {
-		return MULTI_LINESTRING_GEOM_TYPE;
+		return LINESTRING_GEOM_TYPE;
 	}
 
 	@Override
 	public Geometry createGeometry(MissionTrackResultItem item) throws Exception {
-		byte[] b = (byte[]) item.getMissionPropertyValue(TRACK_PROP_KEY);
+		byte[] b = (byte[]) item.getGeometry();
 		if (b == null){
 			return new GeometryCollection(new Geometry[]{}, gf);	
 		}
@@ -184,14 +183,14 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 				StringBuilder sql = new StringBuilder();
 				sql.append( "SELECT "); //$NON-NLS-1$
 				sql.append(sb);
-				sql.append("st_asbinary(st_force2d(st_collect(st_geomfromwkb(bar.geometry)))) as trackgeom "); //$NON-NLS-1$
+				sql.append(" bar.geometry as trackgeom "); //$NON-NLS-1$
 				sql.append(" FROM ");  //$NON-NLS-1$
 				sql.append(engine.getQueryDataTable());
 				sql.append(" foo left join "); //$NON-NLS-1$
 				sql.append( engine.tableName(MissionTrack.class) );
 				sql.append( " bar  on bar.mission_day_uuid = foo.missionday_uuid  "); //$NON-NLS-1$
-				sql.append(" GROUP BY " ); //$NON-NLS-1$
-				sql.append(sb.toString().substring(0, sb.length() - 1));
+				//sql.append(" GROUP BY " ); //$NON-NLS-1$
+				//sql.append(sb.toString().substring(0, sb.length() - 1));
 				
 				if(sortColumn != null){
 					sql.append(" ORDER BY sortkeydbl "); //$NON-NLS-1$
@@ -237,7 +236,8 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
 		
-		it.addMissionPropertyValue(TRACK_PROP_KEY,rs.getBytes("trackgeom")); //$NON-NLS-1$
+		it.setGeometry(rs.getBytes("trackgeom")); //$NON-NLS-1$
+		
 		return it;
 	}
 	

@@ -27,8 +27,10 @@ import java.util.Locale;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.filter.IFilter;
@@ -68,6 +70,15 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 				default: return ((AreaType) value).name();
 			}
 		}
+		if (value instanceof Attribute.GeometrySource src) {
+			switch(src) {
+				case GPS: return "GPS";
+				case MANUAL_DRAW: return "Drawn On Map";
+				case MANUAL_POINT: return "Manually Input of Coordinates";
+				case UNKNOWN: return "Unknown";		
+			}
+		}
+		
 		if (value.equals(GEOMETRY_LABEL)) return Messages.getString("SmartLabelProvider.GeometryColumnLabel", l); //$NON-NLS-1$
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.getString("SmartLabelProvider.AgencyName", l); //$NON-NLS-1$
 		if (value.equals(AGENCY_KEY_KEY)) return Messages.getString("SmartLabelProvider.KeyName", l); //$NON-NLS-1$
@@ -95,15 +106,22 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(CA_DESCRIPTION_KEY)) return Messages.getString("SmartLabelProvider.CaDescription", l); //$NON-NLS-1$
 		if (value.equals(CA_DESIGNATION_KEY)) return Messages.getString("SmartLabelProvider.CaDesignation", l); //$NON-NLS-1$
 		if (value.equals(CA_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.CaTableName", l); //$NON-NLS-1$
+		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeTableName", l); //$NON-NLS-1$
+		if (value.equals(STATION_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.StationsTableName", l); //$NON-NLS-1$
 		
 		if (value.equals(CA_ORGANIZATION_KEY)) return Messages.getString("SmartLabelProvider.CaOrganization", l); //$NON-NLS-1$
 		if (value.equals(CA_POINTOFCONTACT_KEY)) return Messages.getString("SmartLabelProvider.CaPointOfContact", l); //$NON-NLS-1$
 		if (value.equals(CA_COUNTRY_KEY)) return Messages.getString("SmartLabelProvider.CaCountry", l); //$NON-NLS-1$
 		if (value.equals(CA_OWNER_KEY)) return Messages.getString("SmartLabelProvider.CaOwner", l); //$NON-NLS-1$
 		
-		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeTableName", l); //$NON-NLS-1$
-		if (value.equals(STATION_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.StationsTableName", l); //$NON-NLS-1$
+		if (value.equals(AREA_KM2_KEY)) return "Area (km\u00B2)";
+		if (value.equals(PERIMETER_KM_KEY)) return "Perimeter (km)";
+		if (value.equals(POLYGON_KEY)) return "Polygon";
+		if (value.equals(LINESTRING_KEY)) return "LineString";
 		
+		if (value.equals(POLYGON_GEOM_ATTRIBUTE_LABEL)) return "Polygon Area: {0,number,#.##} km\u00B2, Perimeter: {1,number,#.##} km, Source: {2} ";
+		if (value.equals(LINESTRING_GEOM_ATTRIBUTE_LABEL)) return "LineString Length: {0,number,#.##} km, Source: {1}";
+
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_NOT_FOUND)) return Messages.getString("SmartLabelProvider.MergeDmAttributeNotFound", l); //$NON-NLS-1$
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_TYPE_MISMATCH)) return Messages.getString("SmartLabelProvider.MergeDmTypeDifference",l ); //$NON-NLS-1$
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_ATT_TASKNAME)) return Messages.getString("SmartLabelProvider.MergeDmAttributesProgress", l); //$NON-NLS-1$
@@ -128,6 +146,14 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidKey", l); //$NON-NLS-1$
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidName", l); //$NON-NLS-1$
+		
+		if (value.equals(XmlDataModelImporter.I18NMessages.NO_DM_XML_FOUND)) return "No data model xml file found in zip file.";
+		if (value.equals(XmlDataModelImporter.I18NMessages.INVALID_XML)) return "Invalid data model xml file.";
+		
+		if (value.equals(DataModelMerger.ProgressMessages.LOADING)) return "Loading base data model.";
+		if (value.equals(DataModelMerger.ProgressMessages.TASKNAME)) return "Merging Data Models";
+		if (value.equals(DataModelMerger.ProgressMessages.MERGINGATTRIBUTES)) return "Merging attributes.";
+		if (value.equals(DataModelMerger.ProgressMessages.MERGINGCATEGORIES)) return "Merging categories.";
 		
 		if (value.equals(AREA_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.AreaTable", l); //$NON-NLS-1$
 		
@@ -182,7 +208,9 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			case MLIST: return Messages.getString("SmartLabelProvider.MultiListAttType",l); //$NON-NLS-1$
 			case NUMERIC: return Messages.getString("SmartLabelProvider.NumericAttType",l); //$NON-NLS-1$
 			case TEXT: return Messages.getString("SmartLabelProvider.TextAttType",l); //$NON-NLS-1$
-			case TREE: return Messages.getString("SmartLabelProvider.TreeAttType",l);		 //$NON-NLS-1$
+			case TREE: return Messages.getString("SmartLabelProvider.TreeAttType",l);
+			case POLYGON: return "POLYGON";
+			case LINE: return "LINE";
 		}
 		return ""; //$NON-NLS-1$
 	}

@@ -68,6 +68,10 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case SIGNATURE_TYPE_NOT_FOUND: return Messages.getString("ObservationLabelProvider.SignatureTypeNotFound", l); //$NON-NLS-1$
 		case INVALID_CM_UUID: return Messages.getString("ObservationLabelProvider.InvalidCmUuid", l); //$NON-NLS-1$
 		case CM_MISSING: return Messages.getString("ObservationLabelProvider.CmNotFound", l);	 //$NON-NLS-1$
+		case INVALID_GEOMETRY_ATTRIBUTE: return "Invalid WKB for geometry attribute ''{0}''. Observation attribute will not be imported.";
+		case INVALID_GEOMETRY_SRC_ATTRIBUTE: return "The value ''{0}'' is not a valid source value for Geometry attribute. The value will be set to Unknown";
+		case INVALID_LINE_ATTRIBUTE: return "The geometry provided for attribute ''{0}'' is not a linear geometry. Observation attribute will not be imported.";
+		case INVALID_POLYGON_ATTRIBUTE: return "The geometry provided for the attribute ''{0}'' is not a polygon geometry. Observation attribute will not be imported.";
 		}
 		return ""; //$NON-NLS-1$
 	}

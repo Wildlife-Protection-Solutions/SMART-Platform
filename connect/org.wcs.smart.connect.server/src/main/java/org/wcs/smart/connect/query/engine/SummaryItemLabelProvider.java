@@ -67,7 +67,6 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -365,8 +364,8 @@ public class SummaryItemLabelProvider {
 			results = getName((ConservationAreaGroupBy)item);
 		}else if (item instanceof DateGroupBy){
 			results = getName((DateGroupBy)item);
-		}else if (item instanceof EntityAttributeGroupBy){
-			results = getName((EntityAttributeGroupBy)item);
+//		}else if (item instanceof EntityAttributeGroupBy){
+//			results = getName((EntityAttributeGroupBy)item);
 		}else if (item instanceof MissionAttributeGroupBy){
 			results = getName((MissionAttributeGroupBy)item);
 		}else if (item instanceof ObserverGroupBy){
@@ -742,33 +741,33 @@ public class SummaryItemLabelProvider {
 		return items;
 	}
 	
-	private List<ListItem> getName(EntityAttributeGroupBy item){
-		ArrayList<ListItem> items = new ArrayList<ListItem>();
-
-		Query<String> q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey", String.class); //$NON-NLS-1$
-		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
-		q.setParameter("eaKey", item.getEntityAttributeKey()); //$NON-NLS-1$
-		q.setParameter("etKey", item.getEntityKey()); //$NON-NLS-1$
-		q.setMaxResults(1);
-		String entityTypeName = q.uniqueResult();
-		
-		if (entityTypeName == null){
-			logger.severe(MessageFormat.format("Entity attribute not found {0}.", item.getEntityAttributeKey())); //$NON-NLS-1$
-			return items;
-		}
-	
-		String key = item.asString();
-		String attributePart = key.substring(key.indexOf("attribute:")); //$NON-NLS-1$
-		AttributeGroupBy ag = AttributeGroupBy.createAttributeGroupBy(attributePart);
-		List<ListItem> aitems = getName(ag);
-		
-		for (ListItem i : aitems){
-			items.add(new ListItem(null, i.getName() + " [" + entityTypeName + "]", i.getKey())); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		sortItems(items);
-		return items;
-		
-	}
+//	private List<ListItem> getName(EntityAttributeGroupBy item){
+//		ArrayList<ListItem> items = new ArrayList<ListItem>();
+//
+//		Query<String> q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey", String.class); //$NON-NLS-1$
+//		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+//		q.setParameter("eaKey", item.getEntityAttributeKey()); //$NON-NLS-1$
+//		q.setParameter("etKey", item.getEntityKey()); //$NON-NLS-1$
+//		q.setMaxResults(1);
+//		String entityTypeName = q.uniqueResult();
+//		
+//		if (entityTypeName == null){
+//			logger.severe(MessageFormat.format("Entity attribute not found {0}.", item.getEntityAttributeKey())); //$NON-NLS-1$
+//			return items;
+//		}
+//	
+//		String key = item.asString();
+//		String attributePart = key.substring(key.indexOf("attribute:")); //$NON-NLS-1$
+//		AttributeGroupBy ag = AttributeGroupBy.createAttributeGroupBy(attributePart);
+//		List<ListItem> aitems = getName(ag);
+//		
+//		for (ListItem i : aitems){
+//			items.add(new ListItem(null, i.getName() + " [" + entityTypeName + "]", i.getKey())); //$NON-NLS-1$ //$NON-NLS-2$
+//		}
+//		sortItems(items);
+//		return items;
+//		
+//	}
 	
 	private List<ListItem> getName(MissionAttributeGroupBy item){
 		CriteriaBuilder cb = s.getCriteriaBuilder();

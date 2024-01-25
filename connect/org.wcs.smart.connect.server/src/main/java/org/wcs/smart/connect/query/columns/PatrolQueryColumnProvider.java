@@ -43,9 +43,11 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Query column implementation for patrol queries.
@@ -115,6 +117,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 //				return null;
 //			}});
 		
+		keys.add(new TrackGeometryQueryColumn(l));
+		
 		return keys;
 	}
 	
@@ -160,6 +164,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 			keys.add(qc);
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
+		keys.add(new WaypointGeometryQueryColumn(l));
 		return keys;
 	}
 	
@@ -199,6 +204,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY,l));
 		
 		keys.addAll(getPatrolAttributeQueryColumns(q, session));
+		keys.add(new WaypointGeometryQueryColumn(l));
 		
 		return keys;
 	}

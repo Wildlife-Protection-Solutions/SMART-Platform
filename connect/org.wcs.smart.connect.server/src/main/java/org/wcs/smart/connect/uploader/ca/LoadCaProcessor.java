@@ -24,7 +24,6 @@ package org.wcs.smart.connect.uploader.ca;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

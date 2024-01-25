@@ -848,7 +848,7 @@ public enum QueryManager {
 
 	public Attribute.AttributeType getAttributeType(Session session, String attributeKey, ConservationAreaFilter caFilter){
 		if (caFilter.getConservationAreaFilterIds().size() == 1){
-			org.hibernate.query.Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key", Attribute.class); //$NON-NLS-1$
+			org.hibernate.query.Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyId = :key", Attribute.class); //$NON-NLS-1$
 			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
 			q.setParameter("key", attributeKey); //$NON-NLS-1$
 			q.setCacheable(true);

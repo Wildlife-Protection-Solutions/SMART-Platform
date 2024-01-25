@@ -151,7 +151,7 @@ public class PostgresqlSyncProcessor {
 	}
 
 	private void applyChangeLog(Path changelogFile, Path changelogFilestore) throws Exception{
-		PostgresqlChangeLogDeserializer processor = new PostgresqlChangeLogDeserializer(changelogFile, changelogFilestore);
+		PostgresqlChangeLogDeserializer processor = new PostgresqlChangeLogDeserializer(info, changelogFile, changelogFilestore);
 		
 		//disable writing to change log table; all changes written to tables will
 		//not be written to change log table. We will write those changes once
@@ -162,6 +162,9 @@ public class PostgresqlSyncProcessor {
 			ChangeLogManager.INSTANCE.disableChangeTracking(info, session);
 			//apply change log
 			processor.processFile(session);
+			//write all change log 
+			processor.writeToChangeLog(session);
+			
 			ChangeLogManager.INSTANCE.enableChangeTracking(info, session);
 		}catch (Exception ex) {
 			session.getTransaction().rollback();
@@ -174,8 +177,7 @@ public class PostgresqlSyncProcessor {
 			throw ex;
 		}
 		
-		//write all change log 
-		processor.writeToChangeLog(session);
+		
 	}
 
 }

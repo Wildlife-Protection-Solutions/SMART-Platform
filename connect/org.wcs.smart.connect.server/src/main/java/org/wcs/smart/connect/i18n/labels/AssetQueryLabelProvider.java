@@ -24,7 +24,9 @@ package org.wcs.smart.connect.i18n.labels;
 import java.util.Locale;
 
 import org.wcs.smart.asset.query.model.AssetFilterOption;
+import org.wcs.smart.asset.query.model.AssetFormatOption;
 import org.wcs.smart.asset.query.model.AssetValueOption;
+import org.wcs.smart.asset.query.model.PointGeometryQueryColumn;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
@@ -67,6 +69,12 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case ASSET_ACTIVEHOURS: return Messages.getString("AssetQueryLabelProvider.TotalActiveHours", l); //$NON-NLS-1$
 			}
 		}
+		if (item instanceof AssetFormatOption){
+			switch((AssetFormatOption)item){
+			case DAYS_HOUR: return "days, hours";
+			case SECOND: return "seconds";
+			}
+		}
 		if (item instanceof AssetFilterOption){
 			switch((AssetFilterOption)item){
 			case STATION: return Messages.getString("AssetQueryLabelProvider.StationFilterOp", l); //$NON-NLS-1$
@@ -77,6 +85,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			}
 		}
 		if (item instanceof AssetDeploymentDateField) return Messages.getString("AssetQueryLabelProvider.DeploymentDateFilter", l); //$NON-NLS-1$
+
+		if (item == PointGeometryQueryColumn.KEY) return "Waypoint";
 
 		return null;
 	}

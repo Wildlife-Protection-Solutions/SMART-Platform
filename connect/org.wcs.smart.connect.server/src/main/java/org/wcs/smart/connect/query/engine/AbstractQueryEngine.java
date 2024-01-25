@@ -77,6 +77,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.AttributeFilter.GeometryProperty;
 import org.wcs.smart.filter.CategoryAttributeFilter;
 import org.wcs.smart.filter.CategoryFilter;
 import org.wcs.smart.filter.IFilter;
@@ -101,6 +102,7 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.util.UuidUtils;
@@ -378,8 +380,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return the database datatype for the observation
 	 * temporary table
 	 */
-	public String getDataType(AttributeType type) {
-		switch (type) {
+	public String getDataType(AttributeInfo info) {
+		switch (info.getType()) {
 		case LIST:
 			return "varchar(128)"; //keyid //$NON-NLS-1$
 		case TREE:
@@ -394,6 +396,11 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return "varchar(10)"; //$NON-NLS-1$
 		case MLIST:
 			throw new IllegalArgumentException();
+		case LINE:
+		case POLYGON:
+			if (info.getGeometryProperty() == GeometryProperty.AREA || info.getGeometryProperty() == GeometryProperty.PERIMETER)
+				return "double precision"; //$NON-NLS-1$
+			throw new UnsupportedOperationException("Geometry property not support in queries"); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 

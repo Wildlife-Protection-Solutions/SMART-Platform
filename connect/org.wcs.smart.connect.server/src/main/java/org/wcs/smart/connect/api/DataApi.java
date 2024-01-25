@@ -87,7 +87,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class DataApi extends HttpServlet{
-
+//https://localhost:8443/server/api/data/8f7fbe1b-201a-4ef4-bda8-14f5581e65ce
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = Logger.getLogger(DataApi.class.getName());
 	
@@ -238,8 +238,6 @@ public class DataApi extends HttpServlet{
 					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 				}
 				
-				
-					
 				JsonFileProcessor processor = null;
 				try {
 					try{

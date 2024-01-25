@@ -24,6 +24,9 @@ package org.wcs.smart.connect.uploader.sync;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent.Kind;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -34,15 +37,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 
 /**
- * Postgresql specific change log deserializer.  Deserializes a change log
+ * Postgresql specific change log deserializer. Deserializes a change log
  * file and applies each change to the database.
  * 
  * @author Emily
@@ -51,16 +57,46 @@ import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 
 	private List<ChangeLogItem> newItems;
+	private ConservationAreaInfo ca;
 	
-	public PostgresqlChangeLogDeserializer(Path changeLogFile, Path changeLogFilestore) {
+	
+	private List<Object[]> fileEvents;
+	
+	
+	public PostgresqlChangeLogDeserializer(ConservationAreaInfo ca, Path changeLogFile, Path changeLogFilestore) {
 		super(changeLogFile, changeLogFilestore);
 		newItems =  new ArrayList<>();
+		this.ca = ca;
+		this.fileEvents = new ArrayList<>();
 	}
 
 	@Override
 	public void processFile(final Session session) throws Exception{
 		session.createNativeMutationQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
 		super.processFile(session);
+
+		
+		//wait until all filestore events have been processed  
+		//if we don't do this there is a possibility the filestore 
+		//watcher get re-enabled for the CA before the events are processing
+		//causing the event to be logged as a "new change to the file"
+		//which leads to conflicts with syncing 
+		//wait a maximum of 1 second for each file so we don't end up
+		//locking
+		for (Object[] events : fileEvents) {
+			int cnt = 0;
+			while(cnt < 10 &&
+					!ChangeLogManager.INSTANCE.checkStatus(ca, (Path)events[0], (Kind<?>)events[1])) {				
+				Thread.sleep(100);
+				cnt ++;
+			}
+			if (cnt >= 10) {
+				Logger.getLogger(PostgresqlChangeLogDeserializer.class.getName())
+					.log(Level.WARNING, "Waited longer than 1 second for file event to occurr."); //$NON-NLS-1$
+
+			}
+		}
+		
 	}
 	
 	/**
@@ -86,7 +122,8 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		}else{
 			Files.deleteIfExists(toPath);
 		}
-		
+		//add to list of events
+		fileEvents.add(new Object[] {toPath, StandardWatchEventKinds.ENTRY_DELETE});		
 	}
 
 	@Override
@@ -103,13 +140,10 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		}else{
 			//ensure all parent directories are created
 			Files.createDirectories(toPath.getParent());
-			//delete existing file
-			if (!Files.isDirectory(toPath) && Files.exists(toPath)){
-				Files.delete(toPath);
-			}
-			//copy file
-			Files.copy(fromPath, toPath);
-			
+
+			Files.move(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			//add to list of events
+			fileEvents.add(new Object[] {toPath, StandardWatchEventKinds.ENTRY_CREATE});			
 		}
 	}
 

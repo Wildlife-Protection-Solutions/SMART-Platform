@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Grid query column label provider
@@ -47,6 +48,12 @@ public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvid
 		if (key.equals(GRID_TO_BIG_KEY)){
 			return Messages.getString("GridQueryColumnLabelProvider.GridTooBig", l); //$NON-NLS-1$
 		}
+		
+		if (key == GEOM_SOURCE_COLUMN_NAME ) return "{0} - Source";
+		if (key == GEOM_PERIMETER_COLUMN_NAME ) return "{0} - Perimeter";
+		if (key == GEOM_AREA_COLUMN_NAME ) return "{0} - Area";
+		if (key == WaypointGeometryQueryColumn.KEY) return "Waypoint";
+		
 		return null;
 	}
 }

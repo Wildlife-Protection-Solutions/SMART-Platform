@@ -529,7 +529,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 		sql.append(missionTable);
 		sql.append("(mission_uuid UUID,"); //$NON-NLS-1$
 		for (AttributeInfo key : keys){
-			sql.append( key.getColumnName("ma_")  + "_" + engine.getDataType(key.getType())); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append( key.getColumnName("ma_")  + "_" + engine.getDataType(key)); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(",");	 //$NON-NLS-1$
 		}
 		sql.deleteCharAt(sql.length()-1);
@@ -546,7 +546,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(lTempTable); 
 			sql.append("(mission_uuid UUID, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -687,7 +687,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 		sql.append(suAttributeTable);
 		sql.append("(sampling_unit_uuid UUID,"); //$NON-NLS-1$
 		for (AttributeInfo key : keys){
-			sql.append(key.getColumnName("sua_") + " " + engine.getDataType(key.getType())); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(key.getColumnName("sua_") + " " + engine.getDataType(key)); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(",");	 //$NON-NLS-1$
 		}
 		sql.deleteCharAt(sql.length()-1);
@@ -703,7 +703,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(lTempTable); 
 			sql.append("(sampling_unit_uuid UUID, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());

@@ -43,6 +43,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -115,8 +116,8 @@ public class CustomQueryEngine {
 		JSONObject jwp = new JSONObject();
 		jwp.put(UUID_FIELD, UuidUtils.uuidToString(pw.getUuid()));
 		jwp.put(ID_FIELD, pw.getId());
-		jwp.put("date", pw.getDateTime().toLocalDate()); //$NON-NLS-1$
-		jwp.put("time", pw.getDateTime().toLocalTime()); //$NON-NLS-1$
+		jwp.put("date", pw.getDateTime().toLocalDate().toString()); //$NON-NLS-1$
+		jwp.put("time", pw.getDateTime().toLocalTime().toString()); //$NON-NLS-1$
 		jwp.put("x", pw.getX()); //$NON-NLS-1$
 		jwp.put("y", pw.getY()); //$NON-NLS-1$
 		jwp.put("raw_x", pw.getRawX()); //$NON-NLS-1$
@@ -124,7 +125,7 @@ public class CustomQueryEngine {
 		jwp.put("distance", pw.getDistance()); //$NON-NLS-1$
 		jwp.put("bearing", pw.getDirection()); //$NON-NLS-1$
 		jwp.put("comment", pw.getComment()); //$NON-NLS-1$
-		jwp.put("last_modified", pw.getLastModified()); //$NON-NLS-1$
+		jwp.put("last_modified", pw.getLastModified().toString()); //$NON-NLS-1$
 		jwp.put("source",pw.getSourceId()); //$NON-NLS-1$
 		jwp.put("conservation_area_uuid", UuidUtils.uuidToString(pw.getConservationArea().getUuid())); //$NON-NLS-1$
 		
@@ -242,7 +243,16 @@ public class CustomQueryEngine {
 							}
 							n = n.getParent();
 						}
-						break;					
+						break;
+					case LINE:
+						joa.put(VALUE_FIELD, at.getGeometry().getGeometry().toText());
+						joa.put(GeometryProperty.SOURCE.name().toLowerCase(), at.getGeometry().getSource().name());
+						joa.put(GeometryProperty.PERIMETER.name().toLowerCase(), at.getGeometry().getPerimeter());
+					case POLYGON:
+						joa.put(VALUE_FIELD, at.getGeometry().getGeometry().toText());
+						joa.put(GeometryProperty.SOURCE.name().toLowerCase(), at.getGeometry().getSource().name());
+						joa.put(GeometryProperty.PERIMETER.name().toLowerCase(), at.getGeometry().getPerimeter());
+						joa.put(GeometryProperty.AREA.name().toLowerCase(), at.getGeometry().getArea());
 					}
 				}
 				

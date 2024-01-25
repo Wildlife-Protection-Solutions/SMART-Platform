@@ -36,6 +36,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Query column provider for asset queries.
@@ -76,7 +77,7 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 					add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 				}
 				if (add){
-					QueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
+					QueryColumn toAdd = new FixedQueryColumn(item, l);
 					cols.add(toAdd);
 
 				}
@@ -84,7 +85,9 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 			for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
 				cols.add(qc);
 			}
-			cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
+			cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
+			cols.add(new WaypointGeometryQueryColumn(l));
+
 			return cols.toArray(new QueryColumn[cols.size()]);
 	}
 		
@@ -101,10 +104,12 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 				add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 			}
 			if (add){
-				QueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
+				QueryColumn toAdd = new FixedQueryColumn(item, l);
 				cols.add(toAdd);
 			}
 		}
+		cols.add(new WaypointGeometryQueryColumn(l));
+
 		return cols.toArray(new QueryColumn[cols.size()]);
 }
 	

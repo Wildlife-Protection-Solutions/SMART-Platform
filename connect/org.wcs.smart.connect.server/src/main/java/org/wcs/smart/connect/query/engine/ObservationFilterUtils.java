@@ -117,7 +117,7 @@ public class ObservationFilterUtils {
 		sql.append("CREATE TABLE " + observationTable + " (observation_uuid uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (AttributeInfo key : keys) {
 			sql.append(", " + key.getColumnName() + " " //$NON-NLS-1$ //$NON-NLS-2$
-					+ engine.getDataType(key.getType()));
+					+ engine.getDataType(key));
 		}
 		int i = 0;
 		for (AttributeFilter f : mlistFilters) {
@@ -147,7 +147,7 @@ public class ObservationFilterUtils {
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(attributeTempTable); 
 			sql.append("(observation_uuid uuid, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
