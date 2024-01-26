@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
 import org.wcs.smart.incident.internal.Messages;
@@ -46,7 +47,9 @@ public class IncidentObservationAttributeDatasetResultSetMetadata implements IRe
 		STRING_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_stringvaluecolumnname, "attribute:stringvalue", java.sql.Types.VARCHAR),  //$NON-NLS-1$
 		NUMBER_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_numbervaluecolumnname, "attribute:numbervalue", java.sql.Types.NUMERIC),  //$NON-NLS-1$
 		BOOLEAN_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_booleanvaluecolumnname, "attribute:booleanvalue", java.sql.Types.BOOLEAN), //$NON-NLS-1$
-		DATE_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_datevaluecolumnname, "attribute:datevalue", java.sql.Types.DATE); //$NON-NLS-1$
+		DATE_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_datevaluecolumnname, "attribute:datevalue", java.sql.Types.DATE), //$NON-NLS-1$
+		LINE_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_LineGeometyrName, "attribute:linegeometry", IGeometryColumn.Type.MULTILINESTRING.birtDataType), //$NON-NLS-1$
+		POLYGON_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_PolgyonGeometryName, "attribute:polygongeometry", IGeometryColumn.Type.MULTIPOLYGON.birtDataType); //$NON-NLS-1$
 		
 		public String name;
 		public String key;
@@ -88,7 +91,20 @@ public class IncidentObservationAttributeDatasetResultSetMetadata implements IRe
 					return wo.getAttributeValueAsString(Locale.getDefault());
 				}
 				return null;
+			case LINE_VALUE:
+				if (wo.getAttribute().getType() == Attribute.AttributeType.LINE &&
+					wo.getGeometry() != null) {
+					return wo.getGeometry().getGeometry();
+				}
+				return null;
+			case POLYGON_VALUE:
+				if (wo.getAttribute().getType() == Attribute.AttributeType.POLYGON &&
+					wo.getGeometry() != null) {
+					return wo.getGeometry().getGeometry();
+				}
+				return null;
 			}
+			 
 			return null;
 		}
 	}
@@ -142,7 +158,7 @@ public class IncidentObservationAttributeDatasetResultSetMetadata implements IRe
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return SmartIncidentDriver.getNativeDataTypeName( nativeTypeCode, IncidentObservationDataset.DATASET_TYPE );
+	     return SmartIncidentDriver.getNativeDataTypeName( nativeTypeCode, IncidentObservationAttributeDataset.DATASET_TYPE );
 	}
 
 	/**

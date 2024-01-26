@@ -930,6 +930,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+          <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Incident Attachments"
@@ -1082,6 +1112,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
    </extension>
    <extension
@@ -1158,6 +1218,9 @@
       <MapLayer
             maplayer="org.wcs.smart.incident.birt.IncidentMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.incident.birt.IncidentMapLayer">
+      </StyleProvider>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -1213,6 +1276,14 @@
       <defaultmaplayerstyle
             class="org.wcs.smart.incident.map.IncidentMapWaypointRawDefaultStyle">
       </defaultmaplayerstyle>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <coreUpgrader
+            fromVersion="7.5.7"
+            toVersion="8.0.0"
+            upgrader="org.wcs.smart.independentincident.plugin.DesktopReport800Upgrader">
+      </coreUpgrader>
    </extension>
 
 </plugin>

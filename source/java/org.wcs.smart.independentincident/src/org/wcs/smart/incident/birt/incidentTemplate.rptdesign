@@ -318,7 +318,7 @@
                     <property name="name">wp:rawgeometry</property>
                     <property name="nativeName">wp:rawgeometry</property>
                     <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
+                    <property name="nativeDataType">8200</property>
                 </structure>
                 <structure>
                     <property name="position">15</property>
@@ -1330,6 +1330,20 @@
                     <text-property name="displayName">Date Value</text-property>
                     <text-property name="heading">Date Value</text-property>
                 </structure>
+                <structure>
+                	<property name="columnName">attribute:linegeometry</property>
+                	<property name="alias">Line Geometry</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Line Geometry</text-property>
+                    <text-property name="heading">Line Geometry</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:polygongeometry</property>
+                	<property name="alias">Polygon Geometry</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Polygon Geometry</text-property>
+                    <text-property name="heading">Polygon Geometry</text-property>
+                </structure>
             </list-property>
             <list-property name="parameters">
                 <structure>
@@ -1381,6 +1395,16 @@
                         <property name="position">7</property>
                         <property name="name">Date Value</property>
                         <property name="dataType">date</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">Line Geometry</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">Polygon Geometry</property>
+                        <property name="dataType">javaObject</property>
                     </structure>
                 </list-property>
             </structure>
@@ -1435,6 +1459,21 @@
                     <property name="dataType">date</property>
                     <property name="nativeDataType">91</property>
                 </structure>
+                 <structure>
+                    <property name="position">8</property>
+                    <property name="name">attribute:linegeometry</property>
+                    <property name="nativeName">attribute:linegeometry</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">8203</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">attribute:polygongeometry</property>
+                    <property name="nativeName">attribute:polygongeometry</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">8205</property>
+                </structure>
+                
             </list-property>
             <xml-property name="queryText"><![CDATA[]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -2559,15 +2598,27 @@
         <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="721">
             <property name="org.wcs.smart.birt.map.basemap">default</property>
             <property name="org.wcs.smart.birt.map.layers2">
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="1264">
+                    <property name="org.wcs.smart.birt.map.layerName">attributes - Polygon Geometry</property>
+                    <property name="org.wcs.smart.birt.map.layerType">MULTIPOLYGON</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">attribute:polygongeometry</property>
+                    <property name="dataSet">attributes</property>
+                </extended-item>
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="1263">
+                    <property name="org.wcs.smart.birt.map.layerName">attributes - Line Geometry</property>
+                    <property name="org.wcs.smart.birt.map.layerType">MULTILINE</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">attribute:linegeometry</property>
+                    <property name="dataSet">attributes</property>
+                </extended-item>
                 <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="725">
-                    <property name="org.wcs.smart.birt.map.layerName">Incidents</property>
+                    <property name="org.wcs.smart.birt.map.layerName">details - Geometry</property>
                     <property name="org.wcs.smart.birt.map.layerStyle">[{"id":"org.locationtech.udig.style.filter","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"FilterContent\" version=\"1.0\"/>"},{"id":"org.locationtech.udig.style.sld","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"SLDStyle\" version=\"1.0\">&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;lt;sld:UserStyle xmlns=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:sld=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:gml=&amp;quot;http://www.opengis.net/gml&amp;quot; xmlns:ogc=&amp;quot;http://www.opengis.net/ogc&amp;quot;&amp;gt;&amp;lt;sld:Name&amp;gt;newLayer&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeStyle&amp;gt;&amp;lt;sld:Name&amp;gt;group0&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeName&amp;gt;Feature&amp;lt;/sld:FeatureTypeName&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;generic:geometry&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;simple&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:Rule&amp;gt;&amp;lt;sld:Name&amp;gt;default rule&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:Title&amp;gt;default rule&amp;lt;/sld:Title&amp;gt;&amp;lt;sld:PointSymbolizer&amp;gt;&amp;lt;sld:Graphic&amp;gt;&amp;lt;sld:Mark&amp;gt;&amp;lt;sld:WellKnownName&amp;gt;X&amp;lt;/sld:WellKnownName&amp;gt;&amp;lt;sld:Fill&amp;gt;&amp;lt;sld:CssParameter name=&amp;quot;fill&amp;quot;&amp;gt;#0000FF&amp;lt;/sld:CssParameter&amp;gt;&amp;lt;/sld:Fill&amp;gt;&amp;lt;sld:Stroke/&amp;gt;&amp;lt;/sld:Mark&amp;gt;&amp;lt;sld:Size&amp;gt;15&amp;lt;/sld:Size&amp;gt;&amp;lt;/sld:Graphic&amp;gt;&amp;lt;/sld:PointSymbolizer&amp;gt;&amp;lt;/sld:Rule&amp;gt;&amp;lt;/sld:FeatureTypeStyle&amp;gt;&amp;lt;/sld:UserStyle&amp;gt;&lt;/styleEntry>"},{"id":"org.locationtech.udig.mapgraphic.style.font","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-16777216\" FONT_NAME=\"Dialog\" SIZE=\"8\" STYLE=\"0\"/>"},{"id":"org.locationtech.udig.mapgraphic.scaledenom.style","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-1\" LABEL_PREFIX=\"\"/>"}]</property>
                     <property name="org.wcs.smart.birt.map.layerType">POINT</property>
                     <property name="org.wcs.smart.birt.map.geomColumn">wp:geometry</property>
                     <property name="dataSet">details</property>
                 </extended-item>
                 <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="724">
-                    <property name="org.wcs.smart.birt.map.layerName">Incidents</property>
+                    <property name="org.wcs.smart.birt.map.layerName">details - Raw Geometry</property>
                     <property name="org.wcs.smart.birt.map.layerStyle">[{"id":"org.locationtech.udig.style.filter","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"FilterContent\" version=\"1.0\"/>"},{"id":"org.locationtech.udig.style.sld","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"SLDStyle\" version=\"1.0\">&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;lt;sld:UserStyle xmlns=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:sld=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:gml=&amp;quot;http://www.opengis.net/gml&amp;quot; xmlns:ogc=&amp;quot;http://www.opengis.net/ogc&amp;quot;&amp;gt;&amp;lt;sld:Name&amp;gt;newLayer&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeStyle&amp;gt;&amp;lt;sld:Name&amp;gt;group0&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeName&amp;gt;Feature&amp;lt;/sld:FeatureTypeName&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;generic:geometry&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;simple&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:Rule&amp;gt;&amp;lt;sld:Name&amp;gt;default rule&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:Title&amp;gt;default rule&amp;lt;/sld:Title&amp;gt;&amp;lt;sld:PointSymbolizer&amp;gt;&amp;lt;sld:Graphic&amp;gt;&amp;lt;sld:Mark&amp;gt;&amp;lt;sld:WellKnownName&amp;gt;circle&amp;lt;/sld:WellKnownName&amp;gt;&amp;lt;sld:Fill&amp;gt;&amp;lt;sld:CssParameter name=&amp;quot;fill&amp;quot;&amp;gt;#0080FF&amp;lt;/sld:CssParameter&amp;gt;&amp;lt;/sld:Fill&amp;gt;&amp;lt;sld:Stroke/&amp;gt;&amp;lt;/sld:Mark&amp;gt;&amp;lt;sld:Size&amp;gt;10&amp;lt;/sld:Size&amp;gt;&amp;lt;/sld:Graphic&amp;gt;&amp;lt;/sld:PointSymbolizer&amp;gt;&amp;lt;/sld:Rule&amp;gt;&amp;lt;/sld:FeatureTypeStyle&amp;gt;&amp;lt;/sld:UserStyle&amp;gt;&lt;/styleEntry>"},{"id":"org.locationtech.udig.mapgraphic.style.font","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-16777216\" FONT_NAME=\"Dialog\" SIZE=\"8\" STYLE=\"0\"/>"},{"id":"org.locationtech.udig.mapgraphic.scaledenom.style","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-1\" LABEL_PREFIX=\"\"/>"}]</property>
                     <property name="org.wcs.smart.birt.map.layerType">POINT</property>
                     <property name="org.wcs.smart.birt.map.geomColumn">wp:rawgeometry</property>

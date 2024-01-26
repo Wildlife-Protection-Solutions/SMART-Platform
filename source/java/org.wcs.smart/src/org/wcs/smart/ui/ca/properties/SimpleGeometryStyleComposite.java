@@ -125,6 +125,7 @@ public class SimpleGeometryStyleComposite extends Composite{
 		spnLineAlpaha.setMinimum(0);
 		spnLineAlpaha.setMaximum(100);
 		spnLineAlpaha.setIncrement(10);
+		spnLineAlpaha.setSelection(100);
 		spnLineAlpaha.setToolTipText("Transparency value between 0 (transparent) and 100 (opaque)");
 		
 		l = new Label(this, SWT.NONE);
@@ -153,6 +154,7 @@ public class SimpleGeometryStyleComposite extends Composite{
 		spnFillAlpaha.setMinimum(0);
 		spnFillAlpaha.setMaximum(100);
 		spnFillAlpaha.setIncrement(10);
+		spnFillAlpaha.setSelection(100);
 		spnFillAlpaha.setToolTipText("Transparency value between 0 (transparent) and 100 (opaque)");
 		
 		//get listeners for disabling 
