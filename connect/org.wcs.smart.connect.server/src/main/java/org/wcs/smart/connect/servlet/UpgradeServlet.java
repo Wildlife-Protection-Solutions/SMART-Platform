@@ -65,6 +65,7 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.i2.ProfileReport800Upgrader;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.incident.IncidentReport800Upgrader;
 import org.wcs.smart.report.Report800Upgrader;
@@ -1308,6 +1309,7 @@ public class UpgradeServlet extends HttpServlet {
 		try {
 			warnings.addAll( (new Report800Upgrader()).upgrade(s));
 			warnings.addAll( (new IncidentReport800Upgrader()).upgrade(s));
+			warnings.addAll( (new ProfileReport800Upgrader()).upgrade(s));
 		} catch (SQLException e) {
 			throw new HibernateException(e);
 		}

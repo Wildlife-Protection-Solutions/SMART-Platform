@@ -330,6 +330,9 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         patrolUpdatedListeners = null;
     }
 
+    public void renderMap() {
+    	super.getMap().getRenderManager().refresh(null);
+    }
 
     private IMapEditManager getEditManager(){
     	return new IMapEditManager() {

@@ -25,10 +25,14 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.StyleUtil;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * Map layer for entity location attributes
@@ -50,6 +54,26 @@ public class ProfileMapLayersStyleProvider implements IBirtLayerStyleProvider {
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
 			sb.put("org.locationtech.udig.style.sld", StyleUtil.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
 			return sb;
+		}
+		
+		if (extensionId.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)){
+			//return red star style
+			//style based on attribute
+			
+			//get all geometry attributes
+			Attribute.AttributeType type = null;
+			if (info.getLayerType() == LayerType.MULTILINE || info.getLayerType() == LayerType.LINE) {
+				type = Attribute.AttributeType.LINE;
+			}
+			if (info.getLayerType() == LayerType.MULTIPOLYGON || info.getLayerType() == LayerType.POLYGON) {
+				type = Attribute.AttributeType.POLYGON;
+			}
+			if (type == null) return null;
+
+			//TODO: locale here
+			return StyleManager.INSTANCE.buildThemedGeometryAttributeStyle(
+					"Attribute Key", 
+					type, s, ca, true);					
 		}
 		return null;
 	}

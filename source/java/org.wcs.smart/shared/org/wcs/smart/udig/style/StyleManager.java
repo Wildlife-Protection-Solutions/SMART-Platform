@@ -41,7 +41,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.Rule;
 import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
+import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
 import org.locationtech.udig.core.internal.ExtensionPointProcessor;
 import org.locationtech.udig.core.internal.ExtensionPointUtil;
@@ -55,9 +60,13 @@ import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.style.sld.SLD;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.coverage.grid.GridCoverage;
+import org.opengis.filter.FilterFactory;
+import org.opengis.style.FeatureTypeStyle;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.SmartStyle;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
@@ -530,5 +539,55 @@ public class StyleManager {
 	public void applyDefaultStyleToMapLayer(ConservationArea ca, Layer l, Map<String,String> geoIdToMapStyle, Session session,
 			IProgressMonitor monitor) throws IOException {
 		this.applyDefaultStyleToMapLayer(ca, l, geoIdToMapStyle, Collections.emptyMap(), session, monitor);	
+	}
+	
+	
+	public StyleBlackboard buildThemedGeometryAttributeStyle(String attributeField, AttributeType type, 
+			Session session, ConservationArea ca, boolean isKeyBased) {
+		//get all geometry attributes
+		
+		List<Attribute> attributes = session.createQuery("FROM Attribute WHERE type = :type and conservationArea = :ca", Attribute.class) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("type", type) //$NON-NLS-1$
+				.list();
+		
+		if (attributes.isEmpty()) return null;
+		//combine these into a single style
+		
+		StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
+		
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+
+		StyleBuilder sbuilder = new StyleBuilder(sf);
+		
+		Style x = sbuilder.createStyle();
+		List<Rule> rules = new ArrayList<>();
+		for (Attribute a : attributes) {
+			FeatureTypeStyle fs = a.getAttributeGeometryStyle().toStyle().featureTypeStyles().get(0);
+			
+			//extract the symbolizer
+			Symbolizer sym = (Symbolizer) fs.rules().get(0).symbolizers().get(0);
+			
+			//create rule
+			Rule r= sf.createRule();
+			if (isKeyBased) {
+				r.setFilter(ff.equal(ff.property(attributeField.replaceAll(" ", "_")), //$NON-NLS-1$ //$NON-NLS-2$
+						ff.literal(a.getKeyId()), false));
+			}else {
+				r.setFilter(ff.equal(ff.property(attributeField.replaceAll(" ", "_")), //$NON-NLS-1$ //$NON-NLS-2$
+						ff.literal(a.getName()), false));
+			}
+			r.setName(a.getName());
+
+			r.symbolizers().add(sym);
+			
+			rules.add(r);
+		}
+		x.featureTypeStyles().add (
+				sbuilder.createFeatureTypeStyle("Feature", rules.toArray(new Rule[rules.size()])) //$NON-NLS-1$
+				);	
+		sb.put(SLDContent.ID, x);
+		return sb;
 	}
 }

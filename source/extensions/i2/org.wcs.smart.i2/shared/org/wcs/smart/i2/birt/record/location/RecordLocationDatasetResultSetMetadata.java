@@ -49,7 +49,7 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	public static enum Column{
 		RECORD_UUID("recordlocation:record_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		ID("recordlocation:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		POINT("recordlocation:linestring", IGeometryColumn.Type.POINT.birtDataType), //$NON-NLS-1$
+		POINT("recordlocation:point", IGeometryColumn.Type.POINT.birtDataType), //$NON-NLS-1$
 		POLYGON("recordlocation:polygon", IGeometryColumn.Type.POLYGON.birtDataType), //$NON-NLS-1$
 		DATE("recordlocation:date", java.sql.Types.DATE), //$NON-NLS-1$
 		COMMENT("recordlocation:comment", java.sql.Types.VARCHAR), //$NON-NLS-1$

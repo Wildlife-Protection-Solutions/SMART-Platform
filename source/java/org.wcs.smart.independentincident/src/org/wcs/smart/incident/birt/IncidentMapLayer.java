@@ -48,6 +48,7 @@ import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * MapLayer for adding incident dataset to BIRT map.
@@ -97,45 +98,9 @@ public class IncidentMapLayer implements IBirtMapLayerManager, IBirtLayerStylePr
 			}
 			if (type == null) return null;
 			
-			List<Attribute> attributes = s.createQuery("FROM Attribute WHERE type = :type and conservationArea = :ca", Attribute.class) //$NON-NLS-1$
-					.setParameter("ca", ca) //$NON-NLS-1$
-					.setParameter("type", type) //$NON-NLS-1$
-					.list();
-			
-			if (attributes.isEmpty()) return null;
-			//combine these into a single style
-			
-			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
-			
-			StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-			FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-
-			StyleBuilder sbuilder = new StyleBuilder(sf);
-			
-			Style x = sbuilder.createStyle();
-			List<Rule> rules = new ArrayList<>();
-			for (Attribute a : attributes) {
-				FeatureTypeStyle fs = a.getAttributeGeometryStyle().toStyle().featureTypeStyles().get(0);
-				
-				//extract the symbolizer
-				Symbolizer sym = (Symbolizer) fs.rules().get(0).symbolizers().get(0);
-				
-				//create rule
-				Rule r= sf.createRule();
-				r.setFilter(ff.equal(ff.property(IncidentObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE.name.replaceAll(" ", "_")), //$NON-NLS-1$ //$NON-NLS-2$
-							ff.literal(a.getName()), false)); 
-				r.setName(a.getName());
-
-				r.symbolizers().add(sym);
-				
-				rules.add(r);
-			}
-			x.featureTypeStyles().add (
-					sbuilder.createFeatureTypeStyle("Feature", rules.toArray(new Rule[rules.size()])) //$NON-NLS-1$
-					);	
-			sb.put(SLDContent.ID, x);	
-			return sb;
-			
+			return StyleManager.INSTANCE.buildThemedGeometryAttributeStyle(
+					IncidentObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE.name, 
+					type, s, ca, false);			
 		}
 		return null;
 	}

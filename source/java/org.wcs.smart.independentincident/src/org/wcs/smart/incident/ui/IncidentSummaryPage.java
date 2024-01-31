@@ -690,16 +690,15 @@ public class IncidentSummaryPage extends EditorPart {
 					}else{
 						employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
 					}
-				}
-				if (employees != null){
-					Collections.sort(employees, new Comparator<Employee>() {
-						@Override
-						public int compare(Employee arg0, Employee arg1) {
-							return Collator.getInstance().compare(
-									SmartLabelProvider.getFullLabel(arg0).toUpperCase(), 
-									SmartLabelProvider.getFullLabel(arg1).toUpperCase());
-						}
-					});
+					
+					if (employees != null){
+						employees.sort((a,b)->
+							Collator.getInstance().compare(
+								SmartLabelProvider.getFullLabel(a).toUpperCase(), 
+								SmartLabelProvider.getFullLabel(b).toUpperCase())							
+						);
+					}
+					
 				}
 				
 				return Status.OK_STATUS;

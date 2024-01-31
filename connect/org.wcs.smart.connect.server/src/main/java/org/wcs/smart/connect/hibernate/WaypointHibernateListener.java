@@ -46,7 +46,8 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
  */
 public class WaypointHibernateListener implements PreInsertEventListener, PreUpdateEventListener{
 
-
+	//TODO: figure out how to set last modified by
+	
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
 		Waypoint wp = null;

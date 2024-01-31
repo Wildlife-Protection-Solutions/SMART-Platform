@@ -38,6 +38,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
  * Entity locations dataset results metadata
  * 
  * @author Emily
+ * @since 8.0.0
  *
  */
 public class EntityLocationObservationAttributeDatasetResultSetMetadata implements IResultSetMetaData {

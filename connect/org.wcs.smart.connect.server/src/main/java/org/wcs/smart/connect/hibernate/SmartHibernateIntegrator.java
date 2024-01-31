@@ -27,6 +27,7 @@ import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
+import org.wcs.smart.connect.event.EventHibernateListener;
 
 /**
  * Hibernate integrator for intelligence modified dates and last
@@ -47,6 +48,15 @@ public class SmartHibernateIntegrator implements Integrator {
         WaypointHibernateListener listener = new WaypointHibernateListener();
         eventListenerRegistry.prependListeners( EventType.PRE_INSERT, listener );
         eventListenerRegistry.prependListeners( EventType.PRE_UPDATE, listener );
+        
+        EventHibernateListener elistener = new EventHibernateListener(sessionFactory);
+        eventListenerRegistry.appendListeners( EventType.POST_COMMIT_INSERT, elistener );
+        
+        IntelHibernateListener intellistener = new IntelHibernateListener();
+        eventListenerRegistry.prependListeners( EventType.PRE_INSERT, intellistener );
+        eventListenerRegistry.prependListeners( EventType.PRE_UPDATE, intellistener );
+        
+        //TODO: add QA listeners
 	}
 	
 	@Override

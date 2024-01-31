@@ -1179,14 +1179,10 @@ public class MissionDayComposite {
 							SmartLabelProvider.getFullLabel(mm.getMember());
 						}
 						//sort
-						Collections.sort(emps, new Comparator<Employee>() {
-							@Override
-							public int compare(Employee arg0, Employee arg1) {
-								return Collator.getInstance().compare(
-										SmartLabelProvider.getFullLabel(arg0).toUpperCase(), 
-										SmartLabelProvider.getFullLabel(arg1).toUpperCase());
-							}
-						});
+						emps.sort((a,b)->Collator.getInstance().compare(
+								SmartLabelProvider.getFullLabel(a).toUpperCase(), 
+								SmartLabelProvider.getFullLabel(b).toUpperCase()));
+
 					}
 				}
 				observationEditor.setObservers(emps);

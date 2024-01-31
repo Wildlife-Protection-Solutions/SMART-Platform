@@ -407,6 +407,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
     	});
 	}
 
+    public void renderMap() {
+    	super.getMap().getRenderManager().refresh(null);
+    }
+    
 	private void addLayers(){
 		if (loadDefaultLayers != null){
 			loadDefaultLayers.cancel();			
