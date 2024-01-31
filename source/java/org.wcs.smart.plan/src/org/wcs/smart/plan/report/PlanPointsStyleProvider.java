@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.report;
 
+import java.util.Locale;
+
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
@@ -42,7 +44,7 @@ public class PlanPointsStyleProvider implements IBirtLayerStyleProvider {
 
 	@Override
 	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info,
-			ConservationArea ca, Session s) {
+			ConservationArea ca, Locale l,  Session s) {
 		if (extensionId.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
 			sb.put(SLDContent.ID, PlanTargetGeoResource.createStyle(!queryText.equals("plan"))); //$NON-NLS-1$		

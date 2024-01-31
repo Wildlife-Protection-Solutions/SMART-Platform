@@ -1416,6 +1416,10 @@ public class UpgradeServlet extends HttpServlet {
 						"ALTER TABLE smart.i_observation_attribute add column geom bytea", //$NON-NLS-1$
 						"ALTER TABLE smart.i_observation_attribute add column double_value_2 double precision", //$NON-NLS-1$
 						
+						"ALTER TABLE smart.i_entity alter column created_by drop not null", //$NON-NLS-1$
+						"ALTER TABLE smart.i_record alter column created_by drop not null", //$NON-NLS-1$
+						"ALTER TABLE smart.i_attachment alter column created_by drop not null", //$NON-NLS-1$
+						
 						//postgis update
 						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]');END; $$", //$NON-NLS-1$
 

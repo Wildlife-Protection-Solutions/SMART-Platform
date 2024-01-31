@@ -45,7 +45,6 @@ import org.wcs.smart.i2.model.IntelLocation;
  */
 public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaData {
 	
-	//TODO: provide update script for this
 	public static enum Column{
 		RECORD_UUID("recordlocation:record_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		ID("recordlocation:id", java.sql.Types.VARCHAR), //$NON-NLS-1$

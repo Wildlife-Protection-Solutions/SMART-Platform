@@ -19,15 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.hibernate;
+package org.wcs.smart.connect.hibernate.listeners;
 
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
-import org.wcs.smart.connect.event.EventHibernateListener;
 
 /**
  * Hibernate integrator for intelligence modified dates and last
@@ -40,6 +42,7 @@ public class SmartHibernateIntegrator implements Integrator {
 
 	@Override
 	public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+		
 		// As you might expect, an EventListenerRegistry is the place with which event listeners are registered  It is a service
         // so we look it up using the service registry
         final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService( EventListenerRegistry.class );
@@ -56,7 +59,8 @@ public class SmartHibernateIntegrator implements Integrator {
         eventListenerRegistry.prependListeners( EventType.PRE_INSERT, intellistener );
         eventListenerRegistry.prependListeners( EventType.PRE_UPDATE, intellistener );
         
-        //TODO: add QA listeners
+        eventListenerRegistry.appendListeners( EventType.POST_COMMIT_INSERT, new QaHibernateListener(sessionFactory) );
+
 	}
 	
 	@Override

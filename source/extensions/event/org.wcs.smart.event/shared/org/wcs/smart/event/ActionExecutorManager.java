@@ -22,13 +22,18 @@
 package org.wcs.smart.event;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.event.model.IActionType;
+import org.wcs.smart.event.model.IActionTypeExecutor;
 
 /**
  * Action type manager
@@ -36,41 +41,52 @@ import org.wcs.smart.event.model.IActionType;
  * @author Emily
  *
  */
-public enum ActionTypeManager {
+public enum ActionExecutorManager {
 
 	INSTANCE;
 	
-	private static Logger logger = Logger.getLogger( ActionTypeManager.class.getCanonicalName());
-	private volatile List<IActionType> types = null;
+	private static Logger logger = Logger.getLogger( ActionExecutorManager.class.getCanonicalName());
 	
-	public List<IActionType> getActionTypes(){
+	private volatile List<IActionTypeExecutor> executors = null;
+	
+	public List<IActionTypeExecutor> getActionTypes(){
 		return getActionTypesInternal();
 	}
 	
-	public IActionType getActionType(String key) {
-		for(IActionType t : getActionTypesInternal()) {
+	public IActionTypeExecutor getActionType(String key) {
+		for(IActionTypeExecutor t : getActionTypesInternal()) {
 			if (t.getKey().equals(key)) return t;
 		}
 		return null;
 	}
 	
-	private List<IActionType> getActionTypesInternal() {
-		if (types != null) return types;
+	private List<IActionTypeExecutor> getActionTypesInternal() {
+		if (executors != null) return executors;
 		synchronized (INSTANCE) {
-			if (types != null) return types;
+			if (executors != null) return executors;
 
-			List<IActionType> localTypes = new ArrayList<>();
-			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IActionType.EXTENSION_ID);
-			for (IConfigurationElement e : config) {	
-				try {
-					IActionType type = (IActionType) e.createExecutableExtension("class"); //$NON-NLS-1$
-					localTypes.add(type);
-				}catch (Exception ex) {
-					logger.log(Level.WARNING,ex.getMessage(),ex);
+			List<IActionTypeExecutor> localTypes = new ArrayList<>();
+			
+			
+			IExtensionRegistry registry = Platform.getExtensionRegistry();
+	        IExtensionPoint extensionPoint = registry.getExtensionPoint(IActionType.EXTENSION_ID);
+	        if (extensionPoint == null) return Collections.emptyList();
+	            
+	        IExtension[] extensions = extensionPoint.getExtensions();
+			
+			for (IExtension extension : extensions) {
+	            IConfigurationElement[] elements = extension.getConfigurationElements();
+				for (IConfigurationElement e : elements) {	
+					try {
+						IActionTypeExecutor type = (IActionTypeExecutor) e.createExecutableExtension("actionExecutor"); //$NON-NLS-1$
+						localTypes.add(type);
+					}catch (Exception ex) {
+						logger.log(Level.WARNING,ex.getMessage(),ex);
+					}
 				}
 			}
-			this.types = localTypes;
-			return this.types;
+			this.executors = localTypes;
+			return this.executors;
 		}
 	}
 }

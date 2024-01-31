@@ -104,6 +104,7 @@
 		<module>../extensions/asset/org.wcs.smart.asset.query.report/pom-shared.xml</module>
 		
 		<module>../extensions/event/org.wcs.smart.event/pom-shared.xml</module>
+		<module>../extensions/event/org.wcs.smart.event.i2/pom-shared.xml</module>
 		<module>../extensions/r/org.wcs.smart.r/pom-shared.xml</module>
 		
 		<module>../extensions/paws/org.wcs.smart.paws/pom-shared.xml</module>

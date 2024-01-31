@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -74,13 +76,20 @@ public class EventProcessingJob extends Job {
 		while(!observations.isEmpty()) {
 			monitor.setTaskName(Messages.EventProcessingJob_RemainingTaskLabel + observations.size());
 			WaypointObservation o = observations.remove(0);
-			try(Session session = HibernateManager.openSession()){
+			try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 				WaypointObservation temp = session.get(WaypointObservation.class, o.getUuid());
+				
+				Employee e = session.get(Employee.class, SmartDB.getCurrentEmployee().getUuid());
+				if (e != null && !e.getConservationArea().equals(temp.getWaypoint().getConservationArea())) e = null;
 				if (temp != null) o = temp;
 				for(EActionEvent event : getEventActions()) {
 					if (!event.isEnabled()) continue;
 					try {
-						EventProcessor.INSTANCE.processEvent(event, o);
+						
+						Object data = EventProcessor.INSTANCE.processEvent(event, o, e, session);
+						if (data != null) {
+							ActionTypeManagerInternal.INSTANCE.getActionType(event.getAction().getActionTypeKey()).afterExecuted(data);
+						}
 					}catch (Exception ex) {
 						EventPlugIn.displayLog(MessageFormat.format(Messages.EventProcessingJob_EventProcessingError, ex.getMessage()), ex);
 					}

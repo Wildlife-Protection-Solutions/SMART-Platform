@@ -3,7 +3,6 @@ package org.wcs.smart.i2;
 import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -33,8 +31,6 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -57,40 +53,39 @@ public class ProfileReport800Upgrader {
 
 		warnings.addAll( upgradeReportFiles(session));
 		warnings.addAll( upgradeBirtTemplates(session));
-		//TODO: record template
+
 		return warnings;
 	}
 	
 	private List<String> upgradeBirtTemplates(Session session) throws SQLException {
 		List<String> warnings = new ArrayList<>();
-
-		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				
+				//entity type templates
 				try(ResultSet r_rs = c.createStatement().executeQuery(
 						"select birt_template, keyId, ca_uuid from smart.i_entity_type where birt_template is not null")){ //$NON-NLS-1$
 					while (r_rs.next()) {
 						String file = r_rs.getString(1);
-						String entityTypeId = r_rs.getString(2);
+						
 						UUID ca_uuid = UuidUtils.byteToUUID(r_rs.getBytes(3));
 						
 						Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
 								.resolve(UuidUtils.getDirectoryPath(ca_uuid))
-								.resolve("intelligence2")
-								.resolve("entitytypes")
+								.resolve("intelligence2") //$NON-NLS-1$
+								.resolve("entitytypes") //$NON-NLS-1$
 								.resolve(file);
 						
 						try {
 							upgradeFile(p);
 						}catch (Exception ex) {
 							Logger.getLogger(ProfileReport800Upgrader.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-							warnings.add(MessageFormat.format("Unable to update report file {0}. Report may need updating before running", p.toString()));
+							warnings.add(MessageFormat.format("Unable to update report file {0}. Report may need updating before running", p.toString())); //$NON-NLS-1$
 						}
 					}
 				}
 				
+				//record templates
 				try(ResultSet r_rs = c.createStatement().executeQuery(
 						"select uuid from smart.conservation_area")){ //$NON-NLS-1$
 					while (r_rs.next()) {
@@ -98,8 +93,8 @@ public class ProfileReport800Upgrader {
 						
 						Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
 								.resolve(UuidUtils.getDirectoryPath(ca_uuid))
-								.resolve("intelligence2")
-								.resolve("record.rptdesign");
+								.resolve("intelligence2") //$NON-NLS-1$
+								.resolve("record.rptdesign"); //$NON-NLS-1$
 						
 						try {
 							if (Files.exists(p)) {
@@ -107,7 +102,7 @@ public class ProfileReport800Upgrader {
 							}
 						}catch (Exception ex) {
 							Logger.getLogger(ProfileReport800Upgrader.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-							warnings.add(MessageFormat.format("Unable to update report file {0}. Report may need updating before running", p.toString()));
+							warnings.add(MessageFormat.format("Unable to update report file {0}. Report may need updating before running", p.toString())); //$NON-NLS-1$
 						}
 					}
 				}
@@ -129,7 +124,7 @@ public class ProfileReport800Upgrader {
 						String reportId = r_rs.getString(4);
 						String caFileDataStoreLocation = SmartContext.INSTANCE.getFilestoreLocation() + File.separator + UuidUtils.getDirectoryPath(UuidUtils.byteToUUID(ca_uuid));
 						try {
-							Path path = Paths.get(caFileDataStoreLocation).resolve("reports").resolve(reportFilename);
+							Path path = Paths.get(caFileDataStoreLocation).resolve("reports").resolve(reportFilename); //$NON-NLS-1$
 							upgradeFile(path);
 						} catch (Exception ex) {
 							String reportName = reportId;
@@ -189,13 +184,13 @@ public class ProfileReport800Upgrader {
 			Node dataSetItem = dataSetItems.item(i);
 			String extid = dataSetItem.getAttributes().getNamedItem(EXTENSION_ID_ATT_NAME).getTextContent();
 
-			if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.entity.attribute.location")){
+			if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.entity.attribute.location")){ //$NON-NLS-1$
 				updateEntityLocationAttributeDataset(dataSetItem);
-			}else if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.entity.location")){
+			}else if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.entity.location")){ //$NON-NLS-1$
 				updateEntityLocationDataset(dataSetItem, doc);
-			}else if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.query")) {
+			}else if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.query")) { //$NON-NLS-1$
 				updateQueryDataset(dataSetItem, doc);
-			}else if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.record.location")) {
+			}else if (extid.equalsIgnoreCase("org.wcs.smart.i2.birt.dataset.record.location")) { //$NON-NLS-1$
 				updateRecordLocationDataset(dataSetItem, doc);
 			}
 		}
@@ -254,13 +249,13 @@ public class ProfileReport800Upgrader {
 		//replace location:geom with location:polygon 8204 and location:point 8200
 		// update the native data type for the geometry columns
 		
-		String datasetName = dataSetItem.getAttributes().getNamedItem("name").getNodeValue();
+		String datasetName = dataSetItem.getAttributes().getNamedItem(NAME_ATT_NAME).getNodeValue();
 		
 		for (int j = 0; j < dataSetItem.getChildNodes().getLength(); j++) {
 			Node property = dataSetItem.getChildNodes().item(j);
 		
-			if (property.getNodeName().equalsIgnoreCase("text-property")
-					&& nameAttributeEquals(property, "displayName")) {
+			if (property.getNodeName().equalsIgnoreCase("text-property") //$NON-NLS-1$
+					&& nameAttributeEquals(property, "displayName")) { //$NON-NLS-1$
 				datasetName = property.getFirstChild().getNodeValue();
 			}
 			
@@ -276,7 +271,7 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null)
 							continue;
 
-						if (nameAttributeEquals(kid, "columnName") && nodeValue(kid,"location:geom")) { //$NON-NLS-1$
+						if (nameAttributeEquals(kid, "columnName") && nodeValue(kid,"location:geom")) { //$NON-NLS-1$ //$NON-NLS-2$
 							location = structure;
 							break;
 						}
@@ -290,13 +285,13 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null) continue;
 
 						if (nameAttributeEquals(kid, "columnName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("location:polygon");
+							kid.getFirstChild().setNodeValue("location:polygon"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "alias") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "displayName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "heading") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}
 					}
 					property.appendChild(clone);
@@ -306,26 +301,26 @@ public class ProfileReport800Upgrader {
 						Node kid = location.getChildNodes().item(p);
 						if (kid.getAttributes() == null) continue;
 							if (nameAttributeEquals(kid, "columnName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("location:point");
+							kid.getFirstChild().setNodeValue("location:point"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "alias") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "displayName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "heading") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}
 					}
 				}
 			}
 
-			if (property.getNodeName().equalsIgnoreCase("structure")
-					&& nameAttributeEquals(property, "cachedMetaData")) {
+			if (property.getNodeName().equalsIgnoreCase("structure") //$NON-NLS-1$
+					&& nameAttributeEquals(property, "cachedMetaData")) { //$NON-NLS-1$
 				//find resultSetList
 				Node rs = null;
 				for (int k = 0; k < property.getChildNodes().getLength(); k++) {
 					Node kid = property.getChildNodes().item(k);
 					if (kid.getAttributes() == null) continue;
-					if (nameAttributeEquals(kid, "resultSet")) {
+					if (nameAttributeEquals(kid, "resultSet")) { //$NON-NLS-1$
 						rs = kid;
 						break;
 					}
@@ -340,7 +335,7 @@ public class ProfileReport800Upgrader {
 							if (kid.getAttributes() == null)
 								continue;
 
-							if (nameAttributeEquals(kid, "name") && nodeValue(kid,"Geometry")) { //$NON-NLS-1$
+							if (nameAttributeEquals(kid, "name") && nodeValue(kid,"Geometry")) { //$NON-NLS-1$ //$NON-NLS-2$
 								location = items.item(k);
 								break;
 							}
@@ -354,11 +349,11 @@ public class ProfileReport800Upgrader {
 							if (kid.getAttributes() == null) continue;
 
 							if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("8");
+								kid.getFirstChild().setNodeValue("8"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("Polygon Geometry");
+								kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("javaObject");
+								kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 							}
 						}
 						rs.appendChild(clone);
@@ -368,9 +363,9 @@ public class ProfileReport800Upgrader {
 							Node kid = location.getChildNodes().item(p);
 							if (kid.getAttributes() == null) continue;
 								if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("Point Geometry");
+								kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("javaObject");
+								kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 							}
 						}
 					}
@@ -391,7 +386,7 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null)
 							continue;
 
-						if (nameAttributeEquals(kid, "name") && nodeValue(kid, "location:geom")) {
+						if (nameAttributeEquals(kid, "name") && nodeValue(kid, "location:geom")) { //$NON-NLS-1$ //$NON-NLS-2$
 							geometry = structure;
 							break;
 						}
@@ -402,15 +397,15 @@ public class ProfileReport800Upgrader {
 					if (kid.getAttributes() == null) continue;
 
 					if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("7");
+						kid.getFirstChild().setNodeValue("7"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("location:point");
+						kid.getFirstChild().setNodeValue("location:point"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeName") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("location:point");
+						kid.getFirstChild().setNodeValue("location:point"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("javaObject");
+						kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeDataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("8200");
+						kid.getFirstChild().setNodeValue("8200"); //$NON-NLS-1$
 					}
 				}
 					
@@ -422,41 +417,41 @@ public class ProfileReport800Upgrader {
 					if (kid.getAttributes() == null) continue;
 
 					if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("8");
+						kid.getFirstChild().setNodeValue("8"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("location:polygon");
+						kid.getFirstChild().setNodeValue("location:polygon"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeName") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("location:polygon");
+						kid.getFirstChild().setNodeValue("location:polygon"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("javaObject");
+						kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeDataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("8204");
+						kid.getFirstChild().setNodeValue("8204"); //$NON-NLS-1$
 					}
 				}
 			}
 		}
 		
 		if (datasetName != null) {
-			updateTable(doc, datasetName, "Geometry", "Point Geometry");
-			updateMap(doc, datasetName, "location:point", "location:polygon");
+			updateTable(doc, datasetName, "Geometry", "Point Geometry"); //$NON-NLS-1$ //$NON-NLS-2$
+			updateMap(doc, datasetName, "location:point", "location:polygon"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
 	private static void updateMap(Document doc, String datasetName, String pointGeometry, String polygonGeometry) {
 		
-		NodeList extensions = doc.getElementsByTagName("extended-item");
+		NodeList extensions = doc.getElementsByTagName(EXTENDED_ITEM_TAG_NAME);
 		for (int i = 0; i < extensions.getLength(); i ++) {
 			Node extension = extensions.item(i);
 			
 			if (extension.getAttributes() == null) continue;
 			
-			if (!extension.getAttributes().getNamedItem("extensionName").getTextContent().equals("org.wcs.smart.report.birt.SmartMap")) continue;
+			if (!extension.getAttributes().getNamedItem(EXTENSION_NAME_TAG_NAME).getTextContent().equals("org.wcs.smart.report.birt.SmartMap")) continue; //$NON-NLS-1$
 			
 			NodeList properties = extension.getChildNodes();
 			Node layerProperty = null;
 			for (int k = 0; k < properties.getLength(); k ++) {
 				Node property = properties.item(k);
-				if (nameAttributeEquals(property, "org.wcs.smart.birt.map.layers2")) {
+				if (nameAttributeEquals(property, "org.wcs.smart.birt.map.layers2")) { //$NON-NLS-1$
 					layerProperty = property;
 					break;
 				}
@@ -473,29 +468,29 @@ public class ProfileReport800Upgrader {
 				String layerType = null;
 				for (int m = 0; m < layer.getChildNodes().getLength(); m ++) {
 					Node property = layer.getChildNodes().item(m);
-					if (nameAttributeEquals(property, "dataSet")
+					if (nameAttributeEquals(property, "dataSet") //$NON-NLS-1$
 							&& property.getFirstChild().getNodeValue().equals(datasetName)) {
 						processLayer = true;
 					}
-					if (nameAttributeEquals(property, "org.wcs.smart.birt.map.layerName")) {
+					if (nameAttributeEquals(property, "org.wcs.smart.birt.map.layerName")) { //$NON-NLS-1$
 						layerName = property;
 					}
-					if (nameAttributeEquals(property, "org.wcs.smart.birt.map.geomColumn")) {
+					if (nameAttributeEquals(property, "org.wcs.smart.birt.map.geomColumn")) { //$NON-NLS-1$
 						geomColumn = property;
 					}
-					if (nameAttributeEquals(property, "org.wcs.smart.birt.map.layerType")) {
+					if (nameAttributeEquals(property, "org.wcs.smart.birt.map.layerType")) { //$NON-NLS-1$
 						layerType = property.getFirstChild().getNodeValue();
 					}
 				}
 				
 				if (processLayer) {
-					if (layerType.equalsIgnoreCase("POINT")) {
+					if (layerType.equalsIgnoreCase("POINT")) { //$NON-NLS-1$
 						geomColumn.getFirstChild().setNodeValue(pointGeometry);
-						layerName.getFirstChild().setNodeValue(layerName.getFirstChild().getNodeValue() + " - Point Geometry");
+						layerName.getFirstChild().setNodeValue(layerName.getFirstChild().getNodeValue() + " - Point Geometry"); //$NON-NLS-1$
 					}
-					if (layerType.equalsIgnoreCase("POLYGON")) {
+					if (layerType.equalsIgnoreCase("POLYGON")) { //$NON-NLS-1$
 						geomColumn.getFirstChild().setNodeValue(polygonGeometry);
-						layerName.getFirstChild().setNodeValue(layerName.getFirstChild().getNodeValue() + " - Polygon Geometry");
+						layerName.getFirstChild().setNodeValue(layerName.getFirstChild().getNodeValue() + " - Polygon Geometry"); //$NON-NLS-1$
 					}
 					
 				}
@@ -507,7 +502,7 @@ public class ProfileReport800Upgrader {
 	}
 	private static void updateTable(Document doc, String datasetName, String oldGeometry, String newGeometry) {
 	
-		NodeList tables = doc.getElementsByTagName("table");
+		NodeList tables = doc.getElementsByTagName("table"); //$NON-NLS-1$
 		for (int i = 0; i < tables.getLength(); i ++) {
 			Node table = tables.item(i);
 		
@@ -518,8 +513,8 @@ public class ProfileReport800Upgrader {
 				
 				//from dataset property
 				if (kid.getAttributes() == null) continue;
-				if (kid.getNodeName().equalsIgnoreCase("property")
-						&& nameAttributeEquals(kid, "dataSet")
+				if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME)
+						&& nameAttributeEquals(kid, "dataSet") //$NON-NLS-1$
 						&& kid.getFirstChild().getNodeValue().equalsIgnoreCase(datasetName)) {
 					processTable = true;
 					break;
@@ -534,8 +529,8 @@ public class ProfileReport800Upgrader {
 				
 				//from dataset property
 				if (kid.getAttributes() == null) continue;
-				if (kid.getNodeName().equalsIgnoreCase("list-property")
-						&& nameAttributeEquals(kid, "boundDataColumns")) {
+				if (kid.getNodeName().equalsIgnoreCase(LIST_PROPERTY_TAG_NAME)
+						&& nameAttributeEquals(kid, "boundDataColumns")) { //$NON-NLS-1$
 					dataColumnsNode = kid;
 					break;
 				}
@@ -552,8 +547,8 @@ public class ProfileReport800Upgrader {
 				for (int k = 0; k < structure.getChildNodes().getLength(); k ++) {
 					Node kid = structure.getChildNodes().item(k);
 				
-					if (kid.getNodeName().equalsIgnoreCase("property")
-							&& nameAttributeEquals(kid, "name")
+					if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME)
+							&& nameAttributeEquals(kid, "name") //$NON-NLS-1$
 							&& nodeValue(kid, oldGeometry)) {
 						geometryStructure = structure;
 						break;
@@ -568,12 +563,12 @@ public class ProfileReport800Upgrader {
 			for (int j = 0; j < geometryStructure.getChildNodes().getLength(); j ++) {
 				Node kid = geometryStructure.getChildNodes().item(j);
 				
-				if (nameAttributeEquals(kid, "name")) {
+				if (nameAttributeEquals(kid, "name")) { //$NON-NLS-1$
 					kid.getFirstChild().setNodeValue(newGeometry);
-				}else if (nameAttributeEquals(kid, "displayName")) {
+				}else if (nameAttributeEquals(kid, "displayName")) { //$NON-NLS-1$
 					kid.getFirstChild().setNodeValue(newGeometry);
-				}else if (nameAttributeEquals(kid, "expression")) {
-					kid.getFirstChild().setNodeValue("dataSetRow[\"" + newGeometry + "\"]");
+				}else if (nameAttributeEquals(kid, "expression")) { //$NON-NLS-1$
+					kid.getFirstChild().setNodeValue("dataSetRow[\"" + newGeometry + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				}
 			}			
@@ -583,21 +578,21 @@ public class ProfileReport800Upgrader {
 			while(!toProcess.isEmpty()) {
 				Node x = toProcess.remove(0);
 				
-				if (x.getNodeName().equalsIgnoreCase("data")) {
+				if (x.getNodeName().equalsIgnoreCase("data")) { //$NON-NLS-1$
 					//process
 					for (int k = 0; k < x.getChildNodes().getLength(); k ++) {
 						Node kid = x.getChildNodes().item(k);
-						if (kid.getNodeName().equals("property") && nameAttributeEquals(kid, "resultSetColumn")
+						if (kid.getNodeName().equals(PROPERTY_TAG_NAME) && nameAttributeEquals(kid, "resultSetColumn") //$NON-NLS-1$
 								&& nodeValue(kid, oldGeometry)) {
 							kid.getFirstChild().setNodeValue(newGeometry);
 						}
 					}
 				}
-				if (x.getNodeName().equalsIgnoreCase("label")) {
+				if (x.getNodeName().equalsIgnoreCase("label")) { //$NON-NLS-1$
 					//process
 					for (int k = 0; k < x.getChildNodes().getLength(); k ++) {
 						Node kid = x.getChildNodes().item(k);
-						if (kid.getNodeName().equals("text-property") && nameAttributeEquals(kid, "text")
+						if (kid.getNodeName().equals("text-property") && nameAttributeEquals(kid, "text") //$NON-NLS-1$ //$NON-NLS-2$
 								&& nodeValue(kid, oldGeometry)) {
 							kid.getFirstChild().setNodeValue(newGeometry);
 						}
@@ -615,7 +610,7 @@ public class ProfileReport800Upgrader {
 	
 	private static void updateRecordLocationDataset(Node dataSetItem, Document doc) {
 		
-		String datasetName = dataSetItem.getAttributes().getNamedItem("name").getNodeValue();
+		String datasetName = dataSetItem.getAttributes().getNamedItem("name").getNodeValue(); //$NON-NLS-1$
 
 		//replace location:geom with location:polygon 8204 and location:point 8200
 		// update the native data type for the geometry columns
@@ -635,7 +630,7 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null)
 							continue;
 
-						if (nameAttributeEquals(kid, "columnName") && nodeValue(kid, "recordlocation:geom")) {
+						if (nameAttributeEquals(kid, "columnName") && nodeValue(kid, "recordlocation:geom")) { //$NON-NLS-1$ //$NON-NLS-2$
 							location = structure;
 							break;
 						}
@@ -649,13 +644,13 @@ public class ProfileReport800Upgrader {
 						Node kid = clone.getChildNodes().item(p);
 						if (kid.getAttributes() == null) continue;
 						if (nameAttributeEquals(kid, "columnName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("recordlocation:polygon");
+							kid.getFirstChild().setNodeValue("recordlocation:polygon"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "alias") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "displayName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "heading") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}
 					}
 					property.insertBefore(clone, location.getNextSibling());
@@ -664,13 +659,13 @@ public class ProfileReport800Upgrader {
 						Node kid = location.getChildNodes().item(p);
 						if (kid.getAttributes() == null) continue;
 						if (nameAttributeEquals(kid, "columnName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("recordlocation:point");
+							kid.getFirstChild().setNodeValue("recordlocation:point"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "alias") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "displayName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "heading") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}
 					}
 				}
@@ -678,14 +673,14 @@ public class ProfileReport800Upgrader {
 				
 			}
 
-			if (property.getNodeName().equalsIgnoreCase("structure")
-					&& nameAttributeEquals(property, "cachedMetaData")) {
+			if (property.getNodeName().equalsIgnoreCase("structure") //$NON-NLS-1$
+					&& nameAttributeEquals(property, "cachedMetaData")) { //$NON-NLS-1$
 				//find resultSetList
 				Node rs = null;
 				for (int k = 0; k < property.getChildNodes().getLength(); k++) {
 					Node kid = property.getChildNodes().item(k);
 					if (kid.getAttributes() == null) continue;
-					if (nameAttributeEquals(kid, "resultSet")) {
+					if (nameAttributeEquals(kid, "resultSet")) { //$NON-NLS-1$
 						rs = kid;
 						break;
 					}
@@ -702,7 +697,7 @@ public class ProfileReport800Upgrader {
 							if (kid.getAttributes() == null)
 								continue;
 
-							if (nameAttributeEquals(kid, "name") && nodeValue(kid,"Geometry")) { //$NON-NLS-1$
+							if (nameAttributeEquals(kid, "name") && nodeValue(kid,"Geometry")) { //$NON-NLS-1$ //$NON-NLS-2$
 								location = structure;
 								break;
 							}
@@ -715,11 +710,11 @@ public class ProfileReport800Upgrader {
 							Node kid = clone.getChildNodes().item(p);
 							if (kid.getAttributes() == null) continue;
 							if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("7");
+								kid.getFirstChild().setNodeValue("7"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("Polygon Geometry");
+								kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("javaObject");
+								kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 							}
 						}
 						rs.insertBefore(clone, location.getNextSibling());
@@ -729,9 +724,9 @@ public class ProfileReport800Upgrader {
 							Node kid = location.getChildNodes().item(p);
 							if (kid.getAttributes() == null) continue;
 							if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("Point Geometry");
+								kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("javaObject");
+								kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 							}
 						}
 					}
@@ -769,7 +764,7 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null)
 							continue;
 
-						if (nameAttributeEquals(kid, "name") && nodeValue(kid, "recordlocation:geom")) {
+						if (nameAttributeEquals(kid, "name") && nodeValue(kid, "recordlocation:geom")) { //$NON-NLS-1$ //$NON-NLS-2$
 							geometry = structure;
 							break;
 						}
@@ -781,15 +776,15 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null) continue;
 
 						if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("3");
+							kid.getFirstChild().setNodeValue("3"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("recordlocation:point");
+							kid.getFirstChild().setNodeValue("recordlocation:point"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "nativeName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("recordlocation:point");
+							kid.getFirstChild().setNodeValue("recordlocation:point"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("javaObject");
+							kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "nativeDataType") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("8200");
+							kid.getFirstChild().setNodeValue("8200"); //$NON-NLS-1$
 						}
 					}
 					
@@ -801,15 +796,15 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null) continue;
 
 						if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("7");
+							kid.getFirstChild().setNodeValue("7"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("recordlocation:polygon");
+							kid.getFirstChild().setNodeValue("recordlocation:polygon"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "nativeName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("recordlocation:polygon");
+							kid.getFirstChild().setNodeValue("recordlocation:polygon"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("javaObject");
+							kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "nativeDataType") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("8204");
+							kid.getFirstChild().setNodeValue("8204"); //$NON-NLS-1$
 						}
 					}
 					//renumber
@@ -830,14 +825,14 @@ public class ProfileReport800Upgrader {
 			}
 		}
 		
-		updateTable(doc, datasetName, "Geometry", "Point Geometry");
-		updateMap(doc, datasetName, "recordlocation:point", "recordlocation:polygon");
+		updateTable(doc, datasetName, "Geometry", "Point Geometry"); //$NON-NLS-1$ //$NON-NLS-2$
+		updateMap(doc, datasetName, "recordlocation:point", "recordlocation:polygon"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	}
 	
 	private static void updateQueryDataset(Node dataSetItem, Document doc) {
 		
-		String datasetName = dataSetItem.getAttributes().getNamedItem("name").getNodeValue();
+		String datasetName = dataSetItem.getAttributes().getNamedItem("name").getNodeValue(); //$NON-NLS-1$
 
 		//replace loc:geom with loc:polygon 8204 and location:point 8200
 		// update the native data type for the geometry columns
@@ -849,7 +844,6 @@ public class ProfileReport800Upgrader {
 					&& property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equals("columnHints")) { //$NON-NLS-1$
 						
 				NodeList structures = property.getChildNodes();
-				Node previous = null;
 				Node location = null;
 				for (int k = 0; k < structures.getLength(); k++) {
 					Node structure = structures.item(k);
@@ -859,9 +853,8 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null)
 							continue;
 
-						if (nameAttributeEquals(kid, "columnName") && nodeValue(kid, "loc:geom")) {
+						if (nameAttributeEquals(kid, "columnName") && nodeValue(kid, "loc:geom")) { //$NON-NLS-1$ //$NON-NLS-2$
 							location = structure;
-							previous = structures.item(k-1);
 							break;
 						}
 					}
@@ -874,13 +867,13 @@ public class ProfileReport800Upgrader {
 						Node kid = clone.getChildNodes().item(p);
 						if (kid.getAttributes() == null) continue;
 						if (nameAttributeEquals(kid, "columnName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("loc:polygon");
+							kid.getFirstChild().setNodeValue("loc:polygon"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "alias") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "displayName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "heading") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Polygon Geometry");
+							kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 						}
 					}
 								
@@ -888,13 +881,13 @@ public class ProfileReport800Upgrader {
 						Node kid = location.getChildNodes().item(p);
 						if (kid.getAttributes() == null) continue;
 						if (nameAttributeEquals(kid, "columnName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("loc:point");
+							kid.getFirstChild().setNodeValue("loc:point"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "alias") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "displayName") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}else if (nameAttributeEquals(kid, "heading") ) { //$NON-NLS-1$
-							kid.getFirstChild().setNodeValue("Point Geometry");
+							kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 						}
 					}
 					
@@ -904,14 +897,14 @@ public class ProfileReport800Upgrader {
 				}
 			}
 
-			if (property.getNodeName().equalsIgnoreCase("structure")
-					&& nameAttributeEquals(property, "cachedMetaData")) {
+			if (property.getNodeName().equalsIgnoreCase("structure") //$NON-NLS-1$
+					&& nameAttributeEquals(property, "cachedMetaData")) { //$NON-NLS-1$
 				//find resultSetList
 				Node rs = null;
 				for (int k = 0; k < property.getChildNodes().getLength(); k++) {
 					Node kid = property.getChildNodes().item(k);
 					if (kid.getAttributes() == null) continue;
-					if (nameAttributeEquals(kid, "resultSet")) {
+					if (nameAttributeEquals(kid, "resultSet")) { //$NON-NLS-1$
 						rs = kid;
 						break;
 					}
@@ -928,7 +921,7 @@ public class ProfileReport800Upgrader {
 							if (kid.getAttributes() == null)
 								continue;
 
-							if (nameAttributeEquals(kid, "name") && nodeValue(kid,"Geometry")) { //$NON-NLS-1$
+							if (nameAttributeEquals(kid, "name") && nodeValue(kid,"Geometry")) { //$NON-NLS-1$ //$NON-NLS-2$
 								location = structure;
 								break;
 							}
@@ -941,11 +934,11 @@ public class ProfileReport800Upgrader {
 							Node kid = clone.getChildNodes().item(p);
 							if (kid.getAttributes() == null) continue;
 							if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("7");
+								kid.getFirstChild().setNodeValue("7"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("Polygon Geometry");
+								kid.getFirstChild().setNodeValue("Polygon Geometry"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("javaObject");
+								kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 							}
 						}
 									
@@ -954,9 +947,9 @@ public class ProfileReport800Upgrader {
 							Node kid = location.getChildNodes().item(p);
 							if (kid.getAttributes() == null) continue;
 							if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("Point Geometry");
+								kid.getFirstChild().setNodeValue("Point Geometry"); //$NON-NLS-1$
 							}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-								kid.getFirstChild().setNodeValue("javaObject");
+								kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 							}
 						}
 						
@@ -998,7 +991,7 @@ public class ProfileReport800Upgrader {
 						if (kid.getAttributes() == null)
 							continue;
 
-						if (nameAttributeEquals(kid, "name") && nodeValue(kid, "loc:geom")) {
+						if (nameAttributeEquals(kid, "name") && nodeValue(kid, "loc:geom")) { //$NON-NLS-1$ //$NON-NLS-2$
 							geometry = structure;
 							break;
 						}
@@ -1010,15 +1003,15 @@ public class ProfileReport800Upgrader {
 					if (kid.getAttributes() == null) continue;
 
 					if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("3");
+						kid.getFirstChild().setNodeValue("3"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("loc:point");
+						kid.getFirstChild().setNodeValue("loc:point"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeName") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("loc:point");
+						kid.getFirstChild().setNodeValue("loc:point"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("javaObject");
+						kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeDataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("8200");
+						kid.getFirstChild().setNodeValue("8200"); //$NON-NLS-1$
 					}
 				}
 				
@@ -1029,15 +1022,15 @@ public class ProfileReport800Upgrader {
 					if (kid.getAttributes() == null) continue;
 
 					if (nameAttributeEquals(kid, "position") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("7");
+						kid.getFirstChild().setNodeValue("7"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "name") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("loc:polygon");
+						kid.getFirstChild().setNodeValue("loc:polygon"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeName") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("loc:polygon");
+						kid.getFirstChild().setNodeValue("loc:polygon"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "dataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("javaObject");
+						kid.getFirstChild().setNodeValue("javaObject"); //$NON-NLS-1$
 					}else if (nameAttributeEquals(kid, "nativeDataType") ) { //$NON-NLS-1$
-						kid.getFirstChild().setNodeValue("8204");
+						kid.getFirstChild().setNodeValue("8204"); //$NON-NLS-1$
 					}
 				}
 				
@@ -1062,8 +1055,8 @@ public class ProfileReport800Upgrader {
 				}
 			}
 		}
-		updateTable(doc, datasetName, "Geometry", "Point Geometry");
-		updateMap(doc, datasetName, "loc:point", "loc:polygon");
+		updateTable(doc, datasetName, "Geometry", "Point Geometry"); //$NON-NLS-1$ //$NON-NLS-2$
+		updateMap(doc, datasetName, "loc:point", "loc:polygon"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	
 	}
@@ -1073,8 +1066,8 @@ public class ProfileReport800Upgrader {
 		
 		ProfileReport800Upgrader me = new ProfileReport800Upgrader();
 		
-		Path input = Paths.get("C:\\temp\\smart8reports\\000004.rptdesign");
-		Path output = Paths.get("C:\\temp\\smart8reports\\000004.out.rptdesign");
+		Path input = Paths.get("C:\\temp\\smart8reports\\000004.rptdesign"); //$NON-NLS-1$
+		Path output = Paths.get("C:\\temp\\smart8reports\\000004.out.rptdesign"); //$NON-NLS-1$
 		
 		Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
 		me.upgradeFile(output);

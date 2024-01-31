@@ -23,6 +23,7 @@ package org.wcs.smart.event.i2;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 
 /**
  * Activator for this plugin
@@ -51,6 +52,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		SmartContext.INSTANCE.setClass(IProfileEventLabelProvider.class, new ProfileEventLabelProvider());
 	}
 
 	/*

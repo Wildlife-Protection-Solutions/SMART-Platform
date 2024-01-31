@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.hibernate;
+package org.wcs.smart.connect.hibernate.listeners;
 
 import java.time.LocalDateTime;
 import java.util.logging.Level;

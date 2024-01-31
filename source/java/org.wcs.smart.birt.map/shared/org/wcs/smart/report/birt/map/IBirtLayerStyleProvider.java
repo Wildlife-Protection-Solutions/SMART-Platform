@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.util.Locale;
+
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.ca.ConservationArea;
@@ -40,5 +42,6 @@ public interface IBirtLayerStyleProvider {
 	 * @return
 	 */
 	public StyleBlackboard getStyle(String extensionId, String queryText,
-			MapLayerInfo info, ConservationArea ca, Session s);
+			MapLayerInfo info, ConservationArea ca, Locale l,
+			Session s);
 }

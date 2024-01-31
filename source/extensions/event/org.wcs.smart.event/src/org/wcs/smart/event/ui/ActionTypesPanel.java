@@ -36,7 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.event.ActionTypeManager;
+import org.wcs.smart.event.ActionExecutorManager;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.IActionParameter;
 import org.wcs.smart.event.model.IActionType;
@@ -86,7 +86,7 @@ public class ActionTypesPanel extends Composite {
 		column1.getColumn().setWidth(200);
 		column1.setLabelProvider(new AssetTypeLabelProvider());
 		
-		lstTypes.setInput(ActionTypeManager.INSTANCE.getActionTypes());
+		lstTypes.setInput(ActionExecutorManager.INSTANCE.getActionTypes());
 		lstTypes.addSelectionChangedListener(e->updateDetails());
 		
 		Composite rightPartOuter = new Composite(parts, SWT.BORDER);

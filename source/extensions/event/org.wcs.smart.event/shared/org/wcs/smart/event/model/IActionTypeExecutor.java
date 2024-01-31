@@ -19,52 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.event;
+package org.wcs.smart.event.model;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Locale;
 
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.event.spi.PostCommitInsertEventListener;
-import org.hibernate.event.spi.PostInsertEvent;
-import org.hibernate.persister.entity.EntityPersister;
-import org.wcs.smart.SmartContext;
+import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
- * Job for processing observation events. There is a single job
- * accessed through the getInstance() function.
+ * 
  * 
  * @author Emily
  *
  */
-public class EventHibernateListener implements PostCommitInsertEventListener {
+public interface IActionTypeExecutor {
 
-	private SessionFactoryImplementor sessionFactory;
+	public String getKey();
 	
-	public EventHibernateListener (SessionFactoryImplementor sessionFactory){
-		this.sessionFactory = sessionFactory;
-	}
+	/**
+	 * Perform the action
+	 * @param action the action to perform
+	 * @param filter the action file
+	 * @param data the observation data
+	 * @param l the locale
+	 */
+	public Object performAction(EAction action, EFilter filter, WaypointObservation data, Locale l,
+			Employee currentEmployee, Session session);
 	
-	
-	@Override
-	public void onPostInsert(PostInsertEvent event) {	
-		if (event.getEntity() instanceof WaypointObservation) {
-			WaypointObservation wo = (WaypointObservation)event.getEntity();			
-			SmartContext.INSTANCE.getClass(ExecutorService.class)
-				.execute(new ConnectEventProcessor(wo, sessionFactory));
-		}
-	}
-
-	@Override
-	public boolean requiresPostCommitHandling(EntityPersister persister) {
-		return true;
-	}
-
-	@Override
-	public void onPostInsertCommitFailed(PostInsertEvent event) {
-		
-	}
-
-	
-
 }

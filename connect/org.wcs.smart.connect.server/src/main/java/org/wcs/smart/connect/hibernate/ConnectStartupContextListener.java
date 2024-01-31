@@ -84,6 +84,7 @@ import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.hibernate.listeners.SmartHibernateIntegrator;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
 import org.wcs.smart.connect.i18n.labels.AssetLabelProvider;
@@ -98,6 +99,7 @@ import org.wcs.smart.connect.i18n.labels.PatrolCyberTrackerLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PatrolLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PatrolQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PlanLabelProvider;
+import org.wcs.smart.connect.i18n.labels.ProfileEventLabelProvider;
 import org.wcs.smart.connect.i18n.labels.QueryDateLabelProvider;
 import org.wcs.smart.connect.i18n.labels.SmartCollectLabelProvider;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
@@ -148,6 +150,7 @@ import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
+import org.wcs.smart.event.i2.IProfileEventLabelProvider;
 import org.wcs.smart.i2.IQueryEngineFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.incident.IIncidentLabelProvider;
@@ -550,6 +553,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.incident.ILabelProvider.class, new QaIncidentLabelProvider());
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
+		
+		SmartContext.INSTANCE.setClass(IProfileEventLabelProvider.class, new ProfileEventLabelProvider());
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider.class, new ISmartCollectLabelProvider() {
 			@Override

@@ -59,7 +59,7 @@ import org.wcs.smart.udig.style.StyleManager;
 public class QueryStyleProvider extends AbstractQueryStyleProvider{
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, ConservationArea ca, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, ConservationArea ca, Locale l, Session s) {
 		
 		if (extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)){
 		

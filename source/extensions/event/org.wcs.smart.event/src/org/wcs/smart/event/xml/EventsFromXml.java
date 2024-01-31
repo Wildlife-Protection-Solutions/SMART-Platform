@@ -14,7 +14,8 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
-import org.wcs.smart.event.ActionTypeManager;
+import org.wcs.smart.event.ActionExecutorManager;
+import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionEvent;
@@ -230,7 +231,7 @@ public class EventsFromXml {
 		HashMap<String, EAction> newActions = new HashMap<>();
 		for (org.wcs.smart.event.xml.model.EAction xmlAction : xmlConfig.getActions()) {
 			
-			IActionType type = ActionTypeManager.INSTANCE.getActionType(xmlAction.getActionTypeKey());
+			IActionType type = ActionTypeManagerInternal.INSTANCE.getActionType(xmlAction.getActionTypeKey());
 			if (type == null) {
 				warnings.add(MessageFormat.format(Messages.EventsFromXml_ActionTypeNotFound, xmlAction.getActionTypeKey()));
 				continue;

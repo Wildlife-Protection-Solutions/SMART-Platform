@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.event;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.event.model.IActionType;
 import org.wcs.smart.event.ui.model.IActionParameterCollector;
@@ -40,7 +47,8 @@ public enum ActionTypeManagerInternal {
 	INSTANCE;
 	
 	private volatile Map<String, IConfigurationElement> collectors = null;
-	
+	private volatile List<IActionType> types = null;
+
 	public IActionParameterCollector createParameterCollector(IActionType type) {
 		initActionParameterCollectors();
 		if (collectors == null) return null;
@@ -64,13 +72,54 @@ public enum ActionTypeManagerInternal {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IActionType.EXTENSION_ID);
 			for (IConfigurationElement e : config) {	
 				try {
-					IActionType type = (IActionType) e.createExecutableExtension("class"); //$NON-NLS-1$
+					IActionType type = (IActionType) e.createExecutableExtension("actionType"); //$NON-NLS-1$
 					localTypes.put(type.getKey(), e);
 				}catch (Exception ex) {
 					EventPlugIn.log(ex.getMessage(), ex);
 				}
 			}
 			this.collectors = localTypes;
+		}
+	}
+	
+	public List<IActionType> getActionTypes(){
+		return getActionTypesInternal();
+	}
+	
+	public IActionType getActionType(String key) {
+		for(IActionType t : getActionTypesInternal()) {
+			if (t.getKey().equals(key)) return t;
+		}
+		return null;
+	}
+	
+	private List<IActionType> getActionTypesInternal() {
+		if (types != null) return types;
+		synchronized (INSTANCE) {
+			if (types != null) return types;
+
+			List<IActionType> localTypes = new ArrayList<>();
+			
+			
+			IExtensionRegistry registry = Platform.getExtensionRegistry();
+	        IExtensionPoint extensionPoint = registry.getExtensionPoint(IActionType.EXTENSION_ID);
+	        if (extensionPoint == null) return Collections.emptyList();
+	            
+	        IExtension[] extensions = extensionPoint.getExtensions();
+			
+			for (IExtension extension : extensions) {
+	            IConfigurationElement[] elements = extension.getConfigurationElements();
+				for (IConfigurationElement e : elements) {	
+					try {
+						IActionType type = (IActionType) e.createExecutableExtension("actionType"); //$NON-NLS-1$
+						localTypes.add(type);
+					}catch (Exception ex) {
+						EventPlugIn.log(ex.getMessage(), ex);
+					}
+				}
+			}
+			this.types = localTypes;
+			return this.types;
 		}
 	}
 }

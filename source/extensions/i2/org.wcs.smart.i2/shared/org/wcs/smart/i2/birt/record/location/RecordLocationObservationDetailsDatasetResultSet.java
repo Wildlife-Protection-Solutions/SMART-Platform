@@ -91,9 +91,7 @@ public class RecordLocationObservationDetailsDatasetResultSet implements IResult
 		if (index >= 0 && parameters.get(index) != null){
 			
 			query += "AND a.observation.location.record.uuid = :record ";  //$NON-NLS-1$
-		}
-		//TODO: mlist
-//		query += " AND (stringValue is not null or numberValue is not null or numberValue2 is not null or attributeListItem is not null or geom is not null)";
+		}		
 		query += " ORDER BY a.observation.uuid";  //$NON-NLS-1$
 		
 		Query q = connection.getSession().createQuery(query, IntelObservationAttribute.class)

@@ -23,6 +23,7 @@ package org.wcs.smart.report.birt.map.execute;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -49,7 +50,7 @@ public enum BirtStyleManager {
 	private volatile List<IBirtLayerStyleProvider> styleProviders = null;
 	
 	public StyleBlackboard getStyle(String extensionId, String queryText,
-			MapLayerInfo info, ConservationArea ca, Session session) throws Exception{
+			MapLayerInfo info, ConservationArea ca, Locale l, Session session) throws Exception{
 		
 		if (styleProviders == null){
 			synchronized (INSTANCE) {
@@ -58,7 +59,7 @@ public enum BirtStyleManager {
 		}
 		
 		for (IBirtLayerStyleProvider p : styleProviders){
-			StyleBlackboard style = p.getStyle(extensionId, queryText, info, ca, session);
+			StyleBlackboard style = p.getStyle(extensionId, queryText, info, ca, l, session);
 			if (style != null) return style;
 		}
 		return null;

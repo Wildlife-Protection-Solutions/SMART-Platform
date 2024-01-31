@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.event;
 
 import java.time.LocalDate;
@@ -11,9 +32,11 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.event.filter.ParsedFilter;
 import org.wcs.smart.event.model.EActionEvent;
-import org.wcs.smart.event.model.IActionType;
+import org.wcs.smart.event.model.IActionTypeExecutor;
 import org.wcs.smart.filter.AttributeFilter;
 import org.wcs.smart.filter.BooleanFilter;
 import org.wcs.smart.filter.BracketFilter;
@@ -26,6 +49,9 @@ import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
+/**
+ * 
+ */
 public enum EventProcessor {
 
 	INSTANCE;
@@ -33,7 +59,7 @@ public enum EventProcessor {
 	private static final String OPEN_BRACKET = "("; //$NON-NLS-1$
 	private static final String CLOSE_BRACKET = ")"; //$NON-NLS-1$
 
-	public void processEvent(EActionEvent event, WaypointObservation o) throws Exception{
+	public Object processEvent(EActionEvent event, WaypointObservation o, Employee employee, Session session) throws Exception{
 		//lets first check the waypoint source filter
 		ParsedFilter filter = event.getFilter().getParsedFilter();
 		
@@ -47,7 +73,7 @@ public enum EventProcessor {
 			}
 			if (!found) {
 				//does not match waypoint source filter so don't do anything else
-				return;
+				return null;
 			}
 		}
 		boolean ok = true;
@@ -65,9 +91,10 @@ public enum EventProcessor {
 		
 		if (ok) {
 			//execute action
-			IActionType actionType = ActionTypeManager.INSTANCE.getActionType(event.getAction().getActionTypeKey());
-			actionType.performAction(event.getAction(),event.getFilter(), o, Locale.getDefault());
+			IActionTypeExecutor actionType = ActionExecutorManager.INSTANCE.getActionType(event.getAction().getActionTypeKey());
+			return actionType.performAction(event.getAction(),event.getFilter(), o, Locale.getDefault(), employee, session);
 		}
+		return null;
 		
 	}
 

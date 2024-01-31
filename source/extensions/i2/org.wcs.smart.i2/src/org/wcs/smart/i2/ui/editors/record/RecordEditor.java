@@ -165,8 +165,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						return Status.OK_STATUS; //not found
 					}
 					temp.getProfile().getName();
-					temp.getCreatedBy().getFamilyName();
-					temp.getLastModifiedBy().getFamilyName();
+					if (temp.getCreatedBy() != null)  temp.getCreatedBy().getFamilyName();
+					if (temp.getLastModifiedBy() != null)  temp.getLastModifiedBy().getFamilyName();
 					if (temp.getAttachments().size() > 0){
 						for (IntelRecordAttachment a : temp.getAttachments()){
 							try{

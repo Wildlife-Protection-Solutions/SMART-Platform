@@ -21,24 +21,14 @@
  */
 package org.wcs.smart.incident.birt;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Style;
-import org.geotools.styling.StyleBuilder;
-import org.geotools.styling.StyleFactory;
-import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
-import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.style.sld.SLDContent;
-import org.opengis.filter.FilterFactory;
-import org.opengis.style.FeatureTypeStyle;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.incident.birt.details.IncidentDataset;
@@ -85,7 +75,7 @@ public class IncidentMapLayer implements IBirtMapLayerManager, IBirtLayerStylePr
 	@Override
 	public StyleBlackboard getStyle(String extensionId, 
 			String queryText, MapLayerInfo info, ConservationArea ca,
-			Session s) {
+			Locale l, Session s) {
 		
 		if (extensionId.equals(IncidentObservationAttributeDataset.DATASET_TYPE)) {
 			//get all geometry attributes

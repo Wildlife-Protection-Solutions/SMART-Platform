@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt.query;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -90,7 +91,7 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 	
 	@Override
 	public StyleBlackboard getStyle(String extensionId, String queryText,
-			MapLayerInfo info, ConservationArea ca, Session s) {
+			MapLayerInfo info, ConservationArea ca, Locale l, Session s) {
 		
 		if (!extensionId.equals(IntelQueryDataset.DATASET_TYPE)) return null;
 	

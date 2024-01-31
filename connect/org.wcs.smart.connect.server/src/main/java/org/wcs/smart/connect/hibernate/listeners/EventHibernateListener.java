@@ -19,36 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.event.i2.entity;
+package org.wcs.smart.connect.hibernate.listeners;
 
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
-import org.wcs.smart.event.i2.internal.Messages;
-import org.wcs.smart.event.model.IActionParameter;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.event.spi.PostCommitInsertEventListener;
+import org.hibernate.event.spi.PostInsertEvent;
+import org.hibernate.persister.entity.EntityPersister;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
- * Entity mapping parameter for create entity action
+ * 
+ * Hibernate post commit insert event listeners for event processing
  * 
  * @author Emily
  *
  */
-public class MappingParameter implements IActionParameter{
+public class EventHibernateListener implements PostCommitInsertEventListener {
 
-	public final static MappingParameter INSTANCE = new MappingParameter();
+	private SessionFactoryImplementor sessionFactory;
+	
+	public EventHibernateListener (SessionFactoryImplementor sessionFactory){
+		this.sessionFactory = sessionFactory;
+	}
+	
 	
 	@Override
-	public String getKey() {
-		return ParameterKeys.MAPPING_PARAM_KEY;
+	public void onPostInsert(PostInsertEvent event) {	
+		
+		if (event.getEntity() instanceof WaypointObservation) {
+			//TODO: sort out locale
+			WaypointObservation wo = (WaypointObservation)event.getEntity();			
+			SmartContext.INSTANCE.getClass(ExecutorService.class)
+				.execute(new ConnectEventProcessor(wo, sessionFactory, Locale.getDefault() ));
+		}
 	}
 
 	@Override
-	public String getName(Locale l) {
-		return Messages.MappingParameter_Name;
+	public boolean requiresPostCommitHandling(EntityPersister persister) {
+		return true;
 	}
 
 	@Override
-	public boolean isRequired() {
-		return false;
+	public void onPostInsertCommitFailed(PostInsertEvent event) {
+		
 	}
+
+	
 
 }

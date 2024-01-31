@@ -329,7 +329,7 @@ public class MapItemExecutor implements IReportItemExecutor {
 				ConservationArea ca = (ConservationArea) context.getAppContext().get(BirtConstants.CA_PARAM);
 				
 				String xid = ((OdaDataSetHandle) layer.getHandle().getDataSet()).getExtensionID();
-				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, def, ca, session);
+				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, def, ca, context.getLocale(), session);
 			} else {
 				// parse provided style
 				String styleString = def.getMapStyle();

@@ -68,10 +68,16 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
 	
 	private Session session;
 	private Locale locale;
+	private boolean encrypt = true;
 	
 	public AttachmentInterceptor() {
 	}
 
+	public AttachmentInterceptor(boolean encryptFiles) {
+		this.encrypt = encryptFiles;
+	}
+
+	
 	public void setSession(Session session, Locale l) {
 		this.session = session;
 		this.locale = l;
@@ -181,7 +187,7 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     				}
     				to = to.getParent().resolve(basename + extension);
     			}
-    			if (attachment.isEncrypted()) {
+    			if (this.encrypt && attachment.isEncrypted()) {
 	    			try {
 	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation(), to, attachment);
 	    			}catch (Exception ex) {

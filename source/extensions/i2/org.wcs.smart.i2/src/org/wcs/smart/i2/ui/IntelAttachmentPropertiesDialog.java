@@ -47,9 +47,13 @@ public class IntelAttachmentPropertiesDialog extends AttachmentPropertiesDialog{
 
 	@Override
 	protected List<Entry> findAdditionalDetails(ISmartAttachment attachment){
+		IntelAttachment a = (IntelAttachment)attachment;
+		
 		List<Entry> details = new ArrayList<>();
-		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedByLabel, SmartLabelProvider.getShortLabel(((IntelAttachment)attachment).getCreatedBy())));
-		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedOnLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((IntelAttachment)attachment).getDateCreated())));
+		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedByLabel,
+				a.getCreatedBy() == null ? "" : SmartLabelProvider.getShortLabel(a.getCreatedBy()))); //$NON-NLS-1$
+		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedOnLabel, 
+				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(a.getDateCreated())));
 		return details;
 	}
 

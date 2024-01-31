@@ -615,6 +615,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		String[] sql = new String[] {
 			"ALTER TABLE smart.i_observation_attribute add column geom BLOB", //$NON-NLS-1$
 			"ALTER TABLE smart.i_observation_attribute add column double_value_2 double", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.i_entity alter column created_by drop not null", //$NON-NLS-1$
+			"ALTER TABLE smart.i_record alter column created_by drop not null", //$NON-NLS-1$
+			"ALTER TABLE smart.i_attachment alter column created_by drop not null" //$NON-NLS-1$
 		};
 		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
 			

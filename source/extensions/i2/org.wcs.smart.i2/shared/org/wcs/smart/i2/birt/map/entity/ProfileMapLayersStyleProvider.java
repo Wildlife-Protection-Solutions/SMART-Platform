@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.birt.map.entity;
 
+import java.util.Locale;
+
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
@@ -29,6 +31,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.StyleUtil;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDatasetResultSetMetadata;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
@@ -48,7 +51,7 @@ public class ProfileMapLayersStyleProvider implements IBirtLayerStyleProvider {
 
 	@Override
 	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, 
-			ConservationArea ca, Session s) {
+			ConservationArea ca, Locale l, Session s) {
 		if (extensionId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
 			//return red star style
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
@@ -70,10 +73,8 @@ public class ProfileMapLayersStyleProvider implements IBirtLayerStyleProvider {
 			}
 			if (type == null) return null;
 
-			//TODO: locale here
-			return StyleManager.INSTANCE.buildThemedGeometryAttributeStyle(
-					"Attribute Key", 
-					type, s, ca, true);					
+			String field = RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE_KEY.getColumnName(l);
+			return StyleManager.INSTANCE.buildThemedGeometryAttributeStyle(field, type, s, ca, true);					
 		}
 		return null;
 	}

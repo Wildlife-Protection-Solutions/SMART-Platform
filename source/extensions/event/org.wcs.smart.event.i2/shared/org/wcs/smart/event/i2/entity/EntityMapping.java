@@ -32,22 +32,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -57,6 +59,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EntityMapping {
 
+	private static final Logger LOGGER = Logger.getLogger(EntityMapping.class.getName());
+	
 	private static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 	
 	//JSON keys
@@ -88,7 +92,7 @@ public class EntityMapping {
 		try {
 			json = (JSONArray) (new JSONParser()).parse(jsonstring);
 		}catch (Exception ex) {
-			EventPlugIn.log(ex.getMessage(), ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			return null;
 		}
 		List<EntityMapping> mappings = new ArrayList<>();
@@ -137,7 +141,7 @@ public class EntityMapping {
 						LocalDate d = LocalDate.parse((String)item.get(JSON_FIXED_KEY), DateTimeFormatter.ofPattern(DATE_FORMAT));
 						mapping.setFixedValue(d);
 					}catch (Exception ex) {
-						EventPlugIn.log(ex.getMessage(),  ex);
+						LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 					}
 					break;
 				case EMPLOYEE:
@@ -197,16 +201,16 @@ public class EntityMapping {
 		return this.type;
 	}
 	
-	public String getFixedValueAsString() {
+	public String getFixedValueAsString(Locale l) {
 		if (type != Type.FIXED) return ""; //$NON-NLS-1$
 		switch (intelAttribute.getType()) {
 		case BOOLEAN:
-			if (fixedBooleanValue) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
-			return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
+			if (fixedBooleanValue) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
 		case DATE:
 			return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(fixedDateValue);
 		case EMPLOYEE:
-			return SmartLabelProvider.getShortLabel(fixedEmployee);
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(fixedEmployee, l);
 		case LIST:
 			if (intelListItem == null) return ""; //$NON-NLS-1$
 			return intelListItem.getName();

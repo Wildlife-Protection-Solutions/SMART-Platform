@@ -39,21 +39,21 @@ import org.wcs.smart.qa.model.IQaRoutineType;
  * @author Emily
  *
  */
-public class SingleItemDataProvider extends IQaDataProvider{
+public class SingleItemDataProvider<T> extends IQaDataProvider{
 
 	private IQaDataProvider parentProvider;
-	private Collection<?> objects;
+	private Collection<T> objects;
 	
-	public SingleItemDataProvider (IQaDataProvider dataProvider, Object x){
+	public SingleItemDataProvider (IQaDataProvider dataProvider, T x){
 		this.objects = Collections.singleton(x);
 		this.parentProvider = dataProvider;
 	}
 	
-	public SingleItemDataProvider (IQaDataProvider dataProvider, Collection<?> objects){
+	public SingleItemDataProvider (IQaDataProvider dataProvider, Collection<T> objects){
 		this.objects = objects;
 		this.parentProvider = dataProvider;
 	}
-	
+
 	
 	@Override
 	public String getId() {
@@ -66,7 +66,7 @@ public class SingleItemDataProvider extends IQaDataProvider{
 	}
 
 	@Override
-	public Collection<?> getData(Session session,
+	public Collection<T> getData(Session session,
 			ConservationArea conservationArea, LocalDate startDate, LocalDate endDate) {
 		return objects;
 	}

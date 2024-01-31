@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -51,7 +52,7 @@ public abstract class AbstractQueryStyleProvider implements IBirtLayerStyleProvi
 	public abstract StyleBlackboard getStyle(String queryType, UUID uuid, MapLayerInfo info, ConservationArea ca, Session s);
 	
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, ConservationArea ca, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo info, ConservationArea ca, Locale l, Session s) {
 		if (!extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) return null;
 		
 		ParsedQuery pquery = AbstractSmartBirtQuery.parseQueryText(queryText);

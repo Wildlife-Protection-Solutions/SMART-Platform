@@ -37,7 +37,7 @@ public class EntityTypeParameter implements IActionParameter{
 	
 	@Override
 	public String getKey() {
-		return CreateEntityActionType.KEY + ".entitytype"; //$NON-NLS-1$
+		return ParameterKeys.ENTITYTYPE_PARAM_KEY;
 	}
 
 	@Override

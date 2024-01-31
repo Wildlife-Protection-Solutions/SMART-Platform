@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.event.i2.entity.CreateEntityActionType;
 import org.wcs.smart.event.i2.entity.EntityTypeParameter;
 import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -52,7 +51,7 @@ public class EntityTypeDeleteAdvisor implements IDeleteAdvisor {
 		sb.append("AND p.parameterValue = :value AND ea.conservationArea = :ca"); //$NON-NLS-1$
 		
 		Long used = session.createQuery(sb.toString(), Long.class)
-		.setParameter("actionid", CreateEntityActionType.KEY) //$NON-NLS-1$
+		.setParameter("actionid", CreateEntityActionTypeExecutor.KEY) //$NON-NLS-1$
 		.setParameter("pkey", EntityTypeParameter.INSTANCE.getKey()) //$NON-NLS-1$
 		.setParameter("value", entityType.getKeyId()) //$NON-NLS-1$
 		.setParameter("ca", entityType.getConservationArea()) //$NON-NLS-1$
