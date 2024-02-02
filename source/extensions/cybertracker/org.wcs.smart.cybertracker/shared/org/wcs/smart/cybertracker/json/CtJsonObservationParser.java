@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -130,7 +131,11 @@ public class CtJsonObservationParser {
 	private List<JsonImportWarning> warnings = null;
 	
 	private List<WaypointObservationAttribute> applyToAllObservations;
-
+	private Locale l;
+	
+	public CtJsonObservationParser(Locale l) {
+		this.l = l;
+	}
 	
 	private void logException(Exception ex) {
 		logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -181,7 +186,7 @@ public class CtJsonObservationParser {
 		if (o instanceof Number) {
 			observationCounter = ((Number)o).intValue();
 		}else {
-			throw new Exception((new JsonError(JsonError.Type.INVALID_OBS_COUNTER, o.toString())).getMessage()); 
+			throw new Exception((new JsonError(JsonError.Type.INVALID_OBS_COUNTER, o.toString())).getMessage(l)); 
 		}
 		return observationCounter;
 	}
@@ -197,7 +202,7 @@ public class CtJsonObservationParser {
 		warnings = new ArrayList<JsonImportWarning>();
 		
 		if (!((String)feature.get(FEATURE_TYPE_KEY)).equalsIgnoreCase(FEATURE_KEY)){
-			throw new Exception((new JsonError(JsonError.Type.FEATURE_OBJECT_NOT_FOUND, FEATURE_KEY)).getMessage());
+			throw new Exception((new JsonError(JsonError.Type.FEATURE_OBJECT_NOT_FOUND, FEATURE_KEY)).getMessage(l));
 		}
 		
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
@@ -208,7 +213,7 @@ public class CtJsonObservationParser {
 		newWaypoint.setConservationArea(ca);
 		Coordinate c = readXYFromProperties(feature);
 		if (c == null) {
-			throw new Exception((new JsonError(JsonError.Type.LAT_LONG_NOT_FOUND)).getMessage());
+			throw new Exception((new JsonError(JsonError.Type.LAT_LONG_NOT_FOUND)).getMessage(l));
 		}
 		
 		newWaypoint.setRawX(c.x);

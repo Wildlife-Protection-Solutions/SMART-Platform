@@ -597,8 +597,8 @@ public class WorkingSetMapLayersJob extends Job {
 				if (x instanceof IntelRecord && ((IntelRecord)x).getUuid().equals(((IntelRecordService)service).getRecordUuid())){
 					((IntelRecordService)service).refreshNames();
 					updateLayers = true;
-				}else if (x instanceof IntelEntity && ((IntelEntity)x).getUuid().equals(((IntelEntityService)service).getEntityUuid())){
-					((IntelEntityService)service).refreshNames();
+				}else if (x instanceof IntelEntity ie && ie.getUuid().equals(((IntelEntityService)service).getEntityUuid())){
+					((IntelEntityService)service).refreshNames(ie);
 					updateLayers = true;
 				}
 			}

@@ -41,12 +41,11 @@ public class SmartCollectLabelProvider implements ISmartCollectLabelProvider {
 
 		if (item.getClass() == SmartCollectWaypointSource.class) return Messages.SmartCollectLabelProvider_SmartCollectIncident; 
 
-		if (item == SmartCollectJsonImportWarning.WarningType.NO_USER) return "No user specified for SMARTCollect feature.  Feature will not be loaded: {0}";
-		if (item == SmartCollectJsonImportWarning.WarningType.MISSING_DEVICE_ID) return "No device id specified for SMARTCollect feature.  Feature will not be loaded: {0}";
-		if (item == SmartCollectJsonImportWarning.WarningType.FEATURE_DISCARDED) return "{0} features discarded.";
-		if (item == SmartCollectJsonImportWarning.WarningType.USER_BLACKLISTED_FEATURE_DISCARDED) return "The user {0} is blacklisted.  The {1} features reported by this user were not loaded.";
-		
-		if (item == SmartCollectJsonProcessor.FINISH_MESSAGE) return "Created {0} SMARTCollect Incidents";
+		if (item == SmartCollectJsonImportWarning.WarningType.NO_USER) return Messages.SmartCollectLabelProvider_ImportWarning1;
+		if (item == SmartCollectJsonImportWarning.WarningType.MISSING_DEVICE_ID) return Messages.SmartCollectLabelProvider_ImportWarning2;
+		if (item == SmartCollectJsonImportWarning.WarningType.FEATURE_DISCARDED) return Messages.SmartCollectLabelProvider_ImportWarning3;
+		if (item == SmartCollectJsonImportWarning.WarningType.USER_BLACKLISTED_FEATURE_DISCARDED) return Messages.SmartCollectLabelProvider_ImportWarning4;
+		if (item == SmartCollectJsonProcessor.FINISH_MESSAGE) return Messages.SmartCollectLabelProvider_ImportWarning5;
 		
 		return null;
 	}

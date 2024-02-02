@@ -128,7 +128,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		
 		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser();
+			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
 			
 			if (!CtJsonUtil.isTrackPoint(feature)) observationFeatureCount++;
 			

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2023 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,31 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.query.engine;
+package org.wcs.smart.cybertracker;
 
-import java.util.List;
+import org.wcs.smart.ISharedLabelProvider;
 
-import org.locationtech.jts.geom.Geometry;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.query.common.engine.IGeometryResultItem;
-import org.wcs.smart.query.common.model.SummaryQueryResult;
-import org.wcs.smart.query.model.QueryColumn;
-
-public class AssetSummaryResults extends SummaryQueryResult implements IGeometryResultItem{
-
-	@Override
-	public Geometry asGeometry() {
-		return null;
-	}
-
-	@Override
-	public SimpleFeature toSimpleFeature(
-			SimpleFeatureType type, 
-			QueryColumn geometryColumn,
-			List<QueryColumn> columns) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public interface ICyberTrackerLabelProvider extends ISharedLabelProvider {
 
 }

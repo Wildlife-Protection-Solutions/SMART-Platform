@@ -31,10 +31,13 @@ import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -77,16 +80,27 @@ public class IntelEntityService extends IService {
 	/**
 	 * Schedule the job to refresh the resource names
 	 */
-	public void refreshNames(){
-		//TODO: update the georesource titles with the new 
-		//entity identifier
+	public void refreshNames(IntelEntity ie){
+		if (!entityUuid.equals(ie.getUuid())) return;
 		
-//		configureResourceNames.schedule();
-//		try {
-//			configureResourceNames.join();
-//		} catch (InterruptedException e) {
-//			Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
-//		}
+		try {
+			IntelEntityDataSource source = getDataStore(new NullProgressMonitor());
+			
+			source.updateEntityId(ie.getIdAttributeAsText());
+			
+			resources(new NullProgressMonitor()).forEach(gr->{
+				IntelEntityGeoResource igr = (IntelEntityGeoResource) gr;
+				String typeName = igr.getTypeName();
+				String newTitle = source.getName(typeName);
+				try {
+					((IntelEntityGeoResourceInfo)igr.getInfo(new NullProgressMonitor())).setTitle(newTitle);
+				} catch (IOException e) {
+					Intelligence2PlugIn.log(e.getMessage(), e);
+				}
+			});
+		}catch (IOException ex) {
+			Intelligence2PlugIn.log(ex.getMessage(), ex);
+		}
 	}
 	
 	/**

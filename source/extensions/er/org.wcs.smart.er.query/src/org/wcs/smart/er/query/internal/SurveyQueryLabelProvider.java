@@ -88,7 +88,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item instanceof MissionStartDateField) return Messages.MissionStartDateField_Name;
 		if (item instanceof MissionTrackDateField) return Messages.MissionTrackDateField_Name;
 		
-		if (item == TrackGeometryQueryColumn.KEY) return "Track";
+		if (item == TrackGeometryQueryColumn.KEY) return Messages.SurveyQueryLabelProvider_TrackGeomColumn;
 		return null;
 	}
 

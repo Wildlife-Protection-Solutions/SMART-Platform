@@ -260,7 +260,6 @@ public class CyberTracker extends HttpServlet{
 				s.remove(wi);
 			}
 			
-			//TODO: clean up these files in the clean up code
 			//delete the file 
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 					.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(p.getFilename());
@@ -314,7 +313,6 @@ public class CyberTracker extends HttpServlet{
 				s.remove(wi);
 			}
 			
-			//TODO: clean up these files in the clean up code
 			//delete the file 
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 					.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(p.getFilename());
@@ -859,7 +857,6 @@ public class CyberTracker extends HttpServlet{
 						key = new CyberTrackerApiKey();
 						key.setConservationArea(ca);
 						key.setType(keytype);
-						//TODO: hash this key
 						key.setApiKey( UUID.randomUUID().toString() );
 						s.persist(key);
 					}

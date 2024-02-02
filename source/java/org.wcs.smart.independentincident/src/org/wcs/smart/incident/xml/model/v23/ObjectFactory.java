@@ -32,7 +32,8 @@ import jakarta.xml.bind.annotation.XmlRegistry;
 @XmlRegistry
 public class ObjectFactory {
 
-    public final static QName _Waypoint_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.3/independentincident", "Waypoint");
+    @SuppressWarnings("nls")
+	public final static QName _Waypoint_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.3/independentincident", "Waypoint");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.incident.xml.model.v23

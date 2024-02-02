@@ -38,6 +38,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.NativeQuery;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
@@ -49,6 +50,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -216,6 +218,15 @@ public class UpdateableResultSet {
 							((AssetObservationEngine)engine).addTreeLabel(session, newItem);
 						}
 					}
+				}
+				break;
+			case LINE:
+			case POLYGON:
+				if (newValue instanceof Geometry geom) {
+					//setting source to null will ensure the source is not changed
+					GeometryAttributeValue geomValue = new GeometryAttributeValue(geom, null);
+					toUpdate.setGeometry(geomValue);
+					updated = true;
 				}
 				break;
 		}

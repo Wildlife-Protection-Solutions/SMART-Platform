@@ -255,6 +255,8 @@ public class CategoryColumnEngine implements IColumnEngine {
 				sb.append(" varchar(32672) "); //$NON-NLS-1$
 				break;
 			case MLIST:
+			case POLYGON:
+			case LINE:
 				return; //not supported here
 		}
 		log(sb.toString());
@@ -293,6 +295,8 @@ public class CategoryColumnEngine implements IColumnEngine {
 			sb.append(".ob_uuid"); //$NON-NLS-1$
 			break;
 		case MLIST:
+		case LINE:
+		case POLYGON:
 			return; //not supported here
 		}
 		sb.append(")"); //$NON-NLS-1$

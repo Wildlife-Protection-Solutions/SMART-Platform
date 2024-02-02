@@ -184,7 +184,7 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 		Map<DeviceUser, Integer> blacklistCount = new HashMap<>();
 		
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser();
+			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
 			try{

@@ -232,6 +232,8 @@ public class Messages extends NLS {
 
 	public static String ObservationItemList_ShowDetails;
 
+	public static String ObservationLabelProvider_0;
+
 	public static String ObservationLabelProvider_attributenotfound;
 
 	public static String ObservationLabelProvider_categorynotfound;
@@ -245,6 +247,8 @@ public class Messages extends NLS {
 	public static String ObservationLabelProvider_invalidbooleanvalue;
 
 	public static String ObservationLabelProvider_InvalidCmUuid;
+
+	public static String ObservationLabelProvider_InvalidSource;
 
 	public static String ObservationLabelProvider_invalidlistitem;
 
@@ -267,6 +271,10 @@ public class Messages extends NLS {
 	public static String ObservationLabelProvider_mssingproperty1;
 
 	public static String ObservationLabelProvider_noprocessor;
+
+	public static String ObservationLabelProvider_NotLineGeometry;
+
+	public static String ObservationLabelProvider_NotPolygonGeometry;
 
 	public static String ObservationLabelProvider_SignatureTypeNotFound;
 

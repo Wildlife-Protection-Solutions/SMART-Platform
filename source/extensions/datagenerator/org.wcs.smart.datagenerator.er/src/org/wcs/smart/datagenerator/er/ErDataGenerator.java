@@ -54,6 +54,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.datagenerator.er.internal.Messages;
 import org.wcs.smart.datagenerator.er.model.ObservationConfiguration;
@@ -75,6 +77,7 @@ import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -504,6 +507,8 @@ public class ErDataGenerator implements IDataEngine{
 								woa.setAttributeTreeNode(mapping.getAttributeTreeNode());
 								woa.setNumberValue(mapping.getNumberValue());
 								woa.setStringValue(mapping.getStringValue());
+								woa.setNumberValue2(mapping.getNumberValue2());
+								woa.setGeom(mapping.getGeom());
 								
 								if (mapping.getAttributeListItems() != null) {
 									woa.setAttributeListItems(new ArrayList<>());
@@ -624,6 +629,27 @@ public class ErDataGenerator implements IDataEngine{
 			}
 			if (kids.isEmpty()) return null;
 			return kids.get(random.nextInt(kids.size()));
+		case LINE:
+			int x = random.nextInt(15);
+			if (x < 2) x = 2;
+			Coordinate[] cs = new Coordinate[x];
+			for (int i = 0; i < cs.length; i ++) {
+				cs[i] = generatePosition();
+			}
+			Geometry g = GeometryFactoryProvider.getFactory().createLineString(cs);
+			GeometrySource src = GeometrySource.values()[random.nextInt(GeometrySource.values().length)];
+			return new GeometryAttributeValue(g, src);
+			
+		case POLYGON:
+			cs = new Coordinate[4];
+			for (int i = 0; i < cs.length-1; i ++) {
+				cs[i] = generatePosition();
+			}
+			cs[3] = cs[0];
+			g = GeometryFactoryProvider.getFactory().createPolygon(cs);
+			src = GeometrySource.values()[random.nextInt(GeometrySource.values().length)];
+			return new GeometryAttributeValue(g, src);
+		
 		}
 		throw new Exception(MessageFormat.format(Messages.DataGenerator_AttributeTypeNotSupported, a.getType().typeKey));
 	}

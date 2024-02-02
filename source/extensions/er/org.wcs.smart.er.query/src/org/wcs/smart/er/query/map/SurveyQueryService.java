@@ -33,6 +33,7 @@ import org.geotools.data.DataStore;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
@@ -79,7 +80,7 @@ public class SurveyQueryService extends QueryService {
 					ArrayList<QueryGeoResource> temp = new ArrayList<>();
 					for (Name n : ds.getNames()) {
 						if (SurveyQueryDataSource.isMissionTrack(n)) {
-							QueryGeoResource r = new QueryGeoResource(this, n.getLocalPart(), "Mission Tracks");
+							QueryGeoResource r = new QueryGeoResource(this, n.getLocalPart(), Messages.SurveyQueryService_MissionTrackGeoResource);
 							temp.add(r);
 						}else {
 							String name = ds.getLayerName(n);

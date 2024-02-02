@@ -70,6 +70,9 @@ public class IntelEntityDataSource extends ContentDataStore{
 		return new IntelEntityFeatureSource(entry, entityUuid);
 	}
 
+	public void updateEntityId(String entityId) {
+		this.entityId = entityId;
+	}
 	
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
@@ -108,8 +111,8 @@ public class IntelEntityDataSource extends ContentDataStore{
 			}	
 			
 			if (entity.getEntityType().getDmAttribute() != null) {
-				List<CategoryAttribute> options = session.createQuery("FROM CategoryAttribute WHERE id.attribute = :attribute", CategoryAttribute.class)
-				.setParameter("attribute", entity.getEntityType().getDmAttribute())
+				List<CategoryAttribute> options = session.createQuery("FROM CategoryAttribute WHERE id.attribute = :attribute", CategoryAttribute.class) //$NON-NLS-1$
+				.setParameter("attribute", entity.getEntityType().getDmAttribute()) //$NON-NLS-1$
 				.list();
 				
 				List<Attribute> dmAttributes = new ArrayList<>();
@@ -132,7 +135,7 @@ public class IntelEntityDataSource extends ContentDataStore{
 				
 				//need one layer for each dm attribute
 				for (Attribute dmAttribute : dmAttributes) {
-					String type = "WP_" + dmAttribute.getType().name() + "." + dmAttribute.getKeyId(); //$NON-NLS-1$
+					String type = "WP_" + dmAttribute.getType().name() + "." + dmAttribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 					names.add(new NameImpl(type)); 
 					attributeMap.put(type, dmAttribute);
 				}	 
@@ -169,10 +172,10 @@ public class IntelEntityDataSource extends ContentDataStore{
 	}
 
 	public static boolean isObservationLineAttribute(String name) {
-		return (name.startsWith("WP_" + Attribute.AttributeType.LINE.name() + ".")); //$NON-NLS-1$
+		return (name.startsWith("WP_" + Attribute.AttributeType.LINE.name() + ".")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	public static boolean isObservationPolgyonAttribute(String name) {
-		return (name.startsWith("WP_" + Attribute.AttributeType.POLYGON.name() + ".")); //$NON-NLS-1$
+		return (name.startsWith("WP_" + Attribute.AttributeType.POLYGON.name() + ".")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	/**
 	 * these are geometry attributes associated with waypoints (patrol, incident, mission etc)

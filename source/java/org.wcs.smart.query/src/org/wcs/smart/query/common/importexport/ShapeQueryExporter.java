@@ -243,7 +243,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 				}
 			}
 			if (this.geometryColumn == null) {
-				throw new Exception("A geometry column to export must be specified.");
+				throw new Exception(Messages.ShapeQueryExporter_GeometryColumnRequired);
 			}
 		}
 		

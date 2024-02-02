@@ -36,6 +36,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -494,7 +495,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 		
 		try(Reader in = Files.newBufferedReader(p, StandardCharsets.UTF_8)){
 			json = IOUtils.toString(in);
-			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json));
+			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault()));
 			
 			for (int i = 0; i < features.size(); i ++) {
 				JSONObject f = (JSONObject)features.get(i);

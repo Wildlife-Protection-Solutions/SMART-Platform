@@ -71,7 +71,7 @@ public class ExportQueryGeometryColumnPage extends WizardPage {
 		
 		main.setLayout(new GridLayout(1, false));
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Select the geometries to export:");
+		lbl.setText(Messages.ExportQueryGeometryColumnPage_GeometryLabel);
 		
 		Composite wrapper = new Composite(main, SWT.NONE);
 		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -94,7 +94,7 @@ public class ExportQueryGeometryColumnPage extends WizardPage {
 		);
 		
 		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
-		setMessage("Select the geometries to export");
+		setMessage(Messages.ExportQueryGeometryColumnPage_PageMessage);
 		setControl(main);
 	}
 

@@ -348,7 +348,6 @@ public abstract class AbstractSmartImporter {
 					try {
 						ParseResult results = CtJsonUtil.parseDefaultAttributeValues((JSONObject)(new JSONParser()).parse(defaultData), session);
 						for (JsonImportWarning x : results.getWarnings()){
-							//TODO:
 							addWarning(x.getMessage(Locale.getDefault()));
 						}
 						for (WaypointObservationAttribute aa : results.getAttributes()){
@@ -492,6 +491,9 @@ public abstract class AbstractSmartImporter {
 		}
 		case MLIST:
 			throw new IllegalArgumentException("Multi-list is not supported for CyberTracker Classic applications."); //$NON-NLS-1$
+		case LINE:
+		case POLYGON:
+			throw new IllegalArgumentException("Geometry attributes is not supported for CyberTracker Classic applications."); //$NON-NLS-1$
 			
 		}
 		return wpoa;

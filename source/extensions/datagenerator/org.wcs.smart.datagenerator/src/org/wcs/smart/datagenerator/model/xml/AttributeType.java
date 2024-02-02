@@ -25,7 +25,9 @@ import jakarta.xml.bind.annotation.XmlType;
  *       &lt;attribute name="attribute" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="mapping_type" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="double_value" type="{http://www.w3.org/2001/XMLSchema}double" />
+ *       &lt;attribute name="double_value_2" type="{http://www.w3.org/2001/XMLSchema}double" />
  *       &lt;attribute name="string_value" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="geometry_value" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -43,8 +45,12 @@ public class AttributeType {
     protected String mappingType;
     @XmlAttribute(name = "double_value")
     protected Double doubleValue;
+    @XmlAttribute(name = "double_value_2")
+    protected Double doubleValue2;
     @XmlAttribute(name = "string_value")
     protected String stringValue;
+    @XmlAttribute(name = "geometry_value")
+    protected String geometryValue;
 
     /**
      * Gets the value of the attribute property.
@@ -119,6 +125,30 @@ public class AttributeType {
     }
 
     /**
+     * Gets the value of the doubleValue2 property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getDoubleValue2() {
+        return doubleValue2;
+    }
+
+    /**
+     * Sets the value of the doubleValue2 property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setDoubleValue2(Double value) {
+        this.doubleValue2 = value;
+    }
+    
+    /**
      * Gets the value of the stringValue property.
      * 
      * @return
@@ -140,6 +170,30 @@ public class AttributeType {
      */
     public void setStringValue(String value) {
         this.stringValue = value;
+    }
+    
+    /**
+     * Gets the value of the geometryValue property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getGeometryValue() {
+        return geometryValue;
+    }
+
+    /**
+     * Sets the value of the geometryValue property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setGeometryValue(String value) {
+        this.geometryValue = value;
     }
 
 }

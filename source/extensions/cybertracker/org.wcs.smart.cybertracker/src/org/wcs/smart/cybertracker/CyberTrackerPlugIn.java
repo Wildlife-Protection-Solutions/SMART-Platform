@@ -31,6 +31,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
@@ -97,6 +98,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		Job j = new CyberTrackerStartupJob();
 		j.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		j.schedule();
+		
+		SmartContext.INSTANCE.setClass(ICyberTrackerLabelProvider.class, new CyberTrackerLabelProvider());
 	}
 
 	/*

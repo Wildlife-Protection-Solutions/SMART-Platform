@@ -305,6 +305,8 @@ public class Messages extends NLS {
 	public static String SurveyQueryLabelProvider_ObservationGroupColumnName;
 	public static String SurveyQueryLabelProvider_RawXColumnLabel;
 	public static String SurveyQueryLabelProvider_RawYColumnLabel;
+	public static String SurveyQueryLabelProvider_TrackGeomColumn;
+	public static String SurveyQueryService_MissionTrackGeoResource;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryError;
 	public static String SurveySummaryQueryType_QueryTypeName;

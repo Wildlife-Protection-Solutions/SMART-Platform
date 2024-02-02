@@ -84,13 +84,13 @@ public class AttributeValidator {
 		if (!attribute.getType().isGeometry()) return null;
 		
 		if (!(value instanceof GeometryAttributeValue)) {
-			return MessageFormat.format("Attribute value for {0} must be a Geometry.", new Object[]{ attribute.getName() });
+			return MessageFormat.format(Messages.AttributeValidator_GeometryRequired, new Object[]{ attribute.getName() });
 		}
 		if (attribute.getType() == AttributeType.POLYGON && !((GeometryAttributeValue)value).isPolygon()) {
-			return MessageFormat.format("Geometry for attribute {0} must be a MultiPolygon.", new Object[]{ attribute.getName() });
+			return MessageFormat.format(Messages.AttributeValidator_MultiPolygonGeometryRequired, new Object[]{ attribute.getName() });
 		}
 		if (attribute.getType() == AttributeType.LINE && value != null && !((GeometryAttributeValue)value).isLineString()) {
-			return MessageFormat.format("Geometry for attribute {0} must be a MultiLineString.", new Object[]{ attribute.getName() });
+			return MessageFormat.format(Messages.AttributeValidator_LineStringGeometryRequired, new Object[]{ attribute.getName() });
 		}
 		return null;
 	}

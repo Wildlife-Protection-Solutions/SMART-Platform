@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.patrol;
 
 import java.util.Locale;
 
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonImportWarning;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
@@ -36,20 +37,20 @@ public class PatrolCyberTrackerLabelProvider implements IPatrolCyberTrackerLabel
 	@Override
 	public String getLabel(Object item, Locale l) {
 		
-		if (item == PatrolJsonImportWarning.WarningType.STATION_NOT_FOUND) return "Station value not found. Station will be empty.";
-		if (item == PatrolJsonImportWarning.WarningType.TEAM_NOT_FOUND) return "Team value not found. Station will be empty.";
-		if (item == PatrolJsonImportWarning.WarningType.MANDATE_NOT_FOUND) return "Mandate value not found. Station will be empty.";
-		if (item == PatrolJsonImportWarning.WarningType.MEMBER_NOT_FOUND) return "Member not found. Member will not be added to patrol.";
-		if (item == PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR) return "Patrol transport type not found. Patrol part will not be imported.";
-		if (item == PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES) return "The track point {0} matches multiple patrols [{1}].  Ensure the patrol days and times do not overlap and try again.";
-		if (item == PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND) return "No patrol found for 'add to previous waypoint' observation.";
-		if (item == PatrolJsonImportWarning.WarningType.DUPLICATE) return "Possible duplicate processing of file. The patrol {0} linked with this SMART Mobile data already exists in the database with an observation counter greater than the observation counter in the file ({1} > {2})";
+		if (item == PatrolJsonImportWarning.WarningType.STATION_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning1;
+		if (item == PatrolJsonImportWarning.WarningType.TEAM_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning2;
+		if (item == PatrolJsonImportWarning.WarningType.MANDATE_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning3;
+		if (item == PatrolJsonImportWarning.WarningType.MEMBER_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning4;
+		if (item == PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning5;
+		if (item == PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning6;
+		if (item == PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning7;
+		if (item == PatrolJsonImportWarning.WarningType.DUPLICATE) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning8;
 		
 		
-		if (item == PatrolJsonProcessor.StatusMessage.ADDED) return "Created {0} patrols";
-		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return "Modified {0} patrols";
+		if (item == PatrolJsonProcessor.StatusMessage.ADDED) return Messages.PatrolCyberTrackerLabelProvider_CreatedMessage;
+		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return Messages.PatrolCyberTrackerLabelProvider_ModifiedMessage;
 		
-		if (item == PatrolJsonProcessor.CA_ERROR) return "The Conservation Area associated with the file ({0}), does not match the Conservation Area of the patrol currently linked to this data ({1})";
+		if (item == PatrolJsonProcessor.CA_ERROR) return Messages.PatrolCyberTrackerLabelProvider_CaErrorMessage;
 		
 		return null;
 	}

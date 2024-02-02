@@ -56,7 +56,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.event.ActionExecutorManager;
 import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.internal.Messages;

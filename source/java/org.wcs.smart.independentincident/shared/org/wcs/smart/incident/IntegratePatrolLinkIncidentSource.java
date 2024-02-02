@@ -34,7 +34,7 @@ import org.wcs.smart.util.UuidUtils;
 
 /**
  * Waypoint source class for Integrate incidents that are eventually
- * to be added to a patrol.
+ * linked to a patrol (but remain incidents).
  *  
  * @author Emily
  * @since 7.5.7

@@ -116,7 +116,7 @@ public class SelectPointOnMapDialog extends SmartStyledDialog{
 		
 		StyleBuilder sb = new StyleBuilder();
 		
-		Mark mark = sb.createMark("star",  new Color(255, 0, 0), new Color(255, 0, 0), 1);
+		Mark mark = sb.createMark("star",  new Color(255, 0, 0), new Color(255, 0, 0), 1); //$NON-NLS-1$
 		
 		Graphic graph2 = sb.createGraphic(null, mark, null, 1, 10, 0);
         PointSymbolizer symb = sb.createPointSymbolizer(graph2);

@@ -102,7 +102,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		for (int i = 0; i < data.length-1; i ++){
 			data[i] = queryColumns.get(i).getName(); 
 		}
-		data[data.length - 1] = "Geometry";
+		data[data.length - 1] = "Geometry"; //$NON-NLS-1$
 		writer.writeNext(data);
 	}
 

@@ -57,7 +57,7 @@ public class QueryDataSource extends ContentDataStore{
 	 */
 	public QueryDataSource(Query query, IProjectionProvider prjProvider){
 		if (!(query instanceof IStyledQuery)) {
-			throw new UnsupportedOperationException("cannot add non-styled queries to map");			
+			throw new UnsupportedOperationException("cannot add non-styled queries to map");			 //$NON-NLS-1$
 		}
 		this.query = query;
 		this.prjProvider = prjProvider;

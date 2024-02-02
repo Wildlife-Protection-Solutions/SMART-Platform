@@ -29,6 +29,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -36,12 +37,19 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.cybertracker.json.JsonImportWarning.Type;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.ImageSizeOption;
@@ -49,6 +57,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
+import org.wcs.smart.util.GeoJsonUtil;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -356,6 +365,42 @@ public class CtJsonUtil {
 			}
 			toUpdate.setAttributeTreeNode(li);
 			
+		}else if (att.getType().isGeometry()) {
+			JSONObject feature = (JSONObject)value;
+			
+			try {
+				
+				Geometry geom = GeoJsonUtil.toJTSGeometry( (JSONObject) feature.get("geometry") ); //$NON-NLS-1$
+				GeometrySource geomSource= GeometrySource.UNKNOWN; 
+				
+				try {
+					JSONObject properties = (JSONObject) feature.get("properties"); //$NON-NLS-1$
+					String src =  properties.get("source").toString(); //$NON-NLS-1$
+					geomSource = GeometrySource.valueOf(src.toUpperCase());
+				}catch (Exception ex) {
+					
+				}
+				
+				if (att.getType() == AttributeType.LINE) {
+					if (geom instanceof LineString || geom instanceof MultiLineString) {
+						toUpdate.setGeometry(new GeometryAttributeValue(geom, geomSource));
+					}else {
+						warnings.add(new JsonImportWarning(Type.INVALID_LINESTRING_GEOMETRY, att.getName()));
+						return false;
+					}
+				}else if (att.getType() == AttributeType.POLYGON) {
+					if (geom instanceof Polygon || geom instanceof MultiPolygon) {
+						toUpdate.setGeometry(new GeometryAttributeValue(geom, geomSource));
+					}else {
+						warnings.add(new JsonImportWarning(Type.INVALID_POLYGON_GEOMETRY, att.getName()));
+						return false;
+					}
+				}
+			}catch (Exception ex) {
+				warnings.add(new JsonImportWarning(Type.COULD_NOT_PARSE_GEOMETRY, att.getName()));
+				return false;
+			}
+				
 		}
 		return true;
 	}
@@ -379,7 +424,6 @@ public class CtJsonUtil {
 				try{
 					a = findAttribute(key.substring(part.length()), session);
 				}catch (Exception ex){
-					//TODO: log exception
 					warnings.add(new JsonImportWarning(Type.DEFAULT_ATTRIBUTE_NOT_FOUND, key));
 					continue;
 				}
@@ -397,8 +441,6 @@ public class CtJsonUtil {
 						defaultAttributes.add(woa);
 					}
 				}catch (Exception ex){
-					//TODO: log exception
-					//CyberTrackerPlugIn.log(ex.getMessage(), ex);
 					warnings.add(new JsonImportWarning(Type.DEFAULT_ATTRIBUTE_PARSE_ERROR, a.getName(), value.toString(), ex.getLocalizedMessage()));
 
 				}
@@ -408,18 +450,18 @@ public class CtJsonUtil {
 		return new ParseResult(defaultAttributes, warnings);
 	}
 
-	public static List<JSONObject> parseFeaturesFromJsonString(String json) throws Exception {
+	public static List<JSONObject> parseFeaturesFromJsonString(String json, Locale l) throws Exception {
 		JSONObject jsonData = null;
 		try {
 			Object obj = (new JSONParser()).parse(json);
 			jsonData = (JSONObject) obj;
 		} catch (Exception ex) {
-			throw new Exception((new JsonError(JsonError.Type.JSON_PARSE_ERROR, ex.getMessage())).getMessage(), ex); 
+			throw new Exception((new JsonError(JsonError.Type.JSON_PARSE_ERROR, ex.getMessage())).getMessage(l), ex); 
 		}
 
 		JSONArray jsFeatures = (JSONArray) jsonData.get(CtJsonObservationParser.FEATURES_KEY);
 		if (jsFeatures == null)
-			throw new Exception((new JsonError(JsonError.Type.FEATURES_NOT_FOUND, CtJsonObservationParser.FEATURE_KEY)).getMessage());			
+			throw new Exception((new JsonError(JsonError.Type.FEATURES_NOT_FOUND, CtJsonObservationParser.FEATURE_KEY)).getMessage(l));			
 
 		List<JSONObject> features = new ArrayList<JSONObject>();
 		for (int i = 0; i < jsFeatures.size(); i++) {

@@ -1013,6 +1013,8 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_Error_InvalidTransportType;
 	public static String XmlToPatrolConverter_Error_MandateNotFound;
 	public static String XmlToPatrolConverter_Error_TranpsortTypeNotFound;
+
+	public static String XmlToPatrolConverter_GeometryParseError;
 	public static String XmlToPatrolConverter_InvalidDateString;
 	public static String XmlToPatrolConverter_InvalidPatrolId;
 	public static String XmlToPatrolConverter_ListItemNotFound;
@@ -1020,6 +1022,8 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_ObserverNotFound;
 	public static String XmlToPatrolConverter_ReadError;
 	public static String XmlToPatrolConverter_SignatureTypeKeyNotFound;
+
+	public static String XmlToPatrolConverter_SourceParseError;
 	public static String XmlToPatrolConverter_TreeAttributesNotSupported;
 	public static String XmlToPatrolConverter2_ReadError;
 	public static String XmlToPatrolConverter_Warning_AttachmentFileNotFound;

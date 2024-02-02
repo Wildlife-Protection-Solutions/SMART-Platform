@@ -42,10 +42,10 @@ import org.wcs.smart.patrol.model.Track;
  */
 public class QaHibernateListener implements PostCommitInsertEventListener {
 	
-	private QaValidationJob validationJob;
+	private QaValidationProcessor validationJob;
 	
 	public QaHibernateListener (SessionFactoryImplementor sessionFactory){
-		this.validationJob = new QaValidationJob(sessionFactory);
+		this.validationJob = new QaValidationProcessor(sessionFactory);
 	}
 	
 	

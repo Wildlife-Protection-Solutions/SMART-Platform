@@ -61,14 +61,14 @@ import org.wcs.smart.qa.routine.WaypointLocationData;
  * @author Emily
  *
  */
-public class QaValidationJob implements Runnable{
+public class QaValidationProcessor implements Runnable{
 
 	private SessionFactory sessionFactory = null;
 	private List<Object[]> tasks = Collections.synchronizedList(new ArrayList<>());
 	
 	private Thread currentRunnable = null;
 
-	public QaValidationJob(SessionFactory sessionFactory) {
+	public QaValidationProcessor(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
@@ -89,39 +89,39 @@ public class QaValidationJob implements Runnable{
 	
 	private void processItem(Object item, Locale l) {
 		ConservationArea ca = null;
-		SingleItemDataProvider<?> provider = null;
+		SingleItemDataProvider provider = null;
 		
 		if (item instanceof PatrolWaypoint pw){
 			ca = pw.getWaypoint().getConservationArea();
 			WaypointLocationData data = new WaypointLocationData(pw.getWaypoint());
-			provider = new SingleItemDataProvider<WaypointLocationData>(
+			provider = new SingleItemDataProvider(
 					RoutineExtensionManager.INSTANCE.findDataProvider(PatrolWaypointDataProvider.ID), data);
 		
 		}else if (item instanceof Track t){
 			ca = t.getPatrolLegDay().getPatrolLeg().getPatrol().getConservationArea();
 			TrackLocationData data = new TrackLocationData(t);
-			provider = new SingleItemDataProvider<TrackLocationData>(
+			provider = new SingleItemDataProvider(
 					RoutineExtensionManager.INSTANCE.findDataProvider(PatrolTrackDataProvider.ID), data);
 		}
 		if (item instanceof SurveyWaypoint sw){
 			ca = sw.getWaypoint().getConservationArea();
 			WaypointLocationData data = new WaypointLocationData(sw.getWaypoint());
-			provider = new SingleItemDataProvider<WaypointLocationData>(
+			provider = new SingleItemDataProvider(
 					RoutineExtensionManager.INSTANCE.findDataProvider(ErWaypointDataProvider.ID), data);			
 		}else if (item instanceof MissionTrack mt){
 			ca = mt.getMissionDay().getMission().getSurvey().getSurveyDesign().getConservationArea();
 			org.wcs.smart.qa.er.TrackLocationData data = new org.wcs.smart.qa.er.TrackLocationData(mt);
-			provider = new SingleItemDataProvider<org.wcs.smart.qa.er.TrackLocationData>(
+			provider = new SingleItemDataProvider(
 					RoutineExtensionManager.INSTANCE.findDataProvider(ErWaypointDataProvider.ID), data);
 		}else if (item instanceof Waypoint wp) {
 			ca = wp.getConservationArea();
 			WaypointLocationData data = new WaypointLocationData(wp);
 			
 			if (wp.getSourceId().equals(IndepedentIncidentSource.KEY)){
-				provider = new SingleItemDataProvider<WaypointLocationData>(
+				provider = new SingleItemDataProvider(
 						RoutineExtensionManager.INSTANCE.findDataProvider(IncidentDataProvider.ID), data);
 			}else if (wp.getSourceId().equals(IntegrateIncidentSource.KEY)) {
-				provider = new SingleItemDataProvider<WaypointLocationData>(
+				provider = new SingleItemDataProvider(
 						RoutineExtensionManager.INSTANCE.findDataProvider(IntegrateIncidentDataProvider.ID), data);
 			}
 			//we do not validate collect, integratepatrol, integtratepatrollink incidents
@@ -147,7 +147,7 @@ public class QaValidationJob implements Runnable{
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){
-				Logger.getLogger(QaValidationJob.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+				Logger.getLogger(QaValidationProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
 		}
 	}

@@ -138,9 +138,9 @@ public class Attribute extends DmObject{
 	 *
 	 */
 	public enum GeometrySource{
-		MANUAL_DRAW,
-		MANUAL_POINT,
-		GPS,
+		MANUAL_DRAW, //drawn on a map manually (user clicks point on map)
+		MANUAL_POINT,  //manually enter coordinates (x,y) without aid of map
+		GPS, //taken by a GPS (smart mobile)
 		UNKNOWN;
 		
 		public String getLabel(Locale l) {

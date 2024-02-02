@@ -101,7 +101,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 				matching = AttributeType.POLYGON;
 			}
 			
-			String attributeKey = thisType.split("\\.")[1];
+			String attributeKey = thisType.split("\\.")[1]; //$NON-NLS-1$
 			try(Session session = HibernateManager.openSession()){
 				
 				patrol = session.get(Patrol.class, patrol.getUuid());

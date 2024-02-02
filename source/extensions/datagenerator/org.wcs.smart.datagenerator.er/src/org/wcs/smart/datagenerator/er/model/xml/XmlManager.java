@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -215,6 +216,13 @@ public enum XmlManager {
 										 }
 									 }
 								 }
+							 
+							 }else if (attribute.getType().isGeometry()) {
+								woa.setStringValue(a.getStringValue());
+								woa.setNumberValue(a.getDoubleValue());
+								woa.setNumberValue2(a.getDoubleValue2());
+								woa.setGeom( HexFormat.of().parseHex(a.getGeometryValue()));
+								add = a.getGeometryValue() != null;
 							 }
 							 
 							 if (add) {
@@ -315,6 +323,12 @@ public enum XmlManager {
 					case MLIST:
 						if (woa.getAttributeListItems() != null)
 							xmlAttribute.setStringValue( woa.getAttributeListItems().stream().map(e->e.getAttributeListItem().getKeyId()).collect(Collectors.joining(",")) ); //$NON-NLS-1$
+					case LINE:
+					case POLYGON:
+						xmlAttribute.setDoubleValue(woa.getNumberValue());
+						xmlAttribute.setDoubleValue2(woa.getNumberValue2());
+						xmlAttribute.setStringValue(woa.getStringValue());
+						xmlAttribute.setGeometryValue( HexFormat.of().formatHex(woa.getGeom()));
 					}
 				}
 			}

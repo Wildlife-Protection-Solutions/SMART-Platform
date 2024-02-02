@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.hibernate.listeners;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -43,43 +45,60 @@ import org.wcs.smart.observation.model.WaypointObservation;
  */
 public class ConnectEventProcessor implements Runnable {
 
-	private WaypointObservation wo;
-	private SessionFactory sessionFactory;
-	private Locale l;
+	private SessionFactory sessionFactory = null;
+	private List<Object[]> tasks = Collections.synchronizedList(new ArrayList<>());
+	private Thread currentRunnable = null;
+
 	
-	public ConnectEventProcessor(WaypointObservation wo, SessionFactory sessionFactory, Locale l) {
-		this.wo = wo;
+	public ConnectEventProcessor(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
-		this.l = l;
 	}
+	
+	/**
+	 * Register a new observation attribute for events 
+	 */
+	public void addTask(WaypointObservation wo , Locale l){
+		tasks.add(new Object[] {wo, l});
+		start();
+	}
+	
+	private synchronized void start() {
+		if (currentRunnable != null && currentRunnable.isAlive()) return;
+		currentRunnable = new Thread(this);
+		currentRunnable.start();
+	}
+	
 	
 	@Override
 	public void run() {
 		AttachmentInterceptor interceptor = new AttachmentInterceptor(false);
 		try(Session session = sessionFactory.withOptions().interceptor(interceptor).openSession()){
-			interceptor.setSession(session, l);
-			wo = session.get(WaypointObservation.class, wo.getUuid());
-			if (wo == null) return;
+			while(!tasks.isEmpty()) {
+				Object[] data = tasks.remove(0);
+				WaypointObservation wo = (WaypointObservation) data[0];
+				Locale l = (Locale)data[1];
+			
+				interceptor.setSession(session, l);
+				
+				wo = session.get(WaypointObservation.class, wo.getUuid());
+				
+				if (wo == null) continue;
 		
-			for(EActionEvent event : getEventActions(session, wo.getWaypoint().getConservationArea())) {
-				if (!event.isEnabled()) continue;
-				try {
-					EventProcessor.INSTANCE.processEvent(event, wo, null, session);
-				}catch (Exception ex) {
-					Logger.getLogger(ConnectEventProcessor.class.getName()).log(Level.WARNING, "Unable to process events associated with new waypoint observation: " + ex.getMessage(), ex); //$NON-NLS-1$
+				for(EActionEvent event : getEventActions(session, wo.getWaypoint().getConservationArea())) {
+					if (!event.isEnabled()) continue;
+					try {
+						EventProcessor.INSTANCE.processEvent(event, wo, null, session);
+					}catch (Exception ex) {
+						Logger.getLogger(ConnectEventProcessor.class.getName()).log(Level.WARNING, "Unable to process events associated with new waypoint observation: " + ex.getMessage(), ex); //$NON-NLS-1$
+					}
 				}
 			}
 		}
 	}
 	
 	private List<EActionEvent> getEventActions(Session session, ConservationArea ca){
-		List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, 
+		return QueryFactory.buildQuery(session, EActionEvent.class, 
 					new Object[] {"action.conservationArea", ca}).list(); //$NON-NLS-1$
-		events.forEach(evt->{
-			evt.getAction().getParameters().forEach(p->p.getId().getParameterKey());
-			evt.getFilter().getFilterString();
-		});
-		return events;
 	}
 
 }

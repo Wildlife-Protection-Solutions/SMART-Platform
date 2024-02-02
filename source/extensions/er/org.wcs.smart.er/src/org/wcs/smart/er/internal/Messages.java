@@ -954,6 +954,10 @@ public class Messages extends NLS {
 
 	public static String XMLtoMissionConverter_duplicatememberwarning;
 
+	public static String XMLtoMissionConverter_GeometryError;
+
+	public static String XMLtoMissionConverter_GeometrySourceError;
+
 	public static String XMLtoMissionConverter_NoListItemsFound;
 
 	public static String XMLtoMissionConverter_ObserverNotFound;

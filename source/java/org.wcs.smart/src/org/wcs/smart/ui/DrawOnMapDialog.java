@@ -78,6 +78,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.udig.AddLayerTool;
 import org.wcs.smart.udig.SetBasemapTool;
@@ -125,12 +126,13 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void okPressed() {
 		try {
 			getMapPart().getMap().getEditManagerInternal().commitTransaction();
 			
-			FeatureCollection fc = editResource.resolve(FeatureStore.class, new NullProgressMonitor()).getFeatures();
+			FeatureCollection<?, SimpleFeature> fc = editResource.resolve(FeatureStore.class, new NullProgressMonitor()).getFeatures();
 			List<Geometry> geoms = new ArrayList<>();
 			
 			try(FeatureIterator<SimpleFeature> it = fc.features()){
@@ -260,7 +262,7 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 		init(mapComposite);
 				
 		mapComposite.addListener(SWT.Dispose, e -> dispose());
-		getShell().setText("Set Attribute Geomtry");
+		getShell().setText(Messages.DrawOnMapDialog_DialogTitle);
 		return parent;
 	}
 
@@ -274,7 +276,11 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 		// switch to pan tool to remove any editor listeners that stick around
 		ToolProxy found = ((ToolManager) ApplicationGIS.getToolManager())
 				.findToolProxy(MapToolComposite.UDIG_PAN_ID);
-		ApplicationGIS.getToolManager().getToolAction(found.getId(), found.getCategoryId()).run();
+		try {
+			ApplicationGIS.getToolManager().getToolAction(found.getId(), found.getCategoryId()).run();
+		}catch (NullPointerException ex) {
+			//
+		}
 
 		getMapPart().getMap().getEditManagerInternal().setEditFeature(null, null);
 
@@ -287,16 +293,17 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 
 	private void initEditingLayer() {
 		try {
-			String typeStr ="the_geom:Polygon:srid=4326";
+			String typeStr ="the_geom:Polygon:srid=4326"; //$NON-NLS-1$
 			if (type == Type.LINESTRING) {
-				typeStr ="the_geom:LineString:srid=4326";
+				typeStr ="the_geom:LineString:srid=4326"; //$NON-NLS-1$
 			}
 			SimpleFeatureType editType = DataUtilities.createType(
-					"tempattributeedit" + System.nanoTime(), typeStr);
+					"tempattributeedit" + System.nanoTime(), typeStr); //$NON-NLS-1$
 			
 			editResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(editType);
 	
 			AddLayersCommand command = new AddLayersCommand(Collections.singletonList(editResource), mapComposite.getMap().getLayersInternal().size()) {
+				@SuppressWarnings("unchecked")
 				public void run(IProgressMonitor monitor) throws Exception {
 					super.run(monitor);
 					if (getLayers() == null || getLayers().isEmpty())
@@ -318,8 +325,8 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 							for (int i = 0; i < mls.getNumGeometries(); i ++) {
 								LineString ls = (LineString) mls.getGeometryN(i);
 								
-								builder.set("the_geom", ls);
-								SimpleFeature feature = builder.buildFeature("fid_" + i);
+								builder.set("the_geom", ls); //$NON-NLS-1$
+								SimpleFeature feature = builder.buildFeature("fid_" + i); //$NON-NLS-1$
 								features.add(feature);
 							}
 						}
@@ -328,8 +335,8 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 							for (int i = 0; i < mls.getNumGeometries(); i ++) {
 								Polygon ls = (Polygon) mls.getGeometryN(i);
 								
-								builder.set("the_geom", ls);
-								SimpleFeature feature = builder.buildFeature("fid_" + i);
+								builder.set("the_geom", ls); //$NON-NLS-1$
+								SimpleFeature feature = builder.buildFeature("fid_" + i); //$NON-NLS-1$
 								features.add(feature);
 							}
 						}
@@ -337,7 +344,7 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 					if (!features.isEmpty()) {
 						ListFeatureCollection fc = new ListFeatureCollection(editType);
 						fc.addAll(features);
-						FeatureStore store = editResource.resolve(FeatureStore.class, monitor);
+						FeatureStore<SimpleFeatureType, SimpleFeature> store = editResource.resolve(FeatureStore.class, monitor);
 						try{
 							store.removeFeatures(Filter.INCLUDE);
 							store.addFeatures(fc);
@@ -347,9 +354,7 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 							store.removeFeatures(Filter.INCLUDE);
 							store.addFeatures(fc);
 						}
-						
-//						AddFeatureCommand addFeatureCommand = new AddFeatureCommand(, editLayer);
-//						addFeatureCommand.run(monitor);
+	
 						getMap().getEditManagerInternal().commitTransaction();
 					}	
 	

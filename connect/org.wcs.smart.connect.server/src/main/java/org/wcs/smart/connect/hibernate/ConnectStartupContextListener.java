@@ -89,6 +89,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
 import org.wcs.smart.connect.i18n.labels.AssetLabelProvider;
 import org.wcs.smart.connect.i18n.labels.AssetQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.CyberTrackerLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ErLabelProvider;
 import org.wcs.smart.connect.i18n.labels.GridQueryColumnLabelProvider;
 import org.wcs.smart.connect.i18n.labels.IncidentCyberTrackerLabelProvider;
@@ -144,6 +145,7 @@ import org.wcs.smart.connect.query.engine.i2.QueryEngineFactory;
 import org.wcs.smart.connect.report.BirtEngine;
 import org.wcs.smart.connect.report.SmartServiceLabelProvider;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.cybertracker.ICyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
@@ -479,7 +481,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		//register SMART context classes
 		initSmartClasses(sce);
-		
+	
 		//start executor for running background jobs
 		int numthreads = 1;
 		try{
@@ -568,6 +570,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.observation.IObservationLabelProvider.class, new ObservationLabelProvider());
 		SmartContext.INSTANCE.setClass(IAssetQueryColumnProvider.class, new AssetQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(ICyberTrackerLabelProvider.class, new CyberTrackerLabelProvider());
 		
 		
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());

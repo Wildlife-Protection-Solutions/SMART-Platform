@@ -46,6 +46,9 @@ public class IntelEntityGeoResourceInfo extends IGeoResourceInfo {
 		computeBounds(resource, monitor);
 	}
 	
+	public void setTitle(String title) {
+		this.title = title;
+	}
 	/**
 	 * Recomputes the bounds for this resource info.
 	 * 

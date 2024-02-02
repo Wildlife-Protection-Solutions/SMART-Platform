@@ -210,7 +210,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	}
 	
 	private ProcessingStatus run() throws Exception{
-		List<JSONObject> features = CtJsonUtil.parseFeaturesFromJsonString(json);
+		List<JSONObject> features = CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault());
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 		
 			session.beginTransaction();

@@ -320,8 +320,6 @@ public enum ChangeLogManager {
 		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) "); //$NON-NLS-1$
 		query.append("and c.maxrevision = a.revision "); //$NON-NLS-1$
 		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision "); //$NON-NLS-1$
-//		System.out.println(query.toString());
-		
 		
 		NativeQuery<Object> hquery = session.createNativeQuery(query.toString(), Object.class);
 
@@ -329,7 +327,6 @@ public enum ChangeLogManager {
 		hquery.setParameter("revision1", startRevision); //$NON-NLS-1$
 		hquery.setParameter("ca2", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.setParameter("revision2", startRevision); //$NON-NLS-1$
-		//TODO: review this
 		hquery.addScalar("uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.addScalar("revision"); //$NON-NLS-1$
 		hquery.addScalar("action"); //$NON-NLS-1$

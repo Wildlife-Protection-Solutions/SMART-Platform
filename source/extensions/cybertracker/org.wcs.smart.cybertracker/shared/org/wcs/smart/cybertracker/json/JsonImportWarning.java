@@ -25,6 +25,9 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.function.Function;
 
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.cybertracker.ICyberTrackerLabelProvider;
+
 /**
  * SMART Mobile processing warnings
  * 
@@ -48,6 +51,9 @@ public class JsonImportWarning {
 		
 		COULD_NOT_PARSE_BOOLEAN, //1 parameter value being parsed
 		COULD_NOT_PARSE_DATE,  //1 parameter value being parsed
+		COULD_NOT_PARSE_GEOMETRY,  //1 parameter attribute name
+		INVALID_LINESTRING_GEOMETRY, //1 parameter attribute name
+		INVALID_POLYGON_GEOMETRY,   //1 parameter attribute name
 		
 		DUPLICATE_ATTRIBUTES, //1 parameter attribute name
 		
@@ -57,6 +63,10 @@ public class JsonImportWarning {
 		DEFAULT_ATTRIBUTE_NOT_FOUND, //1 parameter - attribute uuid as string
 		
 		JSON_FEATURE_PARSE_ERROR; //1 parameter error message
+		
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(ICyberTrackerLabelProvider.class).getLabel(this, l);
+		}
 	}
 	
 	private Type type;
@@ -84,31 +94,8 @@ public class JsonImportWarning {
 			return MessageFormat.format(message.apply(l), data);
 		}	
 		switch(type) {
-			case CATEGORY_NOT_FOUND: return MessageFormat.format("Category not found. Observation data will not be imported for this waypoint. (category uuid: {0})", data);
-			case LIST_ATTRIBUTE_NOT_FOUND: return MessageFormat.format("Attribute list item not found. Attribute value will not be set for observation. (uuid: {0})", data);
-			case TREE_NODE_NOT_FOUND: return MessageFormat.format("Tree node not found. Attribute value will not be set for observation. (uuid: {0})", data);
-			case ATTRIBUTE_NOT_FOUND: return MessageFormat.format("Attribute not found. Attribute value will not be set for observation. (uuid: {0})", data);
-			case ATT_CAT_NOT_ASSOCIATED: return MessageFormat.format("Attribute ''{0}'' not associated with category ''{1}''. Attribute value will not be set for observation.", data);
-
-			case DEFAULT_ATTRIBUTE_NOT_FOUND: return MessageFormat.format("Attribute not found. The default setting for this value will be ignored for the observation. (uuid: {0})", data);
-			
-			case INVALID_CM: return MessageFormat.format("Source configurable model not found. Source configurable model will be null for this waypoint. (mode uuid: {0}). Ensure your desktop Conservation Area is synchronized with Connect.", data);
-			case INVALID_SIGNATURE: return MessageFormat.format("Signature type not found. The file will be imported as a regular attachment. (signature key: {0}).", data);
-			case INVALID_OBSERVER: return MessageFormat.format("Observer not found found. The observer will be empty for this waypoint. (uuid: {0})", data);
-			
-			case INVALID_ATTACHMENT: return MessageFormat.format("Could not process attachment. Attachment will not be imported. (attachment number: {0})", data);
-			case INVALID_PHOTO_ATTACHMENT: return MessageFormat.format("Could not determine photo attachment type. Attachment will be imported with an unknown file extension. (attachment number: {0})", data);
-			
-			case COULD_NOT_PARSE_BOOLEAN: return MessageFormat.format("Cannot parse boolean value from ''{0}''. Attribute value will not be set.", data);
-			case COULD_NOT_PARSE_DATE: return MessageFormat.format("Cannot parse date from ''{0}''. Date must be provided in either ''{1}'' or ''{2''} format. Attribute value will not be set.", data[0], CtJsonUtil.JSON_DATE_FORMAT_STR, CtJsonUtil.JSON_ATTRIBUTE_DATE_FORMAT_STR);
-			
-			case DUPLICATE_ATTRIBUTES: return MessageFormat.format("The same attribute ({0}) cannot be specified twice for a single observation.", data);
-			
-			case OBS_ATTRIBUTE_PARSE_ERROR: return MessageFormat.format("Could not parse value for attribute {0}: {1}: {2}.", data);
-			case DEFAULT_ATTRIBUTE_PARSE_ERROR: return MessageFormat.format("Could not parse value for default values for attribute {0}: {1}: {2}. Default values will be ignored for this observation.", data);
-			
-			case JSON_FEATURE_PARSE_ERROR: return MessageFormat.format("Error parsing feature information (feature will not be processed): {0}",data);
+			case COULD_NOT_PARSE_DATE: return MessageFormat.format(type.getMessage(l), data[0], CtJsonUtil.JSON_DATE_FORMAT_STR, CtJsonUtil.JSON_ATTRIBUTE_DATE_FORMAT_STR);
+			default: return MessageFormat.format(type.getMessage(l), data);
 		}
-		return "Unknown Warning";
 	}
 }

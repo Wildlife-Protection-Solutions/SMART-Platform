@@ -16,6 +16,8 @@ public class Messages extends NLS {
 	public static String DeleteIncidentHandler_DeleteError;
 	public static String DeleteIncidentHandler_Error1;
 	public static String DeleteIncidentHandler_Error2;
+	public static String DesktopReport800Upgrader_ReportUpdateDialogTitle;
+	public static String DesktopReport800Upgrader_ReportUpgradeMessage;
 	public static String DistanceDirectionComposite_BearingLbl;
 	public static String DistanceDirectionComposite_BearingTooltip;
 	public static String DistanceDirectionComposite_Description;
@@ -277,6 +279,8 @@ public class Messages extends NLS {
 	public static String XmlToIncident_DataError;
 	public static String XmlToIncident_DoubleValueNotFound;
 	public static String XmlToIncident_InvalidDateString;
+	public static String XmlToIncident_InvalidGeometry;
+	public static String XmlToIncident_InvalidSource;
 	public static String XmlToIncident_ListValueNotFound;
 	public static String XmlToIncident_MultpleAttributeValues;
 	public static String XmlToIncident_NoValidItemsForMultiList;

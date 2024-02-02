@@ -277,7 +277,7 @@ public class QueryEditorTableContent {
 		ToolItem runItem = new ToolItem(headerToolbar, SWT.PUSH);
 		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem.addListener(SWT.Selection, e->editor.refreshQuery());
-		runItem.setToolTipText("Run query");
+		runItem.setToolTipText(Messages.QueryEditorTableContent_runquerytooltip);
 		headerToolbar.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.QueryEditorTableContent_QueryPropertiesLable,SWT.NONE);

@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
-import org.wcs.smart.event.ActionExecutorManager;
 import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;

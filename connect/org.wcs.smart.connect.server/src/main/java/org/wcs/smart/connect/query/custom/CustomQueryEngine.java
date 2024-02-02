@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -44,6 +45,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
+import org.wcs.smart.util.GeoJsonUtil;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -206,7 +208,7 @@ public class CustomQueryEngine {
 						joa.put(VALUE_FIELD, at.getNumberValue() >= 0.5);
 						break;
 					case DATE:
-						joa.put(VALUE_FIELD, at.getDateValue());
+						joa.put(VALUE_FIELD, at.getDateValue().toString());
 						break;
 					case LIST:
 						joa.put(VALUE_FIELD, at.getAttributeListItem().getKeyId());
@@ -245,14 +247,20 @@ public class CustomQueryEngine {
 						}
 						break;
 					case LINE:
-						joa.put(VALUE_FIELD, at.getGeometry().getGeometry().toText());
-						joa.put(GeometryProperty.SOURCE.name().toLowerCase(), at.getGeometry().getSource().name());
-						joa.put(GeometryProperty.PERIMETER.name().toLowerCase(), at.getGeometry().getPerimeter());
 					case POLYGON:
-						joa.put(VALUE_FIELD, at.getGeometry().getGeometry().toText());
-						joa.put(GeometryProperty.SOURCE.name().toLowerCase(), at.getGeometry().getSource().name());
-						joa.put(GeometryProperty.PERIMETER.name().toLowerCase(), at.getGeometry().getPerimeter());
-						joa.put(GeometryProperty.AREA.name().toLowerCase(), at.getGeometry().getArea());
+						JSONObject value = new JSONObject();
+						JSONObject geometry = GeoJsonUtil.toGeoJSONGeometry(at.getGeometry().getGeometry());
+						value.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+						value.put("geometry",  geometry); //$NON-NLS-1$
+						JSONObject properties = new JSONObject();
+						properties.put(GeometryProperty.SOURCE.name().toLowerCase(), at.getGeometry().getSource().name());
+						properties.put(GeometryProperty.PERIMETER.name().toLowerCase(), at.getGeometry().getPerimeter());
+						if (at.getAttribute().getType() == Attribute.AttributeType.POLYGON) {
+							properties.put(GeometryProperty.AREA.name().toLowerCase(), at.getGeometry().getArea());	
+						}
+						value.put("properties", properties); //$NON-NLS-1$
+						
+						joa.put(VALUE_FIELD, value);						
 					}
 				}
 				

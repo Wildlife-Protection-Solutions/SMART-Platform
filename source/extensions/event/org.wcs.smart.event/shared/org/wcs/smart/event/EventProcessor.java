@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.event.filter.ParsedFilter;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.IActionTypeExecutor;
@@ -115,7 +116,7 @@ public enum EventProcessor {
 					}else if (operator == Operator.OR) {
 						valueStack.push(v1 || v2);
 					}else {
-						throw new Exception("Invalid operator: " + operator.toString());
+						throw new Exception("Invalid operator: " + operator.toString()); //$NON-NLS-1$
 					}
 				}
 				opStack.pop();
@@ -132,10 +133,10 @@ public enum EventProcessor {
 			}else if (operator == Operator.OR) {
 				valueStack.push(v1 || v2);
 			}else {
-				throw new Exception("Invalid operator: " + operator.toString());
+				throw new Exception("Invalid operator: " + operator.toString()); //$NON-NLS-1$
 			}
 		}
-		if (valueStack.size() != 1) throw new Exception("Evaluation error");
+		if (valueStack.size() != 1) throw new Exception("Filter evaluation error"); //$NON-NLS-1$
 		Boolean isok = (Boolean)valueStack.pop();
 		return isok;
 	}
@@ -276,26 +277,32 @@ public enum EventProcessor {
 					break;
 				case POLYGON:
 				case LINE:
-					double obsvalue = attributeValue.getNumberValue();					
-					if (afilter.getGeometryProperty() == AttributeFilter.GeometryProperty.AREA) {
-						obsvalue = attributeValue.getNumberValue2();
+					double obsvalue = attributeValue.getNumberValue();
+					if (attributeValue.getAttribute().getType() != Attribute.AttributeType.POLYGON &&
+							afilter.getGeometryProperty() == AttributeFilter.GeometryProperty.AREA) {
+						//cannot filter lines on area
+						equation.add(Boolean.FALSE);
+					}else {
+						if (afilter.getGeometryProperty() == AttributeFilter.GeometryProperty.AREA) {
+							obsvalue = attributeValue.getNumberValue2();
+						}
+						boolean gvalue = false;
+						Double gFilterValue = (Double) afilter.getValue();
+						if (afilter.getOperator() == Operator.EQUALS) {
+							gvalue = obsvalue == gFilterValue;
+						}else if (afilter.getOperator() == Operator.NOTEQUALS) {
+							gvalue = obsvalue != gFilterValue;
+						}else if (afilter.getOperator() == Operator.LESSTHAN) {
+							gvalue = obsvalue < gFilterValue;
+						}else if (afilter.getOperator() == Operator.LESSTHANEQUALS) {
+							gvalue = obsvalue <= gFilterValue;
+						}else if (afilter.getOperator() == Operator.GREATERTHAN) {
+							gvalue = obsvalue > gFilterValue;
+						}else if (afilter.getOperator() == Operator.GREATERTHANEQUALS) {
+							gvalue = obsvalue >= gFilterValue;
+						}
+						equation.add(gvalue);
 					}
-					boolean gvalue = false;
-					Double gFilterValue = (Double) afilter.getValue();
-					if (afilter.getOperator() == Operator.EQUALS) {
-						gvalue = obsvalue == gFilterValue;
-					}else if (afilter.getOperator() == Operator.NOTEQUALS) {
-						gvalue = obsvalue != gFilterValue;
-					}else if (afilter.getOperator() == Operator.LESSTHAN) {
-						gvalue = obsvalue < gFilterValue;
-					}else if (afilter.getOperator() == Operator.LESSTHANEQUALS) {
-						gvalue = obsvalue <= gFilterValue;
-					}else if (afilter.getOperator() == Operator.GREATERTHAN) {
-						gvalue = obsvalue > gFilterValue;
-					}else if (afilter.getOperator() == Operator.GREATERTHANEQUALS) {
-						gvalue = obsvalue >= gFilterValue;
-					}
-					equation.add(gvalue);
 					break;
 				}
 				

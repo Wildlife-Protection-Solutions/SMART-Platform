@@ -67,6 +67,8 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 	private GeometryAttributeValue originalValue;
 	private GeometryAttributeValue value;
 	
+	private boolean isEnabled = true;
+	
 	/**
 	 * Creates a new boolean attribute field
 	 * @param attribute must be boolean type attribute
@@ -137,7 +139,18 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 	
 	@Override
 	public void setEnabled(boolean enabled) {
-		btnEdit.setEnabled(false);
+		this.isEnabled = enabled;
+		if (!this.isEnabled) {
+			btnEdit.setEnabled(false);
+			btnClear.setEnabled(false);
+			this.lbl.setEnabled(false);
+			this.lblinfo.setEnabled(false);
+		}else {
+			this.lbl.setEnabled(true);
+			this.lblinfo.setEnabled(true);
+			btnEdit.setEnabled(true);
+			this.btnClear.setEnabled(this.value != null);
+		}
 	}
 
 	@Override
@@ -197,7 +210,7 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 		}else {
 			this.lblinfo.setText(GeometryUtils.getAttributeGeometryLabel(this.value, Locale.getDefault()));
 		}
-		this.btnClear.setEnabled(this.value != null);
+		if (this.isEnabled) this.btnClear.setEnabled(this.value != null);
 	}
 	
 	@Override

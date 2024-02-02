@@ -6,13 +6,11 @@
       <actiontype
             actionExecutor="org.wcs.smart.event.i2.CreateRecordActionTypeExecutor"
             actionType="org.wcs.smart.event.i2.CreateRecordActionType"
-            class="org.wcs.smart.event.i2.CreateRecordActionTypeExecutor"
             parameter_collector="org.wcs.smart.event.i2.CreateRecordParameterCollector">
       </actiontype>
       <actiontype
             actionExecutor="org.wcs.smart.event.i2.CreateEntityActionTypeExecutor"
             actionType="org.wcs.smart.event.i2.entity.CreateEntityActionType"
-            class="org.wcs.smart.event.i2.CreateEntityActionTypeExecutor"
             parameter_collector="org.wcs.smart.event.i2.entity.CreateEntityParameterCollector">
       </actiontype>
    </extension>

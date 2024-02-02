@@ -22,13 +22,11 @@
 package org.wcs.smart.connect.hibernate.listeners;
 
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
 
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.spi.PostCommitInsertEventListener;
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.persister.entity.EntityPersister;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
@@ -39,22 +37,21 @@ import org.wcs.smart.observation.model.WaypointObservation;
  *
  */
 public class EventHibernateListener implements PostCommitInsertEventListener {
+	
+	private ConnectEventProcessor eventJob;
 
-	private SessionFactoryImplementor sessionFactory;
 	
 	public EventHibernateListener (SessionFactoryImplementor sessionFactory){
-		this.sessionFactory = sessionFactory;
+		this.eventJob = new ConnectEventProcessor(sessionFactory);
 	}
-	
 	
 	@Override
 	public void onPostInsert(PostInsertEvent event) {	
 		
 		if (event.getEntity() instanceof WaypointObservation) {
 			//TODO: sort out locale
-			WaypointObservation wo = (WaypointObservation)event.getEntity();			
-			SmartContext.INSTANCE.getClass(ExecutorService.class)
-				.execute(new ConnectEventProcessor(wo, sessionFactory, Locale.getDefault() ));
+			WaypointObservation wo = (WaypointObservation)event.getEntity();
+			this.eventJob.addTask(wo, Locale.getDefault());
 		}
 	}
 
@@ -67,7 +64,5 @@ public class EventHibernateListener implements PostCommitInsertEventListener {
 	public void onPostInsertCommitFailed(PostInsertEvent event) {
 		
 	}
-
-	
 
 }

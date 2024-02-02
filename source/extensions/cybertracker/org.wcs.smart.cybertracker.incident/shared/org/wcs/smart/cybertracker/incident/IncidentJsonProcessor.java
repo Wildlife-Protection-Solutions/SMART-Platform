@@ -100,7 +100,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser();
+			CtJsonObservationParser parser = new CtJsonObservationParser(l);
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
 			try{

@@ -137,7 +137,7 @@ public class PointMapComposite extends MapComposite  {
 					//set custom style for points layer
 					pointLayer = getLayers().get(0);
 					pointLayer.getStyleBlackboard().put(SLDContent.ID, getPointStyling());
-					pointLayer.setName("Selected Point");
+					pointLayer.setName(Messages.PointMapComposite_SelectedLayerName);
 				}
 			};
 			getMap().sendCommandASync(command);
@@ -225,7 +225,7 @@ public class PointMapComposite extends MapComposite  {
         PointSymbolizer notselected = sb.createPointSymbolizer(graph2);
         Rule rnotselected = sb.createRule(notselected);
         rnotselected.setFilter(ff.equals(ff.property("selected"), ff.literal(Boolean.FALSE))); //$NON-NLS-1$
-        rnotselected.setName("Not Selected");
+        rnotselected.setName("Not Selected"); //$NON-NLS-1$
         
         //selected
         mark = sb.createMark("star",  new Color(255, 255, 0), new Color(255, 255, 0), 1); //$NON-NLS-1$
@@ -233,7 +233,7 @@ public class PointMapComposite extends MapComposite  {
         PointSymbolizer selected = sb.createPointSymbolizer(graph2);
         Rule rselected = sb.createRule(selected);
         rselected.setFilter(ff.equals(ff.property("selected"), ff.literal(Boolean.TRUE))); //$NON-NLS-1$
-        rselected.setName("Selected");
+        rselected.setName("Selected"); //$NON-NLS-1$
         
         FeatureTypeStyle fs = sb.createFeatureTypeStyle(null, rselected, rnotselected);
         Style s = sb.createStyle();

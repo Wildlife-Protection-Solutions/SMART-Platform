@@ -49,7 +49,6 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -70,6 +69,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.GeoJsonUtil;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -725,10 +725,21 @@ public abstract class IJsonFeatureProcessor {
 		case POLYGON:
 			JSONObject jvalue = (JSONObject) value;
 			
+			Attribute.GeometrySource source = Attribute.GeometrySource.UNKNOWN;
+			try {
+				JSONObject properties = (JSONObject) jvalue.get("properties"); //$NON-NLS-1$
+				if (properties != null) {
+					String src = properties.get("source").toString(); //$NON-NLS-1$
+					source = Attribute.GeometrySource.valueOf(src.toUpperCase());
+				}
+			}catch (Exception ex) {
+				warnings.add(MessageFormat.format(
+						Messages.INVALID_GEOMETRY_SRC_ATTRIBUTE.getMessage(locale),
+						source, a.getAttribute().getName()));
+			}
 			Geometry geom = null;
 			try {
-				String wkb = jvalue.get("geometry").toString();
-				geom = (new WKBReader()).read(WKBReader.hexToBytes(wkb));
+				geom = GeoJsonUtil.toJTSGeometry((JSONObject) jvalue.get("geometry")); //$NON-NLS-1$
 			}catch (Exception ex) {
 				throw new Exception(MessageFormat.format(
 						Messages.INVALID_GEOMETRY_ATTRIBUTE.getMessage(locale),
@@ -748,16 +759,7 @@ public abstract class IJsonFeatureProcessor {
 				} 
 			}
 			
-			Attribute.GeometrySource source = Attribute.GeometrySource.UNKNOWN;
-			String src = jvalue.get("source").toString();
-				 
-			try {
-				source = Attribute.GeometrySource.valueOf(src.toUpperCase());
-			}catch (Exception ex) {
-				warnings.add(MessageFormat.format(
-						Messages.INVALID_GEOMETRY_SRC_ATTRIBUTE.getMessage(locale),
-						src, a.getAttribute().getName()));
-			}
+			
 			a.setGeometry(new GeometryAttributeValue(geom,source));
 			break;			
 		}

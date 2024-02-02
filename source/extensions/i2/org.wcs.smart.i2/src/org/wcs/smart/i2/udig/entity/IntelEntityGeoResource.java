@@ -207,4 +207,8 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 	public IntelWorkingSetCategory getResourceType() {
 		return IntelWorkingSetCategory.ENTITY;
 	}
+	
+	public String getTypeName() {
+		return this.typeName;
+	}
 }

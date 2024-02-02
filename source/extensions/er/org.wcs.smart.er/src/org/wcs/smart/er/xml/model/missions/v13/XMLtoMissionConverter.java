@@ -562,7 +562,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 				try {
 					src = GeometrySource.valueOf(type.getSValue());	
 				}catch (Exception ex) {
-					warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", type.getSValue(), type.getAttributeKey()));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_GeometrySourceError, type.getSValue(), type.getAttributeKey()));
 				}
 				
 				try {
@@ -571,7 +571,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 					GeometryAttributeValue value = new GeometryAttributeValue(g, src);
 					attribute.setGeometry(value);	
 				}catch (Exception ex) {
-					warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", type.getAttributeKey()));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_GeometryError, type.getAttributeKey()));
 				}
 			}
 			

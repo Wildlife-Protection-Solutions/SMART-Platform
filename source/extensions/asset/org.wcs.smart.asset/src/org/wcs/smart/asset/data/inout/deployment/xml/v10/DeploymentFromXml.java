@@ -375,7 +375,7 @@ public class DeploymentFromXml {
 										try {
 											src = GeometrySource.valueOf(xmla.getStringValue().get(0));	
 										}catch (Exception ex) {
-											warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", xmla.getStringValue().get(0), xmla.getAttributeKey()));
+											warnings.add(MessageFormat.format(Messages.DeploymentFromXml_SourceParseError, xmla.getStringValue().get(0), xmla.getAttributeKey()));
 										}
 										
 										try {
@@ -384,7 +384,7 @@ public class DeploymentFromXml {
 											GeometryAttributeValue value = new GeometryAttributeValue(g, src);
 											woa.setGeometry(value);	
 										}catch (Exception ex) {
-											warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", xmla.getAttributeKey()));
+											warnings.add(MessageFormat.format(Messages.DeploymentFromXml_GeometryParseError, xmla.getAttributeKey()));
 										}
 										
 									}

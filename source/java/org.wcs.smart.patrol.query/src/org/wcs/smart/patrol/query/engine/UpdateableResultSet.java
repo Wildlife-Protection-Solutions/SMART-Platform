@@ -709,6 +709,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 					toUpdate.setGeometry(geomValue);
 					updated = true;
 				}
+				break;
 		}
 		return updated;
 	}

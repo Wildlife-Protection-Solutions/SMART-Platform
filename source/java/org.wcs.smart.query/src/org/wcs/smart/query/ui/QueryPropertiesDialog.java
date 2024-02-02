@@ -254,12 +254,12 @@ public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 		
 		if (query instanceof IStyledQuery) {
 			Label lblStyle = new Label(main, SWT.NONE);
-			lblStyle.setText("Style:");
+			lblStyle.setText(Messages.QueryPropertiesDialog_StyleLabel);
 			
 			Button btn = new Button(main, SWT.PUSH);
-			btn.setText("Clear");
+			btn.setText(Messages.QueryPropertiesDialog_ClearButton);
 			btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			btn.setToolTipText("Clear all map layer style information associated with this query.");
+			btn.setToolTipText(Messages.QueryPropertiesDialog_ClearTooltip);
 			btn.setBackground(btn.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btn.addListener(SWT.Selection, e->{
 				((IStyledQuery) query).setStyle(null);

@@ -8,6 +8,7 @@ import org.hibernate.Session;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentReport800Upgrader;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 
 public class DesktopReport800Upgrader extends AbstractInteralDatabaseUpgrader {
@@ -22,7 +23,7 @@ public class DesktopReport800Upgrader extends AbstractInteralDatabaseUpgrader {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), "Incident Report Upgrade", "The following incident templates could not be upgraded. You may need to reset these to print incidents to PDF.", warnings);
+						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.DesktopReport800Upgrader_ReportUpdateDialogTitle, Messages.DesktopReport800Upgrader_ReportUpgradeMessage, warnings);
 						wd.open();
 					}});
 			}

@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ca.datamodel.AttributeGeometryStyle;
 
 /**
@@ -116,7 +117,7 @@ public class SimpleGeometryStyleComposite extends Composite{
 		setLayout(new GridLayout(3, false));
 		
 		Label l = new Label(this, SWT.NONE);
-		l.setText("Line Color:");
+		l.setText(Messages.SimpleGeometryStyleComposite_Color);
 		
 		btnLineColor = new ColorSelector(this);
 		btnLineColor.addListener(e->fireModified(null));
@@ -126,10 +127,10 @@ public class SimpleGeometryStyleComposite extends Composite{
 		spnLineAlpaha.setMaximum(100);
 		spnLineAlpaha.setIncrement(10);
 		spnLineAlpaha.setSelection(100);
-		spnLineAlpaha.setToolTipText("Transparency value between 0 (transparent) and 100 (opaque)");
+		spnLineAlpaha.setToolTipText(Messages.SimpleGeometryStyleComposite_AlphaTooltip);
 		
 		l = new Label(this, SWT.NONE);
-		l.setText("Line Size:");
+		l.setText(Messages.SimpleGeometryStyleComposite_Size);
 		
 		txtLineSize = new Text(this, SWT.BORDER);
 		txtLineSize.addListener(SWT.Modify, e->fireModified(e));
@@ -140,12 +141,12 @@ public class SimpleGeometryStyleComposite extends Composite{
 			cdLineSize.setImage(FieldDecorationRegistry.getDefault()
 					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 			cdLineSize.setShowHover(true);
-			cdLineSize.setDescriptionText("Invalid value for line size. Value must be an integer.");
+			cdLineSize.setDescriptionText(Messages.SimpleGeometryStyleComposite_InvalidSize);
 			cdLineSize.hide();
 		}
 		
 		lfill = new Label(this, SWT.NONE);
-		lfill.setText("Fill Color:");
+		lfill.setText(Messages.SimpleGeometryStyleComposite_FillColor);
 			
 		btnFillColor = new ColorSelector(this);
 		btnFillColor.addListener(e->fireModified(null));
@@ -155,7 +156,7 @@ public class SimpleGeometryStyleComposite extends Composite{
 		spnFillAlpaha.setMaximum(100);
 		spnFillAlpaha.setIncrement(10);
 		spnFillAlpaha.setSelection(100);
-		spnFillAlpaha.setToolTipText("Transparency value between 0 (transparent) and 100 (opaque)");
+		spnFillAlpaha.setToolTipText(Messages.SimpleGeometryStyleComposite_InvalidAlpha);
 		
 		//get listeners for disabling 
 		btnLineColorl = btnLineColor.getButton().getListeners(SWT.Selection);

@@ -395,7 +395,7 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 				try {
 					src = GeometrySource.valueOf(type.getSValue());	
 				}catch (Exception ex) {
-					warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", type.getSValue(), type.getAttributeKey()));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_InvalidSource, type.getSValue(), type.getAttributeKey()));
 				}
 				
 				try {
@@ -404,7 +404,7 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 					GeometryAttributeValue value = new GeometryAttributeValue(g, src);
 					attribute.setGeometry(value);	
 				}catch (Exception ex) {
-					warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", type.getAttributeKey()));
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_InvalidGeometry, type.getAttributeKey()));
 				}
 			}
 			

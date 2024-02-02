@@ -87,7 +87,7 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 		
 		if (item instanceof AssetDeploymentDateField) return Messages.AssetQueryLabelProvider_DeploymentDateFilter;
 
-		if (item == PointGeometryQueryColumn.KEY) return "Waypoint";
+		if (item == PointGeometryQueryColumn.KEY) return Messages.AssetQueryLabelProvider_WaypointColumnNAme;
 		
 		return null;
 	}

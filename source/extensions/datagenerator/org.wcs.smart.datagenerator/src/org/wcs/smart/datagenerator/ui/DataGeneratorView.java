@@ -893,6 +893,8 @@ public class DataGeneratorView {
 		case LIST:
 		case MLIST:
 		case TREE:
+		case LINE:
+		case POLYGON:
 			v.setSelection(new StructuredSelection(ObservationConfiguration.Type.RANDOM));	
 			break;
 		case DATE:

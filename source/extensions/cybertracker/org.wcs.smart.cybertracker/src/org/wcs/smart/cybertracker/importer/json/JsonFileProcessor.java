@@ -180,7 +180,7 @@ public class JsonFileProcessor {
 		
 		final List<JSONObject> features = new ArrayList<>();;
 		try {
-			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json));
+			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault()));
 		}catch (Throwable ex) {
 			returnValue.ex = ex;
 			returnValue.status = FileStatus.ERROR;

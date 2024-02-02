@@ -519,7 +519,6 @@ public enum PsqlFilterToSqlGenerator {
 				field = "datetime"; //$NON-NLS-1$
 			}
 		}else if (filter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE){
-			//TODO: test this
 			table = engine.tablePrefix(Waypoint.class);
 			field = "last_modified"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){

@@ -129,7 +129,7 @@ public class PawsStatusJob extends Job {
 		synchronized (items) {
 			items.removeAll(readyToDownload);
 			items.removeAll(cancelled);
-			if(!items.isEmpty()) schedule(5000); //TODO: delay length
+			if(!items.isEmpty()) schedule(5000); 
 		}
 		
 		for (PawsRun r : cleanUp) {

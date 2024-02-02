@@ -26,6 +26,8 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -50,8 +52,7 @@ public enum ImageProcessor {
 	INSTANCE;
 	
 	private void logMe(Exception ex) {
-		//TODO: 
-		ex.printStackTrace();
+		Logger.getLogger(ImageProcessor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 	}
 	/**
 	 * Attempts to resize the attachment to the given size.  Resizes the file in the copyFromLocation

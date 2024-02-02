@@ -163,7 +163,7 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 			//add a row for the station id or station location id
 			try {
 				if (!AssetSummaryQuery.canAddGeometry(getQueryDefinition())) {
-					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location");
+					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location"); //$NON-NLS-1$
 				}
 				AssetGroupBy assetGp = (AssetGroupBy)getQueryDefinition().getRowGroupByPart().getGroupBys().get(0);
 				if (assetGp.getOption() == AssetFilterOption.STATION) {
@@ -175,7 +175,7 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 							(new FixedQueryColumn(FixedColumns.LOCATION, l).getName()),
 							"assetlocationid", ColumnType.STRING));  //$NON-NLS-1$
 				}else {
-					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location");
+					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location"); //$NON-NLS-1$
 				}
 			}catch (Exception ex) {
 				throw new RuntimeException(ex);

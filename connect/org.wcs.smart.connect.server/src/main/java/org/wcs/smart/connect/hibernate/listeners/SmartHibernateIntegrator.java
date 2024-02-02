@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.connect.hibernate.listeners;
 
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
 import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
@@ -32,8 +29,8 @@ import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 /**
- * Hibernate integrator for intelligence modified dates and last
- *  modified date.
+ * Hibernate integrator for connect. Included are auditing items (last modified, created),
+ * event management, qa lauching.
  *  
  * @author Emily
  *

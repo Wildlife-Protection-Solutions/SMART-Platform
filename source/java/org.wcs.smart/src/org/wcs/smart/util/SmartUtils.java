@@ -1164,16 +1164,16 @@ public class SmartUtils {
 	
 	public static Style getDefaultAttributeStyle(Attribute.AttributeType type, String attributeNameField) {
 		if (type == null || !type.isGeometry()) {
-			throw new IllegalArgumentException("type must be provided and one of the geometry attribute types");
+			throw new IllegalArgumentException("type must be provided and one of the geometry attribute types"); //$NON-NLS-1$
 		}
 		if (SmartDB.isMultipleAnalysis()) return null;
 
 		List<Attribute> items = null;
 		
 		try(Session session = HibernateManager.openSession()){
-			items = session.createQuery("FROM Attribute WHERE type = :type and conservationArea = :ca", Attribute.class)
-					.setParameter("ca", SmartDB.getCurrentConservationArea())
-					.setParameter("type", type)
+			items = session.createQuery("FROM Attribute WHERE type = :type and conservationArea = :ca", Attribute.class) //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.setParameter("type", type) //$NON-NLS-1$
 					.list();
 		}
 		if (items == null || items.isEmpty()) {
@@ -1190,7 +1190,7 @@ public class SmartUtils {
     	
     	
     	//BrewerPalette p = ColorBrewer.instance().getPalettes()[0];
-    	BrewerPalette p = PlatformGIS.getColorBrewer().getPalette("Set1");
+    	BrewerPalette p = PlatformGIS.getColorBrewer().getPalette("Set1"); //$NON-NLS-1$
     	int i = 0;
 		for (Attribute a : items) {
 			java.awt.Color fillColor = p.getColors()[i];

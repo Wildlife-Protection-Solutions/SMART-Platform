@@ -46,8 +46,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
  */
 public class WaypointHibernateListener implements PreInsertEventListener, PreUpdateEventListener{
 
-	//TODO: figure out how to set last modified by
-	
+	//created by and last modified by get set to null
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
 		Waypoint wp = null;
@@ -84,6 +83,8 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			wp = (Waypoint)event.getEntity();
 			wp.setLastModified(LocalDateTime.now());
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
+			wp.setLastModifiedBy(null);
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
 			return false;
 			
 		}else if (event.getEntity() instanceof WaypointAttachment) {
@@ -99,6 +100,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			//this will fire this event again for the waypoint
 			//updating the session objects as required
 			wp.setLastModified(LocalDateTime.now());
+			wp.setLastModifiedBy(null);
 		}
 
 		return false;

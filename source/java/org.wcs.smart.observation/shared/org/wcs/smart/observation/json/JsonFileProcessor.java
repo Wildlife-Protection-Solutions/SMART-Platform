@@ -39,11 +39,6 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKBWriter;
-import org.locationtech.jts.io.WKTReader;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.observation.IObservationLabelProvider;
@@ -235,23 +230,5 @@ public class JsonFileProcessor {
 		}
 		return null;
 	}
-	
-	
-	public static final void main(String[] args) throws ParseException {
-		
-			String text = "POLYGON((11.47 -0.31, 11.75 -0.25, 11.63 -0.44, 11.47 -0.31))";
-			
-			WKTReader reader = new WKTReader();
-			
-			Geometry g = reader.read(text);
-			
-			WKBWriter writer = new WKBWriter();
-			byte[] b = writer.write(g);
-			
-			String out = WKBWriter.toHex(b);
-			System.out.println(out);
-			
-			
-			Geometry g2 = (new WKBReader()).read(WKBReader.hexToBytes(out));
-	}
+
 }

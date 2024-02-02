@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Smart query data source factor.  
@@ -59,7 +60,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "SMART Query Results";
+		return Messages.QueryDataSourceFactory_Description;
 	}
 
 	/**
@@ -67,7 +68,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "SMART Query";
+		return Messages.QueryDataSourceFactory_Name;
 	}
 
 	/**

@@ -284,7 +284,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
     						pointLayer.setVisible(true);
     					}else if (prjFeatureType != null && type.getName().equals(prjFeatureType.getName())) {
     						prjLayer = l;
-    						prjLayer.setName("SMART Collect Incident - Raw Points"); 
+    						prjLayer.setName(Messages.IncidentMapPage_RawPointLayerName); 
     						prjLayer.setVisible(false);
 
     					}else if (type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.POLYGON.name()) || 
@@ -318,6 +318,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		for (IGeoResource r : this.attributeResources) {
 			List<SimpleFeature> features = new ArrayList<>();
 			try {
+				@SuppressWarnings("unchecked")
 				FeatureStore<SimpleFeatureType, SimpleFeature> store = r.resolve(FeatureStore.class, null);
 				String attributeKey = store.getName().getLocalPart();
 				

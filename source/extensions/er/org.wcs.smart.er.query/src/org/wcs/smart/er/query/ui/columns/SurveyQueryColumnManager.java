@@ -108,9 +108,6 @@ public class SurveyQueryColumnManager {
 	 * on the survey options and the data model of the conservation
 	 * area.
 	 */
-	//TODO: we could try to be smart here and only include
-	//attribute columns in the survey design configurable
-	//model
 	public  QueryColumn[] getObservationQueryColumns(final SurveyDesign sd) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		

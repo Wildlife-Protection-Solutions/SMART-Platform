@@ -47,7 +47,8 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 	@SuppressWarnings("unused")
 	private static final long serialVersionUID = 1L;
 
-	//TODO: sort out createdby/lastupdated by
+	//created by, lastupdatedby get set
+	//to null as we don't have a user for them
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
 		
@@ -55,19 +56,14 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
 			LocalDateTime now = LocalDateTime.now();
-			if (item.getCreatedBy() == null){
-				
-	    		//item.setCreatedBy(SmartDB.getCurrentEmployee());
+			if (item.getDateCreated() == null){
+				item.setCreatedBy(null);
 	    		item.setDateCreated(now);
-	    			
-	    			
-	    		//setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+	    		setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
 	            setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
 			}
-			
-			
-			//item.setLastModifiedBy(SmartDB.getCurrentEmployee());
-			//setValue(event.getState(),event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
+			item.setLastModifiedBy(null);
+			setValue(event.getState(),event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
 			
 			item.setDateModified(now);
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
@@ -81,17 +77,15 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
 			LocalDateTime now = LocalDateTime.now();			
-			if (item.getCreatedBy() == null){
-    			//item.setCreatedBy(SmartDB.getCurrentEmployee());
-    			//setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+			if (item.getDateCreated() == null){
+    			item.setCreatedBy(null);
+    			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
 				item.setDateCreated(now);
 
                 setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
             }
-
-			//item.setLastModifiedBy(SmartDB.getCurrentEmployee());
-			//setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
-			
+			item.setLastModifiedBy(null);
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
 			item.setDateModified(now);
             setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
 		}

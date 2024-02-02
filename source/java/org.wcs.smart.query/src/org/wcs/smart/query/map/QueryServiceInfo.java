@@ -35,10 +35,10 @@ import org.wcs.smart.query.internal.Messages;
 public class QueryServiceInfo extends IServiceInfo{
 
 	public QueryServiceInfo(QueryService service){
-		this.description = "Connects to SMART Query";
+		this.description = Messages.QueryServiceInfo_Description;
 		this.icon = QueryPlugIn.getDefault().getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
 		this.keywords = new String[]{Messages.QueryServiceInfo_Keyword1, Messages.QueryServiceInfo_Keyword2, Messages.QueryServiceInfo_Keyword3, Messages.QueryServiceInfo_Keyword4, Messages.QueryServiceInfo_Keyword5, Messages.QueryServiceInfo_Keyword6};
-		this.title = MessageFormat.format("SMART Query {0}", service.getQuery().getName());
+		this.title = MessageFormat.format(Messages.QueryServiceInfo_Title, service.getQuery().getName());
 	}
 	
 }

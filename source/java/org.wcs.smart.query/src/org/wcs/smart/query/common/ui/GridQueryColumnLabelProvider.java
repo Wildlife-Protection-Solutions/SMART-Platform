@@ -43,10 +43,10 @@ public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvid
 			return Messages.Grid_GridToLargeError;
 		}
 		
-		if (key == GEOM_SOURCE_COLUMN_NAME ) return "{0} - Source";
-		if (key == GEOM_PERIMETER_COLUMN_NAME ) return "{0} - Perimeter";
-		if (key == GEOM_AREA_COLUMN_NAME ) return "{0} - Area";
-		if (key == WaypointGeometryQueryColumn.KEY) return "Waypoint";
+		if (key == GEOM_SOURCE_COLUMN_NAME ) return Messages.GridQueryColumnLabelProvider_SourceLable;
+		if (key == GEOM_PERIMETER_COLUMN_NAME ) return Messages.GridQueryColumnLabelProvider_PerimeterLabel;
+		if (key == GEOM_AREA_COLUMN_NAME ) return Messages.GridQueryColumnLabelProvider_AreaLabel;
+		if (key == WaypointGeometryQueryColumn.KEY) return Messages.GridQueryColumnLabelProvider_WaypointGeometryColumn;
 		
 		return null;
 	}
