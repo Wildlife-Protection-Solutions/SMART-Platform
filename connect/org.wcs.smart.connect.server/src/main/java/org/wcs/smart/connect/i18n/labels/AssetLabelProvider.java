@@ -83,50 +83,50 @@ public class AssetLabelProvider implements IAssetLabelProvider {
 		
 		if (item instanceof FileProcessor.ErrorMessages) {
 			switch((FileProcessor.ErrorMessages)item) {
-				case ASSET_NOT_FOUND: return "No sensor found with ID ''{0}''";
-				case BOOLEAN_PARSE_ERROR: return "Could not parse boolean value from {0} for mapping to boolean attribute {1}";
-				case BOOLEAN_TAG_PARSE_ERROR: return "Could not parse boolean value from the tag {0} for mapping to boolean attribute {1}.";
-				case CATEGORY_NOT_FOUND: return "No data model category found for mapping of attribute {0} with value: {1}.";
-				case DATE_PARSE_ERROR: return "Could not parse date from the value {0} for mapping to date attribute {1}. Date format unsupported.";
-				case DATE_TAG_PARSE_ERROR: return "Could not parse date from the tag {0} for mapping to date attribute {1}";
-				case LIST_ITEM_PARSE_ERROR: return "Could not parse attribute list item from the value {0} for mapping to attribute {1}. No list item with this value found.";
-				case LIST_ITEM_TAG_PARSE_ERROR: return "Could not parse the tag {0} for mapping to list attribute {1}. No matching list item found.";
-				case METADATA_PARSE: return "Could not parse metadata from file: {0}";
-				case MULTIPLE_DEPLOYMENTS: return "Multiple deployments at the same time for sensor {0}. This state is not valid, cannot continue.";
-				case NUMBER_PARSE_ERROR: return "Could not parse number from the value {0} for mapping to attribute {1}";
-				case NUMBER_TAG_PARSE_ERROR: return "Could not parse number from the tag {0} for mapping to number attribute {1}";
-				case STATION_LOCATION_NOT_FOUND: return "No unit location found with id ''{0}''";
-				case STATION_NOT_FOUND: return "No station found for id ''{0}''";
-				case STATION_OVERWRITE: return "Unit location {1} is not associated with the station {0} found for the file. The unit location will take precedence and the station overwritten.";
-				case TREE_NODE_PARSE_ERROR: return "Could not parse attribute tree node from the value {0} for mapping to attribute {1}. No tree node with this value found.";				
-				case TREE_NODE_TAG_PARSE_ERROR: return "Could parse the tag {0} for mapping to tree attribute {1}. No matching tree node.";
+				case ASSET_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning1", l);  //$NON-NLS-1$
+				case BOOLEAN_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning2", l);  //$NON-NLS-1$
+				case BOOLEAN_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning3", l);  //$NON-NLS-1$
+				case CATEGORY_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning4", l);  //$NON-NLS-1$
+				case DATE_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning5", l);  //$NON-NLS-1$
+				case DATE_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning6", l);  //$NON-NLS-1$
+				case LIST_ITEM_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning7", l);  //$NON-NLS-1$
+				case LIST_ITEM_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning8", l);  //$NON-NLS-1$
+				case METADATA_PARSE: return Messages.getString("AssetLabelProvider.FileProcessorWarning9", l);  //$NON-NLS-1$
+				case MULTIPLE_DEPLOYMENTS: return Messages.getString("AssetLabelProvider.FileProcessorWarning10", l);  //$NON-NLS-1$
+				case NUMBER_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning11", l);  //$NON-NLS-1$
+				case NUMBER_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning12", l);  //$NON-NLS-1$
+				case STATION_LOCATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning13", l);  //$NON-NLS-1$
+				case STATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning14", l);  //$NON-NLS-1$
+				case STATION_OVERWRITE: return Messages.getString("AssetLabelProvider.FileProcessorWarning15", l);  //$NON-NLS-1$
+				case TREE_NODE_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning16", l);	//$NON-NLS-1$
+				case TREE_NODE_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning17", l);  //$NON-NLS-1$
 			}
 		}
 		
 		if (item instanceof FileProxy.ErrorMessage) {
 			switch((FileProxy.ErrorMessage)item) {
-				case ASSET_NOT_FOUND: return "No field sensor found";
-				case DATE_NOT_FOUND: return "No date found";
-				case LOCATION_NOT_FOUND: return "=No unit location found";
-				case POSITION_NOT_FOUND: return "No position found";
-				case STATION_NOT_FOUND: return "No station found";
-				case NEW_STATION: return "** NEW STATION {0} **";
-				case NEW_STATION_LOCATION: return "** NEW LOCATION {0} **";
+				case ASSET_NOT_FOUND: return Messages.getString("AssetLabelProvider.SensorNotFound", l);  //$NON-NLS-1$
+				case DATE_NOT_FOUND: return Messages.getString("AssetLabelProvider.DateNotFound", l);  //$NON-NLS-1$
+				case LOCATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.UnitLocationNotFound", l);  //$NON-NLS-1$
+				case POSITION_NOT_FOUND: return Messages.getString("AssetLabelProvider.PositionNotFound", l);  //$NON-NLS-1$
+				case STATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.StationNotFound", l);  //$NON-NLS-1$
+				case NEW_STATION: return Messages.getString("AssetLabelProvider.NewStationOption", l);  //$NON-NLS-1$
+				case NEW_STATION_LOCATION: return Messages.getString("AssetLabelProvider.NewLocationOption", l);  //$NON-NLS-1$
 				
 			}
 		}
 		
 		if (item instanceof Asset.Status) {
 			switch((Asset.Status)item) {
-				case ACTIVE: return "Active";
-				case INACTIVE: return "Active";
-				case RETIRED: return "Retired";
+				case ACTIVE: return Messages.getString("AssetLabelProvider.Active", l);  //$NON-NLS-1$
+				case INACTIVE: return Messages.getString("AssetLabelProvider.Inactive", l);  //$NON-NLS-1$
+				case RETIRED: return Messages.getString("AssetLabelProvider.Retired", l);  //$NON-NLS-1$
 			}
 		}
 		
-		if (item == ExifMetadataField.TAG_FORMAT_1) return "Tag: {0}";
-		if (item == ExifMetadataField.TAG_FORMAT_2) return "Tag: {0} ({1})";
-		if (item.equals(DuplicateFileWarning.class)) return "Potential duplicate data. A file with the name {0} has already been loaded into the Conservation Area.";
+		if (item == ExifMetadataField.TAG_FORMAT_1) return Messages.getString("AssetLabelProvider.Tag1", l);  //$NON-NLS-1$
+		if (item == ExifMetadataField.TAG_FORMAT_2) return Messages.getString("AssetLabelProvider.Tag2", l);  //$NON-NLS-1$
+		if (item.equals(DuplicateFileWarning.class)) return Messages.getString("AssetLabelProvider.DuplicateWarning", l);  //$NON-NLS-1$
 		
 		return null;
 	}

@@ -70,8 +70,8 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 		labels.put(YearDateGroupBy.class, "QueryDateLabelProvider.YearDatesFilterOp"); //$NON-NLS-1$
 		labels.put(WaypointDateField.class,"QueryDateLabelProvider.WpDateDatesFilterOp"); //$NON-NLS-1$
 		labels.put(WaypointLastModifiedDateField.class,"QueryDateLabelProvider.WpLastModifiedFilterOp");  //$NON-NLS-1$
-		labels.put(StartHourGroupBy.class, "Start Hour");
-		labels.put(EndHourGroupBy.class, "End Hour");
+		labels.put(StartHourGroupBy.class, "QueryDateLabelProvider.StartHourDateFilter"); //$NON-NLS-1$
+		labels.put(EndHourGroupBy.class, "QueryDateLabelProvider.EndHourDateFilter"); //$NON-NLS-1$
 	}
 	
 	private String getStartEndDateErrorStr(Locale l){

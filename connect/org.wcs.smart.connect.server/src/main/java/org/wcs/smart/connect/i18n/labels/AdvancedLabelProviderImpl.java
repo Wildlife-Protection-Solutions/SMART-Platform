@@ -84,8 +84,8 @@ public class AdvancedLabelProviderImpl implements
 		if (dataSetType.equals(RecordEntityDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordEntities", l); //$NON-NLS-1$
 		if (dataSetType.equals(RecordLocationDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordLocations", l); //$NON-NLS-1$
 		if (dataSetType.equals(RecordAttachmentDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordAttachments", l); //$NON-NLS-1$
-		if (dataSetType.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)) return "Record Location Geometry Attributes";
-		if (dataSetType.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) return "Entity Observation Geometry Attributes";
+		if (dataSetType.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.RecordGeometryAttributeDataSetName", l); //$NON-NLS-1$
+		if (dataSetType.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.EntityAttributeGeometryDatasetName", l); //$NON-NLS-1$
 		return ""; //$NON-NLS-1$
 	}
 	
@@ -106,15 +106,15 @@ public class AdvancedLabelProviderImpl implements
 			}
 		}
 		
-		if (item == Attribute.AttributeType.POLYGON) return "POLYGON";
-		if (item == Attribute.AttributeType.LINE) return "LINE";
+		if (item == Attribute.AttributeType.POLYGON) return Messages.getString("AdvancedLabelProviderImpl.PolygonDataType", l); //$NON-NLS-1$
+		if (item == Attribute.AttributeType.LINE) return Messages.getString("AdvancedLabelProviderImpl.LineDataType", l); //$NON-NLS-1$
 		
-		if (item == DataModelColumn.GeometryProperty.SOURCE) return "{0} - Source";
-		if (item == DataModelColumn.GeometryProperty.PERIMETER) return "{0} - Perimeter";
-		if (item == DataModelColumn.GeometryProperty.AREA) return "{0} - Area";
+		if (item == DataModelColumn.GeometryProperty.SOURCE) return Messages.getString("AdvancedLabelProviderImpl.SourceLabel", l); //$NON-NLS-1$
+		if (item == DataModelColumn.GeometryProperty.PERIMETER) return Messages.getString("AdvancedLabelProviderImpl.PerimeterLabel", l); //$NON-NLS-1$
+		if (item == DataModelColumn.GeometryProperty.AREA) return Messages.getString("AdvancedLabelProviderImpl.AreaLabel", l); //$NON-NLS-1$
 		
-		if (item == SRC_PROFILES) return "Profile Record Location";
-		if (item == SRC_WPS) return "Waypoint Observation";
+		if (item == SRC_PROFILES) return Messages.getString("AdvancedLabelProviderImpl.ProfileSource", l); //$NON-NLS-1$
+		if (item == SRC_WPS) return Messages.getString("AdvancedLabelProviderImpl.WaypointObsSource", l); //$NON-NLS-1$
 		
 		if (item == DM_SOURCE_LABEL) return Messages.getString("AdvancedLabelProviderImpl.DmObservation", l); //$NON-NLS-1$
 		if (item == PROFILE_SOURCE_LABEL) return Messages.getString("AdvancedLabelProviderImpl.ProfileObservation", l); //$NON-NLS-1$
@@ -129,8 +129,8 @@ public class AdvancedLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.LOC_COMMENT) return  Messages.getString("AdvancedLabelProviderImpl.QueryColComment", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.LOC_DATE) return Messages.getString("AdvancedLabelProviderImpl.QueryColDate", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.LOC_TIME) return Messages.getString("AdvancedLabelProviderImpl.QueryColTime", l); //$NON-NLS-1$
-		if (item == FixedQueryColumn.Column.LOC_POINT) return "Location Point";
-		if (item == FixedQueryColumn.Column.LOC_POLYGON) return "Location Polygon";
+		if (item == FixedQueryColumn.Column.LOC_POINT) return Messages.getString("AdvancedLabelProviderImpl.QueryColPoint", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.LOC_POLYGON) return Messages.getString("AdvancedLabelProviderImpl.QueryColPolygon", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.LOC_ID) return Messages.getString("AdvancedLabelProviderImpl.QueryColId", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordStatus", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordTital", l); //$NON-NLS-1$
@@ -184,8 +184,8 @@ public class AdvancedLabelProviderImpl implements
 		
 		if (item == RecordLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColComment", l); //$NON-NLS-1$
 		if (item == RecordLocationDatasetResultSetMetadata.Column.DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColDate", l); //$NON-NLS-1$
-		if (item == RecordLocationDatasetResultSetMetadata.Column.POINT) return "Point Locations";
-		if (item == RecordLocationDatasetResultSetMetadata.Column.POLYGON) return "Polygon Locations";
+		if (item == RecordLocationDatasetResultSetMetadata.Column.POINT) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColPoint", l); //$NON-NLS-1$
+		if (item == RecordLocationDatasetResultSetMetadata.Column.POLYGON) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColPolygon", l); //$NON-NLS-1$
 		if (item == RecordLocationDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColId", l); //$NON-NLS-1$
 		if (item == RecordLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColObs", l); //$NON-NLS-1$
 		if (item == RecordLocationDatasetResultSetMetadata.Column.RECORD_UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColRecorduuid", l); //$NON-NLS-1$
@@ -230,8 +230,8 @@ public class AdvancedLabelProviderImpl implements
 				
 		if (item == EntityLocationDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColEntity", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColId", l); //$NON-NLS-1$
-		if (item == EntityLocationDatasetResultSetMetadata.Column.POINT) return "Point Geometry";
-		if (item == EntityLocationDatasetResultSetMetadata.Column.POLYGON) return "Polygon Geometry";
+		if (item == EntityLocationDatasetResultSetMetadata.Column.POINT) return Messages.getString("AdvancedLabelProviderImpl.AdvancedLabelProviderImpl.EntityLocationDatasetColPoint", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.POLYGON) return Messages.getString("AdvancedLabelProviderImpl.AdvancedLabelProviderImpl.EntityLocationDatasetColPolygon", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.DATE) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColDate", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColObservation", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCELINK) return Messages.getString("AdvancedLabelProviderImpl.SourceLinkColumnName",l); //$NON-NLS-1$
@@ -281,36 +281,36 @@ public class AdvancedLabelProviderImpl implements
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColSrcImg", l); //$NON-NLS-1$
 		if (item == RecordDatasetResultSetMetadata.Column.PROFILE) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColProfile", l); //$NON-NLS-1$
 		
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE) return "Attribute";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return "Attribute Key";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.BOOLEAN_VALUE) return "Boolean Value";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.DATE_VALUE) return "Date Value";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LINESTRING_VALUE) return "LineString Value";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LOCATIONID) return "Location ID";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.NUMBER_VALUE) return "Number Value";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.OBSERVATION_UUID) return "Observation UUID";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.POLYGON_VALUE) return "Polygon Value";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.RECORD_UUID) return "Record UUID";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.STRING_VALUE) return "String Value";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.GEOM_AREA_VALUE) return "Geometry Area";
-		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.GEOM_PERIMETER_VALUE) return "Geometry Perimeter";
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColAttribute", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColAttributeKey", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.BOOLEAN_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColBooleanValue", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.DATE_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColDateValue", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LINESTRING_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColLineValue", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LOCATIONID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColLocationId", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.NUMBER_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColNumberValue", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.OBSERVATION_UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColObsUuid", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.POLYGON_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColPolygonValue", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.RECORD_UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColRecordUUID", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.STRING_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColStringValue", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.GEOM_AREA_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColGeomArea", l); //$NON-NLS-1$
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.GEOM_PERIMETER_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationObservationDetailsDatasetResultSeColGeomPerimeter", l); //$NON-NLS-1$
 		
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE) return "Attribute";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTEKEY) return "Attribute Key";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.CATEGORY) return "Category";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.CATEGORYHKEY) return "Category Key";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.DATE) return "DateTime";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_AREA) return "Geometry Area (km2)";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_PERIMETER) return "Geometry Perimeter (km)";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_SOURCE) return "Geometry Source";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.LINESTRING) return "LineString Geometry";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.POLYGON) return "Polygon Geometry";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.OBSERVATION_UUID) return "Observation UUID";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.UUID) return "UUID";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION) return "Source";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION_ID) return "ID";
-		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION_UUID) return "Waypoint/Location UUID";
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColAttribute", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTEKEY) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColAttributeKey", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.CATEGORY) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColCategory", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.CATEGORYHKEY) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColCategoryKey", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.DATE) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColDateTime", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColEntityUUID", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_AREA) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColGeomArea", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_PERIMETER) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColGeomPerimeter", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.GEOM_SOURCE) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetGeomSource", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.LINESTRING) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColLineString", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.POLYGON) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColPolygon", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.OBSERVATION_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColObsUuid", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColUUID", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColSoSource", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION_ID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColWpId", l); //$NON-NLS-1$
+		if (item == EntityLocationObservationAttributeDatasetResultSetMetadata.Column.WP_LOCATION_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetColWpUuid", l); //$NON-NLS-1$
 		
 		
 		if (item.equals(EntityDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityDataset", l); //$NON-NLS-1$
@@ -321,7 +321,7 @@ public class AdvancedLabelProviderImpl implements
 		if (item.equals(EntityRelationDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityRelation", l); //$NON-NLS-1$
 		if (item.equals(RecordMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.RecordMetadata", l); //$NON-NLS-1$
 	
-		if (item.equals(EntityLocationObservationAttributeDataset.class)) return "Entity Observation Geometry Attributes";
+		if (item.equals(EntityLocationObservationAttributeDataset.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationObservationAttributeDatasetName", l); //$NON-NLS-1$
 		
 		if (item.equals(AdvancedEntitySearch.Error.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchParseError", l); //$NON-NLS-1$
 		if (item.equals(AdvancedEntitySearch.Error.PARSE_ERROR)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchRunError", l); //$NON-NLS-1$

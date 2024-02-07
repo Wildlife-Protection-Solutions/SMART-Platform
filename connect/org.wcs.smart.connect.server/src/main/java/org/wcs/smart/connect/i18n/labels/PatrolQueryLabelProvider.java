@@ -138,7 +138,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			return Messages.getString("PatrolQueryLabelProvider.InvalidBufferValue",l); //$NON-NLS-1$
 		}
 		if (item == TrackGeometryQueryColumn.KEY) { 
-			return "Patrol Track";
+			return Messages.getString("PatrolQueryLabelProvider.TrackColumName", l);  //$NON-NLS-1$
 		}
 		return null;
 	}

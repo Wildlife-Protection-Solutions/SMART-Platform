@@ -377,13 +377,7 @@ public class ReportApi extends HttpServlet{
 			if (allowed.isEmpty()) return Collections.emptyList();
 			
 			Set<UUID> caUuids = allowed.stream().map(e->e.getCaUuid()).collect(Collectors.toSet());
-			
-			
-			boolean atleastonecaadmin = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
-			if (atleastonecaadmin) {
-				caUuids.add(ConservationArea.MULTIPLE_CA);
-			}
-			
+
 			// CAs are the root folders
 			for(UUID caUuid : caUuids) {
 				ConservationArea ca = s.get(ConservationArea.class, caUuid);

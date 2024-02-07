@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.cybertracker.incident.IncidentJsonProcessor;
 import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
 
@@ -35,8 +36,8 @@ public class IncidentCyberTrackerLabelProvider implements IIncidentCyberTrackerL
 	@Override
 	public String getLabel(Object item, Locale l) {
 		
-		if (item == IncidentJsonProcessor.StatusMessage.ADDED) return "Created {0} incidents";
-		if (item == IncidentJsonProcessor.StatusMessage.MODIFIED) return "Modified {0} incidents";
+		if (item == IncidentJsonProcessor.StatusMessage.ADDED) return Messages.getString("IncidentCyberTrackerLabelProvider_CreatedMessage", l);  //$NON-NLS-1$
+		if (item == IncidentJsonProcessor.StatusMessage.MODIFIED) return Messages.getString("IncidentCyberTrackerLabelProvider_ModifiedMEssage", l);  //$NON-NLS-1$
 		
 		return null;
 	}

@@ -49,10 +49,10 @@ public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvid
 			return Messages.getString("GridQueryColumnLabelProvider.GridTooBig", l); //$NON-NLS-1$
 		}
 		
-		if (key == GEOM_SOURCE_COLUMN_NAME ) return "{0} - Source";
-		if (key == GEOM_PERIMETER_COLUMN_NAME ) return "{0} - Perimeter";
-		if (key == GEOM_AREA_COLUMN_NAME ) return "{0} - Area";
-		if (key == WaypointGeometryQueryColumn.KEY) return "Waypoint";
+		if (key == GEOM_SOURCE_COLUMN_NAME ) return Messages.getString("GridQueryColumnLabelProvider.SourceColName", l);  //$NON-NLS-1$
+		if (key == GEOM_PERIMETER_COLUMN_NAME ) return Messages.getString("GridQueryColumnLabelProvider.PerimeterColName", l);  //$NON-NLS-1$
+		if (key == GEOM_AREA_COLUMN_NAME ) return Messages.getString("GridQueryColumnLabelProvider.AreaColName", l);  //$NON-NLS-1$
+		if (key == WaypointGeometryQueryColumn.KEY) return Messages.getString("GridQueryColumnLabelProvider.WaypointcolName", l);  //$NON-NLS-1$
 		
 		return null;
 	}

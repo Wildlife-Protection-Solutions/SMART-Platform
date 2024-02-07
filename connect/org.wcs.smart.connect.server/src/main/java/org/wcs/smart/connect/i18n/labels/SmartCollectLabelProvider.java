@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 import org.wcs.smart.smartcollection.json.SmartCollectJsonImportWarning;
@@ -38,14 +39,14 @@ public class SmartCollectLabelProvider implements ISmartCollectLabelProvider {
 	@Override
 	public String getLabel(Object item, Locale l) {
 
-		if (item.getClass() == SmartCollectWaypointSource.class) return "SMART Collect Incident"; 
+		if (item.getClass() == SmartCollectWaypointSource.class) return Messages.getString("SmartCollectLabelProvider_WaypointSourceLabel", l);  //$NON-NLS-1$
 
-		if (item == SmartCollectJsonImportWarning.WarningType.NO_USER) return "No user specified for SMARTCollect feature.  Feature will not be loaded: {0}";
-		if (item == SmartCollectJsonImportWarning.WarningType.MISSING_DEVICE_ID) return "No device id specified for SMARTCollect feature.  Feature will not be loaded: {0}";
-		if (item == SmartCollectJsonImportWarning.WarningType.FEATURE_DISCARDED) return "{0} features discarded.";
-		if (item == SmartCollectJsonImportWarning.WarningType.USER_BLACKLISTED_FEATURE_DISCARDED) return "The user {0} is blacklisted.  The {1} features reported by this user were not loaded.";
+		if (item == SmartCollectJsonImportWarning.WarningType.NO_USER) return Messages.getString("SmartCollectLabelProvider_NoUser", l);  //$NON-NLS-1$
+		if (item == SmartCollectJsonImportWarning.WarningType.MISSING_DEVICE_ID) return Messages.getString("SmartCollectLabelProvider_NoDevice", l);  //$NON-NLS-1$
+		if (item == SmartCollectJsonImportWarning.WarningType.FEATURE_DISCARDED) return Messages.getString("SmartCollectLabelProvider_DiscaredFeatures", l);  //$NON-NLS-1$
+		if (item == SmartCollectJsonImportWarning.WarningType.USER_BLACKLISTED_FEATURE_DISCARDED) return Messages.getString("SmartCollectLabelProvider_UserBlacklisted", l);  //$NON-NLS-1$
 		
-		if (item == SmartCollectJsonProcessor.FINISH_MESSAGE) return "Created {0} SMARTCollect Incidents";
+		if (item == SmartCollectJsonProcessor.FINISH_MESSAGE) return Messages.getString("SmartCollectLabelProvider_CreateFeatures", l);  //$NON-NLS-1$
 		
 		return null;
 	}

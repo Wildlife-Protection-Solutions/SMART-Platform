@@ -88,7 +88,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item instanceof MissionStartDateField) return Messages.getString("SurveyQueryLabelProvider.MissionStartDateFilterField", l); //$NON-NLS-1$
 		if (item instanceof MissionTrackDateField) return Messages.getString("SurveyQueryLabelProvider.MissionTrackDateDateFilterField", l); //$NON-NLS-1$
 		
-		if (item == TrackGeometryQueryColumn.KEY) return "Track";
+		if (item == TrackGeometryQueryColumn.KEY) return Messages.getString("SurveyQueryLabelProvider.TrackGeometryColumn", l); //$NON-NLS-1$
 
 		return null;
 	}

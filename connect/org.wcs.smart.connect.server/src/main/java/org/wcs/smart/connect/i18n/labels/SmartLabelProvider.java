@@ -72,10 +72,10 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}
 		if (value instanceof Attribute.GeometrySource src) {
 			switch(src) {
-				case GPS: return "GPS";
-				case MANUAL_DRAW: return "Drawn On Map";
-				case MANUAL_POINT: return "Manually Input of Coordinates";
-				case UNKNOWN: return "Unknown";		
+				case GPS: return Messages.getString("SmartLabelProvider.SourceGPS", l); //$NON-NLS-1$
+				case MANUAL_DRAW: return Messages.getString("SmartLabelProvider.SourceDrawnMap", l); //$NON-NLS-1$
+				case MANUAL_POINT: return Messages.getString("SmartLabelProvider.SourceInput", l); //$NON-NLS-1$
+				case UNKNOWN: return Messages.getString("SmartLabelProvider.SourceUnknown", l);		 //$NON-NLS-1$
 			}
 		}
 		
@@ -114,13 +114,13 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(CA_COUNTRY_KEY)) return Messages.getString("SmartLabelProvider.CaCountry", l); //$NON-NLS-1$
 		if (value.equals(CA_OWNER_KEY)) return Messages.getString("SmartLabelProvider.CaOwner", l); //$NON-NLS-1$
 		
-		if (value.equals(AREA_KM2_KEY)) return "Area (km\u00B2)";
-		if (value.equals(PERIMETER_KM_KEY)) return "Perimeter (km)";
-		if (value.equals(POLYGON_KEY)) return "Polygon";
-		if (value.equals(LINESTRING_KEY)) return "LineString";
+		if (value.equals(AREA_KM2_KEY)) return Messages.getString("SmartLabelProvider.Area", l); //$NON-NLS-1$
+		if (value.equals(PERIMETER_KM_KEY)) return Messages.getString("SmartLabelProvider.Perimeter", l); //$NON-NLS-1$
+		if (value.equals(POLYGON_KEY)) return Messages.getString("SmartLabelProvider.Polygon", l); //$NON-NLS-1$
+		if (value.equals(LINESTRING_KEY)) return Messages.getString("SmartLabelProvider.LineString", l); //$NON-NLS-1$
 		
-		if (value.equals(POLYGON_GEOM_ATTRIBUTE_LABEL)) return "Polygon Area: {0,number,#.##} km\u00B2, Perimeter: {1,number,#.##} km, Source: {2} ";
-		if (value.equals(LINESTRING_GEOM_ATTRIBUTE_LABEL)) return "LineString Length: {0,number,#.##} km, Source: {1}";
+		if (value.equals(POLYGON_GEOM_ATTRIBUTE_LABEL)) return Messages.getString("SmartLabelProvider.PolygonLabel", l); //$NON-NLS-1$
+		if (value.equals(LINESTRING_GEOM_ATTRIBUTE_LABEL)) return Messages.getString("SmartLabelProvider.LineStringLabel", l); //$NON-NLS-1$
 
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_NOT_FOUND)) return Messages.getString("SmartLabelProvider.MergeDmAttributeNotFound", l); //$NON-NLS-1$
 		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_TYPE_MISMATCH)) return Messages.getString("SmartLabelProvider.MergeDmTypeDifference",l ); //$NON-NLS-1$
@@ -147,13 +147,13 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidKey", l); //$NON-NLS-1$
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidName", l); //$NON-NLS-1$
 		
-		if (value.equals(XmlDataModelImporter.I18NMessages.NO_DM_XML_FOUND)) return "No data model xml file found in zip file.";
-		if (value.equals(XmlDataModelImporter.I18NMessages.INVALID_XML)) return "Invalid data model xml file.";
+		if (value.equals(XmlDataModelImporter.I18NMessages.NO_DM_XML_FOUND)) return Messages.getString("SmartLabelProvider.XmlNotFound", l); //$NON-NLS-1$
+		if (value.equals(XmlDataModelImporter.I18NMessages.INVALID_XML)) return Messages.getString("SmartLabelProvider.InvalidXml", l); //$NON-NLS-1$
 		
-		if (value.equals(DataModelMerger.ProgressMessages.LOADING)) return "Loading base data model.";
-		if (value.equals(DataModelMerger.ProgressMessages.TASKNAME)) return "Merging Data Models";
-		if (value.equals(DataModelMerger.ProgressMessages.MERGINGATTRIBUTES)) return "Merging attributes.";
-		if (value.equals(DataModelMerger.ProgressMessages.MERGINGCATEGORIES)) return "Merging categories.";
+		if (value.equals(DataModelMerger.ProgressMessages.LOADING)) return Messages.getString("SmartLabelProvider.LoadingStatus", l); //$NON-NLS-1$
+		if (value.equals(DataModelMerger.ProgressMessages.TASKNAME)) return Messages.getString("SmartLabelProvider.MergingStatus", l); //$NON-NLS-1$
+		if (value.equals(DataModelMerger.ProgressMessages.MERGINGATTRIBUTES)) return Messages.getString("SmartLabelProvider.MergingAttributesStatus", l); //$NON-NLS-1$
+		if (value.equals(DataModelMerger.ProgressMessages.MERGINGCATEGORIES)) return Messages.getString("SmartLabelProvider.MergingCategoryStatus", l); //$NON-NLS-1$
 		
 		if (value.equals(AREA_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.AreaTable", l); //$NON-NLS-1$
 		
@@ -208,9 +208,9 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			case MLIST: return Messages.getString("SmartLabelProvider.MultiListAttType",l); //$NON-NLS-1$
 			case NUMERIC: return Messages.getString("SmartLabelProvider.NumericAttType",l); //$NON-NLS-1$
 			case TEXT: return Messages.getString("SmartLabelProvider.TextAttType",l); //$NON-NLS-1$
-			case TREE: return Messages.getString("SmartLabelProvider.TreeAttType",l);
-			case POLYGON: return "POLYGON";
-			case LINE: return "LINE";
+			case TREE: return Messages.getString("SmartLabelProvider.TreeAttType",l); //$NON-NLS-1$
+			case POLYGON: return Messages.getString("SmartLabelProvider.PolygonAttType", l); //$NON-NLS-1$
+			case LINE: return Messages.getString("SmartLabelProvider.LineAttType", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

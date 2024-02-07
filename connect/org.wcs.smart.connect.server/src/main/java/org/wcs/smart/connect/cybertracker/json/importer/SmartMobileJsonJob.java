@@ -40,6 +40,7 @@ import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.api.DataQueueEventService;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem.Status;
+import org.wcs.smart.connect.i18n.Messages;
 
 import jakarta.persistence.Tuple;
 
@@ -187,7 +188,7 @@ public class SmartMobileJsonJob implements Runnable{
 					try {
 						item.setStatus(Status.ERROR);
 						item.setStatusMessage(
-							MessageFormat.format("Item unable to be processed after {0} days. The system will no longer attempt to process this file.", days));
+							MessageFormat.format(Messages.getString("SmartMobileJsonJob_UnableToProcessAfterXDays", Locale.getDefault()), days)); //$NON-NLS-1$
 							session.getTransaction().commit();
 					}catch (Exception ex) {
 						Logger.getLogger(SmartMobileJsonJob.class.getName()).log(Level.WARNING, ex.getMessage(), ex);

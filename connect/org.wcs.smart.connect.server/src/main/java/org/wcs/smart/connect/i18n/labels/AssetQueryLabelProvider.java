@@ -71,8 +71,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 		}
 		if (item instanceof AssetFormatOption){
 			switch((AssetFormatOption)item){
-			case DAYS_HOUR: return "days, hours";
-			case SECOND: return "seconds";
+			case DAYS_HOUR: return Messages.getString("AssetQueryLabelProvider.dayshourslabel", l);  //$NON-NLS-1$
+			case SECOND: return Messages.getString("AssetQueryLabelProvider.secondslabel", l);  //$NON-NLS-1$
 			}
 		}
 		if (item instanceof AssetFilterOption){
@@ -86,7 +86,7 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 		}
 		if (item instanceof AssetDeploymentDateField) return Messages.getString("AssetQueryLabelProvider.DeploymentDateFilter", l); //$NON-NLS-1$
 
-		if (item == PointGeometryQueryColumn.KEY) return "Waypoint";
+		if (item == PointGeometryQueryColumn.KEY) return Messages.getString("AssetQueryLabelProvider.GeometryColumnName", l);  //$NON-NLS-1$
 
 		return null;
 	}

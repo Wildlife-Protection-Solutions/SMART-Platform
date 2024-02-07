@@ -147,13 +147,14 @@ public class SmartMobileJsonFileProcessor {
 		
 		List<JSONObject> features = null;
 		try {
-			features = CtJsonUtil.parseFeaturesFromJsonString(json);
+			features = CtJsonUtil.parseFeaturesFromJsonString(json, this.locale);
 		}catch (Exception ex ) {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			updateItemStatus(session,Status.ERROR,MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.JsonParseError", locale), ex.getMessage()), null); //$NON-NLS-1$
 			return;
 		}
 
+		IJsonProcessor[] processors = null;
 		session.beginTransaction();
 		try {
 			item = session.get(item.getClass(), item.getUuid());
@@ -166,7 +167,7 @@ public class SmartMobileJsonFileProcessor {
 			
 			List<JsonImportWarning> warnings = new ArrayList<>();
 			
-			IJsonProcessor[] processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
+			processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
 			for (IJsonProcessor p : processors){
 				List<JSONObject> processed = p.processJson(features, session, this.locale);
 				notProc.removeAll(processed);
@@ -228,6 +229,16 @@ public class SmartMobileJsonFileProcessor {
 
 			String message = MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.ProcessingError", locale), ex.getMessage() ); //$NON-NLS-1$
 			updateItemStatus(session,  Status.ERROR, message, null);
+		}finally {
+			for (IJsonProcessor p : processors) {
+				try {
+					p.cleanUp();
+				}catch(Throwable t) {
+					logger.log(Level.SEVERE, t.getMessage(), t);
+				}
+
+			}
+			
 		}
 
 		
