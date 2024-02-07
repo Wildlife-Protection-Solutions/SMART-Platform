@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.patrol.importer;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -355,7 +356,8 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 			int[] size = CtJsonUtil.getImageAutoResizeSizeOption(ca, session);		
 			for (ISmartAttachment attachment : attachments){
 				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes){
-					ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+					Path[] pp = ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+					for (Path p : pp) p.toFile().deleteOnExit();
 				}
 			}	
 		}

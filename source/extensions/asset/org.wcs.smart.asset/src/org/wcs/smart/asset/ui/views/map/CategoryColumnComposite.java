@@ -317,6 +317,7 @@ public class CategoryColumnComposite extends Composite {
 			if (a.getType() == AttributeType.LIST) return;
 			if (a.getType() == AttributeType.MLIST) return;
 			if (a.getType() == AttributeType.TREE) return;
+			if (a.getType().isGeometry()) return;
 			
 			
 			if (a.getType() == AttributeType.BOOLEAN) {
@@ -351,9 +352,13 @@ public class CategoryColumnComposite extends Composite {
 			
 			category.getAllAttribute(allAttributes, true);
 			
+			//remove geometry attributes as we don't support these at this time
+			List<Attribute> toRemove = new ArrayList<>();
+			
 			for (Attribute a : allAttributes) {
 				a.getName();
 				a.getAttributeList().forEach(e->e.getName());
+				if (a.getType().isGeometry()) toRemove.add(a);
 				
 				List<AttributeTreeNode> toVisit = new ArrayList<>();
 				toVisit.addAll(a.getActiveTreeNodes());
@@ -363,6 +368,7 @@ public class CategoryColumnComposite extends Composite {
 					toVisit.addAll(n.getActiveChildren());
 				}
 			}
+			allAttributes.removeAll(toRemove);
 		}
 		
 		attributeOptions.setInput(allAttributes);		

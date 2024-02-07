@@ -320,10 +320,12 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_GeneralHeader;
 	public static String CyberTrackerPropertiesComposite_GPSSettingsHeader;
 	public static String CyberTrackerPropertiesComposite_HeightOp;
+	public static String CyberTrackerPropertiesComposite_ImperialUnits;
 	public static String CyberTrackerPropertiesComposite_IncidentGroupOp;
 	public static String CyberTrackerPropertiesComposite_IncidentGroupTooltip;
 	public static String CyberTrackerPropertiesComposite_InvalidHeight;
 	public static String CyberTrackerPropertiesComposite_InvalidWidth;
+	public static String CyberTrackerPropertiesComposite_MeticUnits;
 	public static String CyberTrackerPropertiesComposite_PhotoSettingsHeader;
 	public static String CyberTrackerPropertiesComposite_PhotoTab;
 	public static String CyberTrackerPropertiesComposite_PrimaryColor;
@@ -335,6 +337,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_TrackColorOp;
 	public static String CyberTrackerPropertiesComposite_TrackTimerDistanceOp;
 	public static String CyberTrackerPropertiesComposite_TrackTimerTimeOp;
+	public static String CyberTrackerPropertiesComposite_UnitOption;
+	public static String CyberTrackerPropertiesComposite_UnitOptionTooltip;
 	public static String CyberTrackerPropertiesComposite_WidthOp;
 	public static String CyberTrackerPropertiesDialog_0;
 	public static String CyberTrackerPropertiesDialog_1;

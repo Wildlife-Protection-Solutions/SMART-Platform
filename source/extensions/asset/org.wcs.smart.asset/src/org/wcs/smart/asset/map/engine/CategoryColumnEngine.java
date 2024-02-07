@@ -537,6 +537,9 @@ public class CategoryColumnEngine implements IColumnEngine {
 			sb.append( " "); //$NON-NLS-1$
 			sb.append(column);
 			sb.append( " is not null "); //$NON-NLS-1$
+		case LINE:
+		case POLYGON:
+			throw new Exception("Geometry attributes not supported"); //$NON-NLS-1$
 		}
 		
 		sb.append(" ) "); //$NON-NLS-1$

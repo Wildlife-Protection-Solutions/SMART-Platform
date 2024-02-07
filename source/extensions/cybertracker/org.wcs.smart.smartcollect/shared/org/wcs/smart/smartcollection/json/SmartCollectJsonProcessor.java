@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.smartcollection.json;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,14 +83,21 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	}
 	
 	protected ConservationArea ca;
+	private List<Path> tempFiles = null;
 	
 	public SmartCollectJsonProcessor(ConservationArea ca) {
 		this.ca = ca;
+		this.tempFiles = new ArrayList<>();
 	}
 
 	@Override
 	public List<JsonImportWarning> getWarnings(){
 		return this.warnings;
+	}
+	
+	@Override
+	public void cleanUp() {
+		cleanUpFiles(tempFiles);
 	}
 	
 	/**
@@ -184,9 +192,9 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 		Map<DeviceUser, Integer> blacklistCount = new HashMap<>();
 		
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
+			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
 			try{
 				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
@@ -280,6 +288,8 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 			}catch (Exception ex) {
 				logException(ex.getMessage() + ": " +feature.toJSONString(), ex); //$NON-NLS-1$
 				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()));
+			}finally{
+				tempFiles.addAll(parser.getTemporaryFiles());
 			}
 		}
 		

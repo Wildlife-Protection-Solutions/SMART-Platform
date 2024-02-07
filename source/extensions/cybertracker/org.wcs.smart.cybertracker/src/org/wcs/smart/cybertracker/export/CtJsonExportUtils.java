@@ -413,6 +413,7 @@ public class CtJsonExportUtils {
 		case THEME_COLOR_2:
 		case THEME_COLOR_3:
 		case THEME_COLOR_4:
+		case UNITS:
 			return false;
 		
 		default:

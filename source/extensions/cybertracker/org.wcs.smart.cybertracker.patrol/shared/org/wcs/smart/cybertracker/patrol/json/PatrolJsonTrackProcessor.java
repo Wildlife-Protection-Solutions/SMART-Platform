@@ -188,6 +188,11 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	}
 
 	@Override
+	public void cleanUp() {
+		//nothing to clean up
+	}
+	
+	@Override
 	public String getStatusMessage(Locale l) {
 		return null;
 	}

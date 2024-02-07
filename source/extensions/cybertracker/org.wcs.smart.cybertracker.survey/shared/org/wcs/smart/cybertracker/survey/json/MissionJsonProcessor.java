@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -37,6 +39,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.jboss.logging.Logger;
+import org.jboss.logging.Logger.Level;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.locationtech.jts.geom.Coordinate;
@@ -91,6 +95,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 			.getSource(SurveyWaypointSource.KEY);
 	
 	private List<JsonImportWarning> warnings;
+	private List<Path> tempFiles;
 	
 	protected Set<Mission> modifiedMissions;
 	protected Set<Mission> newMissions = new HashSet<>();
@@ -109,6 +114,8 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 	
 	public MissionJsonProcessor(ConservationArea ca) {
 		warnings = new ArrayList<>();
+		tempFiles = new ArrayList<>();
+		
 		this.ca = ca;
 	}
 
@@ -137,6 +144,11 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
+	public void cleanUp() {
+		cleanUpFiles(tempFiles);
+	}
+	
+	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception{
 		this.locale = locale;
 		modifiedMissions = new HashSet<Mission>();
@@ -146,10 +158,9 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		
 		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
-			
 			if (!CtJsonUtil.isTrackPoint(feature)) observationFeatureCount++;
 			
+			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
 			try{
 				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
@@ -569,6 +580,8 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 				//TODO: if there is a session.flush error we have a problem we need to stop and rollback
 				logException(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
 				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()));
+			}finally {
+				tempFiles.addAll(parser.getTemporaryFiles());
 			}
 		}
 		

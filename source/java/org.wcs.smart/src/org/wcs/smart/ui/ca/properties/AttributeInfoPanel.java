@@ -994,6 +994,7 @@ public class AttributeInfoPanel extends Composite {
 			((StackLayout)optionComposite.getLayout()).topControl = dateComposite;
 		}else if (type.isGeometry()){
 			((StackLayout)optionComposite.getLayout()).topControl = geometryComposite;
+			geomStylePanel.setType(type);
 		}
 		optionComposite.layout();
 	}

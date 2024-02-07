@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -605,7 +606,8 @@ public class MissionImporter extends AbstractSmartImporter {
 			for (ISmartAttachment attachment : attachments){
 				//only process new attachments
 				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes){
-					ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+					Path[] pp = ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+					for (Path p : pp) p.toFile().deleteOnExit();
 				}
 			}	
 		}

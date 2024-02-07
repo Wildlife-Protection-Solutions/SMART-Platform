@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.cybertracker.json;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -61,4 +65,23 @@ public interface IJsonProcessor {
 	 * @return list of warnings generated during processing
 	 */
 	public List<JsonImportWarning> getWarnings();
+	
+	/**
+	 * To be called after processing is complete to cleanup 
+	 * any temporary files or other resources created during processing
+	 * 
+	 */
+	public void cleanUp();
+	
+	public default void cleanUpFiles(List<Path> files) {
+		for(Path p : files) {
+			try {
+				if (Files.exists(p)) {
+					Files.delete(p);
+				}
+			}catch (Exception ex) {
+				Logger.getLogger(IJsonProcessor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+			}
+		}
+	}
 }

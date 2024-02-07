@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.incident;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +33,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.jboss.logging.Logger;
+import org.jboss.logging.Logger.Level;
 import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -66,6 +70,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	
 	protected List<CtIncidentLink> groupMappings;
 	protected ConservationArea ca;
+	private List<Path> tempFiles;
 	
 	public enum StatusMessage{
 		ADDED, MODIFIED;
@@ -77,6 +82,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	
 	public IncidentJsonProcessor(ConservationArea ca) {
 		warnings = new ArrayList<>();
+		tempFiles = new ArrayList<>();
 		this.ca = ca;
 	}
 
@@ -92,6 +98,11 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
+	public void cleanUp() {
+		cleanUpFiles(tempFiles);
+	}
+	
+	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
 		newIncidents = new HashSet<>();
 		modifiedIncidents = new HashSet<>();
@@ -100,9 +111,9 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser(l);
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
+			CtJsonObservationParser parser = new CtJsonObservationParser(l);
 			try{
 				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
@@ -261,6 +272,8 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 				//if there is a session.flush error we have a problem we need to stop and rollback
 				logException(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
 				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()));
+			}finally {
+				tempFiles.addAll(parser.getTemporaryFiles());
 			}
 		}
 		

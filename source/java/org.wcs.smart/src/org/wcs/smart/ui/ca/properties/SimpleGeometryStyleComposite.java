@@ -120,6 +120,7 @@ public class SimpleGeometryStyleComposite extends Composite{
 		l.setText(Messages.SimpleGeometryStyleComposite_Color);
 		
 		btnLineColor = new ColorSelector(this);
+		btnLineColor.setColorValue(new RGB(125,125,125));
 		btnLineColor.addListener(e->fireModified(null));
 		
 		spnLineAlpaha= new Spinner(this, SWT.BORDER);
@@ -135,6 +136,7 @@ public class SimpleGeometryStyleComposite extends Composite{
 		txtLineSize = new Text(this, SWT.BORDER);
 		txtLineSize.addListener(SWT.Modify, e->fireModified(e));
 		txtLineSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		txtLineSize.setText("1");	 //$NON-NLS-1$
 		
 		if (canEdit) {
 			cdLineSize = new ControlDecoration(txtLineSize, SWT.LEFT | SWT.TOP);
@@ -149,13 +151,14 @@ public class SimpleGeometryStyleComposite extends Composite{
 		lfill.setText(Messages.SimpleGeometryStyleComposite_FillColor);
 			
 		btnFillColor = new ColorSelector(this);
+		btnFillColor.setColorValue(new RGB(125,125,125));
 		btnFillColor.addListener(e->fireModified(null));
 		
 		spnFillAlpaha= new Spinner(this, SWT.BORDER);
 		spnFillAlpaha.setMinimum(0);
 		spnFillAlpaha.setMaximum(100);
 		spnFillAlpaha.setIncrement(10);
-		spnFillAlpaha.setSelection(100);
+		spnFillAlpaha.setSelection(50);
 		spnFillAlpaha.setToolTipText(Messages.SimpleGeometryStyleComposite_InvalidAlpha);
 		
 		//get listeners for disabling 
