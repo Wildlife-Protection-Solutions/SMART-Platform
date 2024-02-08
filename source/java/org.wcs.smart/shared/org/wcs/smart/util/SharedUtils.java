@@ -21,13 +21,21 @@
  */
 package org.wcs.smart.util;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
+import org.geotools.data.FeatureSource;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Coordinate;
 import org.mindrot.jbcrypt.BCrypt;
+import org.opengis.feature.Feature;
+import org.opengis.feature.FeatureVisitor;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.geometry.BoundingBox;
 
 /**
  * Collection of utilities shared with Desktop and Connect applications.
@@ -119,5 +127,24 @@ public class SharedUtils {
 	 */
 	public static String generatePassword(String password){
 		return BCrypt.hashpw(password, BCrypt.gensalt(13));
+	}
+	
+	public static ReferencedEnvelope computeBounds(FeatureSource<SimpleFeatureType, SimpleFeature> fs) throws IOException {
+		
+		final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
+		env.setToNull();
+		fs.getFeatures().accepts(new FeatureVisitor() {
+			@Override
+			public void visit(Feature f) {
+				BoundingBox bb = f.getBounds();
+				if (env.isNull()) {
+					env.init(bb);
+				}else {
+					env.include(bb);
+				}
+			}
+		}, null);
+		if (!env.isNull() && env.isEmpty()) env.expandBy(0.001);
+		return env;
 	}
 }

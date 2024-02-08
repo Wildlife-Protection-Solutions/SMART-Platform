@@ -1,11 +1,6 @@
 package org.wcs.smart.observation.query.model.columns;
 
-import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,7 +8,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -26,11 +20,11 @@ import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.model.AttributeQueryColumn;
-import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Query column cache.
@@ -132,27 +126,11 @@ public class ObservationQueryColumnCache {
 				}
 
 				// add data model category columns
-				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
-				for (int i = 0; i < numCategory; i++) {
-					cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i),i));
-				}
-					
-				//sort attributes alphabetically
-				List<Attribute> atts = new ArrayList<Attribute>();
-				atts.addAll( dataModel.getAttributes() );
-				Collections.sort(atts, new Comparator<Attribute>(){
-					@Override
-					public int compare(Attribute o1, Attribute o2) {
-						return Collator.getInstance().compare(o1.getName(),o2.getName());
-					}});
-					
-				for (Attribute att : atts) {
-					String name = att.getName();
-					cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex()));
-				}
+				cols.addAll(DataModelQueryColumns.generateDataModelQueryColumns(dataModel, false));
 				
 				cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
-				
+			
+				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}
@@ -218,6 +196,8 @@ public class ObservationQueryColumnCache {
 						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 					}
 				}
+				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
+
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				return Status.OK_STATUS;
 			}

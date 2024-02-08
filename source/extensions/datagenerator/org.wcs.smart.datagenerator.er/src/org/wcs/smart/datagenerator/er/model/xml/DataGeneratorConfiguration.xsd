@@ -49,7 +49,9 @@
     	<attribute name="attribute" type="string"></attribute>
     	<attribute name="mapping_type" type = "string"></attribute>
     	<attribute name="double_value" type = "double"></attribute>
+    	<attribute name="double_value_2" type = "double"></attribute>
     	<attribute name="string_value" type = "string"></attribute>
+    	<attribute name="geomtry_value" type = "string"></attribute>
     	
     </complexType>
 </schema>

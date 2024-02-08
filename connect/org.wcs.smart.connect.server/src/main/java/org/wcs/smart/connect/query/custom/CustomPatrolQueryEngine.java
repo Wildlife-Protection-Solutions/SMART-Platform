@@ -384,8 +384,8 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		patrol.put(ID_FIELD, ptr.getId());
 		patrol.put("comment", ptr.getComment()); //$NON-NLS-1$
 		patrol.put("armed", ptr.isArmed()); //$NON-NLS-1$
-		patrol.put("start_date", ptr.getStartDate()); //$NON-NLS-1$
-		patrol.put("end_date", ptr.getEndDate()); //$NON-NLS-1$
+		patrol.put("start_date", ptr.getStartDate().toString()); //$NON-NLS-1$
+		patrol.put("end_date", ptr.getEndDate().toString()); //$NON-NLS-1$
 		patrol.put("objective", ptr.getObjective()); //$NON-NLS-1$
 		
 		//find a client uuid
@@ -436,7 +436,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			switch(custom.getPatrolAttribute().getType()) {
 			case BOOLEAN: value.put(VALUE_FIELD, custom.getNumberValue() >= 0.5);
 				break;
-			case DATE: value.put(VALUE_FIELD,custom.getDateValue());
+			case DATE: value.put(VALUE_FIELD,custom.getDateValue().toString());
 				break;
 			case LIST:
 				value.put(VALUE_FIELD, custom.getAttributeListItem().getKeyId());
@@ -465,8 +465,8 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		JSONObject patrolleg = new JSONObject();
 		patrolleg.put(UUID_FIELD, UuidUtils.uuidToString(pw.getPatrolLegDay().getPatrolLeg().getUuid()));
 		patrolleg.put(ID_FIELD, pw.getPatrolLegDay().getPatrolLeg().getId());
-		patrolleg.put("start_date", pw.getPatrolLegDay().getPatrolLeg().getStartDate()); //$NON-NLS-1$
-		patrolleg.put("end_date", pw.getPatrolLegDay().getPatrolLeg().getEndDate()); //$NON-NLS-1$
+		patrolleg.put("start_date", pw.getPatrolLegDay().getPatrolLeg().getStartDate().toString()); //$NON-NLS-1$
+		patrolleg.put("end_date", pw.getPatrolLegDay().getPatrolLeg().getEndDate().toString()); //$NON-NLS-1$
 		
 		//find a client uuid
 		link = session
@@ -504,7 +504,6 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			JSONObject member = new JSONObject();
 			member.put(UUID_FIELD, UuidUtils.uuidToString(m.getMember().getUuid()));
 			member.put(ID_FIELD, m.getMember().getId());
-			//TODO: locale
 			member.put(NAME_FIELD, SmartLabelProvider.getFullName(m.getMember(), l));
 			member.put("is_leader", m.getIsLeader()); //$NON-NLS-1$
 			member.put("is_pilot", m.getIsPilot()); //$NON-NLS-1$
@@ -514,9 +513,9 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 				
 		//patrol leg day start time
 		JSONObject patrolLegDay = new JSONObject();
-		patrolLegDay.put("date", pw.getPatrolLegDay().getDate()); //$NON-NLS-1$
-		patrolLegDay.put("start_time", pw.getPatrolLegDay().getStartTime()); //$NON-NLS-1$
-		patrolLegDay.put("end_time", pw.getPatrolLegDay().getEndTime()); //$NON-NLS-1$
+		patrolLegDay.put("date", pw.getPatrolLegDay().getDate().toString()); //$NON-NLS-1$
+		patrolLegDay.put("start_time", pw.getPatrolLegDay().getStartTime().toString()); //$NON-NLS-1$
+		patrolLegDay.put("end_time", pw.getPatrolLegDay().getEndTime().toString()); //$NON-NLS-1$
 		
 		patrolleg.put("patrol_leg_day",patrolLegDay); //$NON-NLS-1$
 		
@@ -585,7 +584,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 				values.add(c.getY());
 				coords.add(values);
 				
-				times.add(SharedUtils.toLocalDateTime(c));
+				times.add(SharedUtils.toLocalDateTime(c).toString());
 			}
 		}else {
 			//multiple lines
@@ -603,7 +602,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 					JSONArray values = new JSONArray();
 					values.add(c.getX());
 					values.add(c.getY());
-					ltimes.add(SharedUtils.toLocalDateTime(c));
+					ltimes.add(SharedUtils.toLocalDateTime(c).toString());
 					coords.add(values);
 				}
 			}
@@ -615,7 +614,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		feature.put("properties", props); //$NON-NLS-1$
 		
 		props.put("fid", UuidUtils.uuidToString(track.getUuid())); //$NON-NLS-1$
-		props.put("date", track.getPatrolLegDay().getDate()); //$NON-NLS-1$
+		props.put("date", track.getPatrolLegDay().getDate().toString()); //$NON-NLS-1$
 		props.put("distance_km", track.getDistance()); //$NON-NLS-1$
 		props.put("timestamps", times); //$NON-NLS-1$
 		
@@ -676,8 +675,8 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 		patrol.put(ID_FIELD, ptr.getId());
 		patrol.put("comment", ptr.getComment()); //$NON-NLS-1$
 		patrol.put("armed", ptr.isArmed()); //$NON-NLS-1$
-		patrol.put("start_date", ptr.getStartDate()); //$NON-NLS-1$
-		patrol.put("end_date", ptr.getEndDate()); //$NON-NLS-1$
+		patrol.put("start_date", ptr.getStartDate().toString()); //$NON-NLS-1$
+		patrol.put("end_date", ptr.getEndDate().toString()); //$NON-NLS-1$
 		patrol.put("objective", ptr.getObjective()); //$NON-NLS-1$
 		
 		//find a client uuid
@@ -728,7 +727,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			switch(custom.getPatrolAttribute().getType()) {
 			case BOOLEAN: value.put(VALUE_FIELD, custom.getNumberValue() >= 0.5);
 				break;
-			case DATE: value.put(VALUE_FIELD,custom.getDateValue());
+			case DATE: value.put(VALUE_FIELD,custom.getDateValue().toString());
 				break;
 			case LIST:
 				value.put(VALUE_FIELD, custom.getAttributeListItem().getKeyId());
@@ -757,8 +756,8 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			JSONObject patrolleg = new JSONObject();
 			patrolleg.put(UUID_FIELD, UuidUtils.uuidToString(leg.getUuid()));
 			patrolleg.put(ID_FIELD, leg.getId());
-			patrolleg.put("start_date", leg.getStartDate()); //$NON-NLS-1$
-			patrolleg.put("end_date", leg.getEndDate()); //$NON-NLS-1$
+			patrolleg.put("start_date", leg.getStartDate().toString()); //$NON-NLS-1$
+			patrolleg.put("end_date", leg.getEndDate().toString()); //$NON-NLS-1$
 			legs.add(patrolleg);
 			
 			//find a client uuid
@@ -812,9 +811,9 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			for (PatrolLegDay day : leg.getPatrolLegDays()) {
 				//patrol leg day start time
 				JSONObject patrolLegDay = new JSONObject();
-				patrolLegDay.put("date", day.getDate()); //$NON-NLS-1$
-				patrolLegDay.put("start_time", day.getStartTime()); //$NON-NLS-1$
-				patrolLegDay.put("end_time", day.getEndTime()); //$NON-NLS-1$
+				patrolLegDay.put("date", day.getDate().toString()); //$NON-NLS-1$
+				patrolLegDay.put("start_time", day.getStartTime().toString()); //$NON-NLS-1$
+				patrolLegDay.put("end_time", day.getEndTime().toString()); //$NON-NLS-1$
 				legdays.add(patrolLegDay);
 			}
 			patrolleg.put("patrol_leg_days",legdays); //$NON-NLS-1$

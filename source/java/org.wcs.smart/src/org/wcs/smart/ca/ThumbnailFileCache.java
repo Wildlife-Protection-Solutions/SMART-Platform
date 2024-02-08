@@ -62,8 +62,7 @@ public class ThumbnailFileCache {
 			try {
 				Files.delete(fileName);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				SmartPlugIn.log(e.getMessage(), e);
 			}
 		}
 	}
@@ -120,14 +119,6 @@ public class ThumbnailFileCache {
 	}
 	
 	private long put(byte[] data) {
-//		if (!Files.exists(fileName)) {
-//			try {
-//				Files.createFile(fileName);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 		try(SeekableByteChannel file = Files.newByteChannel(fileName, StandardOpenOption.CREATE, StandardOpenOption.WRITE)){
 			long offset = file.size();
 			

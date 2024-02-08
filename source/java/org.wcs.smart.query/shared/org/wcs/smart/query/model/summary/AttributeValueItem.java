@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import java.util.Locale;
 import java.util.function.Function;
 
 import org.hibernate.Session;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 
@@ -38,6 +43,47 @@ import org.wcs.smart.query.model.filter.IValueVisitor;
  * @since 1.0.0
  */
 public class AttributeValueItem implements IValueItem {
+	
+	public static enum GeometryProperty{
+		AREA("area"), PERIMETER("perimeter"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		private String key;
+		GeometryProperty(String key){
+			this.key = key;
+		}
+		public String getKey() {
+			return this.key;
+		}
+		
+		public static GeometryProperty valueOfKey(String key) {
+			for (GeometryProperty p : GeometryProperty.values()) {
+				if (p.getKey().equalsIgnoreCase(key)) return p;
+			}
+			return null;
+		}
+		
+		public String getLabel(Locale l) {
+			if (this == AREA) 
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.AREA_KM2_KEY, l);
+			if (this == PERIMETER) 
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.PERIMETER_KM_KEY, l);
+			return ""; //$NON-NLS-1$
+		}
+		
+		public Aggregation[] getAggregations() {
+			Aggregation sum = new Aggregation("sum"); //$NON-NLS-1$
+			Aggregation max = new Aggregation("max"); //$NON-NLS-1$
+			Aggregation min = new Aggregation("min"); //$NON-NLS-1$
+			Aggregation avg = new Aggregation("avg"); //$NON-NLS-1$
+			return new Aggregation[] {sum, avg, max, min}; 
+		}
+		
+		public String getDbField() {
+			if (this == AREA) return GeometryAttributeValue.DB_FIELD_AREA;
+			if (this == PERIMETER) return GeometryAttributeValue.DB_FIELD_PERIMETER;
+			throw new IllegalStateException();
+		}
+	}
 	
 	/**
 	 * Creates a new attribute value item of the form
@@ -72,6 +118,8 @@ public class AttributeValueItem implements IValueItem {
 	protected IValueItem.ValueType valueType;
 	protected AttributeType attributeType;
 	
+	protected GeometryProperty geometryProperty;
+	
 	/**
 	 * Creates a new value item from the given key.
 	 * @param key key
@@ -89,10 +137,10 @@ public class AttributeValueItem implements IValueItem {
 		}
 		this.attributeType = Attribute.decodeAttributeTypeKey(attTypeKey);
 		if(attributeType != Attribute.AttributeType.NUMERIC && 
-		   attributeType != Attribute.AttributeType.LIST &&
-		   attributeType != Attribute.AttributeType.MLIST &&
-		   attributeType != Attribute.AttributeType.TREE){ 
-			throw new IllegalStateException("Non numeric attribute type not valid."); //$NON-NLS-1$
+		   attributeType != Attribute.AttributeType.TREE &&
+		   !attributeType.isList() &&
+		   !attributeType.isGeometry()) {
+			throw new IllegalStateException("Attribute type not valid for value drop item."); //$NON-NLS-1$
 		}
 		if (attributeType == AttributeType.NUMERIC){
 			//numeric are of the format
@@ -138,6 +186,23 @@ public class AttributeValueItem implements IValueItem {
 						break;
 					}
 				}
+		}else if (attributeType.isGeometry()){
+			//< SUM_ATTRIBUTE_VALUE_GEOM_KEY : "attribute:" ("p" | "i") ":sum|min|max|avg:" < DM_KEY > ":" ("area"|"perimeter") >
+			//< SUM_CAT_ATT_VALUE_GEOM_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_GEOM_KEY >
+			
+			if (includeCategory){
+				this.categoryKey = bits[1];
+				this.attributeKey = bits[5];
+				this.aggregationKey = bits[4];
+				this.geometryProperty = GeometryProperty.valueOfKey(bits[6]);
+				
+			}else{
+				this.attributeKey = bits[3];
+				this.aggregationKey = bits[2];
+				this.geometryProperty = GeometryProperty.valueOfKey(bits[4]);
+				
+			}
+			
 		}
 	}
 	
@@ -174,6 +239,10 @@ public class AttributeValueItem implements IValueItem {
 	 */
 	public String getCategoryKey(){
 		return this.categoryKey;
+	}
+	
+	public GeometryProperty getGeometryProperty() {
+		return this.geometryProperty;
 	}
 	
 	/**

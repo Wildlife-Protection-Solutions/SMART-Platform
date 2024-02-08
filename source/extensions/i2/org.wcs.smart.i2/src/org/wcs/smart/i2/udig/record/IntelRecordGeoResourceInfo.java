@@ -27,15 +27,12 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
+import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
-import org.opengis.feature.Feature;
-import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Georesource Information for enitity record location
@@ -46,8 +43,13 @@ public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 
 	private Logger logger = Logger.getLogger(IntelRecordGeoResourceInfo.class.getName());
 	
+	public IntelRecordGeoResourceInfo( IntelRecordAttributeGeoResource resource, IProgressMonitor monitor){
+		this.title = resource.getAttribute().getName();
+		computeBounds(resource, monitor);
+	}
+	
 	public IntelRecordGeoResourceInfo( IntelRecordGeoResource resource, IProgressMonitor monitor){
-		this.title = Messages.IntelRecordGeoResourceInfo_Title ;
+		this.title = Messages.IntelRecordGeoResourceInfo_Title1;
 		computeBounds(resource, monitor);
 	}
 	
@@ -60,19 +62,11 @@ public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 	 * 
 	 * @param resource resource source
 	 */
-	public void computeBounds(IntelRecordGeoResource resource, IProgressMonitor monitor){
+	public void computeBounds(IGeoResource resource, IProgressMonitor monitor){
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			fs.getFeatures().accepts(new FeatureVisitor() {
-				@Override
-				public void visit(Feature f) {
-					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
-				}
-			}, null);
-			this.bounds = env;
+			this.bounds = SharedUtils.computeBounds(fs);
 		} catch (IOException e) {
 			logger.log(Level.WARNING,"Could not determine bounds for smart inelligence record resource.", e); //$NON-NLS-1$
 		}

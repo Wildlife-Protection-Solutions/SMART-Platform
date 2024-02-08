@@ -87,6 +87,7 @@ import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDatasetResultSetMetadata;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.item.LayerItem;
@@ -132,7 +133,8 @@ public enum RecordReportGenerator {
 				 RecordAttributeDataset.DATASET_TYPE,
 				 RecordEntityDataset.DATASET_TYPE,
 				 RecordAttachmentDataset.DATASET_TYPE,
-				 RecordLocationDataset.DATASET_TYPE
+				 RecordLocationDataset.DATASET_TYPE,
+				 RecordLocationObservationDetailsDataset.DATASET_TYPE
 		};
 		
 		HashMap<String, OdaDataSetHandle> datasetHandles = new HashMap<>();
@@ -513,15 +515,15 @@ public enum RecordReportGenerator {
 		DataSetHandle layersHandle = datasetHandles.get(RecordLocationDataset.DATASET_TYPE);
 		ExtendedItemHandle pointLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		pointLayer.setDataSet(layersHandle);
-		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
+		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName() + " - " +  RecordLocationDatasetResultSetMetadata.Column.POINT.getColumnName(Locale.getDefault())); //$NON-NLS-1$
 		pointLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POINT.toString());
-		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, RecordLocationDatasetResultSetMetadata.Column.GEOM.getId());
+		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, RecordLocationDatasetResultSetMetadata.Column.POINT.getId());
 		
 		ExtendedItemHandle polyLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		polyLayer.setDataSet(layersHandle);
-		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
+		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName() + " - " +RecordLocationDatasetResultSetMetadata.Column.POLYGON.getColumnName(Locale.getDefault())); //$NON-NLS-1$
 		polyLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POLYGON.toString());
-		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, RecordLocationDatasetResultSetMetadata.Column.GEOM.getId());
+		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, RecordLocationDatasetResultSetMetadata.Column.POLYGON.getId());
 		
 		PropertyHandle layershandle = map.getPropertyHandle(SmartMapItem.SMART_LAYER_PROP2);
 		layershandle.add(pointLayer);

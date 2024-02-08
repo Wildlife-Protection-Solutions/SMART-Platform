@@ -87,6 +87,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.hibernate.Hibernate;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
@@ -778,7 +779,7 @@ public class AssetDeploymentPage {
 					session.flush();
 					
 					//delete any waypoints not associated with asset waypoint
-					try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
+					try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE sourceId = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 						while(scroll.next()) {
 							Waypoint wp = scroll.get();
 							session.remove(wp);
@@ -809,6 +810,7 @@ public class AssetDeploymentPage {
 		if (!(toEdit instanceof AssetDeploymentWrapper)) return;
 		
 		AssetDeployment toUpdate = ((AssetDeploymentWrapper)toEdit).getDeployment();
+		
 		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), toUpdate, allDeployments);
 		ContextInjectionFactory.inject(dialog, parentContext);
 		if (dialog.open() != Window.OK) return;
@@ -816,7 +818,12 @@ public class AssetDeploymentPage {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				HibernateManager.saveOrMerge(session, toUpdate);
+				toUpdate = dialog.getUpdatedDeployment();
+				toUpdate = HibernateManager.saveOrMerge(session, toUpdate);
+				Hibernate.initialize(toUpdate.getStationLocation());
+				Hibernate.initialize(toUpdate.getStationLocation().getStation());
+				((AssetDeploymentWrapper)toEdit).updateDeployment(toUpdate);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

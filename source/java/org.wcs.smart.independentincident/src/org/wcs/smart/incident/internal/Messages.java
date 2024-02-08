@@ -16,6 +16,8 @@ public class Messages extends NLS {
 	public static String DeleteIncidentHandler_DeleteError;
 	public static String DeleteIncidentHandler_Error1;
 	public static String DeleteIncidentHandler_Error2;
+	public static String DesktopReport800Upgrader_ReportUpdateDialogTitle;
+	public static String DesktopReport800Upgrader_ReportUpgradeMessage;
 	public static String DistanceDirectionComposite_BearingLbl;
 	public static String DistanceDirectionComposite_BearingTooltip;
 	public static String DistanceDirectionComposite_Description;
@@ -163,6 +165,7 @@ public class Messages extends NLS {
 	public static String IncidentMapPage_Error1;
 	public static String IncidentMapPage_Error2;
 	public static String IncidentMapPage_MapLayerName;
+	public static String IncidentMapPage_RawPointLayerName;
 	public static String IncidentMapPage_reprojectionError;
 	public static String IncidentMapPage_SaveError;
 	public static String IncidentMapPage_UndonError;
@@ -172,8 +175,10 @@ public class Messages extends NLS {
 	public static String IncidentMapWaypointRawDefaultStyle_MapName;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_booleanvaluecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_datevaluecolumnname;
+	public static String IncidentObservationAttributeDatasetResultSetMetadata_LineGeometyrName;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_namecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_numbervaluecolumnname;
+	public static String IncidentObservationAttributeDatasetResultSetMetadata_PolgyonGeometryName;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_stringvaluecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_uuidcolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_valueasstringcolumnname;
@@ -274,6 +279,8 @@ public class Messages extends NLS {
 	public static String XmlToIncident_DataError;
 	public static String XmlToIncident_DoubleValueNotFound;
 	public static String XmlToIncident_InvalidDateString;
+	public static String XmlToIncident_InvalidGeometry;
+	public static String XmlToIncident_InvalidSource;
 	public static String XmlToIncident_ListValueNotFound;
 	public static String XmlToIncident_MultpleAttributeValues;
 	public static String XmlToIncident_NoValidItemsForMultiList;

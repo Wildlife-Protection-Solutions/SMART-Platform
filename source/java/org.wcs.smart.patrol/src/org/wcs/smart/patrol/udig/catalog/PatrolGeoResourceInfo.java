@@ -25,15 +25,11 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
-import org.opengis.feature.Feature;
-import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Georesource Information for a smart area resource 
@@ -44,7 +40,7 @@ public class PatrolGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public PatrolGeoResourceInfo( PatrolGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.dataType;
+		this.title = resource.name;
 		computeBounds(resource, monitor);
 	}
 	
@@ -57,15 +53,7 @@ public class PatrolGeoResourceInfo extends IGeoResourceInfo {
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			fs.getFeatures().accepts(new FeatureVisitor() {
-				@Override
-				public void visit(Feature f) {
-					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
-				}
-			}, null);
-			this.bounds = env;
+			this.bounds = SharedUtils.computeBounds(fs);
 		} catch (IOException e) {
 			SmartPlugIn.log("Could not determine bounds for smart resource: " + resource.dataType, e); //$NON-NLS-1$
 		}

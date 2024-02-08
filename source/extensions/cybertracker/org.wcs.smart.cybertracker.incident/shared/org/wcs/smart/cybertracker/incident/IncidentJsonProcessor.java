@@ -21,18 +21,25 @@
  */
 package org.wcs.smart.cybertracker.incident;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.jboss.logging.Logger;
+import org.jboss.logging.Logger.Level;
 import org.json.simple.JSONObject;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
@@ -63,21 +70,19 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	
 	protected List<CtIncidentLink> groupMappings;
 	protected ConservationArea ca;
+	private List<Path> tempFiles;
 	
 	public enum StatusMessage{
 		ADDED, MODIFIED;
 		
-		public String getMessage() {
-			switch(this) {
-			case ADDED: return "Created {0} Incidents";
-			case MODIFIED: return "Modified {0} Incidents";
-			}
-			return "";
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(IIncidentCyberTrackerLabelProvider.class).getLabel(this, l);
 		}
 	}
 	
 	public IncidentJsonProcessor(ConservationArea ca) {
 		warnings = new ArrayList<>();
+		tempFiles = new ArrayList<>();
 		this.ca = ca;
 	}
 
@@ -93,7 +98,12 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public void cleanUp() {
+		cleanUpFiles(tempFiles);
+	}
+	
+	@Override
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
 		newIncidents = new HashSet<>();
 		modifiedIncidents = new HashSet<>();
 		groupMappings = new ArrayList<>();
@@ -101,9 +111,9 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser();
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
+			CtJsonObservationParser parser = new CtJsonObservationParser(l);
 			try{
 				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
@@ -262,6 +272,8 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 				//if there is a session.flush error we have a problem we need to stop and rollback
 				logException(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
 				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()));
+			}finally {
+				tempFiles.addAll(parser.getTemporaryFiles());
 			}
 		}
 		
@@ -317,12 +329,12 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		if (newIncidents.isEmpty() && modifiedIncidents.isEmpty()) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newIncidents.isEmpty()){
-			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(), newIncidents.size()));
+			sb.append(MessageFormat.format(StatusMessage.ADDED.getMessage(l), newIncidents.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : newIncidents){
 				sb.append(p.getId());
@@ -335,7 +347,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 		HashSet<Waypoint> tmp = new HashSet<>(modifiedIncidents);
 		for (Waypoint w : newIncidents) tmp.remove(w);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(), tmp.size()));
+			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(l), tmp.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : tmp){
 				sb.append(p.getId());

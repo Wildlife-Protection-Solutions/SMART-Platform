@@ -100,7 +100,7 @@ public class IntelAttributeQueryColumn extends AbstractQueryColumn {
 		case TEXT:
 			return Type.STRING;
 		case POSITION:
-			return Type.GEOMETRY;
+			return Type.POINT;
 		}
 		return null;
 	}

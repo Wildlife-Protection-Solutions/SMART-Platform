@@ -35,11 +35,10 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.map.geotools.QueryDataSource;
 import org.wcs.smart.asset.query.map.style.AssetSummaryPointQueryDefaultStyle;
-import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
+import org.wcs.smart.asset.query.model.PointGeometryQueryColumn;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
 import org.wcs.smart.asset.query.ui.definition.AssetSimpleFilterPanel;
 import org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel;
@@ -73,7 +72,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, AssetSummaryPointQueryDefaultStyle.KEY);
+		styleMappings.put(PointGeometryQueryColumn.KEY, AssetSummaryPointQueryDefaultStyle.KEY);
 	}
 	
 	/**
@@ -253,7 +252,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
 		try {
 			if (AssetSummaryQuery.canAddGeometry( ((AssetSummaryQuery)query).getQueryDefinition() )){
-				return new QueryService((AssetSummaryQuery) query);
+				return new org.wcs.smart.query.map.QueryService((AssetSummaryQuery) query, prjProvider);
 			}
 		}catch (Exception ex) {
 			AssetPlugIn.log(ex.getMessage(), ex);

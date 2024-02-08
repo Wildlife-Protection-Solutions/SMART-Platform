@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -71,6 +73,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
+import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.styling.Fill;
 import org.geotools.styling.Graphic;
@@ -84,11 +87,16 @@ import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
 import org.geotools.util.factory.GeoTools;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.locationtech.udig.ui.PlatformGIS;
 import org.opengis.filter.FilterFactory;
+import org.opengis.filter.FilterFactory2;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
@@ -1149,6 +1157,63 @@ public class SmartUtils {
     	fts.setName("Waypoint Style"); //$NON-NLS-1$
     	fts.rules().add(rr);
 		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
+	}
+	
+	public static Style getDefaultAttributeStyle(Attribute.AttributeType type, String attributeNameField) {
+		if (type == null || !type.isGeometry()) {
+			throw new IllegalArgumentException("type must be provided and one of the geometry attribute types"); //$NON-NLS-1$
+		}
+		if (SmartDB.isMultipleAnalysis()) return null;
+
+		List<Attribute> items = null;
+		
+		try(Session session = HibernateManager.openSession()){
+			items = session.createQuery("FROM Attribute WHERE type = :type and conservationArea = :ca", Attribute.class) //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.setParameter("type", type) //$NON-NLS-1$
+					.list();
+		}
+		if (items == null || items.isEmpty()) {
+			return null;
+		}
+		
+		items.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Waypoint Style"); //$NON-NLS-1$
+    	
+    	
+    	//BrewerPalette p = ColorBrewer.instance().getPalettes()[0];
+    	BrewerPalette p = PlatformGIS.getColorBrewer().getPalette("Set1"); //$NON-NLS-1$
+    	int i = 0;
+		for (Attribute a : items) {
+			java.awt.Color fillColor = p.getColors()[i];
+			i++;
+			if (i >= p.getCount() - 1) {
+				i = 0;
+			}
+			Symbolizer sym = null;
+			if (type == Attribute.AttributeType.POLYGON) {
+				Fill fill = sb.createFill(fillColor, 0.5);
+				Stroke stroke = sb.createStroke(fillColor, 1);
+				sym = sb.createPolygonSymbolizer(stroke, fill);
+			}else if (type == Attribute.AttributeType.LINE) {
+				Stroke stroke = sb.createStroke(fillColor, 1);
+				sym = sb.createLineSymbolizer(stroke);
+			}
+							
+			Rule rr = sb.createRule(sym);
+			rr.setFilter( ff.equals(ff.property(attributeNameField), ff.literal(a.getKeyId())) );
+			rr.setName(a.getName());
+		
+			fts.rules().add(rr);
+		}
 		Style style = sf.createStyle();
     	style.featureTypeStyles().add(fts);
 		return style;

@@ -84,22 +84,27 @@ import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.hibernate.listeners.SmartHibernateIntegrator;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
 import org.wcs.smart.connect.i18n.labels.AssetLabelProvider;
 import org.wcs.smart.connect.i18n.labels.AssetQueryLabelProvider;
-import org.wcs.smart.connect.i18n.labels.EntityLabelProvider;
-import org.wcs.smart.connect.i18n.labels.EntityQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.CyberTrackerLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ErLabelProvider;
 import org.wcs.smart.connect.i18n.labels.GridQueryColumnLabelProvider;
+import org.wcs.smart.connect.i18n.labels.IncidentCyberTrackerLabelProvider;
 import org.wcs.smart.connect.i18n.labels.IncidentLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ObservationLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ObservationQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.PatrolCyberTrackerLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PatrolLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PatrolQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PlanLabelProvider;
+import org.wcs.smart.connect.i18n.labels.ProfileEventLabelProvider;
 import org.wcs.smart.connect.i18n.labels.QueryDateLabelProvider;
+import org.wcs.smart.connect.i18n.labels.SmartCollectLabelProvider;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
+import org.wcs.smart.connect.i18n.labels.SurveyCyberTrackerLabelProvider;
 import org.wcs.smart.connect.i18n.labels.SurveyQueryLabelProvider;
 import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.Alert;
@@ -132,7 +137,6 @@ import org.wcs.smart.connect.qa.QaPatrolLabelProvider;
 import org.wcs.smart.connect.query.PatrolContributionFinder;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.query.columns.AssetQueryColumnProvider;
-import org.wcs.smart.connect.query.columns.EntityQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.ObservationQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.PatrolQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
@@ -141,12 +145,14 @@ import org.wcs.smart.connect.query.engine.i2.QueryEngineFactory;
 import org.wcs.smart.connect.report.BirtEngine;
 import org.wcs.smart.connect.report.SmartServiceLabelProvider;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
-import org.wcs.smart.entity.IEntityLabelProvider;
-import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
-import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
+import org.wcs.smart.cybertracker.ICyberTrackerLabelProvider;
+import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
+import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
+import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
+import org.wcs.smart.event.i2.IProfileEventLabelProvider;
 import org.wcs.smart.i2.IQueryEngineFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.incident.IIncidentLabelProvider;
@@ -475,7 +481,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		//register SMART context classes
 		initSmartClasses(sce);
-		
+	
 		//start executor for running background jobs
 		int numthreads = 1;
 		try{
@@ -513,9 +519,14 @@ public class ConnectStartupContextListener implements ServletContextListener{
 
 	
 	private void initSmartClasses(ServletContextEvent arg0) {
-		SmartContext.INSTANCE.setClass(IEntityLabelProvider.class, new EntityLabelProvider());
-		SmartContext.INSTANCE.setClass(IEntityQueryLabelProvider.class, new EntityQueryLabelProvider());
+//		SmartContext.INSTANCE.setClass(IEntityLabelProvider.class, new EntityLabelProvider());
+//		SmartContext.INSTANCE.setClass(IEntityQueryLabelProvider.class, new EntityQueryLabelProvider());
 		SmartContext.INSTANCE.setClass(IErLabelProvider.class, new ErLabelProvider());
+		SmartContext.INSTANCE.setClass(IIncidentCyberTrackerLabelProvider.class, new IncidentCyberTrackerLabelProvider());
+		SmartContext.INSTANCE.setClass(IPatrolCyberTrackerLabelProvider.class, new PatrolCyberTrackerLabelProvider());
+		SmartContext.INSTANCE.setClass(ISmartCollectLabelProvider.class, new SmartCollectLabelProvider());
+		SmartContext.INSTANCE.setClass(ISurveyCyberTrackerLabelProvider.class, new SurveyCyberTrackerLabelProvider());
+		
 		SmartContext.INSTANCE.setClass(IGridQueryColumnLabelProvider.class, new GridQueryColumnLabelProvider());
 //		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProvider());
 //		SmartContext.INSTANCE.setClass(IIntelligenceQueryLabelProvider.class, new IntelligenceQueryLabelProvider());
@@ -529,7 +540,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(ISurveyQueryLabelProvider.class, new SurveyQueryLabelProvider());
 		SmartContext.INSTANCE.setClass(IIncidentLabelProvider.class, new IncidentLabelProvider());
 		
-		SmartContext.INSTANCE.setClass(IEntityQueryColumnProvider.class, new EntityQueryColumnProvider());
+//		SmartContext.INSTANCE.setClass(IEntityQueryColumnProvider.class, new EntityQueryColumnProvider());
 //		SmartContext.INSTANCE.setClass(IIntelligenceQueryColumnProvider.class, new IntelligenceQueryColumnProvider());
 		SmartContext.INSTANCE.setClass(IObservationQueryColumnProvider.class, new ObservationQueryColumnProvider());
 		SmartContext.INSTANCE.setClass(IPatrolQueryColumnProvider.class, new PatrolQueryColumnProvider());
@@ -545,6 +556,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
 		
+		SmartContext.INSTANCE.setClass(IProfileEventLabelProvider.class, new ProfileEventLabelProvider());
+		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider.class, new ISmartCollectLabelProvider() {
 			@Override
 			public String getLabel(Object item, Locale l) {
@@ -557,6 +570,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.observation.IObservationLabelProvider.class, new ObservationLabelProvider());
 		SmartContext.INSTANCE.setClass(IAssetQueryColumnProvider.class, new AssetQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(ICyberTrackerLabelProvider.class, new CyberTrackerLabelProvider());
 		
 		
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());

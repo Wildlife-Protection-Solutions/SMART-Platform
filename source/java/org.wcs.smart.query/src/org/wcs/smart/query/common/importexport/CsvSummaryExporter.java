@@ -26,7 +26,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -81,7 +81,7 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 	 */
 	@Override
 	public void export(Query query, IQueryResult result, Path file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor)
+			Map<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		SummaryQueryResult results = (SummaryQueryResult) result;
 		if (results == null){

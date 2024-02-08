@@ -62,7 +62,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.event.ActionTypeManager;
+import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.filter.ParsedFilter;
 import org.wcs.smart.event.internal.Messages;
@@ -315,7 +315,7 @@ public class EventsPanel extends Composite {
 		l.addListener(SWT.Dispose, e->boldFont2.dispose());
 		l.setFont(boldFont2);
 		
-		IActionType actionType = ActionTypeManager.INSTANCE.getActionType( actionEvent.getAction().getActionTypeKey() );
+		IActionType actionType = ActionTypeManagerInternal.INSTANCE.getActionType( actionEvent.getAction().getActionTypeKey() );
 		
 		l = new Label(content, SWT.WRAP);
 		l.setText(MessageFormat.format(Messages.EventsPanel_ActionTypeLabel, actionType.getName(Locale.getDefault())));
@@ -444,7 +444,7 @@ public class EventsPanel extends Composite {
 			session.beginTransaction();
 			try {
 				for(EActionEvent event : toDelete) {
-					HibernateManager.saveOrMerge(session, event);
+					session.remove(event);
 				}
 				session.getTransaction().commit();
 				((List<?>)tblEvents.getInput()).removeAll(toDelete);

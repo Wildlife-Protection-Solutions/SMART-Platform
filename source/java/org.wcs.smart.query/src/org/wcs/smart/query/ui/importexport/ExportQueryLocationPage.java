@@ -67,6 +67,8 @@ import org.wcs.smart.util.ReprojectUtils;
  */
 public class ExportQueryLocationPage extends WizardPage {
 
+	public static final String PAGE_NAME = Messages.ExportQueryLocationPage_PageName;
+	
 	private Text txtFile = null;
 
 	private Label lblDelimiter;
@@ -87,9 +89,14 @@ public class ExportQueryLocationPage extends WizardPage {
 	 * Creates a new query wizard page.
 	 */
 	protected ExportQueryLocationPage() {
-		super(Messages.ExportQueryLocationPage_PageName);
+		super(PAGE_NAME);
 	}
 
+	private boolean hasMultiOutput() {
+		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
+		return  wizard.getGeometryColumnsToExport(wizard.getQueryExporter()) != null && wizard.getGeometryColumnsToExport(wizard.getQueryExporter()).size() > 1;
+	}
+	
 	/**
 	 * Initializes the values in the query wizard
 	 */
@@ -101,21 +108,33 @@ public class ExportQueryLocationPage extends WizardPage {
 		
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		IQueryExporter exporter = wizard.getQueryExporter();
-		
+		boolean hasMultiOutput =hasMultiOutput();
+
 		String initFile = wizard.getQuery().getName();
 		if (wizard.getQuery().getId() != null){
 			initFile = initFile + "_" + wizard.getQuery().getId(); //$NON-NLS-1$
 		}
-		initFile = location + File.separator + URLUtils.cleanFilename(initFile) + "." ; //$NON-NLS-1$
+		initFile = location + File.separator + URLUtils.cleanFilename(initFile); 
 		
-		if (exporter == null){
-			initFile += ".txt"; //$NON-NLS-1$
-		}else{
-			if (exporter.getDefaultExtension() != null){
-				initFile += exporter.getDefaultExtension();
-			}else{
-				initFile = location;
+		if (!hasMultiOutput) {
+			//exporting to file
+		
+			if (wizard.getGeometryColumnsToExport(wizard.getQueryExporter()) != null && 
+					wizard.getGeometryColumnsToExport(wizard.getQueryExporter()).size() == 1) {
+				initFile += URLUtils.cleanFilename(wizard.getGeometryColumnsToExport(wizard.getQueryExporter()).get(0).getKey());
 			}
+			initFile += "." ; //$NON-NLS-1$
+			
+			if (exporter == null){
+				initFile += ".txt"; //$NON-NLS-1$
+			}else{
+				if (exporter.getDefaultExtension() != null){
+					initFile += exporter.getDefaultExtension();
+				}else{
+					initFile = location;
+				}
+			}
+			
 		}
 		txtFile.setText( initFile );
 
@@ -185,9 +204,12 @@ public class ExportQueryLocationPage extends WizardPage {
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String ext = ((ExportQueryWizard)getWizard()).getQueryExporter().getDefaultExtension();
-				String name= ((ExportQueryWizard)getWizard()).getQueryExporter().getName();
-				if (ext != null){
+				ExportQueryWizard wizard = (ExportQueryWizard)getWizard();
+				
+				String ext = wizard.getQueryExporter().getDefaultExtension();
+				String name= wizard.getQueryExporter().getName();
+				
+				if (!hasMultiOutput() && ext != null){
 					FileDialog fd = new FileDialog(ExportQueryLocationPage.this.getShell(), SWT.SAVE);
 					
 					String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$

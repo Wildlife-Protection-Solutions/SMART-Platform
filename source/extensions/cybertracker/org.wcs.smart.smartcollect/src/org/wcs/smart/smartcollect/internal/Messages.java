@@ -31,6 +31,7 @@ public class Messages extends NLS {
 	public static String IncidentMapPage_IncidentLayerName;
 	public static String IncidentMapPage_LayerAddFail;
 	public static String IncidentMapPage_MoveFailed;
+	public static String IncidentMapPage_RawPointLayerName;
 	public static String IncidentMapPage_ReprojectFailed;
 	public static String IncidentMapPage_SaveFailed;
 	public static String IncidentMapPage_UpdateFailed;
@@ -80,6 +81,11 @@ public class Messages extends NLS {
 	public static String SmartCollectIncidentEditor_PartName;
 	public static String SmartCollectIncidentEditor_SummaryPageName;
 	public static String SmartCollectIncidentProvider_SmartCollectIncident;
+	public static String SmartCollectLabelProvider_ImportWarning1;
+	public static String SmartCollectLabelProvider_ImportWarning2;
+	public static String SmartCollectLabelProvider_ImportWarning3;
+	public static String SmartCollectLabelProvider_ImportWarning4;
+	public static String SmartCollectLabelProvider_ImportWarning5;
 	public static String SmartCollectLabelProvider_SmartCollectIncident;
 	public static String SmartCollectPackageConfigurator_CMLabel;
 	public static String SmartCollectPackageConfigurator_CmRequired;
@@ -147,6 +153,8 @@ public class Messages extends NLS {
 	public static String XmlToIncident_AttributeCategoryNotFound;
 	public static String XmlToIncident_CategoryNotFound;
 	public static String XmlToIncident_DataNotImported;
+	public static String XmlToIncident_GeometryError;
+	public static String XmlToIncident_GeometrySourceError;
 	public static String XmlToIncident_InvalidDate;
 	public static String XmlToIncident_ListKeyNotFound;
 	public static String XmlToIncident_MultiKeys;

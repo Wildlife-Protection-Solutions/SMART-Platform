@@ -27,7 +27,6 @@ import org.wcs.smart.asset.query.engine.AssetDeploymentSummaryEngine;
 import org.wcs.smart.asset.query.engine.AssetSummaryEngine;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
@@ -47,7 +46,7 @@ import org.wcs.smart.query.model.filter.date.WaypointDateField;
 public class AssetSummaryMetadataProvider implements IMetadataProvider {
 
 	@Override
-	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geometryColumns, SmartConnection c) throws OdaException {
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, SmartConnection c) throws OdaException {
 		AssetSummaryQuery q = (AssetSummaryQuery)query;
 		
 		//set a default date filter for parsing

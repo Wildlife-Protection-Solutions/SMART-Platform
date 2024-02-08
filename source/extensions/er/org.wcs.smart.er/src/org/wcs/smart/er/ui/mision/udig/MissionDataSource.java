@@ -23,7 +23,9 @@ package org.wcs.smart.er.ui.mision.udig;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
@@ -31,6 +33,9 @@ import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.NameImpl;
 import org.hibernate.Session;
 import org.opengis.feature.type.Name;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -46,9 +51,10 @@ public class MissionDataSource extends ContentDataStore{
 	public static final String MISSIONWAYPOINT_TYPE = "MissionPoint"; //$NON-NLS-1$
 	public static final String MISSIONTRACK_TYPE = "MissionTrack"; //$NON-NLS-1$
 	public static final String MISSIONRAWWAYPOINT_TYPE = "MissionPointRaw"; //$NON-NLS-1$
-	
+		
 	private MissionService service;
-	
+	private Map<String,Attribute> attributeMap;
+
 	public MissionDataSource(MissionService service){
 		this.service = service;
 	}
@@ -65,12 +71,24 @@ public class MissionDataSource extends ContentDataStore{
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
 		boolean dd = false;
-		try (Session session = HibernateManager.openSession()){
-			dd = session.get(Mission.class, service.getMissionUuid()).getSurvey().getSurveyDesign().getTrackDistanceDirection();
-		}
+		this.attributeMap = new HashMap<>();
 		List<Name> names = new ArrayList<>();
 		names.add(new NameImpl(MISSIONWAYPOINT_TYPE));
 		names.add(new NameImpl(MISSIONTRACK_TYPE));
+		
+		try (Session session = HibernateManager.openSession()){
+			Mission mission = session.get(Mission.class, service.getMissionUuid()); 
+			dd = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
+			
+			//find all geometry based data model
+			List<Attribute> attributes = DataModelManager.INSTANCE.getGeometryAttributes(session);
+			for (Attribute attribute : attributes) {
+				String type = attribute.getType().name() + "." + attribute.getKeyId(); //$NON-NLS-1$
+				names.add(new NameImpl(type)); 
+				attributeMap.put(type, attribute);
+			}
+		}
+		
 		if (dd) names.add(new NameImpl(MISSIONRAWWAYPOINT_TYPE));
 		return names;
 	}
@@ -80,6 +98,29 @@ public class MissionDataSource extends ContentDataStore{
 		return new MissionFeatureSource(entry);
 	}
 	
+	public static boolean isLineAttribute(String name) {
+		return (name.startsWith(Attribute.AttributeType.LINE.name() + ".")); //$NON-NLS-1$
+	}
+	public static boolean isPolygonAttribute(String name) {
+		return (name.startsWith(Attribute.AttributeType.POLYGON.name() + ".")); //$NON-NLS-1$
+	}
+	public static boolean isGeometryAttribute(String name) {
+		return  (name.startsWith(Attribute.AttributeType.POLYGON.name() + ".") || //$NON-NLS-1$
+				name.startsWith(Attribute.AttributeType.LINE.name() + ".")); //$NON-NLS-1$
+	}
 
-	
+	public String getName(String typeName) {
+		if (typeName.equals(MissionDataSource.MISSIONTRACK_TYPE)) return Messages.MissionFeatureSource_TrackLayerName;
+		if (typeName.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return Messages.MissionFeatureSource_WaypointLayerName;
+		if (typeName.equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) return Messages.MissionFeatureSource_RawWaypointLayerName;
+		if (isGeometryAttribute(typeName)) {
+			return attributeMap.get(typeName).getName();
+		}
+		return null;
+
+	}
+
+	public Attribute getAttribute(String typeName) {
+		return attributeMap.get(typeName);
+	}
 }

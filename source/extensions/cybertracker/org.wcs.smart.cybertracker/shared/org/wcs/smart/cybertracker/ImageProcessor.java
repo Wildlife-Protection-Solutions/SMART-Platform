@@ -25,7 +25,10 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -50,9 +53,9 @@ public enum ImageProcessor {
 	INSTANCE;
 	
 	private void logMe(Exception ex) {
-		//TODO: 
-		ex.printStackTrace();
+		Logger.getLogger(ImageProcessor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 	}
+	
 	/**
 	 * Attempts to resize the attachment to the given size.  Resizes the file in the copyFromLocation
 	 * and updates this location to the new file if the file was resized correctly.
@@ -60,22 +63,24 @@ public enum ImageProcessor {
 	 * @param attachment
 	 * @param width
 	 * @param height
+	 * @return set of temporary paths created during this process that should be removed
+	 * after the attachment is saved to the database
 	 */
-	public void processAttachment(ISmartAttachment attachment, int width, int height){
+	public Path[] processAttachment(ISmartAttachment attachment, int width, int height){
 		try{
-			//fix this - files won't be deleted correctly
 			Path tempDir = Files.createTempDirectory("smart.import"); //$NON-NLS-1$
-			tempDir.toFile().deleteOnExit();
 			Path outImage = tempDir.resolve(attachment.getFilename());
 			if (resizeImage(attachment.getCopyFromLocation(), outImage, width, height)){
 				if (Files.exists(outImage)){
 					attachment.setCopyFromLocation(outImage);
-					outImage.toFile().deleteOnExit();
+					return new Path[] {outImage, tempDir};
 				}
 			}
+			return new Path[] {outImage, tempDir};
 		}catch(Exception ex){
 			logMe(ex);
 		}
+		return new Path[0];
 	}
 	
 	/**
@@ -144,7 +149,7 @@ public enum ImageProcessor {
 				}
 			}	//close input stream
 			
-
+			
 			//configure orientation of targets sizes
 			if ((targetWidth < targetHeight && toResize.getWidth() > toResize
 					.getHeight())
@@ -179,12 +184,15 @@ public enum ImageProcessor {
 				try {
 					ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
 					imageWriteParam.setCompressionMode(ImageWriteParam.MODE_COPY_FROM_METADATA);
+					
 					if (imageWriteParam instanceof JPEGImageWriteParam) {
 						//to fix #2442 - javax.imageio.IIOException: Missing Huffman code table entry
 						//this will always create huffman tables
 						((JPEGImageWriteParam)imageWriteParam).setOptimizeHuffmanTables(true);
 					}
 					writer.setOutput(ios);
+					//TODO: figure out how to keep exif metadata
+//					writer.write(null, new IIOImage(resizedImage, null, metadata),imageWriteParam);
 					writer.write(null, new IIOImage(resizedImage, null, metadata),imageWriteParam);
 				} finally {
 					writer.dispose();
@@ -196,5 +204,12 @@ public enum ImageProcessor {
 			return false;
 		}
 		
+	}
+	
+	public static void main(String[] args) {
+		Path in = Paths.get("C:\\temp\\input.JPG");
+		Path out = Paths.get("C:\\temp\\input.out.JPG");
+		
+		ImageProcessor.INSTANCE.resizeImage(in, out, 200,200);
 	}
 }

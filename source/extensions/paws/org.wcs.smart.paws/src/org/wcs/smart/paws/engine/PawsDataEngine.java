@@ -750,7 +750,6 @@ public class PawsDataEngine {
 				while(results.next()) {
 					String[] data = new String[headers.size()];
 					
-					//TODO: test/fix this
 					Tuple items = results.get();
 					
 					String pid = (String)items.get(0);

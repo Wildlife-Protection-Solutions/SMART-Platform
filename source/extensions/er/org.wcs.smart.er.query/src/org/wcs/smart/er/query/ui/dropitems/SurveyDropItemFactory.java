@@ -459,15 +459,14 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IQuer
 	 */
 	private DropItem createSummaryDmDropItem(SummaryDmObject object) {
 		if (object.isValue()) {
-			if (object.getObject() instanceof Attribute) {
-				if (((Attribute)object.getObject()).getType() == AttributeType.NUMERIC){
-					return createAttributeValueDropItem(
-						(Attribute) object.getObject());
+			if (object.getObject() instanceof Attribute attribute) {
+				if (attribute.getType() == AttributeType.NUMERIC || attribute.getType().isGeometry()){
+					return createAttributeValueDropItem(attribute);
 				}
 				return null;
-			} else if (object.getObject() instanceof CategoryAttribute) {
-				if (((CategoryAttribute)object.getObject()).getAttribute().getType() == AttributeType.NUMERIC){
-					return createAttributeValueDropItem((CategoryAttribute) object.getObject());
+			} else if (object.getObject() instanceof CategoryAttribute catatt) {
+				if (catatt.getAttribute().getType() == AttributeType.NUMERIC || catatt.getAttribute().getType().isGeometry()){
+					return createAttributeValueDropItem(catatt);
 				}
 				return null;
 			} else if (object.getObject() instanceof Category) {

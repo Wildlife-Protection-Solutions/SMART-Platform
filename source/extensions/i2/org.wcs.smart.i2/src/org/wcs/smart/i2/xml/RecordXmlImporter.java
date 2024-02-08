@@ -30,6 +30,7 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,15 +44,19 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.geotools.geometry.jts.WKBReader;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -968,6 +973,25 @@ public class RecordXmlImporter {
 					}
 					newValue.setAttributeTreeNode(treeNode);					
 					break;
+					
+				case LINE:
+				case POLYGON:
+					GeometrySource src = GeometrySource.UNKNOWN;
+					try {
+						src = GeometrySource.valueOf(recordAttribute.getStringValue());	
+					}catch (Exception ex) {
+						warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", recordAttribute.getStringValue(), recordAttribute.getAttribute().getName()));
+					}
+				
+					try {
+						byte[] geom = Base64.getDecoder().decode(recordAttribute.getGeomValue());
+						Geometry g = (new WKBReader()).read(geom);
+						GeometryAttributeValue value = new GeometryAttributeValue(g, src);
+						newValue.setGeometry(value);	
+					}catch (Exception ex) {
+						warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", recordAttribute.getAttribute().getName()));
+					}
+					
 					
 			}
 			

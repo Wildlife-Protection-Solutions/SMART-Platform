@@ -64,7 +64,7 @@ public class Attribute extends DmObject{
 	
 	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 8200;
 	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
-	
+		
 	/**
 	 * Conservation are associated with attribute
 	 */
@@ -104,7 +104,9 @@ public class Attribute extends DmObject{
 		MLIST("m"), //$NON-NLS-1$
 		TREE("t"), //$NON-NLS-1$
 		BOOLEAN("b"), //$NON-NLS-1$
-		DATE("d"); //$NON-NLS-1$
+		DATE("d"), //$NON-NLS-1$
+		POLYGON("p"), //$NON-NLS-1$
+		LINE("i"); //$NON-NLS-1$
 		
 		/**
 		 * type key is used in the queries
@@ -119,10 +121,32 @@ public class Attribute extends DmObject{
 			return this == LIST || this == MLIST;
 		}
 		
+		public boolean isGeometry() {
+			return this == POLYGON || this == LINE;
+		}
+		
 		public String getName(Locale locale) {
 			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getAttributeTypeLabel(this, locale);
 		}
 	}
+	
+	/**
+	 * For geometry attributes we also track the source
+	 * of the geometry in the string field
+	 * 
+	 * @author Emily
+	 *
+	 */
+	public enum GeometrySource{
+		MANUAL_DRAW, //drawn on a map manually (user clicks point on map)
+		MANUAL_POINT,  //manually enter coordinates (x,y) without aid of map
+		GPS, //taken by a GPS (smart mobile)
+		UNKNOWN;
+		
+		public String getLabel(Locale l) {
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(this, l);
+		}
+	};
 	
 	/**
 	 * Parses the attribute type key (n, l etc.) into an attribute type.
@@ -245,9 +269,10 @@ public class Attribute extends DmObject{
 	}
 
 	/**
-	 * Only valid for text attributes.
+	 * Used as regex expression for string attributes and 
+	 * formatting information for other attribute types
 	 * 
-	 * @return a regex pattern for validating string values
+	 * @return 
 	 */
 	public String getRegex() {
 		return regex;
@@ -255,9 +280,10 @@ public class Attribute extends DmObject{
 
 
 	/**
-	 * Only valid for text attributes.
+	 * Used as regex expression for string attributes and 
+	 * formatting information for other attribute types
 	 * 
-	 * @param regex the regex pattern for validating string values
+	 * @param 
 	 */
 	public void setRegex(String regex) {
 		this.regex = regex;
@@ -477,5 +503,15 @@ public class Attribute extends DmObject{
 			}
 		}
 		return text;
+	}
+	
+	@Transient
+	public AttributeGeometryStyle getAttributeGeometryStyle() {
+		return AttributeGeometryStyle.fromAttribute(this);
+	}
+	
+	@Transient
+	public void setAttributeGeometryStyle(AttributeGeometryStyle style) {
+		setRegex(style.getAttributeValue());
 	}
 }

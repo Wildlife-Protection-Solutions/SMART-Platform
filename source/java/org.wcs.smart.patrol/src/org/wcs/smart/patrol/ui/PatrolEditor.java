@@ -137,6 +137,16 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 	};
 	
+	private IPatrolEventListener wpModifiedListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(final int attributeChanged, Object source) {
+			if (attributeChanged == PatrolEventManager.WAYPOINT) {
+				if (mapPage != null) mapPage.renderMap();
+				if (presentationPage != null) presentationPage.renderMap();
+			}
+		}
+	};
+	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(final int attributeChanged, Object source) {
@@ -157,6 +167,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								public void run() {
 									summaryEditor.initValues();
 									createDayPages();
+									updateSummaryPage();
 									mapPage.refresh();
 								}});
 							return Status.OK_STATUS;
@@ -245,6 +256,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolDeleteListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, modifyListener);
+		PatrolEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, wpModifiedListener);
 
 		
 		addPageChangedListener(e->{
@@ -279,7 +291,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, modifyListener);
-
+		PatrolEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, wpModifiedListener);
+		
 		this.saveListener = null;
 		this.patrolDeleteListener = null;
 		super.dispose();
@@ -812,7 +825,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}
 		}				
 		PatrolEventManager.getInstance().patrolSaved(patrol, false);
-		
 	}
 	
 	

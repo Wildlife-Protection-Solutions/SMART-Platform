@@ -26,7 +26,6 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.QueryMetadataProvider;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
@@ -49,7 +48,7 @@ public enum ServerQueryMetadataProvider implements IMetadataProvider {
 	INSTANCE; 
 	
 	@Override
-	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geom, SmartConnection c)
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, SmartConnection c)
 			throws OdaException {
 		
 		if (query instanceof SummaryQuery){
@@ -72,7 +71,7 @@ public enum ServerQueryMetadataProvider implements IMetadataProvider {
 				throw new OdaException(ex);
 			}
 		}
-		return QueryMetadataProvider.INSTANCE.createMetadata(query, isAttachment, geom, c);
+		return QueryMetadataProvider.INSTANCE.createMetadata(query, isAttachment, c);
 	}
 
 }

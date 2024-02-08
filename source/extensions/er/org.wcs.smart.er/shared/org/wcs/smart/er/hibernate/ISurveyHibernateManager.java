@@ -116,7 +116,7 @@ public interface ISurveyHibernateManager {
 	 * @param session
 	 * @return the associated mission attribute list item or null
 	 */
-	public MissionAttributeListItem getMissionAttributeListItenByKey(String key, Session session);
+	public MissionAttributeListItem getMissionAttributeListItenByKey(String missionAttributeKeyId, String key, Session session);
 
 
 	/**

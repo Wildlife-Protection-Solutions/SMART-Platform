@@ -25,8 +25,6 @@ import java.sql.SQLException;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,7 +33,7 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.i2.query.IQueryColumn;
@@ -45,7 +43,9 @@ import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.CategoryQueryColumn;
+import org.wcs.smart.query.model.GeometryAttributeQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
@@ -188,44 +188,55 @@ public class QueryColumnUtils {
 		}
 
 		List<Tuple> attributes = attquery.list();
-		List<QueryColumn> attributeColumns = new ArrayList<QueryColumn>();
-		for (Tuple attribute : attributes) {
-			String keyid = (String) attribute.get(0);
-			
-			String formatstring = null;
-			AttributeType atype = (AttributeType) attribute.get(1);
-			if (atype == AttributeType.NUMERIC) {
-				formatstring = (String)attribute.get(2);
-			}
+		List<AttributeInfo> infos = new ArrayList<>();
+		
+		for (Tuple t : attributes) {
+			String keyid = (String) t.get(0);
+			Attribute.AttributeType atype = (Attribute.AttributeType) t.get(1);
+			String formatstring = (String)t.get(2);
 			String name = attribute2name.get(keyid);
-
-			attributeColumns.add(new AttributeQueryColumn(name, keyid, atype, formatstring) {
-				@Override
-				public Object getValue(IResultItem item) {
-					if (item instanceof ObservationQueryResultItem){
-						return ((ObservationQueryResultItem) item).getAttributeValue(keyid);
-					}
-					return null;
-				}
-				
-				@Override
-				public QueryColumn clone() {
-					return null;
-				}
-			});
+			
+			AttributeInfo ai = new AttributeInfo(name, keyid, atype, formatstring);
+			infos.add(ai);
 		}
-		sortByName(attributeColumns, l);
+		
+		infos.sort((a,b)->Collator.getInstance(l).compare(a.name, b.name));
+		
+		List<QueryColumn> attributeColumns = new ArrayList<QueryColumn>();
+		for (AttributeInfo attribute : infos) {
+			if (attribute.type.isGeometry()) {
+				attributeColumns.add(new GeometryAttributeQueryColumn(attribute.name, attribute.keyid, attribute.type, attribute.formatString));
+			}else {
+				attributeColumns.add(new AttributeQueryColumn(attribute.name, attribute.keyid, attribute.type, attribute.formatString) {
+					@Override
+					public Object getValue(IResultItem item) {
+						if (item instanceof ObservationQueryResultItem){
+							return ((ObservationQueryResultItem) item).getAttributeValue(attribute.keyid);
+						}
+						return null;
+					}
+					
+					@Override
+					public QueryColumn clone() {
+						return null;
+					}
+				});
+			}
+			
+			if (attribute.type.isGeometry()) {
+				attributeColumns.add(new AttributeQueryColumn(GeometryProperty.SOURCE.getColumnName(attribute.name, l), attribute.keyid, GeometryProperty.SOURCE, Attribute.AttributeType.TEXT));	
+				attributeColumns.add(new AttributeQueryColumn(GeometryProperty.PERIMETER.getColumnName(attribute.name, l), attribute.keyid, GeometryProperty.PERIMETER, Attribute.AttributeType.NUMERIC));
+				if (attribute.type == Attribute.AttributeType.POLYGON) {
+					attributeColumns.add(new AttributeQueryColumn(GeometryProperty.AREA.getColumnName(attribute.name, l), attribute.keyid, GeometryProperty.AREA, Attribute.AttributeType.NUMERIC));
+				}
+			}
+		}
 		keys.addAll(attributeColumns);
 		return keys;
 	}
 	
 	public static void sortByName(List<? extends QueryColumn> columns, Locale l){
-		Collections.sort(columns, new Comparator<QueryColumn>() {
-			@Override
-			public int compare(QueryColumn o1, QueryColumn o2) {
-				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
-			}
-		});
+		columns.sort((a,b)->Collator.getInstance(l).compare(a.getName(),  b.getName()));
 	}
 	
 	/**
@@ -319,5 +330,19 @@ public class QueryColumnUtils {
 			}
 		}
 		return sb.toString();
+	}
+	
+	static class AttributeInfo{
+		String name;
+		String keyid;
+		Attribute.AttributeType type;
+		String formatString;
+		
+		public AttributeInfo(String name, String keyid, Attribute.AttributeType type, String formatString) {
+			this.name = name;
+			this.keyid = keyid;
+			this.type = type;
+			this.formatString = formatString;
+		}
 	}
 }

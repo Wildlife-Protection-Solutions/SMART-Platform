@@ -59,55 +59,63 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int COLON = 28;
   /** RegularExpression Id. */
-  int NUMBER = 29;
+  int AREA = 29;
   /** RegularExpression Id. */
-  int FLOAT = 30;
+  int PERIMETER = 30;
   /** RegularExpression Id. */
-  int INTEGER = 31;
+  int NUMBER = 31;
   /** RegularExpression Id. */
-  int DIGIT = 32;
+  int FLOAT = 32;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 33;
+  int INTEGER = 33;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 34;
+  int DIGIT = 34;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 35;
+  int S_CONST_LITERAL = 35;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 36;
+  int CATEGORY_KEY = 36;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 37;
+  int ATT_STR_KEY = 37;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 38;
+  int ATT_VALUE_KEY = 38;
   /** RegularExpression Id. */
-  int ATT_MLIST_KEY = 39;
+  int ATT_BOOL_KEY = 39;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 40;
+  int ATT_LIST_KEY = 40;
   /** RegularExpression Id. */
-  int ATT_DATE_KEY = 41;
+  int ATT_MLIST_KEY = 41;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 42;
+  int ATT_TREE_KEY = 42;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 43;
+  int ATT_DATE_KEY = 43;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 44;
+  int ATT_GEOM_KEY = 44;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 45;
+  int CAT_ATT_STR_KEY = 45;
   /** RegularExpression Id. */
-  int CAT_ATT_MLIST_KEY = 46;
+  int CAT_ATT_VALUE_KEY = 46;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 47;
+  int CAT_ATT_BOOL_KEY = 47;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 48;
+  int CAT_ATT_LIST_KEY = 48;
   /** RegularExpression Id. */
-  int DATE_STRING = 49;
+  int CAT_ATT_MLIST_KEY = 49;
   /** RegularExpression Id. */
-  int DM_KEY = 50;
+  int CAT_ATT_TREE_KEY = 50;
   /** RegularExpression Id. */
-  int LETTER = 51;
+  int CAT_ATT_DATE_KEY = 51;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 52;
+  int CAT_ATT_GEOM_KEY = 52;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 53;
+  int DATE_STRING = 53;
+  /** RegularExpression Id. */
+  int DM_KEY = 54;
+  /** RegularExpression Id. */
+  int LETTER = 55;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 56;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 57;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -143,6 +151,8 @@ public interface ParserConstants {
     "\"equals\"",
     "\"between\"",
     "\":\"",
+    "\"area\"",
+    "\"perimeter\"",
     "<NUMBER>",
     "<FLOAT>",
     "<INTEGER>",
@@ -156,6 +166,7 @@ public interface ParserConstants {
     "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ATT_GEOM_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
     "<CAT_ATT_BOOL_KEY>",
@@ -163,6 +174,7 @@ public interface ParserConstants {
     "<CAT_ATT_MLIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
+    "<CAT_ATT_GEOM_KEY>",
     "<DATE_STRING>",
     "<DM_KEY>",
     "<LETTER>",

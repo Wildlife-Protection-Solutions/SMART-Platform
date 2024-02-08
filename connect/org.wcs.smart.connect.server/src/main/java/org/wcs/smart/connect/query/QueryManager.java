@@ -49,10 +49,6 @@ import org.wcs.smart.connect.query.engine.asset.AssetDeploymentSummaryEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetObservationEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetSummaryEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetWaypointEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
-import org.wcs.smart.connect.query.engine.entity.PsqlEntityWaypointEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErGridEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErMissionEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
@@ -68,10 +64,6 @@ import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
-import org.wcs.smart.entity.query.model.EntityGriddedQuery;
-import org.wcs.smart.entity.query.model.EntityObservationQuery;
-import org.wcs.smart.entity.query.model.EntitySummaryQuery;
-import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.MissionTrackDateField;
@@ -136,10 +128,10 @@ public enum QueryManager {
 			ObservationSummaryQuery.KEY,
 			ObservationGriddedQuery.KEY,
 
-			EntityObservationQuery.KEY,
-			EntityWaypointQuery.KEY,
-			EntitySummaryQuery.KEY,
-			EntityGriddedQuery.KEY,
+//			EntityObservationQuery.KEY,
+//			EntityWaypointQuery.KEY,
+//			EntitySummaryQuery.KEY,
+//			EntityGriddedQuery.KEY,
 
 			SurveyObservationQuery.KEY,
 			SurveyWaypointQuery.KEY,
@@ -172,10 +164,10 @@ public enum QueryManager {
 		queryClasses.add(ObservationSummaryQuery.class);
 		queryClasses.add(ObservationGriddedQuery.class);
 		
-		queryClasses.add(EntityObservationQuery.class);
-		queryClasses.add(EntityWaypointQuery.class);
-		queryClasses.add(EntitySummaryQuery.class);
-		queryClasses.add(EntityGriddedQuery.class);
+//		queryClasses.add(EntityObservationQuery.class);
+//		queryClasses.add(EntityWaypointQuery.class);
+//		queryClasses.add(EntitySummaryQuery.class);
+//		queryClasses.add(EntityGriddedQuery.class);
 		
 		queryClasses.add(SurveyObservationQuery.class);
 		queryClasses.add(SurveyWaypointQuery.class);
@@ -215,10 +207,10 @@ public enum QueryManager {
 		new PsqlObsWaypointEngine(),
 		new PsqlObsSummaryEngine(),
 		new PsqlObsGridEngine(),
-		new PsqlEntityGridEngine(),
-		new PsqlEntityObservationEngine(),
-		new PsqlEntitySummaryEngine(),
-		new PsqlEntityWaypointEngine(),
+//		new PsqlEntityGridEngine(),
+//		new PsqlEntityObservationEngine(),
+//		new PsqlEntitySummaryEngine(),
+//		new PsqlEntityWaypointEngine(),
 		new PsqlErGridEngine(),
 		new PsqlErMissionEngine(),
 		new PsqlErMissionTrackEngine(),
@@ -268,10 +260,10 @@ public enum QueryManager {
 		DATE_FILTERS.put(ObservationSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(ObservationWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(), WaypointLastModifiedDateField.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(EntityGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(EntityObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(EntitySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntityGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntityObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntitySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+//		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
 		
 //		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 //		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
@@ -427,131 +419,6 @@ public enum QueryManager {
 			}
 		}
 		return results;
-			
-			
-//			Constructor<? extends Query> cq = q.getDeclaredConstructor();
-//			cq.setAccessible(true);
-//			Query c = cq.newInstance();
-//			
-//			String type = q.getSimpleName();
-//			String typeKey = c.getTypeKey();
-//			
-//			
-//			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
-//
-//			String querypart  = null;
-//			
-//			
-////			Object entityExample = null;
-////			try {
-////				entityExample = q.getConstructor().newInstance();
-////			} catch (ReflectiveOperationException e) {
-////				throw new RuntimeException(e);
-////			}
-//			//session.unwrap(SessionImpl.class)
-//			
-//			//.getSessionFactory().getQueryEngine().getHqlTranslator().
-//			
-//			String tablename = ((AbstractEntityPersister)session.getSessionFactory().unwrap(SessionFactoryImplementor.class)
-//			.getSessionFactory().getRuntimeMetamodels()
-//			.getMappingMetamodel()
-//			.getEntityDescriptor(q).getEntityPersister()).getTableName();
-//			
-//			
-////			
-////			.getEntityDescriptor( guessEntityName( object ) );
-////			.getSessionFactory().getRuntimeMetamodels().getMappingMetamodel().getEntityDescriptor(type).
-////			getSubclassEntityPersist
-////			
-////			
-////			getFactory().getRuntimeMetamodels()
-////			.getMappingMetamodel()
-////			.getEntityDescriptor( entityName )
-////			
-////			String tablename = ((AbstractEntityPersister)(session.unwrap(SessionImpl.class)).getEntityPersister(q.getSimpleName(), entityExample)).getTableName();
-//			
-//			if (typeKey != null) {
-//				String icon = c.getIconName();				
-//				querypart = "SELECT q.uuid, q.id, q.shared, q.ca_uuid, q.folder_uuid, " //$NON-NLS-1$
-//						+ "c.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + tablename  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//					 	+ " as q JOIN smart.conservation_area c on c.uuid = q.ca_uuid LEFT JOIN smart.i18n_label l on l.element_uuid = q.uuid LEFT JOIN smart.language z on z.uuid = l.language_uuid and (z.isdefault = true or z.code in (:langs" + cnt + ")) " //$NON-NLS-1$
-//					 	+ "WHERE l.element_uuid = q.uuid "; //$NON-NLS-1$
-//			}else {
-//				//get query type from database
-//				querypart = "SELECT q.uuid, q.id, q.shared, q.ca_uuid, q.folder_uuid, " //$NON-NLS-1$
-//						+ "c.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + typeKey + ".png' FROM " + tablename  //$NON-NLS-1$ //$NON-NLS-2$
-//					 	+ " as q JOIN smart.conservation_area c on c.uuid = q.ca_uuid  LEFT JOIN smart.i18n_label l on l.element_uuid = q.uuid LEFT JOIN smart.language z on z.uuid = l.language_uuid and (z.isdefault = true or z.code in (:langs" + cnt + ")) " //$NON-NLS-1$
-//					 	+ "WHERE l.element_uuid = q.uuid "; //$NON-NLS-1$
-//			}
-//	
-//			//TODO:
-////			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-////			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-////			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
-////			translator.compile(Collections.EMPTY_MAP, false);
-////			String sql = translator.getSQLString();
-////			sql = sql.replaceFirst("\\?", ":langs"+ cnt); //$NON-NLS-1$ //$NON-NLS-2$
-//			params.put("langs" + cnt, langs); //$NON-NLS-1$
-//			cnt++;
-////			query += sql;
-//			query += querypart;
-//		}
-//		
-//		NativeQuery<?> nq = session.createNativeQuery(query);
-//		for (Entry<String, Object> param : params.entrySet()) {
-//			nq.setParameter(param.getKey(),  param.getValue());
-//		}
-//		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
-//		//required for uuid data types
-//	
-////		nq.addScalar("col_0_0_");// PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
-////		nq.addScalar("col_1_0_");  //$NON-NLS-1$
-////		nq.addScalar("col_2_0_"); //$NON-NLS-1$
-////		nq.addScalar("col_3_0_");// PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-////		nq.addScalar("col_4_0_");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-////		nq.addScalar("col_5_0_"); //$NON-NLS-1$
-////		nq.addScalar("col_6_0_"); //$NON-NLS-1$
-////		nq.addScalar("col_7_0_"); //$NON-NLS-1$
-////		nq.addScalar("col_8_0_"); //$NON-NLS-1$
-////		nq.addScalar("col_9_0_"); //$NON-NLS-1$
-////		nq.addScalar("col_10_0_"); //$NON-NLS-1$
-//		List<?> items = nq.list();
-//
-//		for (Object i : items) {
-//			Object[] data = (Object[])i;
-//			UUID uuid = (UUID) data[0];
-//			String id = (String)data[1];
-//			boolean isShared = (boolean)data[2];
-//			
-//			UUID cauuid = (UUID)data[3];
-//			UUID folderUuid = (UUID)data[4];
-//			String caid = (String)data[5];
-//			
-//			String value = (String)data[6];
-//			String code = (String)data[7];
-//			
-//			String type = (String)data[8];
-//			String typekey = (String)data[9];
-//			String icon = (String)data[10];
-//				
-//			if (isShared || includeMyQueries) {
-//				QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared, cauuid, folderUuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
-//					
-//				if (!query2names.containsKey(qp)) {
-//					query2names.put(qp, code);
-//				}else {
-//					String currentcode = query2names.get(qp);
-//					int cindex = langs.indexOf(currentcode);
-//					int nindex = langs.indexOf(code);
-//					if ((cindex == -1 && nindex >= 0) || (cindex != -1 && nindex > cindex)) {
-//						query2names.remove(qp);
-//						query2names.put(qp, code);
-//					}
-//				}
-//			}
-//		}
-//
-//		return new ArrayList<>(query2names.keySet());
 	}
 
 	public List<QueryProxy> getAdvancedIntelligenceQueries(Session session, Locale l) throws Exception{
@@ -611,99 +478,6 @@ public enum QueryManager {
 			}
 		}
 		return results;
-//		
-//		List<String> langs = new ArrayList<>();
-//		langs.add(l.getLanguage());
-//		if (!l.getCountry().isEmpty()) {
-//			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
-//			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
-//
-//		}
-//		
-//		HashMap<QueryProxy, String> query2names = new HashMap<>();
-//		String query = ""; //$NON-NLS-1$
-//		
-//		//hql doesn't support UNION
-//		//so we do some hql->sql conversion here and use
-//		//native queries instead.
-//		int cnt = 0;
-//		HashMap<String, Object> params = new HashMap<>();
-//				
-//		for (Class<? extends AbstractIntelQuery> q : getAdvIntelQueryTypes()){
-//			
-//			Constructor<? extends AbstractIntelQuery> cq = q.getDeclaredConstructor();
-//			cq.setAccessible(true);
-//			AbstractIntelQuery c = cq.newInstance();
-//			
-//			String type = q.getSimpleName();
-//			String typeKey = c.getTypeKey();
-//			String icon = c.getIconName();
-//			
-//			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
-//			
-//			String querypart = "SELECT q.uuid, q.conservationArea.uuid, " //$NON-NLS-1$
-//				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon 
-//				+ "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
-//			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
-//	
-//			//TODO:
-////			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
-////			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-////			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
-////			translator.compile(Collections.EMPTY_MAP, false);
-////			String sql = translator.getSQLString();
-////			sql = sql.replaceFirst("\\?", ":langs"+ cnt);  //$NON-NLS-1$//$NON-NLS-2$
-////			params.put("langs" + cnt, langs); //$NON-NLS-1$
-////			cnt++;
-////			query += sql;
-
-//		}
-//
-//		NativeQuery<?> nq = session.createNativeQuery(query);
-//		for (Entry<String, Object> param : params.entrySet()) {
-//			nq.setParameter(param.getKey(),  param.getValue());
-//		}
-//		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
-//		//required for uuid data types
-//		nq.addScalar("col_0_0_");//, PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
-//		nq.addScalar("col_1_0_");//, PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
-//		nq.addScalar("col_2_0_"); //$NON-NLS-1$
-//		nq.addScalar("col_3_0_"); //$NON-NLS-1$
-//		nq.addScalar("col_4_0_"); //$NON-NLS-1$
-//		nq.addScalar("col_5_0_"); //$NON-NLS-1$
-//		nq.addScalar("col_6_0_"); //$NON-NLS-1$
-//		nq.addScalar("col_7_0_"); //$NON-NLS-1$
-//		List<?> items = nq.list();
-//
-//		for (Object i : items) {
-//			Object[] data = (Object[])i;
-//			UUID uuid = (UUID) data[0];
-//			
-//			UUID cauuid = (UUID)data[1];
-//			String caid = (String)data[2];
-//			
-//			String value = (String)data[3];
-//			String code = (String)data[4];
-//			
-//			String type = (String)data[5];
-//			String typekey = (String)data[6];
-//			String icon = (String)data[7];
-//
-//			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon); //$NON-NLS-1$
-//					
-//			if (!query2names.containsKey(qp)) {
-//				query2names.put(qp, code);
-//			}else {
-//				String currentcode = query2names.get(qp);
-//				int cindex = langs.indexOf(currentcode);
-//				int nindex = langs.indexOf(code);
-//				if (cindex == -1 && nindex >= 0) query2names.put(qp, code);
-//				if (cindex != -1 && nindex > cindex) query2names.put(qp, code);
-//			}
-//		}
-//
-//		return new ArrayList<>(query2names.keySet());
 	}
 		
 	/**
@@ -856,7 +630,7 @@ public enum QueryManager {
 
 	public Attribute.AttributeType getAttributeType(Session session, String attributeKey, ConservationAreaFilter caFilter){
 		if (caFilter.getConservationAreaFilterIds().size() == 1){
-			org.hibernate.query.Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key", Attribute.class); //$NON-NLS-1$
+			org.hibernate.query.Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyId = :key", Attribute.class); //$NON-NLS-1$
 			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
 			q.setParameter("key", attributeKey); //$NON-NLS-1$
 			q.setCacheable(true);

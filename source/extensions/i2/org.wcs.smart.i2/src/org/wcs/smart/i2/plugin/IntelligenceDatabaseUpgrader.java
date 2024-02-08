@@ -104,20 +104,27 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV2toV3(session);
 			upgradeV3toV4(session);
 			upgradeV4toV5(session);
+			upgradeV5toV6(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
 			upgradeV1toV2(session);
 			upgradeV2toV3(session);
 			upgradeV3toV4(session);
 			upgradeV4toV5(session);
+			upgradeV5toV6(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_2)){
 			upgradeV2toV3(session);
 			upgradeV3toV4(session);
 			upgradeV4toV5(session);
+			upgradeV5toV6(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_3)){
 			upgradeV3toV4(session);
 			upgradeV4toV5(session);
+			upgradeV5toV6(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_4)){
 			upgradeV4toV5(session);
+			upgradeV5toV6(session);
+		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_5)){
+			upgradeV5toV6(session);
 		}
 	}
 	
@@ -603,6 +610,20 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 
 	}
 	
+	
+	private void upgradeV5toV6(Session session) {
+		String[] sql = new String[] {
+			"ALTER TABLE smart.i_observation_attribute add column geom BLOB", //$NON-NLS-1$
+			"ALTER TABLE smart.i_observation_attribute add column double_value_2 double", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.i_entity alter column created_by drop not null", //$NON-NLS-1$
+			"ALTER TABLE smart.i_record alter column created_by drop not null", //$NON-NLS-1$
+			"ALTER TABLE smart.i_attachment alter column created_by drop not null" //$NON-NLS-1$
+		};
+		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
+			
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_6, session);
+	}
 	
 	
 	@SuppressWarnings("nls")

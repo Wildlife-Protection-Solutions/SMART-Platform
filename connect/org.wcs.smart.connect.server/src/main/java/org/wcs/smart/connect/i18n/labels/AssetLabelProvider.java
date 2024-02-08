@@ -25,8 +25,13 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.wcs.smart.asset.IAssetLabelProvider;
+import org.wcs.smart.asset.data.importer.DuplicateFileWarning;
+import org.wcs.smart.asset.data.importer.FileProcessor;
+import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetWaypointSource;
+import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.connect.i18n.Messages;
 
 /**
@@ -74,6 +79,54 @@ public class AssetLabelProvider implements IAssetLabelProvider {
 		if (item == STATUSKEY_COL_NAME) return Messages.getString("AssetLabelProvider.StatusKeyColumnName", l); //$NON-NLS-1$
 		if (item == ASSET_TYPEKEY_COL_NAME) return Messages.getString("AssetLabelProvider.TypeKeyColumName", l); //$NON-NLS-1$
 		if (item == POSITION_COL_NAME) return Messages.getString("AssetLabelProvider.PositionColumnName", l); //$NON-NLS-1$
+		
+		
+		if (item instanceof FileProcessor.ErrorMessages) {
+			switch((FileProcessor.ErrorMessages)item) {
+				case ASSET_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning1", l);  //$NON-NLS-1$
+				case BOOLEAN_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning2", l);  //$NON-NLS-1$
+				case BOOLEAN_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning3", l);  //$NON-NLS-1$
+				case CATEGORY_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning4", l);  //$NON-NLS-1$
+				case DATE_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning5", l);  //$NON-NLS-1$
+				case DATE_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning6", l);  //$NON-NLS-1$
+				case LIST_ITEM_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning7", l);  //$NON-NLS-1$
+				case LIST_ITEM_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning8", l);  //$NON-NLS-1$
+				case METADATA_PARSE: return Messages.getString("AssetLabelProvider.FileProcessorWarning9", l);  //$NON-NLS-1$
+				case MULTIPLE_DEPLOYMENTS: return Messages.getString("AssetLabelProvider.FileProcessorWarning10", l);  //$NON-NLS-1$
+				case NUMBER_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning11", l);  //$NON-NLS-1$
+				case NUMBER_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning12", l);  //$NON-NLS-1$
+				case STATION_LOCATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning13", l);  //$NON-NLS-1$
+				case STATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.FileProcessorWarning14", l);  //$NON-NLS-1$
+				case STATION_OVERWRITE: return Messages.getString("AssetLabelProvider.FileProcessorWarning15", l);  //$NON-NLS-1$
+				case TREE_NODE_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning16", l);	//$NON-NLS-1$
+				case TREE_NODE_TAG_PARSE_ERROR: return Messages.getString("AssetLabelProvider.FileProcessorWarning17", l);  //$NON-NLS-1$
+			}
+		}
+		
+		if (item instanceof FileProxy.ErrorMessage) {
+			switch((FileProxy.ErrorMessage)item) {
+				case ASSET_NOT_FOUND: return Messages.getString("AssetLabelProvider.SensorNotFound", l);  //$NON-NLS-1$
+				case DATE_NOT_FOUND: return Messages.getString("AssetLabelProvider.DateNotFound", l);  //$NON-NLS-1$
+				case LOCATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.UnitLocationNotFound", l);  //$NON-NLS-1$
+				case POSITION_NOT_FOUND: return Messages.getString("AssetLabelProvider.PositionNotFound", l);  //$NON-NLS-1$
+				case STATION_NOT_FOUND: return Messages.getString("AssetLabelProvider.StationNotFound", l);  //$NON-NLS-1$
+				case NEW_STATION: return Messages.getString("AssetLabelProvider.NewStationOption", l);  //$NON-NLS-1$
+				case NEW_STATION_LOCATION: return Messages.getString("AssetLabelProvider.NewLocationOption", l);  //$NON-NLS-1$
+				
+			}
+		}
+		
+		if (item instanceof Asset.Status) {
+			switch((Asset.Status)item) {
+				case ACTIVE: return Messages.getString("AssetLabelProvider.Active", l);  //$NON-NLS-1$
+				case INACTIVE: return Messages.getString("AssetLabelProvider.Inactive", l);  //$NON-NLS-1$
+				case RETIRED: return Messages.getString("AssetLabelProvider.Retired", l);  //$NON-NLS-1$
+			}
+		}
+		
+		if (item == ExifMetadataField.TAG_FORMAT_1) return Messages.getString("AssetLabelProvider.Tag1", l);  //$NON-NLS-1$
+		if (item == ExifMetadataField.TAG_FORMAT_2) return Messages.getString("AssetLabelProvider.Tag2", l);  //$NON-NLS-1$
+		if (item.equals(DuplicateFileWarning.class)) return Messages.getString("AssetLabelProvider.DuplicateWarning", l);  //$NON-NLS-1$
 		
 		return null;
 	}

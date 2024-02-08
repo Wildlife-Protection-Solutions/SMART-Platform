@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
 import org.opengis.feature.FeatureVisitor;
@@ -57,12 +56,17 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
 			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
+			env.setToNull();
 			featureCount = 0;
 			fs.getFeatures().accepts(new FeatureVisitor() {
 				@Override
 				public void visit(Feature f) {
 					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+					if (env.isNull()) {
+						env.init(bb);
+					}else {
+						env.include(bb);
+					}
 					featureCount ++;
 				}
 			}, null);

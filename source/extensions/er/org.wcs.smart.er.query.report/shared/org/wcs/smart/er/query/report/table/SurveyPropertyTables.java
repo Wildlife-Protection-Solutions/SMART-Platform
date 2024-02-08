@@ -54,7 +54,7 @@ public class SurveyPropertyTables implements IDynamicSmartTables {
 		if (connection.getConservationAreas().size() == 1){
 			mgr = new CaSurveyHibernateManager(connection.getConservationAreas().iterator().next());
 		}else{
-			//TODO: NOT Currently Supported
+			//not currently supported
 			return tables;
 		}
 		Session s = connection.getSession();

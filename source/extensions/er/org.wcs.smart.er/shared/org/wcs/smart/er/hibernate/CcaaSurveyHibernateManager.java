@@ -40,10 +40,10 @@ import org.wcs.smart.er.model.SurveyDesign;
  *
  */
 public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
-
+	//This is currently not supported
+	
 	@Override
 	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s, SamplingUnit.State state) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -55,58 +55,49 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public List<SurveyDesignProxy> getSurveyDesignEditorInputs(Session s,
 			SurveyDesignFilter filter) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public List<Survey> getActiveSurveys(Session s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Set<GeometryType> getSamplingUnitTypes(SurveyDesign sd, Session s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public SurveyDesign getSurveyDesign(String key, Session session) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public MissionAttribute getMissionAttributeByKey(
 			String missionAttributeKeyId, Session session) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public MissionAttributeListItem getMissionAttributeListItenByKey(
+	public MissionAttributeListItem getMissionAttributeListItenByKey(String missionAttributeKeyId,
 			String key, Session session) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public SamplingUnit getSamplingUnitById(String missionTrackId,
 			Session session) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Survey getSurveyById(Session session, String id) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

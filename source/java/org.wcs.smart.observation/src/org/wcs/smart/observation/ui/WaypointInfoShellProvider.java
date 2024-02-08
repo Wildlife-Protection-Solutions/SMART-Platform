@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider.InfoPoint;
 import org.wcs.smart.ui.map.tool.IInfoToolShellProvider;
 
@@ -49,16 +50,24 @@ public class WaypointInfoShellProvider implements IInfoToolShellProvider {
 	@Override
 	public void showShell(int x, int y, InfoPoint point) {
 		List<Waypoint> wps = new ArrayList<>();
+		List<WaypointObservationAttribute> attributes = new ArrayList<>();
 		
 		for (Object pnt: point.getFeatures()) {
 			if (pnt instanceof Waypoint) {
 				wps.add((Waypoint)pnt);
+			}else if (pnt instanceof WaypointObservationAttribute) {
+				attributes.add((WaypointObservationAttribute)pnt);
 			}else {
 				//can adapt to waypoint
 			}
 		}
-		WaypointDetailsShell shell = new WaypointDetailsShell(parent, wps);
-		shell.open(mapComp.toDisplay(x, y));
+		if (!wps.isEmpty()) {
+			WaypointDetailsShell shell = new WaypointDetailsShell(parent, wps);
+			shell.open(mapComp.toDisplay(x, y));
+		}else if (!attributes.isEmpty()) {
+			ObservationAttributeDetailsShell shell = new ObservationAttributeDetailsShell(parent, attributes);
+			shell.open(mapComp.toDisplay(x,y));
+		}
 	}
 
 }

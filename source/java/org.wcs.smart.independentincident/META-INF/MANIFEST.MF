@@ -11,18 +11,21 @@ Require-Bundle: org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)";visibil
  org.eclipse.help;bundle-version="3.5.100",
  org.wcs.smart.report.birt.query;bundle-version="[8.0.0,9.0.0)",
  org.eclipse.datatools.connectivity.oda.design.ui,
- org.wcs.smart.patrol;bundle-version="[8.0.0,9.0.0)"
+ org.wcs.smart.patrol;bundle-version="[8.0.0,9.0.0)",
+ org.apache.xerces
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.event,
  org.wcs.smart.incident.json,
+ org.wcs.smart.incident.map,
  org.wcs.smart.incident.model,
  org.wcs.smart.incident.ui,
  org.wcs.smart.incident.ui.newwizard,
  org.wcs.smart.incident.xml,
  org.wcs.smart.incident.xml.model.v20,
  org.wcs.smart.incident.xml.model.v21,
- org.wcs.smart.incident.xml.model.v22
+ org.wcs.smart.incident.xml.model.v22,
+ org.wcs.smart.incident.xml.model.v23
 Automatic-Module-Name: org.wcs.smart.independentincident
 Bundle-ActivationPolicy: lazy
 Import-Package: org.wcs.smart.patrol.model

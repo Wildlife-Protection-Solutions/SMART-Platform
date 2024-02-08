@@ -69,10 +69,10 @@
          <attribute name="styleprovider" type="string" use="required">
             <annotation>
                <documentation>
-                  Provides the default style for the given query. Should return null for a query if it has no default style or the query is not supported by this extension point.
+                  Provides the default style for the given map layer. Should return null for a layer if it has no default style or the query is not supported by this extension point.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.report.birt.map.IBirtQueryStyleProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.report.birt.map.IBirtLayerStyleProvider"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -34,7 +34,6 @@ import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
@@ -86,15 +85,11 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
-		if (queryTypeKey.equals(AssetWaypointQuery.KEY) ||
-				queryTypeKey.equals(AssetObservationQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, WaypointQueryResultItem.GEOMCOLUMN_KEY);
-			return Collections.singletonList(def);
-		}else if (AssetSummaryQuery.isAssetSummary(queryTypeKey)){
+		if (AssetSummaryQuery.isAssetSummary(queryTypeKey)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, GeometrySummaryQueryResult.GEOMETRY_COLUMN_KEY);
 			return Collections.singletonList(def);
 		}
-		return null;
+		return super.getGeometryOptions(queryTypeKey);
 		
 	}
 

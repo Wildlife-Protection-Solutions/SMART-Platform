@@ -39,7 +39,10 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeGeometryStyle;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.i2.udig.DefaultVisibilityProperty;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.udig.IFilteringResource;
@@ -53,25 +56,28 @@ import org.wcs.smart.udig.IFilteringResource;
 public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetResource, IFilteringResource {
 	
 	private URL url = null;
-	private LocationLayerType type;
 	private Style cachedStyle = null;
+	private String typeName;
+	private String name;
 	
-	public IntelEntityGeoResource(IntelEntityService service, LocationLayerType type){
+	public IntelEntityGeoResource(IntelEntityService service, String typeName, String name){
 		this.service = service;
-		this.type = type;
+		this.typeName = typeName;
+		this.name = name;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + type.name(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
-		
 	}
 
+	
 	@Override
 	public boolean canFilter(){
-		return type == LocationLayerType.POINT || type == LocationLayerType.POLYGON || type == LocationLayerType.DM_OBS;
+		if (typeName.equals(LocationLayerType.ATTRIBUTE.name())) return false;
+		return true;
 	}
 	
 	/**
@@ -96,7 +102,7 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
-		return new IntelEntityGeoResourceInfo(this, monitor);
+		return new IntelEntityGeoResourceInfo(this, name, monitor);
 	}
 
 	/**
@@ -121,6 +127,7 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 	                || adaptee.isAssignableFrom(SimpleFeatureSource.class)
 	                || adaptee.isAssignableFrom(IWorkingSetResource.class)
 	                || adaptee.isAssignableFrom(Style.class)
+	                || adaptee.isAssignableFrom(DefaultVisibilityProperty.class)
 	                || super.canResolve(adaptee);
 	    }
 	  
@@ -140,11 +147,17 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
         if (adaptee.isAssignableFrom(IWorkingSetResource.class)){
         	return adaptee.cast( this );
         }
+        if (adaptee.isAssignableFrom(DefaultVisibilityProperty.class)) {
+        	if (IntelEntityDataSource.isGeometryAttribute(typeName) || IntelEntityDataSource.isObservationGeometryAttribute(typeName)) {
+        		return adaptee.cast(new DefaultVisibilityProperty(false));
+        	}
+        	return adaptee.cast(new DefaultVisibilityProperty());
+        }
       
         if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ){
         	 DataStore ds = ((IntelEntityService)service).getDataStore(monitor);
              if (ds != null) {
-                 FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(IntelEntityDataSource.generateName(type, ((IntelEntityService)service).getEntityUuid()));
+                 FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(typeName);
                  if (fs != null)
                      return adaptee.cast(fs);
              }else{
@@ -161,9 +174,25 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
         }
         if (adaptee.isAssignableFrom(Style.class)){
         	if (cachedStyle == null){
-        		cachedStyle = type.getDefaultLayerStyle();
+        		for (LocationLayerType ll : LocationLayerType.values()) {
+        			if (typeName.equals(ll.name())) {
+        				cachedStyle = ll.getDefaultLayerStyle();
+        				break;
+        			}
+        		}
+        		
         	}
         	if (cachedStyle != null) return adaptee.cast(cachedStyle);
+        	
+        	if (IntelEntityDataSource.isGeometryAttribute(typeName) || IntelEntityDataSource.isObservationGeometryAttribute(typeName)) {
+        		
+        		IntelEntityDataSource ds = ((IntelEntityService)service).getDataStore(monitor);
+        		Attribute a = ds.getAttribute(typeName);
+        		if (a.getType().isGeometry()) {
+        			return adaptee.cast(new AttributeGeometryStyle(a.getType(),a.getRegex()).toStyle());
+        		}
+
+        	}
         }
         return super.resolve(adaptee, monitor);
     }
@@ -177,5 +206,9 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 	@Override
 	public IntelWorkingSetCategory getResourceType() {
 		return IntelWorkingSetCategory.ENTITY;
+	}
+	
+	public String getTypeName() {
+		return this.typeName;
 	}
 }

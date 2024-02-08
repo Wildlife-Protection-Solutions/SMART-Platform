@@ -257,6 +257,15 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	}
 
 	@Transient
+	public CyberTrackerPropertiesProfileOption.Unit getUnits(){
+		return CyberTrackerPropertiesProfileOption.Unit.valueOf(getStringValue(ProfileOptionID.UNITS));
+	}
+	
+	public void setUnits(CyberTrackerPropertiesProfileOption.Unit unit){
+		getOption(ProfileOptionID.UNITS).setStringValue(unit.name());
+	}
+	
+	@Transient
 	public boolean getUseIncidentGroupUi() {
 		return getBooleanValue(ProfileOptionID.INCIDENT_GROUP_UI);
 	}
@@ -569,6 +578,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public Object getDefaultValue(ProfileOptionID option) {
 		switch(option) {
 		case INCIDENT_GROUP_UI: return false;
+		case UNITS: return CyberTrackerPropertiesProfileOption.Unit.METRIC.name();
 		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
 		case APP_NAME: return "SMART Mobile Application";  //$NON-NLS-1$
 		case AUTO_NEXT: return autoNext;

@@ -109,6 +109,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaGroupByDropItem_FiltersLabel;
 	public static String ConservationAreaGroupByDropItem_IncludedLabel;
 	public static String ConservationAreaGroupByDropItem_Name;
+	public static String DataModelQueryColumns_CategoryColumnHeader;
 	public static String DataModelTreeNode_DataModelFiltersLabel;
 	public static String DataModelTreeNode_DmGroupByLabel;
 	public static String DataModelTreeNode_DmValuesLabel;
@@ -150,6 +151,8 @@ public class Messages extends NLS {
 	public static String ExportQueryDefLocationPage_InvalidFolder;
 	public static String ExportQueryDefLocationPage_LoadingLbl;
 	public static String ExportQueryDefLocationPage_WizardTitle;
+	public static String ExportQueryGeometryColumnPage_GeometryLabel;
+	public static String ExportQueryGeometryColumnPage_PageMessage;
 	public static String ExportQueryListPage_DirDialogMessage;
 	public static String ExportQueryListPage_DirDialogText;
 	public static String ExportQueryListPage_PageMessage;
@@ -234,6 +237,10 @@ public class Messages extends NLS {
 	public static String GridQueryColumn_TileXIdColumnName;
 	public static String GridQueryColumn_TileYIdColumnName;
 	public static String GridQueryColumn_ValueColumnName;
+	public static String GridQueryColumnLabelProvider_AreaLabel;
+	public static String GridQueryColumnLabelProvider_PerimeterLabel;
+	public static String GridQueryColumnLabelProvider_SourceLable;
+	public static String GridQueryColumnLabelProvider_WaypointGeometryColumn;
 	public static String GroupByFilterDialog_DeSelectAllLabel;
 	public static String GroupByFilterDialog_DialogMessage;
 	public static String GroupByFilterDialog_DialogTitle;
@@ -326,6 +333,8 @@ public class Messages extends NLS {
 	public static String QueryCaDeleteHandler_DeleteProgressMessage;
 	public static String QueryCaDeleteHandler_Progress_DeletingQueryFolders;
 	public static String QueryDataModelItemListener_ConvertError;
+	public static String QueryDataSourceFactory_Description;
+	public static String QueryDataSourceFactory_Name;
 	public static String QueryDateFilterComposite_AndLabel;
 	public static String QueryDateFilterComposite_BetweenLabel;
 	public static String QueryDateFilterComposite_BetweenLabel2;
@@ -381,6 +390,8 @@ public class Messages extends NLS {
 	public static String QueryListView_LoadQueryJobName;
 	public static String QueryListViewContentProvider_LoadingLabel;
 	public static String QueryPlugIn_Error_DialogTitle;
+	public static String QueryPropertiesDialog_ClearButton;
+	public static String QueryPropertiesDialog_ClearTooltip;
 	public static String QueryPropertiesDialog_CreatorLabel;
 	public static String QueryPropertiesDialog_DialogMessage;
 	public static String QueryPropertiesDialog_DialogTitle;
@@ -388,6 +399,14 @@ public class Messages extends NLS {
 	public static String QueryPropertiesDialog_TranslateLink;
 	public static String QueryTemplateCloner_ProgressCopyFolders;
 	public static String QueryTemplateCloner_ProgressQuery;
+	public static String QueryServiceInfo_Description;
+	public static String QueryServiceInfo_Keyword1;
+	public static String QueryServiceInfo_Keyword2;
+	public static String QueryServiceInfo_Keyword3;
+	public static String QueryServiceInfo_Keyword4;
+	public static String QueryServiceInfo_Keyword5;
+	public static String QueryServiceInfo_Keyword6;
+	public static String QueryServiceInfo_Title;			
 	public static String QueryTypeDialog_CreateButton;
 	public static String QueryTypeDialog_DialogText;
 	public static String QueryTypeDialog_Message;
@@ -458,6 +477,7 @@ public class Messages extends NLS {
 	public static String GriddedTableContent_NumberofRecordsLabel;
 	public static String GriddedTableContent_QueryProperties;
 	public static String GriddedTableContent_RunQueryLink;
+	public static String GriddedTableContent_runquerytooltip;
 	public static String ObservationQuerySummaryInfo_NAValueLabel;
 	public static String ObserverDropItem_loadingEmployeeJobName;
 	public static String ObserverDropItem_ObserverLabel;
@@ -474,6 +494,7 @@ public class Messages extends NLS {
 	public static String QueryEditorTableContent_NumberOfRecordsLabel1;
 	public static String QueryEditorTableContent_QueryPropertiesLable;
 	public static String QueryEditorTableContent_RunQueryLink;
+	public static String QueryEditorTableContent_runquerytooltip;
 	public static String QueryExecutor_QueryEngineNotFound;
 	public static String QueryLazyResultsContentProvider_Loading;
 	public static String QueryLazyResultsContentProvider_LoadJob_Title;
@@ -548,12 +569,14 @@ public class Messages extends NLS {
 	public static String SummaryEditor_PropertiesLabel;
 	public static String SummaryEditor_QueryError;
 	public static String SummaryEditor_RunQueryJobName;
+	public static String SummaryEditor_runquerytooltip;
 	public static String SummaryResultsArea_RunSummaryLink;
 	public static String WaypointQuerySummaryInfo_NumberOfIncidentLabel;
 	public static String WaypointQuerySummaryInfo_UnknownNumberOfIncidents;
 	public static String QueryPropertiesDialog_ColumnsLabel;
 	public static String QueryPropertiesDialog_DeSelectAllLabel;
 	public static String QueryPropertiesDialog_SelectAllLabel;
+	public static String QueryPropertiesDialog_StyleLabel;
 	public static String QueryPropertiesDialog_SystemIdLabel;
 	
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
@@ -572,6 +595,7 @@ public class Messages extends NLS {
 	public static String ListHelpWizardPage_PageTitle;
 	public static String ListItem_Inactive;
 	public static String ShapeQueryExporter_ExporterName;
+	public static String ShapeQueryExporter_GeometryColumnRequired;
 	public static String ShowInTableInfoProvider_Label;
 	public static String SimpleQueryExporter_Error_ExportFailed;
 	public static String SimpleQueryExporter_Error_QueryNotRun;

@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
@@ -653,6 +654,18 @@ public class DropItemFactory {
 			
 			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart, attribute.getKeyId(), canEdit());
 			item.setInitialValue(treeNode);
+			return Collections.singletonList(item);
+		}else if (filter.getAttributeType().isGeometry()) {			
+			AttributeGeometryDropItem item = null;
+			if (category == null) {
+				item = new AttributeGeometryDropItem(attribute);					
+			}else {
+				CategoryAttribute ca = new CategoryAttribute();
+				ca.setAttribute(attribute);
+				ca.setCategory(category);
+				item = new AttributeGeometryDropItem(ca);
+			}
+			item.setData(filter.getGeometryProperty(), filter.getOperator(), filter.getNumberValue());
 			return Collections.singletonList(item);
 		}
 		return Collections.emptyList();

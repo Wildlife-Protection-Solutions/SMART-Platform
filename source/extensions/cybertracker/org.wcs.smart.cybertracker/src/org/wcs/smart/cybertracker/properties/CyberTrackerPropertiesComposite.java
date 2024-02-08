@@ -170,6 +170,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private CTabFolder tabFolder;
 	
 	private ComboViewer cmbSizes;
+	private ComboViewer cmbUnits;
 	private Text txtWidth, txtHeight;
 	private ControlDecoration cdImageWidth, cdImageHeight;
 	private Button btnOpResize;
@@ -403,6 +404,26 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 		});
 		controls.add(btnTestTime);
+		
+		
+		Label lblUnits= new Label(generalContainer, SWT.NONE);
+		lblUnits.setText(Messages.CyberTrackerPropertiesComposite_UnitOption);
+		lblUnits.setToolTipText(Messages.CyberTrackerPropertiesComposite_UnitOptionTooltip);
+
+		cmbUnits = new ComboViewer(generalContainer, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.SINGLE);
+		cmbUnits.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				switch ((CyberTrackerPropertiesProfileOption.Unit)element) {
+				case IMPERIAL: return Messages.CyberTrackerPropertiesComposite_ImperialUnits;
+				case METRIC: return Messages.CyberTrackerPropertiesComposite_MeticUnits;
+				}
+				return super.getText(element);
+			}
+		});
+		cmbUnits.setContentProvider(ArrayContentProvider.getInstance());
+		cmbUnits.setInput(CyberTrackerPropertiesProfileOption.Unit.values());
+		cmbUnits.addSelectionChangedListener(e->changesMade());
+		controls.add(cmbUnits.getControl());
 
 		llGeneral = SmartUiUtils.createSubHeaderLabel(gpsContainer, Messages.CyberTrackerPropertiesComposite_GPSSettingsHeader);
 		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -1335,6 +1356,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnShowEdit.setSelection(ctProperties.isShowEdit());
 		btnShowGPS.setSelection(ctProperties.isShowGPS());
 		btnKioskMode.setSelection(ctProperties.isKioskMode());
+		cmbUnits.setSelection(new StructuredSelection(ctProperties.getUnits()));
 		btnUseIncidentGroup.setSelection(ctProperties.getUseIncidentGroupUi());
 		btnSimpleCamera.setSelection(ctProperties.isSimpleCamera());
 		btnCanPause.setSelection(ctProperties.isCanPause());
@@ -1415,6 +1437,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		if (!validate()) {
 			return false;
 		}
+		ctProperties.setUnits((CyberTrackerPropertiesProfileOption.Unit)cmbUnits.getStructuredSelection().getFirstElement());
 		ctProperties.setAutoNext(btnAutoNext.getSelection());
 		ctProperties.setUserIncidentGroupUi(btnUseIncidentGroup.getSelection());
 		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());

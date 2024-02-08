@@ -65,6 +65,10 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class CellEditorFactory {
 	
+	public static GeometryAttributeDialogCellEditor newGeometryCellEditor(Composite parent, Attribute.AttributeType type) {
+		return new GeometryAttributeDialogCellEditor(parent, type);
+	}
+	
 	public static DoubleCellEditor newDoubleCellEditor(Composite parent, boolean canNull) {
 		return new DoubleCellEditor(parent, canNull);
 	}

@@ -41,6 +41,9 @@ public interface IIntelligenceLabelProvider extends ISharedLabelProvider{
 	
 	public static final Object INSUFFICIENT_PRIVILEGES_LABEL = new Object();
 	
+	public static final Object SRC_PROFILES = new Object();
+	public static final Object SRC_WPS = new Object();
+	
 	public String getDataSourceProductName(String dataSetType, Locale l);
 	
 	/*

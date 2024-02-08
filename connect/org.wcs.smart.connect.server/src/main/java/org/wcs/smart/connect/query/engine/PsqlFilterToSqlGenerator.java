@@ -48,7 +48,6 @@ import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
-import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
@@ -196,8 +195,8 @@ public enum PsqlFilterToSqlGenerator {
 				//observation and entity
 				return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 			}
-		}else if (filter instanceof EntityAttributeFilter){
-			return asSql((EntityAttributeFilter)filter, engine);
+//		}else if (filter instanceof EntityAttributeFilter){
+//			return asSql((EntityAttributeFilter)filter, engine);
 		}else if (filter instanceof WaypointSourceFilter){
 			return asSql((WaypointSourceFilter)filter, engine);
 		}else if (filter instanceof WaypointCmFilter){
@@ -408,6 +407,9 @@ public enum PsqlFilterToSqlGenerator {
 			String p1 = engine.addParameterValue(filter.getValue() + "%");   //$NON-NLS-1$
 			return "( qa." + filter.getAttributeKey() + " like " + p1 + " ) ";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
+		}else if (filter.getAttributeType().isGeometry()){
+			return " (qa.\"" + filter.getAttributeKey() + "_" + filter.getGeometryProperty().name() + "\" " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -517,7 +519,6 @@ public enum PsqlFilterToSqlGenerator {
 				field = "datetime"; //$NON-NLS-1$
 			}
 		}else if (filter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE){
-			//TODO: test this
 			table = engine.tablePrefix(Waypoint.class);
 			field = "last_modified"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
@@ -917,49 +918,49 @@ public enum PsqlFilterToSqlGenerator {
 		return sb.toString();
 	}
 	
-	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
-		
-		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
-	
-		if (filter.getAttributeType() == AttributeType.BOOLEAN){
-			return " (" + tableName + ".value  > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
-		}else if (filter.getAttributeType() == AttributeType.NUMERIC){
-			String p1 = engine.addParameterValue((Double)filter.getValue());
-			return " ( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		}else if (filter.getAttributeType() == AttributeType.TEXT){
-			String queryStr = ""; //$NON-NLS-1$
-			String val = (String)filter.getValue();
-			if (filter.getOperator() == Operator.STR_CONTAINS || 
-					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				String p1 = engine.addParameterValue(val);
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
-			return queryStr;
-		}else if (filter.getAttributeType() == AttributeType.DATE){
-			String date1 = (String) filter.getValue();
-			String date2 = (String) filter.getValue2();
-			String p1 = engine.addParameterValue(date1);
-			String p2 = engine.addParameterValue(date2);
-			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
-		}else if (filter.getAttributeType() == AttributeType.LIST ){
-			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
-				//any option
-				return "( " + tableName + ".value is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
-			}else{
-				String p1 = engine.addParameterValue((String)filter.getValue());
-				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
-		}else if (filter.getAttributeType() == AttributeType.TREE){
-			String p1 = engine.addParameterValue((String)filter.getValue() + "%"); //$NON-NLS-1$
-			return "( " + tableName + ".value like " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-		}
-		return "";  //$NON-NLS-1$
-	}
+//	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
+//		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+//		if (t != null) return t.tablename + "." + t.primarykey + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+//		
+//		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
+//	
+//		if (filter.getAttributeType() == AttributeType.BOOLEAN){
+//			return " (" + tableName + ".value  > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
+//		}else if (filter.getAttributeType() == AttributeType.NUMERIC){
+//			String p1 = engine.addParameterValue((Double)filter.getValue());
+//			return " ( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//		}else if (filter.getAttributeType() == AttributeType.TEXT){
+//			String queryStr = ""; //$NON-NLS-1$
+//			String val = (String)filter.getValue();
+//			if (filter.getOperator() == Operator.STR_CONTAINS || 
+//					filter.getOperator() == Operator.STR_NOTCONTAINS){
+//				String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+//				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//			}else if (filter.getOperator() == Operator.STR_EQUALS){
+//				String p1 = engine.addParameterValue(val);
+//				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//			}
+//			return queryStr;
+//		}else if (filter.getAttributeType() == AttributeType.DATE){
+//			String date1 = (String) filter.getValue();
+//			String date2 = (String) filter.getValue2();
+//			String p1 = engine.addParameterValue(date1);
+//			String p2 = engine.addParameterValue(date2);
+//			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+//		}else if (filter.getAttributeType() == AttributeType.LIST ){
+//			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
+//				//any option
+//				return "( " + tableName + ".value is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
+//			}else{
+//				String p1 = engine.addParameterValue((String)filter.getValue());
+//				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//			}
+//		}else if (filter.getAttributeType() == AttributeType.TREE){
+//			String p1 = engine.addParameterValue((String)filter.getValue() + "%"); //$NON-NLS-1$
+//			return "( " + tableName + ".value like " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+//		}
+//		return "";  //$NON-NLS-1$
+//	}
 	/*
 	 * Track type filter
 	 */

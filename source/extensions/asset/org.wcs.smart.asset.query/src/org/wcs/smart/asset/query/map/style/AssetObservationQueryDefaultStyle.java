@@ -22,18 +22,14 @@
 package org.wcs.smart.asset.query.map.style;
 
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class AssetObservationQueryDefaultStyle implements IMapLayerDefaultStyle {
 
-	public static final String KEY = "org.wcs.smart.asset.query.map.observation"; //$NON-NLS-1$
-	
-	public AssetObservationQueryDefaultStyle() {
-	}
-
 	@Override
 	public String getKey() {
-		return KEY;
+		return AssetObservationQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

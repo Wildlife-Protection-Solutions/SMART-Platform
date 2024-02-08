@@ -408,9 +408,13 @@ public class DataModel extends SimpleDataModel {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
 		try {
 			for (Attribute att : attributes) {
-				if (att.getIcon() != null && att.getIcon().getUuid() == null) session.persist(att.getIcon());
+				if (att.getIcon() != null && att.getIcon().getUuid() == null) {
+					session.persist(att.getIcon());
+				}
 				if (att.getAttributeList() != null) att.getAttributeList().forEach(e->{
-					if (e.getIcon() != null && e.getIcon().getUuid() == null) session.persist(e.getIcon());
+					if (e.getIcon() != null && e.getIcon().getUuid() == null) {
+						session.persist(e.getIcon());
+					}
 				});
 				
 				if (att.getTree() != null) {
@@ -424,15 +428,14 @@ public class DataModel extends SimpleDataModel {
 				progress.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.persist(att);
 				session.flush();
-				session.clear();
 				progress.worked(1);
 			}
+			session.flush();
 
 			processCategories(this, (node)->{
 				if (node.getIcon() != null && node.getIcon().getUuid() == null) {
 					node.getIcon().setConservationArea(node.getConservationArea());
 					HibernateManager.saveOrMerge(session,  node.getIcon());
-					session.flush();
 				}
 			});
 			session.flush();
@@ -441,11 +444,10 @@ public class DataModel extends SimpleDataModel {
 				progress.subTask(Messages.DataModel_Progress_SaveCategory + c.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.persist(c);
 				session.flush();
-				session.clear();
 				progress.worked(1);
 			}
-			
 			DataModelManager.INSTANCE.updateLastModified(session);
+			session.clear();
 			
 			session.getTransaction().commit();
 		} catch (HibernateException ex) {
@@ -514,20 +516,16 @@ public class DataModel extends SimpleDataModel {
 	 * @return the image associated with a given attribute type
 	 */
 	public static Image getAttributeImage(AttributeType type){
-		if (type == Attribute.AttributeType.BOOLEAN){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
-		}else if (type == Attribute.AttributeType.TEXT){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
-		}else if (type == Attribute.AttributeType.LIST){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
-		}else if (type == Attribute.AttributeType.MLIST){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_MULTI_LIST_ICON);
-		}else if (type == Attribute.AttributeType.NUMERIC){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
-		}else if (type == Attribute.AttributeType.TREE){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
-		}else if (type == Attribute.AttributeType.DATE){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+		switch(type) {
+		case BOOLEAN:return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
+		case DATE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+		case LINE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LINE_ICON);
+		case LIST: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
+		case MLIST: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_MULTI_LIST_ICON);
+		case NUMERIC: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
+		case POLYGON: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_POLYGON_ICON);
+		case TEXT: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
+		case TREE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
 		}
 		return null;
 	}

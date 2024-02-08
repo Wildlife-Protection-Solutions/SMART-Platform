@@ -47,7 +47,7 @@ public class SamplingUnitAttributeFilterCollectorVisitor implements IFilterVisit
 	public void visit(IFilter filter) {
 		if (filter instanceof SamplingUnitAttributeFilter){
 			SamplingUnitAttributeFilter f = (SamplingUnitAttributeFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getSamplingUnitAttributeKey(), f.getAttributeType());
+			AttributeInfo in = new AttributeInfo(f.getSamplingUnitAttributeKey(), f.getAttributeType(), null);
 			if (!filters.contains(in)){
 				filters.add(in);
 			}

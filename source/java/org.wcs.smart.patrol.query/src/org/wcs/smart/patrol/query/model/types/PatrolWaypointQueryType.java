@@ -35,9 +35,6 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
-import org.wcs.smart.patrol.query.map.style.PatrolWaypointQueryDefaultStyle;
-import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
@@ -52,6 +49,7 @@ import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -65,7 +63,7 @@ public class PatrolWaypointQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, PatrolWaypointQueryDefaultStyle.KEY);
+		styleMappings.put(WaypointGeometryQueryColumn.KEY, PatrolWaypointQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	private static IQueryDropItemFactory dropItemFactory = null;
@@ -237,7 +235,7 @@ public class PatrolWaypointQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider){
-		return new QueryService((SimpleQuery) query, prjProvider);
+		return new org.wcs.smart.query.map.QueryService((SimpleQuery) query, prjProvider);
 	}
 	
 	/**

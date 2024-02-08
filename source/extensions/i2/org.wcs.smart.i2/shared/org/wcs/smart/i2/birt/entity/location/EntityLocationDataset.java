@@ -47,7 +47,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
 /**
- * Entity locations dataset
+ * Entity locations dataset. This dataset returns all location geometries and waypoint geometrys 
+ * linked to the entity.
  * 
  * @author Emily
  *

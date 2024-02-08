@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -77,6 +78,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
@@ -106,6 +109,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
+	private List<IGeoResource> dmAttributeGeoResources = new ArrayList<>();
+	
 	private Job addLayerJob = new Job(Messages.MissionMapPage_AddLayersJob_Title) {
 		
 		@SuppressWarnings("unchecked")
@@ -117,6 +122,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 
 			
 			try {
+				
+				
 				List<IGeoResource> allLayers = new ArrayList<IGeoResource>();
 				List<IGeoResource> tmp = (List<IGeoResource>) suService.resources(monitor);
 				for (IGeoResource r : tmp){
@@ -130,10 +137,30 @@ public class MissionMapPage extends SmartMapEditorPart {
 				}
 				
 				List<IGeoResource> sortedLayers = new ArrayList<>();
-				List<? extends IGeoResource> layers = missionService.resources(monitor);
-	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONTRACK_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) sortedLayers.add(l);
+	    		Map<String, IGeoResource> toAdd = new HashMap<>();
+	    		List<? extends IGeoResource> layers = missionService.resources(monitor);
+	    		for (IGeoResource l : layers) {
+	    			String typeName = ((MissionGeoResource)l).getType();
+	    			
+	    			if (MissionDataSource.isGeometryAttribute(typeName)) {
+	    				dmAttributeGeoResources.add(l);
+	    			}
+	    			toAdd.put(  ((MissionGeoResource)l).getType(), l );
+	    		}
+	    			
+	    		String[] orderedLayers = new String[] {
+	    				MissionDataSource.MISSIONTRACK_TYPE, 
+	    				MissionDataSource.MISSIONRAWWAYPOINT_TYPE, 
+	    				MissionDataSource.MISSIONWAYPOINT_TYPE
+	    		};
+	    		for (String name : orderedLayers) {
+	    			sortedLayers.add(toAdd.get(name));
+	    			toAdd.remove(name);
+	    		}
+	    		List<IGeoResource> othersorted = new ArrayList<>();
+	    		othersorted.addAll(toAdd.values());
+	    		othersorted.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
+	    		sortedLayers.addAll(0,othersorted);
 	    		
 				allLayers.addAll(sortedLayers);
 				
@@ -160,7 +187,6 @@ public class MissionMapPage extends SmartMapEditorPart {
 			    					MissionFeatureSource fs = l.getGeoResource().resolve(MissionFeatureSource.class, monitor);
 			    					if (fs == null) continue;
 			    					
-			    					l.setName(fs.getLayerName());
 			    					l.setVisible(fs.getDefaultVisibility());
 			    					l.eNotify(new ENotificationImpl(
 			    							(InternalEObject) l, Notification.SET,
@@ -483,9 +509,24 @@ public class MissionMapPage extends SmartMapEditorPart {
 							}
 						}
 						
-						if (waypoints.isEmpty()) return null;
-						Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
-						return new InfoPoint(vm.worldToPixel(px), waypoints, null);	
+						if (!waypoints.isEmpty()) {
+							Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+							return new InfoPoint(vm.worldToPixel(px), waypoints, null);
+						}
+						
+						//search observation attributes
+					
+						Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, dmAttributeGeoResources.toArray(new IGeoResource[dmAttributeGeoResources.size()]));
+						List<WaypointObservationAttribute> matched = (List<WaypointObservationAttribute>) found[0];
+						Coordinate c = (Coordinate) found[1];
+						
+						if (!matched.isEmpty()) {						
+							Coordinate px = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, vm.getCRS());
+							return new InfoPoint(vm.worldToPixel(px), matched, null);
+						}
+						
+						return null;
+						
 					}catch (Exception ex) {
 						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);					
 					}

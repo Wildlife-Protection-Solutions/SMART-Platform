@@ -955,6 +955,8 @@ public class ErDataGeneratorView {
 		case LIST:
 		case MLIST:
 		case TREE:
+		case POLYGON:
+		case LINE:
 			v.setSelection(new StructuredSelection(ObservationConfiguration.Type.RANDOM));	
 			break;
 		case DATE:

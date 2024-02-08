@@ -50,7 +50,8 @@ public class AssetWaypointQuery extends WaypointQuery{
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "assetwaypoint"; //$NON-NLS-1$
-	
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.asset.query.map.waypoint"; //$NON-NLS-1$
+
 	/**
 	 * 
 	 * @see java.lang.Object#clone()

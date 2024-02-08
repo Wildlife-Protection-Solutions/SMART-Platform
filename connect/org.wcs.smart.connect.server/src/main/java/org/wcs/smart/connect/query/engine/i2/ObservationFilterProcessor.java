@@ -41,6 +41,7 @@ import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.filter.AttributeFilter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -398,6 +399,15 @@ public class ObservationFilterProcessor {
 				String tree1 = filter.getKeyValue() + "%"; //$NON-NLS-1$
 				params.put("tree1", tree1); //$NON-NLS-1$
 				sql.append( " ( ta.hkey like :tree1  ) "); //$NON-NLS-1$
+				break;
+			case POLYGON:
+			case LINE:
+				String field = "double_value"; //$NON-NLS-1$
+				if (filter.getGeometryProperty() ==  AttributeFilter.GeometryProperty.AREA) {
+					field = "double_value_2"; //$NON-NLS-1$
+				}
+				sql.append(" ia." + field + " " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				params.put("value", filter.getNumberValue()); //$NON-NLS-1$
 				break;
 			default:
 				break;

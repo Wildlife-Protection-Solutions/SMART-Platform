@@ -331,6 +331,10 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			return Time.valueOf((LocalTime)lastRowItem);
 		}else if (lastRowItem instanceof Timestamp) {
 			return new Time(((Timestamp)lastRowItem).getTime());
+		}else if (lastRowItem instanceof LocalDateTime) {
+			return Time.valueOf( ((LocalDateTime)lastRowItem).toLocalTime() );
+		}else if (lastRowItem == null) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -430,7 +434,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getObject(int)
 	 */
 	public Object getObject(int index) throws OdaException {
-		return getCurrentItem(index);
+		lastRowItem = getCurrentItem(index);
+		return lastRowItem;
 	}
 
 	/**

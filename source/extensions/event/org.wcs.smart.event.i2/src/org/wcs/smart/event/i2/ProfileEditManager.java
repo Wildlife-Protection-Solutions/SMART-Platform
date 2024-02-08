@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.event.i2.entity.CreateEntityActionType;
 import org.wcs.smart.event.i2.entity.EntityMapping;
 import org.wcs.smart.event.i2.entity.EntityTypeParameter;
 import org.wcs.smart.event.i2.entity.MappingParameter;
@@ -62,7 +61,7 @@ public class ProfileEditManager implements IEditValidator {
 		
 		List<EAction> actions = QueryFactory.buildQuery(session, EAction.class, 
 				new Object[] {"conservationArea", profile.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"actionTypeKey", CreateRecordActionType.KEY}).list(); //$NON-NLS-1$
+				new Object[] {"actionTypeKey", CreateRecordActionTypeExecutor.KEY}).list(); //$NON-NLS-1$
 		
 		for(EAction a : actions) {
 			EActionParameterValue value = a.findParameter(ProfileParameter.INSTANCE.getKey());
@@ -88,7 +87,7 @@ public class ProfileEditManager implements IEditValidator {
 		
 		actions = QueryFactory.buildQuery(session, EAction.class, 
 				new Object[] {"conservationArea", profile.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"actionTypeKey", CreateEntityActionType.KEY}).list(); //$NON-NLS-1$
+				new Object[] {"actionTypeKey", CreateEntityActionTypeExecutor.KEY}).list(); //$NON-NLS-1$
 		
 		for(EAction a : actions) {
 			EActionParameterValue value = a.findParameter(ProfileParameter.INSTANCE.getKey());
@@ -120,7 +119,7 @@ public class ProfileEditManager implements IEditValidator {
 		
 		List<EAction> actions = QueryFactory.buildQuery(session, EAction.class, 
 				new Object[] {"conservationArea", source.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"actionTypeKey", CreateRecordActionType.KEY}).list(); //$NON-NLS-1$
+				new Object[] {"actionTypeKey", CreateRecordActionTypeExecutor.KEY}).list(); //$NON-NLS-1$
 		
 		for(EAction a : actions) {
 			EActionParameterValue value = a.findParameter(SourceParameter.INSTANCE.getKey());
@@ -149,7 +148,7 @@ public class ProfileEditManager implements IEditValidator {
 		
 		List<EAction> actions = QueryFactory.buildQuery(session, EAction.class, 
 				new Object[] {"conservationArea", entityType.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"actionTypeKey", CreateEntityActionType.KEY}).list(); //$NON-NLS-1$
+				new Object[] {"actionTypeKey", CreateEntityActionTypeExecutor.KEY}).list(); //$NON-NLS-1$
 		
 		for(EAction a : actions) {
 			EActionParameterValue value = a.findParameter(EntityTypeParameter.INSTANCE.getKey());

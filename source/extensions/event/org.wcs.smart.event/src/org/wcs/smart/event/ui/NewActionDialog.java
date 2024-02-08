@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
-import org.wcs.smart.event.ActionTypeManager;
 import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.internal.Messages;
@@ -154,7 +153,7 @@ public class NewActionDialog extends SmartStyledTitleDialog{
 		cmbActionType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbActionType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbActionType.setLabelProvider(new AssetTypeLabelProvider());
-		List<IActionType> types = ActionTypeManager.INSTANCE.getActionTypes();
+		List<IActionType> types = ActionTypeManagerInternal.INSTANCE.getActionTypes();
 		cmbActionType.setInput(types);
 		cmbActionType.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 

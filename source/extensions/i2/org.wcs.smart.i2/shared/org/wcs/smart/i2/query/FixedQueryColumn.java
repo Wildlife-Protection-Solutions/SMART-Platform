@@ -27,6 +27,8 @@ import java.time.temporal.Temporal;
 import java.util.Locale;
 
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -52,7 +54,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		LOC_DATE("loc:date"), //$NON-NLS-1$
 		LOC_TIME("loc:time"), //$NON-NLS-1$
 		LOC_COMMENT("loc:comment"), //$NON-NLS-1$
-		LOC_GEOMTRY("loc:geom"), //$NON-NLS-1$
+		LOC_POINT("loc:point"), //$NON-NLS-1$
+		LOC_POLYGON("loc:polygon"), //$NON-NLS-1$
 		
 		ENTITY_ID("entity:id"),  //$NON-NLS-1$
 		ENTITY_TYPE("entity:type"), //$NON-NLS-1$
@@ -123,10 +126,16 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			return i.getLocationComment();
 		case LOC_DATE:
 			return i.getLocationDate();
-		case LOC_GEOMTRY:
+		case LOC_POINT:
 			if (i.getGeometryError() != null) return "Parse Error"; //$NON-NLS-1$
 			if (i.getGeometry() == null) return ""; //$NON-NLS-1$
-			return i.getGeometry();
+			if (i.getGeometry() instanceof Point) return i.getGeometry();
+			return null;
+		case LOC_POLYGON:
+			if (i.getGeometryError() != null) return "Parse Error"; //$NON-NLS-1$
+			if (i.getGeometry() == null) return ""; //$NON-NLS-1$
+			if (i.getGeometry() instanceof Polygon) return i.getGeometry();
+			return null;
 		case LOC_ID:
 			return i.getLocationId();
 		case LOC_TIME:
@@ -156,7 +165,12 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case LOC_DATE:
 			case RECORD_DATE:
 				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(l).format( (Temporal)toFormat );
-			case LOC_GEOMTRY:
+			case LOC_POINT:
+				if (toFormat instanceof Geometry) {
+					return ((Geometry)toFormat).toText();
+				}
+				return toFormat.toString();
+			case LOC_POLYGON:
 				if (toFormat instanceof Geometry) {
 					return ((Geometry)toFormat).toText();
 				}
@@ -184,7 +198,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 	
 	@Override
 	public boolean canSort(){
-		if (column == Column.LOC_GEOMTRY) return false;
+		if (column == Column.LOC_POINT || column == Column.LOC_POLYGON) return false;
 		return true;
 	}
 	
@@ -194,8 +208,10 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case LOC_DATE:
 			case RECORD_DATE:
 				return Type.DATE;
-			case LOC_GEOMTRY:
-				return Type.GEOMETRY;
+			case LOC_POINT:
+				return Type.POINT;
+			case LOC_POLYGON:
+				return Type.POLYGON;
 			case LOC_TIME:
 				return Type.TIME;
 			case LOC_COMMENT:

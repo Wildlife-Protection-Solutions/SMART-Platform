@@ -98,7 +98,7 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 		
 		IResultItem item = currentItem;
 		if (item instanceof IGeometryResultItem){
-			return ((IGeometryResultItem)currentItem).asGeometry(getMetaData().getColumnName(colIndex));
+			return ((IGeometryResultItem)currentItem).asGeometry();
 		}
 		return null;
 	}

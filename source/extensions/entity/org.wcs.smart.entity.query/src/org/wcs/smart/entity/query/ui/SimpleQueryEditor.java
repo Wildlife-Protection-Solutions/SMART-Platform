@@ -36,6 +36,8 @@ import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.ui.AttributeColumnLabelProvider;
+import org.wcs.smart.query.common.ui.CategoryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.AttributeQueryColumn;

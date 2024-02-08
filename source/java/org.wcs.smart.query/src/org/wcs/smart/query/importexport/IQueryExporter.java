@@ -22,11 +22,13 @@
 package org.wcs.smart.query.importexport;
 
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Query exporter interface. 
@@ -49,6 +51,20 @@ public interface IQueryExporter {
 	public static final String QUERY_DEFINTION_EXPORTER_ID = "org.wcs.smart.query.export.definition"; //$NON-NLS-1$
 
 	public static final String PROJECTION_PARAM_KEY = "projection"; //$NON-NLS-1$
+	
+	/**
+	 * Parameter key which should resolve to a single QueryColumn
+	 * representing the geometry field to export. Valid for queries
+	 * that contain geometries.
+	 */
+	public static final String GEOMETRY_COLUMN_KEY = "geometry"; //$NON-NLS-1$
+	
+	/**
+	 * Parameter key which should resolve to list of QueryColumn
+	 * that are part of the query results. Should be optional.
+	 * 
+	 */
+	public static final String QUERY_COLUMN_KEY = "columns"; //$NON-NLS-1$
 	
 	/**
 	 * Option key for the encoding to export the file in.  The
@@ -93,9 +109,19 @@ public interface IQueryExporter {
 	boolean canExport(Query query);
 	
 	/**
+	 * if a specific geometry column is supported by the exporter
+	 * @param qc
+	 * @return
+	 */
+	default boolean canExport(QueryColumn qc) {
+		return qc instanceof IGeometryColumn;
+	}
+	
+	/**
 	 * Export the given query.
 	 * 
 	 * @param query the query to export
+	 * @param columns optional and can be null if not appropriate for the query
 	 * @param results the query results to export (can be null)
 	 * @param file the file to write results to
 	 * @param options additional export parameters 
@@ -103,5 +129,5 @@ public interface IQueryExporter {
 	 * @throws Exception an exception if an error occurs
 	 * while exporting
 	 */
-	void export (Query query, IQueryResult results, Path file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception;
+	void export (Query query, IQueryResult results, Path file, Map<String, Object> parameters, IProgressMonitor monitor) throws Exception;
 }

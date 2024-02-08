@@ -26,16 +26,11 @@ import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
 import org.hibernate.Session;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 
@@ -53,9 +48,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	private PagedResultSetIterator iterator;
 	
 	private IResultItem currentItem;
-	private boolean isPoint;
-	private boolean isPolygon;
-	
+	private IQueryColumn geometryColumn;
 	private Session session = null;
 	
 	/**
@@ -64,7 +57,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public QueryFeatureReader(IPagedQueryResultSet results, SimpleFeatureType ftype) {
+	public QueryFeatureReader(IPagedQueryResultSet results, IQueryColumn geometryColumn, SimpleFeatureType ftype) {
 		
 		session = HibernateManager.openSession();
 		try{
@@ -75,9 +68,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		}
 		this.ftype = ftype;
 		this.results = results;
-		isPoint = ftype.getName().equals(QueryDataSource.POINT_TYPE);
-		isPolygon = ftype.getName().equals(QueryDataSource.POLYGON_TYPE);
-		
+		this.geometryColumn = geometryColumn;
 		moveNext();
 	}
 	
@@ -111,7 +102,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		currentItem = null;
 		while(iterator.hasNext()){
 			IResultItem nextItem = iterator.next();
-			if (matchesType(nextItem)){
+			if (geometryColumn.getValue(nextItem) != null) {
 				currentItem = nextItem;
 				return;
 			}
@@ -126,19 +117,9 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		//convert currentItem to Feature;
-		SimpleFeature feature = FeatureGenerator.toFeature(ftype, currentItem, results.getQueryColumns());
+		SimpleFeature feature = FeatureGenerator.toFeature(ftype, currentItem, geometryColumn, results.getQueryColumns());
 		moveNext();
 		return feature;
 	}
 	
-	private boolean matchesType(IResultItem item){
-		if (!(item instanceof IGeometryResultItem)) return false;
-		
-		Geometry g = ((IGeometryResultItem)item).getGeometry();
-		if (isPoint && (g instanceof Point || g instanceof MultiPoint)) return true;
-		if (isPolygon && (g instanceof Polygon || g instanceof MultiPolygon)) return true;
-		return false;
-	}
-	
-
 }

@@ -21,18 +21,13 @@
  */
 package org.wcs.smart.asset.report.map;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.wcs.smart.asset.report.table.LocationTable;
-import org.wcs.smart.asset.report.table.StationTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Map Layers for asset station and asset station location BIRT tables.
@@ -67,17 +62,9 @@ public class StationLocationTableMapLayer implements IBirtMapLayerManager {
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
 		if (handle instanceof OdaDataSetHandle){
-			String geomColumn = null;
-			if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstationlocation")){ //$NON-NLS-1$
-				geomColumn = LocationTable.COLUMN_PREFIX + LocationTable.Column.POSITION.name().toLowerCase(Locale.ROOT);				
-			}else if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstation")){ //$NON-NLS-1$
-				geomColumn = StationTable.COLUMN_PREFIX + StationTable.Column.POSITION.name().toLowerCase(Locale.ROOT);
-			}
-			if (geomColumn == null) return null;
-			return Collections.singletonList(new MapLayerInfo(null, null, LayerType.POINT, geomColumn));		
+			return this.findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
 		}
-		return null;
-		
+		return null;		
 	}
 
 }

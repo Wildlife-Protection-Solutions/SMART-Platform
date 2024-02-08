@@ -129,6 +129,36 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="%table.dataset.display.name"
@@ -181,6 +211,36 @@
          <dataTypeMapping
                nativeDataType="Java Object"
                nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PointGeometry"
+               nativeDataTypeCode="8200"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="LineStringGeometry"
+               nativeDataTypeCode="8201"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="PolygonGeometry"
+               nativeDataTypeCode="8204"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPolygonGeometry"
+               nativeDataTypeCode="8205"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiLineStringGeometry"
+               nativeDataTypeCode="8203"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="MultiPointGeometry"
+               nativeDataTypeCode="8202"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
@@ -279,6 +339,11 @@
             fromVersion="3.3.1"
             toVersion="4.0.0"
             upgrader="org.wcs.smart.report.Report400Upgrader">
+      </coreUpgrader>
+      <coreUpgrader
+            fromVersion="7.5.7"
+            toVersion="8.0.0"
+            upgrader="org.wcs.smart.report.Report800UpgraderDesktop">
       </coreUpgrader>
    </extension>
    <extension

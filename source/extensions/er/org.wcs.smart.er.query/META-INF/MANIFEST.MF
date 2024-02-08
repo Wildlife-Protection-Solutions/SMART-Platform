@@ -13,7 +13,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.wcs.smart.er.query.engine,
  org.wcs.smart.er.query.filter,
- org.wcs.smart.er.query.map.udig,
+ org.wcs.smart.er.query.map.style,
  org.wcs.smart.er.query.model
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.er.query

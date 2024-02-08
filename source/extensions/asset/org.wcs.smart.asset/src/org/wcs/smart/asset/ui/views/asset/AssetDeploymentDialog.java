@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
@@ -111,13 +112,14 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 		
 		if (toUpdate.getUuid() != null) {
 			try(Session s = HibernateManager.openSession()){
+				toUpdate = s.get(AssetDeployment.class, toUpdate.getUuid());
 				
+				Hibernate.initialize(toUpdate);
 				toUpdate.getAssetWaypoints().forEach(w->{
 					LocalDateTime dt = w.getWaypoint().getDateTime();
 					if (minWaypointDate == null || dt.isBefore(minWaypointDate)) minWaypointDate = dt;
 					if (maxWaypointDate == null || dt.isAfter(maxWaypointDate)) maxWaypointDate = dt;
 				});
-				HibernateManager.saveOrMerge(s, toUpdate);
 			}
 		}
 	}
@@ -128,6 +130,10 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 		Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		okBtn.setEnabled(false);
+	}
+
+	public AssetDeployment getUpdatedDeployment() {
+		return this.toUpdate;
 	}
 	
 	@Override

@@ -441,7 +441,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			table = engine.tablePrefix(MissionDay.class);
 			field = "mission_day"; //$NON-NLS-1$			
 		}else if (filter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
-			//TODO: this is going to require a join to the waypoint table
+			//this is going to require a join to the waypoint table
 			table = engine.tablePrefix(Waypoint.class);
 			field = "last_modified"; //$NON-NLS-1$
 		}else{

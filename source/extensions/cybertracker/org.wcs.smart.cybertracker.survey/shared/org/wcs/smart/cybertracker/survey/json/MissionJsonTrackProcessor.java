@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -36,12 +37,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 import org.wcs.smart.cybertracker.json.JsonTrackUtils;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
+import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
@@ -69,10 +72,11 @@ import org.wcs.smart.util.SharedUtils;
  */
 public class MissionJsonTrackProcessor  implements IJsonProcessor {
 
-	public static final String TRACK_LBL = "Track{0}";
+	public static final Object TRACK_LBL = new Object();
 	
 	protected Set<Mission> modifiedMissions;
 	protected List<JsonImportWarning> warnings;
+	protected Locale locale;
 	
 	public MissionJsonTrackProcessor() {
 	}
@@ -82,7 +86,9 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
+		this.locale = l;
+		
 		modifiedMissions = new HashSet<Mission>();
 		warnings = new ArrayList<>();
 		
@@ -153,7 +159,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public void cleanUp() {
+		//nothing to clean up
+	}
+	
+	@Override
+	public String getStatusMessage(Locale l) {
 		return null;
 	}
 	
@@ -162,8 +173,11 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 		return this.warnings;
 	}
 	
+	private static String getTrackLabel(Locale l) {
+		return SmartContext.INSTANCE.getClass(ISurveyCyberTrackerLabelProvider.class).getLabel(TRACK_LBL, l);
+	}
 	
-	public static void addSuPointToMisisonTracks(MissionDay md, SamplingUnit su, Coordinate c, LocalDateTime dt) throws Exception{
+	public static void addSuPointToMisisonTracks(MissionDay md, SamplingUnit su, Coordinate c, LocalDateTime dt, Locale locale) throws Exception{
 		if (md.getTracks() == null) md.setTracks(new ArrayList<MissionTrack>());
 		
 		MissionTrack addTo = null;
@@ -171,7 +185,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack newTrack = new MissionTrack();
 			md.getTracks().add(newTrack);
 			newTrack.setMissionDay(md);
-			newTrack.setId(MessageFormat.format(TRACK_LBL,  md.getTracks().size()));
+			newTrack.setId(MessageFormat.format(getTrackLabel(locale),  md.getTracks().size()));
 			newTrack.setSamplingUnit(su);
 			addTo = newTrack;
 			
@@ -195,7 +209,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 				MissionTrack newTrack = new MissionTrack();
 				md.getTracks().add(newTrack);
 				newTrack.setMissionDay(md);
-				newTrack.setId(MessageFormat.format(TRACK_LBL,  md.getTracks().size()));
+				newTrack.setId(MessageFormat.format(getTrackLabel(locale),  md.getTracks().size()));
 				newTrack.setSamplingUnit(su);
 				addTo = newTrack;
 			}
@@ -221,7 +235,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	 * 3. when sampling unit is changed a "observation" is made 
 	 * 
 	 */
-	public static void addPointToMisisonTracks(MissionDay md, Coordinate c, LocalDateTime dt) throws Exception{
+	public void addPointToMisisonTracks(MissionDay md, Coordinate c, LocalDateTime dt) throws Exception{
 		if (md.getTracks() == null) md.setTracks(new ArrayList<MissionTrack>());
 		
 		MissionTrack addTo = null;
@@ -229,7 +243,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack newTrack = new MissionTrack();
 			md.getTracks().add(newTrack);
 			newTrack.setMissionDay(md);
-			newTrack.setId(MessageFormat.format(TRACK_LBL,  md.getTracks().size()));
+			newTrack.setId(MessageFormat.format(getTrackLabel(locale),  md.getTracks().size()));
 			addTo = newTrack;
 			
 		}else{

@@ -150,7 +150,7 @@ public class HtmlStreamingExporter extends AbstractQueryExporter{
 					
 					writeString("<tr>");
 					for (int i = 0; i < cols.size(); i ++){
-						writeString("<td style='border: solid 1px grey;'>" + results.getValueAsString(resultItem, cols.get(i), session) + "</td>");
+						writeString("<td style='border: solid 1px grey;'>" + results.getValueAsString(resultItem, cols.get(i), this.locale,  session) + "</td>");
 					}
 					writeString("</tr>");
 				}					

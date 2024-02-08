@@ -52,6 +52,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
@@ -64,7 +65,10 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.i2.ProfileReport800Upgrader;
 import org.wcs.smart.i2.model.IntelPermission;
+import org.wcs.smart.incident.IncidentReport800Upgrader;
+import org.wcs.smart.report.Report800Upgrader;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.Tuple;
@@ -88,6 +92,8 @@ public class UpgradeServlet extends HttpServlet {
 	final static AtomicBoolean upgradeLock = new AtomicBoolean(false);
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		List<String> warnings = new ArrayList<>();
+		
 		if (!upgradeLock.compareAndSet(false, true)) {
 			//somebody else is already running this code; we don't want to run it twice to lets get out of here
 			request.setAttribute("org.wcs.smart.upgrade", "RUNNING");  //$NON-NLS-1$//$NON-NLS-2$
@@ -123,11 +129,11 @@ public class UpgradeServlet extends HttpServlet {
 					if (version.equals("7.5.3") || version.equals("7.5.4")) { //$NON-NLS-1$ //$NON-NLS-2$
 						//7.5.4 shouldn't exist as we didn't upgrade version number
 						upgradeDb754to757(s);
-						upgradeDb757to800(s);
+						upgradeDb757to800(s, warnings);
 						updated = true;
 					}else if (version.equals("7.5.5") || version.equals("7.5.6") || version.equals("7.5.7")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
-						upgradeDb757to800(s);
+						upgradeDb757to800(s, warnings);
 						updated = true;
 					}else {
 						request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
@@ -200,6 +206,9 @@ public class UpgradeServlet extends HttpServlet {
 
 				//we are up to date; there is nothing to do here
 				request.setAttribute("org.wcs.smart.upgrade", "UPGRADE_COMPLETE"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (!warnings.isEmpty()) {
+					request.setAttribute("org.wcs.smart.warnings", warnings); //$NON-NLS-1$ 
+				}
 				request.getRequestDispatcher("WEB-INF/upgrade.jsp").forward(request, response); //$NON-NLS-1$
 				return;
 	
@@ -1295,14 +1304,21 @@ public class UpgradeServlet extends HttpServlet {
 	}
 	
 	
-	private void upgradeDb757to800(Session s) {
+	private void upgradeDb757to800(Session s, List<String> warnings) {
+		//upgrade report files
+		try {
+			warnings.addAll( (new Report800Upgrader()).upgrade(s));
+			warnings.addAll( (new IncidentReport800Upgrader()).upgrade(s));
+			warnings.addAll( (new ProfileReport800Upgrader()).upgrade(s));
+		} catch (SQLException e) {
+			throw new HibernateException(e);
+		}
+		
 		s.doWork(new Work() {
 
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try {
-					
-					
 					//disable triggers
 					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
 
@@ -1394,6 +1410,19 @@ public class UpgradeServlet extends HttpServlet {
 						//https://app.assembla.com/spaces/smart-cs/tickets/3643
 						"alter table connect.alerts alter column date type timestamp with time zone", //$NON-NLS-1$
 
+						//geometry support
+						"ALTER TABLE smart.wp_observation_attributes add column geom bytea", //$NON-NLS-1$
+						"ALTER TABLE smart.wp_observation_attributes add column number_value_2 double precision", //$NON-NLS-1$
+						"ALTER TABLE smart.i_observation_attribute add column geom bytea", //$NON-NLS-1$
+						"ALTER TABLE smart.i_observation_attribute add column double_value_2 double precision", //$NON-NLS-1$
+						
+						"ALTER TABLE smart.i_entity alter column created_by drop not null", //$NON-NLS-1$
+						"ALTER TABLE smart.i_record alter column created_by drop not null", //$NON-NLS-1$
+						"ALTER TABLE smart.i_attachment alter column created_by drop not null", //$NON-NLS-1$
+						
+						//postgis update
+						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]');END; $$", //$NON-NLS-1$
+
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
@@ -1407,6 +1436,9 @@ public class UpgradeServlet extends HttpServlet {
 						"update connect.connect_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.er'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.er'", //$NON-NLS-1$
 
+						"update connect.connect_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
+						
 						"update connect.connect_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 
@@ -1425,5 +1457,6 @@ public class UpgradeServlet extends HttpServlet {
 				}
 			}
 		});	
+		
 	}
 }

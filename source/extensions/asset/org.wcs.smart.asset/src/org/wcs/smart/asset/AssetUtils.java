@@ -22,6 +22,7 @@
 package org.wcs.smart.asset;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -149,6 +150,10 @@ public class AssetUtils {
 					break;
 				}
 				switch(a.getAttribute().getType()) {
+					case LINE:
+					case POLYGON:
+						ok = Arrays.equals(a.getGeom(), matching.getGeom());
+						break;
 					case BOOLEAN:
 					case NUMERIC:
 						ok = Objects.equals(a.getNumberValue(), matching.getNumberValue());

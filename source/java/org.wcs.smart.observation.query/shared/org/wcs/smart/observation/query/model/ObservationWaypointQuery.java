@@ -51,6 +51,7 @@ public class ObservationWaypointQuery extends WaypointQuery {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "observationwaypoint"; //$NON-NLS-1$
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.observation.query.map.waypoint"; //$NON-NLS-1$
 
 
 	/**

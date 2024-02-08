@@ -21,7 +21,12 @@
 		<property name="hibernate.dialect">org.hibernate.dialect.DerbyDialect</property>
 
 		<!-- Echo all executed SQL to stdout -->
-		<property name="hibernate.show_sql">false</property> 
+		<property name="hibernate.show_sql">false</property>
+		
+		<!--  enable batch loading to improve performance -->
+		<property name="hibernate.jdbc.batch_size">100</property>
+		<property name="hibernate.order_inserts">true</property>
+		<property name="hibernate.order_updates">true</property> 
 		
 		<property name="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext</property>
 

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.json;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,15 +78,12 @@ import jakarta.xml.bind.DatatypeConverter;
 /**
  * Parses sighting data from cybertracker JSON data.
  * 
+ * After processing is complete, users should call cleanUp
+ * to remove any temporary files
+ * 
  * @author Emily
  *
  */
-
-//TODO: cleanup attachments
-//attachments are put in a temporary file that are not removed after loaded
-//also attachments that are resized have another file that does not get deleted
-//as the software used deleteonexit which won't work on connect - for this
-//see ImageProcessor.java
 public class CtJsonObservationParser {
 
 	protected Logger logger = Logger.getLogger(CtJsonObservationParser.class.getName());
@@ -112,7 +108,6 @@ public class CtJsonObservationParser {
 	
 	public static final String DEVICE_ID = "deviceId"; //$NON-NLS-1$
 	
-	private static final String JPEG_EXT = "jpeg"; //$NON-NLS-1$
 	private static final String PHOTO_KEY = "ct_photo"; //$NON-NLS-1$
 	
 	private static final String WAVE_EXT = "wav"; //$NON-NLS-1$
@@ -133,7 +128,13 @@ public class CtJsonObservationParser {
 	private List<JsonImportWarning> warnings = null;
 	
 	private List<WaypointObservationAttribute> applyToAllObservations;
-
+	private Locale l;
+	private List<Path> tempFiles;
+	
+	public CtJsonObservationParser(Locale l) {
+		this.l = l;
+		this.tempFiles = new ArrayList<>();
+	}
 	
 	private void logException(Exception ex) {
 		logger.log(Level.WARNING, ex.getMessage(), ex);
@@ -141,6 +142,10 @@ public class CtJsonObservationParser {
 	
 	public List<JsonImportWarning> getWarnings(){
 		return this.warnings;
+	}
+	
+	public List<Path> getTemporaryFiles() {
+		return tempFiles;
 	}
 	
 	/**
@@ -184,7 +189,7 @@ public class CtJsonObservationParser {
 		if (o instanceof Number) {
 			observationCounter = ((Number)o).intValue();
 		}else {
-			throw new Exception((new JsonError(JsonError.Type.INVALID_OBS_COUNTER, o.toString())).getMessage()); 
+			throw new Exception((new JsonError(JsonError.Type.INVALID_OBS_COUNTER, o.toString())).getMessage(l)); 
 		}
 		return observationCounter;
 	}
@@ -200,7 +205,7 @@ public class CtJsonObservationParser {
 		warnings = new ArrayList<JsonImportWarning>();
 		
 		if (!((String)feature.get(FEATURE_TYPE_KEY)).equalsIgnoreCase(FEATURE_KEY)){
-			throw new Exception((new JsonError(JsonError.Type.FEATURE_OBJECT_NOT_FOUND, FEATURE_KEY)).getMessage());
+			throw new Exception((new JsonError(JsonError.Type.FEATURE_OBJECT_NOT_FOUND, FEATURE_KEY)).getMessage(l));
 		}
 		
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
@@ -208,9 +213,10 @@ public class CtJsonObservationParser {
 		//parse x and y may be null
 		
 		Waypoint newWaypoint = new Waypoint();
+		newWaypoint.setConservationArea(ca);
 		Coordinate c = readXYFromProperties(feature);
 		if (c == null) {
-			throw new Exception((new JsonError(JsonError.Type.LAT_LONG_NOT_FOUND)).getMessage());
+			throw new Exception((new JsonError(JsonError.Type.LAT_LONG_NOT_FOUND)).getMessage(l));
 		}
 		
 		newWaypoint.setRawX(c.x);
@@ -578,7 +584,8 @@ public class CtJsonObservationParser {
 			//attempt to resize image automatically
 			int[] size = CtJsonUtil.getImageAutoResizeSizeOption(ca, session);		
 			for (ISmartAttachment attachment : attachments){
-				ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+				Path[] files = ImageProcessor.INSTANCE.processAttachment(attachment,size[0], size[1]);
+				for (Path p : files) tempFiles.add(p);
 			}
 		}
 	}
@@ -588,10 +595,9 @@ public class CtJsonObservationParser {
 				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 			
 			// picture object; create a temporary file add it to waypoint observation
-			BufferedImage image = null;
 			
-			//determine file extension; assume jpeg by default
-			String ext = JPEG_EXT;
+			//determine file extension
+			String ext = null;
 			byte[] data = DatatypeConverter.parseBase64Binary(info.getData());
 			
 			try(ByteArrayInputStream bis = new ByteArrayInputStream(data);
@@ -602,35 +608,41 @@ public class CtJsonObservationParser {
 					ext = ir.getFormatName();
 				}
 			}
-							
-			try (InputStream in = new ByteArrayInputStream(data)) {
-				image = ImageIO.read(in);
-			}
+								
+			if (ext == null){
+				//don't know the image format so write without an extension and generate a warning
+				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO_ATTACHMENT, info.getImageCount()));
 				
-			if (image == null){
 				String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
-				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$	
-				//write bytes to temporary file
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$
 				try {
 					Files.write(temp, data);
+					tempFiles.add(temp);
 				}catch (IOException ex) {
 					warnings.add(new JsonImportWarning(Type.INVALID_ATTACHMENT, info.getImageCount()));
 					logger.log(Level.WARNING, ex.getMessage(), ex);
 					return null;
 				}
 				
-				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO_ATTACHMENT, info.getImageCount()));
 				
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
-				
+				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+					attachment.setSignatureType(info.getSignatureType());
+				}
 				return attachment;
 			} else {
 				String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
 				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
-				
-				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
+				try {
+					Files.write(temp, data);
+					tempFiles.add(temp);
+				}catch (IOException ex) {
+					warnings.add(new JsonImportWarning(Type.INVALID_ATTACHMENT, info.getImageCount()));
+					logger.log(Level.WARNING, ex.getMessage(), ex);
+					return null;
+				}
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
@@ -644,6 +656,7 @@ public class CtJsonObservationParser {
 			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT); //$NON-NLS-1$//$NON-NLS-2$
 			try (InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(info.getData()))) {
 				Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
+				tempFiles.add(temp);
 			}
 			WaypointAttachment attachment = new WaypointAttachment();
 			attachment.setCopyFromLocation(temp);

@@ -79,6 +79,14 @@ public interface ICoreLabelProvider extends ISharedLabelProvider {
 	public static final String AREATABLE_AREA_KEY = "areatablecareamkey"; //$NON-NLS-1$
 	public static final String AREATABLE_GEOMETRY_KEY = "areatablegeomkey"; //$NON-NLS-1$
 	
+	public static final String AREA_KM2_KEY = "areakm2";	 //$NON-NLS-1$
+	public static final String PERIMETER_KM_KEY = "perimeterkm"; //$NON-NLS-1$
+	public static final String POLYGON_KEY = "areakm2key"; //$NON-NLS-1$
+	public static final String LINESTRING_KEY = "perimeterkmkey"; //$NON-NLS-1$
+	
+	public static final String POLYGON_GEOM_ATTRIBUTE_LABEL= "polygongeomattributelabel"; //$NON-NLS-1$
+	public static final String LINESTRING_GEOM_ATTRIBUTE_LABEL = "linestringeomattributelabel"; //$NON-NLS-1$
+	
 	public String getEmployeeShortLabel(Employee e, Locale l);
 	
 	public String getAttributeTypeLabel(Attribute.AttributeType type, Locale l);

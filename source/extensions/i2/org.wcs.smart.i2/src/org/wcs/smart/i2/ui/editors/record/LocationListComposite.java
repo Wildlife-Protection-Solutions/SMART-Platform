@@ -456,6 +456,8 @@ public class LocationListComposite extends Composite{
 							if (dialog.open() == Window.OK){
 								editor.setDirty(true);
 								tblObservations.refresh();
+								LocationListComposite.this.editor.locationsUpdated();
+
 							}
 						}
 					}

@@ -28,6 +28,8 @@ import jakarta.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="doubleValue" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="stringValue" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+*          &lt;element name="geomValue" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+
  *       &lt;/sequence>
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="attributeType" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -41,12 +43,14 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XmlWaypointObservationAttribute", propOrder = {
     "doubleValue",
-    "stringValue"
+    "stringValue",
+    "geomValue"
 })
 public class XmlWaypointObservationAttribute {
 
     protected Double doubleValue;
     protected List<String> stringValue;
+    protected String geomValue;
     @XmlAttribute(name = "attributeKey")
     protected String attributeKey;
     @XmlAttribute(name = "attributeType")
@@ -153,4 +157,27 @@ public class XmlWaypointObservationAttribute {
         this.attributeType = value;
     }
 
+    /**
+     * Gets the value of the geomValue property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getGeomValue() {
+        return geomValue;
+    }
+
+    /**
+     * Sets the value of the geomValue property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setGeomValue(String value) {
+        this.geomValue = value;
+    }
 }

@@ -57,7 +57,8 @@ public abstract class QueryColumn implements Cloneable{
 		DATETIME("java.time.LocalDateTime", java.sql.Types.TIMESTAMP), //$NON-NLS-1$ 
 		TIME("java.time.LocalTime", java.sql.Types.TIME), //$NON-NLS-1$
 		TIME_STR("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		BLOB("Blob", java.sql.Types.BLOB); //$NON-NLS-1$
+		BLOB("Blob", java.sql.Types.BLOB), //$NON-NLS-1$
+		GEOMETRY("Blob", java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
 		
 		public String geotoolsType;
 		public int sqlType;
@@ -213,8 +214,8 @@ public abstract class QueryColumn implements Cloneable{
 	 * the formatted string representation of the object associated 
 	 * with this column
 	 */
-	public String getValueAsString(Object value){
-		return getValueAsString(value, true);
+	public String getValueAsString(Object value, Locale l){
+		return getValueAsString(value, l, true);
 	}
 	/**
 	 * @param value 
@@ -223,16 +224,16 @@ public abstract class QueryColumn implements Cloneable{
 	 * the string representation of the object associated 
 	 * with this column
 	 */
-	public String getValueAsString(Object value, boolean formatted){
+	public String getValueAsString(Object value, Locale l, boolean formatted){
 		if (value == null) return ""; //$NON-NLS-1$
 		if (type == ColumnType.BOOLEAN) {
 			if (value instanceof Double){
 				if ((Double)value < 0.5){
 					//false
-					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());	
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);	
 				}else{
 					//true
-					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());	
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);	
 				}
 			}
 			if ((Boolean) value) {
@@ -295,5 +296,9 @@ public abstract class QueryColumn implements Cloneable{
 	 */
 	public String getFormatString() {
 		return null;
+	}
+	
+	public boolean isDefaultGeometryColumn() {
+		return false;
 	}
 }

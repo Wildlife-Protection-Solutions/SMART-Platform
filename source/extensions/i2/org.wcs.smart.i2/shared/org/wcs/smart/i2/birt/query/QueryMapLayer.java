@@ -21,14 +21,15 @@
  */
 package org.wcs.smart.i2.birt.query;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.opengis.style.FeatureTypeStyle;
 import org.opengis.style.LineSymbolizer;
@@ -38,12 +39,15 @@ import org.opengis.style.RasterSymbolizer;
 import org.opengis.style.Rule;
 import org.opengis.style.Style;
 import org.opengis.style.Symbolizer;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SmartStyle;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeGeometryStyle;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.util.UuidUtils;
 
@@ -81,61 +85,88 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
-		if (odaHandle.getExtensionID().equals(IntelQueryDataset.DATASET_TYPE)) {
-			List<MapLayerInfo> layers = new ArrayList<MapLayerInfo>();
-			
-			layers.add( new MapLayerInfo(null, null, LayerType.POINT, FixedQueryColumn.Column.LOC_GEOMTRY.key) );
-			layers.add( new MapLayerInfo(null, null, LayerType.POLYGON, FixedQueryColumn.Column.LOC_GEOMTRY.key) );
-			
-			return layers;
-		}
-		return null;
+		
+		return findGeometryColumnsInResultSet((OdaDataSetHandle) handle);		
 	}
 	
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText,
+			MapLayerInfo info, ConservationArea ca, Locale l, Session s) {
+		
 		if (!extensionId.equals(IntelQueryDataset.DATASET_TYPE)) return null;
 	
-		UUID uuid = null;
-		try {
-			uuid = UuidUtils.stringToUuid( queryText.split(IntelQueryDataset.QUERY_DEF_SEP) [1]);
-		}catch(Exception ex) {
-			ex.printStackTrace();
+		if (info.getGeometryColumnId().startsWith( "attribute:")) { //$NON-NLS-1$
+			//lets see if we can find a datamodel geometry attribute as associated styling information
+			String attkey = info.getGeometryColumnId().substring(info.getGeometryColumnId().indexOf(":")+1); //$NON-NLS-1$
+			Attribute a = s.createQuery("FROM Attribute WHERE keyId = :key and conservationArea = :ca", Attribute.class) //$NON-NLS-1$
+			.setParameter("key", attkey) //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.uniqueResult();
+			if (a != null && a.getType().isGeometry() && a.getRegex() != null) {
+				StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
+				sb.put(SLDID, AttributeGeometryStyle.fromAttribute(a).toStyle());
+				return sb;
+			}
 		}
-		if (uuid == null) return null;
-		
-		IntelRecordObservationQuery q = s.get(IntelRecordObservationQuery.class, uuid);
-		String styleQuery = q.getStyle();
-		if (styleQuery == null) return null;
-		
-		Map<String, StyleBlackboard> styles = null;
-		
-		try {	
-			styles = StyleManager.INSTANCE.fromStringMap(styleQuery);
-		}catch (Exception ex) {
-			ex.printStackTrace();
-			return null;
-		}
-		if (styles == null) return null;
-		
-		//search for style with correct symbolizer
-		for (StyleBlackboard sb : styles.values()) {
-			Style ss = (Style) sb.get(SLDID);
-			for (FeatureTypeStyle fts: ss.featureTypeStyles()) {
-				for (Rule r : fts.rules()) {
-					for (Symbolizer sym : r.symbolizers()) {
-						if (sym instanceof PointSymbolizer && layerType == MapLayerInfo.LayerType.POINT) return sb;
-						if (sym instanceof PointSymbolizer && layerType == MapLayerInfo.LayerType.MULTIPOINT) return sb;
-						
-						if (sym instanceof LineSymbolizer && layerType == MapLayerInfo.LayerType.LINE) return sb;
-						if (sym instanceof LineSymbolizer && layerType == MapLayerInfo.LayerType.MULTILINE) return sb;
-						
-						if (sym instanceof PolygonSymbolizer && layerType == MapLayerInfo.LayerType.POLYGON) return sb;
-						if (sym instanceof PolygonSymbolizer && layerType == MapLayerInfo.LayerType.MULTIPOLYGON) return sb;
-						
-						if (sym instanceof RasterSymbolizer && layerType == MapLayerInfo.LayerType.RASTER) return sb;
+		if (info.getGeometryColumnId().equalsIgnoreCase(FixedQueryColumn.Column.LOC_POINT.key) ||
+				info.getGeometryColumnId().equalsIgnoreCase(FixedQueryColumn.Column.LOC_POLYGON.key)) {
+			UUID uuid = null;
+			try {
+				uuid = UuidUtils.stringToUuid( queryText.split(IntelQueryDataset.QUERY_DEF_SEP) [1]);
+			}catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			if (uuid == null) return null;
+			
+			IntelRecordObservationQuery q = s.get(IntelRecordObservationQuery.class, uuid);
+			String styleQuery = q.getStyle();
+			if (styleQuery != null) {
+				
+				Map<String, StyleBlackboard> styles = null;
+				
+				try {	
+					styles = StyleManager.INSTANCE.fromStringMap(styleQuery);
+				}catch (Exception ex) {
+					ex.printStackTrace();
+					return null;
+				}
+				if (styles != null) {
+					
+					//search for style with correct symbolizer
+					for (StyleBlackboard sb : styles.values()) {
+						Style ss = (Style) sb.get(SLDID);
+						for (FeatureTypeStyle fts: ss.featureTypeStyles()) {
+							for (Rule r : fts.rules()) {
+								for (Symbolizer sym : r.symbolizers()) {
+									if (sym instanceof PointSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.POINT) return sb;
+									if (sym instanceof PointSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.MULTIPOINT) return sb;
+									
+									if (sym instanceof LineSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.LINE) return sb;
+									if (sym instanceof LineSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.MULTILINE) return sb;
+									
+									if (sym instanceof PolygonSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.POLYGON) return sb;
+									if (sym instanceof PolygonSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.MULTIPOLYGON) return sb;
+									
+									if (sym instanceof RasterSymbolizer && info.getLayerType() == MapLayerInfo.LayerType.RASTER) return sb;
+								}
+							}
+						}
 					}
+				}
+			}
+			
+			//find default style
+			SmartStyle style = null;
+			if (info.getGeometryColumnId().equalsIgnoreCase(FixedQueryColumn.Column.LOC_POINT.key)) {
+				style = StyleManager.INSTANCE.getMapLayerDefaultStyle(ca, IntelRecordObservationQuery.POINT_DEFAULT_STYLE_KEY, s);
+			}else if (info.getGeometryColumnId().equalsIgnoreCase(FixedQueryColumn.Column.LOC_POLYGON.key)) {
+				style = StyleManager.INSTANCE.getMapLayerDefaultStyle(ca, IntelRecordObservationQuery.POLYGON_DEFAULT_STYLE_KEY, s);				
+			}
+			if (style != null) {
+				try {
+					return StyleManager.INSTANCE.fromString(style.getStyleString());
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}

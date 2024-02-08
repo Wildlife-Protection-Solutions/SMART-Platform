@@ -53,14 +53,14 @@ public class EntityAttributeFilterCollectorVisitor extends AttributeFilterCollec
 	public void visit(IFilter filter) {
 		if (filter instanceof AttributeFilter){
 			AttributeFilter f = (AttributeFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType());
+			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType(), f.getGeometryProperty());
 			if (!filters.contains(in)){
 				filters.add(in);
 			}
 			
 		}else if (filter instanceof EntityAttributeFilter){
 			EntityAttributeFilter f = (EntityAttributeFilter) filter;
-			AttributeInfo in = new AttributeInfo(engine.getEntityDmAttributeKey(f.getEntityKey(), c), AttributeType.LIST);
+			AttributeInfo in = new AttributeInfo(engine.getEntityDmAttributeKey(f.getEntityKey(), c), AttributeType.LIST, null);
 			//we need to add the dm attribute associated with the entity type
 			if (!filters.contains(in)){
 				filters.add(in);

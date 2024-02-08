@@ -406,6 +406,10 @@ public class WorkingSetMapLayersJob extends Job {
 		}
 		try {
 			for (IGeoResource r : service.resources(monitor)){
+				if (service.canResolve(IntelRecordService.class) && 
+						!service.resolve(IntelRecordService.class, null).canAddToWorkingSet(r)) {						
+					continue;
+				}
 				toAdd.add(new LayerInfo(r,item, canFilter));
 				if (styles != null) layerStyles.put(getLayerStyleIdentifier(r), styles.get(getLayerStyleIdentifier(r).toString()));
 			}
@@ -593,8 +597,8 @@ public class WorkingSetMapLayersJob extends Job {
 				if (x instanceof IntelRecord && ((IntelRecord)x).getUuid().equals(((IntelRecordService)service).getRecordUuid())){
 					((IntelRecordService)service).refreshNames();
 					updateLayers = true;
-				}else if (x instanceof IntelEntity && ((IntelEntity)x).getUuid().equals(((IntelEntityService)service).getEntityUuid())){
-					((IntelEntityService)service).refreshNames();
+				}else if (x instanceof IntelEntity ie && ie.getUuid().equals(((IntelEntityService)service).getEntityUuid())){
+					((IntelEntityService)service).refreshNames(ie);
 					updateLayers = true;
 				}
 			}

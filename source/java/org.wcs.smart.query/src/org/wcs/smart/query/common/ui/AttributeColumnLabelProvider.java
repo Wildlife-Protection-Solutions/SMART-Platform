@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.ui;
 
+import java.util.Locale;
+
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -45,7 +47,7 @@ public class AttributeColumnLabelProvider extends QueryColumnLabelProvider {
 	public String getText(Object element) {
 		if (element instanceof ObservationQueryResultItem) {
 			Object value = column.getValue((ObservationQueryResultItem) element);
-			return column.getValueAsString(value);
+			return column.getValueAsString(value, Locale.getDefault());
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}

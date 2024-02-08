@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.ui.columns;
 
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,7 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -49,15 +48,16 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
+import org.wcs.smart.er.query.model.column.TrackGeometryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
-import org.wcs.smart.query.model.AttributeQueryColumn;
-import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 /**
  * Survey query column manager for creating
@@ -108,9 +108,6 @@ public class SurveyQueryColumnManager {
 	 * on the survey options and the data model of the conservation
 	 * area.
 	 */
-	//TODO: we could try to be smart here and only include
-	//attribute columns in the survey design configurable
-	//model
 	public  QueryColumn[] getObservationQueryColumns(final SurveyDesign sd) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
@@ -171,7 +168,7 @@ public class SurveyQueryColumnManager {
 			cols.add(q.clone());
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
-
+		cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 
@@ -232,6 +229,7 @@ public class SurveyQueryColumnManager {
 		}catch (Exception ex){
 			throw new IllegalStateException(ex);
 		}
+		cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
@@ -250,29 +248,8 @@ public class SurveyQueryColumnManager {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
-						
-						int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
-						for (int i = 0; i < numCategory; i++) {
-							cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.SurveyQueryColumnManager_CategoryColumnLabel, new Object[]{i}), i));
-						}
-							
-						//sort attributes alphabetically
-						List<Attribute> atts = new ArrayList<Attribute>();
-						atts.addAll( dataModel.getAttributes() );
-						Collections.sort(atts, new Comparator<Attribute>(){
-							@Override
-							public int compare(Attribute o1, Attribute o2) {
-								return Collator.getInstance().compare(o1.getName(),o2.getName());
-							}});
-							
-						for (Attribute att : atts) {
-							String name = att.getName();
-							cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex()));
-						}
-						dataModelColumns = cols.toArray(new QueryColumn[cols.size()]);
-						
-						
+						List<QueryColumn> cols = DataModelQueryColumns.generateDataModelQueryColumns(dataModel, false); 
+						dataModelColumns = cols.toArray(new QueryColumn[cols.size()]);					
 						return Status.OK_STATUS;
 					}
 					};
@@ -337,7 +314,8 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
 		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
-		
+		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.MULTILINESTRING, Locale.getDefault()));
+
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
@@ -381,17 +359,15 @@ public class SurveyQueryColumnManager {
 			}
 		};
 		
-//		LoadMissionPropertiesJob j = new LoadMissionPropertiesJob(sd);
 		j.schedule();
 		try {
 			j.join();
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
-//		cols.addAll(j.getColumns());
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		
+		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.LINESTRING, Locale.getDefault()));
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}

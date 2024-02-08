@@ -79,6 +79,7 @@ import org.wcs.smart.query.model.summary.ObserverGroupByViewer;
 import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeGeometryDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BooleanOpDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
@@ -158,6 +159,8 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 			return new AttributeMListQueryDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.TREE ){
 			return new AttributeTreeQueryDropItem(ca);
+		}else if (ca.getAttribute().getType().isGeometry()) {
+			return new AttributeGeometryDropItem(ca);
 		}
 		return null;
 	}
@@ -174,6 +177,8 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 			return new AttributeMListQueryDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.TREE ){
 			return new AttributeTreeQueryDropItem(attribute);
+		}else if (attribute.getType().isGeometry()) {
+			return new AttributeGeometryDropItem(attribute);
 		}
 		return null;
 	}
@@ -435,7 +440,7 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 * 
 	 * @return {@link AttributeDropItem} or {@link AttributeListQueryDropItem} 
-	 * or {@link AttributeTreeDropItem} depending on 
+	 * or {@link AttributeTreeDropItem} or {@link AttributeGeometryDropItem} depending on 
 	 * attribute type.
 	 */
 	public DropItem[] createDropItems(AttributeFilter filter, Session session) throws Exception{
@@ -487,6 +492,9 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 				init.add(li);
 			}
 			it.initializeData(new Object[] {filter.getOperator(), init});
+		}else if (attributeType.isGeometry()) {
+			it.initializeData(new String[]{filter.getGeometryProperty().getKey(), filter.getOperator().getGuiValue(), String.valueOf(value1)});
+
 		}
 	}
 	
@@ -539,7 +547,7 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 * 
 	 * @return {@link AttributeDropItem} or {@link AttributeListQueryDropItem} 
-	 * or {@link AttributeTreeDropItem} depending on 
+	 * or {@link AttributeTreeDropItem} or @{link AttributeGeometryDropItem} depending on 
 	 * attribute type.
 	 */
 	public DropItem[] createDropItems(CategoryAttributeFilter filter, Session session) throws Exception {
@@ -659,9 +667,11 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 	public Object getInitializeData(IValueItem item){
 		if (item instanceof CategoryValueItem){
 			return ((CategoryValueItem) item).getType().key;
-		}else if (item instanceof AttributeValueItem){
-			if (((AttributeValueItem) item).getAttributeType() == AttributeType.NUMERIC){
-				return DataModel.getAggregation(((AttributeValueItem)item).getAggregationKey());
+		}else if (item instanceof AttributeValueItem avi){
+			if (avi.getAttributeType() == AttributeType.NUMERIC){
+				return DataModel.getAggregation(avi.getAggregationKey());
+			}else if(avi.getAttributeType().isGeometry()) {
+				return List.of(avi.getGeometryProperty(), DataModel.getAggregation(avi.getAggregationKey()));				
 			}else{
 				return ((AttributeValueItem)item).getValueType().key;
 			}
@@ -729,6 +739,12 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 					di = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
 				}else{
 					di = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
+				}
+			}else if (attributeType.isGeometry()) {
+				if (cat == null){
+					di = BasicDropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+				}else{
+					di = BasicDropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 				}
 			}
 			if (di != null){

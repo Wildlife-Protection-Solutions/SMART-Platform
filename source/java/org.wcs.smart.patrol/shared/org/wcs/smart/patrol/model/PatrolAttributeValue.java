@@ -311,6 +311,9 @@ public class PatrolAttributeValue {
 			throw new IllegalStateException("multi list attributes not supported for patrol attributes"); //$NON-NLS-1$
 		case TREE:
 			throw new IllegalStateException("tree attributes not supported for patrol attributes"); //$NON-NLS-1$
+		case LINE:
+		case POLYGON:
+			throw new IllegalStateException("geometry attributes not supported for patrol attributes"); //$NON-NLS-1$
 		}
 		return text;
 	}

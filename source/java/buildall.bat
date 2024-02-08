@@ -19,7 +19,6 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.patrol.nl
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.patrol.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.migrate.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.connect.dataqueue.i2.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.i2.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.nl\8.0.0
@@ -37,6 +36,7 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.smartcollect
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.cybertracker.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.i2.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.patrol.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.independentincident.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.er.nl\8.0.0

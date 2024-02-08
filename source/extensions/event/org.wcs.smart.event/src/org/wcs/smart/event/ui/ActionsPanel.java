@@ -56,7 +56,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.event.ActionTypeManager;
+import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
@@ -128,7 +128,7 @@ public class ActionsPanel extends Composite {
 			public String getText(Object element) {
 				if (element instanceof EAction) {
 					EAction action = (EAction)element;
-					IActionType type = ActionTypeManager.INSTANCE.getActionType(action.getActionTypeKey());
+					IActionType type = ActionTypeManagerInternal.INSTANCE.getActionType(action.getActionTypeKey());
 					if (type == null) return Messages.ActionsPanel_UnknownType;
 					return type.getName(Locale.getDefault());
 				}
@@ -305,7 +305,7 @@ public class ActionsPanel extends Composite {
 			return;
 		}
 		EAction action = (EAction) element;
-		IActionType actionType = ActionTypeManager.INSTANCE.getActionType(action.getActionTypeKey());
+		IActionType actionType = ActionTypeManagerInternal.INSTANCE.getActionType(action.getActionTypeKey());
 		
 		Composite headerPart = new Composite(rightPart, SWT.NONE);
 		headerPart.setLayout(new GridLayout(2, false));

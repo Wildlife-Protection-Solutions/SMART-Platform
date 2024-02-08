@@ -60,7 +60,7 @@ public class ContentFilterLayerImpl extends LayerImpl {
 				return new Query(getSchema().getName().getLocalPart(), getFilter());
 			} else {
 				if (getContentFilter() == null) return Query.ALL;
-				return new Query(getSchema().getName().getLocalPart(), getContentFilter());
+				return new Query(getSchema().getTypeName(), getContentFilter());
 			}
 		} catch (Exception e) {
 			if (selection) {

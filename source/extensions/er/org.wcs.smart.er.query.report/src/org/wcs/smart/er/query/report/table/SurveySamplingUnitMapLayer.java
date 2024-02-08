@@ -21,16 +21,13 @@
  */
 package org.wcs.smart.er.query.report.table;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
-import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Map Layers for survey sampling units.
@@ -64,18 +61,9 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
 		if (handle instanceof OdaDataSetHandle){
-			String queryText = ((OdaDataSetHandle) handle).getQueryText();
-			SamplingUnit.GeometryType suType = SamplingUnit.GeometryType.valueOf(queryText.split(":")[1]); //$NON-NLS-1$
-			if (suType == SamplingUnit.GeometryType.PLOT){
-				return Collections.singletonList(new MapLayerInfo(null, null, 
-						LayerType.POINT, SurveySamplingUnitTable.GEOMETRY_COLUMN));		
-			}else if (suType == SamplingUnit.GeometryType.TRANSECT){
-				return Collections.singletonList(new MapLayerInfo(null, null, 
-						LayerType.LINE, SurveySamplingUnitTable.GEOMETRY_COLUMN));
-			}
+			return this.findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
 		}
 		return null;
-		
 	}
 
 }

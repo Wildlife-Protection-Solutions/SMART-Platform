@@ -8,6 +8,9 @@
 		<!-- <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>-->
 		<property name="dialect">org.wcs.smart.connect.hibernate.SmartPostgresDialect</property>
 
+		<property name="hibernate.jdbc.use_streams_for_binary">true</property>
+
+
 		<!-- Echo all executed SQL to stdout -->
 		<property name="show_sql">false</property> 
 		

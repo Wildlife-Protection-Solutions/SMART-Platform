@@ -359,15 +359,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		NativeQuery<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
 		List<Tuple> dataItems = query.list();
 		for (Tuple rowdata: dataItems) {
-			//TODO: test this
-//			if (item instanceof Number) {
-//				item = new Object[] {item};
-//			}
-//			Object[] rowdata = (Object[])item;
-			
-			//now what?
 			int column = 0;
-			
 			String[] groupBys = new String[groupByItems.size()];
 			int index = 0;
 			for (GroupByItem groupBy : groupByItems) {

@@ -22,18 +22,17 @@
 package org.wcs.smart.observation.query.map.style;
 
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class ObservationGridQueryDefaultStyle implements IMapLayerDefaultStyle {
-
-	public static final String KEY = "org.wcs.smart.observation.query.map.grid"; //$NON-NLS-1$
 
 	public ObservationGridQueryDefaultStyle() {
 	}
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return ObservationGriddedQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override

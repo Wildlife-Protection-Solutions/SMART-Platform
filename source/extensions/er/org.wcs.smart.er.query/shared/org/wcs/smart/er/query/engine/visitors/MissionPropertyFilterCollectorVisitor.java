@@ -44,7 +44,7 @@ public class MissionPropertyFilterCollectorVisitor implements IFilterVisitor{
 	public void visit(IFilter filter) {
 		if (filter instanceof MissionPropertyFilter){
 			MissionPropertyFilter f = (MissionPropertyFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType());
+			AttributeInfo in = new AttributeInfo(f.getAttributeKey(), f.getAttributeType(), null);
 			if (!filters.contains(in)){
 				filters.add(in);
 			}

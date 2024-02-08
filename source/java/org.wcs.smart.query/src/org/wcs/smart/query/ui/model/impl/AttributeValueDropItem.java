@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.model.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,6 +52,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.summary.AttributeValueItem;
+import org.wcs.smart.query.model.summary.AttributeValueItem.GeometryProperty;
 
 
 /**
@@ -65,6 +68,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 	private Attribute attribute = null;
 	private Category category = null; 
 	
+	private AttributeValueItem.GeometryProperty geometryProperty;
 	private Aggregation selectedAggregation;
 	private ComboViewer listViewer;
 	
@@ -82,7 +86,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 				try(Session s = HibernateManager.openSession()){
 					try{
 						s.beginTransaction();
-						for (Aggregation a : AttributeValueDropItem.this.attribute.getAggregations()){
+						for (Aggregation a : s.createQuery("FROM Aggregation", Aggregation.class).list()) { //$NON-NLS-1$
 							aggLabels.put(a, Aggregation.getGuiName(a, s, Locale.getDefault()));
 						}
 						s.getTransaction().commit();
@@ -158,7 +162,10 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 		}
 		sb.append(":"); //$NON-NLS-1$
 		sb.append(attribute.getKeyId());
-	
+		if (attribute.getType().isGeometry()) {
+			sb.append(":"); //$NON-NLS-1$
+			sb.append(geometryProperty == null ? "" : geometryProperty.getKey()); //$NON-NLS-1$
+		}
 		return sb.toString();
 	}
 
@@ -169,7 +176,13 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 	 */
 	@Override
 	public void initializeValueData(Object data) {
-		selectedAggregation = (Aggregation)data;
+		if (attribute.getType().isGeometry()) {
+			List<?> values = (List<?>)data;
+			geometryProperty = (GeometryProperty)values.get(0);
+			selectedAggregation = (Aggregation)values.get(1);
+		}else {
+			selectedAggregation = (Aggregation)data;
+		}
 	}
 
 	/* (non-Javadoc)
@@ -178,7 +191,82 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 	@Override
 	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
-		if (attribute.getAggregations().size() == 0){
+
+		if (attribute.getType().isGeometry()) {
+			
+			GridLayout gl = new GridLayout(3, false);
+			gl.marginTop = 0;
+			gl.marginBottom = 0;
+			gl.marginWidth = 0;
+			gl.marginHeight = 0;
+			main.setLayout(gl);
+			main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+
+			//multiple options
+			ComboViewer propertySelector = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+			
+			propertySelector.setContentProvider(ArrayContentProvider.getInstance());
+			propertySelector.setLabelProvider(new LabelProvider() {
+				public String getText(Object element) {
+					return ((GeometryProperty)element).getLabel(Locale.getDefault());
+				}
+			});
+			GeometryProperty[] options = GeometryProperty.values();
+			if (attribute.getType() == Attribute.AttributeType.LINE) {
+				options = new GeometryProperty[] {GeometryProperty.PERIMETER};
+			}
+			propertySelector.setInput(options);
+			propertySelector.addPostSelectionChangedListener(e->{
+				geometryProperty = (GeometryProperty) propertySelector.getStructuredSelection().getFirstElement() ;
+				listViewer.setInput(geometryProperty.getAggregations());
+				Aggregation temp = selectedAggregation;
+				selectedAggregation = null;
+				if (temp != null) {
+					listViewer.setSelection(new StructuredSelection(temp));
+				}else {
+					listViewer.setSelection(new StructuredSelection(geometryProperty.getAggregations()[0]));
+				}
+				this.getTargetPanel().redraw();
+				queryChanged();
+			});
+			
+			//multiple options
+			listViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+			
+			FontData fd = (listViewer.getCombo().getFont().getFontData()[0]);
+			fd.setHeight(fd.getHeight() - 1);
+			smallerFont = new Font(Display.getCurrent(), fd);
+			
+			propertySelector.getCombo().setFont(smallerFont);
+			listViewer.getCombo().setFont(smallerFont);
+			listViewer.setContentProvider(ArrayContentProvider.getInstance());
+			listViewer.setLabelProvider(new LabelProvider(){
+				public String getText(Object element) {
+					if (element instanceof Aggregation){
+						return aggLabels.get(((Aggregation) element));
+					}
+					return super.getText(element);
+				}
+			});
+			
+			listViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					Aggregation newSelection = (Aggregation) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
+					if (! (selectedAggregation != null && selectedAggregation.equals(newSelection))){
+						selectedAggregation = newSelection;
+						queryChanged();	
+					}				 
+				}
+			});
+			
+			if (geometryProperty != null) {
+				propertySelector.setSelection(new StructuredSelection(geometryProperty));
+			}else {
+				propertySelector.setSelection(new StructuredSelection(options[0]));
+			}
+			
+		}else if (attribute.getAggregations().size() == 0){
 			GridLayout gl = new GridLayout(2, false);
 			gl.marginTop = 0;
 			gl.marginBottom = 0;

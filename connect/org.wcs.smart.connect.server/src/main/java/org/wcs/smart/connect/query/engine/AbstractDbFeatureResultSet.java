@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
@@ -41,6 +43,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.api.QueryApi.Direction;
@@ -54,6 +57,7 @@ import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
@@ -163,8 +167,8 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	 */
 	public abstract String getGeometryType();
 
-	public String getValueAsString(T item, QueryColumn qc, Session session){
-		return getValueAsString(item, qc, session, true);
+	public String getValueAsString(T item, QueryColumn qc, Locale l, Session session){
+		return getValueAsString(item, qc, session, l, true);
 	}
 	
 	/**
@@ -176,8 +180,8 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	 * @param formatted if true the formatted value is returned, if false the raw value is returned
 	 * @return
 	 */
-	public String getValueAsString(T item, QueryColumn qc, Session session, boolean formatted){
-		return qc.getValueAsString(getValue(item, qc, session), formatted);
+	public String getValueAsString(T item, QueryColumn qc, Session session, Locale l, boolean formatted){
+		return qc.getValueAsString(getValue(item, qc, session), l, formatted);
 	}
 	
 	public Object getValue(T item, QueryColumn column, Session session){
@@ -309,7 +313,13 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		}
 
 		String key = sortColumn; //This is a bit horrible since users have to send in the attribute key of the column they want to sort. But I don't have a better solution at this point.
-
+		GeometryProperty geomProperty = null;
+		int index = sortColumn.indexOf(";"); //$NON-NLS-1$
+		if (index >0) {
+			key = sortColumn.substring(0,index);
+			geomProperty = GeometryProperty.valueOf(sortColumn.substring(index+1).toUpperCase());			
+		}
+		
 		//TODO: this will not work for CCAA
 		Attribute.AttributeType type = QueryManager.INSTANCE.getAttributeType(session, key, caFilter); // session will not be closed on purpose
 
@@ -393,6 +403,30 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				break;
 			case MLIST:
 				throw new UnsupportedOperationException("Sorting by MULIT LIST attributes is not supported."); //$NON-NLS-1$
+			case POLYGON:
+			case LINE:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				if (geomProperty == GeometryProperty.SOURCE) {
+					sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+					sql.append("(SELECT wpoa." + GeometryAttributeValue.DB_FIELD_SOURCE + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
+				}else if (geomProperty == GeometryProperty.AREA) {
+					sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
+					sql.append("(SELECT wpoa." + GeometryAttributeValue.DB_FIELD_AREA + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
+				}else if (geomProperty == GeometryProperty.PERIMETER) {
+					sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
+					sql.append("(SELECT wpoa." + GeometryAttributeValue.DB_FIELD_PERIMETER + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createNativeMutationQuery(sql.toString()).executeUpdate();
+				
 			}
 		}
 		
@@ -407,7 +441,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		try {
 			a.computeFileLocation(session);
 		} catch (Exception e) {
-			//TODO: log this
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
 		}
 		item.setAttachment(a);
 	}

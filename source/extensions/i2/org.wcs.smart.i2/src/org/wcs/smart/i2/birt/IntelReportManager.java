@@ -52,6 +52,7 @@ import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationObservationAttributeDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.birt.entity.search.EntitySearchDataset;
@@ -60,6 +61,7 @@ import org.wcs.smart.i2.birt.record.RecordDataset;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -183,10 +185,14 @@ public enum IntelReportManager {
 			return Messages.IntelReportManager_RecordEntityDatasetName;
 		}else if (dataSetId.equals(RecordLocationDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_RecordLocationDatasetName;
+		}else if (dataSetId.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)){
+			return "Record Location Observation Details";
 		}else if (dataSetId.equals(RecordAttachmentDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_RecordAttachmentsDatasetName;
 		}else if (dataSetId.equals(EntitySearchDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_EntitySearchesDatasetName;
+		}else if (dataSetId.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) {
+			return "Entity Observation Geometry Attributes";
 		}
 		return dataSetId;
 	}

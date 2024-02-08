@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
-import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 
 /**
@@ -42,14 +41,8 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 
 	private Logger logger = Logger.getLogger(QueryGeoResourceInfo.class.getName());
 	
-	public QueryGeoResourceInfo( QueryGeoResource resource, IProgressMonitor monitor){
-		String namePart = ""; //$NON-NLS-1$
-		if (resource.getDataType().equals(QueryDataSource.POINT_TYPE.getLocalPart())){
-			namePart = Messages.QueryGeoResourceInfo_pointQueryLayerName;
-		}else if (resource.getDataType().equals(QueryDataSource.POLYGON_TYPE.getLocalPart())){
-			namePart = Messages.QueryGeoResourceInfo_polygonQueryLayerName;
-		}
-		this.title = resource.getQueryName() + " (" + namePart + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+	public QueryGeoResourceInfo( QueryGeoResource resource, String name, IProgressMonitor monitor){
+		this.title = resource.getQueryName() + " (" + name + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		computeBounds(resource, monitor);
 	}
 	

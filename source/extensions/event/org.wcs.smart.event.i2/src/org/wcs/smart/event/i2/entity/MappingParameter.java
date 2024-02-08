@@ -38,7 +38,7 @@ public class MappingParameter implements IActionParameter{
 	
 	@Override
 	public String getKey() {
-		return CreateEntityActionType.KEY + ".mapping"; //$NON-NLS-1$
+		return ParameterKeys.MAPPING_PARAM_KEY;
 	}
 
 	@Override

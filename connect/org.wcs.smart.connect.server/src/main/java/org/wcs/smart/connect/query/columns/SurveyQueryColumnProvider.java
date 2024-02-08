@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -47,9 +48,11 @@ import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
+import org.wcs.smart.er.query.model.column.TrackGeometryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -165,7 +168,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
-	
+		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.MULTILINESTRING, l));
 		
 		return cols;
 	}
@@ -200,7 +203,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
-		
+		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.LINESTRING, l));
+
 		return cols;
 	}
 	
@@ -248,6 +252,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			cols.add(q);
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, l));
+		cols.add(new WaypointGeometryQueryColumn(l));
+
 		return cols;
 	}
 	
@@ -285,7 +291,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
 		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
-		
+		cols.add(new WaypointGeometryQueryColumn(l));
+
 		return cols;
 	}
 	

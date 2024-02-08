@@ -22,6 +22,8 @@
 package org.wcs.smart.connect.uploader.sync;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent.Kind;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +103,10 @@ public enum ChangeLogManager {
 			fileStoreReplication = null;
 		}
 	}
+	
+	public boolean checkStatus(ConservationAreaInfo ca, Path p, Kind<?> kind) {
+		return fileWatcher.ignoredContains(ca, p, kind);
+	}
 	/**
 	 * Disables the writing of changes to the change log table for a specific Conservation Area.  When 
 	 * disabled all changes made to database are not logged to the log table (for the given Conservation
@@ -122,8 +128,8 @@ public enum ChangeLogManager {
 	 */
 	//ca.getuuid must be the uuid with -'s removed
 	public void enableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
-		session.createNativeMutationQuery("SET  \"ca.trigger.t" +UuidUtils.uuidToString(ca.getUuid()) + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		fileWatcher.addCa(ca);
+		session.createNativeMutationQuery("SET  \"ca.trigger.t" +UuidUtils.uuidToString(ca.getUuid()) + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
@@ -314,8 +320,6 @@ public enum ChangeLogManager {
 		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) "); //$NON-NLS-1$
 		query.append("and c.maxrevision = a.revision "); //$NON-NLS-1$
 		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision "); //$NON-NLS-1$
-//		System.out.println(query.toString());
-		
 		
 		NativeQuery<Object> hquery = session.createNativeQuery(query.toString(), Object.class);
 
@@ -323,7 +327,6 @@ public enum ChangeLogManager {
 		hquery.setParameter("revision1", startRevision); //$NON-NLS-1$
 		hquery.setParameter("ca2", caUuid);//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.setParameter("revision2", startRevision); //$NON-NLS-1$
-		//TODO: review this
 		hquery.addScalar("uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		hquery.addScalar("revision"); //$NON-NLS-1$
 		hquery.addScalar("action"); //$NON-NLS-1$

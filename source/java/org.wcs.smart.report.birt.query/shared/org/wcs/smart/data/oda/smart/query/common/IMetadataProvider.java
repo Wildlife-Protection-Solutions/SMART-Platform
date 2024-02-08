@@ -23,7 +23,6 @@ package org.wcs.smart.data.oda.smart.query.common;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.model.Query;
 
@@ -35,6 +34,6 @@ import org.wcs.smart.query.model.Query;
  */
 public interface IMetadataProvider {
 
-	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geometryColumns, SmartConnection c)  throws OdaException;
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, SmartConnection c)  throws OdaException;
 	
 }

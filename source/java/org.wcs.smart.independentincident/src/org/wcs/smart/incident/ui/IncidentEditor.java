@@ -153,6 +153,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		setPartName(((IncidentEditorInput)getEditorInput()).getName());
 		summaryEditor.initData();
 		mapPage.updatePointsLayer();
+		mapPage.updateObservationLayers();
 		
 		super.setPartName(getIncident().getId());
 	}

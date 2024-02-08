@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.util.UuidUtils;
@@ -53,6 +54,21 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 					} catch (Exception e) {
 						SmartPatrolPlugIn
 							.log("Could not determine waypoint for uuid " + uuids, e); //$NON-NLS-1$
+						return null;
+					}
+					Waypoint wp = new Waypoint();
+					wp.setUuid(wpuuid);
+					return (T)wp;
+				}
+				if (PatrolDataSource.isGeometryAttribute(sf.getFeatureType().getTypeName()) ){
+					
+					String uuid = sf.getAttribute(ObservationAttributeFeatureFactory.WP_UUID_FIELD).toString();
+					UUID wpuuid;
+					try {
+						wpuuid = UuidUtils.stringToUuid(uuid);
+					} catch (Exception e) {
+						SmartPatrolPlugIn
+							.log("Could not determine waypoint for uuid " + uuid, e); //$NON-NLS-1$
 						return null;
 					}
 					Waypoint wp = new Waypoint();

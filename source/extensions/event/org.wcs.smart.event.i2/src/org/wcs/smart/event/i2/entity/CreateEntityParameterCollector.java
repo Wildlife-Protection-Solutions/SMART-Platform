@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -336,7 +337,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 				if (element instanceof EntityMapping) {
 					EntityMapping map = (EntityMapping) element;
 					if (map.getType() == Type.FIXED) {
-						return map.getFixedValueAsString();
+						return map.getFixedValueAsString(Locale.getDefault());
 					}else if (map.getType() == Type.POSITION) {
 						return Messages.CreateEntityParameterCollector_PositionLabel;
 					}

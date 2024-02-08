@@ -41,9 +41,23 @@ import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
  */
 public class DataModelColumn extends AbstractQueryColumn{
 
+	public enum GeometryProperty{
+		SOURCE, AREA, PERIMETER;
+		
+		public String getKey() {
+			return name().toLowerCase();
+		}
+		
+		public String generateKey(String attributeId) {
+			return attributeId + "." + getKey(); //$NON-NLS-1$
+		}
+	}
+	
 	private int level = -1;
 	private String attributeKey;
 	private Attribute.AttributeType type;
+	private DataModelColumn.GeometryProperty property;
+	private String formatString = null;
 	
 	/**
 	 * Creates a new category data model column
@@ -62,6 +76,27 @@ public class DataModelColumn extends AbstractQueryColumn{
 		super(attribute.getName(), "attribute:" + attribute.getKeyId()); //$NON-NLS-1$
 		this.attributeKey = attribute.getKeyId();
 		this.type = attribute.getType();
+		this.formatString = attribute.getRegex();
+	}
+	
+	/**
+	 * Creates a new attribute data model column
+	 * @param attribute
+	 */
+	public DataModelColumn(Attribute attribute, DataModelColumn.GeometryProperty property, String name){
+		super(name, "attribute:" + attribute.getKeyId() + ":" + property.name()); //$NON-NLS-1$ //$NON-NLS-2$
+		this.attributeKey = attribute.getKeyId();
+		this.type = attribute.getType();
+		this.property = property;
+		this.formatString = attribute.getRegex();
+	}
+	
+	/**
+	 * The format string for attribute columns. May be null.
+	 * @return
+	 */
+	public String getFormatString() {
+		return this.formatString;
 	}
 	
 	/**
@@ -96,7 +131,11 @@ public class DataModelColumn extends AbstractQueryColumn{
 			return ((IntelObservationResultItem)item).getCategoryLabel(level);
 		}
 		if (attributeKey != null){
-			Object value = ((IntelObservationResultItem)item).getAttributeValue(attributeKey);
+			String key = attributeKey;
+			if (this.property != null) {
+				key = property.generateKey(attributeKey);
+			}
+			Object value = ((IntelObservationResultItem)item).getAttributeValue(key);
 			if (value == null) return null;
 			switch(type){
 			case BOOLEAN:
@@ -111,6 +150,15 @@ public class DataModelColumn extends AbstractQueryColumn{
 			case TREE:
 			case MLIST:			
 				return value.toString();
+			case LINE:
+			case POLYGON:
+				if (this.property == null) {
+					return value;
+				}else if (this.property == GeometryProperty.SOURCE ) {
+					return ((Attribute.GeometrySource)value).name();
+				}
+				return value; 
+				
 			}
 		}
 		return null;
@@ -128,6 +176,12 @@ public class DataModelColumn extends AbstractQueryColumn{
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());
 			}else{
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());
+			}
+		}
+		if (getDataType().isGeometry()) {
+			if (this.property == null) {
+				if (this.type.isGeometry()) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this.type, l);
+				return getDataType().name();
 			}
 		}
 		return toFormat.toString();
@@ -148,6 +202,14 @@ public class DataModelColumn extends AbstractQueryColumn{
 			case LIST:
 			case MLIST:
 				return Type.STRING;
+			case LINE:
+				if (this.property == GeometryProperty.SOURCE) return Type.STRING;
+				if (this.property == null) return Type.MULTILINESTRING;
+				return Type.NUMERIC;
+			case POLYGON:
+				if (this.property == GeometryProperty.SOURCE) return Type.STRING;
+				if (this.property == null) return Type.MULTIPOLYGON;
+				return Type.NUMERIC;
 		}
 		return Type.STRING;
 	}

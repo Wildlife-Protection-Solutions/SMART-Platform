@@ -33,6 +33,7 @@ import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -143,7 +144,7 @@ public class StationTable extends SmartBirtTable {
 		int i = 0;
 		for (Column c : Column.values()) {
 			if (c == Column.POSITION) {
-				names[i++] = Types.JAVA_OBJECT;
+				names[i++] = IGeometryColumn.Type.POINT.birtDataType;
 			}else {
 				names[i++] = Types.VARCHAR;
 			}

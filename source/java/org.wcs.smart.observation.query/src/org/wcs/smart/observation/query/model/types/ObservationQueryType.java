@@ -35,9 +35,6 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
-import org.wcs.smart.observation.query.map.style.ObservationObservationQueryDefaultStyle;
-import org.wcs.smart.observation.query.map.udig.QueryService;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.SimpleQueryEditor;
@@ -45,10 +42,12 @@ import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.map.QueryService;
 import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -68,7 +67,7 @@ public class ObservationQueryType implements IMappableQueryType {
 
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(QueryDataSource.WAYPOINT_TYPE, ObservationObservationQueryDefaultStyle.KEY);
+		styleMappings.put(WaypointGeometryQueryColumn.KEY, ObsObservationQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	private static IQueryDropItemFactory dropItemFactory = null;

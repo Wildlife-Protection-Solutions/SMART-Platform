@@ -32,6 +32,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 
 /**
  * Data source for mission observations and tracks.
@@ -53,15 +54,10 @@ public class MissionFeatureSource extends ContentFeatureSource{
 	public boolean getDefaultVisibility() {
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)) return true;
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return true;
+		if (MissionDataSource.isGeometryAttribute(entry.getTypeName())) return true;
 		return false;
 	}
 	
-	public String getLayerName() {
-		if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)) return Messages.MissionFeatureSource_TrackLayerName;
-		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return Messages.MissionFeatureSource_WaypointLayerName;
-		if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) return Messages.MissionFeatureSource_RawWaypointLayerName;
-		return entry.getTypeName();
-	}
 	
 	@Override
 	protected ReferencedEnvelope getBoundsInternal(Query query) throws IOException {
@@ -81,6 +77,10 @@ public class MissionFeatureSource extends ContentFeatureSource{
 			return new MissionTrackFeatureReader(getSource().getMission(), getSchema());
 		}else if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)){
 			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
+		}else if (MissionDataSource.isLineAttribute(entry.getTypeName())){
+			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
+		}else if (MissionDataSource.isPolygonAttribute(entry.getTypeName())){
+			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
 		}
 		
 		return null;
@@ -95,6 +95,10 @@ public class MissionFeatureSource extends ContentFeatureSource{
 				return  SurveyFeatureFactory.createTrackSchema();
 			}else if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) {
 				return SurveyFeatureFactory.createWaypointPrjSchema();
+			}else if (MissionDataSource.isLineAttribute(entry.getTypeName())){
+				return ObservationAttributeFeatureFactory.createObservationLineStringSchema(entry.getTypeName());
+			}else if (MissionDataSource.isPolygonAttribute(entry.getTypeName())){
+				return ObservationAttributeFeatureFactory.createObservationPolygonSchema(entry.getTypeName());
 			}
 		}catch(SchemaException ex){
 			throw new IOException(Messages.MissionDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);

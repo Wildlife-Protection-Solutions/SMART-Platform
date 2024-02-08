@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -49,10 +50,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter;
-import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
+import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
+import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;;
 
 /**
  * Export query wizard page for selection query format
@@ -176,6 +179,20 @@ public class QueryFormatPage extends WizardPage {
 			//eatme
 		}
 	}
-
+	@Override
+    public IWizardPage getNextPage() {
+		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
+		IQueryExporter exporter = getQueryExporter();
+		if (!exporter.supportsOption(ExportOption.GEOMETRY_COLUMN)) {
+			return getWizard().getPage(QueryFormatOptionPage.PAGE_NAME);
+		} else {
+			List<IQueryColumn> columns = wizard.getGeometryColumns(exporter);
+			if (columns != null && columns.size() > 1) {
+				return getWizard().getPage(ExportQueryGeometryColumnPage.PAGE_NAME);
+			}else {
+				return getWizard().getPage(QueryFormatOptionPage.PAGE_NAME);
+			}
+		}
+	}
 }
 

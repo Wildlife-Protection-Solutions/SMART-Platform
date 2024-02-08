@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -84,7 +85,7 @@ public class CompoundQueryExporter implements IQueryExporter {
 
 	@Override
 	public void export(Query query, IQueryResult results, Path file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+			Map<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CompoundQueryExporter_TaskName, 5);
 		if (results== null) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);

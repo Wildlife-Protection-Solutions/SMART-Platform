@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -42,7 +43,7 @@ public class EntityLocationAttributeDatasetResultSetMetadata implements IResultS
 		ENTITY_UUID("entity:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		ATTRIBUTE_KEY("attribute:key", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		ATTRIBUTE_NAME("attribute:name",  java.sql.Types.VARCHAR), //$NON-NLS-1$
-		GEOMETRY("attribute:geometry",  java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
+		GEOMETRY("attribute:geometry",  IGeometryColumn.Type.POINT.birtDataType); //$NON-NLS-1$
 		
 		String id;
 		int type;

@@ -318,14 +318,18 @@ public class MapItemExecutor implements IReportItemExecutor {
 		return stream.toByteArray();
 	}
 
-	private void processStyles(MapLayerInfo def, LayerItem layer, String queryText, double minValue, double maxValue) {
+	private void processStyles(MapLayerInfo def, LayerItem layer, String queryText,
+			double minValue, double maxValue) {
+		
 		StyleBlackboard styleBlackboard = null;
 		try {
 			if (def.getMapStyle() == null || def.getMapStyle().trim().isEmpty()) {
 				// no style is provided; so lets try to load the default style from the query
 				Session session = (Session) context.getAppContext().get(BirtConstants.SESSION_PARAM);
+				ConservationArea ca = (ConservationArea) context.getAppContext().get(BirtConstants.CA_PARAM);
+				
 				String xid = ((OdaDataSetHandle) layer.getHandle().getDataSet()).getExtensionID();
-				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, def.getLayerType(), session);
+				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, def, ca, context.getLocale(), session);
 			} else {
 				// parse provided style
 				String styleString = def.getMapStyle();

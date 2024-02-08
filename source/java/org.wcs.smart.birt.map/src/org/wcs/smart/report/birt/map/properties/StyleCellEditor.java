@@ -22,6 +22,7 @@
 package org.wcs.smart.report.birt.map.properties;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +42,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.birt.map.AddLayersCommand;
 import org.wcs.smart.report.birt.map.BirtMapFactory;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
@@ -112,7 +114,7 @@ public class StyleCellEditor extends DialogCellEditor {
 								String queryText = ((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getQueryText();
 								sb = BirtStyleManager.INSTANCE.getStyle(
 										((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getExtensionID(),
-										queryText, mapLayer.getLayerType(), session);
+										queryText, info, SmartDB.getCurrentConservationArea(),  Locale.getDefault(), session);
 							}
 						}
 						

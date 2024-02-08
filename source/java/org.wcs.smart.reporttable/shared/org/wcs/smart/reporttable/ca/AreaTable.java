@@ -33,6 +33,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.util.ReprojectUtils;
@@ -52,7 +53,7 @@ public class AreaTable  extends SmartBirtTable {
 		AREA_NAME(ICoreLabelProvider.AREATABLE_NAME_KEY, "Name", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		AREA_KEY(ICoreLabelProvider.AREATABLE_KEY_KEY, "Key", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		AREA(ICoreLabelProvider.AREATABLE_AREA_KEY, "Area (m2)", java.sql.Types.DOUBLE), //$NON-NLS-1$
-		GEOMETRY(ICoreLabelProvider.AREATABLE_GEOMETRY_KEY, "Geometry", java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
+		GEOMETRY(ICoreLabelProvider.AREATABLE_GEOMETRY_KEY, "Geometry", IGeometryColumn.Type.MULTIPOLYGON.birtDataType); //$NON-NLS-1$
 		
 		private String name;
 		private int type;

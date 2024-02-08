@@ -23,26 +23,18 @@ package org.wcs.smart.report.query.data.oda.query;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
-import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
-import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -140,18 +132,4 @@ public class PatrolSmartQuery extends AbstractSmartQuery {
 		return super.executeQueryInternal(query, connection);
 	}
 
-	@Override
-	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
-		if (queryTypeKey.equals(PatrolObservationQuery.KEY) ||
-				queryTypeKey.equals(PatrolWaypointQuery.KEY)){		
-			return new GeometryColumn[]{
-					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
-							WaypointQueryResultItem.GEOMCOLUMN_KEY)};
-		}else if (queryTypeKey.equals(PatrolQuery.KEY)){
-			return new GeometryColumn[]{
-					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
-							PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY)};
-		}
-		return null;
-	}
 }

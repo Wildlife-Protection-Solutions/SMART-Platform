@@ -130,6 +130,8 @@ public class ObservationDialog extends SmartStyledDialog {
 						acopy.setAttributeListItem(a.getAttributeListItem());
 						acopy.setAttributeTreeNode(a.getAttributeTreeNode());
 						acopy.setNumberValue(a.getNumberValue());
+						acopy.setNumberValue2(a.getNumberValue2());
+						acopy.setGeom(a.getGeom());
 						acopy.setObservation(copy);
 						acopy.setStringValue(a.getStringValue());
 						

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.common.engine;
 
-
 /**
  * A class to hold the a record in a result query.  
  * 
@@ -30,5 +29,6 @@ package org.wcs.smart.query.common.engine;
  * @since 1.0.0
  */
 public interface IResultItem {
+
 
 }

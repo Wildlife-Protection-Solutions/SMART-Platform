@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -45,6 +46,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -66,6 +68,7 @@ import org.wcs.smart.util.ReprojectUtils;
  */
 public class QueryFormatOptionPage extends WizardPage {
 
+	public static final String PAGE_NAME = "Export_Options"; //$NON-NLS-1$
 	private Text txtFile = null;
 
 	private Label lblDelimiter;
@@ -82,11 +85,12 @@ public class QueryFormatOptionPage extends WizardPage {
 	
 	private Composite main;
 	
+	private boolean isDirectoryOutput = false;
 	/**
 	 * Creates a new query wizard page.
 	 */
 	protected QueryFormatOptionPage() {
-		super("Export_Options"); //$NON-NLS-1$
+		super(PAGE_NAME);
 	}
 
 	/**
@@ -98,13 +102,20 @@ public class QueryFormatOptionPage extends WizardPage {
 			location = System.getProperty("user.home"); //$NON-NLS-1$
 		}
 		
+		
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
+		this.isDirectoryOutput = wizard.getGeometryColumnsForExport() != null && wizard.getGeometryColumnsForExport().size() > 1;
+				
 		IQueryExporter exporter = wizard.getQueryExporter();
 		
-		String initFile = wizard.getQuery().getName();
-		initFile = location + File.separator + URLUtils.cleanFilename(initFile) + "." ; //$NON-NLS-1$
-		initFile += exporter.getExtension();
-		txtFile.setText( initFile );
+		if (!isDirectoryOutput) {
+			String initFile = wizard.getQuery().getName();
+			initFile = location + File.separator + URLUtils.cleanFilename(initFile) + "." ; //$NON-NLS-1$
+			initFile += exporter.getExtension();
+			txtFile.setText( initFile );
+		}else {
+			txtFile.setText( location);
+		}
 
 		boolean isDelimiter = exporter.supportsOption(ExportOption.DELIMITER);
 		boolean isProjection = exporter.supportsOption(ExportOption.PROJECTION);
@@ -165,23 +176,33 @@ public class QueryFormatOptionPage extends WizardPage {
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String ext = ((ExportQueryWizard)getWizard()).getQueryExporter().getExtension();
-				String name= ((ExportQueryWizard)getWizard()).getQueryExporter().getName(Locale.getDefault());
+				
+				if (isDirectoryOutput) {
+					DirectoryDialog dd = new DirectoryDialog(QueryFormatOptionPage.this.getShell());
+					
+					dd.setFilterPath(txtFile.getText());
+					String f = dd.open();
+					if (f != null) txtFile.setText(f);
+					
+				}else {
+					String ext = ((ExportQueryWizard)getWizard()).getQueryExporter().getExtension();
+					String name= ((ExportQueryWizard)getWizard()).getQueryExporter().getName(Locale.getDefault());
 
-				FileDialog fd = new FileDialog(QueryFormatOptionPage.this.getShell(), SWT.SAVE);
-					
-				String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-				String[] names = new String[]{name + " (*." + ext + ")",Messages.QueryFormatOptionPage_AllFileDialogOp}; //$NON-NLS-1$ //$NON-NLS-2$
-					
-				fd.setFilterExtensions(extensions);
-				fd.setFilterNames(names);
-					
-				fd.setFilterPath(txtFile.getText());
-				fd.setFileName(txtFile.getText());
-					
-				String f = fd.open();
-				if (f != null) {
-					txtFile.setText(f);
+					FileDialog fd = new FileDialog(QueryFormatOptionPage.this.getShell(), SWT.SAVE);
+						
+					String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
+					String[] names = new String[]{name + " (*." + ext + ")",Messages.QueryFormatOptionPage_AllFileDialogOp}; //$NON-NLS-1$ //$NON-NLS-2$
+						
+					fd.setFilterExtensions(extensions);
+					fd.setFilterNames(names);
+						
+					fd.setFilterPath(txtFile.getText());
+					fd.setFileName(txtFile.getText());
+						
+					String f = fd.open();
+					if (f != null) {
+						txtFile.setText(f);
+					}
 				}
 			}
 		});
@@ -295,5 +316,8 @@ public class QueryFormatOptionPage extends WizardPage {
 		ops.put(IQueryExporter.ExportOption.ENCODING, getCharset());
 		return ops;
 	}
-	
+	@Override
+    public IWizardPage getNextPage() {
+    	return null;    	
+    }
 }

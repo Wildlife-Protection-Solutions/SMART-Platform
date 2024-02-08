@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -46,39 +48,58 @@ import org.wcs.smart.udig.style.StyleManager;
 public class QueryStyleProvider  extends AbstractQueryStyleProvider{
 
 	@Override
-	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo.LayerType layerType,  Session s) {
+	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo info, ConservationArea ca, Session s) {
 		if (queryUuid == null) return null;
+		
 		String tableName = null;
-		String resourceKey = null;
+		String defaultStyle = null;
+		
 		if (queryType.equals(PatrolGriddedQuery.KEY)){
-			tableName = PatrolGriddedQuery.class.getSimpleName(); 
-			resourceKey = "raster"; //$NON-NLS-1$
+			tableName = PatrolGriddedQuery.class.getSimpleName();
+			defaultStyle = PatrolGriddedQuery.DEFAULT_STYLE_KEY;
 		}else if (queryType.equals(PatrolObservationQuery.KEY)){
-			tableName = PatrolObservationQuery.class.getSimpleName(); 
-			resourceKey = "Waypoint"; //$NON-NLS-1$
+			tableName = PatrolObservationQuery.class.getSimpleName();
+			defaultStyle = PatrolObservationQuery.DEFAULT_STYLE_KEY;
 		}else if (queryType.equals(PatrolWaypointQuery.KEY)){	
-			tableName = PatrolWaypointQuery.class.getSimpleName(); 
-			resourceKey = "Waypoint"; //$NON-NLS-1$
+			tableName = PatrolWaypointQuery.class.getSimpleName();
+			defaultStyle = PatrolWaypointQuery.DEFAULT_STYLE_KEY;
 		}else if (queryType.equals(PatrolQuery.KEY)){	
-			tableName = PatrolQuery.class.getSimpleName(); 
-			resourceKey = "Patrol"; //$NON-NLS-1$
+			tableName = PatrolQuery.class.getSimpleName();
+			defaultStyle = PatrolQuery.DEAFULT_STYLE_KEY;
 		}else{
 			return null;
 		}
 		
-		Query<String> query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid", String.class); //$NON-NLS-1$ //$NON-NLS-2$
+		//attribute style
+		StyleBlackboard sb = super.findDataModelAttributeStyle(s, ca, info.getGeometryColumnId());
+		if (sb != null) return sb;
+						
+		//query style
+		Query<String> query = s.createQuery("SELECT style  FROM " + tableName + " WHERE uuid = :uuid", String.class); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
 		List<String> results = query.list();
-		if (results.size() == 0 ) return null;
-		String stylemap = results.get(0);
-		
-		try {
-			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
-		} catch (Exception e) {
-			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Could not parse query style.", e); //$NON-NLS-1$
+						
+		if (results.size() > 0 && results.get(0) != null) {
+			String stylemap = (String) results.get(0);
+						
+			try {
+				StyleBlackboard x = StyleManager.INSTANCE.fromStringMap(stylemap).get(info.getGeometryColumnId());
+				if (x != null) return x;
+			} catch (Exception e) {
+				Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing SMART Query style.", e); //$NON-NLS-1$
+			}
+		}else {
+			//default style
+			SmartStyle style = StyleManager.INSTANCE.getMapLayerDefaultStyle(ca, defaultStyle, s);
+			if (style != null) {
+				try {
+					return StyleManager.INSTANCE.fromString(style.getStyleString());
+				} catch (Exception e) {
+					Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing default SMART Query style.", e); //$NON-NLS-1$
+				}
+			}
 		}
-		return null;
-
+		return null;	
 	}
 
 }

@@ -28,8 +28,12 @@ import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelLocation;
@@ -44,7 +48,8 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	public static enum Column{
 		RECORD_UUID("recordlocation:record_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		ID("recordlocation:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		GEOM("recordlocation:geom", java.sql.Types.JAVA_OBJECT), //$NON-NLS-1$
+		POINT("recordlocation:point", IGeometryColumn.Type.POINT.birtDataType), //$NON-NLS-1$
+		POLYGON("recordlocation:polygon", IGeometryColumn.Type.POLYGON.birtDataType), //$NON-NLS-1$
 		DATE("recordlocation:date", java.sql.Types.DATE), //$NON-NLS-1$
 		COMMENT("recordlocation:comment", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		OBSERVATION("recordlocation:observation", java.sql.Types.VARCHAR); //$NON-NLS-1$
@@ -65,9 +70,11 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 		public Object getValue(IntelLocation location, Locale l) {
 			if (this == RECORD_UUID) return location.getRecord().getUuid();
 			if (this == ID) return location.getId();
-			if (this == GEOM) {
+			if (this == POINT || this == POLYGON) {
 				try{
-					return location.getGeometry();
+					Geometry g = location.getGeometry();
+					if (this == POINT && g instanceof Point) return g;
+					if (this == POLYGON && g instanceof Polygon) return g;
 				}catch (ParseException e){
 					Logger.getLogger(RecordLocationDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}

@@ -73,8 +73,31 @@ public class Upgrader753To800 extends AbstractInteralDatabaseUpgrader {
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 		
-		
+		//drop entity plugin tables if they exists
 		String[] sql = new String[] {
+			"drop table smart.entity_gridded_query",  //$NON-NLS-1$
+			"drop table smart.entity_observation_query",  //$NON-NLS-1$
+			"drop table smart.entity_summary_query",  //$NON-NLS-1$
+			"drop table smart.entity_waypoint_query",  //$NON-NLS-1$
+			"drop table smart.entity_attribute_value",  //$NON-NLS-1$
+			"drop table smart.entity",  //$NON-NLS-1$
+			"drop table smart.entity_attribute",  //$NON-NLS-1$
+			"drop table smart.entity_type"  //$NON-NLS-1$
+		};
+		for (String s : sql) {
+			try {
+				c.createStatement().execute(s);
+			}catch (Exception ex) {
+				//don't worry if the table doesn't exists
+			}
+		}
+		
+		
+		
+		
+		sql = new String[] {
+		
+				"delete from smart.db_version where plugin_id = 'org.wcs.smart.entity' or plugin_id = 'org.wcs.smart.entity.query'",  //$NON-NLS-1$
 				
 				//remove icon, iconfiles from conservation areas that are not referenced
 				//leave any custom icons if they are used or not  
@@ -118,6 +141,10 @@ public class Upgrader753To800 extends AbstractInteralDatabaseUpgrader {
 				
 				//increase size of property field
 				"ALTER TABLE smart.conservation_area_property alter column value set data type varchar(32672)", //$NON-NLS-1$
+				
+				//geometry support
+				"ALTER TABLE smart.wp_observation_attributes add column geom BLOB", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation_attributes add column number_value_2 double", //$NON-NLS-1$
 				
 				//hibernate 6 employee uuid cannot conflict with ccaa uuid
 				"update smart.employee set uuid = x'00000000000000000000000000000001' where uuid = x'00000000000000000000000000000000'" //$NON-NLS-1$

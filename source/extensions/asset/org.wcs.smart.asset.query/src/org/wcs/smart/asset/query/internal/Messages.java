@@ -102,6 +102,7 @@ public class Messages extends NLS {
 	public static String AssetQueryLabelProvider_StationLocationFilterOptoin;
 	public static String AssetQueryLabelProvider_TotalActiveHours;
 	public static String AssetQueryLabelProvider_TotalHoursColumnName;
+	public static String AssetQueryLabelProvider_WaypointColumnNAme;
 	public static String AssetQueryOptions_CaGroupByOptionName;
 	public static String AssetQueryOptions_QueryOpStation;
 	public static String AssetQueryTemplateCloner_AssetTypeNotFound;

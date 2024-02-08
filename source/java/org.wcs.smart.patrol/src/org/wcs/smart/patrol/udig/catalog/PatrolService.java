@@ -154,9 +154,10 @@ public class PatrolService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
+					PatrolDataSource source = getDataStore(monitor);
 					ArrayList<PatrolGeoResource> temp = new ArrayList<>();
-					for (String tt : getDataStore(monitor).getTypeNames()) {
-						temp.add(new PatrolGeoResource(this, tt));
+					for (String tt : source.getTypeNames()) {
+						temp.add(new PatrolGeoResource(this, tt, source.getName(tt)));
 					}
 					this.members = temp;
 				}
@@ -165,6 +166,8 @@ public class PatrolService extends IService {
 		return members;
 	}
 
+
+	
 	/**
 	 * @see org.locationtech.udig.catalog.IService#createInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */

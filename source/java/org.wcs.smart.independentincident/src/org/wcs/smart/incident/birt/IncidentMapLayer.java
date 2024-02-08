@@ -21,17 +21,24 @@
  */
 package org.wcs.smart.incident.birt;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.hibernate.Session;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.incident.birt.details.IncidentDataset;
-import org.wcs.smart.incident.birt.details.IncidentDatasetResultSetMetadata;
-import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.birt.observations.IncidentObservationAttributeDataset;
+import org.wcs.smart.incident.birt.observations.IncidentObservationAttributeDatasetResultSetMetadata;
+import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * MapLayer for adding incident dataset to BIRT map.
@@ -39,7 +46,7 @@ import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
  * @author Emily
  *
  */
-public class IncidentMapLayer implements IBirtMapLayerManager {
+public class IncidentMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvider {
 
 	public IncidentMapLayer() {
 	}
@@ -50,7 +57,8 @@ public class IncidentMapLayer implements IBirtMapLayerManager {
 			return false;
 		}
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (odaHandle.getExtensionID().equals(IncidentDataset.DATASET_TYPE)){
+		if (odaHandle.getExtensionID().equals(IncidentDataset.DATASET_TYPE) || 
+			odaHandle.getExtensionID().equals(IncidentObservationAttributeDataset.DATASET_TYPE) ){
 			return true;
 		}
 		return false;
@@ -58,13 +66,32 @@ public class IncidentMapLayer implements IBirtMapLayerManager {
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle) throws Exception {
-		MapLayerInfo position = new MapLayerInfo(Messages.IncidentMapLayer_IncidentPositionName, null, LayerType.POINT, IncidentDatasetResultSetMetadata.GEOM_COLUMN_NAME);
-		MapLayerInfo raw = new MapLayerInfo(Messages.IncidentMapLayer_RawPositionName, null, LayerType.POINT, IncidentDatasetResultSetMetadata.RAW_GEOM_COLUMN_NAME);
-		
-		List<MapLayerInfo> items = new ArrayList<>();
-		items.add(position);
-		items.add(raw);
-		return items;
+		if (handle instanceof OdaDataSetHandle) {
+			return findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
+		}
+		return Collections.emptyList();		
 	}
 
+	@Override
+	public StyleBlackboard getStyle(String extensionId, 
+			String queryText, MapLayerInfo info, ConservationArea ca,
+			Locale l, Session s) {
+		
+		if (extensionId.equals(IncidentObservationAttributeDataset.DATASET_TYPE)) {
+			//get all geometry attributes
+			Attribute.AttributeType type = null;
+			if (info.getLayerType() == LayerType.MULTILINE || info.getLayerType() == LayerType.LINE) {
+				type = Attribute.AttributeType.LINE;
+			}
+			if (info.getLayerType() == LayerType.MULTIPOLYGON || info.getLayerType() == LayerType.POLYGON) {
+				type = Attribute.AttributeType.POLYGON;
+			}
+			if (type == null) return null;
+			
+			return StyleManager.INSTANCE.buildThemedGeometryAttributeStyle(
+					IncidentObservationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE.name, 
+					type, s, ca, false);			
+		}
+		return null;
+	}
 }

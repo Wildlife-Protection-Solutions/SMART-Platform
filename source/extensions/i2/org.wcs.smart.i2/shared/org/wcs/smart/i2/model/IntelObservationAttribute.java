@@ -32,8 +32,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
@@ -41,12 +48,15 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
+import org.wcs.smart.util.GeometryUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -66,17 +76,18 @@ public class IntelObservationAttribute extends UuidItem{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
-
 	
 	private AttributeListItem listItem;
 	private AttributeTreeNode nodeItem;
 	private String sValue;
 	private Double dValue;
+	private Double dValue2;
 	private IntelObservation observation;
 	private Attribute attribute;
+	private byte[] geom;
+	private GeometryAttributeValue parsedGeometry = null;
 	private Collection<IntelObservationAttributeList> listItems;
-
+	
 	public IntelObservationAttribute(){
 		
 	}
@@ -131,6 +142,14 @@ public class IntelObservationAttribute extends UuidItem{
 		this.dValue = value;
 	}
 	
+	@Column(name="double_value_2")
+	public Double getNumberValue2(){
+		return this.dValue2;
+	}
+	public void setNumberValue2(Double value){
+		this.dValue2 = value;
+	}
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id.observationAttribute", cascade=CascadeType.ALL, orphanRemoval = true)
 	public Collection<IntelObservationAttributeList> getAttributeListItems(){
 		return this.listItems;
@@ -139,8 +158,77 @@ public class IntelObservationAttribute extends UuidItem{
 		this.listItems = items;
 	}
 	
+	@Column(name="geom")
+	@Lob
+	public byte[] getGeom() {
+		return geom;
+	}
+
+	/**
+	 * Users should not call this method. They should use
+	 * setGeometry(Geometry, GeometrySource) instead. This is the only
+	 * way the string/double fields will be maintained.
+	 * 
+	 * @param geom
+	 */
+	public void setGeom(byte[] geom) {
+		this.geom = geom;
+	}
+	
+
+	@Transient
+	public void setGeometry(GeometryAttributeValue value) {		
+		if (value == null) {
+			setGeom(null);
+			setStringValue(null);
+			setNumberValue(null);
+			this.parsedGeometry = null;
+		}else {
+			try {				 
+				setGeom((new WKBWriter()).write(value.getGeometry()));
+				this.parsedGeometry = value;
+				setStringValue(value.getSource().name());
+				
+				setNumberValue(value.getPerimeter());
+				if (value.getGeometry() instanceof MultiPolygon) {
+					setNumberValue2(value.getArea());
+				}
+			} catch (Exception e) {
+				Logger.getLogger(IntelObservationAttribute.class.getName()).log(Level.WARNING, "Error parsing attribute geometry", e); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	@Transient
+	public GeometryAttributeValue getGeometry() {		
+		if (parsedGeometry == null && getGeom() != null){
+			Geometry g = null;
+			try {				
+				g = (new WKBReader()).read(geom);
+			} catch (Exception e) {
+				Logger.getLogger(IntelObservationAttribute.class.getName()).log(Level.WARNING, "Error parsing attribute geometry", e); //$NON-NLS-1$
+				return null;
+			}
+			
+			Double area = getNumberValue2();
+			Double perimeter = getNumberValue();
+
+			Attribute.GeometrySource source = Attribute.GeometrySource.UNKNOWN;
+			if (getStringValue() != null) {
+				try {
+					source = Attribute.GeometrySource.valueOf(getStringValue());
+				}catch (Exception ex) {
+					Logger.getLogger(IntelObservationAttribute.class.getName()).log(Level.WARNING, "Unable to determine geometry source from: " + getStringValue(), ex); //$NON-NLS-1$
+				}
+			}
+			this.parsedGeometry = new GeometryAttributeValue(g, area, perimeter, source);			
+		}
+		return parsedGeometry;
+	}
+	
 	public boolean hasValue(){
-		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null
+		return this.dValue != null || this.listItem != null || this.nodeItem != null 
+				|| this.sValue != null || this.geom != null
 				|| (this.listItems != null && !this.listItems.isEmpty());	}
 		
 	/**
@@ -151,21 +239,21 @@ public class IntelObservationAttribute extends UuidItem{
 	@Transient
 	public Object getAttributeValue(){
 		AttributeType type = getAttribute().getType();
-		if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
-			return getNumberValue();
-		}else if (type == AttributeType.TEXT){
-			return getStringValue();
-		}else if (type == AttributeType.LIST){
-			return getAttributeListItem();
-		}else if (type == AttributeType.MLIST){
-			if (getAttributeListItems() == null) return Collections.emptySet();
-			return getAttributeListItems().stream().map(m->m.getAttributeListItem()).collect(Collectors.toSet());
-		}else if (type == AttributeType.TREE){
-			return getAttributeTreeNode();
-		}else if (type == AttributeType.DATE){
-			return getDateValue();
+		switch(type) {
+			case BOOLEAN:
+			case NUMERIC:return getNumberValue();
+			case DATE: return getDateValue();
+			case LIST: return getAttributeListItem();
+			case MLIST: {
+				if (getAttributeListItems() == null) return Collections.emptySet();
+				return getAttributeListItems().stream().map(m->m.getAttributeListItem()).collect(Collectors.toSet());
+			}
+			case TEXT: return getStringValue();
+			case TREE: return getAttributeTreeNode();
+			case LINE: return getGeometry();
+			case POLYGON: return getGeometry();
 		}
+		
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
 	
@@ -262,7 +350,14 @@ public class IntelObservationAttribute extends UuidItem{
 				}
 				text = sb.substring(0,  sb.length() - 2);
 			}
+			break;
+		case POLYGON:
+		case LINE:
+			text = GeometryUtils.getAttributeGeometryLabel(getGeometry(), l);
+			break;
+		
 		}
+		
 		return text;
 	}
 	
@@ -379,10 +474,28 @@ public class IntelObservationAttribute extends UuidItem{
 				
 			}
 			break;
+		case POLYGON:
+			if (newValue == null){
+				setGeometry(null);
+			}else if (newValue instanceof GeometryAttributeValue && ((GeometryAttributeValue) newValue).getGeometry() instanceof MultiPolygon){
+				setGeometry((GeometryAttributeValue)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for polygon attributes - must be GeometryAttributeValue with geometry of type multipolygon"); //$NON-NLS-1$
+			}
+			break;
+		case LINE:
+			if (newValue == null){
+				setGeometry(null);
+			}else if (newValue instanceof GeometryAttributeValue && ((GeometryAttributeValue) newValue).getGeometry() instanceof MultiLineString){
+				setGeometry((GeometryAttributeValue)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for linestring attributes - must be GeometryAttributeValue with geometry of type multilinestring"); //$NON-NLS-1$
+			}
+			break;
 		default:
 			throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 		}
 		
 	}
-	
+
 }

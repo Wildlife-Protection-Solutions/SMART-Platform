@@ -102,6 +102,8 @@ public class Messages extends NLS {
 	public static String MissionDropItem_Label;
 	public static String MissionEndDateField_Name;
 	public static String MissionFilter_MissionNotFound;
+	public static String MissionGridQueryDefaultStyle_ErQueryMap;
+	public static String MissionGridQueryDefaultStyle_GridLayerName;
 	public static String MissionIdDropItem_JobName;
 	public static String MissionIdDropItem_MissionIdLabel;
 	public static String MissionIdGroupByDropItem_AllLabel;
@@ -119,7 +121,9 @@ public class Messages extends NLS {
 	public static String MissionMemberDropItem_MemberLabel;
 	public static String MissionMemberDropItem_MemberText;
 	public static String MissionMemberFilter_EmployeeNotFound;
+	public static String MissionObservationQueryDefaultStyle_observationlayer;
 	public static String MissionPropertyQueryColumn_MissionPropertyColumnLabel;
+	public static String MissionQueryDefaultStyle_missionlayer;
 	public static String MissionQueryType_CannotCombineTrackAndObsFilters;
 	public static String MissionQueryType_MissionQueryName;
 	public static String MissionStartDateField_Name;
@@ -127,6 +131,7 @@ public class Messages extends NLS {
 	public static String MissionTrackInfoSection_NA;
 	public static String MissionTrackInfoSection_NumMissions;
 	public static String MissionTrackInfoSection_NumTracks;
+	public static String MissionTrackQueryDefaultStyle_tracklayer;
 	public static String MissionTrackQueryType_MissionTrackQueryType;
 	public static String MissionValueItem_NumberOfDays;
 	public static String MissionValueItem_NumberOfHours;
@@ -137,6 +142,8 @@ public class Messages extends NLS {
 	public static String MissionValueItem_TotalNumSurveys;
 	public static String MissionValueItem_TotalTrackLength;
 	public static String MissionValueItem_ValueItemNotSupported;
+	public static String MissionWaypointQueryDefaultStyle_waypointlayer;
+	public static String MissionWaypointTrackQueryDefaultStyle_wptracklayer;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;
 	public static String QueryServiceInfo_Description;
@@ -298,6 +305,8 @@ public class Messages extends NLS {
 	public static String SurveyQueryLabelProvider_ObservationGroupColumnName;
 	public static String SurveyQueryLabelProvider_RawXColumnLabel;
 	public static String SurveyQueryLabelProvider_RawYColumnLabel;
+	public static String SurveyQueryLabelProvider_TrackGeomColumn;
+	public static String SurveyQueryService_MissionTrackGeoResource;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryError;
 	public static String SurveySummaryQueryType_QueryTypeName;

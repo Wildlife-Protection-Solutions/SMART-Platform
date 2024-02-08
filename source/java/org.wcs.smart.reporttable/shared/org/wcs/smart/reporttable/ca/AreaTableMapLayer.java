@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.reporttable.ca;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -29,7 +28,6 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Map Layers for asset station and asset station location BIRT tables.
@@ -63,15 +61,9 @@ public class AreaTableMapLayer implements IBirtMapLayerManager {
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
 		if (handle instanceof OdaDataSetHandle){
-			String geomColumn = null;
-			if (((OdaDataSetHandle)handle).getQueryText().startsWith("smartareas:")){ //$NON-NLS-1$
-				geomColumn = AreaTable.Column.GEOMETRY.getName();				
-			}
-			if (geomColumn == null) return null;
-			return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTIPOLYGON, geomColumn));		
+			return this.findGeometryColumnsInResultSet((OdaDataSetHandle) handle);
 		}
 		return null;
-		
 	}
 
 }

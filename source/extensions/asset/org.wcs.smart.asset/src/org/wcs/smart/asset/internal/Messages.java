@@ -660,6 +660,7 @@ public class Messages extends NLS {
 	public static String DeploymentFromXml_ConvertSubtask;
 	public static String DeploymentFromXml_CovertingAttributesSubTask;
 	public static String DeploymentFromXml_EmployeeNotFound;
+	public static String DeploymentFromXml_GeometryParseError;
 	public static String DeploymentFromXml_InvalidAssetType;
 	public static String DeploymentFromXml_InvalidFile;
 	public static String DeploymentFromXml_ListItemNotFound;
@@ -673,6 +674,7 @@ public class Messages extends NLS {
 	public static String DeploymentFromXml_SaveError;
 	public static String DeploymentFromXml_SavingSubTask;
 	public static String DeploymentFromXml_SignatureTypeNotFound;
+	public static String DeploymentFromXml_SourceParseError;
 	public static String DeploymentFromXml_StationNotFound;
 	public static String DeploymentFromXml_TreeNodeNotFound;
 	public static String DeploymentFromXml_unzipError;

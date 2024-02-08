@@ -46,7 +46,8 @@ public class PatrolGriddedQuery extends GriddedQuery {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "patrolgrid"; //$NON-NLS-1$
-	
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.patrol.query.map.grid"; //$NON-NLS-1$
+
 	/**
 	 * @see org.wcs.smart.query.model.Query#getType()
 	 */

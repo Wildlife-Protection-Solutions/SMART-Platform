@@ -197,6 +197,20 @@ public class Messages extends NLS {
 
 	public static String ObservationAttachmentLabelProvider_SignatureTypeLabel;
 
+	public static String ObservationAttributeDetailsShell_AreaLabel;
+
+	public static String ObservationAttributeDetailsShell_AreaWithUnits;
+
+	public static String ObservationAttributeDetailsShell_DateTimeLabel;
+
+	public static String ObservationAttributeDetailsShell_PerimeterLabel;
+
+	public static String ObservationAttributeDetailsShell_PerimeterWithUnits;
+
+	public static String ObservationAttributeDetailsShell_SourceLabel;
+
+	public static String ObservationAttributeDetailsShell_WpIdLabel;
+
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;
 	public static String ObservationCloner_ProgressName;
@@ -218,6 +232,8 @@ public class Messages extends NLS {
 
 	public static String ObservationItemList_ShowDetails;
 
+	public static String ObservationLabelProvider_0;
+
 	public static String ObservationLabelProvider_attributenotfound;
 
 	public static String ObservationLabelProvider_categorynotfound;
@@ -231,6 +247,8 @@ public class Messages extends NLS {
 	public static String ObservationLabelProvider_invalidbooleanvalue;
 
 	public static String ObservationLabelProvider_InvalidCmUuid;
+
+	public static String ObservationLabelProvider_InvalidSource;
 
 	public static String ObservationLabelProvider_invalidlistitem;
 
@@ -253,6 +271,10 @@ public class Messages extends NLS {
 	public static String ObservationLabelProvider_mssingproperty1;
 
 	public static String ObservationLabelProvider_noprocessor;
+
+	public static String ObservationLabelProvider_NotLineGeometry;
+
+	public static String ObservationLabelProvider_NotPolygonGeometry;
 
 	public static String ObservationLabelProvider_SignatureTypeNotFound;
 

@@ -312,7 +312,7 @@
                     <property name="name">geometry</property>
                     <property name="nativeName">geometry</property>
                     <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
+                    <property name="nativeDataType">8202</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[plan]]></xml-property>
@@ -600,7 +600,7 @@
                     <property name="name">geometry</property>
                     <property name="nativeName">geometry</property>
                     <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
+                    <property name="nativeDataType">8202</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[subplan]]></xml-property>

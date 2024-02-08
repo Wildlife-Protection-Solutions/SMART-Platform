@@ -23,73 +23,79 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int K_EXACT = 10;
   /** RegularExpression Id. */
-  int COMMA = 11;
+  int AREA = 11;
   /** RegularExpression Id. */
-  int LESS = 12;
+  int PERIMETER = 12;
   /** RegularExpression Id. */
-  int LESSEQUAL = 13;
+  int COMMA = 13;
   /** RegularExpression Id. */
-  int GREATER = 14;
+  int LESS = 14;
   /** RegularExpression Id. */
-  int GREATEREQUAL = 15;
+  int LESSEQUAL = 15;
   /** RegularExpression Id. */
-  int EQUAL = 16;
+  int GREATER = 16;
   /** RegularExpression Id. */
-  int NOTEQUAL = 17;
+  int GREATEREQUAL = 17;
   /** RegularExpression Id. */
-  int NOTEQUAL2 = 18;
+  int EQUAL = 18;
   /** RegularExpression Id. */
-  int OPENPAREN = 19;
+  int NOTEQUAL = 19;
   /** RegularExpression Id. */
-  int CLOSEPAREN = 20;
+  int NOTEQUAL2 = 20;
   /** RegularExpression Id. */
-  int SLASH = 21;
+  int OPENPAREN = 21;
   /** RegularExpression Id. */
-  int PLUS = 22;
+  int CLOSEPAREN = 22;
   /** RegularExpression Id. */
-  int MINUS = 23;
+  int SLASH = 23;
   /** RegularExpression Id. */
-  int CONTAINS = 24;
+  int PLUS = 24;
   /** RegularExpression Id. */
-  int NOT_CONTAINS = 25;
+  int MINUS = 25;
   /** RegularExpression Id. */
-  int STREQUALS = 26;
+  int CONTAINS = 26;
   /** RegularExpression Id. */
-  int BETWEEN = 27;
+  int NOT_CONTAINS = 27;
   /** RegularExpression Id. */
-  int NUMBER = 28;
+  int STREQUALS = 28;
   /** RegularExpression Id. */
-  int FLOAT = 29;
+  int BETWEEN = 29;
   /** RegularExpression Id. */
-  int INTEGER = 30;
+  int NUMBER = 30;
   /** RegularExpression Id. */
-  int DIGIT = 31;
+  int FLOAT = 31;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 32;
+  int INTEGER = 32;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 33;
+  int DIGIT = 33;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 34;
+  int S_CONST_LITERAL = 34;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 35;
+  int ATT_STR_KEY = 35;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 36;
+  int ATT_VALUE_KEY = 36;
   /** RegularExpression Id. */
-  int ATT_MLIST_KEY = 37;
+  int ATT_BOOL_KEY = 37;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 38;
+  int ATT_LIST_KEY = 38;
   /** RegularExpression Id. */
-  int ATT_DATE_KEY = 39;
+  int ATT_MLIST_KEY = 39;
   /** RegularExpression Id. */
-  int DM_KEY = 40;
+  int ATT_TREE_KEY = 40;
   /** RegularExpression Id. */
-  int DATE_STRING = 41;
+  int ATT_DATE_KEY = 41;
   /** RegularExpression Id. */
-  int LETTER = 42;
+  int ATT_GEOM_KEY = 42;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 43;
+  int DM_KEY = 43;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 44;
+  int DATE_STRING = 44;
+  /** RegularExpression Id. */
+  int LETTER = 45;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 46;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 47;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -107,6 +113,8 @@ public interface ParserConstants {
     "\"not\"",
     "\"or\"",
     "\"exact\"",
+    "\"area\"",
+    "\"perimeter\"",
     "\",\"",
     "\"<\"",
     "\"<=\"",
@@ -136,6 +144,7 @@ public interface ParserConstants {
     "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ATT_GEOM_KEY>",
     "<DM_KEY>",
     "<DATE_STRING>",
     "<LETTER>",

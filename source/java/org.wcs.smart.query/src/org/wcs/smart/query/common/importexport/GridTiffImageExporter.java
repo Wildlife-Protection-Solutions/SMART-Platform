@@ -24,7 +24,7 @@ package org.wcs.smart.query.common.importexport;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
@@ -72,7 +72,7 @@ public class GridTiffImageExporter implements IQueryExporter {
 
 	@Override
 	public void export(Query query, IQueryResult result, Path file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor)
+			Map<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		if ( ((GridQueryResult)result).getData().size() == 0 )
 			throw new Exception(Messages.GridTiffImageExporter_EmptyTiffError);

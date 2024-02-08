@@ -40,7 +40,7 @@ public class PatrolZoomToResultProvider extends ZoomToInfoProvider {
 	@Override
 	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof PatrolQueryResultItem) {
-			Geometry g = ((PatrolQueryResultItem)resultItem).asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+			Geometry g = ((PatrolQueryResultItem)resultItem).asGeometry();
 			if (g != null){
 				zoomTo(g);
 				return;

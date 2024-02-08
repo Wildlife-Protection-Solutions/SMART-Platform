@@ -160,6 +160,28 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_TaskName;
 	public static String PatrolCtPackageManager_DefaultName;
 	public static String PatrolCtPackageManager_PatrolType;
+	public static String PatrolCyberTrackerLabelProvider_CaErrorMessage;
+
+	public static String PatrolCyberTrackerLabelProvider_CreatedMessage;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning1;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning2;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning3;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning4;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning5;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning6;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning7;
+
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning8;
+
+	public static String PatrolCyberTrackerLabelProvider_ModifiedMessage;
+
 	public static String PatrolImporter_DuplicateMessage;
 	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;

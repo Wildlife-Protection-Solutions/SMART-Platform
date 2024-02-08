@@ -29,8 +29,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -112,16 +114,23 @@ public enum RoutineExtensionManager {
 	public synchronized Collection<IQaDataProvider> getDataProviders(){
 		if (dataproviders != null) return dataproviders;
 		List<IQaDataProvider> temp = new ArrayList<>();
-		IExtensionRegistry registry = RegistryFactory.getRegistry();
-		IExtensionPoint pnt = registry.getExtensionPoint(QA_ROUTINE_TYPE_EXTENSION_ID);
-		IConfigurationElement[] config = pnt.getConfigurationElements();
-		for (IConfigurationElement e : config) {
-			if (e.getName().equals("data_provider")){ //$NON-NLS-1$
-				try{
-					IQaDataProvider type = (IQaDataProvider)e.createExecutableExtension("class"); //$NON-NLS-1$
-					temp.add(type);
-				}catch (Exception ex){
-					Logger.getLogger(RoutineExtensionManager.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+		
+		
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+        IExtensionPoint extensionPoint = registry.getExtensionPoint(QA_ROUTINE_TYPE_EXTENSION_ID);
+        if (extensionPoint == null) return Collections.emptyList();
+            IExtension[] extensions = extensionPoint.getExtensions();
+		
+		for (IExtension extension : extensions) {
+            IConfigurationElement[] elements = extension.getConfigurationElements();
+            for (IConfigurationElement e : elements) {
+				if (e.getName().equals("data_provider")){ //$NON-NLS-1$
+					try{
+						IQaDataProvider type = (IQaDataProvider)e.createExecutableExtension("class"); //$NON-NLS-1$
+						temp.add(type);
+					}catch (Exception ex){
+						Logger.getLogger(RoutineExtensionManager.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+					}
 				}
 			}
 		}

@@ -135,6 +135,7 @@ public class ReportPlan {
 			PlatformUI.getWorkbench().showPerspective(PlanReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			ReportPlanEditorInput input = new ReportPlanEditorInput(getCustomPlanTemplateLocation());
 			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
+			
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ReportPlan_ErrorEditingPlanTemplate + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;

@@ -22,15 +22,24 @@
 package org.wcs.smart.er.query.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKBReader;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A class to hold the results of a mission track 
@@ -345,20 +354,46 @@ public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQuery
 	private static final WKBReader reader = new WKBReader();
 	
 	@Override
-	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(TRACK_GEOMCOLUMN_KEY)){
-			if (getGeometry() == null) return null;
-			try{
-				return reader.read(getGeometry());
-			}catch (Exception ex){
-				Logger.getLogger(MissionTrackResultItem.class.getName()).log(Level.WARNING, "Error parsing geometry.", ex); //$NON-NLS-1$
-			}
+	public Geometry asGeometry() {
+		
+		if (getGeometry() == null) return null;
+		try{
+			return reader.read(getGeometry());
+		}catch (Exception ex){
+			Logger.getLogger(MissionTrackResultItem.class.getName()).log(Level.WARNING, "Error parsing geometry.", ex); //$NON-NLS-1$
 		}
 		return null;
 	}
 
+	/**
+	 * Converts a query result item to a feature.
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	@Override
+	public SimpleFeature toSimpleFeature(SimpleFeatureType type, QueryColumn geometryColumn,
+			List<QueryColumn> columns) {
+		List<Object> data = new ArrayList<Object>();
+		
+		data.add(geometryColumn.getValue(this));
+		data.add(getMissionId() + "." + UuidUtils.uuidToString(getTrackUuid())); //$NON-NLS-1$
+		int i = 2;
+		for (QueryColumn c : columns){
+			if (c.isVisible() && !c.getKey().equalsIgnoreCase(geometryColumn.getKey())){
+				data.add(QueryColumnUtils.getValue(this, c, type.getDescriptor(i++), Locale.getDefault()));
+			}
+		}		
+		return SimpleFeatureBuilder.build(type, data, (String)data.get(1));
+	}
+	
 	@Override
 	public String getMissionLeader() {
 		throw new UnsupportedOperationException();
 	}
+
 }

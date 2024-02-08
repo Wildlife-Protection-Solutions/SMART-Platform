@@ -443,7 +443,8 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getObject(int)
 	 */
 	public Object getObject(int index) throws OdaException {
-		return getCurrentItem(index);
+		lastRowItem = getCurrentItem(index);
+		return lastRowItem;
 	}
 
 	/**

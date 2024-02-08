@@ -138,9 +138,9 @@ public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 					sb.append( UuidUtils.uuidToString(((AttributeListItem)x).getUuid() ));
 					sb.append(SPACER);
 				}
-				sb.deleteCharAt(sb.length()- 1);
 				
 				if (sb.length() != 0) {
+					sb.deleteCharAt(sb.length()- 1);
 					CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 					if (option == null){
 						option = CmAttributeOptionFactory.createDefaultValueOption(getSourceObject());

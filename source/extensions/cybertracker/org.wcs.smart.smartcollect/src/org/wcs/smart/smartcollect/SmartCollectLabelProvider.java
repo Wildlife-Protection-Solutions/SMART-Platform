@@ -26,6 +26,8 @@ import java.util.Locale;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
+import org.wcs.smart.smartcollection.json.SmartCollectJsonImportWarning;
+import org.wcs.smart.smartcollection.json.SmartCollectJsonProcessor;
 
 /**
  * Label provider for SmartCollect incidents
@@ -39,6 +41,12 @@ public class SmartCollectLabelProvider implements ISmartCollectLabelProvider {
 
 		if (item.getClass() == SmartCollectWaypointSource.class) return Messages.SmartCollectLabelProvider_SmartCollectIncident; 
 
+		if (item == SmartCollectJsonImportWarning.WarningType.NO_USER) return Messages.SmartCollectLabelProvider_ImportWarning1;
+		if (item == SmartCollectJsonImportWarning.WarningType.MISSING_DEVICE_ID) return Messages.SmartCollectLabelProvider_ImportWarning2;
+		if (item == SmartCollectJsonImportWarning.WarningType.FEATURE_DISCARDED) return Messages.SmartCollectLabelProvider_ImportWarning3;
+		if (item == SmartCollectJsonImportWarning.WarningType.USER_BLACKLISTED_FEATURE_DISCARDED) return Messages.SmartCollectLabelProvider_ImportWarning4;
+		if (item == SmartCollectJsonProcessor.FINISH_MESSAGE) return Messages.SmartCollectLabelProvider_ImportWarning5;
+		
 		return null;
 	}
 

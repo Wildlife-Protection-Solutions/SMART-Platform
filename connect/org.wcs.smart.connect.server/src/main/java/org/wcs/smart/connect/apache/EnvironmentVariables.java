@@ -47,7 +47,8 @@ public enum EnvironmentVariables {
 		CHANGELOG_CLEAN_UP_DAYS("smartconnect.changelog_cleanup_days"), //$NON-NLS-1$
 		GFW_CLEAN_UP_DAYS("smartconnect.gfw_cleanup_days"), //$NON-NLS-1$
 		SPATIAL_REF_SYS_TABLE("smartconnect.spatial_ref_sys_table"), //$NON-NLS-1$
-		DATA_QUEUE_CLEAN_UP_DAYS("smartconnect.dataqueue_cleanup_days"); //$NON-NLS-1$
+		DATA_QUEUE_CLEAN_UP_DAYS("smartconnect.dataqueue_cleanup_days"), //$NON-NLS-1$
+		DATA_QUEUE_ERROR_OUT_DAYS("smartconnect.dataqueue_error_out_days"); //$NON-NLS-1$
 		
 		public String key;
 		

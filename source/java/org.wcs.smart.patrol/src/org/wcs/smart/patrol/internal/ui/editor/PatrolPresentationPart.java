@@ -196,6 +196,8 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 	
 	private Layer waypointLayer = null;
 	private Layer trackLayer = null;
+
+	
 	private Object currentSelection = null;
 	
 	private boolean autoZoom = true;
@@ -207,12 +209,26 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			patrolService = new PatrolService(parentEditor.getPatrol());
 	    	try {
+	    		Map<String, IGeoResource> toAdd = new HashMap<>();
 	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
-	    		
 	    		List<IGeoResource> sortedLayers = new ArrayList<>();
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) sortedLayers.add(l);
+
+	    		for (IGeoResource l : layers) toAdd.put(  ((PatrolGeoResource)l).getType(), l );
+    
+	    		String[] orderedLayers = new String[] {
+	    				PatrolDataSource.TRACK_PART_TYPE, 
+	    				PatrolDataSource.WAYPOINT_PRJ_TYPE, 
+	    				PatrolDataSource.WAYPOINT_TYPE,
+	    		};
+	    		for (String name : orderedLayers) {
+	    			sortedLayers.add(toAdd.get(name));
+	    			toAdd.remove(name);
+	    		}
+	    		List<IGeoResource> othersorted = new ArrayList<>();
+	    		othersorted.addAll(toAdd.values());
+	    		othersorted.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
+	    		sortedLayers.addAll(0,othersorted);
+    		
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
@@ -243,7 +259,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		    					
 		    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
 		    					if (fs != null) {
-		    						l.setName(fs.getLayerName());
 		    						l.setVisible(fs.getDefaultVisibility());
 		    						l.eNotify(new ENotificationImpl(
 		    								(InternalEObject) l, Notification.SET,
@@ -251,13 +266,24 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		    					}
 		    					
 		    					if (l.getGeoResource().canResolve(PatrolGeoResource.class)) {
-		    						if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) {
+		    						
+		    						
+		    						String type = l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor()).getType();
+		    						if (type.equals(PatrolDataSource.TRACK_PART_TYPE)) {
 		    							trackLayer = l;
-		    						}else if (((PatrolGeoResource)l.getGeoResource().resolve(PatrolGeoResource.class, new NullProgressMonitor())).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) {
+		    						}else if (type.equals(PatrolDataSource.WAYPOINT_TYPE)) {
 		    							waypointLayer = l;
 		    							waypointLayer.setStyleBlackboard(new WaypointLayerStyleBlackboard(waypointLayer.getStyleBlackboard()));
 		    							waypointLayer.getStyleBlackboard().put(SelectionStyleContent.ID, 
 		    									StyleUtils.INSTANCE.getPointSelectionStyle(waypointLayer.getSchema()));
+//		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_LINESTRING)) {
+//		    							attributeLineStringLayer = l;
+//		    							//attributeLineStringLayer.setFilter(Filter.EXCLUDE);
+//		    						}else if (type.equals(PatrolDataSource.OBS_ATTRIBUTE_POLYGON)) {
+//		    							attributePolygonLayer = l;
+//		    							
+//		    							//DataStore src = attributePolygonLayer.getGeoResource().resolve(PatrolGeoResource.class, null).resolve(DataStore.class, null);
+//		    							//attributePolygonLayer.setFilter(Filter.EXCLUDE);
 		    						}
 		    					 }
 		    				}
@@ -381,6 +407,10 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
     	});
 	}
 
+    public void renderMap() {
+    	super.getMap().getRenderManager().refresh(null);
+    }
+    
 	private void addLayers(){
 		if (loadDefaultLayers != null){
 			loadDefaultLayers.cancel();			

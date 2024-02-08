@@ -67,6 +67,10 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case SIGNATURE_TYPE_NOT_FOUND: return Messages.ObservationLabelProvider_SignatureTypeNotFound;
 		case INVALID_CM_UUID: return Messages.ObservationLabelProvider_InvalidCmUuid;
 		case CM_MISSING: return Messages.ObservationLabelProvider_CmNotFound;
+		case INVALID_GEOMETRY_ATTRIBUTE: return Messages.ObservationLabelProvider_0;
+		case INVALID_GEOMETRY_SRC_ATTRIBUTE: return Messages.ObservationLabelProvider_InvalidSource;
+		case INVALID_LINE_ATTRIBUTE: return Messages.ObservationLabelProvider_NotLineGeometry;
+		case INVALID_POLYGON_ATTRIBUTE: return Messages.ObservationLabelProvider_NotPolygonGeometry;
 		}
 		return ""; //$NON-NLS-1$
 	}

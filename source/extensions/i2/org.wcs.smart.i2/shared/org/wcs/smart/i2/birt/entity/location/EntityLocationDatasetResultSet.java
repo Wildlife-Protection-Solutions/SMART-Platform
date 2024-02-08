@@ -283,7 +283,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		if (colIndex == recordSourceLinkColumn) {
+		if (colIndex == recordSourceLinkColumn && currentItem instanceof IntelEntityLocation) {
 			IntelEntityLocation location = (IntelEntityLocation) currentItem;
 			if (!viewableRecords.contains(location.getLocation().getRecord().getProfile())) {
 				return INSUFFICIENT_PRIVILEGES;
@@ -522,7 +522,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getObject(int)
 	 */
 	public Object getObject(int index) throws OdaException {
-		return getCurrentItem(index);
+		lastRowItem = getCurrentItem(index);
+		return lastRowItem;
 	}
 
 	/**

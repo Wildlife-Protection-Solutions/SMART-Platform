@@ -21,40 +21,56 @@
  */
 package org.wcs.smart.connect.hibernate;
 
+import java.sql.Types;
+
+import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
+import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 
 /**
- * Extension of the postgreSQL dialog to change the way BLOB types
- * are registered to work with the @Lob annotation requirements for
- * apache derby byte[] fields.
+ * Extension of the postgreSQL dialog to change the way BLOB types are
+ * registered to work with the @Lob annotation requirements for apache derby
+ * byte[] fields.
  * 
  * @author Emily
  *
  */
 public class SmartPostgresDialect extends PostgreSQLDialect {
 
-	 public SmartPostgresDialect() {
-		 super(DatabaseVersion.make( 14 ));
+	public SmartPostgresDialect() {
+		super(DatabaseVersion.make(14));
+	}
 
-	        /*
-	         * We use @Lob annotation for byte[] to make apache derby happy.  So
-	         * we need to map this to the bytea type in postgresql, otherwise it is mapped
-	         * to the oid type which doesn't work for us.
-	        */
-//	        registerColumnType(Types.BLOB, "bytea"); //$NON-NLS-1$
-	        //registerColumnType(Types.OTHER, "pg_uuid");
-//	        registerColumnType(1111, "uuid"); //$NON-NLS-1$
-	        
-	        
-	    }
-	 
-//	    @Override
-//	    public SqlTypeDescriptor  remapSqlTypeDescriptor(SqlTypeDescriptor sqlTypeDescriptor) {
-//	        if (sqlTypeDescriptor.getSqlType() == java.sql.Types.BLOB) {
-//	            return BinaryTypeDescriptor.INSTANCE;
-//	        }
-//	        return super.remapSqlTypeDescriptor(sqlTypeDescriptor);
-//	    }
+    /*
+     * We use @Lob annotation for byte[] to make apache derby happy (apache derby doesn't have
+     * bytea type only blob).  So
+     * we need to map this to the bytea type in postgresql, otherwise it is mapped
+     * to the oid type which doesn't work for us.
+    */
+
+	@Override
+	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+		super.contributeTypes(typeContributions, serviceRegistry);
+		final JdbcTypeRegistry jdbcTypeRegistry = typeContributions.getTypeConfiguration().getJdbcTypeRegistry();
+		jdbcTypeRegistry.addDescriptor(Types.BLOB, BinaryJdbcType.INSTANCE);
+
+	}
+
+	@Override
+	protected String columnType(int sqlTypeCode) {
+		if (sqlTypeCode == java.sql.Types.BLOB)
+			return "bytea"; //$NON-NLS-1$
+		return super.columnType(sqlTypeCode);
+	}
+
+	@Override
+	protected String castType(int sqlTypeCode) {
+		if (sqlTypeCode == java.sql.Types.BLOB)
+			return "bytea"; //$NON-NLS-1$
+		return super.castType(sqlTypeCode);
+	}
 
 }

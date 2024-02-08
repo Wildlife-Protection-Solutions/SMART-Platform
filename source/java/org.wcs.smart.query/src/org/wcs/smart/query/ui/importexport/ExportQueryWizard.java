@@ -24,11 +24,15 @@ package org.wcs.smart.query.ui.importexport;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
@@ -46,6 +50,7 @@ import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -54,11 +59,14 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -84,11 +92,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private ExportQueryLocationPage page2;
 	private ExportQueryListPage page3;
 	private ExportQueryDefLocationPage page4;
+	private ExportQueryGeometryColumnPage page2a;
 	
 	private boolean hasError = false;
 	private List<QueryEditorInput> initSelection = null;
 	
 	private List<Projection> supportedProjections = null;
+	private List<QueryColumn> queryColumns = null;
 	private Projection defaultProjection = null;
 	
 	private ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
@@ -106,10 +116,29 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			supportedProjections = QueryFactory.buildQuery(s,Projection.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 			defaultProjection = HibernateManager.getCurrentViewProjection(s);
+			
+			//TODO: this might be slow
+			if (query instanceof SimpleQuery) {
+				queryColumns = ((SimpleQuery) query).computeQueryColumns(Locale.getDefault(), s, ()->defaultProjection);
+				
+			}
 		}
 		super.setNeedsProgressMonitor(true);
 	}
 	
+	public List<QueryColumn> getGeometryColumns(IQueryExporter exporter){
+		if (queryColumns == null) return null;
+		if (exporter == null) return null;
+		
+		List<QueryColumn> geomColumns = queryColumns.stream()
+				.filter(e-> (e instanceof IGeometryColumn))
+				.filter(e -> exporter.canExport(e))
+				.collect(Collectors.toList());
+		geomColumns .sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		
+		return geomColumns;
+	}
+
 	/**
 	 * Creates a new wizard that will allow users to export
 	 * a set of query definitions.
@@ -160,9 +189,12 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		if (this.query != null){
 			page1 = new ExportQueryTypePage();
 			super.addPage(page1);
-		
+
+			page2a = new ExportQueryGeometryColumnPage();
+			super.addPage(page2a);
+			
 			page2 = new ExportQueryLocationPage();
-			super.addPage(page2);
+			super.addPage(page2);			
 		}
 		
 		page3 = new ExportQueryListPage();
@@ -185,6 +217,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	public IQueryExporter getQueryExporter(){
 		return page1.getQueryExporter();
+	}
+	
+	public List<QueryColumn> getGeometryColumnsToExport(IQueryExporter exporter){
+		if (page2a == null) return this.getGeometryColumns(exporter);
+		if (page2a.getGeometryColumns().isEmpty()) return null;
+		if (this.getGeometryColumns(exporter) != null && this.getGeometryColumns(exporter).size() == 1) return this.getGeometryColumns(exporter); 
+		return page2a.getGeometryColumns();
 	}
 	
 	/**
@@ -241,6 +280,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * Exports a single query to the selected format/file.
 	 */
 	private boolean exportSingleFile(IQueryExporter exporter, IProgressMonitor monitor) throws Exception{
+		
+		List<QueryColumn> geometryColumns = getGeometryColumnsToExport(exporter);
+		
 		Path outputFile = page2.getFile();
 		if (exporter.getDefaultExtension() == null){
 			getDialogSettings().put(LAST_DIR_KEY, outputFile.toString());
@@ -248,12 +290,28 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			getDialogSettings().put(LAST_DIR_KEY, outputFile.getParent().toString());
 		}
 		
-		if (!Files.isDirectory(outputFile) && !Files.exists(outputFile.getParent())){
-			boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputFile.getParent()}));
+		if ( !Files.isDirectory(outputFile) && !Files.exists(outputFile.getParent())){
+			boolean create = MessageDialog.openQuestion(getShell(), 
+					Messages.ExportQueryWizard_DialogTitle, 
+					MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, outputFile.getParent()));
 			if (!create){
 				return false;
 			}else{
 				if (!SmartUtils.createDirectory(outputFile.getParent())){
+					return false;
+				}
+			}
+		}
+		
+		if ( geometryColumns != null && geometryColumns.size() > 1
+				&& !Files.exists(outputFile)){
+			boolean create = MessageDialog.openQuestion(getShell(), 
+					Messages.ExportQueryWizard_DialogTitle, 
+					MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, outputFile));
+			if (!create){
+				return false;
+			}else{
+				if (!SmartUtils.createDirectory(outputFile)){
 					return false;
 				}
 			}
@@ -280,7 +338,32 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			return false;
 		}
 		
-		exporter.export(getQuery(), getQuery().getCachedResults(), outputFile, ops, monitor);
+		if (ops == null) ops = new HashMap<>();
+		if (this.queryColumns != null) {
+			ops.put(IQueryExporter.QUERY_COLUMN_KEY, this.queryColumns);
+		}
+		
+		if(geometryColumns != null) {
+			Query query = getQuery();
+			IQueryResult results = query.getCachedResults();
+			
+			for (QueryColumn geomColumn:geometryColumns) {
+				Map<String,Object> thisops = new HashMap<>(ops);
+				thisops.put(IQueryExporter.GEOMETRY_COLUMN_KEY, geomColumn);
+				
+				Path out = outputFile;
+				if (geometryColumns.size() > 1) {
+					String name = query.getName() + "_" + geomColumn.getKey(); //$NON-NLS-1$
+					name = URLUtils.cleanFilename(name) + "."  + exporter.getDefaultExtension(); //$NON-NLS-1$
+					out = out.resolve(name);
+				}
+				
+				exporter.export(query, results, out, thisops, monitor);
+			}
+		
+		}else {
+			exporter.export(getQuery(), getQuery().getCachedResults(), outputFile, ops, monitor);
+		}
 
 		if (monitor.isCanceled()){
 			MessageDialog.openInformation(
@@ -511,6 +594,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		if (event.getTargetPage() == page2){
 			page2.initValues();
 			page2.setPageComplete(true);
+		}else if (event.getTargetPage() == page2a){
+			page2a.initValues();				
 		}else if (event.getTargetPage() == page3){
 			if (event.getCurrentPage() != page4){
 				page3.initValues(initSelection);

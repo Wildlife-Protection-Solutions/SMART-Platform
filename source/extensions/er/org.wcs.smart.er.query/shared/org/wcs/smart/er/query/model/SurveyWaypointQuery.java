@@ -55,7 +55,8 @@ public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 	protected String surveyDesignKey;
 	
 	public static final String KEY = "surveywaypoint"; //$NON-NLS-1$
-	
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.er.query.map.waypoint"; //$NON-NLS-1$
+
 	@Transient
 	public List<byte[]> getMissions() throws Exception{
 		if (getCachedResults() == null) return Collections.emptyList();

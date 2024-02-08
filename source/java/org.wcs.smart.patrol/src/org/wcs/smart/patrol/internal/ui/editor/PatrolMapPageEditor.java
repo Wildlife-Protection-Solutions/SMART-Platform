@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -60,6 +61,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.udig.ObservationAttributeFeatureFactory;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
@@ -106,7 +109,9 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	
 	private PatrolService patrolService = null;
 	private LoadDefaultLayersJob loadDefaultLayers;
-		
+	
+	private List<IGeoResource> dmAttributeResources = new ArrayList<>();
+	
 	private Job addLayerJob = new Job(Messages.PatrolMapPageEditor_AddLayersJobName) {
 		
 		@SuppressWarnings("unchecked")
@@ -117,9 +122,31 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
 	    		
 	    		List<IGeoResource> sortedLayers = new ArrayList<>();
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) sortedLayers.add(l);
-	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) sortedLayers.add(l);
+	    		Map<String, IGeoResource> toAdd = new HashMap<>();
+	    		
+	    		for (IGeoResource l : layers) {
+	    			String typeName = ((PatrolGeoResource)l).getType();
+	    			
+	    			if (PatrolDataSource.isGeometryAttribute(typeName)) {
+	    				dmAttributeResources.add(l);
+	    			}
+	    			toAdd.put( ((PatrolGeoResource)l).getType(), l );
+	    		}
+	    			
+	    		String[] orderedLayers = new String[] {
+	    				PatrolDataSource.TRACK_PART_TYPE, 
+	    				PatrolDataSource.WAYPOINT_PRJ_TYPE, 
+	    				PatrolDataSource.WAYPOINT_TYPE,
+	    		};
+	    		for (String name : orderedLayers) {
+	    			sortedLayers.add(toAdd.get(name));
+	    			toAdd.remove(name);
+	    		}
+	    		List<IGeoResource> othersorted = new ArrayList<>();
+	    		othersorted.addAll(toAdd.values());
+	    		othersorted.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
+	    		sortedLayers.addAll(0,othersorted);
+	    		
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
@@ -140,7 +167,6 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		    					
 		    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
 		    					if (fs != null) {
-		    						l.setName(fs.getLayerName());
 		    						l.setVisible(fs.getDefaultVisibility());
 		    						l.eNotify(new ENotificationImpl(
 		    								(InternalEObject) l, Notification.SET,
@@ -304,6 +330,9 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         patrolUpdatedListeners = null;
     }
 
+    public void renderMap() {
+    	super.getMap().getRenderManager().refresh(null);
+    }
 
     private IMapEditManager getEditManager(){
     	return new IMapEditManager() {
@@ -520,9 +549,23 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 						}
 					}
 					
-					if (waypoints.isEmpty()) return null;
-					Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
-					return new InfoPoint(vm.worldToPixel(px), waypoints, null);	
+					if (!waypoints.isEmpty()) {
+						Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+						return new InfoPoint(vm.worldToPixel(px), waypoints, null);
+					}
+					
+					//search observation attributes
+				
+					Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, dmAttributeResources.toArray(new IGeoResource[dmAttributeResources.size()]));
+					List<WaypointObservationAttribute> matched = (List<WaypointObservationAttribute>) found[0];
+					Coordinate c = (Coordinate) found[1];
+					
+					if (!matched.isEmpty()) {						
+						Coordinate px = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, vm.getCRS());
+						return new InfoPoint(vm.worldToPixel(px), matched, null);
+					}
+					
+					return null;
 				}catch (Exception ex) {
 					SmartPatrolPlugIn.log(ex.getMessage(), ex);					
 				}

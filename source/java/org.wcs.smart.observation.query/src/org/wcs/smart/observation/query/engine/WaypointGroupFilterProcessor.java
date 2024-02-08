@@ -588,7 +588,15 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 				sql.append(getSqlGenerator().asSql(Operator.AND));
 				sql.append(" CAST(" + p3 + " as date) "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(") "); //$NON-NLS-1$
-
+			}else if (attfilter.getAttributeType().isGeometry()){
+				sql.append("("); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttribute.class));
+				sql.append("."); //$NON-NLS-1$
+				sql.append(attfilter.getGeometryProperty().getDbField());
+				sql.append(" "); //$NON-NLS-1$
+				sql.append(getSqlGenerator().asSql(attfilter.getOperator()));
+				String p2 = engine.addParameterValue((Double)attfilter.getValue());
+				sql.append(" " + p2 + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 

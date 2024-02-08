@@ -65,6 +65,7 @@ import org.wcs.smart.dataentry.dialog.composite.CmAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.DateAttributeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.GeometryAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.ListAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.MListAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.NumericAttributeInfoComposite;
@@ -429,6 +430,14 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 
+		attrComposite = new GeometryAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.LINE, attrComposite);
+		
+		attrComposite = new GeometryAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.POLYGON, attrComposite);
+		
 		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);

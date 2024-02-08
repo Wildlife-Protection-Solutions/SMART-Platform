@@ -113,6 +113,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 		if (ns.equals(org.wcs.smart.incident.xml.model.v20.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
 		if (ns.equals(org.wcs.smart.incident.xml.model.v21.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
 		if (ns.equals(org.wcs.smart.incident.xml.model.v22.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
+		if (ns.equals(org.wcs.smart.incident.xml.model.v23.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
 		return false;
 	}
 	/**

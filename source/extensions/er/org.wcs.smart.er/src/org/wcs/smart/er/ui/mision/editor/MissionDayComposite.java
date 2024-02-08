@@ -30,7 +30,6 @@ import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1179,14 +1178,10 @@ public class MissionDayComposite {
 							SmartLabelProvider.getFullLabel(mm.getMember());
 						}
 						//sort
-						Collections.sort(emps, new Comparator<Employee>() {
-							@Override
-							public int compare(Employee arg0, Employee arg1) {
-								return Collator.getInstance().compare(
-										SmartLabelProvider.getFullLabel(arg0).toUpperCase(), 
-										SmartLabelProvider.getFullLabel(arg1).toUpperCase());
-							}
-						});
+						emps.sort((a,b)->Collator.getInstance().compare(
+								SmartLabelProvider.getFullLabel(a).toUpperCase(), 
+								SmartLabelProvider.getFullLabel(b).toUpperCase()));
+
 					}
 				}
 				observationEditor.setObservers(emps);

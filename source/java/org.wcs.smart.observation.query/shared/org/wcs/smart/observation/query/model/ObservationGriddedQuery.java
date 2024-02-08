@@ -48,6 +48,7 @@ public class ObservationGriddedQuery extends GriddedQuery {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String KEY = "observationgrid"; //$NON-NLS-1$
+	public static final String DEFAULT_STYLE_KEY = "org.wcs.smart.observation.query.map.grid"; //$NON-NLS-1$
 	
 	/**
 	 * @see org.wcs.smart.query.model.Query#getType()

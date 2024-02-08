@@ -44,7 +44,7 @@ public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 	public void visit(IFilter filter) {
 		if (filter instanceof AttributeFilter){
 			AttributeFilter f = (AttributeFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType());
+			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType(), f.getGeometryProperty());
 			if (!filters.contains(in)){
 				filters.add(in);
 			}

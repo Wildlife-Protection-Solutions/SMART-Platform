@@ -55,11 +55,10 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
 			LocalDateTime now = LocalDateTime.now();
-			if (item.getCreatedBy() == null){
+			if (item.getDateCreated() == null){
 				if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
 	    			item.setCreatedBy(SmartDB.getCurrentEmployee());
 	    			item.setDateCreated(now);
-	    			
 	    			
 	    			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
 	                setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
@@ -82,7 +81,7 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
 			LocalDateTime now = LocalDateTime.now();			
-			if (item.getCreatedBy() == null){
+			if (item.getDateCreated() == null){
 				if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
 	    			item.setCreatedBy(SmartDB.getCurrentEmployee());
 	    			item.setDateCreated(now);

@@ -35,22 +35,28 @@ import org.wcs.smart.report.birt.map.item.LayerItem;
 public class MapLayerInfo {
 	
 	public enum LayerType{
-		POINT ("Point"), //$NON-NLS-1$
-		POLYGON ("Polygon"), //$NON-NLS-1$
-		LINE("LineString"), //$NON-NLS-1$
-		MULTIPOINT("MultiPoint"), //$NON-NLS-1$
-		MULTIPOLYGON("MultiPolygon"), //$NON-NLS-1$
-		MULTILINE("MultiLineString"), //$NON-NLS-1$
-		RASTER("Raster"); //$NON-NLS-1$
+		POINT ("Point", "PointGeometry"), //$NON-NLS-1$ //$NON-NLS-2$
+		POLYGON ("Polygon", "PolygonGeometry"), //$NON-NLS-1$ //$NON-NLS-2$
+		LINE("LineString", "LineStringGeometry"), //$NON-NLS-1$ //$NON-NLS-2$
+		MULTIPOINT("MultiPoint", "MultiPointGeometry"), //$NON-NLS-1$ //$NON-NLS-2$
+		MULTIPOLYGON("MultiPolygon", "MultiPolygonGeometry"), //$NON-NLS-1$ //$NON-NLS-2$
+		MULTILINE("MultiLineString", "MultiLineStringGeometry"), //$NON-NLS-1$ //$NON-NLS-2$
+		RASTER("Raster", "Raster"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private String geotoolsType;
+		private String odaDataType;
 		
-		LayerType(String geotoolsType){
+		LayerType(String geotoolsType, String odaDataType){
 			this.geotoolsType = geotoolsType;
+			this.odaDataType = odaDataType;
 		}
 		
 		public String getGeotoolsType(){
 			return this.geotoolsType;
+		}
+		
+		public String getOdaType(){
+			return this.odaDataType;
 		}
 	};
 	
@@ -61,6 +67,7 @@ public class MapLayerInfo {
 	private LayerType layerType;
 	
 	private String geometryColumn;
+	private String geometryColumnId;
 	
 	private StyleBlackboard blackboard;
 		
@@ -70,6 +77,10 @@ public class MapLayerInfo {
 	
 	public MapLayerInfo(LayerItem item) {
 		this(item.getLayerName(), item.getLayerStyle(), item.getLayerType(), item.getGeometryColumn(), item.getZoomTo());
+		this.geometryColumnId = item.getGeometryColumnId();
+		if(this.layerType == LayerType.RASTER) {
+			this.geometryColumnId = "raster"; //$NON-NLS-1$
+		}
 	}
 	
 	public MapLayerInfo(String layerName, String mapStyle, LayerType type, String geometryColumn){
@@ -81,7 +92,11 @@ public class MapLayerInfo {
 		this.mapStyle = mapStyle;
 		this.layerType = type;
 		this.geometryColumn = geometryColumn;
+		this.geometryColumnId = this.geometryColumn;
 		this.zoomTo = zoomTo;
+		if(this.layerType == LayerType.RASTER) {
+			this.geometryColumnId = "raster"; //$NON-NLS-1$
+		}
 	}
 
 	public boolean getIncludeZoom() {
@@ -120,6 +135,10 @@ public class MapLayerInfo {
 		this.layerType = layerType;
 	}
 
+	public String getGeometryColumnId() {
+		return geometryColumnId;
+	}
+	
 	public String getGeometryColumn() {
 		return geometryColumn;
 	}

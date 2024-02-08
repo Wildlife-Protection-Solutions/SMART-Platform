@@ -21,22 +21,10 @@
  */
 package org.wcs.smart.patrol.query.exportimport;
 
-import org.geotools.data.DataUtilities;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
-import org.wcs.smart.patrol.query.map.geotools.PatrolQueryFeatureSource;
-import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
-import org.wcs.smart.patrol.query.map.geotools.QueryFeatureSource;
-import org.wcs.smart.patrol.query.map.geotools.QueryResultItemFeature;
-import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -61,23 +49,6 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 		return false;
 	}
 
-	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
-		if (queryType.getKey().equals(PatrolQuery.KEY)){
-			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, type);
-		}else{
-			return QueryResultItemFeature.createObservationFeature((IPatrolQueryResultItem)it,  queryColumns, type);
-		}
-	}
-	
-	@Override
-	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		if (queryType.getKey().equals(PatrolQuery.KEY)){
-			return DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryFeatureSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		}else{
-			return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryFeatureSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
-		}
-	}
 		
 }
 

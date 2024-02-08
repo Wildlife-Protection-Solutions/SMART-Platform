@@ -1027,5 +1027,11 @@
       <defaultmaplayerstyle
             class="org.wcs.smart.er.map.style.MissionMapSamplingUnitPointDefaultStyle">
       </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapLineStringAttributeDefaultStyle">
+      </defaultmaplayerstyle>
+      <defaultmaplayerstyle
+            class="org.wcs.smart.er.map.style.MissionMapPolygonAttributeDefaultStyle">
+      </defaultmaplayerstyle>
    </extension>
 </plugin>

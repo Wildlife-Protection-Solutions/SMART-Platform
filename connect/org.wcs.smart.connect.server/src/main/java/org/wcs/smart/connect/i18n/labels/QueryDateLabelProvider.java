@@ -29,6 +29,7 @@ import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CurrentQuarterDateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
 import org.wcs.smart.query.model.filter.date.Last60DaysDateFilter;
@@ -37,6 +38,7 @@ import org.wcs.smart.query.model.filter.date.LastQuarterDateFilter;
 import org.wcs.smart.query.model.filter.date.LastYearDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthToDateDateFilter;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
@@ -68,7 +70,8 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 		labels.put(YearDateGroupBy.class, "QueryDateLabelProvider.YearDatesFilterOp"); //$NON-NLS-1$
 		labels.put(WaypointDateField.class,"QueryDateLabelProvider.WpDateDatesFilterOp"); //$NON-NLS-1$
 		labels.put(WaypointLastModifiedDateField.class,"QueryDateLabelProvider.WpLastModifiedFilterOp");  //$NON-NLS-1$
-		
+		labels.put(StartHourGroupBy.class, "QueryDateLabelProvider.StartHourDateFilter"); //$NON-NLS-1$
+		labels.put(EndHourGroupBy.class, "QueryDateLabelProvider.EndHourDateFilter"); //$NON-NLS-1$
 	}
 	
 	private String getStartEndDateErrorStr(Locale l){

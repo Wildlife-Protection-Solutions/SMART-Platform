@@ -32,21 +32,32 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
+import org.wcs.smart.util.GeometryUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -55,6 +66,11 @@ import jakarta.persistence.Transient;
 
 /**
  * Waypoint observation attribute.
+ * 
+ * For Geometry attributes the geometry is stored in the geom field, the
+ * string field stores the source, and the number field stores the
+ * perimeter and the number2 field stores the area (for polygons)
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -75,6 +91,9 @@ public class WaypointObservationAttribute extends UuidItem{
 	private AttributeTreeNode nodeItem;
 	private String sValue;
 	private Double dValue;
+	private Double dValue2;
+	private byte[] geom;
+	private GeometryAttributeValue parsedGeometry = null;
 	
 	private Collection<WaypointObservationAttributeList> listItems;
 	
@@ -142,8 +161,93 @@ public class WaypointObservationAttribute extends UuidItem{
 		this.dValue = value;
 	}
 	
+	@Column(name="number_value_2")
+	public Double getNumberValue2(){
+		return this.dValue2;
+	}
+	public void setNumberValue2(Double value){
+		this.dValue2 = value;
+	}
+	
+	@Column(name="geom")
+	@Lob
+	 public byte[] getGeom() {
+		return geom;
+	}
+
+	/**
+	 * Users should not call this method. They should use
+	 * setGeometry(Geometry, GeometrySource) instead. This is the only
+	 * way the string/double fields will be maintained.
+	 * 
+	 * @param geom
+	 */
+	public void setGeom(byte[] geom) {
+		this.geom = geom;
+	}
+	
+
+	@Transient
+	public void setGeometry(GeometryAttributeValue value) {		
+		if (value == null) {
+			setGeom(null);
+			setStringValue(null);
+			setNumberValue(null);
+			setNumberValue2(null);
+			this.parsedGeometry = null;
+		}else {
+			try {				 
+				setGeom((new WKBWriter()).write(value.getGeometry()));
+				this.parsedGeometry = value;
+				if (value.getSource() == null) {
+					if (getStringValue() == null) {
+						setStringValue(GeometrySource.UNKNOWN.name());
+					}
+				}else {
+					setStringValue(value.getSource().name());
+				}
+				
+				setNumberValue(value.getPerimeter());
+				if (value.getGeometry() instanceof MultiPolygon) {
+					setNumberValue2(value.getArea());
+				}
+				
+			} catch (Exception e) {
+				Logger.getLogger(WaypointObservationAttribute.class.getName()).log(Level.WARNING, "Error parsing attribute geometry", e); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	@Transient
+	public GeometryAttributeValue getGeometry() {		
+		if (parsedGeometry == null && getGeom() != null){
+			Geometry g = null;
+			try {				
+				g = (new WKBReader()).read(geom);
+			} catch (Exception e) {
+				Logger.getLogger(WaypointObservationAttribute.class.getName()).log(Level.WARNING, "Error parsing attribute geometry", e); //$NON-NLS-1$
+				return null;
+			}
+			
+			Double area = getNumberValue2();
+			Double perimeter = getNumberValue();
+
+			Attribute.GeometrySource source = Attribute.GeometrySource.UNKNOWN;
+			if (getStringValue() != null) {
+				try {
+					source = Attribute.GeometrySource.valueOf(getStringValue());
+				}catch (Exception ex) {
+					Logger.getLogger(WaypointObservationAttribute.class.getName()).log(Level.WARNING, "Unable to determine geometry source from: " + getStringValue(), ex); //$NON-NLS-1$
+				}
+			}
+			this.parsedGeometry = new GeometryAttributeValue(g, area, perimeter, source);			
+		}
+		return parsedGeometry;
+	}
+	
 	public boolean hasValue(){
-		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null
+		return this.dValue != null || this.listItem != null || this.nodeItem != null 
+				|| this.sValue != null || this.geom != null
 				|| (this.listItems != null && !this.listItems.isEmpty());
 	}
 	
@@ -160,9 +264,10 @@ public class WaypointObservationAttribute extends UuidItem{
 		clone.attribute.getType(); /*ensure attribute has been loaded*/
 		
 		clone.listItem = listItem;
-		if (dValue != null){
-			clone.dValue = Double.valueOf(dValue);
-		}
+		clone.dValue = dValue;
+		clone.dValue2 = dValue2;
+		clone.geom = geom;
+		
 		clone.nodeItem = nodeItem;
 		if (sValue != null){
 			clone.sValue = new String(sValue);
@@ -199,6 +304,8 @@ public class WaypointObservationAttribute extends UuidItem{
 			}
 			case TEXT: return getStringValue();
 			case TREE: return getAttributeTreeNode();
+			case LINE: return getGeometry();
+			case POLYGON: return getGeometry();
 		}
 		
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
@@ -318,6 +425,24 @@ public class WaypointObservationAttribute extends UuidItem{
 				
 			}
 			break;
+		case POLYGON:
+			if (newValue == null){
+				setGeometry(null);
+			}else if (newValue instanceof GeometryAttributeValue && ((GeometryAttributeValue) newValue).getGeometry() instanceof MultiPolygon){
+				setGeometry((GeometryAttributeValue)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for polygon attributes - must be GeometryAttributeValue with geometry of type multipolygon"); //$NON-NLS-1$
+			}
+			break;
+		case LINE:
+			if (newValue == null){
+				setGeometry(null);
+			}else if (newValue instanceof GeometryAttributeValue && ((GeometryAttributeValue) newValue).getGeometry() instanceof MultiLineString){
+				setGeometry((GeometryAttributeValue)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for linestring attributes - must be GeometryAttributeValue with geometry of type multilinestring"); //$NON-NLS-1$
+			}
+			break;
 		default:
 			throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 		}
@@ -414,9 +539,12 @@ public class WaypointObservationAttribute extends UuidItem{
 				text = getAttributeTreeNode().getName();
 			}
 			break;
+		case POLYGON:
+		case LINE:
+			text = GeometryUtils.getAttributeGeometryLabel(getGeometry(), l);
+			break;
 		}
 		return text;
 	}
-	
-	
+
 }

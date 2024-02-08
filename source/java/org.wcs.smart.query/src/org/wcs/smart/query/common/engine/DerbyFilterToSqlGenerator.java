@@ -210,6 +210,9 @@ public class DerbyFilterToSqlGenerator {
 			String p2 = engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$ 
 			return "( qa.\"" + filter.getAttributeKey() + "\" >= " + p1 + " and qa.\"" + filter.getAttributeKey() + "\" < " + p2 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		
+		}else if (filter.getAttributeType().isGeometry()){
+			return " (qa.\"" + filter.getAttributeKey() + "_" + filter.getGeometryProperty().name() + "\" " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		
 		}
 		return ""; //$NON-NLS-1$
 	}

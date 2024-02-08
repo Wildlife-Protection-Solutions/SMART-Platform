@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.udig.query;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.data.Query;
@@ -54,22 +53,32 @@ public class QueryContentFeatureSource extends ContentFeatureSource {
 	
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
-		
-		String geomType = IQueryColumn.Type.GEOMETRY.getFeatureType();
-		if (entry.getName().equals(QueryDataSource.POINT_TYPE)){
-			geomType = "Point"; //$NON-NLS-1$
-		}else if (entry.getName().equals(QueryDataSource.POLYGON_TYPE)){
-			geomType = "Polygon"; //$NON-NLS-1$
-		}
-		try{
-			if (source.getResultSet() == null){
-				return FeatureGenerator.generateFeatureType(geomType, entry.getName(), Collections.emptyList());
-			}else{
-				return FeatureGenerator.generateFeatureType(geomType, entry.getName(), source.getResultSet().getQueryColumns());
+		IQueryColumn geometryColumn = source.findQueryColumn(entry.getTypeName());
+		try {
+			if (source.getResultSet() == null) {
+				return null;
+			}else {
+				return FeatureGenerator.generateFeatureType(entry.getTypeName(), geometryColumn, source.getResultSet().getQueryColumns());
 			}
-		}catch (SchemaException ex){
+		}catch (SchemaException ex) {
 			throw new IOException(ex);
 		}
+		
+//		String geomType = IQueryColumn.Type.GEOMETRY.getFeatureType();
+//		if (entry.getName().equals(QueryDataSource.POINT_TYPE)){
+//			geomType = "Point"; //$NON-NLS-1$
+//		}else if (entry.getName().equals(QueryDataSource.POLYGON_TYPE)){
+//			geomType = "Polygon"; //$NON-NLS-1$
+//		}
+//		try{
+//			if (source.getResultSet() == null){
+//				return FeatureGenerator.generateFeatureType(geomType, entry.getName(), Collections.emptyList());
+//			}else{
+//				return FeatureGenerator.generateFeatureType(geomType, entry.getName(), source.getResultSet().getQueryColumns());
+//			}
+//		}catch (SchemaException ex){
+//			throw new IOException(ex);
+//		}
 	}
 
 	@Override
@@ -104,7 +113,8 @@ public class QueryContentFeatureSource extends ContentFeatureSource {
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(
 			Query arg0) throws IOException {
 		try{
-			return new QueryFeatureReader(source.getResultSet(), getSchema());
+			IQueryColumn geometryColumn = source.findQueryColumn(entry.getTypeName());
+			return new QueryFeatureReader(source.getResultSet(), geometryColumn, getSchema());
 		}catch (Exception ex){
 			throw new IOException(ex);
 		}

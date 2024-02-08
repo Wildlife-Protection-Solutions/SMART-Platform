@@ -45,6 +45,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -281,12 +282,14 @@ public class QaError extends UuidItem{
 	 * @param geom
 	 */
 	@Column(name="geometry")
-	public void setGeometry(byte[] geom){
-		this.bytegeom = geom;
-	}
-	
+	@Lob
 	public byte[] getGeometry(){
 		return this.bytegeom;
+	}
+	
+	
+	public void setGeometry(byte[] geom){
+		this.bytegeom = geom;
 	}
 	
 	/**

@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.wcs.smart.i2.query.observation.filter.*;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.filter.AttributeFilter;
 import java.lang.Exception;
 
 public class Parser
@@ -94,6 +95,8 @@ TOKEN :
 | < STREQUALS : "equals" >
 | < BETWEEN : "between" >
 | < NOTBETWEEN : "notbetween" >
+| < AREA : "area" >
+| < PERIMETER : "perimeter" >
 }
 
 TOKEN : /* Numeric Constants */
@@ -141,6 +144,7 @@ TOKEN :
  | < ATTRIBUTE_KEY_LIST: "dm_attribute:l:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_MLIST: "dm_attribute:m:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_TREE: "dm_attribute:t:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_GEOMETRY : "dm_attribute:"("p" | "i")":"(< DM_KEY >)?":"< DM_KEY >> 
 
 
  | < EATTRIBUTE_KEY_NUMERIC : "e_attribute:n:"< DM_KEY >":"(< DM_KEY >)?>
@@ -426,6 +430,9 @@ IQueryFilter DataModelAttributeFilter():
 	|
 	/* Numeric comparison */
 	filter = DmNumberExpression()
+	|
+	/* Geometry comparison */
+	filter = DmGeometryExpression()
 	| 
 	/* boolean */
 	filter = DmBooleanExpression()
@@ -562,6 +569,26 @@ IQueryFilter DmNumberExpression():
   		return DataModelFilter.create(key, op, value);
 	}
 }
+
+IQueryFilter DmGeometryExpression():
+{
+  AttributeFilter.GeometryProperty property;
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	(  
+		<ATTRIBUTE_KEY_GEOMETRY> {key = token.image;}
+		property = GeometryProperty()				
+		op = NumberOp()
+		< NUMBER > {value = Double.parseDouble(token.image);}
+	)
+	{
+  		return DataModelFilter.create(key, property, op, value);
+	}
+}
+
 
 IQueryFilter DmKeyExpression():
 {
@@ -1045,5 +1072,17 @@ String MultiList() :
   (( < DM_KEY > { list=token.image; })(  ","  < DM_KEY > { list += "," + token.image; })*)
   {
     return list;
+  }
+}
+
+AttributeFilter.GeometryProperty GeometryProperty() :
+{}
+{
+   (
+     < AREA > | 
+     < PERIMETER >
+   )
+  {
+    return AttributeFilter.GeometryProperty.valueOfKey(token.image);
   }
 }

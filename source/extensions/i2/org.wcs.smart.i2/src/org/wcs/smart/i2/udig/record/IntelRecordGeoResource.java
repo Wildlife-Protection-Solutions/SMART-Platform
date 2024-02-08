@@ -63,7 +63,10 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
-		
+	}
+	
+	public LocationLayerType getType() {
+		return this.type;
 	}
 	
 	@Override
@@ -111,6 +114,7 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
 	            return false;
 
 	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
+	        		|| adaptee.isAssignableFrom(IntelRecordGeoResource.class)
 	                || adaptee.isAssignableFrom(IService.class)
 	                || adaptee.isAssignableFrom(IntelRecordService.class)
 	                || adaptee.isAssignableFrom(FeatureSource.class)
@@ -125,6 +129,9 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
 
     @Override
     public <T> T resolve( Class<T> adaptee, IProgressMonitor monitor ) throws IOException {
+    	if (adaptee.isAssignableFrom(IntelRecordAttributeGeoResource.class)) {
+    		return adaptee.cast(this);
+    	}
     	if (adaptee.isAssignableFrom(IGeoResourceInfo.class)){
     		return adaptee.cast(super.getInfo(monitor));
     	}
@@ -140,7 +147,8 @@ public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetR
         if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ){
         	 DataStore ds = ((IntelRecordService)service).getDataStore(monitor);
              if (ds != null) {
-                 FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(IntelRecordDataSource.generateName(type, ((IntelRecordService)service).getRecordUuid()));
+                 FeatureSource<SimpleFeatureType, SimpleFeature> fs = 
+                		 ds.getFeatureSource(IntelRecordDataSource.generateTypeName(type, ((IntelRecordService)service).getRecordUuid()));
                  if (fs != null)
                      return adaptee.cast(fs);
              }else{

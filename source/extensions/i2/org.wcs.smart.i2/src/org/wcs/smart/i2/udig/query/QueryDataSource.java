@@ -23,13 +23,17 @@ package org.wcs.smart.i2.udig.query;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryColumn;
 
 /**
  * Geotools data source for waypoint query.
@@ -47,6 +51,8 @@ public class QueryDataSource extends ContentDataStore{
 	
 	private IPagedQueryResultSet results;
 	
+	private Map<String, IQueryColumn> nameToQcMap;
+
 	
 	/**
 	 * Creates a new data source from the give query.
@@ -82,10 +88,27 @@ public class QueryDataSource extends ContentDataStore{
 
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
-		List<Name> typeNames = new ArrayList<>();
-		typeNames.add(POINT_TYPE);
-		typeNames.add(POLYGON_TYPE);
-		return typeNames;
+		nameToQcMap = new HashMap<>();
+		List<Name> types = new ArrayList<>();
+		
+		for (IQueryColumn qc : results.getQueryColumns()) {
+			if (qc.getDataType().isGeometry()) {
+				Name name = new NameImpl("smartquery", qc.getKey()); //$NON-NLS-1$
+				types.add(name);
+				nameToQcMap.put(name.getLocalPart(), qc);
+			}
+		}
+		
+		return types;
+	}
+	
+	
+	public IQueryColumn findQueryColumn(String typeName) {
+		return nameToQcMap.get(typeName);
+	}
+	
+	public String getLayerName(Name typeName) {
+		return nameToQcMap.get(typeName.getLocalPart()).getColumnName();
 	}
 	
 }

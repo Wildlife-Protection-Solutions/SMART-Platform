@@ -26,12 +26,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTWriter;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.config.ICsvDataExporter;
@@ -63,8 +65,12 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQueryExporter {
 
 	private CSVWriter writer = null;
+	private WKTWriter wktWriter = null;
+	
 	protected char delimiter = DEFAULT_DELIMITER;
 	protected Charset cs = StandardCharsets.UTF_8;
+	
+	
 	/**
 	 * Creates a new exporter that exports to csv format
 	 */
@@ -90,10 +96,13 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 				new OutputStreamWriter(Files.newOutputStream(outputFile), cs),
 				delimiter, '"', SharedUtils.LINE_SEPARATOR); 
 		
-		String data[] = new String[queryColumns.size()]; 
-		for (int i = 0; i < data.length; i ++){
+		wktWriter = new WKTWriter();
+		
+		String data[] = new String[queryColumns.size()+1]; 
+		for (int i = 0; i < data.length-1; i ++){
 			data[i] = queryColumns.get(i).getName(); 
 		}
+		data[data.length - 1] = "Geometry"; //$NON-NLS-1$
 		writer.writeNext(data);
 	}
 
@@ -104,11 +113,13 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	protected void writeRow(IResultItem row)
 			throws Exception {
 		
-		String data[] = new String[queryColumns.size()]; 
-		for (int i = 0; i < data.length; i ++){
+		String data[] = new String[queryColumns.size()+1]; 
+		for (int i = 0; i < data.length-1; i ++){
 			QueryColumn qc = queryColumns.get(i);
-			data[i] = qc.getValueAsString(qc.getValue(row), false);
+			data[i] = qc.getValueAsString(qc.getValue(row), Locale.getDefault(), false);
 		}
+		Geometry value = (Geometry)geometryColumn.getValue(row);
+		if (value != null)	data[data.length - 1] = wktWriter.write(value);
 		ICsvDataExporter.removeLineFeeds(data);
 		writer.writeNext(data);
 	}
@@ -150,8 +161,9 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	@SuppressWarnings("unchecked")
 	@Override
 	public void export(Query query, IQueryResult result, Path file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor)
+			Map<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
+		
 		//delimiter
 		if (parameters.get(DELIMITER_KEY) != null){
 			try{
@@ -176,11 +188,24 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 			};
 		}
 		
+		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
+		if (columns == null) {
+			columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+		}
+		this.geometryColumn = (QueryColumn) parameters.get(IQueryExporter.GEOMETRY_COLUMN_KEY);
+		if (this.geometryColumn == null) {
+			for (QueryColumn qc : columns) {
+				if (qc.isDefaultGeometryColumn()) {
+					this.geometryColumn = qc;
+					break;
+				}
+			}
+		}
+		
 		//filter visible columns 
 		//in SMART this returns all possible query columns; we only want to include visible query columns
 
 		SimpleQuery simpleQuery = (SimpleQuery) query;
-		List<QueryColumn> columns = simpleQuery.computeQueryColumns(Locale.getDefault(), null, provider);
 		boolean isDataFiltering = query instanceof IColumnAutoConfigQuery && result instanceof IColumnInfoProvider && ((IColumnAutoConfigQuery)simpleQuery).isShowDataColumnsOnly();
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			QueryColumn column = iterator.next();
@@ -192,11 +217,11 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		
 		//set data
 		if (result instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet<?>)result, columns, file);
+			super.setData((IPagedQueryResultSet<?>)result, geometryColumn, columns, file);
 		}else if (result instanceof MemoryQueryResult){
-			super.setData( ((MemoryQueryResult<IResultItem>)result).getData(), columns, file);
+			super.setData( ((MemoryQueryResult<IResultItem>)result).getData(), geometryColumn, columns, file);
 		}else if (result instanceof GridQueryResult){
-			super.setData( ((GridQueryResult)result).getData(), columns, file);
+			super.setData( ((GridQueryResult)result).getData(), geometryColumn, columns, file);
 		}
 		//export
 		super.export(monitor);		

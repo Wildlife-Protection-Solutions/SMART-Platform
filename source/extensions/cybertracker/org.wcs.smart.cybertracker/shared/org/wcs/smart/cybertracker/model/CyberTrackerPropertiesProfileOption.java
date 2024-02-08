@@ -46,6 +46,11 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
 	
+	public enum Unit{
+		METRIC,
+		IMPERIAL;
+		
+	}
 	public enum ProfileOptionID {
 		APP_NAME,
 		LARGE_SCROLL_BARS,
@@ -103,6 +108,7 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		IMAGE_HEIGHT,
 		
 		INCIDENT_GROUP_UI,
+		UNITS
 	}
 
 	public enum TrackTimerOp{

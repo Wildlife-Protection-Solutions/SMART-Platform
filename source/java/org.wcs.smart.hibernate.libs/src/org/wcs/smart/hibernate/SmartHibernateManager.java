@@ -283,6 +283,7 @@ public class SmartHibernateManager {
 		if (interceptor == null){
 			session = sessionFactory.openSession();
 		}else{
+			
 			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
 		}
 
@@ -290,6 +291,7 @@ public class SmartHibernateManager {
 		
 		openSessions.add(session);
 		session.addEventListeners(new SessionEndListener(session));
+		
 		
 		if (interceptor != null && interceptor instanceof SessionInterceptor){
 			((SessionInterceptor)interceptor).setSession(session);

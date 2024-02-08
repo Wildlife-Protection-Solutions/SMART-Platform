@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.Style;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.project.internal.Map;
@@ -107,8 +108,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	private ControlDecoration addButtonDecoration;
 	private ToolItem tiDelete;
 	
-	private MapComposite mapComposite;
-	private String layerStyle = null;
+	private PointMapComposite mapComposite;
+	private Style layerStyle = null;
 	
 	private boolean isMulti;
 	
@@ -131,7 +132,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	 * @param parent
 	 * @param style
 	 */
-	public LocationSelectComposite(Composite parent, int style, String layerStyle) {
+	public LocationSelectComposite(Composite parent, int style, Style layerStyle) {
 		super(parent, SWT.HORIZONTAL | style);
 		this.layerStyle = layerStyle;
 		this.isMulti = (style & SWT.SINGLE) != SWT.SINGLE;
@@ -293,10 +294,10 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		}
 		//========map part========
 		ScrolledComposite mapScrollCmp = new ScrolledComposite(this, SWT.H_SCROLL);
-		mapComposite = new MapComposite(mapScrollCmp, SWT.NONE);
+		mapComposite = new PointMapComposite(mapScrollCmp, SWT.NONE);
 		mapComposite.setDataProvider(this);
 		if (layerStyle != null){
-			mapComposite.setStyleSld(this.layerStyle);
+			mapComposite.setPointStyle(this.layerStyle);
 		}
 		
 		mapScrollCmp.setContent(mapComposite);

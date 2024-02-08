@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.survey.json;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
@@ -90,7 +91,7 @@ public class DesktopMissionJsonProcessor extends MissionJsonProcessor implements
 	private void displayWarnings(List<JsonImportWarning> warnings) throws UserCancelledException{
 		 if (!warnings.isEmpty()){
 			 	final boolean[] cont = {false};
-			 	List<String> all = warnings.stream().map(e->e.getMessage()).toList();
+			 	List<String> all = warnings.stream().map(e->e.getMessage(Locale.getDefault())).toList();
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {

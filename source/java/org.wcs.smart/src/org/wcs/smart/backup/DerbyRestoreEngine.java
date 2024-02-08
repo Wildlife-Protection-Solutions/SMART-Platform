@@ -266,6 +266,11 @@ public class DerbyRestoreEngine {
 					//these get remove in version 7.0 and up so we don't care if they exist
 					continue;
 				}
+				if (pluginId.equalsIgnoreCase("org.wcs.smart.entity") || //$NON-NLS-1$
+						 pluginId.equalsIgnoreCase("org.wcs.smart.entity.query") ) { //$NON-NLS-1$
+					//these get remove in version 8.0 and up so we don't care if they exist
+					continue;
+				}
 				if (!installedVersions.keySet().contains(pluginId)){
 					missingPlugins.append(pluginId);
 					missingPlugins.append("\n"); //$NON-NLS-1$

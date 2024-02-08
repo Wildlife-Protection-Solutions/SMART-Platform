@@ -63,6 +63,8 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDatasetMetadata;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationObservationAttributeDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationObservationAttributeDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
@@ -75,6 +77,7 @@ import org.wcs.smart.i2.birt.record.RecordMetadata;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -385,6 +388,10 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 			return new RecordMetadata(this, dataSetType);
 		}else if (dataSetType.equals(EntitySearchDataset.DATASET_TYPE)){
 			return new RecordMetadata(this, dataSetType);
+		}else if (dataSetType.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)){
+			return new RecordMetadata(this, dataSetType);
+		}else if (dataSetType.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) {
+			return new EntityLocationObservationAttributeDatasetMetadata(this);
 		}
 		throw new OdaException(
 				MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$
@@ -422,6 +429,10 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 				return new IntelQueryDataset(this);
 			}else if (dataSetType.equals(EntitySearchDataset.DATASET_TYPE)){
 				return new EntitySearchDataset(this);
+			}else if (dataSetType.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)){
+				return new RecordLocationObservationDetailsDataset(this);
+			}else if (dataSetType.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) {
+				return new EntityLocationObservationAttributeDataset(this);
 			}
 			throw new OdaException(
 					MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$

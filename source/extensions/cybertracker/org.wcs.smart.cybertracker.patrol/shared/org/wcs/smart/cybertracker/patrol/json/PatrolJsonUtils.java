@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -68,7 +69,8 @@ public class PatrolJsonUtils {
 	 * @return
 	 * @throws ParseException 
 	 */
-	public static JsonPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, ConservationArea ca, Session session) throws Exception{
+	public static JsonPatrol parsePatrolMetadata(JSONObject jsonDefaults, 
+			JSONObject jsonValues, ConservationArea ca, Session session, Locale l) throws Exception{
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
@@ -180,7 +182,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(ptransport.substring(JsonPatrolKey.TRANSPORT_TYPE.key.length() + 1));
 			PatrolTransportType transportObj = (PatrolTransportType) session.get(PatrolTransportType.class, uuid);
 			if (transportObj == null || !transportObj.getConservationArea().equals(ca)){
-				throw new Exception( (new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR)).getMessage());
+				throw new Exception( (new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR)).getMessage(l));
 
 			}else{
 				ctPatrol.setPatrolTransportType(transportObj);

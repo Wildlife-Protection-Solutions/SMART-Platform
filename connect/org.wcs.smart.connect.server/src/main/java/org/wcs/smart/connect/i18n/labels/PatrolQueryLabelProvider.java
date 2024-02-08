@@ -29,6 +29,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 
@@ -135,6 +136,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 		}
 		if (item == PatrolValueItemAreaBuffer.ERROR_MSG_KEY) {
 			return Messages.getString("PatrolQueryLabelProvider.InvalidBufferValue",l); //$NON-NLS-1$
+		}
+		if (item == TrackGeometryQueryColumn.KEY) { 
+			return Messages.getString("PatrolQueryLabelProvider.TrackColumName", l);  //$NON-NLS-1$
 		}
 		return null;
 	}

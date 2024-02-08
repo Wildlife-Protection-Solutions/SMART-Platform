@@ -2,6 +2,8 @@ package org.wcs.smart.cybertracker.incident;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -31,6 +33,7 @@ public class CtIncidentPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		SmartContext.INSTANCE.setClass(IIncidentCyberTrackerLabelProvider.class, new IncidentCyberTrackerLabelProvider());
 	}
 
 	/*

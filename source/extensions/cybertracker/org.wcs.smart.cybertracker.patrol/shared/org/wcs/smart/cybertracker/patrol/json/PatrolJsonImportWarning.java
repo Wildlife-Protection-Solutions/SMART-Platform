@@ -1,33 +1,55 @@
+/*
+ * Copyright (C) 2024 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.cybertracker.patrol.json;
 
-import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import java.util.Locale;
 
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
+
+/**
+ * @since 8.0
+ */
 public class PatrolJsonImportWarning extends JsonImportWarning {
 
-	public static final String TT_NOT_FOUND_ERROR = "Patrol transport type not found.";
-	
 	public enum WarningType{
-		STATION_NOT_FOUND("Station value not found. Station will be empty."),
-		TEAM_NOT_FOUND("Team value not found. Station will be empty."),
-		MANDATE_NOT_FOUND("Mandate value not found. Station will be empty."),
-		MEMBER_NOT_FOUND("Member not found. Member will not be added to patrol."),
-		TT_NOT_FOUND_ERROR("Patrol transport type not found. Patrol part will not be imported."),
-		TRACK_POINT_MULTI_MATCHES("The track point {0} matches multiple patrols [{1}].  Ensure the patrol days and times do not overlap and try again."),
-		PATROL_NOT_FOUND("No patrol found for 'add to previous waypoint' observation."),
-		DUPLICATE("Possible duplicate processing of file. The patrol {0} linked with this SMART Mobile data already exists in the database with an observation counter greater than the observation counter in the file ({1} > {2})");
+		STATION_NOT_FOUND,
+		TEAM_NOT_FOUND,
+		MANDATE_NOT_FOUND,
+		MEMBER_NOT_FOUND,
+		TT_NOT_FOUND_ERROR,
+		TRACK_POINT_MULTI_MATCHES,
+		PATROL_NOT_FOUND,
+		DUPLICATE;
 		
-		String message;
-		WarningType(String message, Object...data){
-			this.message = message;
-		}
-		
-		public String getMessage() {
-			return this.message;
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(IPatrolCyberTrackerLabelProvider.class)
+						.getLabel(this,  l);
 		}
 	}
 	
 
 	public PatrolJsonImportWarning(WarningType type, Object...data) {
-		super(type.getMessage(), data);
+		super(l ->type.getMessage(l), data);
 	}
 }

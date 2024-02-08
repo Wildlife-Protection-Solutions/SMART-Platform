@@ -47,6 +47,7 @@ import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.query.DataModelQueryColumns;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -152,28 +153,7 @@ public class EntityQueryColumnCache {
 						}
 					}
 
-					// add data model category columns
-					int numCategory = QueryDataModelManager.getInstance()
-							.getActiveDepth();
-					for (int i = 0; i < numCategory; i++) {
-						cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i), i));
-					}
-
-					// sort attributes alphabetically
-					List<Attribute> atts = new ArrayList<Attribute>();
-					atts.addAll(dataModel.getAttributes());
-					Collections.sort(atts, new Comparator<Attribute>() {
-						@Override
-						public int compare(Attribute o1, Attribute o2) {
-							return Collator.getInstance().compare(o1.getName(),
-									o2.getName());
-						}
-					});
-
-					for (Attribute att : atts) {
-						String name = att.getName();
-						cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType(), att.getRegex()));
-					}
+					cols.addAll(DataModelQueryColumns.generateDataModelQueryColumns(dataModel,  false));
 					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 
 					return Status.OK_STATUS;

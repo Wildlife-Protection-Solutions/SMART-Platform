@@ -38,12 +38,15 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.model.Entity;
+import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityObservationResultItem;
+import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
@@ -63,6 +66,7 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
@@ -163,6 +167,9 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine impleme
 					try(ResultSet rs = c.createStatement().executeQuery("select distinct a.keyid from "+queryDataTable+" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid")) { //$NON-NLS-1$ //$NON-NLS-2$
 						while (rs.next()) { 
 							dataColumns.add(AttributeQueryColumn.KEY_PREFIX + rs.getString(1));
+							for (GeometryProperty prop : GeometryProperty.values()) {
+								dataColumns.add(AttributeQueryColumn.KEY_PREFIX + prop.generateKey(rs.getString(1)));	
+							}
 						}
 					}
 					//looking for fixed columns that have at least one value
@@ -182,6 +189,17 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine impleme
 							dataColumns.add(key);
 						}
 					}
+					//add all entity type attributes - assume these have data
+					List<EntityType> entityTypes = session.createQuery("FROM EntityType WHERE conservationArea = :ca", EntityType.class) //$NON-NLS-1$
+					.setParameter("ca", query.getConservationArea()) //$NON-NLS-1$
+					.list();
+					for (EntityType et : entityTypes){
+						for (EntityAttribute ea : et.getAttributes()){							
+							EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
+							dataColumns.add(newcol.getKey());
+						}
+					}
+					
 					
 					result.setDataColumns(dataColumns);
 					progress.setWorkRemaining(0);

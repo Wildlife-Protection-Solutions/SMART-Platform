@@ -24,8 +24,6 @@ package org.wcs.smart.event.model;
 import java.util.List;
 import java.util.Locale;
 
-import org.wcs.smart.observation.model.WaypointObservation;
-
 /**
  * Action type represents the type of action to perform.  These can have a variety
  * of parameters as required.
@@ -68,12 +66,8 @@ public interface IActionType {
 	public List<IActionParameter> getActionParameters();
 	
 	/**
-	 * Perform the action
-	 * @param action the action to perform
-	 * @param filter the action file
-	 * @param data the observation data
-	 * @param l the locale
+	 * Called after the action is executed with the returned data
 	 */
-	public void performAction(EAction action, EFilter filter, WaypointObservation data, Locale l);
+	public void afterExecuted(Object data);
 	
 }

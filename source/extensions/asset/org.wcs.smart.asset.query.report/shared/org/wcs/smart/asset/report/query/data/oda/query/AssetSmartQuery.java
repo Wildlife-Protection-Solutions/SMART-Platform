@@ -23,24 +23,18 @@ package org.wcs.smart.asset.report.query.data.oda.query;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
-import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
-import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -135,14 +129,4 @@ public class AssetSmartQuery extends AbstractSmartQuery {
 		return super.executeQueryInternal(query, connection);
 	}
 
-	@Override
-	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
-		if (queryTypeKey.equals(AssetObservationQuery.KEY) ||
-				queryTypeKey.equals(AssetWaypointQuery.KEY)){		
-			return new GeometryColumn[]{
-					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
-							WaypointQueryResultItem.GEOMCOLUMN_KEY)};
-		}
-		return null;
-	}
 }

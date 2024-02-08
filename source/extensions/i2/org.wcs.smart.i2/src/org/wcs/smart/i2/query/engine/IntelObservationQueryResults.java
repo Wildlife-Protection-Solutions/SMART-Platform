@@ -37,6 +37,7 @@ import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKBReader;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -46,6 +47,7 @@ import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.DataModelColumn;
+import org.wcs.smart.i2.query.DataModelColumn.GeometryProperty;
 import org.wcs.smart.i2.query.FilterQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
@@ -208,6 +210,17 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 					}
 				}else if (a.getAttribute().getType() == AttributeType.TREE){
 					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeTreeNode().getName());
+					
+				}else if (a.getAttribute().getType().isGeometry()){
+					
+					
+					item.addAttribute(GeometryProperty.SOURCE.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getSource());
+					item.addAttribute(GeometryProperty.PERIMETER.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getPerimeter());
+					if (a.getAttribute().getType() == Attribute.AttributeType.POLYGON) {
+						item.addAttribute(GeometryProperty.AREA.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getArea());
+					}
+					item.addAttribute(a.getAttribute().getKeyId(), a.getGeometry().getGeometry());
+					
 				}else{
 					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeValue());
 				}

@@ -21,12 +21,8 @@
  */
 package org.wcs.smart.ui.map.location;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,39 +38,24 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.XMLMemento;
-import org.geotools.data.DataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureStore;
-import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.styling.Style;
+import org.eclipse.swt.widgets.Label;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
-import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.render.displayAdapter.IMapDisplayListener;
 import org.locationtech.udig.project.render.displayAdapter.MapDisplayEvent;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelListener;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
-import org.locationtech.udig.style.sld.SLDContent;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapInfoAreaComposite;
@@ -88,26 +69,24 @@ import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.util.GeometryUtils;
 
 /**
- * Map Composite
+ * Map Composite for display a map with some tools on a dialog.
  * 
  * @author elitvin
  * @since 1.0.0
  */
 public class MapComposite extends Composite implements MapPart {
 
-	private static final String SMART_POINT_SPEC = "fid:String,id:Integer,selected:Boolean,geom:Point:srid=4326"; //$NON-NLS-1$
-	private static final String SMART_POINT_TYPE_NAME = "smart.ISmartPoint"; //$NON-NLS-1$
-
-	private SimpleFeatureType featureType;
-	private ListFeatureCollection featureCollection;
-	private FeatureStore<SimpleFeatureType,SimpleFeature> store;
-	private Layer pointLayer = null;
-	private IGeoResource pointResource;
-	
 	private MapViewer mapViewer;
-
-	private ISmartPointDataProvider dataProvider;
-	private String styleSld = null;
+	private Label lblCoordinates;
+	
+	private String[] mapTools =  new String[] {
+			SetBasemapTool.ID,
+			ZoomExtentTool.ID,
+			PanTool.ID,
+			ZoomTool.ID,
+			ZoomInTool.ID,
+			ZoomOutTool.ID,
+			SelectionTool.ID };
 	
 	private Job refreshJob = new Job(Messages.MapComposite_MapResizeJob_Title){
 		@Override
@@ -119,29 +98,85 @@ public class MapComposite extends Composite implements MapPart {
 		}
 	};
 	
+	private IMapDisplayListener displayListener =new IMapDisplayListener() {
+		@Override
+		public void sizeChanged(MapDisplayEvent event) {
+			refreshJob.cancel();
+			refreshJob.schedule(600);
+		}
+	};
+	
+	private MapMouseWheelListener wheelListener = new MapMouseWheelListener() {
+		
+		@Override
+		public void mouseWheelMoved(MapMouseWheelEvent e) {
+			refreshJob.cancel();
+			refreshJob.schedule(600);
+		}
+	};
+	
+	private MapMouseMotionListener coordinateProvider = new MapMouseMotionListener() {
+		@Override
+		public void mouseMoved(MapMouseEvent event) {
+			event.getPoint();
+			Coordinate c = getMap().getViewportModelInternal().pixelToWorld(event.x, event.y);
+			lblCoordinates.setText(format(c.x) + ":" + format(c.y)); //$NON-NLS-1$
+		}
+
+		private String format(double d) {
+			DecimalFormat format = (DecimalFormat) NumberFormat.getNumberInstance();
+			format.setMaximumFractionDigits(4);
+			format.setMinimumIntegerDigits(1);
+			format.setGroupingUsed(false);
+			String string = format.format(d);
+			return string;
+		}
+
+		@Override
+		public void mouseDragged(MapMouseEvent event) {
+		}
+
+		@Override
+		public void mouseHovered(MapMouseEvent event) {
+		}
+	};
+	
 	/**
 	 * @param parent
 	 * @param style
 	 */
 	public MapComposite(Composite parent, int style) {
+		this(parent, style, null);
+	}
+	
+	/**
+	 * @param parent
+	 * @param style
+	 */
+	public MapComposite(Composite parent, int style, String[] mapTools) {
 		super(parent, style);
+		if (mapTools != null) this.mapTools = mapTools;
 		createControls();
+		
 	}
 	
 	@Override
 	public void dispose(){
 		super.dispose();
+		
+		mapViewer.getViewport().addMouseMotionListener(coordinateProvider);
+		mapViewer.getMap().getViewportModelInternal().setInitialized(false);
+		
+		mapViewer.getViewport().removePaneListener(displayListener);
+		mapViewer.getViewport().removeMouseWheelListener(wheelListener);
+		
 		mapViewer.getRenderManager().stopRendering();
 		mapViewer.getRenderManager().dispose();
 		mapViewer.dispose();
 		mapViewer = null;
 	}
 	
-	public void setStyleSld(String sld){
-		this.styleSld = sld;
-	}
-	
-	private void createControls() {
+	protected void createControls() {
 
 		GridLayout gd = new GridLayout(2, false);
 		gd.marginBottom=0;
@@ -162,172 +197,56 @@ public class MapComposite extends Composite implements MapPart {
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 
+		mapViewer.getViewport().addPaneListener(displayListener);
+		mapViewer.getViewport().addMouseWheelListener(wheelListener);
+		
+		MapPart current = ((ToolManager) ApplicationGIS.getToolManager()).getCurrentEditor();
+		getShell().addListener(SWT.Dispose, e->ApplicationGIS.getToolManager().setCurrentEditor(current));
+		
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
-		String[] thisTools = new String[] {
-				SetBasemapTool.ID,
-				ZoomExtentTool.ID,
-				PanTool.ID,
-				ZoomTool.ID,
-				ZoomInTool.ID,
-				ZoomOutTool.ID,
-				SelectionTool.ID };
-
-		MapToolComposite tools = new MapToolComposite(thisTools);
+		
+		MapToolComposite tools = new MapToolComposite(this.mapTools);
 		tools.createComposite(this);
 		new MapInfoAreaComposite(this, SWT.NONE, mapViewer) ;
+		
+		lblCoordinates = new Label(this, SWT.NONE);
+		lblCoordinates.setText("0, 0"); //$NON-NLS-1$
+		lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lblCoordinates.setAlignment(SWT.RIGHT);
+		
+		getMapViewer().getViewport().addMouseMotionListener(coordinateProvider);
 
+		addDefaultLayers();
+		
 		tools.selectTool(PanTool.ID);
-
-		addPointsLayer();
+	}
+	
+	protected void addDefaultLayers() {
 		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap());
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				if (isDisposed() || mapViewer == null) return;
-				
+				if (isDisposed() || mapViewer == null)
+					return;
+
 				mapViewer.getMap().sendCommandSync(new ZoomExtentCommand());
 				mapViewer.getMap().getRenderManager().refresh(null);
 			}
 		});
 		defaultLayer.schedule();
 		
-		//if I am disposed before finished cancel job
+		
+		// if I am disposed before finished cancel job
 		addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				defaultLayer.cancel();
 			}
 		});
-	
-		mapViewer.getViewport().addPaneListener(new IMapDisplayListener() {
-			@Override
-			public void sizeChanged(MapDisplayEvent event) {
-				refreshJob.cancel();
-				refreshJob.schedule(600);
-			}
-		});
-		mapViewer.getViewport().addMouseWheelListener(new MapMouseWheelListener() {
-			
-			@Override
-			public void mouseWheelMoved(MapMouseWheelEvent e) {
-				refreshJob.cancel();
-				refreshJob.schedule(600);
-			}
-		});
-
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void addPointsLayer() {
-        try {
-			featureType = DataUtilities.createType(SMART_POINT_TYPE_NAME, SMART_POINT_SPEC);
-			featureCollection = new ListFeatureCollection(featureType);
-			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
-		
-			//dispose of temporary layer when composite is disposed
-			super.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					try{
-						if (pointLayer != null){
-							CatalogPlugin.getDefault().getLocalCatalog().remove(pointLayer.getGeoResource().service(null));
-						}
-					}catch (Exception ex){
-						SmartPlugIn.log("Error removing service", ex); //$NON-NLS-1$
-					}
-					
-				}
-			});
-	        store = pointResource.resolve(FeatureStore.class, null);
-	        pointResource.resolve(DataStore.class, null);
-			List<IGeoResource> layers = new ArrayList<IGeoResource>();
-			layers.add(pointResource);
-			
-			AddLayersCommand command = new AddLayersCommand(layers, 0) {
-				@Override
-				public void run(IProgressMonitor monitor) throws Exception {
-					super.run(monitor);
-					//set custom style for points layer
-					Layer pointLayerEx = getLayers().get(0);
-					String sld = getStylingConfig();
-					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
-					SLDContent c = new SLDContent();
-					Style style = (Style)c.load(memento);
-					pointLayerEx.getStyleBlackboard().put(SLDContent.ID, style);
-				}
-			};
-			getMap().sendCommandASync(command);
-        } catch (Exception exception) {
-			SmartPlugIn.displayLog(Messages.MapComposite_PointLayer_Add_Error, exception);
-		}
-		
-	}
-
-	public void updatePointsLayer() {
-		if (store == null) {
-			return; //most likely we failed to add points layer
-		}
-		try {
-			featureCollection.clear();
-			featureCollection.addAll(getSmartPointAsFeatures(featureType));
-			
-			try{
-				store.removeFeatures(Filter.INCLUDE);
-				store.addFeatures(featureCollection);
-			}catch (ConcurrentModificationException ex){
-				//try again - this should only happen once (udig removes listener)
-				//see SMART bug 1672
-				store.removeFeatures(Filter.INCLUDE);
-				store.addFeatures(featureCollection);
-			}
-			
-			
-		} catch (IOException e) {
-			SmartPlugIn.displayLog(Messages.MapComposite_PointLayer_Update_Error, e);
-		}
-		//refresh map - only refresh point layer 
-		if (pointLayer == null){
-			for (ILayer layer : getMap().getMapLayers()){
-				if (layer.getGeoResource().getID().equals(pointResource.getID())){
-					pointLayer = (Layer)layer;
-				}
-			}
-		}
-		if (pointLayer != null){
-			pointLayer.refresh(null);
-		}
-		return;
-	}
-	
-	private List<SimpleFeature> getSmartPointAsFeatures(SimpleFeatureType ftype) {
-		if (getDataProvider() == null) {
-			return Collections.emptyList();
-		}
-		List<? extends ISmartPoint> points = getDataProvider().getPoints();
-		int size = points.size();
-		List<SimpleFeature> features = new ArrayList<SimpleFeature>(size);
-		for (int i = 0; i < size; i++) {
-			ISmartPoint point = points.get(i);
-			Object data[] = new Object[4];
-			String name = ftype.getName() + "." + i; //$NON-NLS-1$
-			data[0] = name;
-			data[1] = i;
-			data[2] = getDataProvider().isSelected(point);
-			data[3] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(point.getX(), point.getY()));
-			features.add(SimpleFeatureBuilder.build(ftype, data, name));
-		}
-		return features;
-	}
-
-	public void setDataProvider(ISmartPointDataProvider dataProvider) {
-		this.dataProvider = dataProvider;
-	}
-	
-	protected ISmartPointDataProvider getDataProvider() {
-		return dataProvider;
-	}
 	
 	@Override
 	public Map getMap() {
@@ -356,80 +275,13 @@ public class MapComposite extends Composite implements MapPart {
 
 	}
 
+	public MapViewer getMapViewer() {
+		return this.mapViewer;
+	}
+	
 	@Override
 	public IStatusLineManager getStatusLineManager() {
 		return null;
 	}
 
-	private String getStylingConfig() {
-		if (styleSld != null){
-			return styleSld;
-		}
-		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
-		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
-		"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
-		"	&lt;sld:UserStyle xmlns=\"http://www.opengis.net/sld\""+ //$NON-NLS-1$
-		"		xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\""+ //$NON-NLS-1$
-		"		xmlns:gml=\"http://www.opengis.net/gml\"&gt;"+ //$NON-NLS-1$
-		"		&lt;sld:Name&gt;Default Styler&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-		"		&lt;sld:Title /&gt;"+ //$NON-NLS-1$
-		"		&lt;sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:Name&gt;simple&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-
-		//rule for not selected points (same as default)
-		"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
-		"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
-		"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-		"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
-		"                            &lt;ogc:Literal&gt;false&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
-		"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-		"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
-		"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-		"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Fill /&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
-		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
-		"								&lt;sld:CssParameter name=\"fill\"&gt;#1B9E77&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
-		"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
-		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Size&gt;6.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
-		"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
-		"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-		"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
-		
-		//rule for selected points
-		"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
-		"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
-		"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-		"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
-		"                            &lt;ogc:Literal&gt;true&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
-		"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
-		"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
-		"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-		"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
-		"								&lt;sld:CssParameter name=\"fill\"&gt;#FF000&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
-		"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
-		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Size&gt;6.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
-		"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
-		"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-		"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
-		
-		
-		"		&lt;/sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-		"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
-		"</styleEntry>"; //$NON-NLS-1$
-	
-	}
-	
 }

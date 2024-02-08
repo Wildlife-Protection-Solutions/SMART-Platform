@@ -29,6 +29,7 @@ import java.util.Locale;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
@@ -131,6 +132,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == GeometryType.PLOT || 
 				type == GeometryType.TRANSECT){
+			
 			int length = sd.getSamplingUnitAttributes().size() + 3;
 			if (type == GeometryType.TRANSECT){
 				length ++;
@@ -150,7 +152,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 					names[i++] = java.sql.Types.DOUBLE;
 				}
 			}
-			names[i++] = java.sql.Types.JAVA_OBJECT;
+			if (type == GeometryType.PLOT) {
+				names[i++] = IGeometryColumn.Type.POINT.birtDataType;
+			}else if (type == GeometryType.TRANSECT) {
+				names[i++] = IGeometryColumn.Type.LINESTRING.birtDataType;	
+			}
+			
 		}
 		return names;
 	}

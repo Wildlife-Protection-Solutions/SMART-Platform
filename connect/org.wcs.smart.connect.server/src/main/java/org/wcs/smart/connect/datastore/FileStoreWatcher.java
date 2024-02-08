@@ -82,6 +82,13 @@ public class FileStoreWatcher implements Runnable {
     private Set<UUID> casToIgnore = Collections.synchronizedSet(new HashSet<UUID>());
 	private final Logger logger = Logger.getLogger(FileStoreWatcher.class.getName());
 	
+	
+	//when tracking is turned off we
+	//record which files have been ignored
+	//this gets emptied when tracking is turned back on
+	//this maps from a ca_uuid to a list of array [path, kind]
+	private Map<UUID, List<Object[]>> caIgnoredFiles = Collections.synchronizedMap(new HashMap<>());
+    
     public FileStoreWatcher(SessionFactory sessionFactory) throws IOException{
     	this.sessionFactory = sessionFactory;
     	keys = Collections.synchronizedMap(new HashMap<WatchKey, Path>());
@@ -125,12 +132,28 @@ public class FileStoreWatcher implements Runnable {
         return true;
     }
     
+    
+    public boolean ignoredContains(ConservationAreaInfo ca, Path p, Kind<?> kind) {
+    	List<Object[]> data = null;
+    	synchronized (caIgnoredFiles) {
+    		if (caIgnoredFiles.containsKey(ca.getUuid())) {
+    			data = caIgnoredFiles.get(ca.getUuid());
+    		}
+		}
+    	for (Object[] d : data) {
+    		if (d[0].equals(p) && d[1].equals(kind)) return true;
+    	}
+    	return false;
+    }
+    
     public void ignoreCa(ConservationAreaInfo ca) {
+    	caIgnoredFiles.put(ca.getUuid(), new ArrayList<>());
     	casToIgnore.add(ca.getUuid());
     }
     
     public void addCa(ConservationAreaInfo ca) {
-    	casToIgnore.remove(ca.getUuid());
+    	caIgnoredFiles.remove(ca.getUuid());
+    	casToIgnore.remove(ca.getUuid());    	
     }
     
     /**
@@ -163,7 +186,7 @@ public class FileStoreWatcher implements Runnable {
     
     private void processEvent(Path p, Kind<?> kind){
     	if (ignorePaths.contains(p)) return;
-    	
+    	    	
     	Path relativePath = FileSystems.getDefault()
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
     			.relativize(p);
@@ -175,7 +198,10 @@ public class FileStoreWatcher implements Runnable {
     		//no in a ca directory so we do not replication
     		return;
     	}
-    	if (casToIgnore.contains(caUuid)) return;
+    	if (casToIgnore.contains(caUuid)) {
+    		caIgnoredFiles.get(caUuid).add(new Object[] {p,kind});
+    		return;
+    	}
     	
     	ChangeLogItem.Action type = ChangeLogItem.Action.FS_INSERT;
     	if (kind == StandardWatchEventKinds.ENTRY_CREATE){

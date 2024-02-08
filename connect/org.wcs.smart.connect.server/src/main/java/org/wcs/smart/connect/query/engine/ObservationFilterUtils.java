@@ -116,8 +116,8 @@ public class ObservationFilterUtils {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + observationTable + " (observation_uuid uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (AttributeInfo key : keys) {
-			sql.append(", " + key.getKey() + " " //$NON-NLS-1$ //$NON-NLS-2$
-					+ engine.getDataType(key.getType()));
+			sql.append(", " + key.getColumnName() + " " //$NON-NLS-1$ //$NON-NLS-2$
+					+ engine.getDataType(key));
 		}
 		int i = 0;
 		for (AttributeFilter f : mlistFilters) {
@@ -147,7 +147,7 @@ public class ObservationFilterUtils {
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(attributeTempTable); 
 			sql.append("(observation_uuid uuid, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -167,10 +167,10 @@ public class ObservationFilterUtils {
 					sql.append("t.hkey "); //$NON-NLS-1$
 				} else {
 					sql.append(engine.tablePrefix(WaypointObservationAttribute.class)
-							+ "." + key.getColumn()); //$NON-NLS-1$						
+							+ "." + key.getTableColumn()); //$NON-NLS-1$						
 				}
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(" "); //$NON-NLS-1$
 
 				sql.append("FROM "); //$NON-NLS-1$
@@ -216,7 +216,7 @@ public class ObservationFilterUtils {
 				
 				
 				sql.append("WHERE "); //$NON-NLS-1$
-				String p = engine.addParameterValue(key.getKey());
+				String p = engine.addParameterValue(key.getAttributeKey());
 				sql.append(" " + engine.tablePrefix(Attribute.class) + ".keyid = " + p ); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(" AND "); //$NON-NLS-1$
 				sql.append(engine.tablePrefix(Waypoint.class) + ".source in ("); //$NON-NLS-1$
@@ -248,7 +248,7 @@ public class ObservationFilterUtils {
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append(" set "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(" = "); //$NON-NLS-1$
 				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
 				sql.append(attributeTempTable);
@@ -263,7 +263,7 @@ public class ObservationFilterUtils {
 				sql.append("INSERT INTO "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append("(observation_uuid, "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append(key.getColumnName());
 				sql.append(")"); //$NON-NLS-1$
 				sql.append("(SELECT  observation_uuid, value FROM "); //$NON-NLS-1$
 				sql.append(attributeTempTable);

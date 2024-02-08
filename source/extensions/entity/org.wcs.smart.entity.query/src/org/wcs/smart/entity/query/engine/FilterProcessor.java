@@ -28,6 +28,7 @@ import java.util.HashSet;
 
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.entity.query.engine.visitor.AreaFilterVisitor;
+import org.wcs.smart.entity.query.engine.visitor.HasObservationFilterVisitor;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -59,6 +60,7 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 	 */
 	public FilterProcessor(String tableName, DerbyEntityQueryEngine engine, Query query){
 		super(tableName, engine, query);
+		this.observationFilterVisitor = new HasObservationFilterVisitor();
 	}
 	
 	protected DerbyFilterToSqlGenerator getSqlGenerator() {

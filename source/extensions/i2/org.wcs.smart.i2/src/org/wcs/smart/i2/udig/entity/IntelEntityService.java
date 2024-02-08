@@ -24,33 +24,20 @@ package org.wcs.smart.i2.udig.entity;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
-import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -71,46 +58,6 @@ public class IntelEntityService extends IService {
 	private Exception error;
 	
 	private IntelEntityDataSource ds = null;
-	private AttributeListItem dmAttribute;
-		
-	/*
-	 * this jobs configures the names of the geo resources
-	 * associated with this service
-	 */
-	private Job configureResourceNames = new Job("load name"){ //$NON-NLS-1$
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			String recordName = Messages.IntelEntityService_DefaultName;
-			
-			try(Session s = HibernateManager.openSession()){
-				IntelEntity r = (IntelEntity) s.get(IntelEntity.class, entityUuid);
-				if (r != null){
-					recordName = r.getIdAttributeAsText(Locale.getDefault());
-				}
-			}catch (Exception e){	
-				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
-			}
-			try{
-				for (IGeoResource lresource : new ArrayList<>(resources(monitor))){
-					if (lresource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
-						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format(Messages.IntelEntityService_Title, recordName));
-					}else if (lresource.getIdentifier().getRef().equals(LocationLayerType.POINT.name())){
-						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} ({1})", recordName, SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.PROFILE_SOURCE_LABEL, Locale.getDefault()))); //$NON-NLS-1$
-					}else if (lresource.getIdentifier().getRef().equals(LocationLayerType.POLYGON.name())){
-						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} ({1})", recordName, SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.PROFILE_SOURCE_LABEL, Locale.getDefault()))); //$NON-NLS-1$
-					}else if (lresource.getIdentifier().getRef().equals(LocationLayerType.DM_OBS.name())){
-						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} ({1})", recordName, SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.DM_SOURCE_LABEL, Locale.getDefault()))); //$NON-NLS-1$
-					}else{
-						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(recordName);
-					}
-				}
-			}catch (Exception e){
-				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
-			}
-			
-			return org.eclipse.core.runtime.Status.OK_STATUS;
-		}
-	};
 	
 	public IntelEntityService(Map<String, Serializable> params) {
 		this.params = params;
@@ -120,7 +67,6 @@ public class IntelEntityService extends IService {
 		}catch (Exception ex){
 			error = ex;
 		}
-		configureResourceNames.schedule();
 	}
 	
 	/**
@@ -134,12 +80,26 @@ public class IntelEntityService extends IService {
 	/**
 	 * Schedule the job to refresh the resource names
 	 */
-	public void refreshNames(){
-		configureResourceNames.schedule();
+	public void refreshNames(IntelEntity ie){
+		if (!entityUuid.equals(ie.getUuid())) return;
+		
 		try {
-			configureResourceNames.join();
-		} catch (InterruptedException e) {
-			Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
+			IntelEntityDataSource source = getDataStore(new NullProgressMonitor());
+			
+			source.updateEntityId(ie.getIdAttributeAsText());
+			
+			resources(new NullProgressMonitor()).forEach(gr->{
+				IntelEntityGeoResource igr = (IntelEntityGeoResource) gr;
+				String typeName = igr.getTypeName();
+				String newTitle = source.getName(typeName);
+				try {
+					((IntelEntityGeoResourceInfo)igr.getInfo(new NullProgressMonitor())).setTitle(newTitle);
+				} catch (IOException e) {
+					Intelligence2PlugIn.log(e.getMessage(), e);
+				}
+			});
+		}catch (IOException ex) {
+			Intelligence2PlugIn.log(ex.getMessage(), ex);
 		}
 	}
 	
@@ -170,7 +130,6 @@ public class IntelEntityService extends IService {
 		return this.url;
 	}
 
-	private Boolean hasPosition = null;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -185,42 +144,12 @@ public class IntelEntityService extends IService {
 			synchronized (this) {
 				if (members == null){
 					
-					if (hasPosition == null){
-						Job j = new Job("loading attributes"){ //$NON-NLS-1$
-
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								try(Session s = HibernateManager.openSession()){
-									Query<Long> q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid", Long.class); //$NON-NLS-1$
-									q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-									q.setParameter("uuid", entityUuid); //$NON-NLS-1$
-									Long cnt = q.uniqueResult();
-									hasPosition = cnt > 0;	
-									
-									
-									dmAttribute = s.get(IntelEntity.class, entityUuid).getDmAttributeListItem();
-									if (dmAttribute != null) dmAttribute.getAttribute().getName();
-								}
-								
-								return org.eclipse.core.runtime.Status.OK_STATUS;
-							}
-							
-						};
-						j.setSystem(true);
-						j.schedule();
-						try {
-							j.join();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+					IntelEntityDataSource source = getDataStore(monitor);
+					ArrayList<IntelEntityGeoResource> temp = new ArrayList<>();
+					for (String tt : source.getTypeNames()) {
+						temp.add(new IntelEntityGeoResource(this, tt, source.getName(tt)));
 					}
-					ArrayList<IntelEntityGeoResource> list = new ArrayList<>();
-					//two resources per entity one for points and one for polygons
-					list.add(new IntelEntityGeoResource(this, LocationLayerType.POINT));
-					if (dmAttribute != null) list.add(new IntelEntityGeoResource(this, LocationLayerType.DM_OBS));
-					list.add(new IntelEntityGeoResource(this, LocationLayerType.POLYGON));
-					if (hasPosition != null && hasPosition) list.add(new IntelEntityGeoResource(this, LocationLayerType.ATTRIBUTE));					
-					members = list;
+					this.members = temp;					
 				}
 			}
 		}

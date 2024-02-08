@@ -41,6 +41,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGeometryDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -198,6 +199,9 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT, canEdit)};
 		case TREE:
 			return new DropItem[]{new AttributeTreeDropItem(dropItemName, queryKey, attributeKey, canEdit)};
+		case LINE:
+		case POLYGON:
+			return new DropItem[]{new AttributeGeometryDropItem(type, dropItemName, queryKey, canEdit)};
 		default:
 			break;
 			

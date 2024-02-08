@@ -237,9 +237,9 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
 					Attribute attribute = (Attribute) iterator.next();
 					if (attribute.getType() != AttributeType.NUMERIC && 
-							attribute.getType() != AttributeType.LIST &&
-							attribute.getType() != AttributeType.MLIST &&
-							attribute.getType() != AttributeType.TREE){
+							attribute.getType() != AttributeType.TREE &&
+							!attribute.getType().isList() && 
+							!attribute.getType().isGeometry()){
 						iterator.remove();
 					}
 					
@@ -349,13 +349,15 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				if (kids[i] instanceof Attribute){
 					if (((Attribute)kids[i]).getType() == AttributeType.NUMERIC ||
 						((Attribute)kids[i]).getType() == AttributeType.TREE ||
-						((Attribute)kids[i]).getType().isList()) {
+						((Attribute)kids[i]).getType().isList() || 
+						((Attribute)kids[i]).getType().isGeometry() ) {
 						add = true;
 					}
 				}else if (kids[i] instanceof CategoryAttribute){
 					if (((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.NUMERIC ||
 							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE ||
-							((CategoryAttribute)kids[i]).getAttribute().getType().isList()){
+							((CategoryAttribute)kids[i]).getAttribute().getType().isList() || 
+							((CategoryAttribute)kids[i]).getAttribute().getType().isGeometry()){
 						add = true;
 					}
 				}else if (kids[i] instanceof Category){

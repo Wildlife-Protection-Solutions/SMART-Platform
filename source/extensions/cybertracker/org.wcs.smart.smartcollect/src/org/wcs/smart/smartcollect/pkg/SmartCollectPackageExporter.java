@@ -219,7 +219,7 @@ public class SmartCollectPackageExporter {
 	@SuppressWarnings("unchecked")
 	private void createMetadata(Path incidentJson) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackage.PACKAGE_TYPENAME.toUpperCase()));
+		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackage.PACKAGE_TYPENAME.toLowerCase()));
 		
 		
 		JSONObject dataType = new JSONObject();

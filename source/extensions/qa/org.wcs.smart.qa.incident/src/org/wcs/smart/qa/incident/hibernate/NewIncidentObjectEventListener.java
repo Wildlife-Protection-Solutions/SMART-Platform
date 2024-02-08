@@ -56,7 +56,7 @@ public class NewIncidentObjectEventListener implements PostCommitInsertEventList
 			}else if (((Waypoint)x).getSourceId().equals(IntegrateIncidentSource.KEY)) {
 				WaypointLocationData data = new WaypointLocationData((Waypoint) x);
 				SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(IntegrateIncidentDataProvider.ID), data);
-				AutoValidateJob.INSTANCE.addTask(provider);
+				AutoValidateJob.INSTANCE.addTask(provider);			
 			}
 		}
 	}

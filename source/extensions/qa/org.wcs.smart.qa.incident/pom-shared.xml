@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.core.qa.incident</artifactId>
 	<name>SMART Quality Assurance Module - Incident Support</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>

@@ -68,6 +68,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeGeometryDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeMListDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
@@ -324,6 +325,9 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 					}
 					if (!ok) di = new ErrorDropItem(MessageFormat.format(Messages.VisibleWhenDialog_NotTreeNodeFound, hkey, dattribute.getName()));
 					break;
+				case LINE:
+				case POLYGON:
+					di.initializeData(new String[] {afilter.getGeometryProperty().getKey(), afilter.getOperator().asSmartValue(), ((Double)afilter.getValue()).toString()});
 				default:
 					break;
 				
@@ -513,6 +517,9 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			AttributeTreeDropItem tdi = new AttributeTreeDropItem(attribute);
 			tdi.setOnlyActive(true);
 			return tdi;
+		case LINE:
+		case POLYGON:
+			return  new AttributeGeometryDropItem(attribute);
 		};
 		throw new IllegalStateException(MessageFormat.format(Messages.VisibleWhenDialog_InvalidType, attribute.getType().getName(Locale.getDefault())));
 	}

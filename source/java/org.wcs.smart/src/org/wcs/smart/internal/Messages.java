@@ -211,7 +211,10 @@ public class Messages extends NLS {
 	public static String AttributeTreeLabelProvider_RootNode_Label;
 	public static String AttributeTreeNodeDMAdvisor_Error_NotTreeNode;
 	public static String AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;
+	public static String AttributeValidator_GeometryRequired;
 	public static String AttributeValidator_InvalidAttributeValue;
+	public static String AttributeValidator_LineStringGeometryRequired;
+	public static String AttributeValidator_MultiPolygonGeometryRequired;
 	public static String AttributeValidator_RegexMatchFailed;
 	public static String AttributeValidator_StringTooLong;
 	public static String AttributeValidator_ValueRequired;
@@ -749,6 +752,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_xmlfiles;
 	public static String DialogConstants_xmorzipfiles;
 	public static String DialogConstants_zipfiles;
+	public static String DrawOnMapDialog_DialogTitle;
 	public static String DrawPolygonTool_InvalidPolygon;
 	public static String DropItem_removetooltip;
 	public static String EditProjectionDialog_Dialog_Message;
@@ -972,6 +976,8 @@ public class Messages extends NLS {
 	public static String GenerateSmartThemeDialog_ObsCategoryLabel;
 	public static String GenerateSmartThemeDialog_Title;
 	public static String GenerateSmartThemeDialog_ValidSizeRequired;
+	public static String GeometryAttributeField_ClearButton;
+	public static String GeometryAttributeField_ClearButtonTooltip;
 	public static String GpsBabelPreferencePage_CouldNotUpdate;
 	public static String GpsBabelPreferencePage_FileNotFound;
 	public static String GpsBabelPreferencePage_ProgramLocLabel;
@@ -1296,6 +1302,7 @@ public class Messages extends NLS {
 	public static String NewIconSetDialog_SystemSet;
 	public static String NewIconSetDialog_Title;
 	public static String PlugInConfigurationExporter_ExportingVersions;
+	public static String PointMapComposite_SelectedLayerName;
 	public static String ProgressAreaComposite_CancelledMessage;
 	public static String ProgressAreaComposite_StoppingMessage;
 	public static String ProjectionDialog_DialogMessage;
@@ -1373,6 +1380,12 @@ public class Messages extends NLS {
 	public static String ShowDataModelPropertyPageHandler_Progress_LoadingDataModel;
 	public static String SignatureTypeManager_DefaultSignatureTypeName;
 	public static String SignatureTypeManager_DeleteError;
+	public static String SimpleGeometryStyleComposite_AlphaTooltip;
+	public static String SimpleGeometryStyleComposite_Color;
+	public static String SimpleGeometryStyleComposite_FillColor;
+	public static String SimpleGeometryStyleComposite_InvalidAlpha;
+	public static String SimpleGeometryStyleComposite_InvalidSize;
+	public static String SimpleGeometryStyleComposite_Size;
 	public static String SmartAreaWizardPage_CrossCaErrorMessage;
 	public static String SmartAreaWizardPage_Error_LoadingSmartResources;
 	public static String SmartAreaWizardPage_SmartLayerConnectionPage_Title;
@@ -1407,6 +1420,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_areacanamecolumnname;
 	public static String SmartLabelProvider_areageometryname;
 	public static String SmartLabelProvider_areakeyname;
+	public static String SmartLabelProvider_Area;
 	public static String SmartLabelProvider_AreasTableName;
 	public static String SmartLabelProvider_AttributeNotFound;
 	public static String SmartLabelProvider_AttributeTypeNotFound;
@@ -1426,8 +1440,16 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_EqualsOperator;
 	public static String SmartLabelProvider_ExactOperator;
 	public static String SmartLabelProvider_GeometryLabel;
+	public static String SmartLabelProvider_GeometrySourceGPS;
+	public static String SmartLabelProvider_GeometrySourceManualDraw;
+	public static String SmartLabelProvider_GeometrySourceManualPoint;
+	public static String SmartLabelProvider_GeometrySourceUnknown;
 	public static String SmartLabelProvider_InvalidXmlFile;
 	public static String SmartLabelProvider_KeyName;
+	public static String SmartLabelProvider_LineAttributeType;
+	public static String SmartLabelProvider_LineString;
+	public static String SmartLabelProvider_LineStringLabel;
+	public static String SmartLabelProvider_LineStringLayer;
 	public static String SmartLabelProvider_ListAttributeType;
 	public static String SmartLabelProvider_MergeDmAttNotFound;
 	public static String SmartLabelProvider_MergeDmProcessingAtt;
@@ -1444,6 +1466,11 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_OrOperator;
 	public static String SmartLabelProvider_ownercolumnname;
 	public static String SmartLabelProvider_pointofcontactcolumnname;
+	public static String SmartLabelProvider_Perimeter;
+	public static String SmartLabelProvider_Polygon;
+	public static String SmartLabelProvider_PolygonAttributeType;
+	public static String SmartLabelProvider_PolygonLabel;
+	public static String SmartLabelProvider_PolygonLayer;
 	public static String SmartLabelProvider_StationActiveColumnName;
 	public static String SmartLabelProvider_StationsTableName;
 	public static String SmartLabelProvider_TeamsColumnLabel;

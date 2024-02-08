@@ -24,6 +24,7 @@ package org.wcs.smart.incident.birt.details;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -61,8 +62,8 @@ public class IncidentDatasetResultSetMetadata implements IResultSetMetaData {
 		CA_ID(Messages.IncidentDatasetResultSetMetadata_caidcolumnname, "ca:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		CA_NAME(Messages.IncidentDatasetResultSetMetadata_canamecolumnname, "ca:name", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		
-		RAW_GEOMETRY(Messages.IncidentDatasetResultSetMetadata_rawgeomcolumnname, RAW_GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT),
-		GEOMETRY(Messages.IncidentDatasetResultSetMetadata_geomcolumnname, GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT);
+		RAW_GEOMETRY(Messages.IncidentDatasetResultSetMetadata_rawgeomcolumnname, RAW_GEOM_COLUMN_NAME, IGeometryColumn.Type.POINT.birtDataType),
+		GEOMETRY(Messages.IncidentDatasetResultSetMetadata_geomcolumnname, GEOM_COLUMN_NAME, IGeometryColumn.Type.POINT.birtDataType);
 	
 		public String name;
 		public String key;

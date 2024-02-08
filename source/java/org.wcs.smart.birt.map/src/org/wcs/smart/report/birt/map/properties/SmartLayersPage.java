@@ -864,13 +864,18 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		// attempt to parse id out of name; users do not want ids appearing the legends on maps
 		//#1051
-		String name = ld.getHandle().getDisplayName();
+		String name = ld.getHandle().getName();
+		if (name == null) name = ld.getHandle().getDisplayName();  
 		int start = name.lastIndexOf('[');
 		int end = name.lastIndexOf(']');
 		if (start >= 0 && end >= 0 && start < end){
 			name = name.substring(0, start);
 		}
-		ld.getInfo().setLayerName(name);
+		if (ld.getInfo().getLayerName() == null) {
+			ld.getInfo().setLayerName(name);
+		}else {
+			ld.getInfo().setLayerName(name + " - " + ld.getInfo().getLayerName()); //$NON-NLS-1$
+		}
 		try{
 			ExtendedItemHandle eihandle = itemHandle.getModuleHandle().getElementFactory().newExtendedItem(null, LayerItem.EXTENSION_NAME);
 			LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);

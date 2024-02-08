@@ -23,13 +23,24 @@ package org.wcs.smart.asset.query.model;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
+import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IStyledQuery;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
@@ -142,4 +153,75 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 		return typeKey.equalsIgnoreCase(ASSET_SUMMARY_KEY) || 
 				typeKey.equalsIgnoreCase(DEPLOYMENT_SUMMARY_KEY);
 	}
+
+	@Override
+	public List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider) {
+
+			SummaryQueryResult results = (SummaryQueryResult)getCachedResults();
+			List<QueryColumn> columns = new ArrayList<>();
+			
+			//add a row for the station id or station location id
+			try {
+				if (!AssetSummaryQuery.canAddGeometry(getQueryDefinition())) {
+					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location"); //$NON-NLS-1$
+				}
+				AssetGroupBy assetGp = (AssetGroupBy)getQueryDefinition().getRowGroupByPart().getGroupBys().get(0);
+				if (assetGp.getOption() == AssetFilterOption.STATION) {
+					columns.add(new EmptyQueryColumn(
+							(new FixedQueryColumn(FixedColumns.STATION, l).getName()),
+							"assetstationid", ColumnType.STRING));  //$NON-NLS-1$
+				}else if (assetGp.getOption() == AssetFilterOption.STATIONLOCATION) {
+					columns.add(new EmptyQueryColumn(
+							(new FixedQueryColumn(FixedColumns.LOCATION, l).getName()),
+							"assetlocationid", ColumnType.STRING));  //$NON-NLS-1$
+				}else {
+					throw new Exception("Cannot create map layer for field sensor summary query that does not have a single column group by that is station or location"); //$NON-NLS-1$
+				}
+			}catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+			
+			// [ [TEAM_1, TEAM_1, TEAM_1, TEAM_2, TEAM_2, TEAM_2].
+			//  [SA, SB, SC, SA, SB, SC]
+			//  [V1, V1, V1, V1, V1, V1] ]
+			SummaryHeader[][] headers = results.getColumnHeaderValues();
+			
+			int length = headers[0].length;
+			for (int i = 0; i < length; i ++) {
+				StringBuilder sb = new StringBuilder();
+				StringBuilder sbkey = new StringBuilder();
+				for (SummaryHeader[] items : headers) {
+					sb.append(items[i].getFullName());
+					sb.append("_"); //$NON-NLS-1$
+					sbkey.append(items[i].getKey());
+					sbkey.append("_"); //$NON-NLS-1$
+				}
+				
+				columns.add(new EmptyQueryColumn(sb.toString(), sbkey.toString(), ColumnType.NUMBER ));
+			}
+			
+			columns.add(new PointGeometryQueryColumn(l));
+			
+			return columns;
+		
+	}
+	
+	private class EmptyQueryColumn extends QueryColumn{
+		public EmptyQueryColumn(String name, String key, ColumnType type) {
+			super(name, key, type);
+		}
+		@Override
+		public Object getValue(IResultItem item) {
+			return null;
+		}
+		
+		@Override
+		public QueryColumn clone() {
+			return new EmptyQueryColumn(getName(), getKey(), getType());
+		}
+		
+	}
+	
+	
+
 }

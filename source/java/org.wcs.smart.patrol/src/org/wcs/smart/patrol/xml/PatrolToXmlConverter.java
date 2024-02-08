@@ -23,6 +23,7 @@
 package org.wcs.smart.patrol.xml;
 
 import java.time.LocalTime;
+import java.util.Base64;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -44,17 +45,17 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.xml.model.LabelType;
-import org.wcs.smart.patrol.xml.model.v13.AttachmentType;
-import org.wcs.smart.patrol.xml.model.v13.ObjectiveType;
-import org.wcs.smart.patrol.xml.model.v13.PatrolLegDayType;
-import org.wcs.smart.patrol.xml.model.v13.PatrolLegType;
-import org.wcs.smart.patrol.xml.model.v13.PatrolMemberType;
-import org.wcs.smart.patrol.xml.model.v13.PatrolType;
-import org.wcs.smart.patrol.xml.model.v13.TrackType;
-import org.wcs.smart.patrol.xml.model.v13.WaypointObservationAttributeType;
-import org.wcs.smart.patrol.xml.model.v13.WaypointObservationGroupType;
-import org.wcs.smart.patrol.xml.model.v13.WaypointObservationType;
-import org.wcs.smart.patrol.xml.model.v13.WaypointType;
+import org.wcs.smart.patrol.xml.model.v14.AttachmentType;
+import org.wcs.smart.patrol.xml.model.v14.ObjectiveType;
+import org.wcs.smart.patrol.xml.model.v14.PatrolLegDayType;
+import org.wcs.smart.patrol.xml.model.v14.PatrolLegType;
+import org.wcs.smart.patrol.xml.model.v14.PatrolMemberType;
+import org.wcs.smart.patrol.xml.model.v14.PatrolType;
+import org.wcs.smart.patrol.xml.model.v14.TrackType;
+import org.wcs.smart.patrol.xml.model.v14.WaypointObservationAttributeType;
+import org.wcs.smart.patrol.xml.model.v14.WaypointObservationGroupType;
+import org.wcs.smart.patrol.xml.model.v14.WaypointObservationType;
+import org.wcs.smart.patrol.xml.model.v14.WaypointType;
 import org.wcs.smart.util.SmartUtils;
 
 public class PatrolToXmlConverter {
@@ -99,7 +100,7 @@ public class PatrolToXmlConverter {
 		/* custom attributes */
 		for (PatrolAttributeValue av : p.getCustomAttributes()) {
 			
-			org.wcs.smart.patrol.xml.model.v13.AttributeType axml = new org.wcs.smart.patrol.xml.model.v13.AttributeType();
+			org.wcs.smart.patrol.xml.model.v14.AttributeType axml = new org.wcs.smart.patrol.xml.model.v14.AttributeType();
 			axml.setKey(av.getPatrolAttribute().getKeyId());
 			if (av.getStringValue() != null) axml.setStringValue(av.getStringValue());
 			if (av.getNumberValue() != null) axml.setDoubleValue(av.getNumberValue());
@@ -277,6 +278,10 @@ public class PatrolToXmlConverter {
 						xml2.getItemKey().add(li.getAttributeListItem().getKeyId());
 					}
 				}
+			}else if (att.getAttribute().getType().isGeometry()) {
+				xml2.setSValue(att.getStringValue());
+				xml2.setGeomValue( Base64.getEncoder().encodeToString(att.getGeom()) );
+				add = true;
 			}
 			if (add){
 				xml.getAttributes().add(xml2);

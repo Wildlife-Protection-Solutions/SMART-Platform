@@ -39,14 +39,13 @@ import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
-import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
-import org.wcs.smart.er.query.map.style.MissionQueryDefaultStyle;
-import org.wcs.smart.er.query.map.udig.QueryService;
+import org.wcs.smart.er.query.model.column.TrackGeometryQueryColumn;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.map.QueryService;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
@@ -66,7 +65,7 @@ public class MissionQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put( SurveyQueryDataSource.TRACKS_TYPE, MissionQueryDefaultStyle.KEY);
+		styleMappings.put( TrackGeometryQueryColumn.KEY, MissionQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	public MissionQueryType() {

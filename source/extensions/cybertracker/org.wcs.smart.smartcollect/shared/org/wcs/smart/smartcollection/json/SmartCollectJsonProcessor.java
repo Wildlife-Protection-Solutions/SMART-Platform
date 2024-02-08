@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.smartcollection.json;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -34,6 +36,7 @@ import java.util.Set;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
@@ -44,6 +47,7 @@ import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.smartcollect.model.SmartCollectUser;
 import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
@@ -62,6 +66,8 @@ import org.wcs.smart.smartcollection.json.SmartCollectJsonImportWarning.WarningT
  */
 public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	
+	public static final Object FINISH_MESSAGE = new Object();
+	
 	protected List<JsonImportWarning> warnings;
 
 	protected HashMap<String, WaypointObservationGroup> obsgroupmapping;
@@ -77,14 +83,21 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	}
 	
 	protected ConservationArea ca;
+	private List<Path> tempFiles = null;
 	
 	public SmartCollectJsonProcessor(ConservationArea ca) {
 		this.ca = ca;
+		this.tempFiles = new ArrayList<>();
 	}
 
 	@Override
 	public List<JsonImportWarning> getWarnings(){
 		return this.warnings;
+	}
+	
+	@Override
+	public void cleanUp() {
+		cleanUpFiles(tempFiles);
 	}
 	
 	/**
@@ -123,7 +136,7 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	protected abstract Boolean processNotOkUsers(Set<SmartCollectUser> notok) throws Exception;
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception {
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception {
 	
 		warnings = new ArrayList<>();
 		waypoints = new HashSet<>();
@@ -179,9 +192,9 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 		Map<DeviceUser, Integer> blacklistCount = new HashMap<>();
 		
 		for (JSONObject feature : features){
-			CtJsonObservationParser parser = new CtJsonObservationParser();
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
+			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
 			try{
 				JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 				if (properties == null) continue;
@@ -275,6 +288,8 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 			}catch (Exception ex) {
 				logException(ex.getMessage() + ": " +feature.toJSONString(), ex); //$NON-NLS-1$
 				warnings.add(new JsonImportWarning(JsonImportWarning.Type.JSON_FEATURE_PARSE_ERROR, ex.getMessage()));
+			}finally{
+				tempFiles.addAll(parser.getTemporaryFiles());
 			}
 		}
 		
@@ -292,12 +307,12 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public String getStatusMessage(Locale l) {
 		if (waypoints.isEmpty() ) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		if (!waypoints.isEmpty()){
-			sb.append(MessageFormat.format("Created {0} SMARTCollect Incidents", waypoints.size()));
+			sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(ISmartCollectLabelProvider.class).getLabel(FINISH_MESSAGE, l), waypoints.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : waypoints){
 				sb.append(p.getId());

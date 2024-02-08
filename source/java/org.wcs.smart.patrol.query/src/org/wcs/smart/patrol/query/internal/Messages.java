@@ -160,6 +160,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_RawYColumnName;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
 	public static String PatrolQueryLabelProvider_TrackAreaValueItem;
+	public static String PatrolQueryLabelProvider_TrackColumnName;
 	public static String PatrolQueryMemoryResult_DeleteError;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_ErrorInvalidPatrolFilterValue;

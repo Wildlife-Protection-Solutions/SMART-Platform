@@ -54,8 +54,8 @@ public class PatrolAttributeQueryColumn extends QueryColumn {
 			case MLIST: 
 			case TEXT:
 			case TREE:return ColumnType.STRING;
+			default: return ColumnType.STRING;
 		}
-		return ColumnType.STRING;
 	}
 	
 	@Override

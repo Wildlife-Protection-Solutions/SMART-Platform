@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Query page for the query export wizard
@@ -155,11 +156,17 @@ public class ExportQueryTypePage extends WizardPage {
      * The default behavior is to ask the wizard for the next page.
      */
     public IWizardPage getNextPage() {
+    	ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
     	IQueryExporter exporter = getQueryExporter();
     	if (exporter.getId().startsWith(IQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
     		return getWizard().getPage(ExportQueryListPage.PAGE_NAME);
     	}else{
-    		return getWizard().getNextPage(this);
+    		List<QueryColumn> columns = wizard.getGeometryColumns(exporter);
+    		if (columns != null && columns.size() > 1) {
+    			return getWizard().getPage(ExportQueryGeometryColumnPage.PAGE_NAME);
+    		}else {
+    			return getWizard().getPage(ExportQueryLocationPage.PAGE_NAME);
+    		}
     	}
     }
 }

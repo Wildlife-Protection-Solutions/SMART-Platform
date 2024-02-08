@@ -22,6 +22,7 @@
 package org.wcs.smart.report.birt.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -40,6 +41,15 @@ import org.wcs.smart.report.birt.map.MapLayerInfo;
  */
 public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 	
+	/**
+	 * Return true if the given query type had layers that can 
+	 * be added to the map.
+	 * 
+	 * @param queryTypeKey
+	 * @return
+	 */
+	public abstract boolean canAddToMap(String queryTypeKey);
+	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
 		if (!(handle instanceof OdaDataSetHandle)) {
@@ -56,20 +66,35 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 		return false;
 	}
 	
-	public abstract boolean canAddToMap(String queryTypeKey);
+	/**
+	 * Add additional map layers that are represented by a query column
+	 * (for raster queries)
+	 * 
+	 * @param queryTypeKey
+	 * @return a list or empty list, never null
+	 */
+	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
+		return Collections.emptyList();
+	}
 	
-	public abstract List<MapLayerInfo> getGeometryOptions(String queryTypeKey);
-	
+	/**
+	 * Computes the possible geometry columns based on the results
+	 * set metadata.
+	 */
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle) throws Exception{
+		
+		List<MapLayerInfo> maplayers = new ArrayList<>();
 		
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
 		if (odaHandle.getExtensionID().equals(SmartQuery.SMART_DATASET_TYPE)) {
 			if (canAddToMap(odaHandle)) {
+				
 				String queryTypeKey = odaHandle.getQueryText().split(":")[0]; //$NON-NLS-1$
-				return getGeometryOptions(queryTypeKey);
+				maplayers.addAll(getGeometryOptions(queryTypeKey));				
+				maplayers.addAll(this.findGeometryColumnsInResultSet(odaHandle));
 			}
 		}
-		return new ArrayList<MapLayerInfo>();
+		return maplayers;
 	}
 	
 

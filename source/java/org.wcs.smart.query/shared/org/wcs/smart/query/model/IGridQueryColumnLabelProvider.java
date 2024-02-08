@@ -33,4 +33,9 @@ import org.wcs.smart.ISharedLabelProvider;
 public interface IGridQueryColumnLabelProvider extends ISharedLabelProvider {
 
 	public static String GRID_TO_BIG_KEY = "gridtobig"; //$NON-NLS-1$
+	
+	public static String GEOM_SOURCE_COLUMN_NAME = "geometrysource"; //$NON-NLS-1$
+	public static String GEOM_PERIMETER_COLUMN_NAME= "geometryperimeter"; //$NON-NLS-1$
+	public static String GEOM_AREA_COLUMN_NAME = "geometryarea"; //$NON-NLS-1$
+	
 }

@@ -107,6 +107,7 @@ public class MapQuery extends ReportItemQueryBase {
 				ColumnHintHandle hh = (ColumnHintHandle) x;
 				if (hh.getColumnName().equals(layer.getGeometryColumn())){
 					if (hh.getAlias() != null){
+						//TODO: test this out; changed for data model attributes
 						layer.setGeometryColumn(hh.getAlias());
 					}
 				}

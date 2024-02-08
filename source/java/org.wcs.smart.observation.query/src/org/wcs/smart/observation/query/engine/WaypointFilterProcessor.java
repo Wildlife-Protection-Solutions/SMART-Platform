@@ -572,6 +572,15 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(") "); //$NON-NLS-1$
 			}else if (attfilter.getAttributeType() == AttributeType.MLIST) {
 				//nothing to do; dealt with as join above
+			}else if (attfilter.getAttributeType().isGeometry()){
+				sql.append("("); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttribute.class));
+				sql.append("."); //$NON-NLS-1$
+				sql.append(attfilter.getGeometryProperty().getDbField());
+				sql.append(" "); //$NON-NLS-1$
+				sql.append(getSqlGenerator().asSql(attfilter.getOperator()));
+				String p1 = engine.addParameterValue((Double)attfilter.getValue());
+				sql.append(" " + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		

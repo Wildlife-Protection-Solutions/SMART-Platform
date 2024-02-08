@@ -29,7 +29,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.wcs.smart.incident.xml.model.v22.WaypointType;
+import org.wcs.smart.incident.xml.model.v23.WaypointType;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
@@ -42,7 +42,7 @@ import jakarta.xml.bind.Marshaller;
  * @since 1.0.0
  */
 public class IncidentXmlManager {
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.incident.xml.model.v22"; //$NON-NLS-1$
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.incident.xml.model.v23"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 	public static final String OBSERVATION_ATTACHMENT_DIR_NAME = "attachments/observations"; //$NON-NLS-1$
@@ -63,7 +63,7 @@ public class IncidentXmlManager {
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
-		org.wcs.smart.incident.xml.model.v22.ObjectFactory objFactor = new org.wcs.smart.incident.xml.model.v22.ObjectFactory();
+		org.wcs.smart.incident.xml.model.v23.ObjectFactory objFactor = new org.wcs.smart.incident.xml.model.v23.ObjectFactory();
 		
 		JAXBElement<WaypointType> element = objFactor.createWaypoint(type);
 		marshaller.marshal(element, file);
@@ -93,6 +93,8 @@ public class IncidentXmlManager {
 				return new org.wcs.smart.incident.xml.model.v21.XmlToIncident();
 			}else if (version.equals(org.wcs.smart.incident.xml.model.v22.ObjectFactory._Waypoint_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.incident.xml.model.v22.XmlToIncident();
+			}else if (version.equals(org.wcs.smart.incident.xml.model.v23.ObjectFactory._Waypoint_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.incident.xml.model.v23.XmlToIncident();
 			}
 		}catch (Exception ex){
 			//invalid xml file

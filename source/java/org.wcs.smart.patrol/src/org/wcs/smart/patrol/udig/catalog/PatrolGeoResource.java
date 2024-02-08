@@ -58,10 +58,12 @@ public class PatrolGeoResource extends IGeoResource {
 	
 	private URL url = null;
 	protected String dataType;
+	protected String name;
 	
-	public PatrolGeoResource(PatrolService service, String dataType){
+	public PatrolGeoResource(PatrolService service, String dataType, String name){
 		this.service = service;
 		this.dataType = dataType;
+		this.name = name;
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
@@ -69,8 +71,13 @@ public class PatrolGeoResource extends IGeoResource {
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
+		
 	}
 	
+	@Override
+	public String getTitle() {
+		return this.name;		
+	}
 	
 	public String getType(){
 		return dataType;
@@ -157,8 +164,14 @@ public class PatrolGeoResource extends IGeoResource {
         	if (dataType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return adaptee.cast(getWaypointPrjStyle());
         	if (dataType.equals(PatrolDataSource.WAYPOINT_TYPE)) return adaptee.cast(getWaypointStyle());
         	if (dataType.equals(PatrolDataSource.TRACK_PART_TYPE)) return adaptee.cast(getTrackStyle());
+        	
+        	if (PatrolDataSource.isGeometryAttribute(dataType)) {
+           	 	PatrolDataSource ds = ((PatrolService)service).getDataStore(monitor);
+           	 	return adaptee.cast(ds.getAttribute(dataType).getAttributeGeometryStyle().toStyle());
 
+        	}
         }
+        
         return super.resolve(adaptee, monitor);
     }
     

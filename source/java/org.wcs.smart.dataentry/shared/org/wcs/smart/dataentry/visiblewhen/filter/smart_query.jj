@@ -5,7 +5,9 @@ import java.util.*;
 import org.wcs.smart.filter.*;
 
 public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >
-| < K_EXACT : "exact" >}
+| < K_EXACT : "exact" >
+| < AREA : "area" >
+| < PERIMETER : "perimeter" >}
 
 
 TOKEN :
@@ -39,6 +41,7 @@ TOKEN :
  | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+ | < ATT_GEOM_KEY : "attribute:"("p" | "i")":"< DM_KEY > >  
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
@@ -102,7 +105,31 @@ IFilter BooleanItemExpression():
     	return filter;  	}
 }
 
+IFilter GeometryFilterExpression():
+{
+  IFilter filter = null;
+  AttributeFilter.GeometryProperty property;
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	(
+		( 
+			< ATT_GEOM_KEY > {key = token.image;}
+			property = GeometryProperty()
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = AttributeFilter.createGeometryFilter(key, property, op, value);
+		}
+	)
 
+	{
+  		return filter;
+	}
+}
 
 
 IFilter NumberExpression():
@@ -139,6 +166,9 @@ IFilter AttributeExpression():
 	|
 	/* Numeric comparison */
 	filter = NumberExpression()
+	|
+	/* Geometry comparison */
+	filter = GeometryFilterExpression()	
 	| 
 	/* boolean */
 	filter = BooleanItemExpression()
@@ -286,3 +316,16 @@ Operator DateOp() :
     return Operator.parseOperator(fulltoken);
   }
 }
+
+AttributeFilter.GeometryProperty GeometryProperty() :
+{}
+{
+   (
+     < AREA > | 
+     < PERIMETER >
+   )
+  {
+    return AttributeFilter.GeometryProperty.valueOfKey(token.image);
+  }
+}
+

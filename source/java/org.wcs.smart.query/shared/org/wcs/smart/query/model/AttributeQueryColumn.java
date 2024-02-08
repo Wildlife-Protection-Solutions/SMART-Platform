@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.query.model;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 
@@ -42,10 +47,50 @@ public class AttributeQueryColumn extends QueryColumn {
 	
 	public static final String KEY_PREFIX = "attribute:"; //$NON-NLS-1$
 
-	protected String attributeKey = null;
-	protected AttributeType attributeType;
+	public static enum GeometryProperty{
+		SOURCE, AREA, PERIMETER;
+		
+		public String getKey() {
+			return name().toLowerCase();
+		}
+		
+		/**
+		 * generates the column key based on the attribute id and property
+		 * 
+		 * @param attributeId
+		 * @return
+		 */
+		public String generateKey(String attributeId) {
+			return attributeId + "." + getKey(); //$NON-NLS-1$
+		}
+		
+		/**
+		 * the number of decimal places to display in the results
+		 * @return
+		 */
+		public int displayDecimalPlaces() {
+			return 2;
+		}
+		
+		public String getDbField() {
+			if (this == SOURCE) return GeometryAttributeValue.DB_FIELD_SOURCE;
+			if (this == AREA) return GeometryAttributeValue.DB_FIELD_AREA;
+			if (this == PERIMETER) return GeometryAttributeValue.DB_FIELD_PERIMETER;
+			throw new IllegalStateException();
+		}
+		
+		public String getColumnName(String attributeName, Locale l) {		
+			if (this == SOURCE) return MessageFormat.format(SmartContext.INSTANCE.getClass(IGridQueryColumnLabelProvider.class).getLabel(IGridQueryColumnLabelProvider.GEOM_SOURCE_COLUMN_NAME, l), attributeName);
+			if (this == PERIMETER) return MessageFormat.format(SmartContext.INSTANCE.getClass(IGridQueryColumnLabelProvider.class).getLabel(IGridQueryColumnLabelProvider.GEOM_PERIMETER_COLUMN_NAME, l), attributeName);
+			if (this == AREA) return MessageFormat.format(SmartContext.INSTANCE.getClass(IGridQueryColumnLabelProvider.class).getLabel(IGridQueryColumnLabelProvider.GEOM_AREA_COLUMN_NAME, l), attributeName);
+			throw new IllegalStateException();
+		}
+	}
 	
+	protected String attributeId = null;
+	protected AttributeType attributeType;
 	protected String formatString;
+	protected GeometryProperty geomProperty = null;
 
 	/**
 	 * Creates a new attribute column.
@@ -54,10 +99,11 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @param key the attribute id key
 	 * @param type the type of the attribute column
 	 */
-	public AttributeQueryColumn(String name, String attributeId, AttributeType type, String formatString){
+	public AttributeQueryColumn(String name, String attributeId, 
+			AttributeType type, String formatString){
 		super(name, KEY_PREFIX + attributeId, null);
 		this.formatString = formatString;
-		this.attributeKey = attributeId;
+		this.attributeId = attributeId;
 		this.attributeType = type;
 		ColumnType ctype = ColumnType.STRING;
 		if (type == AttributeType.NUMERIC ){
@@ -66,6 +112,32 @@ public class AttributeQueryColumn extends QueryColumn {
 			ctype = ColumnType.BOOLEAN;
 		}else if (type == AttributeType.DATE) {
 			ctype = ColumnType.DATE;
+		}else if (type.isGeometry()) {
+			ctype = ColumnType.GEOMETRY;
+		}else {
+			ctype = ColumnType.STRING;
+		}
+		super.setType(ctype);
+	}
+	
+	public AttributeQueryColumn(String name, String attributeId,
+			GeometryProperty prop, AttributeType type){
+		super(name, KEY_PREFIX + prop.generateKey(attributeId), null); 
+		if (prop == GeometryProperty.AREA || prop == GeometryProperty.PERIMETER) {
+			this.formatString = String.valueOf(prop.displayDecimalPlaces());
+		}
+		this.attributeId = attributeId;
+		this.attributeType = type;
+		this.geomProperty = prop;
+		ColumnType ctype = ColumnType.STRING;
+		if (type == AttributeType.NUMERIC ){
+			ctype = ColumnType.NUMBER;
+		}else if (type == AttributeType.BOOLEAN){
+			ctype = ColumnType.BOOLEAN;
+		}else if (type == AttributeType.DATE) {
+			ctype = ColumnType.DATE;
+		}else if (type.isGeometry()) {
+			ctype = ColumnType.GEOMETRY;
 		}else {
 			ctype = ColumnType.STRING;
 		}
@@ -82,24 +154,42 @@ public class AttributeQueryColumn extends QueryColumn {
 	}
 	
 	public String getAttributeId(){
-		return getKey().substring(KEY_PREFIX.length());
+		return this.attributeId;
+		
+	}
+	
+	public GeometryProperty getGeometryProperty() {
+		return this.geomProperty;
 	}
 
 	@Override
-	public String getValueAsString(Object value, boolean formatted){
+	public String getValueAsString(Object value, Locale l, boolean formatted){
+
 		if (value == null) return ""; //$NON-NLS-1$
 		
 		if (formatted && this.attributeType == Attribute.AttributeType.NUMERIC) {
 			return Attribute.formatNumberAsString(value, formatString);
 		}
-		return super.getValueAsString(value, formatted);
+		if (getAttributeType() == Attribute.AttributeType.POLYGON) {
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.POLYGON_KEY, l);
+		}
+		if (getAttributeType() == Attribute.AttributeType.LINE) {
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.LINESTRING_KEY, l);
+		}
+		
+		return super.getValueAsString(value, l, formatted);
+	}
+	
+	private String getColumnKey() {
+		if (geomProperty != null) return geomProperty.generateKey(getAttributeId());
+		return getAttributeId();
 	}
 	
 	@Override
 	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof ObservationQueryResultItem) {
 			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
-			Object x = item.getAttributeValue(attributeKey);
+			Object x = item.getAttributeValue(getColumnKey());
 			if (x != null) {
 				if (getType() == QueryColumn.ColumnType.BOOLEAN){
 					return Boolean.valueOf((Double)x >= 0.5);
@@ -120,8 +210,13 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.asset.query.model.observation.QueryColumn#clone()
 	 */
 	@Override
-	public QueryColumn clone() {
-		QueryColumn newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getAttributeType(), getFormatString());
+	public QueryColumn clone() { 
+		QueryColumn newColumn = null;
+		if (this.geomProperty == null) {
+			newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getAttributeType(), getFormatString());
+		}else {
+			newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getGeometryProperty(), getAttributeType());
+		}
 		newColumn.setEdit(canEdit());
 		return newColumn;
 	}

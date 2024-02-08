@@ -33,6 +33,9 @@
 	<ResourceLink name="smartconnect.gfw_cleanup_days" 
 		global="smartconnect.gfw_cleanup_days"
 		type="java.lang.Integer"  />
+	<ResourceLink name="smartconnect.dataqueue_error_out_days" 
+		global="smartconnect.dataqueue_error_out_days"
+		type="java.lang.Integer"  />
 		
 	<ResourceLink name="mail/Session" 
 		global="mail/Session"

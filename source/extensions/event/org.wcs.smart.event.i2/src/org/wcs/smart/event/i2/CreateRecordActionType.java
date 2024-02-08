@@ -21,48 +21,18 @@
  */
 package org.wcs.smart.event.i2;
 
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.hibernate.Session;
-import org.locationtech.jts.geom.Coordinate;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.i2.internal.Messages;
-import org.wcs.smart.event.model.EAction;
-import org.wcs.smart.event.model.EActionParameterValue;
-import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.event.model.IActionParameter;
 import org.wcs.smart.event.model.IActionType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelAttachment;
-import org.wcs.smart.i2.model.IntelLocation;
-import org.wcs.smart.i2.model.IntelObservation;
-import org.wcs.smart.i2.model.IntelObservationAttribute;
-import org.wcs.smart.i2.model.IntelObservationAttributeList;
-import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.model.IntelProfileRecordSource;
-import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordAttachment;
-import org.wcs.smart.i2.model.IntelRecordSource;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 
 /**
  * Create new profile record action type
@@ -71,11 +41,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
  *
  */
 public class CreateRecordActionType implements IActionType {
-
-	public static final String KEY = "org.wcs.smart.profile.newrecord"; //$NON-NLS-1$
-
-	
-	private static Logger logger = Logger.getLogger(CreateRecordActionType.class.getCanonicalName());
 
 	private List<IActionParameter> parameters;
 	
@@ -88,7 +53,7 @@ public class CreateRecordActionType implements IActionType {
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return CreateRecordActionTypeExecutor.KEY;
 	}
 
 	@Override
@@ -107,199 +72,10 @@ public class CreateRecordActionType implements IActionType {
 	}
 
 	@Override
-	public void performAction(EAction action, EFilter filter, WaypointObservation data, Locale l) {
-		//create a new intelligence record
-		
-		IntelRecord newRecord = new IntelRecord();
-		newRecord.setConservationArea(data.getWaypoint().getConservationArea());
-		newRecord.setAttributes(new ArrayList<>());
-		newRecord.setComment(""); //$NON-NLS-1$
-		newRecord.setLocations(new ArrayList<>());
-		newRecord.setPrimaryDate(data.getWaypoint().getDateTime());
-		newRecord.setStatus(IntelRecord.Status.NEW);
-		
-		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
-			data = session.get(WaypointObservation.class, data.getUuid());
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append(MessageFormat.format( Messages.AdvIntelLabelProvider_CreateActionTypeMsg1, action.getId(), filter.getId()));
-			sb.append("\n\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.CreateRecordActionType_WaypointIdLabel, data.getWaypoint().getId()));
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment() == null ? "" : data.getWaypoint().getComment())); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg5, data.getCategory().getName()));
-			sb.append("\n"); //$NON-NLS-1$
-			for (WaypointObservationAttribute a : data.getAttributesSorted()) {
-				sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
-				sb.append("\n"); //$NON-NLS-1$
-			}
-			
-			newRecord.setDescription(sb.toString());
-			
-			EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
-			if (profileParam == null || profileParam.getParameterValue().isEmpty()) {
-				throw new RuntimeException(Messages.CreateRecordActionType_ProfileParameterNotSet);
-			}
-			EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
-			EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
-			if (titleParam != null) {
-				newRecord.setTitle(titleParam.getParameterValue());
-			}else {
-				newRecord.setTitle(""); //$NON-NLS-1$
-			}
-			newRecord.setAttachments(new ArrayList<>());
-			
-			IntelLocation location = new IntelLocation();
-			location.setConservationArea(newRecord.getConservationArea());
-			location.setComment(data.getWaypoint().getComment());
-			location.setDateTime(data.getWaypoint().getDateTime());
-			location.setId( data.getWaypoint().getId() );
-			location.setRecord(newRecord);
-			location.setGeometry(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(data.getWaypoint().getX(),data.getWaypoint().getY())));
-			newRecord.getLocations().add(location);
-	
-			location.setObservations(new ArrayList<>());
-			
-			IntelObservation io = new IntelObservation();
-			io.setCategory(data.getCategory());
-			io.setObservationAttributes(new ArrayList<>());
-			io.setLocation(location);
-			for (WaypointObservationAttribute aa : data.getAttributes()) {
-				IntelObservationAttribute cloneAttribute = new IntelObservationAttribute();
-				cloneAttribute.setAttribute(aa.getAttribute());
-				cloneAttribute.setAttributeListItem(aa.getAttributeListItem());
-				cloneAttribute.setAttributeTreeNode(aa.getAttributeTreeNode());
-				cloneAttribute.setNumberValue(aa.getNumberValue());
-				cloneAttribute.setStringValue(aa.getStringValue());
-				cloneAttribute.setObservation(io);
-				
-				if (aa.getAttributeListItems() != null) {
-					cloneAttribute.setAttributeListItems(new ArrayList<>());
-					for (WaypointObservationAttributeList al : aa.getAttributeListItems()) {
-						IntelObservationAttributeList il = new IntelObservationAttributeList();
-						il.setAttributeLisItem(al.getAttributeListItem());
-						il.setObservationAttribute(cloneAttribute);
-						cloneAttribute.getAttributeListItems().add(il);
-					}
-				}
-				io.getObservationAttributes().add(cloneAttribute);
-			}
-			location.getObservations().add(io);
-		
-			
-			String keyid = profileParam.getParameterValue();
-			IntelProfile ip = QueryFactory.buildQuery(session, IntelProfile.class, 
-					new Object[] {"keyId", keyid}, //$NON-NLS-1$
-					new Object[] {"conservationArea", data.getWaypoint().getConservationArea()}).uniqueResult(); //$NON-NLS-1$
-			
-			if (ip == null) throw new RuntimeException(Messages.CreateRecordActionType_ProfileNotFound);
-			
-			newRecord.setProfile(ip);
-			newRecord.setSmartSource(data.getWaypoint());
-			
-			if(data.getAttachments() != null) {
-				for (ObservationAttachment a : data.getAttachments()) {
-					try {
-						a.computeFileLocation(session);
-					} catch (Exception e) {
-						logger.log(Level.WARNING, "Unable to compute file location for attachment, file will no be imported into new intelligence record: " + e.getMessage(), e); //$NON-NLS-1$
-						continue;
-					}
-	
-					IntelAttachment attachment = new IntelAttachment();
-					attachment.setConservationArea(newRecord.getConservationArea());
-					attachment.setFilename(a.getFilename());
-					attachment.setCopyFromLocation(a.getAttachmentFile());
-					attachment.setDateCreated(LocalDateTime.now());
-					attachment.setCreatedBy(SmartDB.getCurrentEmployee());
-					
-					IntelRecordAttachment rattachment = new IntelRecordAttachment();
-					rattachment.setAttachment(attachment);
-					rattachment.setRecord(newRecord);
-					rattachment.setAttachment(attachment);
-					
-					newRecord.getAttachments().add(rattachment);
-				}
-			}
-			if (data.getWaypoint().getAttachments() != null) {
-				for (WaypointAttachment a : data.getWaypoint().getAttachments()) {
-					try {
-						a.computeFileLocation(session);
-					} catch (Exception e) {
-						logger.log(Level.WARNING, "Unable to compute file location for attachment, file will no be imported into new intelligence record: " + e.getMessage(), e); //$NON-NLS-1$
-						continue;
-					}
-	
-					IntelAttachment attachment = new IntelAttachment();
-					attachment.setConservationArea(newRecord.getConservationArea());
-					attachment.setFilename(a.getFilename());
-					attachment.setCopyFromLocation(a.getAttachmentFile());
-					attachment.setDateCreated(LocalDateTime.now());
-					attachment.setCreatedBy(SmartDB.getCurrentEmployee());
-					
-					IntelRecordAttachment rattachment = new IntelRecordAttachment();
-					rattachment.setAttachment(attachment);
-					rattachment.setRecord(newRecord);
-					rattachment.setAttachment(attachment);
-					
-					newRecord.getAttachments().add(rattachment);
-				}
-			}
-			session.beginTransaction();
-			try {
-				if (sourceParam != null) {
-					IntelRecordSource source = QueryFactory.buildQuery(session, IntelRecordSource.class, 
-						new Object[] {"conservationArea", newRecord.getConservationArea()}, //$NON-NLS-1$
-						new Object[] {"keyId", sourceParam.getParameterValue()}).uniqueResult(); //$NON-NLS-1$
-					
-					//ensure profile is valid for record source
-					boolean ok = false;
-					for (IntelProfileRecordSource irs : source.getProfiles()) {
-						if (irs.getProfile().equals(ip)) {
-							ok = true;
-						}
-					}
-					if (!ok) {
-						throw new RuntimeException(MessageFormat.format(Messages.CreateRecordActionType_InvalidProfile, ip.getName(), source.getName()));
-					}
-					
-					newRecord.setRecordSource(source);
-				}
-				//create a unquie title
-				int uniqueNumber = 0;
-				while(true) {
-					String title = newRecord.getTitle();
-					if (uniqueNumber > 0) title = title + " " + uniqueNumber; //$NON-NLS-1$
-					Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class,
-							new Object[] {"conservationArea", newRecord.getConservationArea()}, //$NON-NLS-1$
-							new Object[] {"title", title}); //$NON-NLS-1$
-				
-					if (cnt == 0) {
-						break;
-					}
-					uniqueNumber++;
-				}
-				if (uniqueNumber > 0) {
-					newRecord.setTitle(newRecord.getTitle() + " " + uniqueNumber); //$NON-NLS-1$
-				}
-				
-				newRecord.getAttachments().forEach(aa->{
-					session.persist(aa.getAttachment());
-				});
-				session.persist(newRecord);
-				session.getTransaction().commit();
-			}catch(Exception ex) {
-				EventPlugIn.displayLog(ex.getMessage(), ex);
-				return;
-			}
-		}
+	public void afterExecuted(Object data) {
+		if (data == null) return;
 		IEventBroker eventBroker = EclipseContextFactory.getServiceContext(EventPlugIn.getDefault().getBundle().getBundleContext()).get(IEventBroker.class);
-		eventBroker.send(IntelEvents.RECORD_NEW, Collections.singletonList(newRecord));
+		eventBroker.send(IntelEvents.RECORD_NEW, Collections.singletonList(data));
 		
 	}
 

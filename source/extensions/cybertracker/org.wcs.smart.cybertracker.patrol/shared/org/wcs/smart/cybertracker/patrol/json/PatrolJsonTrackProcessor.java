@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -79,7 +80,7 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
 		warnings = new ArrayList<>();
 		
@@ -98,6 +99,8 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			Double y = ((Number) pntArray.get(1)).doubleValue();
 			LocalDateTime dt = CtJsonUtil.parseJsonDateTime((String)properties.get(CtJsonObservationParser.DATETIME_KEY));
 
+			
+			
 			String deviceId = (String) properties.get(CtJsonObservationParser.DEVICE_ID);
 			 
 			List<CtPatrolLink> links = linkmap.get(deviceId);
@@ -185,7 +188,12 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public void cleanUp() {
+		//nothing to clean up
+	}
+	
+	@Override
+	public String getStatusMessage(Locale l) {
 		return null;
 	}
 	

@@ -21,27 +21,24 @@
  */
 package org.wcs.smart.er.query.map.style;
 
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.udig.style.IMapLayerDefaultStyle;
 
 public class MissionTrackQueryDefaultStyle implements IMapLayerDefaultStyle {
-	
-	public static final String KEY = "org.wcs.smart.er.query.map.missiontrack"; //$NON-NLS-1$
-
-	public MissionTrackQueryDefaultStyle() {
-	}
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return MissionTrackQuery.DEFAULT_STYLE_KEY;
 	}
 
 	@Override
 	public String getMapName() {
-		return "Ecological Records Query";
+		return Messages.MissionGridQueryDefaultStyle_ErQueryMap;
 	}
 
 	@Override
 	public String getLayerName() {
-		return "Mission Track";
+		return Messages.MissionTrackQueryDefaultStyle_tracklayer;
 	}
 }

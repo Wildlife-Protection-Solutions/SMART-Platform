@@ -126,6 +126,7 @@ public class AttributeInfoPanel extends Composite {
 	private Composite listComposite;
 	private Composite textComposite;
 	private Composite numericComposite;
+	private Composite geometryComposite;
 
 	private ComboViewer cmbType;
 	private Button chRequired;
@@ -150,6 +151,8 @@ public class AttributeInfoPanel extends Composite {
 	private Button btnSort;
 	
 	private Button btnConvert;
+	
+	private SimpleGeometryStyleComposite geomStylePanel;
 	
 	private List<NamedKeyItem> attributeList = new ArrayList<NamedKeyItem>();
 	
@@ -758,6 +761,17 @@ public class AttributeInfoPanel extends Composite {
 		dateComposite.setLayout(new GridLayout(1, false));
 		dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
+		/* Geometry Options */
+		geometryComposite = new Composite(optionComposite, SWT.NONE);
+		geometryComposite.setLayout(new GridLayout(1, false));
+		geometryComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		
+		geomStylePanel = new SimpleGeometryStyleComposite(geometryComposite, SWT.NONE, canEdit);
+		if (!canEdit){
+			geomStylePanel.setEditable(false);
+		}else {
+			geomStylePanel.addListener(SWT.Modify, e->validate());
+		}
 		selectOption();
 		if (canEdit){
 			validate();
@@ -931,6 +945,13 @@ public class AttributeInfoPanel extends Composite {
 					cdAttTree.hide();
 				}
 			}
+		}else if (type.isGeometry()) {
+			cdMaxValue.hide();
+			cdMaxValue.hide();
+			cdAttList.hide();
+			if (cdAttTree != null) cdAttTree.hide();
+			
+			error = geomStylePanel.validate();
 		}
 		
 		for (IValidationListener listener: listeners){
@@ -971,6 +992,9 @@ public class AttributeInfoPanel extends Composite {
 			((StackLayout)optionComposite.getLayout()).topControl = treeComposite;
 		}else if (type.equals(AttributeType.DATE)){
 			((StackLayout)optionComposite.getLayout()).topControl = dateComposite;
+		}else if (type.isGeometry()){
+			((StackLayout)optionComposite.getLayout()).topControl = geometryComposite;
+			geomStylePanel.setType(type);
 		}
 		optionComposite.layout();
 	}
@@ -1082,6 +1106,9 @@ public class AttributeInfoPanel extends Composite {
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
 				
+			}else if (att.getType().isGeometry()) {
+				geomStylePanel.setType(att.getType());
+				geomStylePanel.initValues(att.getAttributeGeometryStyle());
 			}
 		}
 		
@@ -1340,6 +1367,8 @@ public class AttributeInfoPanel extends Composite {
 					}
 					
 				}
+			}else if (att.getType().isGeometry()) {
+				att.setAttributeGeometryStyle(geomStylePanel.getValue());
 			}
 			session.flush();
 			

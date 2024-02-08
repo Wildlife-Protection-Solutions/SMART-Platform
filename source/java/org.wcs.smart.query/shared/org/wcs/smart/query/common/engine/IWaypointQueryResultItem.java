@@ -28,6 +28,6 @@ package org.wcs.smart.query.common.engine;
  *
  */
 public interface IWaypointQueryResultItem extends IResultItem {
-
-
+	
+	
 }

@@ -23,6 +23,7 @@ package org.wcs.smart.event.i2;
 
 import java.util.Locale;
 
+import org.wcs.smart.event.i2.entity.ParameterKeys;
 import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.IActionParameter;
 
@@ -32,7 +33,7 @@ public class ProfileParameter implements IActionParameter {
 	
 	@Override
 	public String getKey() {
-		return "org.wcs.smart.profile.common.profile"; //$NON-NLS-1$
+		return ParameterKeys.PROFILE_PARAM_KEY;
 	}
 
 	@Override

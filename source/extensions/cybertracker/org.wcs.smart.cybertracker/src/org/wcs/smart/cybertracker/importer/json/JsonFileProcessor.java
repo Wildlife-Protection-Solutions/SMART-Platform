@@ -30,6 +30,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -48,6 +49,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -179,7 +181,7 @@ public class JsonFileProcessor {
 		
 		final List<JSONObject> features = new ArrayList<>();;
 		try {
-			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json));
+			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault()));
 		}catch (Throwable ex) {
 			returnValue.ex = ex;
 			returnValue.status = FileStatus.ERROR;
@@ -188,19 +190,26 @@ public class JsonFileProcessor {
 		}
 		
 		
+		List<IDesktopJsonProcessor> processors;
+		try {
+			processors = getProcessors();
+		} catch (Exception ex) {
+			returnValue.message = Messages.JsonFileProcessor_ErrorMessage + ex.getMessage();
+			returnValue.ex = ex;
+			returnValue.status = FileStatus.ERROR;
+			return returnValue;
+		}
+		
 		session.beginTransaction();
 		try {
 			List<JSONObject> notProc = new ArrayList<JSONObject>();
 			notProc.addAll(features);
 			
-			
-			List<IDesktopJsonProcessor> processors = getProcessors();
-			
 			StringBuilder statusMsg = new StringBuilder();
 			for (IDesktopJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session);
+				List<JSONObject> processed = p.processJson(features, session, Locale.getDefault());
 				notProc.removeAll(processed);
-				String msg = p.getStatusMessage();
+				String msg = p.getStatusMessage(Locale.getDefault());
 				if (msg != null){
 					statusMsg.append(msg);
 				}
@@ -270,6 +279,10 @@ public class JsonFileProcessor {
 			returnValue.ex = ex;
 			returnValue.status = FileStatus.ERROR;
 			return returnValue;
+		}finally {
+			for (IJsonProcessor p : processors) {
+				p.cleanUp();
+			}
 		}
 	
 	}

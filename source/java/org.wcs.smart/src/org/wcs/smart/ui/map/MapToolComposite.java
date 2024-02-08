@@ -71,6 +71,13 @@ public class MapToolComposite {
 	public static final String UDIG_ZOOM_OUT_ID = "org.locationtech.udig.tool.default.ZoomOut"; //$NON-NLS-1$
 	public static final String UDIG_DISTANCE_ID = "org.locationtech.udig.tool.info.distancetool"; //$NON-NLS-1$
 	
+	public static final String UDIG_ADD_VERTEX= "org.locationtech.udig.tools.addVertexTool"; //$NON-NLS-1$
+	public static final String UDIG_REMOVE_VERTEX= "org.locationtech.udig.tools.removeVertexTool"; //$NON-NLS-1$
+	public static final String UDIG_POLYGON_CREATE = "org.locationtech.udig.tools.polygonEdit"; //$NON-NLS-1$
+	public static final String UDIG_LINE_CREATE = "org.locationtech.udig.tools.lineEdit"; //$NON-NLS-1$
+	public static final String UDIG_POLYGON_HOLE = "org.locationtech.udig.tools.holeEdit"; //$NON-NLS-1$
+	public static final String UDIG_GEOM_SELECTEDIT = "org.locationtech.udig.tools.selectionTool";  //$NON-NLS-1$
+	
 	public static final String[] DEFAULT_MAP_TOOLS = {
 		AddLayerTool.ID,
 		SetBasemapTool.ID, 

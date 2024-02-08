@@ -84,6 +84,7 @@ import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
+import org.wcs.smart.query.model.summary.AttributeValueItem.GeometryProperty;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -496,7 +497,14 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		
 		clearParameters();
 		
-		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
+		if (attributeItem.getAttributeType() == AttributeType.NUMERIC || 
+				attributeItem.getAttributeType().isGeometry()) {
+			
+			String field = "number_value"; //$NON-NLS-1$
+			if (attributeItem.getAttributeType().isGeometry() &&
+				attributeItem.getGeometryProperty() == GeometryProperty.AREA) {
+				field = "number_value_2"; //$NON-NLS-1$
+			}
 			StringBuilder fromSql = new StringBuilder();
 
 			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
@@ -515,7 +523,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
-			valueAggSql.append(".number_value)"); //$NON-NLS-1$
+			valueAggSql.append("." + field + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$
@@ -550,7 +558,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 
 			sql.append(" WHERE "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append(".number_value is not null and "); //$NON-NLS-1$
+			sql.append("." + field + " is not null and "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(tablePrefix(Attribute.class));
 			String p1 = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p1); //$NON-NLS-1$

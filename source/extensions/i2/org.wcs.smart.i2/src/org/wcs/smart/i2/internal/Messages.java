@@ -73,6 +73,7 @@ public class Messages extends NLS {
 	public static String AttributeFieldEditor_ReprojectionError;
 	public static String AttributeFieldEditor_ReprojectionError2;
 	public static String AttributeFieldEditor_ReprojectionError3;
+	public static String AttributeGeometryDropItem_numericvaluerequired;
 	public static String AttributeListDialog_deleteDialogMsg;
 	public static String AttributeListDialog_DeleteDialogTitle;
 	public static String AttributeListDialog_DeleteError;
@@ -988,7 +989,7 @@ public class Messages extends NLS {
 	public static String IntelRecordDetailsWizardPage_NoConfOptions;
 	public static String IntelRecordDetailsWizardPage_unauthorized;
 	public static String IntelRecordEntityLinkWizardPage_RecordEntityLinksDatasetName;
-	public static String IntelRecordGeoResourceInfo_Title;
+	public static String IntelRecordGeoResourceInfo_Title1;
 	public static String IntelRecordLocationWizardPage_RecordLocationsDatasetName;
 	public static String IntelRecordObservationQueryEditor_DefinitionSection;
 	public static String IntelRecordObservationQueryEditor_ProfileSection;
@@ -1409,7 +1410,7 @@ public class Messages extends NLS {
 	public static String RecordMapPage_ImportGpsMenuItem;
 	public static String RecordMapPage_ImportMenuItem;
 	public static String RecordMapPage_jobname;
-	public static String RecordMapPage_PositionMapLayerName;
+	public static String RecordMapPage_PositionMapLayerName1;
 	public static String RecordNarrativeView_copy;
 	public static String RecordNarrativeView_cut;
 	public static String RecordNarrativeView_delete;

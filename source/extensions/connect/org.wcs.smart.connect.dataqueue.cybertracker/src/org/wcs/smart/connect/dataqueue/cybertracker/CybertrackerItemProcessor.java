@@ -56,6 +56,7 @@ import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.json.IDesktopJsonProcessor;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.util.ZLibUtil;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -210,7 +211,8 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	}
 	
 	private ProcessingStatus run() throws Exception{
-		List<JSONObject> features = CtJsonUtil.parseFeaturesFromJsonString(json);
+		List<JSONObject> features = CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault());
+		List<IDesktopJsonProcessor> processors = null;
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 		
 			session.beginTransaction();
@@ -218,11 +220,11 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				List<JSONObject> notProc = new ArrayList<JSONObject>();
 				notProc.addAll(features);
 				StringBuilder statusMsg = new StringBuilder();
-				List<IDesktopJsonProcessor> processors = getProcessors();
+				processors = getProcessors();
 				for (IDesktopJsonProcessor p : processors){
-					List<JSONObject> processed = p.processJson(features, session);
+					List<JSONObject> processed = p.processJson(features, session, Locale.getDefault());
 					notProc.removeAll(processed);
-					String msg = p.getStatusMessage();
+					String msg = p.getStatusMessage(Locale.getDefault());
 					if (msg != null){
 						statusMsg.append(msg);
 					}
@@ -289,6 +291,16 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				
 				ProcessingStatus status = new ProcessingStatus(Status.ERROR, MessageFormat.format(Messages.CybertrackerItemProcessor_DataProcessingError, ex.getMessage()));
 				return status;
+			}
+		}finally {
+			if (processors != null) {
+				for (IJsonProcessor p : processors) {
+					try {
+						p.cleanUp();
+					}catch(Throwable t) {
+						CyberTrackerPlugIn.log(t.getMessage(), t);
+					}
+				}
 			}
 		}
 	}

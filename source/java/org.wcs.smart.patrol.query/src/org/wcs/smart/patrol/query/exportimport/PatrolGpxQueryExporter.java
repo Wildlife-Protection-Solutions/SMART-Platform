@@ -28,9 +28,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -40,6 +40,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
+import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.ObjectFactory;
 import org.wcs.smart.gpx.xml.TrkType;
@@ -98,6 +99,11 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 	}
 
 	@Override
+	public boolean canExport(QueryColumn qc) {
+		return (qc instanceof IGeometryColumn) && qc.isDefaultGeometryColumn();
+	}
+	
+	@Override
 	public boolean canExport(Query query) {
 		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) ||
 				query.getTypeKey().equals(PatrolWaypointQuery.KEY)||
@@ -109,16 +115,21 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void export(Query query, IQueryResult result, Path file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
-		List<QueryColumn> columns = (((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null));
+	public void export(Query query, IQueryResult result, Path file, 
+			Map<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+		
+		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
+		if (columns == null) {
+			columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null);
+		}
 		
 		//set data
 		if (result instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet<?>)result, columns, file);
+			super.setData((IPagedQueryResultSet<?>)result, geometryColumn, columns, file);
 		}else if (result instanceof MemoryQueryResult){
-			super.setData( ((MemoryQueryResult<IResultItem>)result).getData(), columns, file);
+			super.setData( ((MemoryQueryResult<IResultItem>)result).getData(), geometryColumn, columns, file);
 		}else if (result instanceof GridQueryResult){
-			super.setData( ((GridQueryResult)result).getData(), columns, file);
+			super.setData( ((GridQueryResult)result).getData(), geometryColumn, columns, file);
 		}
 		//export
 		super.export(monitor);		
@@ -151,7 +162,7 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 
 	private void recordTrack(PatrolQueryResultItem item) throws DatatypeConfigurationException {
 		if (item.getTrack() != null) {
-			Geometry geometry = item.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+			Geometry geometry = item.asGeometry();
 			if (geometry != null) {
 				TrkType trk = new TrkType();
 				MultiLineString mls = (MultiLineString) geometry;

@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
+import org.wcs.smart.query.model.WaypointGeometryQueryColumn;
 
 public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvider {
 
@@ -41,6 +42,12 @@ public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvid
 		if (key.equals(GRID_TO_BIG_KEY)){
 			return Messages.Grid_GridToLargeError;
 		}
+		
+		if (key == GEOM_SOURCE_COLUMN_NAME ) return Messages.GridQueryColumnLabelProvider_SourceLable;
+		if (key == GEOM_PERIMETER_COLUMN_NAME ) return Messages.GridQueryColumnLabelProvider_PerimeterLabel;
+		if (key == GEOM_AREA_COLUMN_NAME ) return Messages.GridQueryColumnLabelProvider_AreaLabel;
+		if (key == WaypointGeometryQueryColumn.KEY) return Messages.GridQueryColumnLabelProvider_WaypointGeometryColumn;
+		
 		return null;
 	}
 }

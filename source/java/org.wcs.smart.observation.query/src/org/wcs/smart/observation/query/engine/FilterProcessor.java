@@ -405,8 +405,8 @@ public class FilterProcessor implements IFilterProcessor {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + observationTable + " (observation_uuid char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (AttributeInfo key : keys) {
-			sql.append(", \"" + key.getKey() + "\" " //$NON-NLS-1$ //$NON-NLS-2$
-					+ engine.getDataType(key.getType()));
+			sql.append(", " + key.getColumnName() + " " //$NON-NLS-1$ //$NON-NLS-2$
+					+ engine.getDataType(key));
 		}
 		int i = 0;
 		for (AttributeFilter f : mlistFilters) {
@@ -431,14 +431,14 @@ public class FilterProcessor implements IFilterProcessor {
 		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
 			progress.split(1);
-			progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getKey());
+			progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getAttributeKey());
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(attributeTempTable); 
 			sql.append("(observation_uuid char(16) for bit data, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
+			sql.append( engine.getDataType(key) );
 			sql.append( ")"); //$NON-NLS-1$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -459,10 +459,10 @@ public class FilterProcessor implements IFilterProcessor {
 					sql.append("t.hkey "); //$NON-NLS-1$
 				} else {
 					sql.append(prefix(WaypointObservationAttribute.class)
-							+ "." + key.getColumn()); //$NON-NLS-1$						
+							+ "." + key.getTableColumn()); //$NON-NLS-1$						
 				}
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
+				sql.append(key.getColumnName());
 				sql.append(" "); //$NON-NLS-1$
 
 				sql.append("FROM "); //$NON-NLS-1$
@@ -516,7 +516,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("WHERE "); //$NON-NLS-1$
 				
 				sql.append(" " + prefix(Attribute.class) + ".keyid = '"); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(key.getKey());
+				sql.append(key.getAttributeKey());
 				sql.append("'"); //$NON-NLS-1$
 				
 				Collection<IWaypointSource> src = getWaypointSources();
@@ -551,7 +551,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append(" set "); //$NON-NLS-1$
-				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
+				sql.append(key.getColumnName());  
 				sql.append(" = "); //$NON-NLS-1$
 				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
 				sql.append(attributeTempTable);
@@ -566,7 +566,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("INSERT INTO "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append("(observation_uuid, "); //$NON-NLS-1$
-				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
+				sql.append(key.getColumnName());
 				sql.append(")"); //$NON-NLS-1$
 				sql.append("(SELECT  observation_uuid, value FROM "); //$NON-NLS-1$
 				sql.append(attributeTempTable);

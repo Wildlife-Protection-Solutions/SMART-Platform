@@ -33,6 +33,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.InflaterInputStream;
@@ -146,13 +147,14 @@ public class SmartMobileJsonFileProcessor {
 		
 		List<JSONObject> features = null;
 		try {
-			features = CtJsonUtil.parseFeaturesFromJsonString(json);
+			features = CtJsonUtil.parseFeaturesFromJsonString(json, this.locale);
 		}catch (Exception ex ) {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			updateItemStatus(session,Status.ERROR,MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.JsonParseError", locale), ex.getMessage()), null); //$NON-NLS-1$
 			return;
 		}
 
+		IJsonProcessor[] processors = null;
 		session.beginTransaction();
 		try {
 			item = session.get(item.getClass(), item.getUuid());
@@ -165,11 +167,11 @@ public class SmartMobileJsonFileProcessor {
 			
 			List<JsonImportWarning> warnings = new ArrayList<>();
 			
-			IJsonProcessor[] processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
+			processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
 			for (IJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session);
+				List<JSONObject> processed = p.processJson(features, session, this.locale);
 				notProc.removeAll(processed);
-				String msg = p.getStatusMessage();
+				String msg = p.getStatusMessage(this.locale);
 				if (msg != null) statusMsg.append(msg);
 				
 				warnings.addAll(p.getWarnings());
@@ -186,15 +188,19 @@ public class SmartMobileJsonFileProcessor {
 
 			if (!notProc.isEmpty()){
 				//not all items have been processed
-				StringBuilder sb = new StringBuilder();
-				sb.append(MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.FeatureProccessedCount", locale), features.size(), notProc.size())); //$NON-NLS-1$
-				for (JSONObject o : notProc){
-					sb.append(o.toJSONString() + "; "); //$NON-NLS-1$
-				}
-				sb.deleteCharAt(sb.length()-1);
-				sb.deleteCharAt(sb.length()-1);
+				final int fsize = features.size();
+				Function<Locale,String> warn = (l)->{ 
+					StringBuilder sb = new StringBuilder();
+					sb.append(MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.FeatureProccessedCount", l), fsize, notProc.size())); //$NON-NLS-1$
+					for (JSONObject o : notProc){
+						sb.append(o.toJSONString() + "; "); //$NON-NLS-1$
+					}
+					sb.deleteCharAt(sb.length()-1);
+					sb.deleteCharAt(sb.length()-1);
+					return sb.toString();
+				};
 				
-				warnings.add(new JsonImportWarning(sb.toString()));
+				warnings.add(new JsonImportWarning(warn));
 			}
 			
 			if (warnings.isEmpty()) {
@@ -205,7 +211,7 @@ public class SmartMobileJsonFileProcessor {
 			item.setStatusMessage(statusMsg.toString());
 			item.setWarningMessages(null);
 			for (JsonImportWarning warn : warnings) {
-				item.addWarningMessage(warn.getMessage());
+				item.addWarningMessage(warn.getMessage(this.locale));
 			}
 			
 			session.getTransaction().commit();
@@ -223,6 +229,16 @@ public class SmartMobileJsonFileProcessor {
 
 			String message = MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.ProcessingError", locale), ex.getMessage() ); //$NON-NLS-1$
 			updateItemStatus(session,  Status.ERROR, message, null);
+		}finally {
+			for (IJsonProcessor p : processors) {
+				try {
+					p.cleanUp();
+				}catch(Throwable t) {
+					logger.log(Level.SEVERE, t.getMessage(), t);
+				}
+
+			}
+			
 		}
 
 		
@@ -241,7 +257,7 @@ public class SmartMobileJsonFileProcessor {
 			item.setWarningMessages(null);
 			if (warnings != null) {
 				for (JsonImportWarning warn : warnings) {
-					item.addWarningMessage(warn.getMessage());
+					item.addWarningMessage(warn.getMessage(this.locale));
 				}
 			}
 			

@@ -35,7 +35,6 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.observation.query.map.style.ObservationGridQueryDefaultStyle;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.observation.query.ui.ObservationGriddedQueryEditor;
@@ -69,7 +68,7 @@ public class ObservationGridQueryType implements IMappableQueryType {
 	
 	private static final HashMap<String, String> styleMappings = new HashMap<>();
 	static{
-		styleMappings.put(RasterService.GRIDDED_TYPE, ObservationGridQueryDefaultStyle.KEY);
+		styleMappings.put(RasterService.GRIDDED_TYPE, ObservationGriddedQuery.DEFAULT_STYLE_KEY);
 	}
 	
 	

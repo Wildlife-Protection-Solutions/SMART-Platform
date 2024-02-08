@@ -68,6 +68,10 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case SIGNATURE_TYPE_NOT_FOUND: return Messages.getString("ObservationLabelProvider.SignatureTypeNotFound", l); //$NON-NLS-1$
 		case INVALID_CM_UUID: return Messages.getString("ObservationLabelProvider.InvalidCmUuid", l); //$NON-NLS-1$
 		case CM_MISSING: return Messages.getString("ObservationLabelProvider.CmNotFound", l);	 //$NON-NLS-1$
+		case INVALID_GEOMETRY_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidGeoJson", l);  //$NON-NLS-1$
+		case INVALID_GEOMETRY_SRC_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidGeomSource", l);  //$NON-NLS-1$
+		case INVALID_LINE_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidLineGeom", l);  //$NON-NLS-1$
+		case INVALID_POLYGON_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidPolygonGeom", l);  //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}
