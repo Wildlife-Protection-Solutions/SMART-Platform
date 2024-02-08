@@ -44,6 +44,10 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.cybertracker"; //$NON-NLS-1$
 
+	//TODO: update before build to minimum required smart mobile
+	//version to support SMART Desktop features 
+	public static final String SMART_MOBILE_MIN_VERSION = "1";
+	
 	public static final String DB_VERSION_3_0 = "3.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_4_0 = "4.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_5_0 = "5.0"; //$NON-NLS-1$

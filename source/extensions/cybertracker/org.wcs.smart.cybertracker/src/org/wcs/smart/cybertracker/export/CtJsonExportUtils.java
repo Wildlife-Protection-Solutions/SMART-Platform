@@ -181,6 +181,7 @@ public class CtJsonExportUtils {
 	public static final String JSON_SERVER_PROTOCOL_KEY= "PROTOCOL"; //$NON-NLS-1$
 	
 	public static final String JSON_SMART_VERSION_KEY= "smart_version"; //$NON-NLS-1$
+	public static final String JSON_CT_MIN_VERSION_KEY= "smart_mobile_min_build"; //$NON-NLS-1$
 	
 	/**
 	 * JSON options property key that identifies the type
@@ -322,6 +323,7 @@ public class CtJsonExportUtils {
 		projectJSON.put("creation_date",DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(ZonedDateTime.now())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
 		projectJSON.put(JSON_SMART_VERSION_KEY, SMART_JSON_VERSION);
+		projectJSON.put(JSON_CT_MIN_VERSION_KEY, CyberTrackerPlugIn.SMART_MOBILE_MIN_VERSION);
 		if(projectAdditions != null) {
 			for (Entry<String, Object> e : projectAdditions.entrySet()) {
 				projectJSON.put(e.getKey(), e.getValue());
