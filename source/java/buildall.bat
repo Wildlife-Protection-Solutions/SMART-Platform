@@ -70,10 +70,10 @@ del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%
 
 del %outputlocation%\smartapp-macosx.cocoa.x86_64.zip
-copy .\org.wcs.smart-product\target\products\smartapp-macosx.cocoa.x86_64.zip %outputlocation%
+copy .\org.wcs.smart-product\target\products\smartapp-macosx.cocoa.x86_64.tar.gz %outputlocation%
 
 del %outputlocation%\smartapp-linux.gtk.x86_64.zip
-copy .\org.wcs.smart-product\target\products\smartapp-linux.gtk.x86_64.zip %outputlocation%
+copy .\org.wcs.smart-product\target\products\smartapp-linux.gtk.x86_64.tar.gz %outputlocation%
 
 del %outputlocation%\org.wcs.smart.updatesite-%version%-SNAPSHOT.zip
 copy .\org.wcs.smart.updatesite\target\org.wcs.smart.updatesite-%version%-SNAPSHOT.zip %outputlocation%
