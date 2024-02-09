@@ -163,7 +163,6 @@ public class UpgradeEngine {
 			upgrader.upgrade(p);
 			run.add(upgrader);		
 		}
-		
 		//postprocess
 		postProcess(progress.split(1), run);
 

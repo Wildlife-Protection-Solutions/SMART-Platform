@@ -889,8 +889,7 @@ public class Report400Upgrader extends AbstractInteralDatabaseUpgrader {
 		if (qq == null) return null; //this is not a valid query type;likely a table with no geometry column (employee)
 		
 		GeometryColumn[] columns = getGeometryColumns(queryType);
-		if (columns == null)
-			return null;
+		if (columns == null || columns.length == 0) return null;
 		return columns[0].getKey();
 	}
 

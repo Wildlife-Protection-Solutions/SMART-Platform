@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
@@ -85,6 +86,7 @@ public class Upgrader753To800 extends AbstractInteralDatabaseUpgrader {
 			"drop table smart.entity_type"  //$NON-NLS-1$
 		};
 		for (String s : sql) {
+			SmartPlugIn.logInfo(s);
 			try {
 				c.createStatement().execute(s);
 			}catch (Exception ex) {
@@ -152,6 +154,7 @@ public class Upgrader753To800 extends AbstractInteralDatabaseUpgrader {
 		
 		
 		for (String s : sql) {
+			SmartPlugIn.logInfo(s);
 			c.createStatement().execute(s);
 		}
 		

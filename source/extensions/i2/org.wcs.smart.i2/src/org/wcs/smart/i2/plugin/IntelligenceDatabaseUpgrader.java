@@ -34,9 +34,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.MutationQuery;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -622,6 +625,14 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
 			
+		//upgrade reports 
+		try {
+			(new ProfileDesktopReport800Updater()).upgrade(session);
+		} catch (Exception e) {
+			MessageDialog.openError(null, "Profile Report Upgrade Error", "Unable to upgrade Profile BIRT templates. Some templates may need to be manually updated or reset.");
+			SmartPlugIn.log(e.getMessage(), e);
+		}
+		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_6, session);
 	}
 	

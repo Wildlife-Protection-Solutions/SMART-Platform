@@ -23,12 +23,6 @@
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.cybertracker.alert">
-      <alertExtension
-            clazz="org.wcs.smart.connect.cybertracker.alert.ConnectConfigurationExtension">
-      </alertExtension>
-   </extension>
-   <extension
          point="org.wcs.smart.connect.configure.optionpanel">
       <Panel
             class="org.wcs.smart.connect.cybertracker.CtxOptionsPanel">
