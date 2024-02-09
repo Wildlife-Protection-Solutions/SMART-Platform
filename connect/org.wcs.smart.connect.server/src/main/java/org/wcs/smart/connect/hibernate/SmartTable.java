@@ -74,7 +74,6 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectUser;
@@ -83,7 +82,6 @@ import org.wcs.smart.connect.model.Quicklink;
 import org.wcs.smart.connect.model.UserQuicklink;
 import org.wcs.smart.connect.model.UsersDefaultDashboard;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
-import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -265,8 +263,6 @@ public enum SmartTable {
 	CMATTRIBUTETREENODE(CmAttributeTreeNode.class,".config.model.conservationArea"),
 	CMATTRIBUTECONFIG(CmAttributeConfig.class,".model.conservationArea" ),
 	CMNODE(CmNode.class,".model.conservationArea"),
-	CMCONNECTALERT(org.wcs.smart.connect.cybertracker.model.ConnectAlert.class, ".model.conservationArea"),
-	CTCONNECTPROPERTY(ConnectCtProperties.class, ".model.conservationArea"),
 	CONFIGURABLEMODEL(ConfigurableModel.class,null),
 	CONNECTSERVER(ConnectServer.class, null),
 	CONNECTSERVEROPTION(ConnectServerOption.class, ".id.server.conservationArea"),
@@ -284,7 +280,6 @@ public enum SmartTable {
 	CTPATROLWPLINK(CtPatrolWpLink.class, ".link.patrolLeg.patrol.conservationArea"),
 	CTMISSIONWPLINK(CtMissionWpLink.class, ".link.mission.survey.surveyDesign.conservationArea"),
 	
-	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
 	DATALINK(DataLink.class, null),
 	DASHBOARD(Dashboard.class, null),
 //	ENTITY(Entity.class,".entityType.conservationArea"),

@@ -23,26 +23,15 @@ package org.wcs.smart.cybertracker;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-import org.eclipse.core.runtime.Assert;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.cybertracker.export.ElementsUtil;
-import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * CyberTracker related database functions.
@@ -137,38 +126,7 @@ public class CyberTrackerHibernateManager {
 	 * @throws Exception 
 	 */
 	public static void deleteProfile(Session session, CyberTrackerPropertiesProfile profile) {
-		List<ConfigurableModelCtPropertiesProfile>  usedProfiles =
-				QueryFactory.buildQuery(session, ConfigurableModelCtPropertiesProfile.class,"profile", profile).getResultList(); //$NON-NLS-1$
-		for (ConfigurableModelCtPropertiesProfile ct : usedProfiles){
-			session.remove(ct);
-		}
 		session.remove(profile);
-	}
-	
-	/**
-	 * Returns a profile associated with given {@link ConfigurableModel}
-	 * @param session
-	 * @param configurableModel
-	 * @return
-	 */
-	public static ConfigurableModelCtPropertiesProfile getAssociatedCmProfile(Session session, ConfigurableModel configurableModel) {
-		Assert.isNotNull(configurableModel, "Configurable model"); //$NON-NLS-1$
-		if (configurableModel.getUuid() == null) {
-			return createDefaultCmProfile(session, configurableModel);
-		}
-		
-		ConfigurableModelCtPropertiesProfile item = QueryFactory.buildQuery(session, ConfigurableModelCtPropertiesProfile.class,"id.model", configurableModel).uniqueResult(); //$NON-NLS-1$
-		if (item == null){
-			return createDefaultCmProfile(session, configurableModel);
-		}
-		return item;
-	}
-
-	private static ConfigurableModelCtPropertiesProfile createDefaultCmProfile(Session session, ConfigurableModel configurableModel) {
-		ConfigurableModelCtPropertiesProfile cm2ctp = new ConfigurableModelCtPropertiesProfile();
-		cm2ctp.setModel(configurableModel);
-		cm2ctp.setProfile(getDefaultProfile(session));
-		return cm2ctp;
 	}
 	
 	/**
@@ -206,56 +164,5 @@ public class CyberTrackerHibernateManager {
 		return defaultProfile;
 	}
 
-	public static boolean isEmptyTag0(String uuid) {
-		return uuid == null || uuid.isEmpty() || ElementsUtil.NULL_VALUE.equals(uuid);
-	}
-	
-	public static <T> T fetchByUuid(Class<T> clazz, String uuid, Session session) {
-		if (isEmptyTag0(uuid))
-			return null;
-		try {
-			T value = fetchByUuid(clazz, UuidUtils.stringToUuid(uuid), session);
-			
-			if (value instanceof Category){
-				if (((Category)value).getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
-				return null;
-			}
-			if (value instanceof Attribute){
-				if (((Attribute)value).getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
-				return null;
-			}
-			if (value instanceof AttributeListItem){
-				if (((AttributeListItem)value).getAttribute().getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
-				return null;
-			}
-			if (value instanceof AttributeTreeNode){
-				if (((AttributeTreeNode)value).getAttribute().getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
-				return null;
-			}
-			if (value instanceof Employee){
-				if (((Employee)value).getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
-				return null;
-			}
-
-			return value;
-		} catch (Exception e) {
-			CyberTrackerPlugIn.log(e.getMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * The function selects based on the uuid.  It is up to the user to ensure the 
-	 * returning objects is valid for the current conservation area.
-	 * 
-	 * @param clazz
-	 * @param byteUuid
-	 * @param session
-	 * @return
-	 */
-	public static <T> T fetchByUuid(Class<T> clazz, UUID byteUuid, Session session) {
-		if (byteUuid == null) return null;
-		return (T) session.get(clazz, byteUuid);
-	}
 
 }

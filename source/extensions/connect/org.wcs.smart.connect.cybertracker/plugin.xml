@@ -2,25 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.wcs.smart.dataentry.extradata">
-      <tab
-            content="org.wcs.smart.connect.cybertracker.dataentry.ConfigurableModelEditorConnectTab">
-      </tab>
-   </extension>
-   <extension
-         point="org.wcs.smart.hibernate.libs.mapping">
-      <class
-            ca_property=".model.conservationArea"
-            class="org.wcs.smart.connect.cybertracker.model.ConnectAlert"
-            supportsCcaa="false">
-      </class>
-      <class
-            ca_property=".model.conservationArea"
-            class="org.wcs.smart.connect.cybertracker.model.ConnectCtProperties"
-            supportsCcaa="false">
-      </class>
-   </extension>
-   <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
             class="org.wcs.smart.connect.cybertracker.updatesite.OnUninstallAction"
@@ -46,25 +27,6 @@
       <alertExtension
             clazz="org.wcs.smart.connect.cybertracker.alert.ConnectConfigurationExtension">
       </alertExtension>
-   </extension>
-   <extension
-         point="org.wcs.smart.caTemplateCloner">
-      <templateCloner
-            class="org.wcs.smart.connect.cybertracker.ConnectCtTemplateCloner"
-            id="org.wcs.smart.connect.cybertracker.templateCloner">
-         <require
-               id="org.wcs.smart.dataentry.cmTemplateCloner">
-         </require>
-      </templateCloner>
-   </extension>
-   <extension
-         point="org.wcs.smart.dataentry.xml">
-      <importer
-            class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataImporter">
-      </importer>
-      <exporter
-            class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataExporter">
-      </exporter>
    </extension>
    <extension
          point="org.wcs.smart.connect.configure.optionpanel">

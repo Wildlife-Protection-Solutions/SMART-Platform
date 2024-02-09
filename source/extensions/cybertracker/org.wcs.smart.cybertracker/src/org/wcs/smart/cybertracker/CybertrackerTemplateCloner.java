@@ -29,11 +29,9 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
 /**
  * Clones the cybertracker properties when creating
@@ -80,8 +78,6 @@ public class CybertrackerTemplateCloner implements
 				engine.getSession().flush();
 			}
 			
-			cloneCmProfileMappings(engine, p, clone);
-			
 			sub.worked(1);
 		}
 		
@@ -104,18 +100,6 @@ public class CybertrackerTemplateCloner implements
 			sub.worked(1);
 		}
 		
-	}
-	
-	private void cloneCmProfileMappings(ConservationAreaClonerEngine engine, CyberTrackerPropertiesProfile sourceProfile, CyberTrackerPropertiesProfile clonedProfile) throws Exception {
-		List<ConfigurableModelCtPropertiesProfile> toClone = 
-				QueryFactory.buildQuery(engine.getSession(), ConfigurableModelCtPropertiesProfile.class, "profile", sourceProfile).getResultList(); //$NON-NLS-1$
-		for (ConfigurableModelCtPropertiesProfile cmctp : toClone) {
-			ConfigurableModelCtPropertiesProfile clone = new ConfigurableModelCtPropertiesProfile();
-			clone.setModel((ConfigurableModel)engine.getNewConservationItem(cmctp.getModel()));
-			clone.setProfile(clonedProfile);
-			engine.getSession().persist(clone);
-		}
-		engine.getSession().flush();
 	}
 
 }

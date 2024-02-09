@@ -229,6 +229,8 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	private void update75to80(Session session) {
 		String[] sql = new String[] {
 			"ALTER TABLE smart.ct_metadata_value ADD COLUMN is_required boolean default false not null", //$NON-NLS-1$
+			"delete from smart.ct_properties_profile_option where option_id in ('AUTO_NEXT','USE_LARGE_TABS','USE_LARGE_TITLES','LARGE_SCROLL_BARS','USE_TITLE_BAR','SHOW_EDIT','SHOW_GPS','SIMPLE_CAMERA','USE_SD_CARD','RESET_ON_SYNC','RESET_ON_NEXT','SIGHTING_ACCURACY','TRACK_ACCURACY','GPS_TIME_ZONE','UTM_ZONE','DILUTION_OF_PRECISION','FIELD_MAP_FILENAME','LOCK100','DATA_FORMAT')", //$NON-NLS-1$
+			"drop table drop table smart.cm_ct_properties_profile" //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

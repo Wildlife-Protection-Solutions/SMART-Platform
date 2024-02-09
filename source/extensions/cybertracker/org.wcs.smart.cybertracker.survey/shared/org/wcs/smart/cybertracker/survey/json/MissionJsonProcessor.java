@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -39,8 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.jboss.logging.Logger;
-import org.jboss.logging.Logger.Level;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.locationtech.jts.geom.Coordinate;

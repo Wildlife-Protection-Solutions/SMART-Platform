@@ -54,21 +54,12 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	public static final int EXIT_PIN_MIN_VALUE = 1;
 	public static final int EXIT_PIN_MAX_VALUE = 99999999;
-	
-	public static final double SIGHTING_ACCURACY_MIN_VALUE = 0.01;
-	public static final double SIGHTING_ACCURACY_MAX_VALUE = 49;
-	
-	public static final double TRACK_ACCURACY_MIN_VALUE = 0.01;
-	public static final double TRACK_ACCURACY_MAX_VALUE = 49;
 
 	public static final int SIGHTING_FIX_COUNT_MIN_VALUE = 1;
 	public static final int SIGHTING_FIX_COUNT_MAX_VALUE = 60;
 
 	public static final int TIME_TRACK_MIN_VALUE = 0;
 	public static final int TIME_TRACK_MAX_VALUE = 10000;
-
-	public static final int UTM_ZONE_MIN_VALUE = 0;
-	public static final int UTM_ZONE_MAX_VALUE = 60;
 
 	public static final int MAX_PHOTO_COUNT_MIN_VALUE = 1;
 	public static final int MAX_PHOTO_COUNT_MAX_VALUE = 100;
@@ -119,48 +110,20 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public static final int DILUTION_OF_PRECISION_MAX_VALUE = 49;
 
 	//default properties
-	private static final boolean largeScrollBars = false;
 	private static final boolean kioskMode = true;
-	private static final boolean simpleCamera = true;
 	private static final boolean canPause = true;
 	private static final int exitPin = 1234;
-	
-	private static final double sightingAccuracy = 20.0;
 	private static final int sightingFixCount = 10;
 	private static final int waypointTimer = 300; //aka Track Timer 
-	private static final int gpsTimeZone = 0; //GMT/UTC time offset
-    private static final int skipButtonTimeout = 3;
-    
-	private static final boolean useTitleBar = false;
-	private static final boolean useLargeTitles = true;
-	private static final boolean useLargeTabs = false;
-	
-	private static final boolean disableEditing = false;
-	private static final boolean useSdCard = false;
+	private static final int skipButtonTimeout = 3;
+    private static final boolean disableEditing = false;
 	private static final boolean testTime = false;
-	private static final boolean resetOnSync = false;
-	private static final boolean resetOnNext = true;
-	
-	private static final double trackAccuracy = 20.0;
-	
 	private static final boolean useGpsTime = true;
 	private static final boolean manualGps = false;
 	private static final boolean allowSkipManualGps = true;
-	
-	private static final String fieldMapFilename = ""; //$NON-NLS-1$
-	private static final boolean lock100 = false;
 	private static final boolean useMapOnSkip = true;
-	
-	private static final boolean autoNext = false;
-	private static final boolean showEdit = true;
-	private static final boolean showGPS = true;
-	
 	private static final int projection = 0;
-    private static final int utmZone = 0;
-
     private static final int maxPhotoCount = 10;
-    
-    private static final int dilutionOfPrecision = DILUTION_OF_PRECISION_MAX_VALUE;
     
 	private ConservationArea conservationArea;
 	private boolean isDefault = false;
@@ -237,17 +200,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
 		return (option != null) ? option.getStringValue() : (String)getDefaultValue(optionId);
 	}
-	
-	@Transient
-	public CyberTrackerPropertiesOption.Protocol getDataFormat() {
-		return CyberTrackerPropertiesOption.Protocol.valueOf( getStringValue(ProfileOptionID.DATA_FORMAT) );
-	}
-	public void setDataFormat(CyberTrackerPropertiesOption.Protocol dataFormat) {
-		getOption(ProfileOptionID.DATA_FORMAT).setStringValue(dataFormat.name());
-	}
-
-	
-	
+		
 	@Transient
 	public boolean isKioskMode() {
 		return getBooleanValue(ProfileOptionID.KIOSK_MODE);
@@ -273,14 +226,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		getOption(ProfileOptionID.INCIDENT_GROUP_UI).setBooleanValue(useGroupUi);
 	}
 	
-	@Transient
-	public boolean isSimpleCamera() {
-		return getBooleanValue(ProfileOptionID.SIMPLE_CAMERA);
-	}
-	public void setSimpleCamera(boolean simpleCamera) {
-		getOption(ProfileOptionID.SIMPLE_CAMERA).setBooleanValue(simpleCamera);
-	}
-	
+
 	@Transient
 	public boolean isCanPause() {
 		return getBooleanValue(ProfileOptionID.CAN_PAUSE);
@@ -288,24 +234,6 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setCanPause(boolean canPause) {
 		getOption(ProfileOptionID.CAN_PAUSE).setBooleanValue(canPause);
 	}
-	
-	@Transient
-	public boolean isLargeScrollBars() {
-		return getBooleanValue(ProfileOptionID.LARGE_SCROLL_BARS);
-	}
-	public void setLargeScrollBars(boolean largeScrollBars) {
-		getOption(ProfileOptionID.LARGE_SCROLL_BARS).setBooleanValue(largeScrollBars);
-	}
-
-	
-	@Transient
-	public double getSightingAccuracy() {
-		return getDoubleValue(ProfileOptionID.SIGHTING_ACCURACY);
-	}
-	public void setSightingAccuracy(double sightingAccuracy) {
-		getOption(ProfileOptionID.SIGHTING_ACCURACY).setDoubleValue(sightingAccuracy);
-	}
-	
 	
 	@Transient
 	public int getSightingFixCount() {
@@ -331,16 +259,6 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setWaypointTimerType(CyberTrackerPropertiesProfileOption.TrackTimerOp tt) {
 		getOption(ProfileOptionID.WAYPOINT_TIMER_TYPE).setStringValue(tt.name());
 	}
-
-	
-	@Transient
-	public int getGpsTimeZone() {
-		return getIntValue(ProfileOptionID.GPS_TIME_ZONE);
-	}
-	public void setGpsTimeZone(int gpsTimeZone) {
-		getOption(ProfileOptionID.GPS_TIME_ZONE).setIntegerValue(gpsTimeZone);
-	}
-
 	
 	@Transient
 	public int getSkipButtonTimeout() {
@@ -352,15 +270,6 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	
 	@Transient
-	public boolean isAutoNext() {
-		return getBooleanValue(ProfileOptionID.AUTO_NEXT);
-	}
-	public void setAutoNext(boolean autoNext) {
-		getOption(ProfileOptionID.AUTO_NEXT).setBooleanValue(autoNext);
-	}
-
-	
-	@Transient
 	public int getExitPin() {
 		return getIntValue(ProfileOptionID.EXIT_PIN);
 	}
@@ -368,32 +277,6 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		getOption(ProfileOptionID.EXIT_PIN).setIntegerValue(exitPin);
 	}
 	
-	
-	@Transient
-	public boolean isUseTitleBar() {
-		return getBooleanValue(ProfileOptionID.USE_TITLE_BAR);
-	}
-	public void setUseTitleBar(boolean useTitleBar) {
-		getOption(ProfileOptionID.USE_TITLE_BAR).setBooleanValue(useTitleBar);
-	}
-	
-	
-	@Transient
-	public boolean isUseLargeTabs() {
-		return getBooleanValue(ProfileOptionID.USE_LARGE_TABS);
-	}
-	public void setUseLargeTabs(boolean useLargeTabs) {
-		getOption(ProfileOptionID.USE_LARGE_TABS).setBooleanValue(useLargeTabs);
-	}
-	
-	
-	@Transient
-	public boolean isUseLargeTitles() {
-		return getBooleanValue(ProfileOptionID.USE_LARGE_TITLES);
-	}
-	public void setUseLargeTitles(boolean useLargeTitles) {
-		getOption(ProfileOptionID.USE_LARGE_TITLES).setBooleanValue(useLargeTitles);
-	}
 	
 	
 	@Transient
@@ -403,16 +286,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setDisableEditing(boolean disableEditing) {
 		getOption(ProfileOptionID.DISABLE_EDITING).setBooleanValue(disableEditing);
 	}
-	
-	
-	@Transient
-	public boolean isUseSdCard() {
-		return getBooleanValue(ProfileOptionID.USE_SD_CARD);
-	}
-	public void setUseSdCard(boolean useSdCard) {
-		getOption(ProfileOptionID.USE_SD_CARD).setBooleanValue(useSdCard);
-	}
-	
+
 	
 	@Transient
 	public boolean isTestTime() {
@@ -421,34 +295,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setTestTime(boolean testTime) {
 		getOption(ProfileOptionID.TEST_TIME).setBooleanValue(testTime);
 	}
-	
-	
-	@Transient
-	public boolean isResetOnSync() {
-		return getBooleanValue(ProfileOptionID.RESET_ON_SYNC);
-	}
-	public void setResetOnSync(boolean resetOnSync) {
-		getOption(ProfileOptionID.RESET_ON_SYNC).setBooleanValue(resetOnSync);
-	}
-	
-	
-	@Transient
-	public boolean isResetOnNext() {
-		return getBooleanValue(ProfileOptionID.RESET_ON_NEXT);
-	}
-	public void setResetOnNext(boolean resetOnNext) {
-		getOption(ProfileOptionID.RESET_ON_NEXT).setBooleanValue(resetOnNext);
-	}
-	
-	
-	@Transient
-	public double getTrackAccuracy() {
-		return getDoubleValue(ProfileOptionID.TRACK_ACCURACY);
-	}
-	public void setTrackAccuracy(double trackAccuracy) {
-		getOption(ProfileOptionID.TRACK_ACCURACY).setDoubleValue(trackAccuracy);
-	}
-	
+
 	
 	@Transient
 	public boolean isUseGpsTime() {
@@ -475,26 +322,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setAllowSkipManualGps(boolean allowSkipManualGps) {
 		getOption(ProfileOptionID.ALLOW_SKIP_MANUAL_GPS).setBooleanValue(allowSkipManualGps);
 	}
-	
-	
-	@Transient
-	public String getFieldMapFilename() {
-		return getStringValue(ProfileOptionID.FIELD_MAP_FILENAME);
-	}
-	public void setFieldMapFilename(String fieldMapFilename) {
-		getOption(ProfileOptionID.FIELD_MAP_FILENAME).setStringValue(fieldMapFilename);
-	}
-	
-	
-	@Transient
-	public boolean isLock100() {
-		return getBooleanValue(ProfileOptionID.LOCK100);
-	}
-	public void setLock100(boolean lock100) {
-		getOption(ProfileOptionID.LOCK100).setBooleanValue(lock100);
-	}
-	
-	
+		
 	@Transient
 	public boolean isUseMapOnSkip() {
 		return getBooleanValue(ProfileOptionID.USE_MAP_ON_SKIP);
@@ -504,35 +332,11 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	}
 	
 	@Transient
-	public boolean isShowEdit() {
-		return getBooleanValue(ProfileOptionID.SHOW_EDIT);
-	}
-	public void setShowEdit(boolean showEdit) {
-		getOption(ProfileOptionID.SHOW_EDIT).setBooleanValue(showEdit);
-	}
-
-	@Transient
-	public boolean isShowGPS() {
-		return getBooleanValue(ProfileOptionID.SHOW_GPS);
-	}
-	public void setShowGPS(boolean showGPS) {
-		getOption(ProfileOptionID.SHOW_GPS).setBooleanValue(showGPS);
-	}
-
-	@Transient
 	public int getProjection() {
 		return getIntValue(ProfileOptionID.PROJECTION);
 	}
 	public void setProjection(int prj) {
 		getOption(ProfileOptionID.PROJECTION).setIntegerValue(prj);
-	}
-
-	@Transient
-	public int getUtmZone() {
-		return getIntValue(ProfileOptionID.UTM_ZONE);
-	}
-	public void setUtmZone(int zone) {
-		getOption(ProfileOptionID.UTM_ZONE).setIntegerValue(zone);
 	}
 
 	@Transient
@@ -543,14 +347,6 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		getOption(ProfileOptionID.MAX_PHOTO_COUNT).setIntegerValue(count);
 	}
 
-	@Transient
-	public int getDilutionOfPrecision() {
-		return getIntValue(ProfileOptionID.DILUTION_OF_PRECISION);
-	}
-	public void setDilutionOfPrecision(int dop) {
-		getOption(ProfileOptionID.DILUTION_OF_PRECISION).setIntegerValue(dop);
-	}
-	
 	@Transient
 	public boolean getResizePhoto() {
 		return getBooleanValue(ProfileOptionID.RESIZE_IMAGE);
@@ -581,37 +377,18 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		case UNITS: return CyberTrackerPropertiesProfileOption.Unit.METRIC.name();
 		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
 		case APP_NAME: return "SMART Mobile Application";  //$NON-NLS-1$
-		case AUTO_NEXT: return autoNext;
 		case CAN_PAUSE: return canPause;
-		case DATA_FORMAT: return CyberTrackerPropertiesOption.Protocol.GEOJSON_COMPRESSED.name();
-		case DILUTION_OF_PRECISION: return dilutionOfPrecision;
 		case DISABLE_EDITING: return disableEditing;
 		case EXIT_PIN: return exitPin;
-		case FIELD_MAP_FILENAME: return fieldMapFilename;
-		case GPS_TIME_ZONE: return gpsTimeZone;
 		case KIOSK_MODE: return kioskMode;
-		case LARGE_SCROLL_BARS: return largeScrollBars;
-		case LOCK100: return lock100;
 		case MANUAL_GPS: return manualGps;
 		case MAX_PHOTO_COUNT: return maxPhotoCount;
 		case PROJECTION: return projection;
-		case RESET_ON_NEXT: return resetOnNext;
-		case RESET_ON_SYNC: return resetOnSync;
-		case SHOW_EDIT: return showEdit;
-		case SHOW_GPS: return showGPS;
-		case SIGHTING_ACCURACY: return sightingAccuracy;
 		case SIGHTING_FIX_COUNT: return sightingFixCount;
-		case SIMPLE_CAMERA: return simpleCamera;
 		case SKIP_BUTTON_TIMEOUT: return skipButtonTimeout;
 		case TEST_TIME: return testTime;
-		case TRACK_ACCURACY: return trackAccuracy;
 		case USE_GPS_TIME: return useGpsTime;
-		case USE_LARGE_TABS: return useLargeTabs;
-		case USE_LARGE_TITLES: return useLargeTitles;
 		case USE_MAP_ON_SKIP: return useMapOnSkip;
-		case USE_SD_CARD: return useSdCard;
-		case USE_TITLE_BAR: return useTitleBar;
-		case UTM_ZONE: return utmZone;
 		case WAYPOINT_TIMER: return waypointTimer;
 		case WAYPOINT_TIMER_TYPE: return CyberTrackerPropertiesProfileOption.TrackTimerOp.TIME.name();
 		case THEME_COLOR_1: return -1;

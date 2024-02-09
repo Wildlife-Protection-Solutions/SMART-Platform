@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -69,7 +70,6 @@ import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
-import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
@@ -199,7 +199,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 					context.set(SurveyDesign.class, null);
 				}else {
 					ConfigurableModel cm = design.getConfigurableModel();
-					cmDefaultProfile = getAssciatedProfile(cm);
+					cmDefaultProfile = getDefaultProfile();
 					profileViewer.setSelection(new StructuredSelection(cmDefaultProfile));
 					
 					context.set(ConfigurableModel.class, cm != null ? cm : new ConfigurableModel());
@@ -332,19 +332,11 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		onValidate.accept(null);
 	}
 	
-	private CyberTrackerPropertiesProfile getAssciatedProfile(Object src) {
+	private CyberTrackerPropertiesProfile getDefaultProfile() {
 		try (Session session = HibernateManager.openSession()){
-			if (src instanceof ConfigurableModel) {
-				ConfigurableModel cm = (ConfigurableModel) src;
-				ConfigurableModelCtPropertiesProfile cmctp = CyberTrackerHibernateManager.getAssociatedCmProfile(session, cm);
-				CyberTrackerPropertiesProfile  profile = cmctp.getProfile();
-				profile.equals(profile);
-				return profile;
-			} else {
-				CyberTrackerPropertiesProfile profile = CyberTrackerHibernateManager.getDefaultProfile(session);
-				profile.equals(profile);
-				return profile;
-			}
+			CyberTrackerPropertiesProfile profile = CyberTrackerHibernateManager.getDefaultProfile(session);
+			Hibernate.initialize(profile);
+			return profile;
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.CtSurveyPackageConfigurator_LoadingError, ex);
 			return null;

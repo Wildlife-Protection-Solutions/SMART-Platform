@@ -65,6 +65,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -72,11 +73,10 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
+import org.wcs.smart.cybertracker.export.DataModelWrapper;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
-import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
-import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.TrackTimerOp;
@@ -209,7 +209,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				Object profile = ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
 				if (profile instanceof ConfigurableModel) {
 					selectedModel = (ConfigurableModel)profile;
-					cmDefaultProfile = getAssciatedProfile(selectedModel);
+					cmDefaultProfile = getDefaultProfile();
 					profileViewer.setSelection(new StructuredSelection(cmDefaultProfile));
 				}else if (profile instanceof DataModelWrapper) {
 					selectedModel = null;					
@@ -470,24 +470,17 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		onValidate.accept(null);
 	}
 	
-	private CyberTrackerPropertiesProfile getAssciatedProfile(Object src) {
+	private CyberTrackerPropertiesProfile getDefaultProfile() {
 		try (Session session = HibernateManager.openSession()){
-			if (src instanceof ConfigurableModel) {
-				ConfigurableModel cm = (ConfigurableModel) src;
-				ConfigurableModelCtPropertiesProfile cmctp = CyberTrackerHibernateManager.getAssociatedCmProfile(session, cm);
-				CyberTrackerPropertiesProfile  profile = cmctp.getProfile();
-				profile.equals(profile);
-				return profile;
-			} else {
-				CyberTrackerPropertiesProfile profile = CyberTrackerHibernateManager.getDefaultProfile(session);
-				profile.equals(profile);
-				return profile;
-			}
+			CyberTrackerPropertiesProfile profile = CyberTrackerHibernateManager.getDefaultProfile(session);
+			Hibernate.initialize(profile);
+			return profile;
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.PatrolCTPackageDialog_ProfileLoadError, ex);
 			return null;
 		}
 	}
+	
 	
 	private void loadData() {		
     	

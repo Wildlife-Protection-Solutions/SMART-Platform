@@ -84,8 +84,12 @@ public class ConnectCtDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion == null) {
 			createTables(session);
 			upgradeV1toV2(session);
+			upgradeV2toV3(session);
 		}else if (currentVersion.equalsIgnoreCase(ConnectCtPlugIn.DB_VERSION_1)){
 			upgradeV1toV2(session);
+			upgradeV2toV3(session);
+		}else if (currentVersion.equalsIgnoreCase(ConnectCtPlugIn.DB_VERSION_2)){
+			upgradeV2toV3(session);
 		}
 	}
 
@@ -104,6 +108,23 @@ public class ConnectCtDatabaseUpgrader implements IDatabaseUpgrader {
 			}
 		});
 		HibernateManager.setPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, ConnectCtPlugIn.DB_VERSION_2, session);
+	}
+	
+	private void upgradeV2toV3(Session session) {
+		String[] sql = new String[]{
+				"DROP TABLE smart.connect_alert", //$NON-NLS-1$
+				"DROP TABLE smart.connect_ct_properties" //$NON-NLS-1$
+		};
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				for (int i = 0; i < sql.length; i ++){
+					c.createStatement().execute(sql[i]);
+				}
+			}
+		});
+		HibernateManager.setPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, ConnectCtPlugIn.DB_VERSION_3, session);
 	}
 	
 	private void createTables(Session session){

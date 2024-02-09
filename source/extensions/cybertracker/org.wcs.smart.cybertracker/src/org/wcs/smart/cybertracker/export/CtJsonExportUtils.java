@@ -183,11 +183,14 @@ public class CtJsonExportUtils {
 	public static final String JSON_SMART_VERSION_KEY= "smart_version"; //$NON-NLS-1$
 	public static final String JSON_CT_MIN_VERSION_KEY= "smart_mobile_min_build"; //$NON-NLS-1$
 	
-	/**
-	 * JSON options property key that identifies the type
-	 */
-	public static final String JSON_EMPLOYEE_METADATA_KEY = ScreensUtil.COMMON_PREFIX + "Employees"; //$NON-NLS-1$
 	
+    public static final String COMMON_PREFIX = "SMART_"; //$NON-NLS-1$
+    public static final String RESULT_ID = COMMON_PREFIX + "PatrolID"; //$NON-NLS-1$
+	public static final String JSON_EMPLOYEE_METADATA_KEY = COMMON_PREFIX + "Employees"; //$NON-NLS-1$
+    public static final String RESULT_DATATYPE = COMMON_PREFIX + "DataType"; //$NON-NLS-1$
+    public static final String RESULT_START_DATE = MetadataFieldValue.START_DATE_METADATA_KEY;
+    public static final String RESULT_START_TIME = MetadataFieldValue.START_TIME_METADATA_KEY;
+    
 	/**
 	 * JSON options property key for map definition
 	 */
@@ -373,42 +376,24 @@ public class CtJsonExportUtils {
 	private static boolean isBoolean(ProfileOptionID option) {
 		switch(option){
 		
-		case USE_TITLE_BAR:
-		case USE_LARGE_TITLES:
-		case USE_LARGE_TABS:
-		case LARGE_SCROLL_BARS:
-		case AUTO_NEXT:
-		case SHOW_EDIT:
-		case SHOW_GPS:
 		case KIOSK_MODE:	
 		case CAN_PAUSE:
-		case SIMPLE_CAMERA:
 		case DISABLE_EDITING:
-		case USE_SD_CARD:
 		case TEST_TIME:
-		case RESET_ON_NEXT:
-		case RESET_ON_SYNC:
 		case USE_MAP_ON_SKIP:
 		case USE_GPS_TIME:
 		case MANUAL_GPS:
 		case ALLOW_SKIP_MANUAL_GPS:
-		case LOCK100:
 		case RESIZE_IMAGE:
 		case INCIDENT_GROUP_UI:
 			return true;
 			
 		case APP_NAME:
-		case DILUTION_OF_PRECISION:
 		case EXIT_PIN:
-		case FIELD_MAP_FILENAME:
-		case GPS_TIME_ZONE:
 		case MAX_PHOTO_COUNT:
 		case PROJECTION:
-		case SIGHTING_ACCURACY:
 		case SIGHTING_FIX_COUNT:
 		case SKIP_BUTTON_TIMEOUT:
-		case TRACK_ACCURACY:
-		case UTM_ZONE:
 		case WAYPOINT_TIMER_TYPE:
 		case WAYPOINT_TIMER:
 		case THEME_COLOR_1:
@@ -842,7 +827,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
 		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(ScreensUtil.RESULT_ID, dataType);
+		typeOp.put(RESULT_ID, dataType);
 		return typeOp;
 	}
 	
@@ -854,7 +839,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
 		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(ScreensUtil.RESULT_START_DATE, dataType);
+		typeOp.put(RESULT_START_DATE, dataType);
 		return typeOp;
 	}
 	
@@ -867,7 +852,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
 		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(ScreensUtil.RESULT_START_TIME, dataType);
+		typeOp.put(RESULT_START_TIME, dataType);
 		return typeOp;
 	}
 	
@@ -880,7 +865,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, outputDataType);
 		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(ScreensUtil.RESULT_DATATYPE, dataType);
+		typeOp.put(RESULT_DATATYPE, dataType);
 		return typeOp;
 	}
 	

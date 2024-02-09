@@ -90,6 +90,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Ui Controller for adding connect alerts/upload details to package
+ * 
  * @author Emily
  *
  */

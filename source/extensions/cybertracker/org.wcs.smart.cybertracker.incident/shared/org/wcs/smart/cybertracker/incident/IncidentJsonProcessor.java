@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.incident;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -33,8 +32,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.jboss.logging.Logger;
-import org.jboss.logging.Logger.Level;
 import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;

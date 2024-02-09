@@ -1420,13 +1420,22 @@ public class UpgradeServlet extends HttpServlet {
 						"ALTER TABLE smart.i_record alter column created_by drop not null", //$NON-NLS-1$
 						"ALTER TABLE smart.i_attachment alter column created_by drop not null", //$NON-NLS-1$
 						
+						//remove cybertracker plugins
+						"delete from smart.ct_properties_profile_option where option_id in ('AUTO_NEXT','USE_LARGE_TABS','USE_LARGE_TITLES','LARGE_SCROLL_BARS','USE_TITLE_BAR','SHOW_EDIT','SHOW_GPS','SIMPLE_CAMERA','USE_SD_CARD','RESET_ON_SYNC','RESET_ON_NEXT','SIGHTING_ACCURACY','TRACK_ACCURACY','GPS_TIME_ZONE','UTM_ZONE','DILUTION_OF_PRECISION','FIELD_MAP_FILENAME','LOCK100','DATA_FORMAT')", //$NON-NLS-1$
+						"drop table smart.cm_ct_properties_profile", //$NON-NLS-1$
+						"DROP TABLE smart.connect_alert", //$NON-NLS-1$
+						"DROP TABLE smart.connect_ct_properties", //$NON-NLS-1$
+						
 						//postgis update
 						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]');END; $$", //$NON-NLS-1$
 
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
-
+						
+						"update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.connect.cybertracker'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.connect.cybertracker'", //$NON-NLS-1$
+						
 						"update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.asset.query'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.asset.query'", //$NON-NLS-1$
 
