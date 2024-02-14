@@ -562,6 +562,7 @@ public class DataQueueView{
 		l.setToolTipText(Messages.DataQueueView_FilteredTooltip);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 200;
+		filterWarningComp.setVisible(false);
 		
 		
 		Hyperlink link = toolkit.createHyperlink(main, Messages.DataQueueView_RefreshLabel, SWT.NONE);
