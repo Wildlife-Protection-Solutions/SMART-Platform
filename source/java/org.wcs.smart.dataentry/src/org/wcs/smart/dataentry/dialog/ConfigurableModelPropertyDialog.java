@@ -365,7 +365,33 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				return;
 			}
 			
-			Dialog dialog = new ConfigurableModelEditDialog(initModel, opDialog.getCmTemplate(), opDialog.getOriginal2CloneItemMap());
+			ConfigurableModel finitModel  = initModel;
+
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			try {
+			pmd.run(true, true, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Saving configurable model...", IProgressMonitor.UNKNOWN);
+					
+					try(Session s = HibernateManager.openSession(new AssociatedImageInterceptor())){
+						s.beginTransaction();
+						try {
+							s.persist(finitModel);
+							s.getTransaction().commit();
+						}catch (Exception ex) {
+							throw new InvocationTargetException(ex, ex.getMessage());
+						}
+					}
+					
+				}
+			});
+			}catch (Exception ex) {
+				SmartPlugIn.displayLog(ex.getMessage(), ex);
+				return;
+			}
+			
+			Dialog dialog = new ConfigurableModelEditDialog(finitModel);
 			dialog.open();
 			
 			//refresh list

@@ -44,7 +44,6 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlB
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -63,6 +62,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnPhotoFirst;
 	private Button btnUseEr;
 	private ComboViewer cmbIconSet;
+	
 	
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, model, session);
@@ -95,12 +95,12 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		
 		List<Object> sets = new ArrayList<>();
 		sets.add(NONE);
-		try(Session session = HibernateManager.openSession()){
-			List<IconSet> items = QueryFactory.buildQuery(session, IconSet.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
-			items.forEach(e->e.getName());
-			sets.addAll(items);
-		}
+		
+		List<IconSet> items = QueryFactory.buildQuery(session, IconSet.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+		items.forEach(e->e.getName());
+		sets.addAll(items);
+		
 		cmbIconSet.setInput(sets);
 		cmbIconSet.setSelection(new StructuredSelection(NONE));
 		cmbIconSet.addSelectionChangedListener(e->{

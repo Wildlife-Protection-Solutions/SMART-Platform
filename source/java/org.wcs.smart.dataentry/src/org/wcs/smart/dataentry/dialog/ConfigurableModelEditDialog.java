@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,13 +46,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -73,9 +66,6 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 	private static final int DIALOG_HEIGHT = 725;
 
 	private ConfigurableModel model;
-	private ConfigurableModel clonedFrom;
-	private Map<UUID, UuidItem> original2CloneItemMap;
-
 	
 	private List<IConfigurableModelEditorTabContent> tabs;
 	private boolean changesMade = false;
@@ -85,37 +75,14 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 	private Session session = null;
 
 	public ConfigurableModelEditDialog(ConfigurableModel cm) {
-		this(cm, null, null);
-	}
-	
-	public ConfigurableModelEditDialog(ConfigurableModel cm, ConfigurableModel clonedFrom, Map<UUID, UuidItem> o2iMap) {
 		super(Display.getDefault().getActiveShell());
+		
+		if (cm.getUuid() == null) throw new IllegalStateException("Configurable model must already exist in the database"); //$NON-NLS-1$
 		
 		session = HibernateManager.openSession(new AssociatedImageInterceptor());
 		session.beginTransaction();
-		if (cm.getUuid() != null){
-			this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
-		}else{
-			this.model = cm;
-			session.persist(this.model);
-			this.changesMade = true;
-			if (cm.getIconSet() != null) {
-				cm.setIconSet((IconSet)session.merge(cm.getIconSet()));
-			}
-			//attach categories/attributes
-			List<CmNode> toProcess = new ArrayList<>();
-			toProcess.addAll(this.model.getNodes());
-			while(!toProcess.isEmpty()) {
-				CmNode n = toProcess.remove(0);
-				toProcess.addAll(n.getChildren());
-				if (n.getCategory() != null) {
-					n.setCategory(session.get(Category.class, n.getCategory().getUuid()));
-					n.getCmAttributes().forEach(a->a.setAttribute(session.get(Attribute.class, a.getAttribute().getUuid())));
-				}
-			}
-		}
-		this.clonedFrom = clonedFrom;
-		this.original2CloneItemMap = o2iMap;
+
+		this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
 	}
 	
 	public Session getSession(){
@@ -314,15 +281,7 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 	public ConfigurableModel getModel() {
 		return model;
 	}
-	
-	public ConfigurableModel getClonedFrom() {
-		return clonedFrom;
-	}
-	
-	public Map<UUID, UuidItem> getOriginal2CloneItemMap() {
-		return original2CloneItemMap;
-	}
-	
+
 	protected void fireChangesMade() {
 		for (IConfigurableModelChangeListener listener : cmListeners) {
 			listener.notifyChangesMade();
