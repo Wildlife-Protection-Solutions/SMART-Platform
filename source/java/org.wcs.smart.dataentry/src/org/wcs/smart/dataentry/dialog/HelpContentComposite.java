@@ -535,12 +535,13 @@ public class HelpContentComposite extends Composite {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (!otherConfigurableModels.isEmpty()) return Status.OK_STATUS;
-			
+			CmAttribute temp = attribute;
+			if (temp == null) return Status.OK_STATUS;
 			try(Session session = HibernateManager.openSession()){
 				otherConfigurableModels.addAll(QueryFactory.buildQuery(session, ConfigurableModel.class, 
-						new Object[] {"conservationArea", attribute.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
+						new Object[] {"conservationArea", temp.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
 						.list());
-				otherConfigurableModels.remove(attribute.getNode().getModel());
+				otherConfigurableModels.remove(temp.getNode().getModel());
 				otherConfigurableModels.forEach(e->e.getName());
 			}
 			Display.getDefault().asyncExec(()->{

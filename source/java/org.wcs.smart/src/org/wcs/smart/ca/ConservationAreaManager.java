@@ -24,6 +24,7 @@ package org.wcs.smart.ca;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,8 +37,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 
@@ -299,5 +302,30 @@ public class ConservationAreaManager {
 			if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN)) return true;
 		}
 		return false;
+	}
+	
+	public String deleteEmployee(Session session, Employee e) throws Exception {
+		
+		Employee del = (Employee) session.get(Employee.class, e.getUuid()); //reload employee see #2178
+		if (del == null) {
+			//employee not found cannot remove
+			return "Employee not found.";			
+		}
+				
+		String deleteError = null;
+		try{
+			//first run before delete 
+			ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, session);
+				//validate delete
+			if (!DeleteManager.canDelete(del, session)){
+				deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
+			}else{
+				session.remove(del);
+			}
+		}catch (Exception ex){
+			deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return deleteError;		
 	}
 }

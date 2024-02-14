@@ -196,10 +196,11 @@ public class EmployeeDialog extends SmartStyledDialog {
 			return false;
 		}
 		
-		ProgressMonitorDialog pd = new ProgressMonitorDialog(getShell());
-		final boolean[] restart = {false};
+		final boolean restart = toUpdate.equals(SmartDB.getCurrentEmployee());
 		final boolean[] ok = {false};
+		final String[] error = {null};
 		
+		ProgressMonitorDialog pd = new ProgressMonitorDialog(getShell());
 		try {
 			pd.run(true, false, new IRunnableWithProgress() {
 				
@@ -208,74 +209,45 @@ public class EmployeeDialog extends SmartStyledDialog {
 						InterruptedException {
 					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, 1);
 					
+					monitor.subTask(SmartLabelProvider.getFullLabel(toUpdate));
+
 					try(Session s = HibernateManager.openSession()){					
 						Transaction tx = s.beginTransaction();
 						try{
-							
-							Employee del = (Employee) s.get(Employee.class, toUpdate.getUuid()); //reload employee see #2178
-							if (del == null) {
-								//employee not found cannot remove
-								ok[0] = false;
-								return;
+							error[0] = ConservationAreaManager.getInstance().deleteEmployee(s, toUpdate);
+							if (error[0] != null) {
+								throw new Exception(error[0]);
 							}
-								
-							monitor.subTask(SmartLabelProvider.getFullLabel(del));
-							String deleteError = null;
-							try{
-								//first run before delete 
-								ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, s);
-									
-								//validate delete
-								if (!DeleteManager.canDelete(del, s)){
-									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
-								}else{
-									//delete
-									if (del.equals(SmartDB.getCurrentEmployee())){
-										restart[0] = true;
-									}
-									s.remove(del);
-								}
-							}catch (Exception ex){
-								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
-								SmartPlugIn.log(ex.getMessage(), ex);
-							}
-								
-							if (deleteError != null){
-								final String errormsg = deleteError;
-								Display.getDefault().syncExec(new Runnable(){
-									@Override
-									public void run() {
-										MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, errormsg);
-									}});
-								ok[0] = false;
-							}else {
-								ok[0] = true;
-							}
-							monitor.worked(1);
-							
 							monitor.subTask(Messages.EmployeePropertyPage_ProgressCommitChanges);
+						
 							tx.commit();
-						}catch ( final Exception ex){
-							try{
-								tx.rollback();
-							}catch (Exception ex2){
-								SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
-							}
+							ok[0] = true;
+						}catch (Exception ex) {
+							tx.rollback();
 							ok[0] = false;
-							SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$							
-						}	
+							throw new InvocationTargetException(ex, ex.getMessage());
+						}
+							
 					}
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(e.getLocalizedMessage(), e);
-			ok[0] = false;
+			if (error[0] != null) {
+				MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, error[0]);
+				return false;
+			}else {
+				SmartPlugIn.displayLog(e.getMessage(), e);
+				return false;
+			}
 		}
 			
-		if (restart[0]){
+		if (error[0] != null) {
+			MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, error[0]);
+			return false;
+		}else if (ok[0] && restart){
 			//restart
 			PlatformUI.getWorkbench().restart();
-			return false;
+			return true;
 		}
 		return ok[0];
 	}

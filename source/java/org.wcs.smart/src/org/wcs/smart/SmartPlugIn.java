@@ -40,6 +40,7 @@ import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
+import org.wcs.smart.ca.EmployeeDeleteListener;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
@@ -348,6 +349,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		Job.getJobManager().beginRule(SmartPlugIn.PLUGIN_START_MUTEX, null);
 
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addEmployeeListener(EmployeeDeleteListener.INSTANCE);
 		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		
@@ -373,6 +375,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		ConservationAreaManager.getInstance().removeEmployeeListener(EmployeeDeleteListener.INSTANCE);
+		
 		try {
 			// clean out the catalog
 			List<IResolve> members = CatalogPlugin.getDefault().getLocalCatalog().members(null);
