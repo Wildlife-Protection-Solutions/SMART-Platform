@@ -55,6 +55,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaErrorCleaner;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -266,30 +267,61 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<QaError> errors = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
+			
 				List<QaError> allErrors = QueryFactory.buildQuery(s, QaError.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 
-				//configure links
-				for (QaError e : allErrors){
-					for (QaError link : errors){
-						if (e.getSourceId().equals(link.getSourceId())){
-							e.addLink(link);
-							link.addLink(e);
+				s.beginTransaction();
+				try {
+					//configure links
+					for (int i = 0; i < allErrors.size(); i ++) {
+						QaError e = allErrors.get(i);
+						
+						boolean exists = RoutineExtensionManager.INSTANCE.findDataProvider(e.getDataProviderId())
+							.exsits(s, e.getSourceId());
+						
+						if (!exists) {
+							//can't find source object so remove error from the database
+							s.remove(e);
+						}else {
+							for (QaError link : errors){
+								if (e.getSourceId().equals(link.getSourceId())){
+									e.addLink(link);
+									link.addLink(e);
+								}
+							}
+							errors.add(e);
+							e.getQaRoutine().getName();
+							e.getDataProvider().getName(Locale.getDefault());
 						}
-					}
-					errors.add(e);
-					e.getQaRoutine().getName();
-					e.getDataProvider().getName(Locale.getDefault());
+						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+						if (i % 10 == 0) {
+							updateTable(null, DialogConstants.LOADING_TEXT + " (" + i + "/" + allErrors.size() + ")");
+						}
+					}			
+					s.getTransaction().commit();
+				}catch (Exception ex) {
+					QaPlugIn.displayLog(ex.getMessage(), ex);
+					s.getTransaction().rollback();
 				}
 			}
-			
+
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			Display.getDefault().asyncExec(()->{
-				if (monitor.isCanceled()) return;
-				setResults(errors);
-			});
+			updateTable(errors, null);
+			
 			return Status.OK_STATUS;
 		}
-		
+		private void updateTable(List<QaError> errors, String message) {
+			if (message != null) {
+				
+				Display.getDefault().asyncExec(()->{
+					tblResults.setInput(new String[]{message});
+				});
+			}else {
+				Display.getDefault().asyncExec(()->{
+					setResults(errors);
+				});
+			}
+		}
 	};
 	
 }

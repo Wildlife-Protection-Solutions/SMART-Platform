@@ -736,20 +736,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * @param waypoints
 	 * @param onComplete added to the job, run once the save is complete; can be null
 	 */
-	public void save(Collection<PatrolWaypoint> waypoints, IJobChangeListener onComplete) {
-		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
+	public void saveNew(Collection<PatrolWaypoint> waypoints, IJobChangeListener onComplete) {
+		SaveNewWaypointJob saveWaypointJob = new SaveNewWaypointJob();
 		saveWaypointJob.setWaypoints(waypoints);
 		if (onComplete != null) saveWaypointJob.addJobChangeListener(onComplete);
 		saveWaypointJob.schedule();
 	}
-	/**
-	 * Saves the collection of waypoints.
-	 * 
-	 * @param waypoints
-	 */
-	public void save(Collection<PatrolWaypoint> waypoints) {
-		save(waypoints, null);
-	}
+
 	
 	/**
 	 * Deletes the collection of waypoints in a separate thread.

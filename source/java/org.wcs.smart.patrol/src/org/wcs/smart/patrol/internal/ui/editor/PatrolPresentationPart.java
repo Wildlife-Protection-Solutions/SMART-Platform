@@ -377,6 +377,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 				}
 				refreshWaypointData();
 			}
+			getMap().getRenderManager().refresh(null);
 		}
 	};
 	

@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -96,6 +97,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
@@ -113,6 +115,7 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolTrackEditDialog;
+import org.wcs.smart.patrol.ui.UpdateWaypointJob;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -940,121 +943,116 @@ public class PatrolLegDayInputComposite {
 		
 		
 	}
+	
+	private void updateWaypoint(PatrolWaypoint pw, OtColumn column, Consumer<Waypoint> updatefunction) {
+		
+		Consumer<PatrolWaypoint> postSave = pwx->{
+			if (column == OtColumn.EAST || column == OtColumn.NORTH){
+				//update map
+				editor.getPatrolEditor().getMap().getRenderManager().refresh(null);
+			}else if (column == OtColumn.ATTACHMENTS) {
+				//update reference
+				try(Session session = HibernateManager.openSession()){
+					Waypoint waypoint = session.get(Waypoint.class, pwx.getWaypoint().getUuid());
+					pwx.setWaypoint(waypoint);
+					try {
+						editor.getPatrolEditor().loadPatrolWaypointDetails(pwx, session);
+					} catch (Exception e) {
+						SmartPatrolPlugIn.log(e.getMessage(), e);
+					}
+					
+				}
+							
+			}
+			Display.getDefault().asyncExec(()->observationTable.refresh());
+		};
+		
+		(new UpdateWaypointJob(pw, updatefunction, postSave)).schedule();	
+	}
 
-	private void setWaypointValue(Object element, OtColumn column, Object value){		
+	private void setWaypointValue(Object element, OtColumn column, Object value){
+		PatrolWaypoint pwaypoint = (PatrolWaypoint)element;
 		Waypoint waypoint = ((PatrolWaypoint)element).getWaypoint();
-		boolean needSave = false;
+		
 		if (column == OtColumn.ID) {
 			if (waypoint.getId().equals(((String)value).strip())) return; //no change
-			waypoint.setId((String)value);
-			needSave = true;
+			updateWaypoint(pwaypoint, column, x->x.setId( ((String)value).trim() ) );
+			return;
 		} else if (column == OtColumn.EAST) {
 			if (waypoint.getRawX() == ((Double)value).doubleValue()) return; // no change
-			waypoint.setRawX((Double)value);
-			needSave = true;
+			updateWaypoint(pwaypoint, column, x->x.setRawX((Double)value) );
+			return;
+			
 		} else if (column == OtColumn.NORTH) {
 			if (waypoint.getRawY() == ((Double)value).doubleValue()) return; // no change
-			waypoint.setRawY((Double)value);
-			needSave = true;
+			updateWaypoint(pwaypoint, column, x->x.setRawY((Double)value) );
+			return;
+			
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof LocalTime){
 				if (timeEqual(waypoint.getDateTime().toLocalTime(), ((LocalTime)value))) return; //no change
-				waypoint.setDateTime(patrolLegDate.getDate().atTime((LocalTime)value));
-				needSave = true;
+				updateWaypoint(pwaypoint, column, x->x.setDateTime(patrolLegDate.getDate().atTime((LocalTime)value)) );
+				return;
 			}
 		} else if (column == OtColumn.DIRECTION) {
 			if (value == null){
 				if (waypoint.getDirection() != null) {
-					waypoint.setDirection(null);
-					needSave = true;
+					updateWaypoint(pwaypoint, column, x->x.setDirection(null));
+					return;
 				}
 			}else{
 				if (waypoint.getDirection() != null && waypoint.getDirection().doubleValue() == ((Double)value).doubleValue()) return; //no change
-				needSave = true;
 				Double d = (Double)value;
 				if (d < 0 || d >= 360) return;	//invalid value
-				waypoint.setDirection(d.floatValue());
+				updateWaypoint(pwaypoint,column, x->x.setDirection(d.floatValue()));
+				return;
 			}
 		} else if (column == OtColumn.DISTANCE) {
 			if (value == null){
 				if (waypoint.getDistance() != null) {
-					waypoint.setDistance(null);
-					needSave = true;
+					updateWaypoint(pwaypoint, column, x->x.setDistance(null));
+					return;
 				}
 			}else{
 				if (waypoint.getDistance() != null && waypoint.getDistance().doubleValue() == ((Double)value).doubleValue()) return; //no change
-				needSave = true;
 				Double d = (Double)value;
 				if (d < 0) return;	//invalid value
-				waypoint.setDistance( d.floatValue());
+				updateWaypoint(pwaypoint, column, x->x.setDistance(d.floatValue()));
+				return;
 			}
-			needSave = true;
 		} else if (column == OtColumn.OBSERVATION) {
 			//updated in cell editor
-			needSave = false;
+
 		} else if (column == OtColumn.COMMENT) {
 			
 			if (waypoint.getComment() == null && (value == null || ((String)value).trim().isEmpty())) return;
 			if (waypoint.getComment() != null && waypoint.getComment().equals((String)value)) return; //no change;
 			if (((String)value).trim().isEmpty()) {
-				waypoint.setComment(null);
+				updateWaypoint(pwaypoint, column, x->x.setComment(null));
 			}else {
-				waypoint.setComment((String)value);
+				updateWaypoint(pwaypoint, column, x->x.setComment(((String)value).trim()));
 			}
-			needSave = true;
+			return;
 		} else if (column == OtColumn.ATTACHMENTS) {
 			if (value instanceof Waypoint) {
-				needSave = true;
-				waypoint = (Waypoint)value;
-				((PatrolWaypoint)element).setWaypoint(waypoint);
+				Waypoint newattachments = (Waypoint)value;
+				
+				updateWaypoint(pwaypoint, column, waypointx->{
+					if (waypointx.getAttachments() == null) waypointx.setAttachments(new ArrayList<>());
+					
+					for(WaypointAttachment wa : newattachments.getAttachments()) {
+						if (!waypointx.getAttachments().contains(wa)) waypointx.getAttachments().add(wa);
+					}
+					List<WaypointAttachment> toDelete = new ArrayList<>();
+					for (WaypointAttachment wa : waypointx.getAttachments()) {
+						if (!newattachments.getAttachments().contains(wa)) toDelete.add(wa);
+					}
+					waypointx.getAttachments().removeAll(toDelete);
+				});
+
 			}
 		}
-		if (needSave){
-			final Waypoint fwaypoint = waypoint; 
-			IJobChangeListener listener = new IJobChangeListener() {
-				@Override
-				public void sleeping(IJobChangeEvent event) { }
-				@Override
-				public void scheduled(IJobChangeEvent event) { }
-				@Override
-				public void running(IJobChangeEvent event) { }
-				@Override
-				public void awake(IJobChangeEvent event) { }
-				@Override
-				public void aboutToRun(IJobChangeEvent event) { }
-				
-				@Override
-				public void done(IJobChangeEvent event) {
-					
-					if (column == OtColumn.EAST || column == OtColumn.NORTH){
-						//update map
-						editor.getPatrolEditor().getMap().getRenderManager().refresh(null);
-					}else if (column == OtColumn.ATTACHMENTS) {
-						//update reference
-						try(Session session = HibernateManager.openSession()){
-							Waypoint waypoint = session.get(Waypoint.class, fwaypoint.getUuid());
-							((PatrolWaypoint)element).setWaypoint(waypoint);
-							try {
-								editor.getPatrolEditor().loadPatrolWaypointDetails(((PatrolWaypoint)element), session);
-							} catch (Exception e) {
-								SmartPatrolPlugIn.log(e.getMessage(), e);
-							}
-							
-						}
-									
-					}
-					Display.getDefault().asyncExec(()->observationTable.refresh());
-				}
-
-			};
-			
-			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element), listener);
-			
-			
-		}else {
-			observationTable.refresh();
-		}
-		
+		observationTable.refresh();
 	}
 	
 	private Object getWaypointValue(PatrolWaypoint element, OtColumn column) {
@@ -1212,18 +1210,7 @@ public class PatrolLegDayInputComposite {
 			
 			patrolLegDate.getWaypoints().add(wp);
 			
-			IJobChangeListener listener = new IJobChangeListener() {
-				@Override
-				public void sleeping(IJobChangeEvent event) { }
-				@Override
-				public void scheduled(IJobChangeEvent event) { }
-				@Override
-				public void running(IJobChangeEvent event) { }
-				@Override
-				public void awake(IJobChangeEvent event) { }
-				@Override
-				public void aboutToRun(IJobChangeEvent event) { }
-				@Override
+			IJobChangeListener listener = new JobChangeAdapter() {
 				public void done(IJobChangeEvent event) {
 					Display.getDefault().asyncExec(()->{
 						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
@@ -1233,7 +1220,7 @@ public class PatrolLegDayInputComposite {
 
 			};
 			
-			editor.getPatrolEditor().save(Collections.singleton(wp), listener);
+			editor.getPatrolEditor().saveNew(Collections.singleton(wp), listener);
 			
 		}
 	}
@@ -1352,7 +1339,7 @@ public class PatrolLegDayInputComposite {
 		 */
 		@Override
 		protected void setValue(Object element, Object value) {
-			setWaypointValue((PatrolWaypoint)element, column, value);
+			setWaypointValue((PatrolWaypoint)element, column, value);			
 		}
 	}
 }

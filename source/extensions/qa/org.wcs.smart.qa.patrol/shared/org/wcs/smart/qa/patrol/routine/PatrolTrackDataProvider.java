@@ -134,4 +134,8 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		return ((TrackLocationData)obj).getTrack().getUuid();
 	}
 
+	@Override
+	public boolean exsits(Session session, UUID srcIdentifier) {
+		return (session.get(Track.class, srcIdentifier) != null);
+	}
 }

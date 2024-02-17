@@ -89,4 +89,9 @@ public class SingleItemDataProvider extends IQaDataProvider{
 	public IQaDataProvider getParent() {
 		return this.parentProvider;
 	}
+
+	@Override
+	public boolean exsits(Session session, UUID srcIdentifier) {
+		return parentProvider.exsits(session, srcIdentifier);
+	}
 }

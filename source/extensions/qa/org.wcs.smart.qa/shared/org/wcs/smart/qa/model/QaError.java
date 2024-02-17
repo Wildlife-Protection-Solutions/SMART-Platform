@@ -355,8 +355,8 @@ public class QaError extends UuidItem{
 	
 	
 	/**
-	 * Links another qa error with this one.  Links
-	 * are qa errors generated on the same data item by
+	 * Links another QA error with this one.  Links
+	 * are QA errors generated on the same data item by
 	 * different routines. 
 	 * @param g
 	 */
@@ -367,7 +367,7 @@ public class QaError extends UuidItem{
 	
 	/**
 	 * Links
-	 * are qa errors generated on the same data item by
+	 * are QA errors generated on the same data item by
 	 * different routines. 
 	 * 
 	 * @return

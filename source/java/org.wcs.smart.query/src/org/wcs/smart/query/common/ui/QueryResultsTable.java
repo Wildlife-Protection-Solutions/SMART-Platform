@@ -349,7 +349,7 @@ public abstract class QueryResultsTable {
 				sorter = null;
 			}
 			
-			viewer.add(new QueryTableViewerColumn(viewer,c, sorter, getLabelProvider(c, columns)));
+			viewers.add(new QueryTableViewerColumn(viewer,c, sorter, getLabelProvider(c, columns)));
 		}
 		return viewers.toArray(new QueryTableViewerColumn[viewers.size()]);
 	}

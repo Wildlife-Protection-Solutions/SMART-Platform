@@ -154,7 +154,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		getWizardInternal().setCanFinish(canComplete && getNextPage() instanceof ObservationSummaryWizardPage);
 		setPageComplete(canComplete);
-		getWizard().getContainer().getShell().setDefaultButton(btnAdd);
+		
+		//remove some mac doesn't white-out
+		//getWizard().getContainer().getShell().setDefaultButton(btnAdd);
 	}
 
 	@Override
@@ -620,7 +622,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		this.currentAttachments = new ArrayList<ObservationAttachment>();;
 		attachmentViewer.setInput(currentAttachments);
 		attsModified = false;
-		getWizard().getContainer().getShell().setDefaultButton(btnAdd);
+		//remove so mac doesn't white out text
+		//getWizard().getContainer().getShell().setDefaultButton(btnAdd);
 		if (attributeTable != null){
 			attributeTable.getControl().setData(AttributeTable.EDITING_OBS_KEY, null);
 			attributeTable.refresh();

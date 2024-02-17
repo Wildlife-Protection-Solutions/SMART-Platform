@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.patrol.ui;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,89 +31,56 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 
 /**
- * Job fo saving a set of waypoints to the database.
+ * Job for updating patrol waypoints in the database.  This job
+ * will fire waypointModified event after the waypoint is saved to
+ * the database.
  * 
  * @author Emily
  *
  */
-public class SaveWaypointJob extends Job {
+public class UpdateWaypointJob extends Job {
 	
-	private volatile Collection<PatrolWaypoint> waypoints;
-
-	public SaveWaypointJob() {
+	private Collection<PatrolWaypoint> waypoints;
+	private Consumer<Waypoint> updateFunction;
+	private Consumer<PatrolWaypoint> postSave;
+	
+	/**
+	 * 
+	 * @param wp patrol waypoint to update
+	 * 
+	 * @param updateFunction this function is called against the waypoint
+	 * in the database and the waypoint provided
+	 * 
+	 * @param postSave after the waypoint is updated and saved to the database this function 
+	 * is called
+	 */
+	public UpdateWaypointJob(PatrolWaypoint wp, Consumer<Waypoint> updateFunction,
+			Consumer<PatrolWaypoint> postSave) {
 		super(Messages.PatrolEditor_SaveWaypoints_JobName);
+		
+		waypoints = Collections.singletonList(wp);
+		this.updateFunction = updateFunction;
+		this.postSave = postSave;
 	}
-
-	public void setWaypoints(Collection<PatrolWaypoint> points) {
-		synchronized (this) {
-			this.waypoints = points;
-		}
-
-	}
-
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		ArrayList<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
-		synchronized (this) {
-			pnts.addAll(waypoints);
-		}
-		
+
 		try (Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			saveSession.beginTransaction();
 			try{
-				for (PatrolWaypoint wp : pnts) {
-					if (wp.getWaypoint().getAttachments() != null) wp.getWaypoint().setAttachments(new ArrayList<>(wp.getWaypoint().getAttachments()));
-					
-					Waypoint pnt = wp.getWaypoint();
-					
-					pnt.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-					pnt.setConservationArea(SmartDB.getCurrentConservationArea());
-					
-					//merge here messed up attachments ("copy from location" doesn't get merged) 
-					//so need to save attachments before merge
-					pnt.saveNewAttachments(saveSession);
-					saveSession.flush();
-					
-					if (pnt.getUuid() == null) {
-						saveSession.persist(pnt);
-						saveSession.persist(wp);
-					}else {
-						pnt = saveSession.merge(pnt);
-					}
-					
-					// remove observations with no data
-					for (WaypointObservation wo : pnt.getAllObservations()) {
-						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-						for (WaypointObservationAttribute att : wo.getAttributes()) {
-							if (!att.hasValue()) {
-								toDelete.add(att);
-							}
-						}
-						wo.getAttributes().removeAll(toDelete);
-					}
-					
-					//remove groups with no data
-					List<WaypointObservationGroup> gdelete = new ArrayList<>();
-					if (pnt.getObservationGroups() == null) pnt.setObservationGroups(new ArrayList<>());
-					for (WaypointObservationGroup g : pnt.getObservationGroups()) {
-						if (g.getObservations() == null || g.getObservations().isEmpty()) gdelete.add(g);
-					}
-					pnt.getObservationGroups().removeAll(gdelete);
-					
-//					ObservationHibernateManager.computeAttachmentLocations(pnt, saveSession);
+				for (PatrolWaypoint wp : waypoints) {					
+					Waypoint toUpdate = saveSession.get(Waypoint.class, wp.getWaypoint().getUuid());
+					updateFunction.accept(wp.getWaypoint());
+					updateFunction.accept(toUpdate);
 				}
 				saveSession.getTransaction().commit();
 			
@@ -127,6 +94,10 @@ public class SaveWaypointJob extends Job {
 										+ ex.getLocalizedMessage(), ex);
 			}
 		}
+		for (PatrolWaypoint wp : waypoints){
+			postSave.accept(wp);
+		}
+		
 		for (PatrolWaypoint wp : waypoints){
 			try{
 				PatrolEventManager.getInstance().waypointModified(wp);

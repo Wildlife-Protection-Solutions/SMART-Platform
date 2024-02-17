@@ -100,6 +100,10 @@ public class UploadCaEngine {
 				try {
 					localStatus = getLocalStatus(s, server.getConservationArea());
 			
+					if (localStatus == null && serverInfo != null ) {
+						//conservation area already exists on server
+						throw new Exception(Messages.UploadCaEngine_CaAlreadyExists);
+					}
 					//check status
 					if (serverInfo != null){
 						if (serverInfo.getStatus() == ConservationAreaProxy.Status.ERROR){
@@ -166,10 +170,9 @@ public class UploadCaEngine {
 							}
 						}
 					}
-					
 					//create db records
 					if (serverInfo == null || 
-							(serverInfo != null && serverInfo.getStatus() == ConservationAreaProxy.Status.NODATA)){
+						(serverInfo != null && serverInfo.getStatus() == ConservationAreaProxy.Status.NODATA)){
 						//update ca to server (new ca will be created if required; otherwise we update existing)
 						if (localStatus != null){
 							s.remove(localStatus);

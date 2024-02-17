@@ -140,12 +140,12 @@ public class Messages extends NLS {
 	public static String ConvertedConnectCt2CmExtraData_Missing_PingFrequency;
 	public static String ConvertedConnectCt2CmExtraData_Missing_DataFrequency;
 	public static String ConvertedConnectCt2CmExtraData_PositionTypeNotSet;
-	public static String CtxOptionsPanel_Name;
-	public static String CtxOptionsPanel_Option;
-	public static String CtxOptionsPanel_OptionTooltip;
+	public static String CtxOptionsPanel_Name1;
+	public static String CtxOptionsPanel_Option1;
+	public static String CtxOptionsPanel_OptionTooltip1;
 	public static String CtxOptionsPanel_ReplicationInfo;
 	public static String CtxOptionsPanel_RestartInfo;
-	public static String CtxOptionsPanel_RestartOpMsg;
+	public static String CtxOptionsPanel_RestartOpMsg1;
 	public static String CtxOptionsPanel_RestartOpTitle;
 	public static String ExportCtPackageToConnect_CompleteTitle;
 	public static String ExportCtPackageToConnect_Message;

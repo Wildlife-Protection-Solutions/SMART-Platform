@@ -65,7 +65,7 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 
 	@Override
 	public String getName() {
-		return Messages.CtxOptionsPanel_Name;
+		return Messages.CtxOptionsPanel_Name1;
 	}
 
 	@Override
@@ -117,7 +117,7 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 	public void afterSave(ConnectServer server) {
 		if (requiresRestart) {
 			boolean restart = MessageDialog.openQuestion(getShell(), Messages.CtxOptionsPanel_RestartOpTitle, 
-					Messages.CtxOptionsPanel_RestartOpMsg);
+					Messages.CtxOptionsPanel_RestartOpMsg1);
 			if (restart) {
 				PlatformUI.getWorkbench().restart();
 			}
@@ -148,8 +148,8 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 		}
 		
 		btnExcludeCtxFiles = new Button(part, SWT.CHECK);
-		btnExcludeCtxFiles.setText(Messages.CtxOptionsPanel_Option);
-		btnExcludeCtxFiles.setToolTipText(Messages.CtxOptionsPanel_OptionTooltip);
+		btnExcludeCtxFiles.setText(Messages.CtxOptionsPanel_Option1);
+		btnExcludeCtxFiles.setToolTipText(Messages.CtxOptionsPanel_OptionTooltip1);
 		btnExcludeCtxFiles.addListener(SWT.Selection, e->{
 			listeners.forEach(listener->listener.modifyText(new ModifyEvent(e)));
 		});

@@ -59,6 +59,7 @@ import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -79,6 +80,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.udig.catalog.PatrolGeoResource;
 import org.wcs.smart.patrol.udig.catalog.PatrolService;
 import org.wcs.smart.patrol.ui.PatrolEditor;
@@ -234,6 +236,19 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		}
 	};
 	    
+	 private IWaypointEventListener wpListener = new IWaypointEventListener() {
+		
+		@Override
+		public void handleEvent(Waypoint wp) {
+			if (!wp.getSourceId().equals(PatrolWaypointSource.PATROL_WP_SOURCE_ID)) return;
+			//redraw map
+			getMap().getRenderManager().refresh(null);
+			
+		}
+	};
+			
+		    
+		
 	public PatrolMapPageEditor(PatrolEditor parent){
 		this.parentEditor = parent;
 		
@@ -302,6 +317,8 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		super.createPartControl(parent);
         addLayers();
         PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
+        WaypointEventManager.getInstance().addListener(WaypointEventManager.EventType.WAYPOINT_MODIFIED, wpListener);
+        
         
         if (PatrolManager.getInstance().canEditWaypointLocations() == null){
         	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
@@ -321,6 +338,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         super.dispose();
         
         PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
+        WaypointEventManager.getInstance().removeListener(WaypointEventManager.EventType.WAYPOINT_MODIFIED, wpListener);
         
         //dispose of patrol service
         CatalogPlugin.getDefault().getLocalCatalog().remove(patrolService);

@@ -1,0 +1,143 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.ui;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+
+/**
+ * Job for saving a set of NEW waypoints to the database.
+ * To update a waypoint you should use the UpdateWaypointJob.
+ * 
+ * @author Emily
+ *
+ */
+public class SaveNewWaypointJob extends Job {
+	
+	private volatile Collection<PatrolWaypoint> waypoints;
+
+	public SaveNewWaypointJob() {
+		super(Messages.PatrolEditor_SaveWaypoints_JobName);
+	}
+
+	public void setWaypoints(Collection<PatrolWaypoint> points) {
+		synchronized (this) {
+			this.waypoints = points;
+		}
+
+	}
+
+	@Override
+	protected IStatus run(IProgressMonitor monitor) {
+		ArrayList<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
+		synchronized (this) {
+			pnts.addAll(waypoints);
+		}
+		
+		try (Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			saveSession.beginTransaction();
+			try{
+				for (PatrolWaypoint wp : pnts) {
+					saveSession.evict(wp.getWaypoint());
+					saveSession.evict(wp);
+					if (wp.getWaypoint().getAttachments() != null) wp.getWaypoint().setAttachments(new ArrayList<>(wp.getWaypoint().getAttachments()));
+					
+					Waypoint pnt = wp.getWaypoint();
+					
+					pnt.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+					pnt.setConservationArea(SmartDB.getCurrentConservationArea());
+					
+					//merge here messed up attachments ("copy from location" doesn't get merged) 
+					//so need to save attachments before merge
+					pnt.saveNewAttachments(saveSession);
+					saveSession.flush();
+					
+					if (pnt.getUuid() == null) {
+						saveSession.persist(pnt);
+						saveSession.persist(wp);
+					}else {
+						throw new IllegalStateException("Cannot save waypoint with uuids");
+					}
+					
+					// remove observations with no data
+					for (WaypointObservation wo : pnt.getAllObservations()) {
+						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+						for (WaypointObservationAttribute att : wo.getAttributes()) {
+							if (!att.hasValue()) {
+								toDelete.add(att);
+							}
+						}
+						wo.getAttributes().removeAll(toDelete);
+					}
+					
+					//remove groups with no data
+					List<WaypointObservationGroup> gdelete = new ArrayList<>();
+					if (pnt.getObservationGroups() == null) pnt.setObservationGroups(new ArrayList<>());
+					for (WaypointObservationGroup g : pnt.getObservationGroups()) {
+						if (g.getObservations() == null || g.getObservations().isEmpty()) gdelete.add(g);
+					}
+					pnt.getObservationGroups().removeAll(gdelete);
+					
+//					ObservationHibernateManager.computeAttachmentLocations(pnt, saveSession);
+				}
+				saveSession.getTransaction().commit();
+			
+			} catch (Exception ex) {
+				if (saveSession.getTransaction().isActive()) {
+					saveSession.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn
+						.displayLog(
+								Messages.PatrolEditor_Error_SavingWaypoints
+										+ ex.getLocalizedMessage(), ex);
+			}
+		}
+		for (PatrolWaypoint wp : waypoints){
+			try{
+				PatrolEventManager.getInstance().waypointModified(wp);
+			}catch (Exception ex){
+				SmartPatrolPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
+			}
+		}
+		return Status.OK_STATUS;
+	}
+
+}

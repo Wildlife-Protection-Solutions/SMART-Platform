@@ -50,7 +50,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.ui.SaveWaypointJob;
+import org.wcs.smart.patrol.ui.SaveNewWaypointJob;
 
 /**
  * Class of utilities that support
@@ -171,7 +171,7 @@ public class PatrolGPSDataImport {
 		}
 		
 		//start up a save job
-		SaveWaypointJob saveJob = new SaveWaypointJob();
+		SaveNewWaypointJob saveJob = new SaveNewWaypointJob();
 		saveJob.setWaypoints(addedWaypoints);
 		saveJob.schedule();
 		saveJob.join();

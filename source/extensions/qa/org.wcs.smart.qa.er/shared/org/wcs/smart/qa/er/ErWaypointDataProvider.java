@@ -108,4 +108,9 @@ public class ErWaypointDataProvider extends IQaDataProvider {
 	public UUID getFeatureSource(Session session, Object obj) {
 		return ((WaypointLocationData)obj).getWaypoint().getUuid();
 	}
+	
+	@Override
+	public boolean exsits(Session session, UUID srcIdentifier) {
+		return (session.get(Waypoint.class, srcIdentifier) != null);
+	}
 }

@@ -104,4 +104,8 @@ public class IntegrateIncidentDataProvider extends IQaDataProvider {
 		return ((WaypointLocationData)obj).getWaypoint().getUuid();
 	}
 
+	@Override
+	public boolean exsits(Session session, UUID srcIdentifier) {
+		return (session.get(Waypoint.class, srcIdentifier) != null);
+	}
 }

@@ -81,6 +81,13 @@ public abstract class IQaDataProvider {
 	 */
 	public abstract String getFeatureId(Session session, Object obj, Locale l);
 	
+	/**
+	 * Checks if the data represented by the srcIdentifiers still exists in the database. 
+	 * 
+	 * @param srcIdentifier
+	 * @return
+	 */
+	public abstract boolean exsits(Session session, UUID srcIdentifier);
 	
 	/**
 	 * From an object returned by the getData call, the function determines

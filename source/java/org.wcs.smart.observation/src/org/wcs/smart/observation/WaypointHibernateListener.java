@@ -55,7 +55,14 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			wp = (Waypoint)event.getEntity();
 			
 			wp.setLastModified(LocalDateTime.now());
-			wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
+			
+			if (!wp.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+				//should never be inserting waypoints in ccaa
+				//ticket: #3520
+				ObservationPlugIn.log("waypoint being modified by employee not associated with CA", null); //$NON-NLS-1$
+			}else {
+				wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
+			}
 			
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
@@ -89,8 +96,15 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			wp = (Waypoint)event.getEntity();
 			
 			wp.setLastModified(LocalDateTime.now());
-			wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
-		
+			
+			if (!wp.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+				//should never be inserting waypoints in ccaa
+				//ticket: #3520
+				ObservationPlugIn.log("waypoint being modified by employee not associated with CA", null); //$NON-NLS-1$
+			}else {
+				wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
+			}
+			
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
 			
