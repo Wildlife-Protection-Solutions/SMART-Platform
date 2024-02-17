@@ -52,8 +52,12 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		Waypoint wp = null;
 		if (event.getEntity() instanceof Waypoint){
 			wp = (Waypoint)event.getEntity();
+			
 			wp.setLastModified(LocalDateTime.now());
+			wp.setLastModifiedBy(null);
+			
 			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
 			return false;
 			
 		}else if (event.getEntity() instanceof WaypointAttachment) {
@@ -71,6 +75,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			//this will fire this event again for the waypoint
 			//updating the session objects as required
 			wp.setLastModified(LocalDateTime.now());
+			wp.setLastModifiedBy(null);
 		}
 
 		return false;

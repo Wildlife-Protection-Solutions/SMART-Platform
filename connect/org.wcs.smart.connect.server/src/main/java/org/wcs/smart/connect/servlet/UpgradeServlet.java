@@ -1429,6 +1429,22 @@ public class UpgradeServlet extends HttpServlet {
 						//postgis update
 						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]');END; $$", //$NON-NLS-1$
 
+						//remove entity plugins
+						"drop table smart.entity_gridded_query",  //$NON-NLS-1$
+						"drop table smart.entity_observation_query",  //$NON-NLS-1$
+						"drop table smart.entity_summary_query",  //$NON-NLS-1$
+						"drop table smart.entity_waypoint_query",  //$NON-NLS-1$
+						"drop table smart.entity_attribute_value",  //$NON-NLS-1$
+						"drop table smart.entity",  //$NON-NLS-1$
+						"drop table smart.entity_attribute",  //$NON-NLS-1$
+						"drop table smart.entity_type",  //$NON-NLS-1$
+						
+						"delete from  connect.connect_plugin_version where plugin_id = 'org.wcs.smart.entity'", //$NON-NLS-1$
+						"delete from  connect.connect_plugin_version where plugin_id = 'org.wcs.smart.entity.query'", //$NON-NLS-1$
+						"delete from  connect.ca_plugin_version where plugin_id = 'org.wcs.smart.entity'", //$NON-NLS-1$
+						"delete from  connect.ca_plugin_version where plugin_id = 'org.wcs.smart.entity.query'", //$NON-NLS-1$
+						
+						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
@@ -1451,7 +1467,10 @@ public class UpgradeServlet extends HttpServlet {
 						"update connect.connect_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 
+
 						"update connect.connect_version set version = '8.0.0', last_updated = now()", //$NON-NLS-1$
+						
+						
 					};
 					for (String s : sql) {
 						//System.out.println(s);
