@@ -27,7 +27,12 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
@@ -54,7 +59,8 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 */
 	@Override
 	public ListItem getPatrolMandate(Session session, String value) throws Exception{
-		return getListItem(session, "PatrolMandate", value); //$NON-NLS-1$
+		return getListItem(session, PatrolMandate.class, UuidUtils.stringToUuid(value));
+
 	}
 	
 	/**
@@ -66,7 +72,7 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 */
 	@Override
 	public ListItem getStation(Session session, String value) throws Exception{
-		return getListItem(session, "Station", value); //$NON-NLS-1$
+		return getListItem(session, Station.class, UuidUtils.stringToUuid(value));
 	}
 	
 	/**
@@ -78,7 +84,7 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 */
 	@Override
 	public ListItem getTeam(Session session, String value) throws Exception{
-		return getListItem(session, "Team", value); //$NON-NLS-1$
+		return getListItem(session, Team.class, UuidUtils.stringToUuid(value));
 	}
 	
 	/**
@@ -89,7 +95,7 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 * @throws Exception
 	 */
 	public ListItem getTransportType(Session session, String value) throws Exception{
-		return getListItem(session, "PatrolTransportType", value); //$NON-NLS-1$
+		return getListItem(session, PatrolTransportType.class, UuidUtils.stringToUuid(value)); 
 	}
 	
 	/**
@@ -101,16 +107,9 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 * @return resulting list item
 	 * @throws Exception
 	 */
-	private ListItem getListItem(Session session, String clazz, String value) throws Exception{
-		Query<Tuple> q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid", Tuple.class); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("uuid", UuidUtils.stringToUuid(value)); //$NON-NLS-1$
-		List<Tuple> results = q.list();
-		if (results.size() == 1){
-			return new ListItem( (UUID)results.get(0).get(0), (String)results.get(0).get(1));
-		}else{
-			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadError, new Object[]{clazz, value}), null);
-			return null;
-		}
+	private ListItem getListItem(Session session, Class<? extends NamedItem> clazz, UUID uuid) throws Exception{
+		NamedItem item = session.get(clazz, uuid);
+		return new ListItem(item.getUuid(), item.getName());		
 	}
 	
 	/**

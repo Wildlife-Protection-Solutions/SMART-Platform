@@ -217,7 +217,10 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			}
 			propertySelector.setInput(options);
 			propertySelector.addPostSelectionChangedListener(e->{
-				geometryProperty = (GeometryProperty) propertySelector.getStructuredSelection().getFirstElement() ;
+				GeometryProperty newSelection = (GeometryProperty) propertySelector.getStructuredSelection().getFirstElement() ;
+				if (newSelection.equals(geometryProperty)) return;
+				
+				geometryProperty = newSelection;
 				listViewer.setInput(geometryProperty.getAggregations());
 				Aggregation temp = selectedAggregation;
 				selectedAggregation = null;
@@ -262,8 +265,10 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			
 			if (geometryProperty != null) {
 				propertySelector.setSelection(new StructuredSelection(geometryProperty));
-			}else {
-				propertySelector.setSelection(new StructuredSelection(options[0]));
+				listViewer.setInput(geometryProperty.getAggregations());
+				if (selectedAggregation != null) {
+					listViewer.setSelection(new StructuredSelection(selectedAggregation));
+				}
 			}
 			
 		}else if (attribute.getAggregations().size() == 0){

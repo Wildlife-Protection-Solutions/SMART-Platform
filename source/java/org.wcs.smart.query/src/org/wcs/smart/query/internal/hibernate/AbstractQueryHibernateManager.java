@@ -178,23 +178,28 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
+				String name = query.getName();
+				
 				if (newQuery){
 					query.setId(generateQueryId(s));
 					//page1.setQuery();
 					s.persist(query);
 				}else {
+					//merge resets transient fields					
 					query = s.merge(query);
 				}
-				
-				query.updateName(SmartDB.getCurrentLanguage(), query.getName());
+				//reset name
+				query.setName(name);
+				query.updateName(SmartDB.getCurrentLanguage(), name);
 				if (SmartDB.getCurrentConservationArea().getDefaultLanguage() != null){
 					if (query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
 						//if label for default language is null then update the default as well
-						query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
+						query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
 					}
 				}
 				if (proxy != null){
-					QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getDropItemFactory().generateDropItems(proxy, s);
+					QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey())
+						.getDropItemFactory().generateDropItems(proxy, s);
 				}
 				
 				s.getTransaction().commit();
