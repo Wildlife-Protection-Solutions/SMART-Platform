@@ -68,6 +68,7 @@ public class MenuItemsFilter implements Filter {
 		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", "smarttoken.png", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", "smarttoken.png", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QUEUE("MenuItemsFilter.DataQueueLabel","dataq.png",  ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ER("MenuItemsFilter.EarthRangerLabel","earthranger32.png",  ConnectRESTApplication.SERVLET_PATH + "earthranger", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		USERS("MenuItemsFilter.AccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		CAUSERS("MenuItemsFilter.CaAccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		CT("MenuItemsFilter.CyberTrackerMenuItem1", "cybertracker.png", ConnectRESTApplication.SERVLET_PATH + "cybertracker", new HashSet<>(Arrays.asList(AdminAccountAction.KEY, CaAdminAccountAction.KEY, CyberTrackerAction.KEY))), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

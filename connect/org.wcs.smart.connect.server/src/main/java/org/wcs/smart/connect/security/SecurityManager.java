@@ -117,7 +117,9 @@ public enum SecurityManager {
 		if(action.equals(AdminAccountAction.KEY)){
 			return false;
 		}
-		//check if CaAdmin role allows access, API and other code checking for access must call canAccess with the CAUUID as the resource for this check to work
+		//check if CaAdmin role allows access, 
+		//API and other code checking for access must call canAccess 
+		//with the CAUUID as the resource for this check to work
 		Long cnt3 = QueryFactory.buildCountQuery(s, SmartUserAction.class, 
 				new Object[] {"username", username}, //$NON-NLS-1$
 				new Object[] {"action", CaAdminAccountAction.KEY}, //$NON-NLS-1$
