@@ -90,6 +90,10 @@ public class GeometryAttributeValue {
 				this.area = GeometryUtils.getAreaInKm((MultiPolygon)geometry);
 				this.perimeter = GeometryUtils.getGeometryPerimeterInKm(this.geometry);
 			}
+			if (geometry == null) {
+				this.area = null;
+				this.perimeter = null;
+			}
 		}
 	}
 	

@@ -129,10 +129,15 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 			type = DrawOnMapDialog.Type.LINESTRING;
 		}
 		if (value == null) value = new GeometryAttributeValue(null, GeometrySource.MANUAL_DRAW);
+		
 		DrawOnMapDialog dialog = new DrawOnMapDialog(lbl.getShell(), type, value.getGeometry());
 		if (dialog.open() != Window.OK) return;
 		
-		value.setGeometry(dialog.getGeometry());
+		if (dialog.getGeometry() == null) {
+			value = null;
+		}else {
+			value.setGeometry(dialog.getGeometry());
+		}
 		updateLabel();
 		setModified(true);
 	}
