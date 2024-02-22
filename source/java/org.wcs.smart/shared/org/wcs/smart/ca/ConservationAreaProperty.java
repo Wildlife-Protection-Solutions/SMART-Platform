@@ -18,6 +18,12 @@ public class ConservationAreaProperty extends UuidItem{
 	public static final String CA_DM_LAST_MODIFIED_KEY = "datamodel.lastmodified"; //$NON-NLS-1$
 	
 	/**
+	 * Key for earch ranger url associated with convservation area
+	 */
+	public static final String EARTH_RANGER_URL= "earthranger.url"; //$NON-NLS-1$
+	
+	
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;

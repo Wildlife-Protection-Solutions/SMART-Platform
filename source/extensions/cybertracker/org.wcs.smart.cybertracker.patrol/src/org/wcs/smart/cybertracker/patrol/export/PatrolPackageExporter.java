@@ -240,8 +240,14 @@ public class PatrolPackageExporter {
 				}
 				
 				sub.split(1);
+				
+				
+				projectAdditions.put(CtJsonExportUtils.JSON_INTEGRATE_KEY, CtJsonExportUtils.getEarthRangerUrl(session, ctpackage.getConservationArea()));
+				
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
+				CtJsonExportUtils.writeProjectJson(ctpackage.getName(), version, CM_MODEL_FILE, logo, 
+						projectFile, metadataFile, projectAdditions);
+
 				
 				//add all files in working directory to package
 				try(Stream<Path> files = Files.list(workingDir)){
@@ -262,11 +268,6 @@ public class PatrolPackageExporter {
 		}
 	}
 	
-	
-	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
-	}
-
 	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, boolean collectObserver, Path targetFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(targetFile)){
 			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, session));

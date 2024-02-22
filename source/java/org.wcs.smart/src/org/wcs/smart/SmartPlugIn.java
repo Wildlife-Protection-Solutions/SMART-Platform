@@ -279,6 +279,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	
 	public static final String ICON_AUTOZOOM = "org.wcs.smart.icon32.autozoom"; //$NON-NLS-1$
 	
+	public static final String ICON_INTEGRATE = "org.wcs.smart.integrate"; //$NON-NLS-1$
+	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.
@@ -490,6 +492,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(ICON_AUTOZOOM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/auto_zoom.png")); //$NON-NLS-1$);
 	     
+	     reg.put(ICON_INTEGRATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/integrate.png")); //$NON-NLS-1$);
 	     
 	}
 	

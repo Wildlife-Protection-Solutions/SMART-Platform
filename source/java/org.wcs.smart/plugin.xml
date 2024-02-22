@@ -1707,6 +1707,11 @@
             id="org.wcs.smart.preference.map.styles"
             name="Default Map Layer Styles">
       </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.EarthRangerPreferencePage"
+            id="org.wcs.smart.preference.earthranger"
+            name="Earth Ranger">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">

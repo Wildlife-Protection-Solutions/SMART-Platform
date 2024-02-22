@@ -52,6 +52,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
@@ -121,6 +122,7 @@ public class CtJsonExportUtils {
 	 */
 	public static final String JSON_REQUIRED_PROP_KEY = "isRequired"; //$NON-NLS-1$
 	
+	public static final String JSON_INTEGRATE_KEY = "smart_integrate_url"; //$NON-NLS-1$
 
 	/**
 	 * JSON options key for representing if metaitem 
@@ -302,7 +304,14 @@ public class CtJsonExportUtils {
 		return profileObj.toJSONString();
 	}
 
-	
+	public static String getEarthRangerUrl(Session session, ConservationArea ca) {
+		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"key", ConservationAreaProperty.EARTH_RANGER_URL}).uniqueResult(); //$NON-NLS-1$
+		if (prop == null) return null;
+		if (prop.getValue().isBlank()) return null;
+		return prop.getValue();
+	}
 	/**
 	 * 
 	 * @param projectName required projection name
@@ -315,7 +324,8 @@ public class CtJsonExportUtils {
 	 * @throws IOException
 	 */
 	public static void writeProjectJson(String projectName, String version, String cmFile, 
-			Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
+			Path logoFile, Path outputFile, Path metadataFilename,
+			HashMap<String, Object> projectAdditions) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectName); //$NON-NLS-1$
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$

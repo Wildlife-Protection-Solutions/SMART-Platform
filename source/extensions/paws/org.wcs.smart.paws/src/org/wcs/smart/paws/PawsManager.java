@@ -73,6 +73,7 @@ public enum PawsManager {
 		if (service == null) {
 			service = new PawsService();
 			service.setConservationArea(SmartDB.getCurrentConservationArea());
+			session.persist(service);
 		}
 		
 		service.setApiKey("1d43720ec3fe47d5928dd4cda7d66440"); //$NON-NLS-1$
