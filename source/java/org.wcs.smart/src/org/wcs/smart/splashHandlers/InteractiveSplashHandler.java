@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -54,6 +55,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -115,6 +117,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private ComboViewer cmvConservationArea  = null;
 	private Label progressLabel  = null;
 	private Link lblAdvanced = null;
+	private Label lblSMART = null;
 	private ProgressBar pbar;
 	
 	private Cursor appStartCursor;
@@ -343,18 +346,44 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		((GridLayout)right.getLayout()).marginHeight = 0;
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label lblSpacer = new Label(right, SWT.NONE);
+		final Color blue = new Color(right.getDisplay(), 50, 74, 115);
+
+		//TODO: remove when mac splash screen issue is resolved
+		Composite lblSMART = new Composite(right, SWT.NONE);
+		lblSMART.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));	
+		FontData fd2 = lblSMART.getFont().getFontData()[0];
+		fd2.setHeight(65);
+		Font f = new Font(lblSMART.getDisplay(), fd2);
+		lblSMART.setFont(f);
+		lblSMART.addListener(SWT.Dispose, e->f.dispose());
+		lblSMART.setForeground(blue);
+		lblSMART.addPaintListener(e->{
+			e.gc.setFont(f);
+			int w =lblSMART.getBounds().width;
+			
+	        FontMetrics frc = e.gc.getFontMetrics();
+	        int width = e.gc.stringExtent("SMART8").x;
+	        int x = w - width;
+	        
+	        int ascent = frc.getLeading() + 2;
+	        e.gc.setBackground(lblSMART.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+	        e.gc.drawText("SMART8", x, -ascent);
+	        
+		});
+		
+		
+		Label lblSpacer = new Label(right, SWT.BORDER);
 		lblSpacer.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		int hh = (int)(getSplash().getBounds().height * 0.3);
 		((GridData)lblSpacer.getLayoutData()).heightHint = hh;
 		((GridData)lblSpacer.getLayoutData()).widthHint = 0;
 		lblSpacer.setVisible(false);
 		
+		
 		//version label
 		Label lblVersion = new Label(right, SWT.NONE);
 		lblVersion.setText(MessageFormat.format(Messages.InteractiveSplashHandler_VersionLabel, new Object[]{System.getProperty("org.wcs.smart.version.simple")})); //$NON-NLS-1$
 		lblVersion.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
-		final Color blue = new Color(lblVersion.getDisplay(), 50, 74,115);
 		lblVersion.setForeground(blue);
 		
 		FontData fd = lblVersion.getFont().getFontData()[0];

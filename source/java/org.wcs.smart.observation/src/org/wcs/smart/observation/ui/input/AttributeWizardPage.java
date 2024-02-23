@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -154,11 +155,28 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		getWizardInternal().setCanFinish(canComplete && getNextPage() instanceof ObservationSummaryWizardPage);
 		setPageComplete(canComplete);
-		
-		//remove some mac doesn't white-out
-		//getWizard().getContainer().getShell().setDefaultButton(btnAdd);
+		setDefaultButton(btnAdd);
 	}
 
+	private Button btnLastDefault;
+	
+	private void setDefaultButton(Button btn) {
+		if (btn == null) return ;
+	
+		//the color scheme on MAC causes white text on white background
+		//with default button
+		//RE: #3672
+		if (SystemUtils.IS_OS_MAC) {
+			if (btnLastDefault != null) {
+				btnLastDefault.setBackground(btn.getBackground());
+			}
+			this.btnLastDefault = btn;
+			btn.setBackground(null);
+		}
+		
+		getWizard().getContainer().getShell().setDefaultButton(btn);
+	}
+	
 	@Override
 	public void dispose(){
 		if (attributeFields != null){
@@ -585,7 +603,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		editingOb = wo;
 		if (btnUpdate != null){
 			btnUpdate.setEnabled(true);
-			getWizard().getContainer().getShell().setDefaultButton(btnUpdate);
+			setDefaultButton(btnUpdate);
 		}
 		for (IAttributeField<?> field : attributeFields){
 			WaypointObservationAttribute value = (wo.findAttribute(field.getAttribute()));
@@ -622,8 +640,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		this.currentAttachments = new ArrayList<ObservationAttachment>();;
 		attachmentViewer.setInput(currentAttachments);
 		attsModified = false;
-		//remove so mac doesn't white out text
-		//getWizard().getContainer().getShell().setDefaultButton(btnAdd);
+		setDefaultButton(btnAdd);
 		if (attributeTable != null){
 			attributeTable.getControl().setData(AttributeTable.EDITING_OBS_KEY, null);
 			attributeTable.refresh();
