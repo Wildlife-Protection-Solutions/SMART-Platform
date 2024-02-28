@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;

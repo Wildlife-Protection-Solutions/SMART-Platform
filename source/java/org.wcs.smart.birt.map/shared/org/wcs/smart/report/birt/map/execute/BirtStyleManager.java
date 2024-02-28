@@ -24,6 +24,8 @@ package org.wcs.smart.report.birt.map.execute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -82,9 +84,11 @@ public enum BirtStyleManager {
             for( int j = 0; j < elements.length; j++ ) {
                 IConfigurationElement element = elements[j];
                 if (element.getName().equals("StyleProvider")){ //$NON-NLS-1$
-                	IBirtLayerStyleProvider manager = (IBirtLayerStyleProvider) element.createExecutableExtension("styleprovider"); //$NON-NLS-1$
-                	if (manager != null){
-                		items.add(manager);
+                	try {
+	                	IBirtLayerStyleProvider manager = (IBirtLayerStyleProvider) element.createExecutableExtension("styleprovider"); //$NON-NLS-1$
+	                	if (manager != null) items.add(manager);
+                	}catch (Throwable t) {
+                		Logger.getLogger(BirtStyleManager.class.getName()).log(Level.WARNING,t.getMessage(), t);
                 	}
                 }
             }

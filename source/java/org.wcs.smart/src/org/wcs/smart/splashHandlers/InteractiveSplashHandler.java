@@ -347,30 +347,6 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		final Color blue = new Color(right.getDisplay(), 50, 74, 115);
-
-		//TODO: remove when mac splash screen issue is resolved
-		Composite lblSMART = new Composite(right, SWT.NONE);
-		lblSMART.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));	
-		FontData fd2 = lblSMART.getFont().getFontData()[0];
-		fd2.setHeight(65);
-		Font f = new Font(lblSMART.getDisplay(), fd2);
-		lblSMART.setFont(f);
-		lblSMART.addListener(SWT.Dispose, e->f.dispose());
-		lblSMART.setForeground(blue);
-		lblSMART.addPaintListener(e->{
-			e.gc.setFont(f);
-			int w =lblSMART.getBounds().width;
-			
-	        FontMetrics frc = e.gc.getFontMetrics();
-	        int width = e.gc.stringExtent("SMART8").x;
-	        int x = w - width;
-	        
-	        int ascent = frc.getLeading() + 2;
-	        e.gc.setBackground(lblSMART.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-	        e.gc.drawText("SMART8", x, -ascent);
-	        
-		});
-		
 		
 		Label lblSpacer = new Label(right, SWT.BORDER);
 		lblSpacer.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));

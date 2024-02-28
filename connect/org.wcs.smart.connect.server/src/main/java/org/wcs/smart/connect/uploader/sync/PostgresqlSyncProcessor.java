@@ -162,10 +162,10 @@ public class PostgresqlSyncProcessor {
 			ChangeLogManager.INSTANCE.disableChangeTracking(info, session);
 			//apply change log
 			processor.processFile(session);
+			ChangeLogManager.INSTANCE.enableChangeTracking(info, session);
+			
 			//write all change log 
 			processor.writeToChangeLog(session);
-			
-			ChangeLogManager.INSTANCE.enableChangeTracking(info, session);
 		}catch (Exception ex) {
 			session.getTransaction().rollback();
 			session.beginTransaction();

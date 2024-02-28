@@ -275,6 +275,7 @@ public enum ChangeLogManager {
 		query.setParameter(10, item.getKey2());//,PostgresUUIDType.INSTANCE);
 		query.executeUpdate();
 		
+		
 	}
 	
 	/**

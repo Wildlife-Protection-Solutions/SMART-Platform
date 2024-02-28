@@ -1429,6 +1429,9 @@ public class UpgradeServlet extends HttpServlet {
 						//postgis update
 						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]');END; $$", //$NON-NLS-1$
 
+						//missing constraint 
+						"alter table smart.i_entity_type add constraint ca_entity_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+						
 						//remove entity plugins
 						"drop table smart.entity_gridded_query",  //$NON-NLS-1$
 						"drop table smart.entity_observation_query",  //$NON-NLS-1$
@@ -1444,6 +1447,9 @@ public class UpgradeServlet extends HttpServlet {
 						"delete from  connect.ca_plugin_version where plugin_id = 'org.wcs.smart.entity'", //$NON-NLS-1$
 						"delete from  connect.ca_plugin_version where plugin_id = 'org.wcs.smart.entity.query'", //$NON-NLS-1$
 						
+						
+						//fix function st_length_spheriod is now st_lengthspheriod
+						"CREATE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]'); END; $$",
 						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$

@@ -29,6 +29,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.text.MessageFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -493,7 +495,7 @@ public class CyberTrackerNoa {
 		s.beginTransaction();
 		try{		
 			item.setConservationArea(ca);
-			item.setName("CyberTracker " + DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now())); //$NON-NLS-1$
+			item.setName(MessageFormat.format("CyberTracker {0} UTC", DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(Instant.now()))); //$NON-NLS-1$
 			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
 				item.setType(SmartMobileJsonFileProcessor.CT_ZIP_TYPE);
 			}else{
