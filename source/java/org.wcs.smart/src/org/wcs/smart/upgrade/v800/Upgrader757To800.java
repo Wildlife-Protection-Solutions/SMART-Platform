@@ -24,6 +24,10 @@ package org.wcs.smart.upgrade.v800;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -94,8 +98,7 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 			}
 		}
 		
-		
-		
+		int offset = -1*ZoneOffset.systemDefault().getRules().getStandardOffset(Instant.now()).getTotalSeconds();
 		
 		sql = new String[] {
 		
@@ -151,6 +154,10 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 			//hibernate 6 employee uuid cannot conflict with ccaa uuid
 			"update smart.employee set uuid = x'00000000000000000000000000000001' where uuid = x'00000000000000000000000000000000'", //$NON-NLS-1$
 
+			//waypoint last modified for timestamp change to utc
+			//TODO: sort this out - not accurate for dst
+			//TODO: same for entity audit items
+			"update smart.waypoint set last_modified =  {fn TIMESTAMPADD(SQL_TSI_SECOND, " + offset+ ", last_modified)} where last_modified is not null",
 		};
 		
 		

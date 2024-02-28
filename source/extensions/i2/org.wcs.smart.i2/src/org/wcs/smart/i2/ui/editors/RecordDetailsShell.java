@@ -229,8 +229,8 @@ public class RecordDetailsShell extends SmartShellDialog{
 				IntelRecord temp = (IntelRecord)s.get(IntelRecord.class, record.getUuid());
 				name = temp.getTitle();
 				narr = temp.getDescription();
-				dCreated = temp.getDateCreated();
-				dModified = temp.getDateModified();
+				dCreated = temp.getDateCreatedAtLocal();
+				dModified = temp.getDateModifiedAtLocal();
 				
 				for (IntelEntityRecord e : temp.getEntities()){
 					if (IntelSecurityManager.INSTANCE.canViewEntities(e.getEntity().getProfile())) {

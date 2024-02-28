@@ -941,8 +941,8 @@ public class MissionDayComposite {
 			}
 			return Messages.MissionDayComposite_None;
 		} else if (column == OtColumn.LAST_MODIFIED) {
-			if (element.getWaypoint().getLastModified() == null) return ""; //$NON-NLS-1$
-			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(element.getWaypoint().getLastModified());
+			if (element.getWaypoint().getLastModifiedAtLocal() == null) return ""; //$NON-NLS-1$
+			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(element.getWaypoint().getLastModifiedAtLocal());
 
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (element.getWaypoint().getLastModifiedBy() == null) return ""; //$NON-NLS-1$
@@ -983,7 +983,7 @@ public class MissionDayComposite {
 			}
 			return samplingUnitEditor.getIndex(null);
 		} else if (column == OtColumn.LAST_MODIFIED) {
-			return wp.getLastModified();
+			return wp.getLastModifiedAtLocal();
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());

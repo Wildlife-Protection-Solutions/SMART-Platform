@@ -221,10 +221,10 @@ public class RecordSummaryPage extends EditorPart{
 	public void doAfterSave(){
 		headerLabel.setText(recordEditor.getRecord().getTitle());
 		entityPanel.refreshEntities();
-		if (recordEditor.getRecord().getDateModified() == null) {
+		if (recordEditor.getRecord().getDateModifiedAtLocal() == null) {
 			lblLastModified.setText(""); //$NON-NLS-1$
 		}else {
-			lblLastModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateModified()));
+			lblLastModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateModifiedAtLocal()));
 		}
 		lblLastModifiedBy.setText(recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy())); //$NON-NLS-1$
 	}
@@ -628,13 +628,13 @@ public class RecordSummaryPage extends EditorPart{
 		Label l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_CreateLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateCreated() == null ? "" : DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateCreated())); //$NON-NLS-1$
+		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateCreatedAtLocal() == null ? "" : DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateCreatedAtLocal())); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_ModifiedLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		lblLastModified = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateModified() == null ? "" : DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateModified())); //$NON-NLS-1$
+		lblLastModified = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateModifiedAtLocal() == null ? "" : DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateModifiedAtLocal())); //$NON-NLS-1$
 		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_CreatedByLabel);

@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +98,7 @@ public class Waypoint extends UuidItem {
 		
 	}
 	
+    
 	@Column(name="source")
 	public String getSourceId(){
 		return this.sourceId;
@@ -185,8 +188,17 @@ public class Waypoint extends UuidItem {
 		return lastModifiedDate;
 	}
 
+	
+	@Transient
+	public LocalDateTime getLastModifiedAtLocal() {
+		LocalDateTime utc = getLastModified();
+		if (utc == null) return null;
+		return utc.toInstant(ZoneOffset.UTC).atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+
+	
 	/**
-	 * @param the last modified date time
+	 * @param the last modified date time in UTC
 	 */
 	public void setLastModified(LocalDateTime modifiedDateTime) {
 		this.lastModifiedDate = modifiedDateTime;

@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -240,6 +241,12 @@ public class WaypointAttributeTable {
 //					}
 					
 					session.getTransaction().commit();
+					
+					Waypoint saved = session.get(Waypoint.class, wo.getWaypoint().getUuid());
+					wo.getWaypoint().setLastModified(saved.getLastModified());
+					wo.getWaypoint().setLastModifiedBy(saved.getLastModifiedBy());
+					Hibernate.initialize(saved.getLastModifiedBy());
+					
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
 					AssetPlugIn.displayLog(Messages.WaypointAttributeTable_SaveError + ex.getMessage(), ex);

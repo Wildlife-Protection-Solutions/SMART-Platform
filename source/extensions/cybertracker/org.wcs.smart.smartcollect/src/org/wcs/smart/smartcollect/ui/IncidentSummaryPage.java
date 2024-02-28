@@ -202,10 +202,10 @@ public class IncidentSummaryPage extends EditorPart {
 			if (incident.getLastModifiedBy() != null) {
 				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastUpdatedMsg1, 
 						SmartLabelProvider.getShortLabel(incident.getLastModifiedBy()), 
-						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModified())));
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModifiedAtLocal())));
 			}else {
 				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastUpdatedMsg2, 
-						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModified())));
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModifiedAtLocal())));
 			}
 			this.lblLastModified.setText(sb.toString());
 			

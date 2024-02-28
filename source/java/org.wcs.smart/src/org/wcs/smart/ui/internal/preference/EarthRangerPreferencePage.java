@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.internal.preference;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -74,6 +76,7 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 
 	@Override
 	public boolean performOk() {
+		if (!validate()) return false;
 		save(txtUrl.getText());
 		return true;
 	}
@@ -81,7 +84,8 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		loadDefault.schedule();	
+		loadDefault.schedule();
+		validate();
 	}
 
 	private boolean save(String url) {
@@ -128,6 +132,7 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 		txtUrl = new Text(main, SWT.BORDER );
 		txtUrl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtUrl.setText(DialogConstants.LOADING_TEXT);
+		txtUrl.addListener(SWT.Modify, e->validate());
 		
 		l = new Label(main, SWT.WRAP);
 		l.setText("This will be of the form https://<server>.pamdas.org");
@@ -135,9 +140,19 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 		((GridData)l.getLayoutData()).widthHint = 100;
 
 		loadDefault.schedule();
+		validate();
 		return main;
 	}
 	
+	private boolean validate() {
+		String error = null;
+		if (!txtUrl.getText().trim().isBlank() && !txtUrl.getText().trim().startsWith("https://")) { //$NON-NLS-1$
+			error = MessageFormat.format("URL must start with {0}", "https://");
+		}
+		setErrorMessage(error);
+		setValid(error == null);
+		return error==null;
+	}
 	private Job loadDefault = new Job("load preference") {  //$NON-NLS-1$
 
 		@Override

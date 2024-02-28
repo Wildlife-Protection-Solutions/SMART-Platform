@@ -17,8 +17,15 @@
 function setUrl(){
 	var url = document.getElementById('caselect').value;
 	var iframe = document.getElementById('erframe');
-	iframe.setAttribute("src", url);
+	
+	var evt = function() {
+		iframe.removeEventListener("load", evt);
+		iframe.setAttribute("src", url);
+	}
+	iframe.addEventListener("load", evt);
+	iframe.setAttribute("src", "about:blank");
 	document.getElementById("opennew").href = url;
+	
 
 }
 </script>

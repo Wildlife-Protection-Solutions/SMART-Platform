@@ -61,8 +61,8 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 		public Object getValue(IntelEntityRecord location) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
 			if (this == TITLE) return location.getRecord().getTitle();
-			if (this == DATE_RECIEVED) return location.getRecord().getDateCreated();
-			if (this == DATE_MODIFIED) return location.getRecord().getDateModified();
+			if (this == DATE_RECIEVED) return location.getRecord().getDateCreatedAtLocal();
+			if (this == DATE_MODIFIED) return location.getRecord().getDateModifiedAtLocal();
 			if (this == DESCRIPTION) return location.getRecord().getDescription();
 			if (this == STATUS) return location.getRecord().getStatus().name();
 			return null;

@@ -58,9 +58,9 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		public String getLabel(IntelRecord record){
 			switch(this){
 			case DATE_CREATED:
-				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateCreated());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateCreatedAtLocal());
 			case LAST_MODIFIED:
-				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateModified());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateModifiedAtLocal());
 			case PRIMARY_DATE:
 				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getPrimaryDate());
 			case STATUS:
@@ -73,7 +73,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 			case TITLE:
 				return record.getTitle();
 			case TITLE_CREATED:
-				return MessageFormat.format(Messages.RecordLabelProvider_0Title1DateCreated, record.getTitle(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateCreated()));
+				return MessageFormat.format(Messages.RecordLabelProvider_0Title1DateCreated, record.getTitle(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateCreatedAtLocal()));
 			default:
 				break;
 			

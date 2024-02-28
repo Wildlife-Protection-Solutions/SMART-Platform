@@ -426,9 +426,9 @@ public class WaypointInfoView {
 			if (wp == null) return;
 			if (wp.getLastModifiedBy() != null) {
 				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated1, 
-						SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()),  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModified()));
+						SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()),  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModifiedAtLocal()));
 			}else {
-				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated2,  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModified()));
+				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated2,  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModifiedAtLocal()));
 			}
 			Label l = toolkit.createLabel(parent, data, SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));

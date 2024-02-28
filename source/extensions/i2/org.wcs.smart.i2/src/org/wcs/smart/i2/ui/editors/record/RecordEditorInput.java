@@ -59,7 +59,7 @@ public class RecordEditorInput implements IEditorInput{
 	public RecordEditorInput(IntelRecord record){
 		this.record = record;
 		this.name = record.getTitle();
-		this.date = record.getDateCreated();
+		this.date = record.getDateCreatedAtLocal();
 		if (record.getRecordSource() != null) this.sourceUuid = record.getRecordSource().getUuid();
 		this.status = record.getStatus();
 		this.profileUuid = record.getProfile().getUuid();

@@ -88,9 +88,9 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 				if (record.getLastModifiedBy() == null) return null;
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getLastModifiedBy(), l);
 			case CREATED:
-				return record.getDateCreated();
+				return record.getDateCreatedAtLocal();
 			case LAST_MODIFIED:
-				return record.getDateModified();
+				return record.getDateModifiedAtLocal();
 			case STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(record.getStatus(), l);
 			case STATUS_KEY:

@@ -54,6 +54,9 @@ public class WaypointHibernateIntegrator implements Integrator {
         WaypointHibernateListener listener = new WaypointHibernateListener();
         eventListenerRegistry.prependListeners( EventType.PRE_INSERT, listener );
         eventListenerRegistry.prependListeners( EventType.PRE_UPDATE, listener );
+        eventListenerRegistry.prependListeners( EventType.PRE_DELETE, listener );
+//        eventListenerRegistry.prependListeners( EventType.POST_UPDATE, listener );
+//        eventListenerRegistry.prependListeners( EventType.POST_INSERT, listener );
 	}
 	
 	@Override

@@ -285,7 +285,7 @@ public class PatrolQueryEditorTableContent {
 		// --- Query Properties ----
 		Composite queryProp = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
 		
-		layout = new GridLayout(2, false);
+		layout = new GridLayout(3, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 10;
 		layout.horizontalSpacing = 0;
@@ -294,14 +294,23 @@ public class PatrolQueryEditorTableContent {
 		layout.marginLeft = 5;
 		queryProp.setLayout(layout);
 		queryProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+				
 		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(editor.getQuery().getTypeKey());
 		dateComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
-		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
+		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
 		dateComposite.adapt(toolkit);
 		if (editor.getInputInternal().getDateFilter() != null) {
 			dateComposite.setDateFilter(editor.getInputInternal().getDateFilter());
 		}		
+		
+		ToolBar headerToolbar = new ToolBar(queryProp, SWT.FLAT);
+		ToolItem runItem = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
+		runItem.addListener(SWT.Selection, e->editor.refreshQuery());
+		runItem.setToolTipText("Run query");
+		
+		headerToolbar.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+		
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.PatrolQueryEditorTableContent_QueryPropertiesLabel,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));

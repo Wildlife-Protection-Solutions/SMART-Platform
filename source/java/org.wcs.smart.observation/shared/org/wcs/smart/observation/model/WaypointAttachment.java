@@ -56,7 +56,8 @@ public class WaypointAttachment extends ISmartAttachment implements ISignatureAt
 	public WaypointAttachment(){
 		
 	}
-	
+
+    
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="wp_uuid", referencedColumnName="uuid")
 	public Waypoint getWaypoint(){

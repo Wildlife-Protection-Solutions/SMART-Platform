@@ -272,6 +272,7 @@ Export-Package:
  org.hibernate.proxy.pojo,
  org.hibernate.query,
  org.hibernate.query.criteria,
+ org.hibernate.query.spi,
  org.hibernate.resource.transaction.spi,
  org.hibernate.service,
  org.hibernate.service.internal,

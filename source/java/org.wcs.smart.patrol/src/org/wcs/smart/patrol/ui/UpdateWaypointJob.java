@@ -84,6 +84,11 @@ public class UpdateWaypointJob extends Job {
 				}
 				saveSession.getTransaction().commit();
 			
+				for (PatrolWaypoint wp : waypoints) {					
+					Waypoint toUpdate = saveSession.get(Waypoint.class, wp.getWaypoint().getUuid());
+					wp.getWaypoint().setLastModified(toUpdate.getLastModified());
+					wp.getWaypoint().setLastModifiedBy(toUpdate.getLastModifiedBy());
+				}
 			} catch (Exception ex) {
 				if (saveSession.getTransaction().isActive()) {
 					saveSession.getTransaction().rollback();

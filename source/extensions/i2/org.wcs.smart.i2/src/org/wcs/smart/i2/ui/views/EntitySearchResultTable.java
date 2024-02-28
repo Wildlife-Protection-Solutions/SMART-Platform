@@ -803,9 +803,9 @@ public class EntitySearchResultTable extends Composite {
 			((GridData)l.getLayoutData()).widthHint = 100;
 			addListener(l);
 			StringBuilder sb = new StringBuilder();
-			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateCreatedLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(entity.getDateCreated())));
+			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateCreatedLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(entity.getDateCreatedAtLocal())));
 			sb.append("\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateModifiedLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(entity.getDateModified())));
+			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateModifiedLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(entity.getDateModifiedAtLocal())));
 			l.setToolTipText(sb.toString());
 			
 			Composite entitycomp = toolkit.createComposite(right);

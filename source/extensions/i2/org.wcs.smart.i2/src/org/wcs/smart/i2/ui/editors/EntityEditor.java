@@ -121,6 +121,7 @@ import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -429,9 +430,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				List<IntelEntityRecord> entityRecords =  QueryFactory.buildQuery(s, IntelEntityRecord.class, "id.entity", entity).getResultList(); //$NON-NLS-1$
 				for (IntelEntityRecord r : entityRecords){
 					records.add(r.getRecord());
-					r.getRecord().getDateCreated();
-					r.getRecord().getDateModified();
-					r.getRecord().getTitle();
+					Hibernate.initialize(r.getRecord());
 					r.getRecord().getProfile().getName();
 					if (r.getRecord().getRecordSource() != null){
 						r.getRecord().getRecordSource().getIcon();
@@ -565,7 +564,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
-		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModified()));
+		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModifiedAtLocal()));
 		if (txtDmListItem != null) {
 			if (entity.getDmAttributeListItem() != null) {
 				txtDmListItem.setText(MessageFormat.format("{0} [{1}]", entity.getDmAttributeListItem().getName(), entity.getDmAttributeListItem().getKeyId())); //$NON-NLS-1$
@@ -2020,8 +2019,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
 		if (lblType.isDisposed()) return;
 		 
-		lblCreated.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateCreated()));
-		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModified()));
+		lblCreated.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateCreatedAtLocal()));
+		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModifiedAtLocal()));
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
 		

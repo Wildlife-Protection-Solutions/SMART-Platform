@@ -459,6 +459,8 @@ public class ObservationCellEditor extends DialogCellEditor {
 			}
 			this.wp.getObservationGroups().clear();
 			this.wp.getObservationGroups().addAll(wizard.getWaypoint().getObservationGroups());
+			this.wp.setLastModified(wizard.getWaypoint().getLastModified());
+			this.wp.setLastModifiedBy(wizard.getWaypoint().getLastModifiedBy());
 			return wp;
 		}finally{
 			dialogOpen = false;

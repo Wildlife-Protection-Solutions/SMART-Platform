@@ -283,7 +283,7 @@ public enum DropItemFactory {
 			}else if (a.getAttribute().getType() == Attribute.AttributeType.TREE) {
 				return new DropItem[] {new AttributeTreeDropItem((CategoryAttribute)element) };
 			}else if (a.getAttribute().getType().isGeometry()) {
-				return new DropItem[] {new AttributeGeometryDropItem((Attribute) element) };
+				return new DropItem[] {new AttributeGeometryDropItem((CategoryAttribute) element) };
 			}else {
 				return new DropItem[] {new AttributeDropItem((CategoryAttribute)element) };	
 			}

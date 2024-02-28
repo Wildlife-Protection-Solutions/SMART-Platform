@@ -959,10 +959,8 @@ public class PatrolLegDayInputComposite {
 						editor.getPatrolEditor().loadPatrolWaypointDetails(pwx, session);
 					} catch (Exception e) {
 						SmartPatrolPlugIn.log(e.getMessage(), e);
-					}
-					
-				}
-							
+					}	
+				}				
 			}
 			Display.getDefault().asyncExec(()->observationTable.refresh());
 		};
@@ -1082,7 +1080,7 @@ public class PatrolLegDayInputComposite {
 		} else if (column == OtColumn.ATTACHMENTS) {
 			return wp;
 		} else if (column == OtColumn.LAST_MODIFIED) {
-			return wp.getLastModified();
+			return wp.getLastModifiedAtLocal();
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
@@ -1143,8 +1141,8 @@ public class PatrolLegDayInputComposite {
 				return MessageFormat.format(Messages.PatrolLegDayInputComposite_AttachmentColumnLabel, new Object[]{wpCnt});
 			}
 		} else if (column == OtColumn.LAST_MODIFIED) {
-			if (wp.getLastModified() == null) return ""; //$NON-NLS-1$
-			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModified());
+			if (wp.getLastModifiedAtLocal() == null) return ""; //$NON-NLS-1$
+			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModifiedAtLocal());
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());

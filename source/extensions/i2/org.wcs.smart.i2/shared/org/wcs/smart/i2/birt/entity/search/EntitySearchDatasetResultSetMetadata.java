@@ -72,8 +72,8 @@ public class EntitySearchDatasetResultSetMetadata implements IResultSetMetaData 
 			if (this == ID) return entity.getIdAttributeAsText(l);
 			if (this == TYPE_KEY) return entity.getEntityType().getKeyId();
 			if (this == TYPE) return entity.getEntityType().getName();
-			if (this == DATE_CREATED) return entity.getDateCreated();
-			if (this == DATE_MODIFIED) return entity.getDateModified();
+			if (this == DATE_CREATED) return entity.getDateCreatedAtLocal();
+			if (this == DATE_MODIFIED) return entity.getDateModifiedAtLocal();
 			if (this == CREATED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), l);
 			if (this == MODIFIED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), l);
 			if (this == PRIMARY_IMAGE){

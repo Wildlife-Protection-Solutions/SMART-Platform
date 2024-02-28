@@ -127,7 +127,7 @@ public class CustomQueryEngine {
 		jwp.put("distance", pw.getDistance()); //$NON-NLS-1$
 		jwp.put("bearing", pw.getDirection()); //$NON-NLS-1$
 		jwp.put("comment", pw.getComment()); //$NON-NLS-1$
-		jwp.put("last_modified", pw.getLastModified().toString()); //$NON-NLS-1$
+		jwp.put("last_modified", pw.getLastModifiedAtLocal().toString()); //$NON-NLS-1$
 		jwp.put("source",pw.getSourceId()); //$NON-NLS-1$
 		jwp.put("conservation_area_uuid", UuidUtils.uuidToString(pw.getConservationArea().getUuid())); //$NON-NLS-1$
 		

@@ -281,7 +281,9 @@ public class SmartHibernateManager {
 		}
 		Session session = null;
 		if (interceptor == null){
-			session = sessionFactory.openSession();
+			session = sessionFactory
+//					.withOptions().interceptor(new AuditItemInterceptor())
+					.openSession();
 		}else{
 			
 			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
@@ -299,16 +301,7 @@ public class SmartHibernateManager {
 		return session;
 		
 	}
-	
-//	protected static void endSessionFactoryNoLock(){
-//		synchronized (sessionFactoryLock) {
-//			if (sessionFactory != null){
-//				closeAllSessions();
-//				sessionFactory.close();
-//			}
-//			sessionFactory = null;	
-//		}
-//	}
+
 	
 	/**
 	 * Closes the current session factory.

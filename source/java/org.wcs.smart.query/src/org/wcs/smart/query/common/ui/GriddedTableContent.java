@@ -245,7 +245,7 @@ public class GriddedTableContent {
 		
 		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(editor.getQueryInternal().getTypeKey());
 		dateComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
-		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
+		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
 		dateComposite.adapt(toolkit);
 		if (editor.getInputInternal().getDateFilter() != null) {
 			dateComposite.setDateFilter(editor.getInputInternal().getDateFilter());

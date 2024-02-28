@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
@@ -60,26 +61,32 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 		this.ftype = ftype;
 		this.thisType = typeName;
 	
-		if (thisType.equals(PatrolDataSource.WAYPOINT_TYPE)){
+		if (thisType.equals(PatrolDataSource.WAYPOINT_TYPE) || 
+				thisType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
+			
 			List<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
-			for (PatrolLeg l : patrol.getLegs()){
-				for (PatrolLegDay d : l.getPatrolLegDays()){
-					if (d.getWaypoints() != null){
-						pnts.addAll(d.getWaypoints());
+
+			try(Session session = HibernateManager.openSession()){
+				patrol = session.get(Patrol.class, patrol.getUuid());
+				if (patrol != null) {
+					for (PatrolLeg l : patrol.getLegs()){
+						for (PatrolLegDay d : l.getPatrolLegDays()){
+							if (d.getWaypoints() != null){
+								pnts.addAll(d.getWaypoints());
+							}
+						}
 					}
 				}
-			}
-			fIterator = pnts.iterator();
-		}else if (thisType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)){
-			List<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
-			for (PatrolLeg l : patrol.getLegs()){
-				for (PatrolLegDay d : l.getPatrolLegDays()){
-					if (d.getWaypoints() != null){
-						pnts.addAll(d.getWaypoints());
-					}
+				for (PatrolWaypoint pw : pnts) {
+					Hibernate.initialize(pw.getWaypoint());
+					pw.getWaypoint().getObservationsAsString();
 				}
 			}
+			
+			
 			fIterator = pnts.iterator();
+			
+		
 		}else if (thisType.equals(PatrolDataSource.TRACK_PART_TYPE)){
 			List<TrackPart> pnts = new ArrayList<>();
 			for (PatrolLeg l : patrol.getLegs()){

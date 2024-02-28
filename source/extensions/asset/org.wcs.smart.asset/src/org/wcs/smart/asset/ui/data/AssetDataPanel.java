@@ -1595,14 +1595,15 @@ public abstract class AssetDataPanel {
 			waypointComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)waypointComment.getLayoutData()).widthHint = detailsPart.getBounds().width;
 			
+			//TODO: update these when item is modified
 			String lastModified = null;
 			if (waypoint.getWaypoint().getLastModifiedBy() != null) {
 				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated1, 
 						SmartLabelProvider.getShortLabel(waypoint.getWaypoint().getLastModifiedBy()), 
-						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getLastModified()));
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getLastModifiedAtLocal()));
 			}else {
 				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated2, 
-						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getLastModified()));
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getLastModifiedAtLocal()));
 			}
 			Label lastModifiedLabel = toolkit.createLabel(spacer, lastModified);
 			lastModifiedLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));

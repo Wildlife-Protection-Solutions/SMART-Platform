@@ -176,7 +176,7 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 			data[7] = null;
 		}else {
 			data[5] = location.getRecord().getTitle();
-			data[6] = location.getRecord().getDateCreated();
+			data[6] = location.getRecord().getDateCreatedAtLocal();
 			data[7] = UuidUtils.uuidToString(location.getRecord().getUuid());
 		}
 		data[8] = UuidUtils.uuidToString(location.getUuid());

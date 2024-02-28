@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -103,4 +105,14 @@ public interface IIntelAuditItem {
 	 *            created_by
 	 */
 	public void setLastModifiedBy(Employee lastModifiedBy);
+	
+	public default LocalDateTime getDateCreatedAtLocal() {
+		if (getDateCreated() == null) return null;
+		return getDateCreated().toInstant(ZoneOffset.UTC).atZone(ZoneId.systemDefault()).toLocalDateTime();
+		
+	}
+	public default LocalDateTime getDateModifiedAtLocal() {
+		if (getDateModified() == null) return null;
+		return getDateModified().toInstant(ZoneOffset.UTC).atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
 }

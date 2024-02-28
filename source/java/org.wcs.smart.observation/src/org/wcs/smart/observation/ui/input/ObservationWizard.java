@@ -32,6 +32,7 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconCache;
@@ -541,7 +542,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				
 				this.wp = wpupdated;
 				this.wp.getObservationsAsString();
-
+				Hibernate.initialize(wp.getLastModifiedBy());
 			}catch (Exception ex){
 				ObservationPlugIn.displayLog(Messages.ObservationWizard_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;

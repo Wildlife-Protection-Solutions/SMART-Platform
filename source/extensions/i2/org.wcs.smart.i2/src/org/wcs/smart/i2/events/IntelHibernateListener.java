@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.i2.events;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +32,7 @@ import org.hibernate.event.spi.PreInsertEvent;
 import org.hibernate.event.spi.PreInsertEventListener;
 import org.hibernate.event.spi.PreUpdateEvent;
 import org.hibernate.event.spi.PreUpdateEventListener;
+import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IIntelAuditItem;
 
@@ -50,27 +53,8 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
-		
 		if (event.getEntity() instanceof IIntelAuditItem){
-			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
-			
-			LocalDateTime now = LocalDateTime.now();
-			if (item.getDateCreated() == null){
-				if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
-	    			item.setCreatedBy(SmartDB.getCurrentEmployee());
-	    			item.setDateCreated(now);
-	    			
-	    			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
-	                setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
-				}
-            }
-			
-			if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
-				item.setLastModifiedBy(SmartDB.getCurrentEmployee());
-				setValue(event.getState(),event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
-			}
-			item.setDateModified(now);
-			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
+			updateAuditFields((IIntelAuditItem) event.getEntity(), event.getState(), event.getPersister());
 		}
 		return false;
 	}
@@ -78,25 +62,28 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 	@Override
 	public boolean onPreInsert(PreInsertEvent event) {
 		if (event.getEntity() instanceof IIntelAuditItem){
-			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
-			
-			LocalDateTime now = LocalDateTime.now();			
-			if (item.getDateCreated() == null){
-				if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
-	    			item.setCreatedBy(SmartDB.getCurrentEmployee());
-	    			item.setDateCreated(now);
-	    			setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
-	                setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
-				}
-            }
-			if (item.getLastModifiedBy() == null && item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
-				item.setLastModifiedBy(SmartDB.getCurrentEmployee());
-				setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
-			}
-			item.setDateModified(now);
-            setValue(event.getState(), event.getPersister().getEntityPersister().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
+			updateAuditFields((IIntelAuditItem) event.getEntity(), event.getState(), event.getPersister());			
 		}
 		return false;
+	}
+	
+	private void updateAuditFields(IIntelAuditItem item, Object[] state, EntityPersister persister ) {
+		LocalDateTime nowAsUtc = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+		if (item.getDateCreated() == null){
+			if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+    			item.setCreatedBy(SmartDB.getCurrentEmployee());
+    			item.setDateCreated(nowAsUtc);
+    			setValue(state, persister.getEntityPersister().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+                setValue(state, persister.getEntityPersister().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
+			}
+        }
+		
+		if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
+			setValue(state, persister.getEntityPersister().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
+		}
+		item.setDateModified(nowAsUtc);
+        setValue(state, persister.getEntityPersister().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$	
 	}
 
 	private void setValue(Object[] currentState, String[] propertyNames, String propertyToSet, Object value, Object entity) {

@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
@@ -93,8 +94,10 @@ public class SaveWaypointJob extends Job {
 						saveSession.persist(wp);
 					}else {
 						pnt = saveSession.merge(pnt);
+						
 						//required to prevent duplicate loading of survey waypoint object
 						saveSession.get(SurveyWaypoint.class, wp.getId()).getMissionDay().getUuid();
+						wp = saveSession.merge(wp);
 						//saveSession.merge(wp);
 					}
 					updated.add(pnt);
@@ -120,6 +123,14 @@ public class SaveWaypointJob extends Job {
 					
 				}
 				saveSession.getTransaction().commit();
+				
+				for (SurveyWaypoint wp : pnts) {
+					Waypoint saved = saveSession.get(Waypoint.class, wp.getWaypoint().getUuid());
+					wp.getWaypoint().setLastModified(saved.getLastModified());
+					wp.getWaypoint().setLastModifiedBy(saved.getLastModifiedBy());
+					Hibernate.initialize(saved.getLastModifiedBy());
+				}					
+				
 				
 			} catch (Exception ex) {
 				if (saveSession.getTransaction().isActive()) {

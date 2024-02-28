@@ -144,8 +144,8 @@ public class RecordCsvExporter implements ICsvDataExporter {
 
 				headers.add(r.getTitle());
 				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getPrimaryDate()));
-				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getDateCreated()));
-				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getDateModified()));
+				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getDateCreatedAtLocal()));
+				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getDateModifiedAtLocal()));
 				headers.add(ll.getLabel(r.getStatus(), Locale.getDefault()));
 				headers.add(r.getRecordSource() == null ? "" : r.getRecordSource().getName()); //$NON-NLS-1$
 				headers.add(r.getProfile().getName());

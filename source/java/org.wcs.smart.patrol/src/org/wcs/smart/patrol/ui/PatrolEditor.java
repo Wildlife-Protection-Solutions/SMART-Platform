@@ -372,7 +372,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					//a.getAttributeValue();	
 				});
 				
-				session.getTransaction().commit();
+				session.getTransaction().rollback();
 				if (ops == null){
 					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 				}
