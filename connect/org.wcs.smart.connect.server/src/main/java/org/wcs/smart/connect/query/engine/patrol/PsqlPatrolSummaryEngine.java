@@ -826,7 +826,14 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		
 		clearParameters();
 		
-		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
+		if (attributeItem.getAttributeType() == AttributeType.NUMERIC
+				|| attributeItem.getAttributeType().isGeometry()) {
+
+			String field = "number_value"; //$NON-NLS-1$
+			if (attributeItem.getGeometryProperty() != null) {
+				field = attributeItem.getGeometryProperty().getDbField();
+			}
+			
 			StringBuilder fromSql = new StringBuilder();
 
 			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
@@ -845,7 +852,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
-			valueAggSql.append(".number_value)"); //$NON-NLS-1$
+			valueAggSql.append("." + field + ")"); //$NON-NLS-1$
 
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$
@@ -880,7 +887,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 
 			sql.append(" WHERE "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append(".number_value is not null and "); //$NON-NLS-1$
+			sql.append("." + field + " is not null and "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(tablePrefix(Attribute.class));
 			String p1 = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p1); //$NON-NLS-1$

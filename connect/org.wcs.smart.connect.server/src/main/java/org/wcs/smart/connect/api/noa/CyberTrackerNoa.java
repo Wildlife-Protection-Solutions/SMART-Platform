@@ -32,6 +32,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -114,6 +115,8 @@ import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 public class CyberTrackerNoa {
 
 	public static final String PATH = "cybertracker"; //$NON-NLS-1$
+	private DateTimeFormatter fileDtFormatter = DateTimeFormatter.ofPattern("MMM dd, uuuu HH:mm:ss" )
+			.withZone(ZoneOffset.UTC);
 
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
 	
@@ -495,7 +498,8 @@ public class CyberTrackerNoa {
 		s.beginTransaction();
 		try{		
 			item.setConservationArea(ca);
-			item.setName(MessageFormat.format("CyberTracker {0} UTC", DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(Instant.now()))); //$NON-NLS-1$
+			
+			item.setName(MessageFormat.format("CyberTracker {0} UTC", fileDtFormatter.format(Instant.now()))); //$NON-NLS-1$
 			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
 				item.setType(SmartMobileJsonFileProcessor.CT_ZIP_TYPE);
 			}else{

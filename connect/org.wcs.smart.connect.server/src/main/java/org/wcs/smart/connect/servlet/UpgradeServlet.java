@@ -1431,6 +1431,11 @@ public class UpgradeServlet extends HttpServlet {
 
 						//missing constraint 
 						"alter table smart.i_entity_type add constraint ca_entity_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+						"alter table smart.i_relationship_type add constraint ca_relationship_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+						"alter table smart.i_relationship_group add constraint ca_relationship_group_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+						"alter table smart.i_recordsource add constraint ca_recordsource_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+						"alter table smart.i_attribute add constraint ca_attribute_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+						"alter table smart.i_profile_config add constraint profile_config_ca_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
 						
 						//remove entity plugins
 						"drop table smart.entity_gridded_query",  //$NON-NLS-1$

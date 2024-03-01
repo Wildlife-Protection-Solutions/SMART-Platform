@@ -400,7 +400,14 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
 		
 		clearParameters();
-		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
+		if (attributeItem.getAttributeType() == AttributeType.NUMERIC 
+				|| attributeItem.getAttributeType().isGeometry()) {
+
+			String field = "number_value"; //$NON-NLS-1$
+			if (attributeItem.getGeometryProperty() != null) {
+				field = attributeItem.getGeometryProperty().getDbField();
+			}
+			
 			StringBuilder fromSql = new StringBuilder();
 
 			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
@@ -419,7 +426,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
-			valueAggSql.append(".number_value)"); //$NON-NLS-1$
+			valueAggSql.append("." + field +")"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$
@@ -454,7 +461,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 
 			sql.append(" WHERE "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append(".number_value is not null and "); //$NON-NLS-1$
+			sql.append("." + field + " is not null and "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(tablePrefix(Attribute.class));
 			String p = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p); //$NON-NLS-1$
