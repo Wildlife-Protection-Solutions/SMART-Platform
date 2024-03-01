@@ -133,6 +133,7 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 					Waypoint wp = session.get(Waypoint.class, incident.getUuid());
 					//update and save
 					panel.updateIncident(wp);
+					session.flush();
 					panel.afterSave(wp, session);
 					session.getTransaction().commit();
 				}catch (Exception ex){

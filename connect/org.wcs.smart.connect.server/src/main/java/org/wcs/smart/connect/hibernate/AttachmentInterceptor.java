@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.connect.i18n.Messages;
@@ -175,6 +176,11 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     				extension = name.substring(pos);
     			}
     			
+    			
+    			//clean any special characters from filename
+				String filename = URLUtils.cleanFilename(to.getFileName().toString());
+				to = to.getParent().resolve(filename);
+				
     			Pattern p = Pattern.compile("(.*)_(\\d+)"); //$NON-NLS-1$
     			int counter = 1;
     			
@@ -185,8 +191,11 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     				}else{
     					basename = basename + "_" + (counter++); //$NON-NLS-1$
     				}
-    				to = to.getParent().resolve(basename + extension);
+    				
+    				//clean filename
+    				to = to.getParent().resolve(URLUtils.cleanFilename(basename + extension));
     			}
+    			
     			if (this.encrypt && attachment.isEncrypted()) {
 	    			try {
 	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation(), to, attachment);

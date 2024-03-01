@@ -248,6 +248,9 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		refreshTable();
 	}
 	
+	public void refresh() {
+		tblAttachments.refresh();
+	}
 	private void refreshTable(){
 		all.clear();
 		all.addAll(this.attachments);

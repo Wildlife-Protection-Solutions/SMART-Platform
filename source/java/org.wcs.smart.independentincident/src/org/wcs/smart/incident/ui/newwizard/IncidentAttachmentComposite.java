@@ -164,6 +164,10 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 		}
 	}
 
+	public void afterSave(Waypoint wp, Session session) {
+		this.attachmentComp.refresh();
+	}
+	
 	@Override
 	public String getName() {
 		return Messages.IncidentAttachmentComposite_Name;
