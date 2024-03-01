@@ -63,7 +63,7 @@ public class ConflictExceptionImpl extends ConflictException{
 			}
 		}
 		sb.append("\n\n"); //$NON-NLS-1$
-		sb.append(Messages.ConflictExceptionImpl_ResolutionMessage);
+		sb.append(Messages.ConflictExceptionImpl_ResolutionMessage1);
 			
 		return sb.toString();
 	}

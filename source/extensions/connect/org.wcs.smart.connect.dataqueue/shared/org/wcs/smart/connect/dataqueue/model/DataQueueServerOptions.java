@@ -33,7 +33,7 @@ public enum DataQueueServerOptions {
 	CHECK_ONSTARTUP(Boolean.FALSE),
 	STARTUP_AUTOPROCESS(Boolean.FALSE),
 	STARTUP_PROMPT(Boolean.TRUE),
-	AUTO_CHECK(Boolean.TRUE),
+	AUTO_CHECK(Boolean.FALSE),
 	AUTO_AUTOPROCESS(Boolean.FALSE),
 	AUTO_PROMPT(Boolean.TRUE),
 	AUTO_MINUTES(30),

@@ -100,7 +100,7 @@ public class Messages extends NLS {
 	public static String ConflictDataRecoveryEngine_ReApplyError;
 	public static String ConflictExceptionImpl_ConflictMessage;
 	public static String ConflictExceptionImpl_FileLabel;
-	public static String ConflictExceptionImpl_ResolutionMessage;
+	public static String ConflictExceptionImpl_ResolutionMessage1;
 	public static String ConflictExceptionImpl_TableLabel;
 	public static String ConnectCaListPage_CaLabel;
 	public static String ConnectCaListPage_CouldNotConnect1;
