@@ -620,7 +620,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			
 			"ALTER TABLE smart.i_entity alter column created_by drop not null", //$NON-NLS-1$
 			"ALTER TABLE smart.i_record alter column created_by drop not null", //$NON-NLS-1$
-			"ALTER TABLE smart.i_attachment alter column created_by drop not null" //$NON-NLS-1$
+			"ALTER TABLE smart.i_attachment alter column created_by drop not null", //$NON-NLS-1$
+			
+			"alter table smart.i_profile_config add constraint profile_config_ca_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+
 		};
 		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
 			
