@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.internal;
 
-import javax.transaction.Status;
+import jakarta.transaction.Status;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

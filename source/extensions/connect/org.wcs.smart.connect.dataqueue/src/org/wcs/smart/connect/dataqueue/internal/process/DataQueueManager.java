@@ -464,7 +464,7 @@ public enum DataQueueManager {
 
 			@Override
 			public void afterCompletion(int status) {
-				if (status == javax.transaction.Status.STATUS_COMMITTED) {
+				if (status == jakarta.transaction.Status.STATUS_COMMITTED) {
 					// if the transaction was successful we also want to delete
 					// the associated files
 					Path dataQueueFiles = FileSystems.getDefault()

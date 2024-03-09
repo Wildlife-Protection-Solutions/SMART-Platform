@@ -16,12 +16,10 @@
 	<version>8.0.0-SNAPSHOT</version>
 		
 	<properties>
-		<hibernate.version>6.3.0.Final</hibernate.version>
-		<!-- <hibernate.version>6.2.0.CR1</hibernate.version> -->
+		<hibernate.version>6.4.4.Final</hibernate.version>
 		<ehcache.version>3.10.8</ehcache.version>
-		<derby.version>10.16.1.1</derby.version>
-		<!--https://db.apache.org/derby/releases/release-10_16_1_1.cgi-->		
-		<c3p0.version>0.9.5.5</c3p0.version>
+		<derby.version>10.17.1.0</derby.version>
+		<c3p0.version>0.10.0</c3p0.version>
 	</properties>
     
 	<dependencies>
@@ -57,12 +55,12 @@
 			<version>${ehcache.version}</version>
 			<classifier>jakarta</classifier>
 			<exclusions>
-			<!-- https://stackoverflow.com/questions/72128029/how-do-i-resolve-could-not-find-artifact-javax-xml-bindjaxb-apipom2-3-0-b1611 -->
-                <exclusion>
-                    <groupId>org.glassfish.jaxb</groupId>
-                    <artifactId>jaxb-runtime</artifactId>
-                </exclusion>
-            </exclusions>
+				<!-- https://stackoverflow.com/questions/72128029/how-do-i-resolve-could-not-find-artifact-javax-xml-bindjaxb-apipom2-3-0-b1611 -->
+			        <exclusion>
+                    			<groupId>org.glassfish.jaxb</groupId>
+                    			<artifactId>jaxb-runtime</artifactId>
+                		</exclusion>
+            		</exclusions>
         	</dependency>	        
 		<!-- Hibernate c3p0 connection pool -->
 		<dependency>
@@ -75,12 +73,10 @@
     			<artifactId>c3p0</artifactId>
     			<version>${c3p0.version}</version>
 		</dependency>
-		
-		
-		        <dependency>
-		<groupId>org.slf4j</groupId>
-  		<artifactId>slf4j-log4j12</artifactId>
-  		<version>1.6.4</version>
-        </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+  			<artifactId>slf4j-log4j12</artifactId>
+  			<version>1.6.4</version>
+        	</dependency>
 	</dependencies>
 </project>

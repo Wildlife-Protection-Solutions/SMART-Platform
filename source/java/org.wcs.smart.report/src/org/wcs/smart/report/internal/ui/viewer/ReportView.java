@@ -32,8 +32,8 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;

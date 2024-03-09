@@ -13,35 +13,35 @@
 		<geotools.version>28.1</geotools.version>
 		<jts.version>1.19.0</jts.version>
 		
-		<hibernate.version>6.3.0.Final</hibernate.version>
+		<hibernate.version>6.4.4.Final</hibernate.version>
 
-		<birt.version>4.9.0</birt.version>
+		<birt.version>4.14.0</birt.version>
 		<udig.version>3.1.0-SNAPSHOT</udig.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<resteasy.version>5.0.3.Final</resteasy.version>
+		<resteasy.version>6.2.7.Final</resteasy.version>
 		
 		<org.eclipse.datatools.connectivity.oda.version>3.6.101-SNAPSHOT</org.eclipse.datatools.connectivity.oda.version>
-		<org.eclipse.ui.workbench.version>3.126.0</org.eclipse.ui.workbench.version>
-		<org.eclipse.core.runtime.version>3.26.0</org.eclipse.core.runtime.version>
-		<org.eclipse.emf.ecore.version>2.29.0</org.eclipse.emf.ecore.version>
+		<org.eclipse.ui.workbench.version>3.131.0</org.eclipse.ui.workbench.version>
+		<org.eclipse.core.runtime.version>3.30.0</org.eclipse.core.runtime.version>
+		<org.eclipse.emf.ecore.version>2.36.0</org.eclipse.emf.ecore.version>
 		<org.eclipse.swt.win32.win32.x86_64.version>3.110.0</org.eclipse.swt.win32.win32.x86_64.version>
 		<org.eclipse.jface.version>3.27.0</org.eclipse.jface.version>
 		
 		<json-simple.version>1.1.1</json-simple.version>
 		<jBCrypt.version>0.4.3</jBCrypt.version>
-		<metadata-extractor.version>2.18.0</metadata-extractor.version>
+		<metadata-extractor.version>2.19.0</metadata-extractor.version>
 		<opencsv.version>2.3</opencsv.version>
 		
-		<commons-codec.version>1.14</commons-codec.version>
-		<commons-io.version>2.9.0</commons-io.version>
-		<commons-compress.version>1.21</commons-compress.version>
+		<commons-codec.version>1.16.1</commons-codec.version>
+		<commons-io.version>2.15.1</commons-io.version>
+		<commons-compress.version>1.26.0</commons-compress.version>
 
 		<java-string-similarity.version>2.0.0</java-string-similarity.version>
 		<jackson-databind.version>2.13.4.1</jackson-databind.version>
 		<jackson-annotations.version>2.13.2</jackson-annotations.version>
 		
 		<gson.version>2.9.0</gson.version>
-		<com.ibm.icu.icu4j.version>67.1</com.ibm.icu.icu4j.version>
+		<!--<com.ibm.icu.icu4j.version>67.1</com.ibm.icu.icu4j.version>-->
 		<mozilla.javascript.version>1.7.5.v201504281450</mozilla.javascript.version>
 	</properties>
 	<modules>

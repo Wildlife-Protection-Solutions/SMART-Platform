@@ -8,7 +8,7 @@ Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.cybertracker;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.wcs.smart.plan;bundle-version="[8.0.0,9.0.0)";visibility:=reexport
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.wcs.smart.cybertracker.plan
 Bundle-ClassPath: .

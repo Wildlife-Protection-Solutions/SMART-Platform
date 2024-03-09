@@ -24,9 +24,6 @@ package org.wcs.smart.connect.hibernate;
 import java.beans.Introspector;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -56,6 +53,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.birt.core.framework.FrameworkException;
 import org.eclipse.birt.core.framework.PlatformConfig;
@@ -383,30 +381,13 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		//for reports
 	    IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
 
-	    //hack to support smart icons in map styling in reports
-	    //allows a custom url handler that deals with the platform:/plugin
-	    //urls and loads the corresponding image from the jar file
-	    try {
-	    	
-			final Field factoryField = URL.class.getDeclaredField("factory"); //$NON-NLS-1$
-			factoryField.setAccessible(true);
-			final Field lockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
-			lockField.setAccessible(true);
+	    //Previously implemented the information from here:
+	    //https://stackoverflow.com/questions/41696088/register-custom-urlstreamhandler-in-spring-web-application-tomcat
+	    //but no longer works in java21
+	    //tried services file but that didn't load
+	    TomcatURLStreamHandlerFactory.getInstance().addUserFactory(new SMARTURLStreamHandlerProvider());
 
-			// use same lock as in java.net.URL.setURLStreamHandlerFactory
-			synchronized (lockField.get(null)) {
-				final URLStreamHandlerFactory urlStreamHandlerFactory = (URLStreamHandlerFactory) factoryField
-						.get(null);
-				// Reset the value to prevent Error due to a factory already defined
-				factoryField.set(null, null);
-				URL.setURLStreamHandlerFactory(new SMARTURLStreamHandlerProvider(urlStreamHandlerFactory));
-			}
-		} catch (Exception ex) {
-			throw new IllegalStateException("Cannot url stream handler factory.", ex); //$NON-NLS-1$
-
-		}
-	    
-		//configure file store
+	    //configure file store
 		try{
 			DataStoreManager.INSTANCE.initDatastore();
 		}catch(NamingException ex){

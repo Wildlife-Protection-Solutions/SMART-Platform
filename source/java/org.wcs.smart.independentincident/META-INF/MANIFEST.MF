@@ -13,7 +13,7 @@ Require-Bundle: org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)";visibil
  org.eclipse.datatools.connectivity.oda.design.ui,
  org.wcs.smart.patrol;bundle-version="[8.0.0,9.0.0)",
  org.apache.xerces
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.event,
  org.wcs.smart.incident.json,

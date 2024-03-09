@@ -29,7 +29,7 @@
   			<groupId>org.eclipse.platform</groupId>
   			<artifactId>org.eclipse.jface</artifactId>
   			<version>${org.eclipse.jface.version}</version>
-  			<scope>compile</scope>
+  			<scope>provided</scope>
 		</dependency>
 	</dependencies>	
 </project>

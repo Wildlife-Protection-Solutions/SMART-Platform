@@ -8,7 +8,7 @@ Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.eclipse.ui.forms
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation.query,
  org.wcs.smart.observation.query.engine,

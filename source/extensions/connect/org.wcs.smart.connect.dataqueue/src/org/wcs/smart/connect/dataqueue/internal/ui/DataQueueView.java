@@ -28,8 +28,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -136,7 +136,7 @@ public class DataQueueView{
 				
 				@Override
 				public void afterCompletion(int status) {
-					if (status == javax.transaction.Status.STATUS_COMMITTED){
+					if (status == jakarta.transaction.Status.STATUS_COMMITTED){
 						connect = null;
 						Display.getDefault().asyncExec(new Runnable() {
 							@Override

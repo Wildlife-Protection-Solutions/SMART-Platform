@@ -23,8 +23,8 @@ package org.wcs.smart.ui;
 
 import java.net.URL;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.tools.compat.parts.DIViewPart;

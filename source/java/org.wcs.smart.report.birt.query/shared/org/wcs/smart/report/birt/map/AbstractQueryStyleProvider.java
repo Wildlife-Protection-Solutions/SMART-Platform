@@ -61,7 +61,7 @@ public abstract class AbstractQueryStyleProvider implements IBirtLayerStyleProvi
 	
 	protected StyleBlackboard findDataModelAttributeStyle(Session session, ConservationArea ca, String columnKey) {
 		//columnKey is of the form attibute:attributekey
-		if (!columnKey.startsWith("attribute:")) return null; //$NON-NLS-1$
+		if (columnKey == null || !columnKey.startsWith("attribute:")) return null; //$NON-NLS-1$
 		
 		String key = columnKey.substring(columnKey.lastIndexOf(":") + 1); //$NON-NLS-1$
 		

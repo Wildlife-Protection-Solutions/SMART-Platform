@@ -26,8 +26,8 @@ import java.awt.geom.Point2D;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;

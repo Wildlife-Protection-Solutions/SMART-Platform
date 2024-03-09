@@ -85,7 +85,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 			
 			@Override
 			public void afterCompletion(int status) {
-				if (status == javax.transaction.Status.STATUS_COMMITTED){
+				if (status == jakarta.transaction.Status.STATUS_COMMITTED){
 					//we need any empty transaction that returns true for wasCommitted
 					//for the itercceptor
 					Transaction tx = new Transaction(){

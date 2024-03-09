@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.patrol.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.wcs.smart.report.birt.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: org.wcs.smart.plan,
  org.wcs.smart.plan.model,
  org.wcs.smart.plan.xml.model

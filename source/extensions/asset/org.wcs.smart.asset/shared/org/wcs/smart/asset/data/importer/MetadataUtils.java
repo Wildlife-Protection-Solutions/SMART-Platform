@@ -118,7 +118,7 @@ public class MetadataUtils {
 		new ExifImageDirectory(),
 		new ExifSubIFDDirectory(),
 		new ExifInteropDirectory(),
-		new ExifThumbnailDirectory(),
+		new ExifThumbnailDirectory(0),
 		new GpsDirectory(),
 		new FileSystemDirectory(),
 		//new FileTypeDirectory(),

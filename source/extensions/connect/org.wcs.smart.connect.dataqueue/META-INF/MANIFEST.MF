@@ -8,7 +8,7 @@ Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart.connect;bundle-version="[8.0.0,9.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.connect.dataqueue,
  org.wcs.smart.connect.dataqueue.internal.server,
