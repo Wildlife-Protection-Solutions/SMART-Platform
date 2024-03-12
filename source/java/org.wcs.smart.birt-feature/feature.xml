@@ -327,4 +327,8 @@
          id="org.eclipse.datatools.help"
          version="0.0.0"/>
 
+   <plugin
+         id="org.eclipse.orbit.xml-apis-ext"
+         version="0.0.0"/>
+
 </feature>
