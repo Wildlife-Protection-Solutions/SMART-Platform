@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -142,6 +143,7 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 				}
 			}
 			IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_MODIFIED, incident);
+			WaypointEventManager.getInstance().waypointModified(incident);
 			setChangesMade(false);
 		}
 		return true;

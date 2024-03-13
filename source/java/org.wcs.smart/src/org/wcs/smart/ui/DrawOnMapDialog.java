@@ -50,6 +50,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.Fill;
 import org.geotools.styling.Rule;
 import org.geotools.styling.Stroke;
@@ -65,6 +66,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.selection.SelectLayerCommand;
@@ -356,9 +358,14 @@ public class DrawOnMapDialog extends SmartStyledDialog implements DialogMap {
 						}
 	
 						getMap().getEditManagerInternal().commitTransaction();
-					}	
-	
-					getMap().sendCommandSync(new ZoomExtentCommand());
+						
+						ReferencedEnvelope env = new ReferencedEnvelope(fc.getBounds());
+						env.expandBy(0.01);
+						getMap().sendCommandASync(new SetViewportBBoxCommand(env));
+						
+					}	else {
+						getMap().sendCommandSync(new ZoomExtentCommand());
+					}
 	
 				}
 			};

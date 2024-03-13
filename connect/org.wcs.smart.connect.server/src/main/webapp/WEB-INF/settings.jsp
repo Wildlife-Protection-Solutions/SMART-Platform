@@ -52,21 +52,25 @@
 		
 		<div class="settingsTable">
 			<div class="block settings-header"><fmt:message key="settings.dataqueueprocessing" /></div>
-			<div style="margin-top: 5px">
-				<input id="dq_smartmobile_connect" type="checkbox"  />
-				<label for="dq_smartmobile_connect" title="<fmt:message key="settings.processconnecttooltip" />"><fmt:message key="settings.processonconnect" /></label>
+			
+			<div style="margin: 10px; display:flex; flex-direction:column">
+				<div style="margin-top: 5px; margin-bottom:5px; font-weight:bold">Conservation Area - Processing Options</div>
+				<div style="margin-left: 20px;">
+					<div style="margin-bottom:5px; ">For each Conservation Area you can configure if the SMART Mobile data processing should happen on Connect (recommended) or if the processing should occur via the Desktop interface.</div>
+					<div id="dq_smartmobile_ca_settings"></div>
+				</div>
 			</div>
 			
 			<div style="margin: 10px; display:flex; flex-direction:column">
 				<div style="margin-top: 5px; margin-bottom:5px; font-weight:bold"><fmt:message key="settings.dqcollectop" /></div>
 				<div style="margin-left: 20px">
-				<div style="margin-bottom:5px; "><fmt:message key="settings.dqcollectopmessage" /></div>
-				<select style="width: fit-content" id="qd_smartcollect_useroption">
-					<option value="validaterequeue"><fmt:message key="settings.dqcollectopvalidate" /></option>
-					<option value="load"><fmt:message key="settings.dqcollectopload" />)</option>
-					<option value="requeue"><fmt:message key="settings.dqcollectoprequeue" /></option>
-					<option value="discard"><fmt:message key="settings.dqcollectopdiscard" /></option>
-				</select>
+					<div style="margin-bottom:5px; "><fmt:message key="settings.dqcollectopmessage" /></div>
+					<select style="width: fit-content" id="qd_smartcollect_useroption">
+						<option value="validaterequeue"><fmt:message key="settings.dqcollectopvalidate" /></option>
+						<option value="load"><fmt:message key="settings.dqcollectopload" />)</option>
+						<option value="requeue"><fmt:message key="settings.dqcollectoprequeue" /></option>
+						<option value="discard"><fmt:message key="settings.dqcollectopdiscard" /></option>
+					</select>
 				</div>
 			</div>
 		</div>

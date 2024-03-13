@@ -100,6 +100,13 @@ public class SmartMobileDataQueueOptionPanel implements IServerOptionsPanel{
 		}else{
 			btnEnableDesktopProcessing.setEnabled(false);		
 		}
+		
+		l = new Label(s1, SWT.WRAP);
+		l.setText(Messages.SmartMobileDataQueueOptionPanel_DataQueueProcessingInformation);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 100;
+		l.setEnabled(isEditable);
+		
 		return main;
 	}
 	

@@ -14,6 +14,7 @@ public class Messages extends NLS {
 	public static String CybertrackerItemProcessor_ProcessedMsg;
 	public static String CybertrackerItemProcessor_TaskName;
 	public static String CybertrackerItemProcessor_WarningTitle;
+	public static String SmartMobileDataQueueOptionPanel_DataQueueProcessingInformation;
 	public static String SmartMobileDataQueueOptionPanel_Description;
 	public static String SmartMobileDataQueueOptionPanel_Name;
 	public static String SmartMobileDataQueueOptionPanel_OptionsSection;

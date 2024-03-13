@@ -147,15 +147,22 @@ public class SmartMobileJsonJob implements Runnable{
 		types.add(SmartMobileJsonFileProcessor.CT_TYPE);
 		types.add(SmartMobileJsonFileProcessor.CT_ZIP_TYPE);
 			
+		//only process cas whose setting
+		//allows it
+		List<UUID> cauuids = session.createQuery("SELECT uuid FROM ConservationAreaInfo WHERE smartMobileDqProcessor = true", UUID.class) //$NON-NLS-1$
+				.list();
+		
 		Query<ServerDataQueueItem> q = null;
 		if (toSkip.isEmpty()) {
-			q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status order by uploadedDate asc", ServerDataQueueItem.class) //$NON-NLS-1$
+			q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status and conservationArea in (:cas) order by uploadedDate asc", ServerDataQueueItem.class) //$NON-NLS-1$
 					.setParameter("types", types) //$NON-NLS-1$
+					.setParameter("cas", cauuids) //$NON-NLS-1$
 					.setParameter("status", ServerDataQueueItem.Status.QUEUED); //$NON-NLS-1$
 		}else {
-			q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status and uuid not in (:toskip) order by uploadedDate asc", ServerDataQueueItem.class) //$NON-NLS-1$
+			q = session.createQuery("FROM ServerDataQueueItem WHERE type in (:types) and status = :status and uuid not in (:toskip) and conservationArea in (:cas) order by uploadedDate asc", ServerDataQueueItem.class) //$NON-NLS-1$
 					.setParameter("types", types) //$NON-NLS-1$
 					.setParameter("status", ServerDataQueueItem.Status.QUEUED) //$NON-NLS-1$
+					.setParameter("cas", cauuids) //$NON-NLS-1$
 					.setParameter("toskip", toSkip); //$NON-NLS-1$
 					
 		}

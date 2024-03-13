@@ -1399,7 +1399,9 @@ public class UpgradeServlet extends HttpServlet {
 						"alter table connect.data_queue add column warning_message varchar", //$NON-NLS-1$
 						
 						"create table connect.settings(key varchar primary key, value varchar)", //$NON-NLS-1$
-						"insert into connect.settings(key, value) values ('connect.dataqueue.smartmobile.processing', 'true')", //$NON-NLS-1$
+						"alter table connect.ca_info add column smartmobile_dq_processing boolean default true", //$NON-NLS-1$
+						//delete from connect.settings where key = 'connect.dataqueue.smartmobile.processing'
+						
 						"insert into connect.settings(key, value) values ('connect.dataqueue.smartcollect.useroption', 'validaterequeue')", //$NON-NLS-1$
 						
 						"alter table smart.patrol_leg_day alter column end_time type time(0)", //$NON-NLS-1$

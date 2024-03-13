@@ -124,14 +124,7 @@ window.onload = function(){
 	document.getElementById("btnUpdateDefaults").addEventListener("click", saveDefaults);
 
 	//data queue settings
-	document.getElementById("dq_smartmobile_connect").onclick = function(){
-		var value = "false";
-		if (document.getElementById("dq_smartmobile_connect").checked){
-			value = "true";
-		}
-		dqUpdateSetting('connect.dataqueue.smartmobile.processing', value);
-	};
-
+	
 	document.getElementById("qd_smartcollect_useroption").onchange = function(){
 		var value = document.getElementById("qd_smartcollect_useroption").value;
 		dqUpdateSetting('connect.dataqueue.smartcollect.useroption', value);
@@ -1047,16 +1040,46 @@ function dqSettingsLoaded(){
 		return;
 	}
 	
-	document.getElementById("dq_smartmobile_connect").checked = false;
 	document.getElementById("qd_smartcollect_useroption").value = 'validaterequeue';
+	
+	var caoptions = document.getElementById('dq_smartmobile_ca_settings');
+	while (caoptions.firstChild) {
+    	caoptions.removeChild(caoptions.lastChild);
+  	}
+  	
 	var settings= JSON.parse(this.responseText);
 	for (let setting of settings){
-		if (setting.key == 'connect.dataqueue.smartmobile.processing'){
+		if (setting.key.startsWith('connect.dataqueue.smartcollect.ca')){
+			
+			var newitem = document.createElement("div");
+			caoptions.appendChild(newitem);
+			
+			var checkbox = document.createElement("input");
+			checkbox.id=setting.key;
+			checkbox.type = "checkbox";
+			newitem.appendChild(checkbox);
+			
+			var label = document.createElement("label");
+			label.for = setting.key;
+			label.title = setting.tooltip;
+			label.innerHTML = setting.label;
+			newitem.appendChild(label);
+			
+			
 			if (setting.value.toUpperCase() == "TRUE"){
-				document.getElementById("dq_smartmobile_connect").checked = true;		
+				checkbox.checked = true;		
 			}else{
-				document.getElementById("dq_smartmobile_connect").checked = false;
+				checkbox.checked = false;
 			}
+			
+			checkbox.onclick = function(){	
+				var value = "false";
+				if (this.checked){
+					value = "true";
+				}
+				dqUpdateSetting(this.id, value);
+			};
+
 		}
 		if (setting.key == 'connect.dataqueue.smartcollect.useroption'){
 			document.getElementById("qd_smartcollect_useroption").value = setting.value;

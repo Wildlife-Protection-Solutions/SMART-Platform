@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -60,6 +61,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
@@ -71,6 +73,7 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConnectSetting;
+import org.wcs.smart.connect.model.ConnectSettingProxy;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
@@ -672,19 +675,40 @@ public class DataQueue {
 	@GET
     @Path("/settings")
 	@Operation(description="Get data queue processing settings")
-    public List<ConnectSetting> getSettings(){
+    public List<ConnectSettingProxy> getSettings(){
 		
 		String[] keys = new String[ConnectSetting.DQ_SETTINGS.length];
 		for (int i = 0; i < keys.length; i ++) {
 			keys[i] = ConnectSetting.DQ_SETTINGS[i].key;
 		}
 		
+		List<ConnectSettingProxy> settings = new ArrayList<>();
+		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return s.createQuery("FROM ConnectSetting WHERE key IN (:keys)", ConnectSetting.class) //$NON-NLS-1$
+			List<ConnectSetting> items = s.createQuery("FROM ConnectSetting WHERE key IN (:keys)", ConnectSetting.class) //$NON-NLS-1$
 				.setParameterList("keys", keys) //$NON-NLS-1$
 				.list();
+			for (ConnectSetting setting : items) {
+				ConnectSettingProxy p = new ConnectSettingProxy(setting.getKey(),setting.getValue(), null, null);
+				settings.add(p);
+			}
+			
+			List<ConservationAreaInfo> infos = s.createQuery("FROM ConservationAreaInfo where uuid != :ccaa", ConservationAreaInfo.class) //$NON-NLS-1$
+					.setParameter("ccaa", ConservationArea.MULTIPLE_CA) //$NON-NLS-1$
+					.list();
+			infos.sort((a,b)->Collator.getInstance().compare(a.getLabel(), b.getLabel()));
+			
+			for (ConservationAreaInfo info : infos) {
+				Boolean value = info.getSmartMobileDqProcessor();
+				if (value == null) value = Boolean.TRUE;
+				String key =ConnectSetting.CA_PROCESSING_OP_PREFIX + UuidUtils.uuidToString(info.getUuid());
+				
+				ConnectSettingProxy temp = new ConnectSettingProxy(key, value ? "true" : "false",  //$NON-NLS-1$ //$NON-NLS-2$
+						info.getLabel(), "enable if you want to process SMART Mobile data for this Conservation Area on Connect (recommended)"); 
+				settings.add(temp);
+			}
 			
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Unable to get settings." + ex.getMessage(), ex); //$NON-NLS-1$
@@ -692,6 +716,7 @@ public class DataQueue {
 		}finally {
 			s.getTransaction().rollback();
 		}
+		return settings;
 	}
 	
 	/**
@@ -714,54 +739,68 @@ public class DataQueue {
 				throw new SmartConnectException(Response.Status.FORBIDDEN);
 			}
 			
-			ConnectSetting.Setting key = null;
-			for (ConnectSetting.Setting setting : ConnectSetting.DQ_SETTINGS) {
-				if (setting.key.equalsIgnoreCase(settingKey)) {
-					key = setting;
-					break;
-				}
-			}
-			if (key == null) {
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingKey", request.getLocale())); //$NON-NLS-1$
-			}
 			
-			String updatedValue = null;
-			
-			if (key == ConnectSetting.Setting.DQ_SMART_MOBILE_PROCESSING) {
-				if (newValue.strip().equalsIgnoreCase("true")) { //$NON-NLS-1$
-					updatedValue = "true"; //$NON-NLS-1$
-				}else {
-					updatedValue = "false"; //$NON-NLS-1$
+			if (settingKey.startsWith(ConnectSetting.CA_PROCESSING_OP_PREFIX)) {
+				
+				String ca = settingKey.substring(ConnectSetting.CA_PROCESSING_OP_PREFIX.length());
+				UUID cauuid = UuidUtils.stringToUuid(ca);
+				
+				ConservationAreaInfo cainfo = s.get(ConservationAreaInfo.class, cauuid);
+				if (cainfo == null) {
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingKey", request.getLocale())); //$NON-NLS-1$
 				}
-			}else if (key == ConnectSetting.Setting.DQ_SMART_COLLECT_USEROPTION) {
-				for (ConnectSetting.SmartCollectUserOption op : ConnectSetting.SmartCollectUserOption.values()) {
-					if (op.key.equalsIgnoreCase(newValue.strip())) {
-						updatedValue = op.key;
+			
+				Boolean updatedValue = Boolean.TRUE;
+				if (newValue.strip().equalsIgnoreCase("false")) { //$NON-NLS-1$
+					updatedValue = Boolean.FALSE;
+				}
+				cainfo.setSmartMobileDqProcessor(updatedValue);
+				
+			}else {
+				
+				ConnectSetting.Setting key = null;
+				for (ConnectSetting.Setting setting : ConnectSetting.DQ_SETTINGS) {
+					if (setting.key.equalsIgnoreCase(settingKey)) {
+						key = setting;
 						break;
 					}
 				}
-			}else {
-				updatedValue = newValue.strip();
+				if (key == null) {
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingKey", request.getLocale())); //$NON-NLS-1$
+				}
+				
+				String updatedValue = null;
+				
+				if (key == ConnectSetting.Setting.DQ_SMART_COLLECT_USEROPTION) {
+					for (ConnectSetting.SmartCollectUserOption op : ConnectSetting.SmartCollectUserOption.values()) {
+						if (op.key.equalsIgnoreCase(newValue.strip())) {
+							updatedValue = op.key;
+							break;
+						}
+					}
+				}else {
+					updatedValue = newValue.strip();
+				}
+				
+				if (updatedValue== null) {
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingValue", request.getLocale())); //$NON-NLS-1$
+				}
+				
+				ConnectSetting setting = s.get(ConnectSetting.class, key.key);
+				if (setting == null) {
+					setting = new ConnectSetting();
+					setting.setKey(key.key);
+					s.persist(setting);
+				}
+				setting.setValue(updatedValue);
 			}
-			
-			if (updatedValue== null) {
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidSettingValue", request.getLocale())); //$NON-NLS-1$
-			}
-			
-			ConnectSetting setting = s.get(ConnectSetting.class, key.key);
-			if (setting == null) {
-				setting = new ConnectSetting();
-				setting.setKey(key.key);
-				s.persist(setting);
-			}
-			setting.setValue(updatedValue);
 			s.getTransaction().commit();
 			
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Unable to update settings." + ex.getMessage(), ex); //$NON-NLS-1$
-			throw new SmartConnectException(Response.Status.BAD_REQUEST);  
-		}finally {
 			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, "Unable to update settings." + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST);
+			
 		}
 	}
 	
@@ -773,7 +812,7 @@ public class DataQueue {
     @Path("/processing/start")
 	@Operation(description="Starts data queue processing if not already started")
 	@Consumes({ MediaType.TEXT_PLAIN})
-    public void updateSetting(){
+    public void startProcessing(){
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

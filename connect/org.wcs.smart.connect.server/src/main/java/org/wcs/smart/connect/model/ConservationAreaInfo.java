@@ -62,6 +62,7 @@ public class ConservationAreaInfo {
 	private UUID caUuid;
 	private Status status;
 	private int lockKey;
+	private Boolean smartMobileProcessing;
 	
 	public ConservationAreaInfo(){
 	}
@@ -119,5 +120,19 @@ public class ConservationAreaInfo {
 	
 	protected void setLockKey(int key){
 		this.lockKey = key;
+	}
+	
+	/**
+	 * 
+	 * @return the key used to lock the conservation area
+	 */
+	@Column(name="smartmobile_dq_processing")
+	@JsonIgnore
+	public Boolean getSmartMobileDqProcessor(){
+		return this.smartMobileProcessing;
+	}
+	
+	public void setSmartMobileDqProcessor(Boolean smartMobileProcessing){
+		this.smartMobileProcessing = smartMobileProcessing;
 	}
 }

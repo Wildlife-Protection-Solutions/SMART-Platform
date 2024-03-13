@@ -8,14 +8,14 @@ import jakarta.persistence.Table;
 @Table(name="settings", schema="connect")
 public class ConnectSetting {
 
+	public static final String CA_PROCESSING_OP_PREFIX = "connect.dataqueue.smartcollect.ca."; //$NON-NLS-1$
+	
 	public static ConnectSetting.Setting[] DQ_SETTINGS = new ConnectSetting.Setting[] {
-		Setting.DQ_SMART_MOBILE_PROCESSING,
 		Setting.DQ_SMART_COLLECT_USEROPTION,
 	};
 	
 	public static enum Setting{
 		
-		DQ_SMART_MOBILE_PROCESSING("connect.dataqueue.smartmobile.processing"), //$NON-NLS-1$
 		DQ_SMART_COLLECT_USEROPTION("connect.dataqueue.smartcollect.useroption"); //$NON-NLS-1$
 		
 		public String key;

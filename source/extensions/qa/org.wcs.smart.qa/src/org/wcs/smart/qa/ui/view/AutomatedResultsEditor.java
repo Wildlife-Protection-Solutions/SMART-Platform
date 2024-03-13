@@ -295,7 +295,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 						}
 						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 						if (i % 10 == 0) {
-							updateTable(null, DialogConstants.LOADING_TEXT + " (" + i + "/" + allErrors.size() + ")");
+							updateTable(null, MessageFormat.format("{0} ({1}/{2})", DialogConstants.LOADING_TEXT, i,allErrors.size())); //$NON-NLS-1$
 						}
 					}			
 					s.getTransaction().commit();
