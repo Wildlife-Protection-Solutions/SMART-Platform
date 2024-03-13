@@ -39,6 +39,16 @@ public class SmartApp implements IApplication {
 	
 	public static final String ID = "smartapp"; //$NON-NLS-1$
 
+	/*
+	 * I had to add this flag when upgrading to eclipse
+	 * 4.30 as they changed the way the startup codes works
+	 * Without it if you call PlatformUI.getWorkbench().restart();
+	 * from the splash screen and npe is thrown and the application
+	 * shuts down and does not restart. Adding this flag allows me
+	 * to set the returnCode. It should only be used from the splashscreen 		
+	 */
+	public static boolean IS_RESTART = false;
+	
 	@Override
 	public Object start(IApplicationContext context) throws Exception {	
 		PropertyConfigurator.configure(getClass().getResourceAsStream("/log4j.properties")); //$NON-NLS-1$
@@ -48,7 +58,7 @@ public class SmartApp implements IApplication {
 		try {
 			int returnCode = PlatformUI.createAndRunWorkbench(display,
 					workbenchAdvisor);
-			if (returnCode == PlatformUI.RETURN_RESTART) {
+			if (returnCode == PlatformUI.RETURN_RESTART || IS_RESTART) {
 				return IApplication.EXIT_RESTART;
 			}
 			

@@ -42,7 +42,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -55,7 +54,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -74,6 +72,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.DisplayAccess;
 import org.eclipse.ui.splash.AbstractSplashHandler;
+import org.wcs.smart.SmartApp;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -117,7 +116,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private ComboViewer cmvConservationArea  = null;
 	private Label progressLabel  = null;
 	private Link lblAdvanced = null;
-	private Label lblSMART = null;
+	
 	private ProgressBar pbar;
 	
 	private Cursor appStartCursor;
@@ -316,7 +315,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		int returnCode = dialog.open();
 		if (returnCode == InitializeDialog.RESTART){
 			//restart
-			PlatformUI.getWorkbench().restart();
+			SmartApp.IS_RESTART = true;
+			PlatformUI.getWorkbench().restart();		
 		}else if (returnCode != InitializeDialog.CANCEL){
 			//on close refresh startup screen
 			startup();
