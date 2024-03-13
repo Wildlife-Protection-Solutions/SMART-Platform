@@ -8,8 +8,10 @@ echo %outputlocation%
 MKDIR %outputlocation%
 
 REM run maven to build packages
+REM set JAVA_HOME=C:\Java\jdk-11.0.2
 REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
 call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
+rem call mvn clean install -Pallplatforms,update,core,plugins,utils,languagepacks
 REM call mvn install -Pallplatforms,migrationtools
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
