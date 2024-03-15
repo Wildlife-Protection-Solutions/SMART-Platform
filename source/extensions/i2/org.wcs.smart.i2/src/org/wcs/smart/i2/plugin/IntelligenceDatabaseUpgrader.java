@@ -32,12 +32,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.MutationQuery;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -48,6 +50,7 @@ import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+import org.wcs.smart.upgrade.v800.Upgrader757To800;
 import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -633,6 +636,46 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		} catch (Exception e) {
 			MessageDialog.openError(null, "Profile Report Upgrade Error", "Unable to upgrade Profile BIRT templates. Some templates may need to be manually updated or reset.");
 			SmartPlugIn.log(e.getMessage(), e);
+		}
+		
+		
+		//upgrade last modified/created dates
+		
+		HashMap<ConservationArea, String> caTimeZoneMapping = SmartContext.INSTANCE.getClass(Upgrader757To800.class).getCaTimeZoneMapping();
+
+		for (Entry<ConservationArea, String> entry : caTimeZoneMapping.entrySet()) {
+			
+			String[] queries = new String[]{
+				
+				"update smart.i_entity set date_modified = smart.localTsToUtcTs(date_modified, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_modified is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_entity set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_record set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_record set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_working_set set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_working_set set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_entity_record_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_entity_record_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_entity_summary_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_entity_summary_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_record_obs_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_record_obs_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_record_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_record_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				"update smart.i_record_summary_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"update smart.i_record_summary_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			};
+			
+			for (String query : queries) {
+				SmartPlugIn.logInfo(query);
+				session.createNativeMutationQuery(query).executeUpdate();
+			}
 		}
 		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_6, session);

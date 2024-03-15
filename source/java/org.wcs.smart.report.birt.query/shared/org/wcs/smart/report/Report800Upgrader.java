@@ -35,6 +35,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -86,23 +87,40 @@ public class Report800Upgrader {
 			public void execute(Connection c) throws SQLException {
 				try(ResultSet r_rs = c.createStatement().executeQuery("select uuid, ca_uuid, filename, id from smart.report")){ //$NON-NLS-1$
 					while (r_rs.next()) {
-						byte[] uuid = r_rs.getBytes(1);
-						byte[] ca_uuid = r_rs.getBytes(2);
+						Object uuid = r_rs.getObject(1);
+						Object cauuid = r_rs.getObject(2);
+						
 						String reportFilename = r_rs.getString(3);
 						String reportId = r_rs.getString(4);
-						String caFileDataStoreLocation = SmartContext.INSTANCE.getFilestoreLocation() + File.separator + UuidUtils.getDirectoryPath(UuidUtils.byteToUUID(ca_uuid));
+						
+						//support both derby and postgresql
+						UUID cadir = null;
+						if (cauuid instanceof UUID) {
+							cadir = (UUID)cauuid;
+						}else {
+							//byte[]
+							cadir = UuidUtils.byteToUUID((byte[])cauuid);
+						}
+						
+						String caFileDataStoreLocation = SmartContext.INSTANCE.getFilestoreLocation() + 
+								File.separator + 
+								UuidUtils.getDirectoryPath(cadir);
 						try {
 							xmlUpdater(Paths.get(caFileDataStoreLocation).resolve(Report.REPORT_DIR).resolve(reportFilename));
 						} catch (Exception ex) {
 							String reportName = reportId;
 							PreparedStatement ps = c.prepareStatement("select lbl.VALUE from smart.REPORT rpt left join smart.I18N_LABEL lbl on lbl.ELEMENT_UUID=rpt.uuid left join smart.LANGUAGE lng on lbl.LANGUAGE_UUID=lng.UUID where rpt.UUID=? and lng.ISDEFAULT"); //$NON-NLS-1$
-							ps.setBytes(1, uuid);
+							if (uuid instanceof UUID) {
+								ps.setObject(1, (UUID)uuid);
+							}else {
+								ps.setBytes(1, (byte[])uuid);
+							}
 							try (ResultSet name_rs = ps.executeQuery()) {
 								if (name_rs.next()) {
 									reportName = name_rs.getString(1);
 								}
 							} catch (Exception e) {
-								Logger.getLogger(Report800Upgrader.class.getName()).log(Level.WARNING, "Failed to find a name for report with uuid=" + UuidUtils.uuidToString(UuidUtils.byteToUUID(uuid)), e); //$NON-NLS-1$
+								Logger.getLogger(Report800Upgrader.class.getName()).log(Level.WARNING, "Failed to find a name for report with id " + reportId, e); //$NON-NLS-1$
 							}
 							warnings.add(MessageFormat.format("Unable to upgrade Report {0} - {1}.", reportName, ex.getMessage())); //$NON-NLS-1$
 							Logger.getLogger(Report800Upgrader.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
@@ -120,8 +138,12 @@ public class Report800Upgrader {
 				try(ResultSet ca_rs = c.createStatement().executeQuery("select uuid, name from smart.conservation_area")){ //$NON-NLS-1$
 					while (ca_rs.next()) {
 						ConservationArea ca = new ConservationArea();
-						byte[] uuid = ca_rs.getBytes(1);
-						ca.setUuid(UuidUtils.byteToUUID(uuid));
+						Object uuid = ca_rs.getBytes(1);
+						if (uuid instanceof UUID) {
+							ca.setUuid((UUID)uuid);
+						}else {
+							ca.setUuid(UuidUtils.byteToUUID((byte[])uuid));
+						}
 						ca.setName(ca_rs.getString(2));
 						cas.add(ca);
 					}

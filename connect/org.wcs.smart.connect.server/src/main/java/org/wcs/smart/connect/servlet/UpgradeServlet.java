@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1428,8 +1429,6 @@ public class UpgradeServlet extends HttpServlet {
 						"DROP TABLE smart.connect_alert", //$NON-NLS-1$
 						"DROP TABLE smart.connect_ct_properties", //$NON-NLS-1$
 						
-						//postgis update
-						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]');END; $$", //$NON-NLS-1$
 
 						//missing constraint 
 						"alter table smart.i_entity_type add constraint ca_entity_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
@@ -1456,7 +1455,7 @@ public class UpgradeServlet extends HttpServlet {
 						
 						
 						//fix function st_length_spheriod is now st_lengthspheriod
-						"CREATE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]'); END; $$",
+						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]'); END; $$", //$NON-NLS-1$
 						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
@@ -1483,12 +1482,107 @@ public class UpgradeServlet extends HttpServlet {
 
 						"update connect.connect_version set version = '8.0.0', last_updated = now()", //$NON-NLS-1$
 						
+						//---- change ca version so users cannot sync with this and cause problems ----
+						//users must upgrade on connect OR desktop
+						//the lastmodified/createddate requires this update
+						"update connect.ca_info SET version = uuid_generate_v4()", //$NON-NLS-1$
+						"delete from connect.change_log", //$NON-NLS-1$
+						"delete from connect.change_log_history" //$NON-NLS-1$
 						
 					};
 					for (String s : sql) {
 						//System.out.println(s);
 						c.createStatement().executeUpdate(s);
 					}
+					
+					
+					//update last modified/created by dates approximating the timezone based on 
+					//the average of all waypoints in the database
+					//if this won't work then users should upgrade CA in desktop where
+					//they can select appropriate timezone
+					String query = """ 
+							with centroids as (
+									SELECT ca_uuid, st_centroid(st_geomfromwkb( geometry))  as c 
+									FROM smart.i_location il
+							),
+							points as(
+									SELECT ca_uuid, st_x(c) as x, st_y(c) as y FROM centroids
+									UNION ALL 
+									SELECT ca_uuid, x, y FROM smart.waypoint w 
+							)
+							SELECT ca_uuid, avg(x), avg(y) FROM points GROUP BY ca_uuid;
+					"""; //$NON-NLS-1$
+					
+					HashMap<UUID, Double> capoints = new HashMap<>();
+					try(Statement s = c.createStatement();
+							ResultSet rs = s.executeQuery(query)){
+						while(rs.next()) {
+							UUID cauuid = (UUID)rs.getObject(1);
+							Double x = rs.getDouble(2);
+							
+							Double approxoffset = 0.0;
+							if (x < -180 || x > 180 ) {
+								//invalid longitude
+							}else {
+								approxoffset = Math.floor(Math.abs(x) / 15.0);
+								if (x > 0) approxoffset = -approxoffset;	
+							}
+							capoints.put(cauuid, approxoffset);
+						}						
+					}
+					
+					query = "SELECT uuid FROM smart.conservation_area"; //$NON-NLS-1$
+					try(Statement s = c.createStatement();
+							ResultSet rs = s.executeQuery(query)){
+						while(rs.next()) {
+							UUID cauuid = (UUID)rs.getObject(1);
+							if (cauuid.equals(ConservationArea.MULTIPLE_CA)) continue;
+							
+							Double offset = 0.0;
+							if (capoints.containsKey(cauuid)) {
+								offset = capoints.get(cauuid);
+							}
+							
+							//update all the timezones += the offset hours
+							String[] updates = new String[] {
+								
+								"update smart.waypoint set last_modified = last_modified + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								
+								"update smart.i_entity set date_modified = date_modified + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_modified is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_entity set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_record set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_record set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_working_set set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_working_set set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_entity_record_query set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_entity_record_query set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_entity_summary_query set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_entity_summary_query set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_record_obs_query set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_record_obs_query set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_record_query set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_record_query set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+								"update smart.i_record_summary_query set last_modified_date = last_modified_date + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								"update smart.i_record_summary_query set date_created = date_created + interval '" + offset + " hour' where ca_uuid = '" + cauuid.toString() + "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+							};
+							for (String update : updates) {
+								try(Statement st = c.createStatement()){
+									st.executeUpdate(update);
+								}
+							}
+						}						
+					}
+							
+					//for each coordinate find timezone
+					
 					
 					//re-enable triggers
 					c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$

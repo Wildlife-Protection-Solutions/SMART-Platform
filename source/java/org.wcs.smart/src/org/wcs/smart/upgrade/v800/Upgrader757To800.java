@@ -23,20 +23,44 @@ package org.wcs.smart.upgrade.v800;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.text.MessageFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * 7.0.0 to 7.5.0 upgrader
@@ -48,12 +72,32 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 	
 	private Exception thrownException = null;
 
+	private HashMap<ConservationArea, String> caTimeZoneMapping;
+	
+	
+	public HashMap<ConservationArea, String> getCaTimeZoneMapping(){
+		return this.caTimeZoneMapping;
+	}
+	
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
-		
 		monitor.subTask(MessageFormat.format(Messages.Upgrader700To741_UpgradeMsg, UpgradeEngine.UpgradeFromVersion.V800.fromVersion, UpgradeEngine.UpgradeFromVersion.V800.toVersion));  
 		thrownException = null;
+		
 		try(Session s = HibernateManager.openSession()){
+			
+			//open a dialog to confirm timezone settings for Conservation Area
+			List<ConservationArea> cas = s.createQuery("FROM ConservationArea WHERE uuid != :ccaa ", ConservationArea.class) //$NON-NLS-1$
+					.setParameter("ccaa", ConservationArea.MULTIPLE_CA) //$NON-NLS-1$
+					.list();
+			
+			Display.getDefault().syncExec(()->{
+				TimeZoneDialog dialog = new TimeZoneDialog(Display.getDefault().getActiveShell(), cas);
+				dialog.open();
+				caTimeZoneMapping = dialog.getMappings();			
+				SmartContext.INSTANCE.setClass(Upgrader757To800.class, this);	
+			});
+			
 			s.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
@@ -78,6 +122,8 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 		
+		
+		
 		//drop entity plugin tables if they exists
 		String[] sql = new String[] {
 			"drop table smart.entity_gridded_query",  //$NON-NLS-1$
@@ -97,8 +143,6 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 				//don't worry if the table doesn't exists
 			}
 		}
-		
-		int offset = -1*ZoneOffset.systemDefault().getRules().getStandardOffset(Instant.now()).getTotalSeconds();
 		
 		sql = new String[] {
 		
@@ -155,15 +199,21 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 			"update smart.employee set uuid = x'00000000000000000000000000000001' where uuid = x'00000000000000000000000000000000'", //$NON-NLS-1$
 
 			//waypoint last modified for timestamp change to utc
-			//TODO: sort this out - not accurate for dst
-			//TODO: same for entity audit items
-			"update smart.waypoint set last_modified =  {fn TIMESTAMPADD(SQL_TSI_SECOND, " + offset+ ", last_modified)} where last_modified is not null",
+			"CREATE FUNCTION smart.localTsToUtcTs(ts timestamp, zoneid varchar(256)) returns timestamp LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.DerbyUtils.localToUtc' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+			
 		};
-		
 		
 		for (String s : sql) {
 			SmartPlugIn.logInfo(s);
 			c.createStatement().execute(s);
+		}
+
+		//use timezone setting for each ca to update
+		HashMap<ConservationArea, String> caTimeZoneMapping = SmartContext.INSTANCE.getClass(Upgrader757To800.class).getCaTimeZoneMapping();
+		for (Entry<ConservationArea, String> entry : caTimeZoneMapping.entrySet()) {
+			String query = "update smart.waypoint set last_modified = smart.localTsToUtcTs(last_modified, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			SmartPlugIn.logInfo(query);
+			c.createStatement().execute(query);
 		}
 		
 		/* VERSION UDATE */
@@ -171,4 +221,114 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 		c.createStatement().execute(ssql);
 	}
 
+	
+	class TimeZoneDialog extends SmartStyledTitleDialog{
+
+		private List<ConservationArea> cas;
+		private HashMap<ConservationArea, String> zoneMapping;
+		
+		private List<String> allZones = new ArrayList<>(ZoneId.getAvailableZoneIds());
+		
+		public TimeZoneDialog(Shell parent, List<ConservationArea> cas) {
+			super(parent);
+			this.cas = cas;
+			this.zoneMapping = new HashMap<>();
+			for (ConservationArea ca : cas) {
+				zoneMapping.put(ca, ZoneId.systemDefault().getId());
+			}
+		
+			LocalDateTime now = LocalDateTime.now();
+			allZones.sort((a,b)->{
+				ZoneId za = ZoneId.of(a);
+				ZoneId zb = ZoneId.of(b);
+				Integer seca = za.getRules().getOffset(now).getTotalSeconds();
+				Integer secb = zb.getRules().getOffset(now).getTotalSeconds();
+				if (seca.intValue() != secb.intValue()) return Integer.compare(seca, secb);
+				String d1 = za.getDisplayName(TextStyle.SHORT, Locale.getDefault());
+				String d2 = zb.getDisplayName(TextStyle.SHORT, Locale.getDefault());
+				return Collator.getInstance().compare(d1, d2);
+			});
+		}
+		
+		@Override
+		public Control createDialogArea(Composite parent){
+			Composite composite = (Composite) super.createDialogArea(parent);
+
+			Composite outer  = new Composite(composite, SWT.NONE);
+			outer.setLayout(new GridLayout());
+			outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			//Create an outer composite for spacing
+			ScrolledComposite scrolled = new ScrolledComposite(outer, SWT.V_SCROLL | SWT.NONE);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			scrolled.setLayoutData(gd);
+			
+			// always show the focus control
+			scrolled.setShowFocusedControl(true);
+			scrolled.setExpandHorizontal(true);
+			scrolled.setExpandVertical(true);
+			
+			Composite main = new Composite(scrolled, SWT.NONE);
+			main.setLayout(new GridLayout(2, false));
+			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			
+			for (ConservationArea ca : cas) {
+				Label l = new Label(main, SWT.NONE);
+				l.setText(ca.getNameLabel());
+				
+				ComboViewer cmbViewer = createCombo( main);
+				cmbViewer.addSelectionChangedListener(e->{
+					zoneMapping.put(ca, (String)cmbViewer.getStructuredSelection().getFirstElement());
+				});
+			}
+			
+			setMessage("Select the most appropriate timezone for each Conservation Area"); 
+			setTitle("Timezone Mapping"); 
+			getShell().setText("Timezone Mapping");
+			
+			
+			scrolled.setContent(main);
+			Point pnt = scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			scrolled.setMinSize(pnt);
+			((GridData)scrolled.getLayoutData()).heightHint = Math.min(250, pnt.y);
+			
+			return composite; 
+		}
+		
+		private ComboViewer createCombo(Composite parent){
+			ComboViewer cmbTz = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbTz.setContentProvider(ArrayContentProvider.getInstance());
+			cmbTz.setLabelProvider(new LabelProvider() {
+				@Override
+				public String getText(Object element) {
+					ZoneId zone = ZoneId.of((String)element);
+					String offset = zone.getRules().getOffset(LocalDateTime.now()).getDisplayName(TextStyle.SHORT, Locale.getDefault());
+					String label = zone.getDisplayName(TextStyle.SHORT, Locale.getDefault());
+					label += " (" +  zone.getId(); //$NON-NLS-1$
+					label += " UTC" + offset + ") "; //$NON-NLS-1$ //$NON-NLS-2$
+					return label;
+				}
+			});
+			
+			cmbTz.setInput(allZones);
+			cmbTz.setSelection(new StructuredSelection(ZoneId.systemDefault().getId()));
+			
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);			
+			cmbTz.getCombo().setLayoutData(gd);
+				
+			return cmbTz;
+		}
+		
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		}
+		
+		public HashMap<ConservationArea, String> getMappings(){
+			return this.zoneMapping;
+		}
+		
+	}
 }
