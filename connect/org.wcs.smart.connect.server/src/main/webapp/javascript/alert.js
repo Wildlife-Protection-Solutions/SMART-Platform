@@ -901,10 +901,11 @@ function getFilteredUrl(base){
 function getDateRange(dateSelectId, fromDatePickerId, toDatePickerId) {
 	var dateSelect = document.getElementById(dateSelectId).value;
 	
+	
 	if(dateSelect == -1) { //custom dates
 		var from = new Date(document.getElementById(fromDatePickerId).value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
 		var to = new Date(document.getElementById(toDatePickerId).value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
-
+	
 		if(isNaN(to) || isNaN(from) || from > to){
 			displayError(i18n("alert.invalidcustomdates"));
 		} else {
@@ -917,8 +918,8 @@ function getDateRange(dateSelectId, fromDatePickerId, toDatePickerId) {
 		return null;
 	} else if(dateSelect > 0) { //number of trailing hours from now
 		var now = new Date();
-		var utcnow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
-		
+		var utcnow = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+
 		var end = utcnow + 86400000; //add 24 hours to time frame
 		var start = utcnow  - dateSelect*60*60*1000;  
 		return {
