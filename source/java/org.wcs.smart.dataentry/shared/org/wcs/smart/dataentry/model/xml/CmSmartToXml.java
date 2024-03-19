@@ -374,6 +374,13 @@ public class CmSmartToXml {
 						ca.getAttribute().getRegex() != null && !ca.getAttribute().getRegex().isBlank()) {
 					at.setRegex(ca.getAttribute().getRegex());
 				}
+				
+				if (ca.getAttribute().getType() == Attribute.AttributeType.NUMERIC &&
+						ca.getAttribute().getRegex() != null && !ca.getAttribute().getRegex().isBlank()) {
+					//#3695
+					at.setRegex(ca.getAttribute().getRegex());
+				}
+				
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();
 					aot.setId(option.getOptionId());
@@ -412,6 +419,8 @@ public class CmSmartToXml {
 							aot.setStringValue(convertVisibleWhenExpression(option.getStringValue(), node));
 						}
 					}
+					
+					
 				}
 				
 				if (ca.getUuid() != null) {
