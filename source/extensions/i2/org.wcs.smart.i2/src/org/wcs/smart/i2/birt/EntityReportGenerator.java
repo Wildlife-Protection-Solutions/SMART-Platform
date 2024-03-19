@@ -617,13 +617,13 @@ public enum EntityReportGenerator {
 		DataSetHandle layersHandle = datasetHandles.get(EntityLocationDataset.DATASET_TYPE);
 		ExtendedItemHandle pointLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		pointLayer.setDataSet(layersHandle);
-		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getName() + " - " + EntityLocationDatasetResultSetMetadata.Column.POINT.getColumnName(Locale.getDefault()));
+		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getName() + " - " + EntityLocationDatasetResultSetMetadata.Column.POINT.getColumnName(Locale.getDefault())); //$NON-NLS-1$
 		pointLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POINT.toString());
 		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, EntityLocationDatasetResultSetMetadata.Column.POINT.getId());
 		
 		ExtendedItemHandle polyLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		polyLayer.setDataSet(layersHandle);
-		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getName() + " - " + EntityLocationDatasetResultSetMetadata.Column.POLYGON.getColumnName(Locale.getDefault()));
+		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getName() + " - " + EntityLocationDatasetResultSetMetadata.Column.POLYGON.getColumnName(Locale.getDefault())); //$NON-NLS-1$
 		polyLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POLYGON.toString());
 		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP,EntityLocationDatasetResultSetMetadata.Column.POLYGON.getId());
 		
@@ -634,7 +634,7 @@ public enum EntityReportGenerator {
 		//find geometry attributes in dataset handle and add to map
 		
 		layersHandle = datasetHandles.get(EntityDataset.DATASET_TYPE);
-		layersHandle.getProperty("resultSet");
+		layersHandle.getProperty("resultSet"); //$NON-NLS-1$
 		for (MapLayerInfo ml : IBirtMapLayerManager.geometryColumnsInResultSet((OdaDataSetHandle) layersHandle)) {
 			ExtendedItemHandle attributeLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 			attributeLayer.setDataSet(layersHandle);
