@@ -638,18 +638,6 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		
 		for (Column c : new Column[] {Column.ID, Column.TIME, Column.CATEGORY}) createTableColumn(c);
 		
-//		int catcnt = 0;
-//		try(Session session = HibernateManager.openSession()){
-//			Number v = (Number)session.createNativeQuery("SELECT max(smart.hkeylength(c.hkey)) FROM smart.dm_category c WHERE c.ca_uuid = :ca")
-//					.setParameter("ca", parentEditor.getPatrol().getConservationArea())
-//					.uniqueResult();
-//			catcnt = v.intValue();
-//		}catch (Exception ex) {
-//			ex.printStackTrace();
-//		}
-//		
-//		for (int i = catcnt; i >=0; i --) createTableColumn(i);
-		
 		for (Column c : new Column[] {Column.X, Column.Y, Column.ATTACHMENTS}) createTableColumn(c);
 					
 		Menu wpMenu = new Menu(tblData.getControl());
@@ -666,9 +654,12 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 		MenuItem miEdit = new MenuItem(wpMenu,SWT.PUSH);
 		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		miEdit.addListener(SWT.Selection,e->{
-			editWaypoint();
-		});
+		miEdit.addListener(SWT.Selection,e->editWaypoint());
+		
+		MenuItem miDelete = new MenuItem(wpMenu,SWT.PUSH);
+		miDelete.setText(Messages.PatrolPresentationPart_DeleteWaypointOption);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection,e->deleteWaypoint());
 		
 		new MenuItem(wpMenu, SWT.SEPARATOR);
 		
@@ -705,6 +696,13 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 			e.gc.drawLine(dataSection.getLocation().x, dataSection.getLocation().y, dataSection.getSize().x, dataSection.getLocation().y);
 			
 		});
+	}
+	
+	private void deleteWaypoint() {
+		Object x = tblData.getStructuredSelection().getFirstElement();
+		Waypoint wp = findWaypoint(x);
+		
+		parentEditor.doDeleteWaypoints(Collections.singleton(wp));
 	}
 	
 	private void editWaypoint() {

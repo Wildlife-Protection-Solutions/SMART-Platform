@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.CTabFolder;
@@ -744,22 +745,47 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	
+	
 	/**
 	 * Deletes the collection of waypoints in a separate thread.
 	 * 
-	 * @param waypoints
+	 * @param waypoints collection of either PatrolWaypoint or Waypoint
 	 * @return the job responsible for deleting waypoints
 	 */
-	public Job delete(final Collection<PatrolWaypoint> waypoints) {
+	public void doDeleteWaypoints(final Collection<?> waypoints) {
+		
+		boolean doDel = MessageDialog.openConfirm(getSite().getShell(),
+					Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle, 
+					Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage1);
+		if (!doDel){
+			return;
+		}
+		
 		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+
+				List<PatrolLegDay> legs = new ArrayList<>();
+				List<PatrolWaypoint> deleted = new ArrayList<>();
+				
 				try(Session saveSession = HibernateManager
 						.openSession(new WaypointAttachmentInterceptor())){
 				
 					saveSession.beginTransaction();
 					try{
-						for (PatrolWaypoint wp : waypoints) {
+						for (Object o : waypoints) {
+							PatrolWaypoint wp = null;
+							if (o instanceof PatrolWaypoint) {
+								wp = (PatrolWaypoint)o;
+							}else if (o instanceof Waypoint w) {
+								wp = saveSession.createQuery("FROM PatrolWaypoint WHERE id.waypoint = :wp", PatrolWaypoint.class) //$NON-NLS-1$
+								.setParameter("wp", w) //$NON-NLS-1$
+								.uniqueResult();
+							}
+							if (wp == null) continue;
+							deleted.add(wp);
+							wp.getPatrolLegDay().getWaypoints().remove(wp);
+							legs.add(wp.getPatrolLegDay());
 							saveSession.remove(wp);
 							saveSession.remove(wp.getWaypoint());					
 						}
@@ -772,7 +798,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 				}
 				
-				for (PatrolWaypoint wp : waypoints){
+				for (PatrolWaypoint wp : deleted){
 					try{
 						PatrolEventManager.getInstance().waypointDeleted(wp);
 					}catch (Exception ex){
@@ -780,11 +806,19 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 				}
 				
+				//leg day changes
+				getSite().getShell().getDisplay().syncExec(()->{
+					for (PatrolLegDay pld: legs) {
+						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, pld);
+					}
+				});
+				
+				
 				return Status.OK_STATUS;
 			}
 		};
+
 		saveJob.schedule();
-		return saveJob;
 	}
 	
 	private void savePatrolPart(final Object patrolPart){

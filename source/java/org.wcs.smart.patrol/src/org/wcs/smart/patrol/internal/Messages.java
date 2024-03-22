@@ -497,7 +497,7 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message1;
 	public static String PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_Button;
-	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage;
+	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage1;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle;
 	public static String PatrolLegDayInputComposite_Direction_ColumnHeader1;
 	public static String PatrolLegDayInputComposite_Distance_ColumnHeader1;
@@ -725,6 +725,8 @@ public class Messages extends NLS {
 	public static String PatrolPresentationPart_Days;
 
 	public static String PatrolPresentationPart_DaysAndLegs;
+
+	public static String PatrolPresentationPart_DeleteWaypointOption;
 
 	public static String PatrolPresentationPart_EndDate;
 

@@ -522,6 +522,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 						if (wo.getUuid() == null) session.persist(wo);
 						for (ObservationAttachment oa : wo.getAttachments()) {
 							if (oa.getUuid() == null) session.persist(oa);
+							if (oa.getAttachmentTags() == null) oa.setAttachmentTags(new ArrayList<>());
 							for (AttachmentTagLink tag : oa.getAttachmentTags()) {
 								if (tag.getUuid() == null) session.persist(tag);
 							}

@@ -767,34 +767,16 @@ public class PatrolLegDayInputComposite {
 	
 	
 	private void deleteSelectedWaypoints() {
-		boolean doDel = MessageDialog.openConfirm(mainComposite.getShell(), Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle, Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage);
-		if (!doDel){
-			return;
-		}
 		IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
+
 		ArrayList<PatrolWaypoint> deleted = new ArrayList<PatrolWaypoint>();
-		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			PatrolWaypoint w = (PatrolWaypoint) iterator.next();
-			if (patrolLegDate.getWaypoints().remove(w)){
-				w.setPatrolLegDay(null);
-				deleted.add(w);
-			}	
+			deleted.add(w);				
 		}
 		
 		//delete waypoints
-		Job j = editor.getPatrolEditor().delete(deleted);
-		j.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				//once the job is completed we can fire this event
-				mainComposite.getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);			}
-				});
-			}
-		});	
+		editor.getPatrolEditor().doDeleteWaypoints(deleted);		
 	}
 	
 	
