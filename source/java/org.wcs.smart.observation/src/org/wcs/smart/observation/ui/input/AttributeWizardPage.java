@@ -103,6 +103,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	
 	private Button btnUpdate = null;
 	private Button btnAdd;
+	private Button btnLastDefault;
 	
 	private List<IAttributeField<?>> attributeFields = null;
 	private WizardPage nextPage = null;
@@ -147,10 +148,13 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		getWizardInternal().setCanFinish(canComplete && getNextPage() instanceof ObservationSummaryWizardPage);
 		setPageComplete(canComplete);
-		setDefaultButton(btnAdd);
+		if (editingOb == null) {
+			setDefaultButton(btnAdd);
+		}else {
+			setDefaultButton(btnUpdate);
+		}
 	}
 
-	private Button btnLastDefault;
 	
 	private void setDefaultButton(Button btn) {
 		if (btn == null) return ;
@@ -280,32 +284,23 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			gl2.marginWidth = gl2.marginHeight = 0;
 			buttons.setLayout(gl2);
 			
-			Label l = new Label(buttons, SWT.SEPARATOR | SWT.HORIZONTAL);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+//			Label l = new Label(buttons, SWT.SEPARATOR | SWT.HORIZONTAL);
+//			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			btnAdd = new Button(buttons, SWT.PUSH);
+			btnAdd.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			btnAdd.setText(Messages.AttributeWizardPage_AddObservation_Button1);
+			btnAdd.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
+			btnAdd.addListener(SWT.Selection, e->addObservation());
 			
 			btnUpdate = new Button(buttons, SWT.PUSH);
 			btnUpdate.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnUpdate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-			btnUpdate.setText(Messages.AttributeWizardPage_UpdateObsButton);
+			btnUpdate.setText(Messages.AttributeWizardPage_UpdateObsButton1);
 			btnUpdate.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
 			btnUpdate.setEnabled(false);
-			btnUpdate.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {					
-					updateObservation();
-				}
-			});
-			btnAdd = new Button(buttons, SWT.PUSH);
-			btnAdd.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			btnAdd.setText(Messages.AttributeWizardPage_AddObservation_Button);
-			btnAdd.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
-			btnAdd.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					addObservation();
-				}
-			});
+			btnUpdate.addListener(SWT.Selection, e->updateObservation());
 			
 			//multiple observations
 			Composite bottomPanel = new Composite(page, SWT.NONE);

@@ -27,7 +27,7 @@ public class Messages extends NLS {
 	public static String AttributeTreeNodeDMAdvisor_InvalidObjectType;
 	public static String AttributeWizardPage_addAttachmentTooltip;
 
-	public static String AttributeWizardPage_AddObservation_Button;
+	public static String AttributeWizardPage_AddObservation_Button1;
 
 	public static String AttributeWizardPage_AttachmentsLabel;
 	public static String AttributeWizardPage_CannotCreateObservationError_DialogMessage;
@@ -48,7 +48,7 @@ public class Messages extends NLS {
 
 	public static String AttributeWizardPage_removeAttachmenttooltip;
 	public static String AttributeWizardPage_SaveModificationsWarningMessage;
-	public static String AttributeWizardPage_UpdateObsButton;
+	public static String AttributeWizardPage_UpdateObsButton1;
 	public static String AttributeWizardPage_Warning_DialogTitle;
 	
 	public static String CaDeleteHandler_ProgressDeleteWp;
