@@ -51,6 +51,8 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String WAYPOINT_ID_ICON = "org.wcs.smart.observation.waypointid"; //$NON-NLS-1$
 	
+	public static final String ADD14_ICON = "org.wcs.smart.observation.add14"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static ObservationPlugIn plugin;
 	
@@ -134,6 +136,10 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 		reg.put(WAYPOINT_ID_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
 						"images/icons/obj16/waypoint_id.png"));//$NON-NLS-1$
+		
+		reg.put(ADD14_ICON,
+				imageDescriptorFromPlugin(PLUGIN_ID,
+						"images/icons/add_14.png"));//$NON-NLS-1$
 		super.initializeImageRegistry(reg);
 	}
 }

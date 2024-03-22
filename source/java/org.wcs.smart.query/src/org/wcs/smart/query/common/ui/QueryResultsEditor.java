@@ -411,9 +411,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			Job j = new Job(Messages.QueryResultsEditor_initquerylobname){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-//					SimpleQuery q = getQueryInternal();
-//					q.getQueryColumns(Locale.getDefault(), null, QueryResultsEditor.this);
-//					
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 
 						@Override

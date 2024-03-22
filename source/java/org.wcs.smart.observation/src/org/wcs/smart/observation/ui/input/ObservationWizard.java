@@ -34,6 +34,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.wcs.smart.AttachmentTagManager;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconManager;
@@ -50,6 +52,7 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -78,6 +81,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	private boolean isModified = false;
 	
 	private List<Employee> observers;
+	private List<AttachmentTag> tags;
 	private Employee observer = null;
 	private boolean trackObserver = false;
 	
@@ -137,6 +141,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			//load observation, categories, and attribute details	
 			this.wp = session.get(Waypoint.class, waypoint.getUuid());
 			
+			this.tags = AttachmentTagManager.INSTANCE.getTags(session,  waypoint.getConservationArea());
+			this.tags.forEach(t->t.getName());
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				for (WaypointObservation ob : g.getObservations()) {
 					ob.getAttributes().forEach(a->a.getAttributeValueAsString(Locale.getDefault()));
@@ -151,6 +157,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 						}catch (Exception ex) {
 							ObservationPlugIn.log(ex.getMessage(), ex);
 						}
+						oa.getAttachmentTags().forEach(t->Hibernate.initialize(t.getTag()));
 					}
 					ob.getCategory().getFullCategoryName();
 					ob.getCategory().getName();
@@ -218,6 +225,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	
 	public Waypoint getWaypoint() {
 		return this.wp;
+	}
+	
+	public List<AttachmentTag> getTags(){
+		return this.tags;
 	}
 	
 	/**
@@ -511,6 +522,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 						if (wo.getUuid() == null) session.persist(wo);
 						for (ObservationAttachment oa : wo.getAttachments()) {
 							if (oa.getUuid() == null) session.persist(oa);
+							for (AttachmentTagLink tag : oa.getAttachmentTags()) {
+								if (tag.getUuid() == null) session.persist(tag);
+							}
 						}
 					}
 				}

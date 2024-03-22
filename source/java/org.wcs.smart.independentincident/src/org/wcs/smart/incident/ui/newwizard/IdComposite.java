@@ -68,8 +68,13 @@ public class IdComposite extends AbstractIncidentComposite {
 
 	@Override
 	public Composite createComposite(Composite parent) {
-		Composite item = new Composite(parent, SWT.NONE);
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout());
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		
+		Composite item = new Composite(main, SWT.NONE);
 		item.setLayout(new GridLayout(2, false));
+		item.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
 			Label l = new Label(item, SWT.NONE);

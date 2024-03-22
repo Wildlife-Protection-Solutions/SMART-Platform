@@ -575,6 +575,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	private Object[] createComboViewerSection(String sectionName, Composite parent, 
 			PatrolMetadataField field, boolean isOptional, boolean supportImages, IconSet defaultIs) {
+		
 		Composite g = parent;
 		
 		Label l = new Label(g, SWT.NONE);
@@ -586,7 +587,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		Button btn = new Button(g, SWT.CHECK);
 		btn.setSelection(true);
 		btn.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-
+		
 		Button btnrq = new Button(g, SWT.CHECK);
 		btnrq.setSelection(true);
 		btnrq.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
@@ -606,8 +607,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		cmb.setInput(new String[] { DialogConstants.LOADING_TEXT });
 		cmb.getControl().setEnabled(false);
 		cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		
+				
 		btn.addListener(SWT.Selection, e-> {
 			cmb.getControl().setEnabled(!btn.getSelection());
 			if (isOptional) btnrq.setEnabled(btn.getSelection());

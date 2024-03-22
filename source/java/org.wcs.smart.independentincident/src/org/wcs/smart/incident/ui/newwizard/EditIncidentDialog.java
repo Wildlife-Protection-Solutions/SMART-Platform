@@ -93,7 +93,7 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 			center.setLayout(gl);
 			
 			Composite x = panel.createComposite(center);
-			x.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+			x.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			panel.addChangeListener(new Listener(){
 				@Override
@@ -134,6 +134,7 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 					Waypoint wp = session.get(Waypoint.class, incident.getUuid());
 					//update and save
 					panel.updateIncident(wp);
+					panel.afterSave(wp, session);
 					session.flush();
 					panel.afterSave(wp, session);
 					session.getTransaction().commit();

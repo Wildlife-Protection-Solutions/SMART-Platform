@@ -22,7 +22,9 @@
 package org.wcs.smart.data.oda.smart.query.common;
 
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.ISignatureAttachment;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -39,13 +41,16 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 	public static final SignatureTypeQueryColumn KEY_COLUMN = new SignatureTypeQueryColumn(Type.KEY);
 	public static final SignatureTypeQueryColumn NAME_COLUMN = new SignatureTypeQueryColumn(Type.NAME);
 	
+	public static final SignatureTypeQueryColumn TAGS_COLUMN = new SignatureTypeQueryColumn(Type.TAGS);
+	
 	public static enum Type{
-		KEY,NAME;
+		KEY,NAME, TAGS;
 		
 		public String getName() {
 			switch(this) {
 			case KEY: return "Signature Type Key"; //$NON-NLS-1$
 			case NAME: return "Signature Type Name"; //$NON-NLS-1$
+			case TAGS: return "Attachment Tags";
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -54,6 +59,7 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 			switch(this) {
 			case KEY: return "attachment:signaturetypekey"; //$NON-NLS-1$
 			case NAME: return "attachment:signaturetypename"; //$NON-NLS-1$
+			case TAGS: return "attachment:tags";
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -74,6 +80,21 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 				if (((ISignatureAttachment) att).getSignatureType() != null) {
 					if (type == Type.KEY) return ((ISignatureAttachment) att).getSignatureType().getKeyId();
 					if (type == Type.NAME) return ((ISignatureAttachment) att).getSignatureType().getName();
+				}
+			}
+			if (att instanceof ITaggedAttachment tagged) {
+				if (type == Type.TAGS) {
+					
+					if (tagged.getAttachmentTags() != null && !tagged.getAttachmentTags().isEmpty()) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("|");
+						for (AttachmentTagLink tag : tagged.getAttachmentTags()) {
+							sb.append(tag.getTag().getKeyId());
+							sb.append("|");
+						}
+						return sb.toString();
+					}
+					
 				}
 			}
 		}

@@ -21,8 +21,13 @@
  */
 package org.wcs.smart.observation.ui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -33,16 +38,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.common.attachment.AttachmentComposite;
-import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
+import org.hibernate.Session;
+import org.wcs.smart.AttachmentTagManager;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.ui.input.AttachmentPreviewTagComposite;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -60,10 +70,11 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class AttachmentDialog extends SmartStyledTitleDialog{
 
 	private Waypoint waypoint;
-	private AttachmentComposite<WaypointAttachment> attachmentComposite;
+	private List<ISmartAttachment> attachments;
 	
 	private Link moveLink;
 	private boolean isMoved = false;
+	private AttachmentPreviewTagComposite preview;
 	
 	/**
 	 * @param parentShell
@@ -81,6 +92,21 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
+	private void addAttachment() {
+		preview.addAttachment(()->new WaypointAttachment(), attachments);
+		modified();
+	}
+	
+	private void deleteAttachment() {
+		preview.deleteAttachments(attachments);
+		modified();
+	}
+	
+	private void modified() {
+		preview.refresh();
+		moveLink.setEnabled(false);
+		getButton(IDialogConstants.OK_ID).setEnabled(true);
+	}
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite)super.createDialogArea(parent);
@@ -89,45 +115,24 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 		spacer.setLayout(new GridLayout());
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		attachmentComposite = new AttachmentComposite<WaypointAttachment>(spacer, SWT.NONE) {
-			@Override
-			protected WaypointAttachment createNewAttachement() {
-				return new WaypointAttachment();
-			}
-
-			@Override
-			protected void createControls() {
-				super.createControls();
-				tblAttachments.setLabelProvider(new ObservationAttachmentLabelProvider(){
-					@Override
-					public String getText(Object element) {
-						String text = super.getText(element);
-						if (element instanceof ISmartAttachment){
-							if (other.contains(element)) text = "**" + text; //$NON-NLS-1$
-						}
-						return text;
-					}
-				});
-			}
-
-		};
-		attachmentComposite.addAttachmentsChangeListener(new IAttachmentsChangeListener() {
-			@Override
-			public void attachmentsChanged() {
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
-				moveLink.setEnabled(false);
-			}
-		});
-		if (waypoint.getAttachments() != null){
-			attachmentComposite.initAttachments(waypoint.getAttachments());
+		List<AttachmentTag> tags = null;
+		try(Session session = HibernateManager.openSession()){
+			tags = AttachmentTagManager.INSTANCE.getTags(session, waypoint.getConservationArea());
 		}
 		
-		List<ISmartAttachment> obs = new ArrayList<ISmartAttachment>();
+		preview = new AttachmentPreviewTagComposite(spacer,
+				tags,
+				e->addAttachment(),
+				e->deleteAttachment(),
+				a->(a instanceof WaypointAttachment));
+		preview.addListener(SWT.Modify, e->modified());
 		
+		attachments = new ArrayList<>();
+		attachments.addAll(waypoint.getAttachments());
 		for (WaypointObservation o : waypoint.getAllObservations()) {
-			if (o.getAttachments() != null) obs.addAll(o.getAttachments());
+			if (o.getAttachments() != null) attachments.addAll(o.getAttachments());
 		}
-		attachmentComposite.initOtherAttachments(obs);
+		preview.setInput(attachments);
 		
 		Composite c = new Composite(spacer, SWT.NONE);
 		c.setLayout(new GridLayout());
@@ -163,12 +168,17 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 	public boolean hasMoved() {
 		return this.isMoved;
 	}
+	
 	/**
 	 * @return all attachments selected by the user
 	 */
 	public List<WaypointAttachment> getAttchments() {
-		if (attachmentComposite != null) {
-			return attachmentComposite.getAttchments();
+		if (this.attachments != null) {
+			List<WaypointAttachment> ws = new ArrayList<>();
+			for (ISmartAttachment a : attachments) {
+				if (a instanceof WaypointAttachment wa) ws.add(wa);
+			}
+			return ws;
 		}
 		return Collections.emptyList();
 	}

@@ -49,14 +49,14 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 	private static Logger logger = Logger.getLogger(AssetQueryColumnProvider.class.getName());
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIdColumns, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		try{
 			if (queryTypeKey.equals(AssetObservationQuery.KEY)){
-				return getObservationQueryColumns(query, l, session);
+				return getObservationQueryColumns(query, l, includeIdColumns, session);
 			}
 			if (queryTypeKey.equals(AssetWaypointQuery.KEY)){
-				return getWaypointQueryColumns(query, l, session);
+				return getWaypointQueryColumns(query, l, includeIdColumns, session);
 			}
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE, "Error determining query columns.", ex); //$NON-NLS-1$
@@ -65,7 +65,7 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 		return null;
 	}
 
-	private QueryColumn[] getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException {
+	private QueryColumn[] getObservationQueryColumns(Query query, Locale l, boolean includeIdColumns, Session session) throws SQLException {
 			//load from the database 
 			ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 			
@@ -88,10 +88,14 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 			cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 			cols.add(new WaypointGeometryQueryColumn(l));
 
+			if (includeIdColumns ) {
+				cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+				cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));
+			}
 			return cols.toArray(new QueryColumn[cols.size()]);
 	}
 		
-	private QueryColumn[] getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException {
+	private QueryColumn[] getWaypointQueryColumns(Query query, Locale l, boolean includeIdColumns, Session session) throws SQLException {
 		//load from the database 
 		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
@@ -109,8 +113,12 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 			}
 		}
 		cols.add(new WaypointGeometryQueryColumn(l));
-
+		
+		if (includeIdColumns ) {
+			cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+		}
 		return cols.toArray(new QueryColumn[cols.size()]);
 }
 	
 }
+

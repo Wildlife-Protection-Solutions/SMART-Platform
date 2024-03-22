@@ -59,8 +59,10 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.wcs.smart.LocalAttachmentTagManager;
 import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -94,8 +96,13 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	private String errorEditTimeMessage = MessageFormat.format(Messages.PatrolOptionsPropertyPage_Error_EditTimeInvalid, -1, Short.MAX_VALUE);
 
 	private TableViewer tblSignatures;
-	private List<SignatureType> types;
-	private List<SignatureType> deleteTypes;
+	private List<SignatureType> sigTypes;
+	private List<SignatureType> deleteSigTypes;
+	
+	
+	private TableViewer tblAttachmentTags;
+	private List<AttachmentTag> attTags;
+	private List<AttachmentTag> deleteAttTags;
 	
 	/**
 	 * @param parent
@@ -105,13 +112,21 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		super(parent, Messages.PatrolOptionsPropertyPage_DialogTitle);
 		try(Session s = HibernateManager.openSession()){
 			patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
-			types = LocalSignatureTypeManager.INSTANCE.getTypes(s, SmartDB.getCurrentConservationArea());
-			types.forEach(t->{
+			sigTypes = LocalSignatureTypeManager.INSTANCE.getTypes(s, SmartDB.getCurrentConservationArea());
+			sigTypes.forEach(t->{
 				Hibernate.initialize(t);
 				t.getNames().forEach(n->Hibernate.initialize(n.getLanguage()));
 			});
+			
+			attTags = LocalAttachmentTagManager.INSTANCE.getTags(s, SmartDB.getCurrentConservationArea());
+			attTags.forEach(t->{
+				Hibernate.initialize(t);
+				t.getNames().forEach(n->Hibernate.initialize(n.getLanguage()));
+			});
+			
 		}
-		deleteTypes = new ArrayList<>();
+		deleteSigTypes = new ArrayList<>();
+		deleteAttTags = new ArrayList<>();
 	}
 	
 
@@ -174,7 +189,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		});
 		
 		tblSignatures.setContentProvider(ArrayContentProvider.getInstance());
-		tblSignatures.setInput(types);
+		tblSignatures.setInput(sigTypes);
 		tblSignatures.getTable().setHeaderVisible(true);
 		tblSignatures.getTable().setLinesVisible(true);
 
@@ -237,6 +252,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.addListener(SWT.Selection, e->deleteSignatureType());
 		btnDelete.setEnabled(false);
+		
+		createAttachmentTagsSection(container);
 		
 		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_DistanceBearingOpLabel);
 		
@@ -382,6 +399,127 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		return container;
 	}
 
+	private void createAttachmentTagsSection(Composite container) {
+		SmartUiUtils.createHeaderLabel(container, "Attachment Tags");
+		
+		Composite csig = new Composite(container, SWT.NONE);
+		csig.setLayout(new GridLayout(2, false));
+		csig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label l = new Label(csig, SWT.WRAP);
+		l.setText("Tags can be added to attachments to identify or categorize files.");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)l.getLayoutData()).widthHint = 350;
+		
+		Composite tcomp = new Composite(csig, SWT.NONE);
+		tcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)tcomp.getLayoutData()).heightHint = 100;
+		tcomp.setLayout(new TableColumnLayout());
+		
+		tblAttachmentTags = new TableViewer(tcomp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		tblAttachmentTags.getTable().setHeaderVisible(true);
+		tblAttachmentTags.getTable().setLinesVisible(true);
+
+		TableViewerColumn viewerColumn = new TableViewerColumn(tblAttachmentTags,SWT.NONE);
+		TableColumn column = viewerColumn.getColumn();
+		column.setText("Name");
+		column.setResizable(true);
+		column.setMoveable(true);
+		TableColumnLayout layout = (TableColumnLayout) tcomp.getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				return ((AttachmentTag)element).getName();
+			}
+		});
+		
+		viewerColumn = new TableViewerColumn(tblAttachmentTags,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText("Key");
+		column.setResizable(true);
+		column.setMoveable(true);
+		layout.setColumnData(column, new ColumnWeightData(2,ColumnWeightData.MINIMUM_WIDTH, true));
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				return ((AttachmentTag)element).getKeyId();
+			}
+		});
+		
+		tblAttachmentTags.setContentProvider(ArrayContentProvider.getInstance());
+		tblAttachmentTags.setInput(attTags);
+		tblAttachmentTags.getTable().setHeaderVisible(true);
+		tblAttachmentTags.getTable().setLinesVisible(true);
+
+		tblAttachmentTags.getTable().addListener(SWT.MouseDoubleClick, e->{
+			int idx = tblAttachmentTags.getCell(new Point(e.x, e.y)).getColumnIndex();
+			if (idx == 0) {
+				editAttachmentTagName();
+			}else {
+				editAttachmentTagKey();
+			}
+		});
+		
+		Menu mnu = new Menu(tblAttachmentTags.getControl());
+		
+		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.addListener(SWT.Selection,  e->addAttachmentTag());
+		
+		MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.addListener(SWT.Selection,  e->editAttachmentTagName());
+		miEdit.setEnabled(false);
+		
+		MenuItem miEditKey = new MenuItem(mnu, SWT.PUSH);
+		miEditKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		miEditKey.addListener(SWT.Selection,  e->editAttachmentTagKey());
+		miEditKey.setEnabled(false);
+		
+		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.addListener(SWT.Selection,  e->deleteAttachmentTag());
+		miDelete.setEnabled(false);
+		
+		tblAttachmentTags.getControl().setMenu(mnu);
+		
+		
+		Composite btns = new Composite(csig, SWT.NONE);
+		btns.setLayout(new GridLayout());
+		btns.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridLayout)btns.getLayout()).marginWidth = 0;
+		((GridLayout)btns.getLayout()).marginHeight = 0;
+		
+		Button btnAdd = new Button(btns, SWT.NONE);
+		btnAdd.setBackground(csig.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.addListener(SWT.Selection, e->addAttachmentTag());
+		
+		Button btnEdit = new Button(btns, SWT.NONE);
+		btnEdit.setBackground(csig.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.addListener(SWT.Selection, e->editAttachmentTagName());
+		btnEdit.setEnabled(false);
+		
+		Button btnDelete = new Button(btns, SWT.NONE);
+		btnDelete.setBackground(csig.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.addListener(SWT.Selection, e->deleteAttachmentTag());
+		btnDelete.setEnabled(false);
+		
+		tblAttachmentTags.addSelectionChangedListener(e->{
+			boolean v = !tblAttachmentTags.getSelection().isEmpty();
+			miEdit.setEnabled(v);
+			miEditKey.setEnabled(v);
+			btnEdit.setEnabled(v);
+			miDelete.setEnabled(v);
+			btnDelete.setEnabled(v);
+		});
+	}
+	
 	private void addSignatureType() {
 		SmartStyledInputDialog nameD = new SmartStyledInputDialog(getShell(),
 				Messages.ObservationOptionsPropertyPage_NewTypeHeader, Messages.ObservationOptionsPropertyPage_NewTypeMessage, Messages.ObservationOptionsPropertyPage_NewTypeHeader2,
@@ -391,9 +529,9 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 				});
 		if (nameD.open() == Window.OK) {
 			SignatureType newType = LocalSignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea(), nameD.getValue());
-			newType.setKeyId( NamedKeyItem.generateKey(newType.getName(), types) );
+			newType.setKeyId( NamedKeyItem.generateKey(newType.getName(), sigTypes) );
 			
-			types.add(newType);
+			sigTypes.add(newType);
 		
 			tblSignatures.refresh();
 			setChangesMade(true);
@@ -404,7 +542,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		Object x = tblSignatures.getStructuredSelection().getFirstElement();
 		
 		if (x instanceof SignatureType) {
-			InputDialog id = new KeyInputDialog(getShell(), ((SignatureType) x).getKeyId(), types);
+			InputDialog id = new KeyInputDialog(getShell(), ((SignatureType) x).getKeyId(), sigTypes);
 			int ret = id.open();
 			if (ret != Window.CANCEL) {
 				((SignatureType)x).setKeyId(id.getValue());
@@ -428,14 +566,67 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		for (Iterator<?> iterator = tblSignatures.getStructuredSelection().iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
 			if (item instanceof SignatureType) {
-				types.remove(item);
-				deleteTypes.add((SignatureType) item);
+				sigTypes.remove(item);
+				deleteSigTypes.add((SignatureType) item);
 			}
 		}
 		tblSignatures.refresh();
 		setChangesMade(true);
 	}
 	
+	
+
+	private void addAttachmentTag() {
+		SmartStyledInputDialog nameD = new SmartStyledInputDialog(getShell(), 
+				"New Attachment Tag", "Enter the name for the tag", "Attachment Tag",				
+				e->{
+					if(e.trim().isEmpty()) return Messages.ObservationOptionsPropertyPage_NameRequired;
+					return null;
+				});
+		if (nameD.open() == Window.OK) {
+			AttachmentTag newType = LocalAttachmentTagManager.INSTANCE.createTag(SmartDB.getCurrentConservationArea(), nameD.getValue());
+			newType.setKeyId( NamedKeyItem.generateKey(newType.getName(), sigTypes) );
+			attTags.add(newType);
+			tblAttachmentTags.refresh();
+			setChangesMade(true);
+		}
+	}
+	
+	private void editAttachmentTagKey() {
+		Object x = tblAttachmentTags.getStructuredSelection().getFirstElement();
+		
+		if (x instanceof AttachmentTag) {
+			InputDialog id = new KeyInputDialog(getShell(), ((AttachmentTag) x).getKeyId(), sigTypes);
+			int ret = id.open();
+			if (ret != Window.CANCEL) {
+				((AttachmentTag)x).setKeyId(id.getValue());
+				tblAttachmentTags.refresh(x);
+			}
+		}
+	}
+	
+	private void editAttachmentTagName() {
+		Object x = tblAttachmentTags.getStructuredSelection().getFirstElement();
+		if (x instanceof AttachmentTag) {
+			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), (AttachmentTag)x);
+			if (dialog.open() ==  Window.OK){
+				tblAttachmentTags.refresh();
+				setChangesMade(true);
+			}
+		}
+	}
+	
+	private void deleteAttachmentTag() {
+		for (Iterator<?> iterator = tblAttachmentTags.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof AttachmentTag) {
+				attTags.remove(item);
+				deleteAttTags.add((AttachmentTag) item);
+			}
+		}
+		tblAttachmentTags.refresh();
+		setChangesMade(true);
+	}
 	/*
 	 * Creates a control decoration for a wizard page field.
 	 */
@@ -503,14 +694,25 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 				
 				this.patrolOption = s.merge(patrolOption);
 				
-				for (SignatureType t : deleteTypes) {
+				//signatures
+				for (SignatureType t : deleteSigTypes) {
 					LocalSignatureTypeManager.INSTANCE.deleteType(t, s);
 				}
 				s.flush();
+				sigTypes.forEach(t->LocalSignatureTypeManager.INSTANCE.saveType(t, s));
 				
-				types.forEach(t->LocalSignatureTypeManager.INSTANCE.saveType(t, s));
+				//tags
+				for (AttachmentTag t : deleteAttTags) {
+					LocalAttachmentTagManager.INSTANCE.deleteTag(t, s);
+				}
+				s.flush();
+				attTags.forEach(t->LocalAttachmentTagManager.INSTANCE.saveTag(t, s));
 				
 				s.getTransaction().commit();
+				
+				deleteSigTypes.clear();
+				deleteAttTags.clear();
+				
 				setChangesMade(false);
 				
 				//fire event for options modified

@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.SQLOrder;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.SignatureType;
@@ -89,6 +90,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private Path imageFile;
 	private String extension; //image name extension
 	private String signatures; //comma delimiter list of signature uuids valid for this node (if category)
+	private String attachmenttags; //comma delimiter list of attchment tags valid for this node (if category )
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -222,7 +224,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	public void setSignatures(String signatures) {
 		this.signatures = signatures;
 	}
-	
+		
 	@Transient
 	public Set<UUID> getSignatureUuids(){
 		if (getSignatures() == null) return Collections.emptySet();
@@ -248,6 +250,41 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		setSignatures(sb.toString());
+	}
+	
+	@Column(name="attachment_tags")
+	public String getAttachmentTags() {
+		return this.attachmenttags;
+	}
+	public void setAttachmentTags(String attachmenttags) {
+		this.attachmenttags = attachmenttags;
+	}
+	
+	@Transient
+	public Set<UUID> getAttachmentTagUuids(){
+		if (getAttachmentTags() == null) return Collections.emptySet();
+		Set<UUID> items = new HashSet<>();
+		for (String uuid : getAttachmentTags().split(SIGNATURE_SPACER)) {
+			try {
+				items.add(UuidUtils.stringToUuid(uuid));
+			}catch (Exception ex) {}
+		}
+		return items;
+	}
+
+	@Transient
+	public void setAttachmentTags(Set<AttachmentTag> tags) {
+		StringBuilder sb = new StringBuilder();
+		for (AttachmentTag t : tags) {
+			sb.append(UuidUtils.uuidToString(t.getUuid()));
+			sb.append(SIGNATURE_SPACER);
+		}
+		if (sb.length() == 0) {
+			setAttachmentTags((String)null);
+			return;
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		setAttachmentTags(sb.toString());
 	}
 	
 	@Transient

@@ -22,79 +22,70 @@
 package org.wcs.smart;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
 
 /**
- * For managing signature types
+ * For managing attachment tags
  * 
  * @author Emily
  *
  */
-public class LocalSignatureTypeManager extends SignatureTypeManager{
+public class LocalAttachmentTagManager extends AttachmentTagManager{
 
-	public static LocalSignatureTypeManager INSTANCE = new LocalSignatureTypeManager();
+	public static LocalAttachmentTagManager INSTANCE = new LocalAttachmentTagManager();
 	
-	private LocalSignatureTypeManager() {
+	private LocalAttachmentTagManager() {
 		super();
 	}
 	
 	
 	/**
-	 * Delete a type from the Conservation Area
+	 * Delete a tag from the Conservation Area
 	 * 
 	 * @param type
 	 * @param session
-	 * @throws Exception if the signature cannot be deleted
+	 * @throws Exception if the attachment tag cannot be deleted
 	 */
-	public void deleteType(SignatureType type, Session session) throws Exception {
+	public void deleteTag(AttachmentTag tag, Session session) throws Exception {
 		
-		if (!DeleteManager.canDelete(type, session)) {
-			throw new Exception(Messages.SignatureTypeManager_DeleteError);
+		if (!DeleteManager.canDelete(tag, session)) {
+			throw new Exception("Cannot delete attachment tag.");
 		}
 		
-		if (type.getUuid() == null) return;
+		if (tag.getUuid() == null) return;
 		
-		String sql = "UPDATE WaypointAttachment SET signatureType = null WHERE signatureType = :type";  //$NON-NLS-1$
-		session.createMutationQuery(sql).setParameter("type", type).executeUpdate(); //$NON-NLS-1$
+		String sql = "DELETE FROM AttachmentTagLink WHERE tag = :tag";  //$NON-NLS-1$
+		session.createMutationQuery(sql).setParameter("tag", tag).executeUpdate(); //$NON-NLS-1$
 		
-		session.remove(type);
+		session.remove(tag);
 	}
 		
 	/**
-	 * Saves the signature type to the database 
+	 * Saves the attachment tag to the database 
 	 * @param type
 	 * @param session
 	 */
-	public void saveType(SignatureType type, Session session) {
-		HibernateManager.saveOrMerge(session, type);
+	public AttachmentTag saveTag(AttachmentTag type, Session session) {
+		return HibernateManager.saveOrMerge(session, type);
 	}
 	
+	
 	/**
-	 * Creates a new type with the given name
+	 * Creates a new tag with the given name
 	 * @param ca
 	 * @param name
 	 * @return
 	 */
-	public SignatureType createType(ConservationArea ca, String name) {
-		SignatureType newType = new SignatureType();
-		newType.setConservationArea(ca);
-		newType.updateName(ca.getDefaultLanguage(), name);
-		newType.setName(name);
-		newType.updateName(SmartDB.getCurrentLanguage(), name);
-		return newType;
-	}
-	/**
-	 * Creates a new type with a default name
-	 * 
-	 * @param ca
-	 * @return
-	 */
-	public SignatureType createType(ConservationArea ca) {
-		return createType(ca, Messages.SignatureTypeManager_DefaultSignatureTypeName);
+	public AttachmentTag createTag(ConservationArea ca, String name) {
+		AttachmentTag newTag = new AttachmentTag();
+		newTag.setConservationArea(ca);
+		newTag.updateName(ca.getDefaultLanguage(), name);
+		newTag.setName(name);
+		newTag.updateName(SmartDB.getCurrentLanguage(), name);
+		return newTag;
 	}
 }

@@ -94,8 +94,10 @@ import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.HibernateUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -1039,13 +1041,21 @@ public class PatrolLegDayInputComposite {
 					if (waypointx.getAttachments() == null) waypointx.setAttachments(new ArrayList<>());
 					
 					for(WaypointAttachment wa : newattachments.getAttachments()) {
-						if (!waypointx.getAttachments().contains(wa)) waypointx.getAttachments().add(wa);
+						if (!waypointx.getAttachments().contains(wa)) {
+							waypointx.getAttachments().add(wa);
+						}else {
+							//merge tags							
+							WaypointAttachment toUpdate = HibernateUtil.findInList(waypointx.getAttachments(), wa);
+							HibernateUtil.mergeCollection(toUpdate.getAttachmentTags(), wa.getAttachmentTags());
+						}
 					}
 					List<WaypointAttachment> toDelete = new ArrayList<>();
 					for (WaypointAttachment wa : waypointx.getAttachments()) {
-						if (!newattachments.getAttachments().contains(wa)) toDelete.add(wa);
+						if (!newattachments.getAttachments().contains(wa)) toDelete.add(wa);						
 					}
 					waypointx.getAttachments().removeAll(toDelete);
+					
+					
 				});
 
 			}

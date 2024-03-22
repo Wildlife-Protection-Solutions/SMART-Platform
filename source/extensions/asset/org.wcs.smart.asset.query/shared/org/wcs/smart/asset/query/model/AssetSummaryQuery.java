@@ -155,7 +155,8 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 	}
 
 	@Override
-	public List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider) {
+	public List<QueryColumn> computeQueryColumns(Locale l, Session session, 
+			IProjectionProvider prjProvider) {
 
 			SummaryQueryResult results = (SummaryQueryResult)getCachedResults();
 			List<QueryColumn> columns = new ArrayList<>();

@@ -53,9 +53,12 @@ public class PatrolQueryColumnCache {
 		return instance;
 	}
 	
-	private volatile QueryColumn[] queryColumns = null;
+	private volatile QueryColumn[] obsQueryColumns = null;
+	private volatile QueryColumn[] obsQueryColumnsId = null;
 	private volatile QueryColumn[] patrolQueryColumns = null;
+	private volatile QueryColumn[] patrolQueryColumnsId = null;
 	private volatile QueryColumn[] waypointQueryColumns = null;
+	private volatile QueryColumn[] waypointQueryColumnsId = null;
 	private volatile QueryColumn[] gridQueryColumns = null;
 	
 	private final Object GRIDLOCK = new Object();
@@ -69,7 +72,7 @@ public class PatrolQueryColumnCache {
 			
 			@Override
 			public void modified() {
-				queryColumns = null;
+				obsQueryColumns = null;
 				patrolQueryColumns = null;
 				gridQueryColumns = null;
 				
@@ -79,7 +82,7 @@ public class PatrolQueryColumnCache {
 		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_OPTIONS_MODIFIED, new IWaypointEventListener() {
 			@Override
 			public void handleEvent(Waypoint wp) {
-				queryColumns = null;
+				obsQueryColumns = null;
 			}
 		});
 	}
@@ -93,14 +96,21 @@ public class PatrolQueryColumnCache {
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public  QueryColumn[] getObservationQueryColumns() {
+	public  QueryColumn[] getObservationQueryColumns(boolean includeIds) {
 		
-		if (queryColumns != null){
-			return cloneColumns(queryColumns);
+		if (!includeIds && obsQueryColumns != null){
+			return cloneColumns(obsQueryColumns);
 		}
+		if (includeIds && obsQueryColumnsId != null){
+			return cloneColumns(obsQueryColumnsId);
+		}
+		
 		synchronized (OBSERVATIONLOCK) {
-			if (queryColumns != null){
-				return cloneColumns(queryColumns);
+			if (!includeIds && obsQueryColumns != null){
+				return cloneColumns(obsQueryColumns);
+			}
+			if (includeIds && obsQueryColumnsId != null){
+				return cloneColumns(obsQueryColumnsId);
 			}	
 		
 			//outside job to prevent deadlocking
@@ -136,7 +146,12 @@ public class PatrolQueryColumnCache {
 						add = SmartDB.isMultipleAnalysis();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 						add = patrolOps.getTrackObserver();
+					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
+							item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID ||
+							item == FixedQueryColumn.FixedColumns.PATROL_UUID ) {
+						add = false;
 					}
+					
 					if (add){
 						QueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
 						cols.add(toAdd);
@@ -176,7 +191,15 @@ public class PatrolQueryColumnCache {
 				cols.add(toAdd);
 				
 				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
-				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				
+				if (includeIds) {
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_UUID, Locale.getDefault()));
+					obsQueryColumnsId = cols.toArray(new QueryColumn[cols.size()]);
+				}else {
+					obsQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				}
 				
 				
 				return Status.OK_STATUS;
@@ -190,7 +213,11 @@ public class PatrolQueryColumnCache {
 			}
 		}
 		
-		return  cloneColumns(queryColumns);
+		if (includeIds) {
+			return  cloneColumns(obsQueryColumnsId);
+		}else {
+			return  cloneColumns(obsQueryColumns);
+		}
 	}
 
 	
@@ -202,17 +229,23 @@ public class PatrolQueryColumnCache {
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public  QueryColumn[] getWaypointQueryColumns() {
+	public  QueryColumn[] getWaypointQueryColumns(boolean includeIds) {
 		
-		if (waypointQueryColumns != null){
+		if (!includeIds && waypointQueryColumns != null){
 			return cloneColumns(waypointQueryColumns);
 		}
+		if (includeIds && waypointQueryColumnsId != null){
+			return cloneColumns(waypointQueryColumnsId);
+		}
+		
 		synchronized (WAYPOINTLOCK) {
-			if (waypointQueryColumns != null){
+			if (!includeIds && waypointQueryColumns != null){
 				return cloneColumns(waypointQueryColumns);
-			}	
-		
-		
+			}
+			if (includeIds && waypointQueryColumnsId != null){
+				return cloneColumns(waypointQueryColumnsId);
+			}
+			
 			Job j = new Job(Messages.QueryColumnCache_LoadingWPQueryColumnJobName){
 
 			@Override
@@ -243,6 +276,10 @@ public class PatrolQueryColumnCache {
 						add = SmartDB.isMultipleAnalysis();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 						add = false; //observer is attached to an observation not a waypoint
+					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
+							item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID ||
+							item == FixedQueryColumn.FixedColumns.PATROL_UUID ) {
+						add = false;
 					}
 					if (add){
 						FixedQueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
@@ -274,7 +311,13 @@ public class PatrolQueryColumnCache {
 				}
 				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				
-				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				if (includeIds) {
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_UUID, Locale.getDefault()));
+					waypointQueryColumnsId = cols.toArray(new QueryColumn[cols.size()]);
+				}else {
+					waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				}
 				return Status.OK_STATUS;
 			}
 			};
@@ -286,7 +329,11 @@ public class PatrolQueryColumnCache {
 			}
 		}
 		
-		return  cloneColumns(waypointQueryColumns);
+		if (includeIds) {
+			return  cloneColumns(waypointQueryColumnsId);
+		}else {
+			return  cloneColumns(waypointQueryColumns);
+		}
 	}
 
 	
@@ -296,14 +343,20 @@ public class PatrolQueryColumnCache {
 	 * on the patrol options 
 	 */
 	
-	public  QueryColumn[] getPatrolQueryColumns() {
+	public  QueryColumn[] getPatrolQueryColumns(boolean includeId) {
 		
-		if (patrolQueryColumns != null){
+		if (!includeId && patrolQueryColumns != null){
 			return cloneColumns(patrolQueryColumns);
 		}
+		if (includeId && patrolQueryColumnsId != null){
+			return cloneColumns(patrolQueryColumnsId);
+		}
 		synchronized (PATROLLOCK) {
-			if (patrolQueryColumns != null){
+			if (!includeId && patrolQueryColumns != null){
 				return cloneColumns(patrolQueryColumns);
+			}
+			if (includeId && patrolQueryColumnsId != null){
+				return cloneColumns(patrolQueryColumnsId);
 			}
 			
 			Job j = new Job(Messages.QueryColumn_LoadingPatrolColumnJobName){
@@ -320,19 +373,22 @@ public class PatrolQueryColumnCache {
 								FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 								boolean add = true;
 								if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER || 
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED || 
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY ||
-											item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER || 
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED || 
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY ||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
+									item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID ||
+									item == FixedQueryColumn.FixedColumns.PATROL_UUID ||
+									item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
 									// do nothing, don't want these columns for patrol queries
 									add = false;
 								}else{
@@ -362,7 +418,12 @@ public class PatrolQueryColumnCache {
 							cols.addAll(getPatrolAttributeQueryColumns(session));
 							cols.add(new TrackGeometryQueryColumn(Locale.getDefault()));
 							
-							patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+							if (includeId) {
+								cols.add(new FixedQueryColumn(FixedColumns.PATROL_UUID, Locale.getDefault()));
+								patrolQueryColumnsId = cols.toArray(new QueryColumn[cols.size()]);
+							}else {
+								patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+							}
 						
 						} finally {
 							if (session.getTransaction().isActive()){
@@ -380,8 +441,11 @@ public class PatrolQueryColumnCache {
 				throw new IllegalStateException(ex);
 			}
 		}
-		
-		return  cloneColumns(patrolQueryColumns);
+		if (includeId) {
+			return  cloneColumns(patrolQueryColumnsId);
+		}else {
+			return  cloneColumns(patrolQueryColumns);
+		}
 	}
 
 	public QueryColumn[] getGridColumns() {

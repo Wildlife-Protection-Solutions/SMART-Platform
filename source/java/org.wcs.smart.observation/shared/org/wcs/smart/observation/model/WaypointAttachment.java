@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.model;
 
 import java.io.File;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -34,6 +35,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
@@ -46,13 +48,14 @@ import jakarta.persistence.Transient;
  */
 @Entity
 @Table(name="wp_attachments", schema="smart")
-public class WaypointAttachment extends ISmartAttachment implements ISignatureAttachment {
+public class WaypointAttachment extends ISmartAttachment implements ISignatureAttachment, ITaggedAttachment {
 
 	private static final long serialVersionUID = 1L;
 	
 	private Waypoint wp;
 	private SignatureType signatureType; 
-	
+	private List<AttachmentTagLink> attachmentTags;
+
 	public WaypointAttachment(){
 		
 	}
@@ -77,6 +80,14 @@ public class WaypointAttachment extends ISmartAttachment implements ISignatureAt
 		this.signatureType = stype;
 	}
 
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name="wp_attachment_uuid", referencedColumnName="uuid")
+	public List<AttachmentTagLink> getAttachmentTags(){
+		return this.attachmentTags;
+	}
+	public void setAttachmentTags(List<AttachmentTagLink> tags){
+		this.attachmentTags = tags;
+	}
 	
 	/**
 	 * @return the full path to where the file should be stored in the 

@@ -36,6 +36,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Interceptor;
 import org.hibernate.query.Query;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.SignatureType;
@@ -233,6 +234,17 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		}else{
 			clonedNode.setCategory(null);
 		}
+		if (toCopy.getAttachmentTagUuids() != null) {
+			Set<AttachmentTag> atypes = new HashSet<>();
+			for (UUID cuuid : toCopy.getAttachmentTagUuids()) {
+				AttachmentTag temp = new AttachmentTag();
+				temp.setUuid(cuuid);
+				AttachmentTag newItem = engine.getNewConservationItem(temp);
+				if (newItem != null) atypes.add(newItem);
+			}
+			clonedNode.setAttachmentTags(atypes);
+		}
+		
 		if (toCopy.getSignatureUuids() != null) {
 			Set<SignatureType> stypes = new HashSet<>();
 			for (UUID cuuid : toCopy.getSignatureUuids()) {

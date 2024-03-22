@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,31 +19,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model;
+package org.wcs.smart;
 
-import java.util.Locale;
+import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.ca.AttachmentTag;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
- * Column provider for patrol query.
+ * For managing signature types
+ * 
  * @author Emily
  *
  */
-public interface IQueryColumnProvider {
+public class AttachmentTagManager {
 
+	public static AttachmentTagManager INSTANCE = new AttachmentTagManager();
+	
+	protected AttachmentTagManager() {
+		
+	}
+	
 	/**
-	 * Get columns for query.
-	 * 
-	 * @param query the query to get columns for
-	 * @param l the locale for the column names
-	 * @param session current db session
+	 * Gets all types for a given Conservation Area
+	 * @param session
+	 * @param ca
 	 * @return
 	 */
-	public QueryColumn[] getQueryColumns(Query query, Locale l, 
-			boolean includeIdColumns, Session session);
+	public List<AttachmentTag> getTags(Session session, ConservationArea ca){
+		return QueryFactory.buildQuery(session, AttachmentTag.class,
+				new Object[] {"conservationArea", ca}).list();  //$NON-NLS-1$
+	}
 	
-	
+	/**
+	 * Find a signature type with a given keyid in the conservation area
+	 * 
+	 * @param keyId
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public AttachmentTag findTag(String keyId, ConservationArea ca, Session session) {
+		AttachmentTag stype = QueryFactory.buildQuery(session, AttachmentTag.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).uniqueResult(); //$NON-NLS-1$
+		return stype;
+
+	}
+
 }

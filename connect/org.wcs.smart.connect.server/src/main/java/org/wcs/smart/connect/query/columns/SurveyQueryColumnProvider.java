@@ -69,18 +69,18 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	
 	private static Logger logger = Logger.getLogger(SurveyQueryColumnProvider.class.getName());
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIdColumns, Session session) {
 		List<QueryColumn> cols = null;
 		try{
 			String queryTypeKey = query.getTypeKey();
 			if (queryTypeKey.equals(SurveyObservationQuery.KEY)){
-				cols = getObservationQueryColumns(query, l, session);
+				cols = getObservationQueryColumns(query, l, includeIdColumns, session);
 			}else if (queryTypeKey.equals(SurveyWaypointQuery.KEY)){
-				cols = getWaypointQueryColumns(query, l, session);
+				cols = getWaypointQueryColumns(query, l, includeIdColumns, session);
 			}else if (queryTypeKey.equals(SurveyGriddedQuery.KEY)){
 				cols = getGriddedQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(MissionQuery.KEY)){
-				cols = getMissionQueryColumns(query, l, session);
+				cols = getMissionQueryColumns(query, l, includeIdColumns, session);
 			}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
 				cols = getMissionTrackQueryColumns(query, l, session);
 			}
@@ -148,7 +148,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return columns;
 	}
 	
-	private List<QueryColumn> getMissionQueryColumns(Query query, Locale l, Session session) {
+	private List<QueryColumn> getMissionQueryColumns(Query query, Locale l, boolean includeIds, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -169,6 +169,10 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
 		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.MULTILINESTRING, l));
+		
+		if (includeIds) {
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_UUID, Locale.getDefault()));
+		}
 		
 		return cols;
 	}
@@ -208,7 +212,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
-	private List<QueryColumn> getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getObservationQueryColumns(Query query, Locale l, boolean includeIds, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -254,10 +258,16 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 		cols.add(new WaypointGeometryQueryColumn(l));
 
+		if (includeIds) {
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_UUID, Locale.getDefault()));
+		}
+		
 		return cols;
 	}
 	
-	private List<QueryColumn> getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getWaypointQueryColumns(Query query, Locale l, boolean includeIds, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -293,6 +303,11 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
 		cols.add(new WaypointGeometryQueryColumn(l));
 
+		if (includeIds) {
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_UUID, Locale.getDefault()));
+		}
+		
 		return cols;
 	}
 	

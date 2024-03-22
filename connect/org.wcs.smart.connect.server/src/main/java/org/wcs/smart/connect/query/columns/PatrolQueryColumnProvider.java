@@ -59,18 +59,18 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 	private static Logger logger = Logger.getLogger(PatrolQueryColumnProvider.class.getName());
 	
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIds, Session session) {
 		List<QueryColumn> cols = null;
 		try{
 			String queryTypeKey = query.getTypeKey();
 			if (queryTypeKey.equals(PatrolObservationQuery.KEY)){
-				cols = getObservationQueryColumns(query, l, session);
+				cols = getObservationQueryColumns(query, l, includeIds,session);
 			}else if (queryTypeKey.equals(PatrolWaypointQuery.KEY)){
-				cols = getWaypointQueryColumns(query, l, session);
+				cols = getWaypointQueryColumns(query, l, includeIds,session);
 			}else if (queryTypeKey.equals(PatrolGriddedQuery.KEY)){
 				cols = getGriddedQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(PatrolQuery.KEY)){
-				cols = getPatrolQueryColumns(query, l, session);
+				cols = getPatrolQueryColumns(query, l, includeIds, session);
 			}
 			if (cols != null){
 				QueryColumnUtils.filterQueryColumns(cols, query);
@@ -83,7 +83,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return null;
 	}
 
-	private List<QueryColumn> getPatrolQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getPatrolQueryColumns(Query q, Locale l, boolean includeIds, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
 		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -119,10 +119,14 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		
 		keys.add(new TrackGeometryQueryColumn(l));
 		
+		if (includeIds) {
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_UUID, Locale.getDefault()));
+		}
+		
 		return keys;
 	}
 	
-	private List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getObservationQueryColumns(Query q, Locale l, boolean includeIds, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -165,10 +169,17 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 		keys.add(new WaypointGeometryQueryColumn(l));
+		
+		if (includeIds) {
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_UUID, Locale.getDefault()));
+		}
+		
 		return keys;
 	}
 	
-	private List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getWaypointQueryColumns(Query q, Locale l,boolean includeIds, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -205,6 +216,11 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		
 		keys.addAll(getPatrolAttributeQueryColumns(q, session));
 		keys.add(new WaypointGeometryQueryColumn(l));
+		
+		if (includeIds) {
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_UUID, Locale.getDefault()));
+		}
 		
 		return keys;
 	}

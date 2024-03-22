@@ -1382,6 +1382,10 @@
             class="org.wcs.smart.ca.QuickLink"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.ca.AttachmentTag"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">

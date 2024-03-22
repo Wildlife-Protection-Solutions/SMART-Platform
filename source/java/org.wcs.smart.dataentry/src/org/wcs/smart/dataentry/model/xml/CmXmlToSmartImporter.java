@@ -40,8 +40,10 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.LocalAttachmentTagManager;
 import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
@@ -117,6 +119,7 @@ public class CmXmlToSmartImporter {
 	private Map<String, UuidItem> dataMap;
 
 	private HashMap<String, SignatureType> signatures;
+	private HashMap<String, AttachmentTag> attachmentTags;
 	
 	/**
 	 * 
@@ -183,6 +186,7 @@ public class CmXmlToSmartImporter {
 		warnings = new ArrayList<String>();
 		dataMap = new HashMap<>();
 		signatures = new HashMap<>();
+		attachmentTags = new HashMap<>();
 		
 		compatibilityConfigIndexes = new HashMap<>();
 		
@@ -237,6 +241,30 @@ public class CmXmlToSmartImporter {
 				}
 			}
 			
+			List<AttachmentTag> atags = LocalAttachmentTagManager.INSTANCE.getTags(session,  SmartDB.getCurrentConservationArea());
+			
+			if (xmlCm.getAttachmentTags() != null) {
+				for (org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType xtag : xmlCm.getAttachmentTags().getAttachmentTagType()){
+					String keyId = xtag.getKeyid();
+					
+					AttachmentTag existing = null;
+					for (AttachmentTag t : atags) {
+						if (t.getKeyId().equalsIgnoreCase(keyId)) {
+							existing = t;
+							break;
+						}
+					}
+					if (existing == null) {
+						warnings.add(MessageFormat.format("An attachment tag with the key ''{0}'' could not found, a new attachment tag will be added to the Conservation Area", keyId));
+						existing = LocalAttachmentTagManager.INSTANCE.createTag(SmartDB.getCurrentConservationArea(), keyId);
+						existing.setKeyId(keyId);
+						updateNames(existing, xtag.getName());
+						session.persist(existing);
+					}
+					attachmentTags.put(xtag.getUuid(), existing);
+				}
+			
+			}			
 			//icon set
 			if (xmlCm.getIconSet() != null && !xmlCm.getIconSet().isEmpty()) {
 				IconSet is = QueryFactory.buildQuery(session, IconSet.class, 
@@ -616,7 +644,15 @@ public class CmXmlToSmartImporter {
 					}
 					cmNode.setSignatures(bits);
 				}
-				
+				if (xmlNode.getAttachmentTags() != null) {
+					Set<AttachmentTag> bits = new HashSet<>();
+					for (org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType s : xmlNode.getAttachmentTags()) {
+						if (attachmentTags.containsKey(s.getUuid())) {
+							bits.add(attachmentTags.get(s.getUuid()));
+						}
+					}
+					cmNode.setAttachmentTags(bits);
+				}
 				if (xmlNode.getIntegrateIncidentType() != null) {
 					cmNode.setIntegrateIncidentType(CmNode.IntegrateIncidentType.valueOf(xmlNode.getIntegrateIncidentType()));
 				}

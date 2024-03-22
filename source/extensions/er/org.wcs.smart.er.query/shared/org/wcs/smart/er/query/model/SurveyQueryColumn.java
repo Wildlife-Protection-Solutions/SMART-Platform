@@ -64,6 +64,7 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_START( ColumnType.DATE, "mission:startdate"),  //$NON-NLS-1$
 		MISSION_END( ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
 		MISSION_LEADER(ColumnType.STRING, "mission:leader"), //$NON-NLS-1$
+		MISSION_UUID(ColumnType.STRING, "mission:uuid"), //$NON-NLS-1$
 		
 		MISSION_TRACKTYPE( ColumnType.STRING, "mission:tracktype"),  //$NON-NLS-1$
 		MISSION_TRACKDATE( ColumnType.DATE, "mission:trackdate"),  //$NON-NLS-1$
@@ -86,7 +87,9 @@ public class SurveyQueryColumn extends QueryColumn {
 		WAYPOINT_OBSERVER( ColumnType.STRING, "waypoint:observer"),   //$NON-NLS-1$
 		WAYPOINT_LAST_MODIFIED(ColumnType.DATETIME, "waypoint:modified"), //$NON-NLS-1$
 		WAYPOINT_LAST_MODIFIED_BY(ColumnType.STRING, "waypoint:modifiedby"), //$NON-NLS-1$
-		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"); //$NON-NLS-1$
+		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"), //$NON-NLS-1$
+		WAYPOINT_UUID(ColumnType.STRING, "waypoint:uuid"), //$NON-NLS-1$
+		OBSERVATION_UUID(ColumnType.STRING, "obs:uuid"); //$NON-NLS-1$
 
 		
 		private ColumnType type;
@@ -163,6 +166,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_OBSERVER: return item.getWaypointObserver();
 				case WAYPOINT_LAST_MODIFIED: return item.getLastModifiedDate();
 				case WAYPOINT_LAST_MODIFIED_BY: return item.getLastModifiedBy();
+				case WAYPOINT_UUID: return UuidUtils.uuidToString(item.getWaypointUuid());
 				default: break;
 			}
 		}
@@ -170,7 +174,9 @@ public class SurveyQueryColumn extends QueryColumn {
 			ObservationQueryResultItem item = (ObservationQueryResultItem)queryResultItem;
 			if (column == FixedColumns.OBS_GROUP_ID) 
 				return item.getObservationGroupUuid() == null ? "" : UuidUtils.uuidToString(item.getObservationGroupUuid()); //$NON-NLS-1$
-			
+			if (column == FixedColumns.OBSERVATION_UUID) {
+				return UuidUtils.uuidToString(item.getObservationUuid());
+			}
 		}
 		if (queryResultItem instanceof SurveyObservationResultItem) {
 			if (column == FixedColumns.SAMPLING_UNIT) return ((SurveyObservationResultItem) queryResultItem).getSamplingUnitId();
@@ -193,6 +199,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_TRACKID: return item.getTrackId();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case MISSION_TRACKLENGTH: return item.getTrackLength();
+				case MISSION_UUID: return UuidUtils.uuidToString(item.getMissionUuid());
 				default: break;
 			}
 		}

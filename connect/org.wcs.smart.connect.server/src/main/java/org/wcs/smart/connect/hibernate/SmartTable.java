@@ -49,6 +49,7 @@ import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
@@ -177,6 +178,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord;
 import org.wcs.smart.incident.model.IncidentWaypoint;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -489,6 +491,9 @@ public enum SmartTable {
 	CAQUICKLINK(QuickLink.class, null),
 	
 	INCIDENTWAYPOINT(IncidentWaypoint.class, ".waypoint.conservationArea"),
+		
+	ATTACHMENT_TAG(AttachmentTag.class, null),
+	ATTACHMENT_TAG_LINK(AttachmentTagLink.class, ".tag.conservationArea"),
 	;
 	
 	public Class<?> hibernateClass;

@@ -42,25 +42,25 @@ import org.wcs.smart.query.model.QueryColumn;
 public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIdColumns, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		String surveyDesignKey = ((ISurveyQuery)query).getSurveyDesign();
 		
 		if (queryTypeKey.equals(SurveyObservationQuery.KEY)){
 			return SurveyQueryColumnManager.getInstance()
 				.getObservationQueryColumns(
-						getSurveyDesignAsObject(surveyDesignKey));
+						getSurveyDesignAsObject(surveyDesignKey), includeIdColumns);
 		}else if (queryTypeKey.equals(SurveyWaypointQuery.KEY)){
 			return SurveyQueryColumnManager.getInstance()
 			.getWaypointQueryColumns(
-					getSurveyDesignAsObject(surveyDesignKey));
+					getSurveyDesignAsObject(surveyDesignKey), includeIdColumns);
 		}else if (queryTypeKey.equals(SurveyGriddedQuery.KEY)){
 			return SurveyQueryColumnManager.getInstance()
 			.getGridColumns();
 		}else if (queryTypeKey.equals(MissionQuery.KEY)){
 			return SurveyQueryColumnManager.getInstance()
 			.getMissionQueryColumns(
-					getSurveyDesignAsObject(surveyDesignKey));
+					getSurveyDesignAsObject(surveyDesignKey), includeIdColumns);
 		}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
 			return SurveyQueryColumnManager.getInstance()
 			.getMissionTrackQueryColumns(

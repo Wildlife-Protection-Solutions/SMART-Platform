@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.observation.ui.input;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,14 +32,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -56,7 +49,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -67,7 +59,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
@@ -102,7 +93,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	/* current category & attribute list */
 	private Category thisCategory;
 	private List<Attribute> catAttributes;
-	private List<ObservationAttachment> currentAttachments;
+	
 	private boolean attsModified = false;
 	private ScrolledComposite scComp ;
 	private WaypointObservation editingOb = null;
@@ -119,8 +110,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	//bold font
 	private Font boldLabelFont = null;
 	private boolean requiresObservation = false;
-	private ListViewer attachmentViewer;
-	
+	private AttachmentPreviewTagComposite attachmentViewer;
+	private ArrayList<ISmartAttachment> currentAttachments ;
+
 	
 	private ObservationWizard getWizardInternal() {
 		return ((ObservationWizard)getWizard());
@@ -614,7 +606,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		}
 
-		currentAttachments = new ArrayList<ObservationAttachment>();
+		currentAttachments = new ArrayList<>();
 		if (editingOb.getAttachments() != null){
 			currentAttachments.addAll(editingOb.getAttachments());
 		}
@@ -637,7 +629,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	private void clearEditObservation(){
 		this.editingOb = null;
 		this.btnUpdate.setEnabled(false);
-		this.currentAttachments = new ArrayList<ObservationAttachment>();;
+		this.currentAttachments = new ArrayList<>();;
 		attachmentViewer.setInput(currentAttachments);
 		attsModified = false;
 		setDefaultButton(btnAdd);
@@ -685,87 +677,21 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		((GridData)lbl.getLayoutData()).verticalIndent = 2;
 		
-		Composite compAttach = new Composite(cattribute, SWT.NONE);
-		compAttach.setLayout(new GridLayout(2, false));
-		compAttach.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		attachmentViewer = new ListViewer(compAttach, SWT.BORDER | SWT.V_SCROLL);
-		attachmentViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)attachmentViewer.getControl().getLayoutData()).heightHint = 50;
-		attachmentViewer.setContentProvider(ArrayContentProvider.getInstance());
-		attachmentViewer.setLabelProvider(new LabelProvider(){
-			public String getText(Object element){
-				return ((ISmartAttachment)element).getFilename();
-			}
-		});
-		attachmentViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
-				if (att != null){
-					AttachmentUtil.openAttachment(att);
-				}
-			}
-		});
-		
-		this.currentAttachments = new ArrayList<ObservationAttachment>();
-		attachmentViewer.setInput(this.currentAttachments);
-		
-		ToolBar tb = new ToolBar(compAttach, SWT.FLAT | SWT.VERTICAL);
-		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
-		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiEdit.setToolTipText(Messages.AttributeWizardPage_addAttachmentTooltip);
-		tiEdit.addListener(SWT.Selection,e->addAttachment());
-		
-		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setToolTipText(Messages.AttributeWizardPage_removeAttachmenttooltip);
-		tiDelete.addListener(SWT.Selection, e->deleteAttachment());
-
-		Menu menu = new Menu(attachmentViewer.getControl());
-		attachmentViewer.getControl().setMenu(menu);
-		
-		MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
-		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		miEdit.setText(DialogConstants.ADD_BUTTON_TEXT);
-		miEdit.addListener(SWT.Selection,e->addAttachment());
-		
-		MenuItem miDelete = new MenuItem(menu, SWT.PUSH);
-		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		miDelete.addListener(SWT.Selection, e->deleteAttachment());
-
+		attachmentViewer = new AttachmentPreviewTagComposite(cattribute, 
+				getWizardInternal().getTags(), e->addAttachment(), e->deleteAttachment());
+				
+		this.currentAttachments = new ArrayList<>();
+		attachmentViewer.setInput(currentAttachments);
 	}
+	
 	private void deleteAttachment() {
-		ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
-		if (att != null){
-			currentAttachments.remove(att);
-			attsModified = true;
-		}
-		attachmentViewer.refresh();
+		attachmentViewer.deleteAttachments(currentAttachments);
+		attsModified = true;
 	}
-	private void addAttachment() {
-		FileDialog fd = new FileDialog(getShell(), SWT.MULTI);
-		
-		String file = fd.open();
-		if (file == null) {
-			return;
-		}
-		Path root = Paths.get(fd.getFilterPath());
-		for (int i = 0; i < fd.getFileNames().length; i ++){
-			Path f = root.resolve(fd.getFileNames()[i]);
-			if (!Files.exists(f)){
-				ObservationPlugIn.displayLog(MessageFormat.format(Messages.AttributeWizardPage_FileNotFoundError, new Object[]{f.toAbsolutePath().toString()}), null);
-				return;
-			}
-			
-			ObservationAttachment oa = new ObservationAttachment();
-			oa.setCopyFromLocation(f);
-			oa.setFilename(f.getFileName().toString());
-			currentAttachments.add(oa);
-		}
-		attachmentViewer.refresh();
+	
+	private void addAttachment() {		
+		attachmentViewer.addAttachment(()->new ObservationAttachment(), currentAttachments);
 		attsModified = true;
 	}
 	/*
@@ -800,19 +726,19 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		// update the attachments
 		wo.setAttachments(new ArrayList<ObservationAttachment>());
 		
-		for (ObservationAttachment a : currentAttachments){
+		for (ISmartAttachment a : currentAttachments){
 			try{
 				Path temp = a.getCopyFromLocation() == null ? a.getAttachmentFile() : null;
-				a.setObservation(wo);
+				((ObservationAttachment)a).setObservation(wo);
 				if (temp != null) a.computeFileLocation(temp);
-				wo.getAttachments().add(a);
+				wo.getAttachments().add((ObservationAttachment)a);
 			}catch (Exception ex){
 				ObservationPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
 		
 		//clear all fields
-		currentAttachments = new ArrayList<ObservationAttachment>();
+		currentAttachments = new ArrayList<>();
 		attachmentViewer.setInput(currentAttachments);
 		for (IAttributeField<?> field : attributeFields){
 			field.clear();

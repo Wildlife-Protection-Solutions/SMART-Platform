@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.internal.Messages;
@@ -71,6 +72,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		for (WaypointAttachment wa : wp.getAttachments()) {
 			try {
 				wa.computeFileLocation(session);
+				wa.getAttachmentTags().forEach(t->Hibernate.initialize(t.getTag()));
 			}catch (Exception ex) {}
 			if (wa.getSignatureType() != null) wa.getSignatureType().getName();
 		}
@@ -81,6 +83,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 					for (ObservationAttachment wa : wo.getAttachments()) {
 						try {
 							wa.computeFileLocation(session);
+							wa.getAttachmentTags().forEach(t->Hibernate.initialize(t.getTag()));
 						}catch (Exception ex) {}
 						
 						if (wa.getSignatureType() != null) wa.getSignatureType().getName();

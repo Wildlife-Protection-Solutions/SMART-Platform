@@ -36,6 +36,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor.LinkDataType;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -142,6 +143,13 @@ public class CustomQueryEngine {
 				attachment.put("size", Files.size(a.getAttachmentFile())); //$NON-NLS-1$
 			}catch (Exception ex) {
 				logger.log(Level.WARNING,ex.getMessage(),ex);
+			}
+			if (a.getAttachmentTags() != null && !a.getAttachmentTags().isEmpty()) {
+				JSONArray tags = new JSONArray();
+				for (AttachmentTagLink link : a.getAttachmentTags()) {
+					tags.add(link.getTag().getKeyId());
+				}
+				attachment.put("tags", tags); //$NON-NLS-1$
 			}
 		}
 		
@@ -275,6 +283,14 @@ public class CustomQueryEngine {
 						attachment.put("size", Files.size(a.getAttachmentFile())); //$NON-NLS-1$
 					}catch (Exception ex) {
 						logger.log(Level.WARNING,ex.getMessage(),ex);
+					}
+					
+					if (a.getAttachmentTags() != null && !a.getAttachmentTags().isEmpty()) {
+						JSONArray tags = new JSONArray();
+						for (AttachmentTagLink alink : a.getAttachmentTags()) {
+							tags.add(alink.getTag().getKeyId());
+						}
+						attachment.put("tags", tags); //$NON-NLS-1$
 					}
 				}
 				

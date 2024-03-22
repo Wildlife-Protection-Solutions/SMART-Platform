@@ -108,7 +108,7 @@ public class SurveyQueryColumnManager {
 	 * on the survey options and the data model of the conservation
 	 * area.
 	 */
-	public  QueryColumn[] getObservationQueryColumns(final SurveyDesign sd) {
+	public  QueryColumn[] getObservationQueryColumns(final SurveyDesign sd, boolean includeIdColumns) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
 		// survey columns 
@@ -169,6 +169,12 @@ public class SurveyQueryColumnManager {
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
 		cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
+		
+		if (includeIdColumns) {
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_UUID, Locale.getDefault()));
+		}
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 
@@ -179,7 +185,7 @@ public class SurveyQueryColumnManager {
 	 * on the survey options and the data model of the conservation
 	 * area.
 	 */
-	public  QueryColumn[] getWaypointQueryColumns(final SurveyDesign sd) {
+	public  QueryColumn[] getWaypointQueryColumns(final SurveyDesign sd, boolean includeIdColumns) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		
 		// survey columns 
@@ -230,6 +236,10 @@ public class SurveyQueryColumnManager {
 			throw new IllegalStateException(ex);
 		}
 		cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
+		if (includeIdColumns) {
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_UUID, Locale.getDefault()));
+		}
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
@@ -288,7 +298,7 @@ public class SurveyQueryColumnManager {
 		return new QueryColumnLabelProvider(column);
 	}
 	
-	public  QueryColumn[] getMissionQueryColumns(final SurveyDesign sd) {
+	public  QueryColumn[] getMissionQueryColumns(final SurveyDesign sd, boolean includeIdColumns) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 	
 		if (SmartDB.isMultipleAnalysis()){
@@ -316,7 +326,9 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
 		cols.add(new TrackGeometryQueryColumn(IGeometryColumn.Type.MULTILINESTRING, Locale.getDefault()));
 
-		
+		if (includeIdColumns) {
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_UUID, Locale.getDefault()));
+		}
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	

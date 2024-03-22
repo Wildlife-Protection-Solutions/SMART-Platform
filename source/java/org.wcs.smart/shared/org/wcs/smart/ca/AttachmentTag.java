@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,31 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model;
+package org.wcs.smart.ca;
 
-import java.util.Locale;
-
-import org.hibernate.Session;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 /**
- * Column provider for patrol query.
+ * Represent attachment tag in the system
+ * 
  * @author Emily
  *
  */
-public interface IQueryColumnProvider {
-
+@Entity
+@Table(name="attachment_tag", schema="smart")
+public class AttachmentTag extends NamedKeyItem{
+	
 	/**
-	 * Get columns for query.
 	 * 
-	 * @param query the query to get columns for
-	 * @param l the locale for the column names
-	 * @param session current db session
-	 * @return
 	 */
-	public QueryColumn[] getQueryColumns(Query query, Locale l, 
-			boolean includeIdColumns, Session session);
+	private static final long serialVersionUID = 1L;
 	
+	private ConservationArea conservationArea;
 	
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return this.conservationArea;
+	}
+	
+	public void setConservationArea(ConservationArea conservationArea){
+		this.conservationArea = conservationArea;
+	}
+
 }

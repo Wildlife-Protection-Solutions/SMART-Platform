@@ -57,7 +57,8 @@ public interface IStyledQuery {
 	//TODO:
 	//investigate moving this elsewhere
 	//used by asset summary queries
-	public default List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider){
+	public default List<QueryColumn> computeQueryColumns(Locale l, Session session, 
+			IProjectionProvider prjProvider){
 		return null;
 	}
 

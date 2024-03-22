@@ -65,7 +65,9 @@ public class FixedQueryColumn extends QueryColumn {
 		
 		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
 		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby"),   //$NON-NLS-1$
-		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"); //$NON-NLS-1$
+		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"), //$NON-NLS-1$
+		WAYPOINT_UUID( ColumnType.STRING,"waypoint:uuid"),   //$NON-NLS-1$
+		OBSERVATION_UUID( ColumnType.STRING,"obs:uuid");  //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -150,6 +152,8 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getLastModifiedDate();
 			case WAYPOINT_LASTMODIFIEDBY:
 				return item.getLastModifiedBy();
+			case WAYPOINT_UUID:
+				return UuidUtils.uuidToString(item.getWaypointUuid());
 				default: break;
 			}
 		}
@@ -158,6 +162,9 @@ public class FixedQueryColumn extends QueryColumn {
 			if (column == FixedColumns.OBS_GROUP_ID) {
 				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
 				return UuidUtils.uuidToString(item.getObservationGroupUuid());
+			}
+			if (column == FixedColumns.OBSERVATION_UUID) {
+				return UuidUtils.uuidToString(item.getObservationUuid());
 			}
 		}
 		return ""; //$NON-NLS-1$

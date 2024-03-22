@@ -105,6 +105,7 @@ public abstract class AbstractIncidentComposite {
 	 * Updates the incident with the values from the composite.
 	 * 
 	 * @param incident
+	 * @param session - may be null if in wizard
 	 * 
 	 */
 	public abstract void updateIncident(Waypoint incident);

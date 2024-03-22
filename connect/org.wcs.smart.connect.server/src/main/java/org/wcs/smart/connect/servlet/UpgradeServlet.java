@@ -1314,7 +1314,7 @@ public class UpgradeServlet extends HttpServlet {
 		} catch (SQLException e) {
 			throw new HibernateException(e);
 		}
-		
+
 		s.doWork(new Work() {
 
 			@Override
@@ -1456,6 +1456,42 @@ public class UpgradeServlet extends HttpServlet {
 						
 						//fix function st_length_spheriod is now st_lengthspheriod
 						"CREATE or REPLACE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision LANGUAGE plpgsql AS $$ BEGIN RETURN ST_LengthSpheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID[\"WGS 84\",6378137,298.257223563]'); END; $$", //$NON-NLS-1$
+						
+						
+						//attachment tags
+						"CREATE TABLE smart.attachment_tag (uuid uuid not null, ca_uuid uuid not null, keyid varchar(128) not null, primary key (uuid), unique(ca_uuid, keyid))",  //$NON-NLS-1$
+						"ALTER TABLE smart.attachment_tag  ADD CONSTRAINT attachment_tag_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+						
+						"CREATE TABLE SMART.attachment_tag_link (uuid uuid not null, obs_attachment_uuid uuid, wp_attachment_uuid uuid, tag_uuid uuid not null, primary key(uuid))", //$NON-NLS-1$
+						
+						"ALTER TABLE smart.attachment_tag_link  ADD CONSTRAINT attachment_tag_link_tag_uuid_fk FOREIGN KEY (tag_uuid) REFERENCES smart.attachment_tag(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+						"ALTER TABLE smart.attachment_tag_link  ADD CONSTRAINT attachment_tag_link_obs_attachment_uuid_fk FOREIGN KEY (obs_attachment_uuid) REFERENCES smart.observation_attachment(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+						"ALTER TABLE smart.attachment_tag_link  ADD CONSTRAINT attachment_tag_link_wp_attachment_uuid_fk FOREIGN KEY (wp_attachment_uuid) REFERENCES smart.wp_attachments(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+						"ALTER TABLE smart.cm_node add column attachment_tags varchar", //$NON-NLS-1$
+
+						"CREATE TRIGGER trg_attachment_tag AFTER INSERT OR UPDATE OR DELETE ON smart.attachment_tag FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
+						
+						"""								
+						CREATE OR REPLACE FUNCTION connect.trg_attachment_tag_link() RETURNS trigger AS $$ 
+								DECLARE
+									ROW RECORD;
+								BEGIN
+									IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN 
+										ROW = NEW; 
+									ELSIF (TG_OP = 'DELETE') THEN 
+										ROW = OLD; 
+									END IF; 
+									INSERT INTO connect.change_log 
+										(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+										SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, t.CA_UUID
+										FROM smart.attachment_tag t WHERE t.uuid = ROW.tag_uuid;
+									RETURN ROW;
+								END$$ LANGUAGE 'plpgsql'
+						""", //$NON-NLS-1$
+						
+						"CREATE TRIGGER trg_attachment_tag_link AFTER INSERT OR UPDATE OR DELETE ON smart.attachment_tag_link FOR EACH ROW execute procedure connect.trg_attachment_tag_link()", //$NON-NLS-1$
+
 						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$

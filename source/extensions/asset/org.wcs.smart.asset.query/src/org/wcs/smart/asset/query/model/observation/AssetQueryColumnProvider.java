@@ -39,13 +39,13 @@ import org.wcs.smart.query.model.QueryColumn;
 public class AssetQueryColumnProvider implements IAssetQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIds, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		if (queryTypeKey.equals(AssetObservationQuery.KEY)){
-			return AssetQueryColumnCache.getInstance().getObservationQueryColumns();
+			return AssetQueryColumnCache.getInstance().getObservationQueryColumns(includeIds);
 		}
 		if (queryTypeKey.equals(AssetWaypointQuery.KEY)){
-			return AssetQueryColumnCache.getInstance().getWaypointQueryColumns();
+			return AssetQueryColumnCache.getInstance().getWaypointQueryColumns(includeIds);
 		}
 		return null;
 	}

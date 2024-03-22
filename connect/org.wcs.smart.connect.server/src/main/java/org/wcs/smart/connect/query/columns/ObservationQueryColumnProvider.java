@@ -53,14 +53,14 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 	private static Logger logger = Logger.getLogger(PatrolQueryColumnProvider.class.getName());
 	
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIds, Session session) {
 		List<QueryColumn> cols = null;
 		try{
 			String queryTypeKey = query.getTypeKey();
 			if (queryTypeKey.equals(ObsObservationQuery.KEY)){
-				cols = getObservationQueryColumns(query, l, session);
+				cols = getObservationQueryColumns(query, l, includeIds, session);
 			}else if (queryTypeKey.equals(ObservationWaypointQuery.KEY)){
-				cols = getWaypointQueryColumns(query, l, session);
+				cols = getWaypointQueryColumns(query, l, includeIds, session);
 			}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
 				cols = getGriddedQueryColumns(query, l, session);
 			}
@@ -75,7 +75,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		return null;
 	}
 
-	private List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getObservationQueryColumns(Query q, Locale l, boolean includeIds, Session session) throws SQLException{
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -91,7 +91,9 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = QueryColumnUtils.trackObserver(ops);
-			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
+			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID ||
+					item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
+					item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID){
 				add = false;
 			}
 			if (add){
@@ -105,10 +107,15 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 		keys.add(new WaypointGeometryQueryColumn(l));
 
+		if (includeIds) {
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));
+		}
+		
 		return keys;
 	}
 	
-	private List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, boolean includeIds, Session session) throws SQLException{
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -124,7 +131,9 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = false;
-			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
+			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID ||
+					item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
+					item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID){
 				add = false;
 			}
 			if (add){
@@ -132,6 +141,11 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 			}
 		}
 		keys.add(new WaypointGeometryQueryColumn(l));
+		
+		if (includeIds) {
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+		}
+		
 		return keys;
 	}
 	

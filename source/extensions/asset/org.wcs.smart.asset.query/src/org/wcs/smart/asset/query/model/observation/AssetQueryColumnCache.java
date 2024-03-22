@@ -64,7 +64,9 @@ public class AssetQueryColumnCache {
 	}
 	
 	private volatile QueryColumn[] queryColumns = null;
+	private volatile QueryColumn[] queryColumnsId = null;
 	private volatile QueryColumn[] waypointQueryColumns = null;
+	private volatile QueryColumn[] waypointQueryColumnsId = null;
 	
 	private final Object OBSERVATIONLOCK = new Object();
 	private final Object WAYPOINTLOCK = new Object();
@@ -94,16 +96,21 @@ public class AssetQueryColumnCache {
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public  QueryColumn[] getObservationQueryColumns() {
+	public  QueryColumn[] getObservationQueryColumns(boolean includeIds) {
 		
-		if (queryColumns != null){
+		if (!includeIds && queryColumns != null){
 			return cloneColumns(queryColumns);
 		}
+		if (includeIds && queryColumnsId != null){
+			return cloneColumns(queryColumnsId);
+		}
 		synchronized (OBSERVATIONLOCK) {
-			if (queryColumns != null){
+			if (!includeIds && queryColumns != null){
 				return cloneColumns(queryColumns);
-			}	
-		
+			}
+			if (includeIds && queryColumnsId != null){
+				return cloneColumns(queryColumnsId);
+			}
 			//outside job to prevent deadlocking
 			final DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
 			
@@ -117,6 +124,8 @@ public class AssetQueryColumnCache {
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID) continue;
+					if (item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID) continue;
 					
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
@@ -149,7 +158,13 @@ public class AssetQueryColumnCache {
 
 				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
 				
-				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				if (!includeIds) {
+					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				}else {
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBSERVATION_UUID, Locale.getDefault()));					
+					queryColumnsId = cols.toArray(new QueryColumn[cols.size()]);
+				}
 				
 				
 				return Status.OK_STATUS;
@@ -163,7 +178,10 @@ public class AssetQueryColumnCache {
 			}
 		}
 		
-		return  cloneColumns(queryColumns);
+		if (!includeIds){
+			return cloneColumns(queryColumns);
+		}
+		return cloneColumns(queryColumnsId);		
 	}
 
 	
@@ -175,14 +193,20 @@ public class AssetQueryColumnCache {
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public  QueryColumn[] getWaypointQueryColumns() {
+	public  QueryColumn[] getWaypointQueryColumns(boolean includeIds) {
 		
-		if (waypointQueryColumns != null){
+		if (!includeIds && waypointQueryColumns != null){
 			return cloneColumns(waypointQueryColumns);
 		}
+		if (includeIds && waypointQueryColumnsId != null){
+			return cloneColumns(waypointQueryColumnsId);
+		}
 		synchronized (WAYPOINTLOCK) {
-			if (waypointQueryColumns != null){
+			if (!includeIds && waypointQueryColumns != null){
 				return cloneColumns(waypointQueryColumns);
+			}
+			if (includeIds && waypointQueryColumnsId != null){
+				return cloneColumns(waypointQueryColumnsId);
 			}	
 		
 		
@@ -197,7 +221,8 @@ public class AssetQueryColumnCache {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 					
 					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
-					
+					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID) continue;
+					if (item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID) continue;
 
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
@@ -220,7 +245,13 @@ public class AssetQueryColumnCache {
 					}
 				}
 				cols.add(new WaypointGeometryQueryColumn(Locale.getDefault()));
-				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				if (includeIds ) {
+					cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_UUID, Locale.getDefault()));
+					waypointQueryColumnsId = cols.toArray(new QueryColumn[cols.size()]);
+				}else {
+
+					waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				}
 				return Status.OK_STATUS;
 			}
 			};
@@ -232,7 +263,12 @@ public class AssetQueryColumnCache {
 			}
 		}
 		
-		return  cloneColumns(waypointQueryColumns);
+		if (!includeIds){
+			return cloneColumns(waypointQueryColumns);
+		}else {
+			return cloneColumns(waypointQueryColumnsId);
+		}
+		
 	}
 
 

@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.observation;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -71,12 +73,14 @@ public class ObservationHibernateManager extends HibernateManager{
 		if (wp.getAttachments() != null){
 			for (ISmartAttachment a : wp.getAttachments()){
 				a.computeFileLocation(session);
+				Hibernate.initialize(((ITaggedAttachment)a).getAttachmentTags());
 			}
 		}
 		for (WaypointObservation wo : wp.getAllObservations()){
 			if (wo.getAttachments() != null){
 				for (ISmartAttachment a : wo.getAttachments()){
 					a.computeFileLocation(session);
+					Hibernate.initialize(((ITaggedAttachment)a).getAttachmentTags());
 				}
 			}		
 		}

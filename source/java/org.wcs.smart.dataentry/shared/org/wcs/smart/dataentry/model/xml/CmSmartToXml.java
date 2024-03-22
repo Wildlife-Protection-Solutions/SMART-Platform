@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.hibernate.Session;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SignatureType;
@@ -60,6 +61,7 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataExporter;
+import org.wcs.smart.dataentry.model.xml.generated.AttachmentTagTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
 import org.wcs.smart.dataentry.model.xml.generated.CmAttributeConfigType;
@@ -101,6 +103,7 @@ public class CmSmartToXml {
 	private ConfigurableModel cmModel;
 	private Map<String, Path> filesToInclude;
 	private Set<UUID> signatures;
+	private Set<UUID> attachmenttags;
 
 	
 	public CmSmartToXml(Session session) {
@@ -157,6 +160,7 @@ public class CmSmartToXml {
 		if (monitor.isCanceled()) throw new OperationCanceledException();
 				
 		addSignatureTypeMetadata(cmModel);
+		addAttachmentTagTypeMetadata(cmModel);
 				
 		//nodes
 		processCmNodes(monitor);
@@ -209,6 +213,35 @@ public class CmSmartToXml {
 					xtype.setKeyid(stype.getKeyId());
 					xmlModel.getSignatures().getSignatureType().add(xtype);
 					signatures.add(stype.getUuid());
+				}
+			}
+		}
+	}
+	
+	private void addAttachmentTagTypeMetadata(ConfigurableModel cm) {
+		//find and write signatures
+		Set<UUID> alltags = new HashSet<>();
+		ArrayDeque<CmNode> nodes = new ArrayDeque<>();
+		nodes.addAll(cm.getNodes());
+		while(!nodes.isEmpty()) {
+			CmNode node = nodes.remove();
+			alltags.addAll(node.getAttachmentTagUuids());
+			nodes.addAll(node.getChildren());
+		}
+		attachmenttags = new HashSet<>();
+		if (!alltags.isEmpty()) {
+		
+			xmlModel.setAttachmentTags(new AttachmentTagTypeList());
+			
+			for (UUID uuid : alltags) {
+				AttachmentTag stype = session.get(AttachmentTag.class, uuid);
+				if (stype != null) {
+					org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType xtype = new org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType();
+					xtype.setUuid(UuidUtils.uuidToString(stype.getUuid()));
+					setNames(xtype.getName(), stype.getNames());
+					xtype.setKeyid(stype.getKeyId());
+					xmlModel.getAttachmentTags().getAttachmentTagType().add(xtype);
+					attachmenttags.add(stype.getUuid());
 				}
 			}
 		}
@@ -341,6 +374,15 @@ public class CmSmartToXml {
 		nt.setPhotoRequired(node.isPhotoRequired());
 		if (node.getDisplayMode() != null) {
 			nt.setDisplayMode(node.getDisplayMode().name());
+		}
+		if (node.getCategory() != null && !node.getAttachmentTagUuids().isEmpty()) {
+			for (UUID uuid : node.getAttachmentTagUuids()) {
+				if (attachmenttags.contains(uuid)) {
+					org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType xs = new org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType();
+					xs.setUuid(UuidUtils.uuidToString(uuid));
+					nt.getAttachmentTags().add(xs);
+				}
+			}
 		}
 		
 		nt.setImageFile(getImageFileRef(node));

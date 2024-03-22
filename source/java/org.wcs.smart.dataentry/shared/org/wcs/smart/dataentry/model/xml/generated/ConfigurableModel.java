@@ -30,6 +30,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="languages" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}LanguageListType"/>
  *         &lt;element name="signatures" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}SignatureTypeList" minOccurs="0"/>
+ *         &lt;element name="attachmentTags" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttachmentTagTypeList" minOccurs="0"/>
  *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded"/>
  *         &lt;element name="nodes" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NodeTypeList" minOccurs="0"/>
  *         &lt;element name="listItems" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttributeListItemTypeList" minOccurs="0"/>
@@ -56,6 +57,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(name = "ConfigurableModel", propOrder = {
     "languages",
     "signatures",
+    "attachmentTags",
     "name",
     "nodes",
     "listItems",
@@ -71,6 +73,7 @@ public class ConfigurableModel {
     @XmlElement(required = true)
     protected LanguageListType languages;
     protected SignatureTypeList signatures;
+    protected AttachmentTagTypeList attachmentTags;
     @XmlElement(required = true)
     protected List<NameType> name;
     protected NodeTypeList nodes;
@@ -138,6 +141,30 @@ public class ConfigurableModel {
      */
     public void setSignatures(SignatureTypeList value) {
         this.signatures = value;
+    }
+    
+    /**
+     * Gets the value of the attachmentTags property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link AttachmentTagTypeList }
+     *     
+     */
+    public AttachmentTagTypeList getAttachmentTags() {
+        return attachmentTags;
+    }
+
+    /**
+     * Sets the value of the attachmentTags property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link AttachmentTagTypeList }
+     *     
+     */
+    public void setAttachmentTags(AttachmentTagTypeList value) {
+        this.attachmentTags = value;
     }
 
     /**

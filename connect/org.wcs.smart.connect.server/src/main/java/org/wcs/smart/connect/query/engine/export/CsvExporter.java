@@ -177,7 +177,13 @@ public class CsvExporter extends AbstractQueryExporter {
 		IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session,
 				query.getConservationArea());
 		List<QueryColumn> cols = results.getQueryColumns(query, locale, session, prj);
-
+		
+		//remove the default query column from the query results
+		for (Iterator<QueryColumn> iterator = cols.iterator(); iterator.hasNext();) {
+			QueryColumn queryColumn = (QueryColumn) iterator.next();
+			if (queryColumn.isDefaultGeometryColumn()) iterator.remove();
+			
+		}
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8), delimiter)) {
 
 			// headers

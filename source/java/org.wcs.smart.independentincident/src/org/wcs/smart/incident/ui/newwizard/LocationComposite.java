@@ -105,8 +105,13 @@ public class LocationComposite extends AbstractIncidentComposite {
 
 	@Override
 	public Composite createComposite(Composite parent) {
-		Composite item = new Composite(parent, SWT.NONE);
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout());
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		
+		Composite item = new Composite(main, SWT.NONE);
 		item.setLayout(new GridLayout(2, false));
+		item.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		Label l = new Label(item, SWT.NONE);
 		l.setText(Messages.LocationComposite_ProjectionLabel);

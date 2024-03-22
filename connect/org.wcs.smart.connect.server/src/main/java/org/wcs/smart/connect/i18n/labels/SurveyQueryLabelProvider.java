@@ -70,7 +70,10 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED) return Messages.getString("SurveyQueryLabelProvider.LastModifiedLabel", l); //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED_BY) return Messages.getString("SurveyQueryLabelProvider.LastModifiedByLabel", l); //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.OBS_GROUP_ID) return Messages.getString("SurveyQueryLabelProvider.ObsGroupColumnName", l); //$NON-NLS-1$
-				
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_UUID) return "Waypoint UUID" ;
+		if (item == SurveyQueryColumn.FixedColumns.OBSERVATION_UUID) return "Observation UUID" ;
+		if (item == SurveyQueryColumn.FixedColumns.MISSION_UUID) return "Mission UUID" ;
+		
 		if (item == ValueItem.TRACK_LENGTH){ return Messages.getString("SurveyQueryLabelProvider.TrackDistanctOp", l);} //$NON-NLS-1$
 		if (item == ValueItem.MISSION_COUNT){ return Messages.getString("SurveyQueryLabelProvider.NumMissionsOp", l);} //$NON-NLS-1$
 		if (item == ValueItem.SURVEY_COUNT){ return Messages.getString("SurveyQueryLabelProvider.NumSurveysOp", l);} //$NON-NLS-1$

@@ -46,7 +46,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.LocalAttachmentTagManager;
 import org.wcs.smart.LocalSignatureTypeManager;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SignatureType;
@@ -78,6 +80,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
+	private static final String LBLKEY = "LBL";
+
 	private CmNode node;
 
 	private Label lblCategory;
@@ -87,6 +91,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnSingleGpsPoint;
 	private ImageSelectionControl imageControl;
 	private CheckboxTableViewer chSignatures;
+	private CheckboxTableViewer chAttachments;
 	private ComboViewer cmbErOpViewer;
 	private Label lblErOp;
 	
@@ -231,6 +236,11 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
 				btnPhotoRequired.setEnabled(isPhotoRequiredEnabled(getSourceObject()));
+				if (chAttachments != null) {
+					chAttachments.getControl().setEnabled(isPhotoRequiredEnabled(getSourceObject()));
+					((Label)chAttachments.getData(LBLKEY)).setEnabled(isPhotoRequiredEnabled(getSourceObject()));
+				}
+
 				fireModelChanged();
 			}
 		});
@@ -250,6 +260,37 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				fireModelChanged();
 			}
 		});
+		
+		List<AttachmentTag> tags = LocalAttachmentTagManager.INSTANCE.getTags(session, SmartDB.getCurrentConservationArea());
+		if (!tags.isEmpty()) {
+			new Label(container, SWT.NONE);
+			
+			label = new Label(container, SWT.NONE);
+			label.setText("Attachment Tags:");
+			label.setToolTipText("Select the attachment tags that are valid for this type of observation.");
+			label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			((GridData)label.getLayoutData()).horizontalIndent = 15;
+			
+			new Label(container, SWT.NONE);
+			
+			chAttachments = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+			chAttachments.setLabelProvider(new NamedItemLabelProvider());
+			chAttachments.setContentProvider(ArrayContentProvider.getInstance());
+			chAttachments.setInput(tags);
+			chAttachments.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)chAttachments.getControl().getLayoutData()).heightHint = 50;
+			((GridData)chAttachments.getControl().getLayoutData()).horizontalIndent = 15;
+			
+			chAttachments.addCheckStateListener(e->{
+				Set<AttachmentTag> types = new HashSet<>();
+				for (Object x : chAttachments.getCheckedElements()) {
+					if (x instanceof AttachmentTag) types.add((AttachmentTag) x);
+				}
+				node.setAttachmentTags(types);
+				fireModelChanged();
+			});
+			chAttachments.setData(LBLKEY, label);
+		}
 		
 		label = new Label(container, SWT.NONE);
 //		label.setText(Messages.CmNodeInfoComposite_ClassicOptionsLbl);
@@ -353,6 +394,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 		List<SignatureType> sTypes = LocalSignatureTypeManager.INSTANCE.getTypes(session, SmartDB.getCurrentConservationArea());
 		if (!sTypes.isEmpty()) {
+			
 			label = new Label(container, SWT.NONE);
 			label.setText(Messages.CmNodeInfoComposite_SignaturesLabel);
 			label.setToolTipText(Messages.CmNodeInfoComposite_SignaturesTooltip);
@@ -363,7 +405,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			chSignatures.setContentProvider(ArrayContentProvider.getInstance());
 			chSignatures.setInput(sTypes);
 			chSignatures.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)chSignatures.getControl().getLayoutData()).heightHint = 80;
+			((GridData)chSignatures.getControl().getLayoutData()).heightHint = 50;
 			
 			chSignatures.addCheckStateListener(e->{
 				Set<SignatureType> types = new HashSet<>();
@@ -391,6 +433,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 					if (btnPhotoRequired != null) {
 						btnPhotoRequired.setSelection(getPhotoRequiredValue(n));
 						btnPhotoRequired.setEnabled(isPhotoRequiredEnabled(n));
+					}
+					if (chAttachments != null) {
+						chAttachments.getControl().setEnabled(isPhotoRequiredEnabled(n));
+						((Label)chAttachments.getData(LBLKEY)).setEnabled(isPhotoRequiredEnabled(n));
 					}
 					if (btnCollectMultiple != null)
 						btnCollectMultiple.setSelection(n.isCollectMultipleObservations());
@@ -549,6 +595,13 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 					Set<UUID> items = node.getSignatureUuids();
 					for (SignatureType t : ((List<SignatureType>)chSignatures.getInput())){
 						if (items.contains(t.getUuid()))chSignatures.setChecked(t, true); 
+					}
+				}
+				if (chAttachments != null) {
+					chAttachments.setAllChecked(false);
+					Set<UUID> items = node.getAttachmentTagUuids();
+					for (AttachmentTag t : ((List<AttachmentTag>)chAttachments.getInput())){
+						if (items.contains(t.getUuid()))chAttachments.setChecked(t, true); 
 					}
 				}
 			}

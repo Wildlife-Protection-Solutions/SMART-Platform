@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.hibernate;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +51,27 @@ public class HibernateUtil {
 			}
 		}catch (Exception ex) {
 			Logger.getLogger(HibernateUtil.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+		}
+		return null;
+	}
+	
+	
+	public static <T> void mergeCollection(Collection<T> toUpdate, Collection<T> newList) {
+		if (toUpdate == null) return;
+		List<T> toDelete = new ArrayList<>();
+		for (T x : toUpdate) {
+			if (!newList.contains(x)) toDelete.add(x);
+		}
+		toUpdate.removeAll(toDelete);
+		
+		for (T item : newList) {
+			if (!toUpdate.contains(item)) toUpdate.add(item);
+		}
+	}
+	
+	public static <T> T findInList(Collection<T> list, T item){
+		for (T i : list) {
+			if (i.equals(item)) return i;
 		}
 		return null;
 	}

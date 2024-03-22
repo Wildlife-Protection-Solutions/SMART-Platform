@@ -55,8 +55,15 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		monitor.subTask(Messages.DeleteConservationAreaHandler_DeletePropertiesProgress);
 		deleteCaProperties(ca, session);
 		deleteSignatures(ca, session);
+		deleteTags(ca, session);
 		
 		deleteIcons(ca, session);
+	}
+	
+	private void deleteTags(ConservationArea ca, Session session) throws Exception{
+		session.createMutationQuery("delete from AttachmentTag where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deleteSignatures(ConservationArea ca, Session session) throws Exception{

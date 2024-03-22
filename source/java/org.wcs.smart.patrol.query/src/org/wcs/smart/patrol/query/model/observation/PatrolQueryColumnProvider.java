@@ -41,16 +41,16 @@ import org.wcs.smart.query.model.QueryColumn;
 public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIds, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		if (queryTypeKey.equals(PatrolObservationQuery.KEY)){
-			return PatrolQueryColumnCache.getInstance().getObservationQueryColumns();
+			return PatrolQueryColumnCache.getInstance().getObservationQueryColumns(includeIds);
 		}
 		if (queryTypeKey.equals(PatrolWaypointQuery.KEY)){
-			return PatrolQueryColumnCache.getInstance().getWaypointQueryColumns();
+			return PatrolQueryColumnCache.getInstance().getWaypointQueryColumns(includeIds);
 		}
 		if (queryTypeKey.equals(PatrolQuery.KEY)){
-			return PatrolQueryColumnCache.getInstance().getPatrolQueryColumns();
+			return PatrolQueryColumnCache.getInstance().getPatrolQueryColumns(includeIds);
 		}
 		if (queryTypeKey.equals(PatrolGriddedQuery.KEY)){
 			return PatrolQueryColumnCache.getInstance().getGridColumns();

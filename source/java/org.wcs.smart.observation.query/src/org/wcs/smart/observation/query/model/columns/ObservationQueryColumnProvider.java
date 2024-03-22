@@ -39,12 +39,12 @@ import org.wcs.smart.query.model.QueryColumn;
 public class ObservationQueryColumnProvider implements IObservationQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, boolean includeIdColumns, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		if (queryTypeKey.equals(ObsObservationQuery.KEY)){
-			return ObservationQueryColumnCache.getInstance().getObservationQueryColumns();
+			return ObservationQueryColumnCache.getInstance().getObservationQueryColumns(includeIdColumns);
 		}else if (queryTypeKey.equals(ObservationWaypointQuery.KEY)){
-			return ObservationQueryColumnCache.getInstance().getWaypointQueryColumns();
+			return ObservationQueryColumnCache.getInstance().getWaypointQueryColumns(includeIdColumns);
 		}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
 			return ObservationQueryColumnCache.getInstance().getGridColumns();
 		}

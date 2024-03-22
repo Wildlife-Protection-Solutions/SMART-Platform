@@ -93,6 +93,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		try{
+			
 			HibernateManager.saveOrMerge(session, newIncident);
 			
 			for (IWizardPage page : getPages()) {

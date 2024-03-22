@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.model;
 
 import java.io.File;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -34,6 +35,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
@@ -46,13 +48,13 @@ import jakarta.persistence.Transient;
  */
 @Entity
 @Table(name="observation_attachment", schema="smart")
-public class ObservationAttachment extends ISmartAttachment implements ISignatureAttachment{
+public class ObservationAttachment extends ISmartAttachment implements ISignatureAttachment, ITaggedAttachment{
 
 	private static final long serialVersionUID = 1L;
 	
 	private WaypointObservation observation;
 	private SignatureType signatureType; 
-
+	private List<AttachmentTagLink> attachmentTags;
     
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="obs_uuid", referencedColumnName="uuid")
@@ -72,6 +74,15 @@ public class ObservationAttachment extends ISmartAttachment implements ISignatur
 	}
 	public void setSignatureType(SignatureType stype){
 		this.signatureType = stype;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name="obs_attachment_uuid", referencedColumnName="uuid")
+	public List<AttachmentTagLink> getAttachmentTags(){
+		return this.attachmentTags;
+	}
+	public void setAttachmentTags(List<AttachmentTagLink> tags){
+		this.attachmentTags = tags;
 	}
 	
 	@Transient

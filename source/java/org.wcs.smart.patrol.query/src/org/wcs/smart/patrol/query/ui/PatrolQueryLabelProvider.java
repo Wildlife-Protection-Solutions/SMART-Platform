@@ -82,6 +82,11 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_OBSERVER: return Messages.FixedQueryColumn_ObserverColumnName;
 			case WAYPOINT_LASTMODIFIED: return Messages.PatrolQueryLabelProvider_LastModified_ColumnName;
 			case WAYPOINT_LASTMODIFIEDBY: return Messages.PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
+			case OBSERVATION_UUID: return "Observation UUID";
+			case PATROL_UUID: return "Patrol UUID";
+			case WAYPOINT_UUID: return "Waypoint UUID";
+			default:
+				break;
 			}
 		}
 		if (item instanceof PatrolValueOption){

@@ -76,7 +76,8 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 			}
 		}
 		
-		for (QueryColumn col : query.computeQueryColumns(connection.getCurrentLocale(), connection.getSession(), provider)){
+		List<QueryColumn> cols = query.computeQueryColumns(connection.getCurrentLocale(), connection.getSession(), provider, true);
+		for (QueryColumn col : cols){
 			if ((isObs && (includeAll || col.isVisible())) || (!isObs && col.isVisible())){
 				vis.add(col);
 			}
@@ -87,6 +88,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 			vis.add(AttachmentFilenameQueryColumn.INSTANCE);
 			vis.add(SignatureTypeQueryColumn.KEY_COLUMN);
 			vis.add(SignatureTypeQueryColumn.NAME_COLUMN);
+			vis.add(SignatureTypeQueryColumn.TAGS_COLUMN);
 			vis.add(AttachmentByteQueryColumn.INSTANCE);
 		}
 			

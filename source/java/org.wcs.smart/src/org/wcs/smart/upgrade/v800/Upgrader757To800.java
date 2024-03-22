@@ -201,6 +201,19 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 			//waypoint last modified for timestamp change to utc
 			"CREATE FUNCTION smart.localTsToUtcTs(ts timestamp, zoneid varchar(256)) returns timestamp LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.DerbyUtils.localToUtc' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 			
+
+			//attachment tags
+			"CREATE TABLE smart.attachment_tag (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, keyid varchar(128) not null, primary key (uuid), unique(ca_uuid, keyid))", //$NON-NLS-1$
+			"ALTER TABLE smart.attachment_tag  ADD CONSTRAINT attachment_tag_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			"CREATE TABLE SMART.attachment_tag_link (uuid char(16) for bit data not null, obs_attachment_uuid char(16) for bit data, wp_attachment_uuid char(16) for bit data, tag_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.attachment_tag_link  ADD CONSTRAINT attachment_tag_link_tag_uuid_fk FOREIGN KEY (tag_uuid) REFERENCES smart.attachment_tag(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.attachment_tag_link  ADD CONSTRAINT attachment_tag_link_obs_attachment_uuid_fk FOREIGN KEY (obs_attachment_uuid) REFERENCES smart.observation_attachment(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.attachment_tag_link  ADD CONSTRAINT attachment_tag_link_wp_attachment_uuid_fk FOREIGN KEY (wp_attachment_uuid) REFERENCES smart.wp_attachments(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+			"ALTER TABLE smart.cm_node add column attachment_tags long varchar", //$NON-NLS-1$
+
 		};
 		
 		for (String s : sql) {

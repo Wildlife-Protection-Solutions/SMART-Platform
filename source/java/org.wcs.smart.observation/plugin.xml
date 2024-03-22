@@ -85,6 +85,11 @@
             class="org.wcs.smart.observation.model.DataLink"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".tag.conservationArea"
+            class="org.wcs.smart.observation.model.AttachmentTagLink"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.menus">

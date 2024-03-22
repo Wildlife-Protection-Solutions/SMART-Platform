@@ -69,7 +69,7 @@ public class IncidentWizardPage extends WizardPage {
 		center.setLayout(gl);
 		
 		Composite x = contents.createComposite(center);
-		x.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		x.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
 		contents.addChangeListener(new Listener(){

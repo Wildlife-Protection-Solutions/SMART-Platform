@@ -171,7 +171,7 @@ public abstract class GriddedQuery extends StyledQuery {
 	@Transient
 	public List<QueryColumn> computeQueryColumns(Locale l, Session session) {
 		List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
-			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, false, session);
 			queryColumns = new ArrayList<QueryColumn>();
 			for (int i = 0; i < cols.length; i ++){
 				queryColumns.add(cols[i]);

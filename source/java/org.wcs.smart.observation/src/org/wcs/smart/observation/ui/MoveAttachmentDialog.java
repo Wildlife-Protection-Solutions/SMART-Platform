@@ -130,7 +130,7 @@ public class MoveAttachmentDialog extends SmartStyledTitleDialog {
 		tbViewer.getTable().addListener(SWT.Dispose, e->{
 			loadImages.cancel();
 			for (Image img : images.values()) {
-				img.dispose();
+				if (img != null) img.dispose();
 			}
 		});
 		TableViewerColumn tv = new TableViewerColumn(tbViewer, SWT.NONE);

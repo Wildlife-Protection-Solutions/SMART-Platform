@@ -233,9 +233,17 @@ public abstract class SimpleQuery extends StyledQuery {
 	 * @return
 	 */
 	@Transient
-	public List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider){
+	public List<QueryColumn> computeQueryColumns(Locale l, Session session, 
+			IProjectionProvider prjProvider){
+		return computeQueryColumns(l, session, prjProvider, false);
 		
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
+	}
+	@Transient
+	public List<QueryColumn> computeQueryColumns(Locale l, Session session, 
+			IProjectionProvider prjProvider, boolean includeIdColumns){
+		
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass())
+				.getQueryColumns(this, l, includeIdColumns, session);
 		
 		List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

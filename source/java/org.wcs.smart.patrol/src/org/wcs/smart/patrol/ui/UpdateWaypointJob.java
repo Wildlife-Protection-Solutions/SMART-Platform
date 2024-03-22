@@ -31,7 +31,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -81,7 +83,15 @@ public class UpdateWaypointJob extends Job {
 					Waypoint toUpdate = saveSession.get(Waypoint.class, wp.getWaypoint().getUuid());
 					updateFunction.accept(wp.getWaypoint());
 					updateFunction.accept(toUpdate);
+					
+					for (WaypointAttachment wa: toUpdate.getAttachments()) {
+						if (wa.getAttachmentTags() == null) continue;
+						for (AttachmentTagLink link : wa.getAttachmentTags()) {
+							if (link.getUuid() == null) saveSession.persist(link);
+						}
+					}
 				}
+				
 				saveSession.getTransaction().commit();
 			
 				for (PatrolWaypoint wp : waypoints) {					

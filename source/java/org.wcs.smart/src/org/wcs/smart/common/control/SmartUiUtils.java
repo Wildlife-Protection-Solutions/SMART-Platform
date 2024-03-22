@@ -142,7 +142,8 @@ public class SmartUiUtils {
 				if (kid instanceof Link) kid.setBackground(transparent);
 				if (kid instanceof Hyperlink) kid.setBackground(transparent);
 				if (kid instanceof Button) {
-					if ((kid.getStyle() & SWT.CHECK) == SWT.CHECK || (kid.getStyle() & SWT.RADIO) == SWT.RADIO) {
+					if ((kid.getStyle() & SWT.CHECK) == SWT.CHECK || 
+							(kid.getStyle() & SWT.RADIO) == SWT.RADIO) {
 						if (!SystemUtils.IS_OS_MAC) kid.setBackground(transparent);
 					}
 				}

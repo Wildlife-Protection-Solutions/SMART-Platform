@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
+import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -442,12 +443,15 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		(new LoadAlertTypesJob(context, force) {
 			@Override
 			public void typesLoaded(List<AlertType> atypes) {
-				try {
+				
+				List<AlertType> types = new ArrayList<>(atypes);
+				
+				cmbPositionType.getControl().getDisplay().asyncExec(()->{
+					
 					fireEvents = false;
-					List<AlertType> types = new ArrayList<>(atypes);
-					cmbPositionType.getControl().getDisplay().asyncExec(()->{
+					try {
 						cmbPositionType.setInput(types);
-						
+							
 						if (ctpackage instanceof AbstractCtPackage) {
 							MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
 							if (data.getUuidValue() != null) {
@@ -470,10 +474,11 @@ public class ConnectDataUiController implements IPackageUiContribution{
 							}
 						}
 						onInitilized.run();
-					});
-				}finally {
-					fireEvents = true;
-				}
+					}finally {
+						fireEvents = true;		
+					}
+				});
+			
 			}
 		}).schedule();
 	}
@@ -638,7 +643,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					boolean isprivate = true;
 					if (privatemd.getBooleanValue() != null) isprivate = privatemd.getBooleanValue();
 					
-					URL url = new URL(surl);
+					URL url = URI.create(surl).toURL();
 					String link = ICtPackage.generateSmartMobileAppLink(url, isprivate);
 					txtUrl.setText(link);
 				}catch (Exception ex) {

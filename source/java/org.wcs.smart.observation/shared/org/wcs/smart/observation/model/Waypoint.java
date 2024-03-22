@@ -420,12 +420,28 @@ public class Waypoint extends UuidItem {
 		if (getAttachments() != null) {
 			getAttachments().forEach(wa->{
 				if (wa.getUuid() == null) session.persist(wa);
+				
+				if (wa.getAttachmentTags() != null) {
+					//save an tags
+					wa.getAttachmentTags().stream()
+						.filter(e->e.getUuid() == null)
+						.forEach(e->session.persist(e));
+					
+				}
 			});
 		}
 		for (WaypointObservation wo : getAllObservations()) {
 			if (wo.getAttachments() == null) continue;
 			wo.getAttachments().forEach(a->{
 				if (a.getUuid() == null) session.persist(wo);
+				
+				if (a.getAttachmentTags() != null) {
+					//save an tags
+					a.getAttachmentTags().stream()
+						.filter(e->e.getUuid() == null)
+						.forEach(e->session.persist(e));
+					
+				}
 			});
 		}
 	}

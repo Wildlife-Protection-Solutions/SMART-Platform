@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2022 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,31 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model;
+package org.wcs.smart.observation.model;
 
-import java.util.Locale;
-
-import org.hibernate.Session;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import java.util.List;
 
 /**
- * Column provider for patrol query.
+ * Interface for attachments that can have a tags type
+ * 
  * @author Emily
+ * @since 8.0
  *
  */
-public interface IQueryColumnProvider {
+public interface ITaggedAttachment {
 
 	/**
-	 * Get columns for query.
-	 * 
-	 * @param query the query to get columns for
-	 * @param l the locale for the column names
-	 * @param session current db session
+	 * Links to associated tags
 	 * @return
 	 */
-	public QueryColumn[] getQueryColumns(Query query, Locale l, 
-			boolean includeIdColumns, Session session);
+	public List<AttachmentTagLink> getAttachmentTags();
 	
-	
+	/**
+	 * set tag links
+	 * @param tags
+	 */
+	public void setAttachmentTags(List<AttachmentTagLink> tags);
 }

@@ -283,7 +283,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	public void loadWaypointDetails(SurveyWaypoint wp, Session session) throws Exception {
 		ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
 		wp.getWaypoint().getObservationsAsString();
-		Hibernate.initialize(wp.getWaypoint());
+		Hibernate.initialize(wp.getWaypoint());		
+		if (wp.getWaypoint().getLastModifiedBy() != null) wp.getWaypoint().getLastModifiedBy().getFamilyName();
 	}
 	
 	/**

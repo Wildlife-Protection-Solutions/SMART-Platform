@@ -31,9 +31,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.LocalAttachmentTagManager;
 import org.wcs.smart.LocalSignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -113,6 +115,8 @@ public class ConservationAreaTemplateCloner implements
 		progress.subTask(Messages.ConservationAreaTemplateCloner_CopyingProperties);
 		cloneProperties(engine);
 		cloneSignatures(engine);
+		cloneAttachmentTags(engine);
+		
 		progress.worked(1);
 	}
 	
@@ -126,6 +130,22 @@ public class ConservationAreaTemplateCloner implements
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKeyId(t.getKeyId());
 			LocalSignatureTypeManager.INSTANCE.saveType(clone, engine.getSession());
+			
+			engine.addConservationItemMapping(t, clone);
+		}
+		engine.getSession().flush();
+		
+	}
+	
+	private void cloneAttachmentTags(ConservationAreaClonerEngine engine) {
+		List<AttachmentTag> tags = LocalAttachmentTagManager.INSTANCE.getTags(engine.getSession(), engine.getTemplateCa());
+		
+		for (AttachmentTag t : tags) {
+			AttachmentTag clone = new AttachmentTag();
+			engine.copyLabels(t, clone);
+			clone.setConservationArea(engine.getNewCa());
+			clone.setKeyId(t.getKeyId());
+			LocalAttachmentTagManager.INSTANCE.saveTag(clone, engine.getSession());
 			
 			engine.addConservationItemMapping(t, clone);
 		}

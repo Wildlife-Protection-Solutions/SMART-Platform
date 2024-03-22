@@ -97,7 +97,6 @@ public class GriddedTableContent {
 	public void initValues(GriddedQuery query) {
 		setQueryName(query);
 		resultsTable.initQuery(query);
-//		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
 	}
 	
 	public void setQueryName(GriddedQuery query){
