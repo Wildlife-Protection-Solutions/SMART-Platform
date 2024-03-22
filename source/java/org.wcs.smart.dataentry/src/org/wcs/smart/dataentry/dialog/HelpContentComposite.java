@@ -23,6 +23,8 @@ package org.wcs.smart.dataentry.dialog;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
@@ -407,24 +410,40 @@ public class HelpContentComposite extends Composite {
 					List<CmAttribute> nodes = new ArrayList<>();
 					final ConfigurableModel cm = (ConfigurableModel)x[0];
 					try(Session session = HibernateManager.openSession()){
-						ConfigurableModel cm2 = session.get(ConfigurableModel.class, cm.getUuid());
-						List<CmNode> nn = new ArrayList<>();
-						nn.addAll(cm2.getNodes());
-						while(!nn.isEmpty()) {
-							CmNode n = nn.remove(0);
-							if (n.getChildren() != null) nn.addAll(n.getChildren());
-							if (n.getCmAttributes() != null) {
-								for (CmAttribute att : n.getCmAttributes()) {
-									if (att.getAttribute().equals(attribute.getAttribute())) {
-										nodes.add(att);
+						session.beginTransaction();
+						
+						session.doWork(new Work() {
+							@Override
+							public void execute(Connection c) throws SQLException {
+								int iso = c.getTransactionIsolation();
+								c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+								
+								try {
+									ConfigurableModel cm2 = session.get(ConfigurableModel.class, cm.getUuid());
+									List<CmNode> nn = new ArrayList<>();
+									nn.addAll(cm2.getNodes());
+									while(!nn.isEmpty()) {
+										CmNode n = nn.remove(0);
+										if (n.getChildren() != null) nn.addAll(n.getChildren());
+										if (n.getCmAttributes() != null) {
+											for (CmAttribute att : n.getCmAttributes()) {
+												if (att.getAttribute().equals(attribute.getAttribute())) {
+													nodes.add(att);
+												}
+											}
+										}
 									}
+									for (CmAttribute n : nodes) {
+										n.getName();
+										n.getNode().getName();
+									}
+								}finally {
+									c.setTransactionIsolation(iso);
 								}
+								session.getTransaction().rollback();
 							}
-						}
-						for (CmAttribute n : nodes) {
-							n.getName();
-							n.getNode().getName();
-						}
+						});
+						
 					}
 					
 					Display.getDefault().asyncExec(()->{
@@ -538,11 +557,30 @@ public class HelpContentComposite extends Composite {
 			CmAttribute temp = attribute;
 			if (temp == null) return Status.OK_STATUS;
 			try(Session session = HibernateManager.openSession()){
-				otherConfigurableModels.addAll(QueryFactory.buildQuery(session, ConfigurableModel.class, 
-						new Object[] {"conservationArea", temp.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
-						.list());
-				otherConfigurableModels.remove(temp.getNode().getModel());
-				otherConfigurableModels.forEach(e->e.getName());
+				session.beginTransaction();
+				session.doWork(new Work() {
+					
+					@Override
+					public void execute(Connection c) throws SQLException {
+						int iso = c.getTransactionIsolation();
+						c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+						
+						try {
+							otherConfigurableModels.addAll(QueryFactory.buildQuery(session, ConfigurableModel.class, 
+									new Object[] {"conservationArea", temp.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
+									.list());
+							otherConfigurableModels.remove(temp.getNode().getModel());
+							otherConfigurableModels.forEach(e->e.getName());
+						}finally {
+							c.setTransactionIsolation(iso);
+						}
+						
+					}
+				
+					
+				});
+				session.getTransaction().rollback();
+				
 			}
 			Display.getDefault().asyncExec(()->{
 				if (!otherConfigurableModels.isEmpty()) tiImport.setEnabled(true);

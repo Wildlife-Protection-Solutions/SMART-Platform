@@ -29,7 +29,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/derbytools-10.17.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-c3p0-6.4.4.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mchange-commons-java-0.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.4.4.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.4.4.Final.jar" sourcepath="lib-src/hibernate-core-6.4.4.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-jcache-6.4.4.Final.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -28,7 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -56,6 +59,9 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
+import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.MatrixNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
@@ -126,8 +132,8 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	
 	private HashMap<ControlButton, Button> controlButtons = new HashMap<ControlButton, Button>();
 	
-	private List<CmAttributeConfig> deletedConfigs = new ArrayList<>();
-	private List<CmAttributeConfig> addedConfigs = new ArrayList<>();
+//	private List<CmAttributeConfig> deletedConfigs = new ArrayList<>();
+//	private List<CmAttributeConfig> addedConfigs = new ArrayList<>();
 	
 	
 	private ScrolledComposite propertiesComp, helpComp;
@@ -257,7 +263,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				
 				if (modelTreeViewer.getStructuredSelection().size() == 1) {
 					Object item = modelTreeViewer.getStructuredSelection().getFirstElement();
-					if (item instanceof CmNode) canDelete = true;
+					
 					if (item instanceof CmNode && ((CmNode)item).getCategory() == null) {
 						canAddCategory = true;
 						canAddGroup = true;
@@ -270,7 +276,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				
 				List<CmAttribute> selectedItems = new ArrayList<>();
 				for (Iterator<?> iterator2 = modelTreeViewer.getStructuredSelection().iterator(); iterator2.hasNext();) {
+					
 					Object item = iterator2.next();
+					
+					if (item instanceof CmNode) canDelete = true;
+					
 					if (!(item instanceof CmAttribute)) {
 						isVisible = false;
 						break;
@@ -342,7 +352,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 					
 					MenuItem mi = new MenuItem(treeMenu, SWT.PUSH);
 					mi.setText(ControlButton.DELETE.name);
-					mi.addListener(SWT.Selection, evt->doControlButtonPress(ControlButton.DELETE));
+					mi.addListener(SWT.Selection, evt->doDeleteNodes());
 					mi.setImage(ControlButton.DELETE.getImage());
 				}
 				
@@ -390,9 +400,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		IModelChangedListener modelChangeListener = new IModelChangedListener() {
 			@Override
 			public void modelChanged() {
-				dialog.notifyChangesMade();
-				modelTreeViewer.refresh();
-				dialog.getSession().flush();
+				modified();
 			}
 		};
 
@@ -401,10 +409,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
-		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), true, deletedConfigs);
+		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), true);
 		groupNodeComposite.addModelChangedListener(modelChangeListener);
 		
-		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), false, deletedConfigs);
+		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
@@ -418,15 +426,15 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
-		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
+		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.LIST, attrComposite);
 
-		attrComposite = new MListAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
+		attrComposite = new MListAttributeInfoComposite(infoInnerPanel, dialog);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.MLIST, attrComposite);
 		
-		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
+		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 
@@ -477,6 +485,49 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		return container;
 	}
 
+	private void modified() {
+		dialog.notifyChangesMade();
+		modelTreeViewer.refresh();
+		dialog.getSession().flush();
+	}
+	
+	private void doDeleteNodes() {
+		IStructuredSelection selection = modelTreeViewer.getStructuredSelection();
+		List<CmNode> toDelete = new ArrayList<>();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object item = iterator.next();
+			if (item instanceof CmNode) {
+				toDelete.add((CmNode)item);
+			}
+		}
+		if (toDelete.isEmpty()) return;
+		
+		if (!MessageDialog.openQuestion(dialog.getShell(), "Delete", "Are you sure you want to removed the selected nodes. This action cannot be undone.")) {
+			return;
+		}
+		
+		ProgressMonitorDialog ddialog = new ProgressMonitorDialog(dialog.getShell());
+		try {
+			ddialog.run(true, false, monitor->{
+				monitor.beginTask("Deleting selected nodes", toDelete.size() + 2);
+				for (CmNode node : toDelete) {
+					monitor.subTask(node.getName());
+					deleteNode(node, dialog.getSession());
+					monitor.worked(1);
+				}
+				monitor.subTask("saving...");
+				dialog.getSession().flush();
+				monitor.done();
+			});
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+
+		
+		modified();
+	}
+	
+	
 	private void groupSelectedAttributes() {
 
 		List<CmAttribute> items = new ArrayList<>();
@@ -579,12 +630,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	public void performSave(Session s) {
 		s.flush();
 		if (dialog.getModel().getUuid() == null) s.persist(dialog.getModel());
-		addedConfigs.forEach(c->{if (c.getUuid() == null) s.persist(c);});
 		dialog.getModel().getDefaultConfigs().values().forEach(e->{if (e.getUuid() == null) s.persist(e);});
-		//HibernateManager.saveOrMerge(s, dialog.getModel());
-		//addedConfigs.forEach(e->HibernateManager.saveOrMerge(s, e));
-		//dialog.getModel().getDefaultConfigs().values().forEach(e->HibernateManager.saveOrMerge(s, e));
-		deletedConfigs.clear();
 	}
 	
 	/**
@@ -644,5 +690,74 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	@Override
 	public int getTabIndex() {
 		return 0;
+	}
+	
+	public static List<CmAttributeConfig> deleteNode(CmNode node, Session session) {
+		ConfigurableModel model = node.getModel();
+		CmNode parentNode = node.getParent();
+		List<CmAttributeConfig> deleted = new ArrayList<>();
+		node.setParent(null);
+		if (parentNode == null) {
+			//this is the root node
+			model.getNodes().remove(node);
+			//re-order nodes
+			int i = 0;
+			for (CmNode n : model.getNodes()){
+				n.setNodeOrder(i++);
+			}
+		} else {
+			//not a root node
+			parentNode.getChildren().remove(node);
+				
+			//re-order nodes
+			int i = 0;
+			for (CmNode n : parentNode.getChildren()){
+				n.setNodeOrder(i++);
+			}
+		}
+			
+		//remove default tree mapping if present
+		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(model);
+		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
+			if (!existingTrees.contains(a)) {
+				//attribute is not present in CM anymore -> remove all related configurations
+				model.getDefaultConfigs().remove(a);
+				deleted.addAll(removeRelatedConfigs(a, node, session));		
+			}
+		}
+		//remove default list mapping if present
+		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(model);
+		for (Attribute a : CmDefaultListsUtil.getPresentedListAttributes(node)) {
+			if (!existingLists.contains(a)) {
+				//attribute is not present in CM anymore -> remove all related configurations
+				model.getDefaultConfigs().remove(a);
+				deleted.addAll(removeRelatedConfigs(a, node, session));
+			}
+		}
+		return deleted;		
+	}
+	
+	private static List<CmAttributeConfig> removeRelatedConfigs(Attribute a, CmNode node, Session session) {
+		List<CmAttributeConfig> deleted = new ArrayList<>(); 
+		List<CmAttributeConfig> configs = DataentryHibernateManager.getCmAttributeConfigs(session, 
+				node.getModel(), a);
+		for (CmAttributeConfig cfg : configs) {
+			if (node.getCmAttributes().isEmpty()) continue;
+			//for hibernate
+			node.getCmAttributes().forEach(cma->{
+				if (cfg.equals(cma.getConfig())) {
+					cma.setConfig(null);
+				}
+			});
+			
+			session.remove(cfg);
+			deleted.add(cfg);
+
+			//for hibernate
+			if (cfg.getList() != null)cfg.getList().forEach(f->f.setConfig(null));
+			if (cfg.getTree() != null)cfg.getTree().forEach(f->f.setConfig(null));
+		}
+		return deleted;
+		
 	}
 }

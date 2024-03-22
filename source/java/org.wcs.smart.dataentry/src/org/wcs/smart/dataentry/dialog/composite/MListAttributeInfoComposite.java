@@ -80,8 +80,8 @@ public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public MListAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog, List<CmAttributeConfig> deletedConfigs, List<CmAttributeConfig> addedConfigs) {
-		super(parent, dialog, deletedConfigs, addedConfigs);
+	public MListAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog) {
+		super(parent, dialog);
 		this.dialog = dialog;
 	}
 

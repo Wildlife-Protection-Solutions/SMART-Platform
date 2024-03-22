@@ -62,19 +62,15 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 
 	private ComboViewer configViewer;
 	private ConfigurableModelEditDialog dialog;
-	private List<CmAttributeConfig> deletedConfigs = null;
-	private List<CmAttributeConfig> addedConfigs = null;
 	protected ToolItem tiDeleteConfig;
 	/**
 	 * @param parent
 	 * @param model
 	 * @param session
 	 */
-	public CmAttributeConfInfoComposite(Composite parent, ConfigurableModelEditDialog dialog, List<CmAttributeConfig> deletedConfigs, List<CmAttributeConfig> addedConfigs) {
+	public CmAttributeConfInfoComposite(Composite parent, ConfigurableModelEditDialog dialog) {
 		super(parent, dialog.getModel(), dialog.getSession());
 		this.dialog = dialog;
-		this.deletedConfigs = deletedConfigs;
-		this.addedConfigs = addedConfigs;
 	}
 	
 	public ConfigurableModelEditDialog getDialog() {
@@ -84,10 +80,6 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 	private List<CmAttributeConfig> getConfigs(CmAttribute cmAttr) {
 		ConfigurableModel cm = cmAttr.getNode().getModel();
 		List<CmAttributeConfig> cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cm, cmAttr.getAttribute()));
-		cfgList.removeAll(deletedConfigs);
-		for (CmAttributeConfig c : addedConfigs) {
-			if (c.getAttribute().equals(cmAttr.getAttribute()) && !cfgList.contains(c)) cfgList.add(c);
-		}
 		CmAttributeConfig defaultCfg = dialog.getModel().getDefaultConfigs().get(cmAttr.getAttribute());
 		if (defaultCfg != null && !cfgList.contains(defaultCfg)) {
 			cfgList.add(defaultCfg);
@@ -172,13 +164,10 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 	}
 
 	protected void applyNewConig(CmAttributeConfig cfg) {
-		if (cfg.getUuid() == null && !addedConfigs.contains(cfg)) {
+		if (cfg.getUuid() == null) {
 			dialog.getSession().persist(cfg);
-			addedConfigs.add(cfg);
 		}
-		
 		List<CmAttributeConfig> cfgList = getConfigs(getSourceObject());
-		//cfgList.sort(new CmAttributeConfigComparator());
 		configViewer.setInput(cfgList);
 		configViewer.setSelection(new StructuredSelection(cfg));
 		handleConfigViewerSelectionChanged();
@@ -201,8 +190,6 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		if (config.getUuid() != null) {
 			dialog.getSession().remove(config);
 		}
-		if (!deletedConfigs.contains(config)) deletedConfigs.add(config);
-		addedConfigs.remove(config);
 		
 		List<CmAttributeConfig> cfgList = getConfigs(getSourceObject());
 		configViewer.setInput(cfgList);

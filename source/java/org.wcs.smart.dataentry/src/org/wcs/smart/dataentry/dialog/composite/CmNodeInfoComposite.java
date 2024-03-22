@@ -96,16 +96,16 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Label lblErOp;
 	
 	private boolean isGroup;
-	private List<CmAttributeConfig> deletedConfigs;
+//	private List<CmAttributeConfig> deletedConfigs;
 	 
 	private static final String NOVALUE = ""; //$NON-NLS-1$
 	
-	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup, List<CmAttributeConfig> deletedConfigs) {
+	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
 		super(parent, model, session);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
-		this.deletedConfigs = deletedConfigs;
+//		this.deletedConfigs = deletedConfigs;
 		this.isGroup = isGroup;
 		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -486,70 +486,31 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			return;
 		}
 		
-		CmNode parentNode = node.getParent();
-		node.setParent(null);
-		if (parentNode == null) {
-			//this is the root node
-			getModel().getNodes().remove(node);
-			//re-order nodes
-			int i = 0;
-			for (CmNode n : getModel().getNodes()){
-				n.setNodeOrder(i++);
-			}
-		} else {
-			//not a root node
-			parentNode.getChildren().remove(node);
-			
-			//re-order nodes
-			int i = 0;
-			for (CmNode n : parentNode.getChildren()){
-				n.setNodeOrder(i++);
-			}
-		}
-		
-		//remove default tree mapping if present
-		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(getModel());
-		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
-			if (!existingTrees.contains(a)) {
-				//attribute is not present in CM anymore -> remove all related configurations
-				getModel().getDefaultConfigs().remove(a);
-				removeRelatedConfigs(a, node);
-				
-				
-			}
-		}
-		//remove default list mapping if present
-		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(getModel());
-		for (Attribute a : CmDefaultListsUtil.getPresentedListAttributes(node)) {
-			if (!existingLists.contains(a)) {
-				//attribute is not present in CM anymore -> remove all related configurations
-				getModel().getDefaultConfigs().remove(a);
-				removeRelatedConfigs(a, node);
-			}
-		}
+		ConfigurableModelEditorDefaultTab.deleteNode(node, session);
+
 		fireModelChanged();
 	}
 
-	private void removeRelatedConfigs(Attribute a, CmNode node) {
-		List<CmAttributeConfig> configs = DataentryHibernateManager.getCmAttributeConfigs(this.session, getModel(), a);
-		for (CmAttributeConfig cfg : configs) {
-			if (node.getCmAttributes().isEmpty()) continue;
-			//for hibernate
-			node.getCmAttributes().forEach(cma->{
-				if (cfg.equals(cma.getConfig())) {
-					cma.setConfig(null);
-				}
-			});
-			
-			this.session.remove(cfg);
-			this.deletedConfigs.add(cfg);
-
-			//for hibernate
-			if (cfg.getList() != null)cfg.getList().forEach(f->f.setConfig(null));
-			if (cfg.getTree() != null)cfg.getTree().forEach(f->f.setConfig(null));
-		}
-		
-	}
+//	private void removeRelatedConfigs(Attribute a, CmNode node) {
+//		List<CmAttributeConfig> configs = DataentryHibernateManager.getCmAttributeConfigs(this.session, getModel(), a);
+//		for (CmAttributeConfig cfg : configs) {
+//			if (node.getCmAttributes().isEmpty()) continue;
+//			//for hibernate
+//			node.getCmAttributes().forEach(cma->{
+//				if (cfg.equals(cma.getConfig())) {
+//					cma.setConfig(null);
+//				}
+//			});
+//			
+//			this.session.remove(cfg);
+//			this.deletedConfigs.add(cfg);
+//
+//			//for hibernate
+//			if (cfg.getList() != null)cfg.getList().forEach(f->f.setConfig(null));
+//			if (cfg.getTree() != null)cfg.getTree().forEach(f->f.setConfig(null));
+//		}
+//		
+//	}
 	
 	private boolean isPhotoAllowedEnabled(CmNode node) {
 		return !node.getModel().isPhotoFirst();

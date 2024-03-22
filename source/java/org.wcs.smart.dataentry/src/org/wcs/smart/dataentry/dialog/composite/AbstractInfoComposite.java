@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -191,20 +192,6 @@ public abstract class AbstractInfoComposite extends Composite {
 		return modeViewer;
 	}
 
-	private void addToParent(CmNode node) {
-		Object obj = getSourceObject();
-		if (obj instanceof CmNode) {
-			CmNode parentNode = (CmNode) obj;
-			node.setParent(parentNode);
-			node.setNodeOrder(parentNode.getChildren().size());
-			parentNode.getChildren().add(node);
-		} else if (obj instanceof CmRootNode) {
-			node.setParent(null);
-			node.setNodeOrder(getModel().getNodes().size());
-			getModel().getNodes().add(node);
-		}
-		fireModelChanged();
-	}
 	
 	/**
 	 * Handles delete button
@@ -221,7 +208,19 @@ public abstract class AbstractInfoComposite extends Composite {
 		node.setName(Messages.AbstractInfoComposite_NewGroupDefaultName);
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
 		node.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), node.getName());
-		addToParent(node);
+		
+		Object obj = getSourceObject();
+		if (obj instanceof CmNode) {
+			CmNode parentNode = (CmNode) obj;
+			node.setParent(parentNode);
+			node.setNodeOrder(parentNode.getChildren().size());
+			parentNode.getChildren().add(node);
+		} else if (obj instanceof CmRootNode) {
+			node.setParent(null);
+			node.setNodeOrder(getModel().getNodes().size());
+			getModel().getNodes().add(node);
+		}
+		fireModelChanged();
 	}
 	
 	protected void loadFiles(Icon i, Session s) {
@@ -238,68 +237,62 @@ public abstract class AbstractInfoComposite extends Composite {
 	protected void addDatamodelCategory() {
 		try {
 			DataModel dm = getDataModel();
-			final DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm);
-			if (dialog.open() == IDialogConstants.OK_ID) {
-		
-				if (dialog.getCategories().isEmpty()) return;
+			final DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm) {
+				@Override
+				protected void createButtonsForButtonBar(Composite parent) {
+					// create OK and Cancel buttons by default
+					createButton(parent, IDialogConstants.OK_ID, "Add Selected", false);
+					createButton(parent, IDialogConstants.FINISH_ID, "Add Selected With Children", true);
+					createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CANCEL_LABEL, false);
+					
+					getButton(IDialogConstants.FINISH_ID).setEnabled(false);
+					getButton(IDialogConstants.OK_ID).setEnabled(false);
+					getButton(IDialogConstants.CLOSE_ID).setFocus();
+					
+					super.setReturnCode(IDialogConstants.CLOSE_ID);
+				}
+				protected void updateButtons() {
+					super.updateButtons();
+					getButton(IDialogConstants.FINISH_ID).setEnabled(getButton(IDialogConstants.OK_ID).getEnabled());
+				}
+			};
+			
+			int ret = dialog.open();
+			if (ret != IDialogConstants.FINISH_ID && ret != IDialogConstants.OK_ID) return;
+			if (dialog.getCategories().isEmpty()) return;
 				
-				//this can be slow for large trees or many categories; put it in a pmd
-				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			List<Category> toAdd = dialog.getCategories();
+			boolean includeKids = ret == IDialogConstants.FINISH_ID;
+			
+			//this can be slow for large trees or many categories; put it in a pmd
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 				
-				pmd.run(true, false, new IRunnableWithProgress() {
+			pmd.run(true, false, new IRunnableWithProgress() {
 
-					@Override
-					public void run(IProgressMonitor monitor)
-							throws InvocationTargetException,
-							InterruptedException {
-						
-						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
-						
-						for (Category c : dialog.getCategories()){
-							monitor.subTask(c.getName());
-							Category start = c;
-							
-							while(c != null){
-								c.getNames().size();
-								loadFiles(c.getIcon(), session);
-									
-								for (CategoryAttribute ca : c.getAttributes(true)){
-									ca.getAttribute().getNames().size();
-									loadFiles(ca.getAttribute().getIcon(), session);
-										
-									if (ca.getAttribute().getAggregations()!= null) ca.getAttribute().getAggregations().size();
-									if (ca.getAttribute().getActiveListItems() != null){
-										for (AttributeListItem li : ca.getAttribute().getActiveListItems()){
-											li.getNames().size();
-											loadFiles(li.getIcon(), session);
-										}
-									}
-									visitTreeNodes(ca.getAttribute().getActiveTreeNodes(),session);
-								}
-								c = c.getParent();
-							}
-							addCategory(start);
-							monitor.worked(1);
-						}
-						monitor.done();						
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					
+					monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, toAdd.size() + 2);
+					if (includeKids)	{
+						addCategoriesWithKids(toAdd, monitor);
+					}else {
+						addCategoriesWithoutKids(toAdd, monitor);
 					}
-					private void visitTreeNodes(List<AttributeTreeNode> nodes, Session s){
-						if (nodes == null) return;
-						for (AttributeTreeNode n : nodes){
-							loadFiles(n.getIcon(), s);
-							n.getNames().size();
-							visitTreeNodes(n.getActiveChildren(),s );
-						}
-					}
-				});
-			}
+					
+					monitor.subTask("saving...");
+					session.flush();
+					monitor.worked(2);
+					
+					Display.getDefault().syncExec(()->fireModelChanged());
+				}
+			});
+			
 		} catch (Throwable ex) {
 			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
 		}
 	}
 	
-	private void addCategory(Category category){
-		
+	private CmNode createNodeFromCategory(Category category) {
 		final CmNode node = new CmNode();
 		node.setModel(getModel());
 		node.setCategory(category);
@@ -325,20 +318,16 @@ public abstract class AbstractInfoComposite extends Composite {
 			}
 			session.persist(cma);
 		}
-		//we need to call this part in the main ui thread
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				addToParent(node);
-			}
-		});
+		return node;
 	}
+	
 
 	private void ensureDefaultTreeExists(Attribute a) {
 		ConfigurableModel m = getModel();
 		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
 		if (!existingTrees.contains(a) || m.getDefaultConfigs().get(a) == null) {
 			CmAttributeConfig cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
+			if (cfg.getUuid() == null) session.persist(cfg);
 			m.getDefaultConfigs().put(a, cfg);
 		}
 	}
@@ -348,8 +337,126 @@ public abstract class AbstractInfoComposite extends Composite {
 		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
 		if (!existingLists.contains(a) || m.getDefaultConfigs().get(a) == null) {
 			CmAttributeConfig cfg = CmDefaultListsUtil.buildDefaultListConfig(m, a);
+			if (cfg.getUuid() == null) session.persist(cfg);
 			m.getDefaultConfigs().put(a, cfg);
 		}
+	}
+	
+	private void addCategoriesWithKids(List<Category> category, IProgressMonitor monitor) {
+		List<Category> allCategories = new ArrayList<>(category);
+		allCategories.sort((a,b)->Integer.compare(Category.hkeyLength(a.getHkey()),Category.hkeyLength(b.getHkey())));
+			
+		List<Category> processed = new ArrayList<>();
+		while(!allCategories.isEmpty()) {
+			Category c = allCategories.removeFirst();
+			monitor.subTask(c.getName());
+			monitor.worked(1);
+			
+			if (processed.contains(c)) {
+				monitor.worked(1);
+				continue;
+			}
+			
+			addCategoriesWithKids(Collections.singletonList(c), null, processed, category);
+			monitor.worked(1);
+			
+		}		
+	}
+	
+	private void addCategoriesWithKids(List<Category> category, CmNode parent, List<Category> processed, List<Category> originalSelection) {
+		List<Category> allCategories = new ArrayList<>(category);
+		allCategories.sort((a,b)->Integer.compare(Category.hkeyLength(a.getHkey()),Category.hkeyLength(b.getHkey())));
+		
+		while(!allCategories.isEmpty()) {
+			Category c = allCategories.removeFirst();
+			processed.add(c);			
+			if (c.getChildren().isEmpty()) {
+				//add this as a root
+				CmNode node = createNodeFromCategory(c);
+				
+				Object xparent = parent;
+				if (xparent == null) {
+					xparent = getSourceObject();
+				}
+				
+				if (xparent instanceof CmNode) {
+					CmNode parentNode = (CmNode) xparent;
+					node.setParent(parentNode);
+					node.setNodeOrder(parentNode.getChildren().size());
+					parentNode.getChildren().add(node);
+				} else if (xparent instanceof CmRootNode) {
+					node.setParent(null);
+					node.setNodeOrder(getModel().getNodes().size());
+					getModel().getNodes().add(node);
+				}
+			}else {
+				//create a new SubGroup
+				
+				CmNode node = new CmNode();
+				node.setModel(getModel());
+				node.setName(c.getName());
+				for (org.wcs.smart.ca.Label l : c.getNames()) {
+					node.updateName(l.getLanguage(), l.getValue());
+				}
+				
+				Object xparent = parent;
+				if (xparent == null) {
+					xparent = getSourceObject();
+				}
+				
+				if (xparent instanceof CmNode) {
+					CmNode parentNode = (CmNode) xparent;
+					node.setParent(parentNode);
+					node.setNodeOrder(parentNode.getChildren().size());
+					parentNode.getChildren().add(node);
+				} else if (xparent instanceof CmRootNode) {
+					node.setParent(null);
+					node.setNodeOrder(getModel().getNodes().size());
+					getModel().getNodes().add(node);
+				}
+				
+				//if no kids are in root selection then we add all kids
+				//otherwise if one kid is in root selection we only
+				//add the kids in the root selection
+				List<Category> toAdd = new ArrayList<>(c.getActiveChildren());
+				
+				List<Category> existsInOriginal = new ArrayList<>();
+				for (Category kid : toAdd) {
+					if (originalSelection.contains(kid)) {
+						existsInOriginal.add(kid);
+					}
+				}
+				
+				if (!existsInOriginal.isEmpty()) {
+					addCategoriesWithKids(existsInOriginal, node, processed, originalSelection);
+				}else {				
+					addCategoriesWithKids(toAdd, node, processed, originalSelection);
+				}
+			}
+			
+		}
+	}
+	
+	private void addCategoriesWithoutKids(List<Category> categories, IProgressMonitor monitor) {
+		for (Category c : categories){
+			monitor.subTask(c.getName());
+			CmNode node = createNodeFromCategory(c);
+			
+			Object xparent = getSourceObject();
+			
+			if (xparent instanceof CmNode) {
+				CmNode parentNode = (CmNode) xparent;
+				node.setParent(parentNode);
+				node.setNodeOrder(parentNode.getChildren().size());
+				parentNode.getChildren().add(node);
+			} else if (xparent instanceof CmRootNode) {
+				node.setParent(null);
+				node.setNodeOrder(getModel().getNodes().size());
+				getModel().getNodes().add(node);
+			}
+			monitor.worked(1);
+		}
+
 	}
 
 	private DataModel cachedDataModel = null;

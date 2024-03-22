@@ -88,7 +88,7 @@ public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDia
 					}
 				}
 				
-				getButton(IDialogConstants.OK_ID).setEnabled(selectedCategories.size() > 0);
+				updateButtons();
 
 			}
 		});
@@ -113,6 +113,10 @@ public class DatamodelCategorySelectorDialog  extends AbstractPropertyJHeaderDia
 		setMessage(Messages.DatamodelCatecorySelectorDialog_Message);
 		
 		return container;
+	}
+	
+	protected void updateButtons() {
+		getButton(IDialogConstants.OK_ID).setEnabled(selectedCategories.size() > 0);
 	}
 
 	@Override
