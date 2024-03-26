@@ -640,41 +640,45 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		
 		//upgrade last modified/created dates
-		
-		HashMap<ConservationArea, String> caTimeZoneMapping = SmartContext.INSTANCE.getClass(Upgrader757To800.class).getCaTimeZoneMapping();
-
-		for (Entry<ConservationArea, String> entry : caTimeZoneMapping.entrySet()) {
-			
-			String[] queries = new String[]{
+		if (SmartContext.INSTANCE.getClass(Upgrader757To800.class) != null) {
+			//if we are installing we don't have timezome mappings and we won't have anything to do
+			//TODO: verify this
+			HashMap<ConservationArea, String> caTimeZoneMapping = 
+					SmartContext.INSTANCE.getClass(Upgrader757To800.class).getCaTimeZoneMapping();
+	
+			for (Entry<ConservationArea, String> entry : caTimeZoneMapping.entrySet()) {
 				
-				"update smart.i_entity set date_modified = smart.localTsToUtcTs(date_modified, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_modified is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_entity set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String[] queries = new String[]{
+					
+					"update smart.i_entity set date_modified = smart.localTsToUtcTs(date_modified, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_modified is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_entity set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_record set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_record set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_working_set set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_working_set set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_entity_record_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_entity_record_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_entity_summary_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_entity_summary_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_record_obs_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_record_obs_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_record_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_record_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+					"update smart.i_record_summary_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"update smart.i_record_summary_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				};
 				
-				"update smart.i_record set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_record set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				"update smart.i_working_set set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_working_set set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				"update smart.i_entity_record_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_entity_record_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				"update smart.i_entity_summary_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_entity_summary_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				"update smart.i_record_obs_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_record_obs_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				"update smart.i_record_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_record_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				"update smart.i_record_summary_query set last_modified_date = smart.localTsToUtcTs(last_modified_date, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and last_modified_date is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"update smart.i_record_summary_query set date_created = smart.localTsToUtcTs(date_created, '" + entry.getValue() + "') where ca_uuid = x'" + UuidUtils.uuidToString(entry.getKey().getUuid())+ "' and date_created is not null", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			};
-			
-			for (String query : queries) {
-				SmartPlugIn.logInfo(query);
-				session.createNativeMutationQuery(query).executeUpdate();
+				for (String query : queries) {
+					SmartPlugIn.logInfo(query);
+					session.createNativeMutationQuery(query).executeUpdate();
+				}
 			}
 		}
 		
