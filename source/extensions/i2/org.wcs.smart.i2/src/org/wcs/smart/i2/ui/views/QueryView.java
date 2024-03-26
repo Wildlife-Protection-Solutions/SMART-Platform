@@ -484,7 +484,7 @@ public class QueryView {
 		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof QueryProxy){
-				AbstractIntelQuery deletedItem = InternalQueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid(), ((QueryProxy) x).getTypeKey());
+				AbstractIntelQuery deletedItem = InternalQueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid(), ((QueryProxy) x).getTypeKey(), context);
 				if (deletedItem != null){
 					removed.add(deletedItem);
 				}

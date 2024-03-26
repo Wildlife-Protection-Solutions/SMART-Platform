@@ -105,6 +105,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.SmartWizardDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Intelligence query editor for record observation query
@@ -134,7 +135,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	private FilterDefinitionPanel dpanel;
 	private ProfilesDefinitionPanel ppanel;
 	private ToolItem[] runItem = new ToolItem[2];
-	private ToolItem saveItem;
+	private ToolItem[] saveItem = new ToolItem[2];
 	private ToolItem wsetItem;
 	private Label infoLabel;
 	
@@ -254,7 +255,11 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
-		if (saveItem != null) saveItem.setEnabled(isDirty);
+		for (ToolItem ti : saveItem) {
+			if (ti != null) ti.setEnabled(isDirty);
+		}
+		
+		if (wsetItem != null) wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet() && getQuery().getUuid() != null);
 		dpanel.setQueryState(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
@@ -356,10 +361,11 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
-			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
-			saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
-			saveItem.addListener(SWT.Selection, (event)->IntelRecordObservationQueryEditor.this.getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false));
-			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
+			saveItem[0] = new ToolItem(headerToolbar, SWT.PUSH);
+			saveItem[0].setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
+			saveItem[0].addListener(SWT.Selection, (event)->IntelRecordObservationQueryEditor.this.getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false));
+			saveItem[0].setToolTipText(Messages.IntelQueryEditor_saveTooltip);
+			saveItem[0].setEnabled(false);
 			
 			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
 			saveAsItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVEAS_ICON));
@@ -368,9 +374,15 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		
 			wsetItem = new ToolItem(headerToolbar, SWT.PUSH);
 			wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-			wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context));
+			wsetItem.addListener(SWT.Selection, (event)->{
+				if (getQuery().getUuid() == null) {
+					MessageDialog.openInformation(getSite().getShell(), DialogConstants.ERROR_STRING, "You must save the query before you can add it to the working set.");
+					return;
+				}
+				WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context);
+			});
 			wsetItem.setToolTipText(Messages.IntelQueryEditor_AddWsTooltip);
-			wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+			wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet() && getQuery() != null &&  getQuery().getUuid() != null);
 		}
 		
 		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);
@@ -662,15 +674,10 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
-			saveItem = new ToolItem(toolbar, SWT.PUSH);
-			saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
-			saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
-			saveItem.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);
-				}
-			});
+			saveItem[1] = new ToolItem(toolbar, SWT.PUSH);
+			saveItem[1].setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
+			saveItem[1].setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
+			saveItem[1].addListener(SWT.Selection, e->getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false));
 			
 			ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
 			clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);

@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.i2;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
 import org.wcs.smart.ca.ConservationArea;
@@ -76,8 +78,9 @@ public enum InternalQueryManager {
 	 * @param queryUuid
 	 * @return
 	 */
-	public AbstractIntelQuery deleteQuery(UUID queryUuid, String queryType){
+	public AbstractIntelQuery deleteQuery(UUID queryUuid, String queryType, IEclipseContext context){
 		AbstractIntelQuery removed = null;
+		
 		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
@@ -86,6 +89,7 @@ public enum InternalQueryManager {
 					removed = s.get(c, queryUuid);
 					if (removed != null) break;
 				}
+				
 				
 				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 				
@@ -101,6 +105,8 @@ public enum InternalQueryManager {
 				return null;
 			}
 		}
+		
+		WorkingSetManager.INSTANCE.removeQueryFromWorkingSet(Collections.singleton(removed), context);
 		
 		return removed;
 	}

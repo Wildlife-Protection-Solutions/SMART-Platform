@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -88,7 +89,10 @@ import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.QueryManager;
+import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
@@ -314,10 +318,61 @@ public class WorkingSetMapLayersJob extends Job {
 		for (IntelWorkingSetQuery i : workingset.getQueries()){
 			if (queriesToAdd.containsKey(i)) {
 				AbstractIntelQuery query = queriesToAdd.get(i);
-				String name = query.getName();
-				if (name == null) name = Messages.WorkingSetMapLayersJob_QueryNotFound;
-				QueryService service = new QueryService(null, query.getUuid(), name);
-				computeLayers(toAdd, layerStyles, i, service, false, monitor);	
+				
+				//run the query and add to working set
+				RunQueryJob job = new RunQueryJob(query) {
+					
+					@Override
+					protected void onError(Exception ex) {
+						Intelligence2PlugIn.log(ex.getMessage(), ex);
+						
+					}
+					
+					@Override
+					protected void onComplete(IQueryResult results) {
+						UUID ws = WorkingSetManager.INSTANCE.getActiveWorkingSet();
+						if (ws == null) return;
+						
+						if (results == null){
+							//Do something better here - show something on tree with error image overlay
+							Intelligence2PlugIn.displayLog(Messages.WorkingSetQueryLayersJob_QueryRunError, null);
+							return;
+						}
+						
+						if (!(results instanceof IPagedQueryResultSet)) return; //cannot be added to map
+						
+						//ensure the query is still part of the working set; it might have been deleted by the user
+						boolean add = false;
+						try(Session s = HibernateManager.openSession()){
+							IntelWorkingSet temp = (IntelWorkingSet) s.get(IntelWorkingSet.class, ws);
+							if (temp.getQueries() != null){
+								for (IntelWorkingSetQuery tq : temp.getQueries()){
+									if (tq.getQuery().equals(query.getUuid())){
+										add = true;
+										break;
+									}
+								}
+							}
+						}
+						if (!add) return;
+						
+						String name = query.getName();
+						if (name == null) name = Messages.WorkingSetMapLayersJob_QueryNotFound;
+						QueryService service = new QueryService((IPagedQueryResultSet)results, query.getUuid(), name);
+						computeLayers(toAdd, layerStyles, i, service, false, monitor);	
+					}
+					
+					@Override
+					protected void onCancel() {	
+					}
+				};
+				job.configureParameter(LocalDate.class.getName(), dates);
+				job.schedule();
+				try {
+					job.join();
+				} catch (InterruptedException e) {
+					Intelligence2PlugIn.log(e.getMessage(), e);
+				}
 			}
 			
 		}
@@ -632,4 +687,8 @@ public class WorkingSetMapLayersJob extends Job {
 			this.canFilter = canFilter;
 		}
 	};
+	
+	
+	
+	
 }

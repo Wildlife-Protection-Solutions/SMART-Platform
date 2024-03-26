@@ -94,6 +94,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		
 		IntelWorkingSet workingset = null;
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		HashMap<UUID, AbstractIntelQuery> queryNames = new HashMap<>();
