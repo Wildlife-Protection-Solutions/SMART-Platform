@@ -312,12 +312,14 @@ public class IncidentMapPage extends SmartMapEditorPart {
 							prjLayer.setVisible(false);
 							StyleManager.INSTANCE.applyDefaultStyleToMapLayer(SmartDB.getCurrentConservationArea(), prjLayer, geoIdToStyle, defaultStyles, session, monitor);
 						}
-						
-						
-					}						
-					pointLayer.eNotify(new ENotificationImpl(
-							(InternalEObject) pointLayer, Notification.SET,
-							ProjectPackage.LAYER__VISIBLE, false, true));
+					}	
+					
+					if (pointLayer != null) {
+						pointLayer.eNotify(new ENotificationImpl(
+								(InternalEObject) pointLayer, Notification.SET,
+								ProjectPackage.LAYER__VISIBLE, false, true));
+					}
+					
 				}
 			};
 			getMap().sendCommandSync(command);
