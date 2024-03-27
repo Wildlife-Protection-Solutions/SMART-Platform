@@ -152,6 +152,7 @@ public class RecoverCaDialog extends SmartStyledTitleDialog {
 		btnApplyNew.setText(Messages.RecoverCaDialog_RetainNewDataOp );
 		btnApplyNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)btnApplyNew.getLayoutData()).widthHint = widthHint;
+		btnApplyNew.setSelection(true);	
 		
 		Label lblRecoverDetails = new Label(recoverOps, SWT.WRAP);
 		lblRecoverDetails.setText(Messages.RecoverCaDialog_RetainNewDataInfo);
