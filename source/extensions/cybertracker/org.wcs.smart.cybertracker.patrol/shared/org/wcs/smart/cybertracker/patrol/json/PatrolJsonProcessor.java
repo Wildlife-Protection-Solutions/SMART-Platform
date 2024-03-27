@@ -37,6 +37,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -128,7 +130,11 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale,
+			IProgressMonitor monitor) throws Exception{
+		
+		SubMonitor smonitor = SubMonitor.convert(monitor, features.size()*2);
+				
 		modifiedPatrols = new HashSet<Patrol>();
 		newPatrolLinks = new HashMap<UUID, CtPatrolLink>();
 		this.locale = locale;
@@ -137,6 +143,8 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		
 		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
+			smonitor.worked(1);
+			
 			if (!CtJsonUtil.isTrackPoint(feature)) observationFeatureCount++;
 			
 			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
@@ -631,7 +639,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		
 		//try processing track features
 		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
-		processedFeatures.addAll(trackProcessor.processJson(features, session, locale));
+		processedFeatures.addAll(trackProcessor.processJson(features, session, locale, smonitor.split(features.size())));
 		modifiedPatrols.addAll(trackProcessor.getModifiedPatrols());
 		processTrackWarnings(trackProcessor.getWarnings());
 		

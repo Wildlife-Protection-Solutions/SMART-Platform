@@ -38,7 +38,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
+
 
 /**
  * A collection of zip utilities.
@@ -213,5 +214,4 @@ public class Zipper {
 
         }
     }
-    
 }

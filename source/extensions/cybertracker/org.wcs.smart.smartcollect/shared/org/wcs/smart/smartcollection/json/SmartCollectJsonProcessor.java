@@ -34,6 +34,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
@@ -136,7 +138,7 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 	protected abstract Boolean processNotOkUsers(Set<SmartCollectUser> notok) throws Exception;
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception {
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale, IProgressMonitor monitor) throws Exception {
 	
 		warnings = new ArrayList<>();
 		waypoints = new HashSet<>();
@@ -144,10 +146,12 @@ public abstract class SmartCollectJsonProcessor implements IJsonProcessor {
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();
 		
 		SmartCollectWaypoint currentWaypoint = null;
-		
+		SubMonitor smonitor = SubMonitor.convert(monitor, features.size());
+
 		//preprocess users
 		Set<DeviceUser> users = new HashSet<>();
 		for (JSONObject feature : features){
+			smonitor.worked(1);
 			JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);
 			if (properties == null) continue;
 			JSONObject sighting = (JSONObject)properties.get(CtJsonObservationParser.SIGHTINGS_KEY);

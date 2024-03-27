@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.udig.catalog;
 import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -67,7 +68,7 @@ public class PatrolGeoResource extends IGeoResource {
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = URL.of(URI.create(serviceIdentifer.toExternalForm() + "#" + dataType), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }

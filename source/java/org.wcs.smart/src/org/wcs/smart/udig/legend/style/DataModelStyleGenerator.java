@@ -26,6 +26,7 @@ import static org.locationtech.udig.style.advanced.utils.Utilities.getFormat;
 import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -415,7 +416,7 @@ public class DataModelStyleGenerator {
 		
 		PointSymbolizer ps = styleBuilder.createPointSymbolizer();
 		
-		URL url = new URL(fname);
+		URL url = URI.create(fname).toURL();
 		ExternalGraphic graphic = styleBuilder.createExternalGraphic(url, getFormat(url.toString()));
 		ps.setGraphic( styleBuilder.createGraphic(graphic, null, null) );
 		ps.getGraphic().setSize(styleBuilder.literalExpression(iconSize));

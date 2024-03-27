@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.ui;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 
 import org.eclipse.jface.action.ContributionItem;
@@ -88,7 +88,7 @@ public class QuickLinksContributionItem extends ContributionItem {
 				//assume no protocal and add one
 				url = "http://" + url; //$NON-NLS-1$
 			}
-			PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+			PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(URI.create(url).toURL());
 		} catch (Exception e) {
 			SmartPlugIn.log(e.getMessage(), e);
 		}

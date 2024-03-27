@@ -105,6 +105,6 @@ public class I18nUtil
 	    
 	    if(tempStringTokenizer.hasMoreTokens())
 	    	c = (String) tempStringTokenizer.nextElement();
-	    return new Locale(l,c);
+	    return Locale.of(l, c);
 	}
 }

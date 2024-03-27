@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import java.util.zip.InflaterInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.json.simple.JSONObject;
@@ -169,7 +170,7 @@ public class SmartMobileJsonFileProcessor {
 			
 			processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
 			for (IJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session, this.locale);
+				List<JSONObject> processed = p.processJson(features, session, this.locale, new NullProgressMonitor());
 				notProc.removeAll(processed);
 				String msg = p.getStatusMessage(this.locale);
 				if (msg != null) statusMsg.append(msg);

@@ -1109,6 +1109,7 @@ public class ConservationAreas extends HttpServlet{
 			ca.setUuid(uuid);
 			ca.setVersion(null);
 			ca.setStatus(Status.NODATA);
+			ca.setSmartMobileDqProcessor(Boolean.TRUE);
 					
 			s.persist(ca);
 			s.getTransaction().commit();
@@ -1168,6 +1169,7 @@ public class ConservationAreas extends HttpServlet{
 				ca.setStatus(Status.UPLOADING);
 				ca.setLabel(Messages.getString("ConservationAreas.UnknownLbl", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				ca.setVersion(version);
+				ca.setSmartMobileDqProcessor(Boolean.TRUE);
 				s.persist(ca);
 				
 				//configure default permissions for user

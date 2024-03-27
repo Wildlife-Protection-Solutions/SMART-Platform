@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 
@@ -51,7 +52,7 @@ public interface IJsonProcessor {
 	 * @param features
 	 * @return a list of objects that have been processed
 	 */
-	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception;
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale, IProgressMonitor monitor) throws Exception;
 		
 	/**
 	 * 

@@ -37,6 +37,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -146,7 +148,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale, IProgressMonitor monitor) throws Exception{
 		this.locale = locale;
 		modifiedMissions = new HashSet<Mission>();
 		newMissionLinks = new HashMap<UUID, CtMissionLink>();
@@ -154,7 +156,10 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
 		int observationFeatureCount = 0;
+		SubMonitor smonitor = SubMonitor.convert(monitor, features.size()*2);
+
 		for (JSONObject feature : features){
+			smonitor.worked(1);
 			if (!CtJsonUtil.isTrackPoint(feature)) observationFeatureCount++;
 			
 			CtJsonObservationParser parser = new CtJsonObservationParser(locale);
@@ -596,7 +601,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		
 		//try processing track features
 		MissionJsonTrackProcessor trackProcessor = new MissionJsonTrackProcessor();
-		processedFeatures.addAll(trackProcessor.processJson(features, session, locale));
+		processedFeatures.addAll(trackProcessor.processJson(features, session, locale, smonitor.split(features.size())));
 		modifiedMissions.addAll(trackProcessor.getModifiedMissions());
 		processTrackWarnings(trackProcessor.getWarnings());
 		

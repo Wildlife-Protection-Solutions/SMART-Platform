@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -203,16 +204,20 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try{
 			monitor.setTaskName(MessageFormat.format(Messages.CybertrackerItemProcessor_TaskName, litem.getName()));
-			returnValue = run();
+			returnValue = runInternal(monitor);
 		}catch (Exception ex){
 			returnException = ex;
 		}
 		return;
 	}
 	
-	private ProcessingStatus run() throws Exception{
+	private ProcessingStatus runInternal(IProgressMonitor monitor) throws Exception{
 		List<JSONObject> features = CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault());
 		List<IDesktopJsonProcessor> processors = null;
+		
+		processors = getProcessors();
+		SubMonitor smonitor = SubMonitor.convert(monitor, processors.size()*10 + 2);
+		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 		
 			session.beginTransaction();
@@ -220,9 +225,9 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				List<JSONObject> notProc = new ArrayList<JSONObject>();
 				notProc.addAll(features);
 				StringBuilder statusMsg = new StringBuilder();
-				processors = getProcessors();
+				
 				for (IDesktopJsonProcessor p : processors){
-					List<JSONObject> processed = p.processJson(features, session, Locale.getDefault());
+					List<JSONObject> processed = p.processJson(features, session, Locale.getDefault(), smonitor.split(10));
 					notProc.removeAll(processed);
 					String msg = p.getStatusMessage(Locale.getDefault());
 					if (msg != null){
@@ -268,6 +273,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 				}
 				
 				session.getTransaction().commit();
+				smonitor.worked(1);
 				
 				ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, MessageFormat.format(Messages.CybertrackerItemProcessor_CompleteMsg, statusMsg.toString()));
 				
@@ -279,6 +285,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 						CyberTrackerPlugIn.displayError(Messages.CybertrackerItemProcessor_ErrorTitle, t.getMessage(), t);
 					}
 				}
+				smonitor.done();
 				return status;
 			}catch (UserCancelledException ex){
 				session.getTransaction().rollback();

@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
 public class IconCellHighlighter extends FocusCellHighlighter {
-	private ViewerCell oldCell;
+	
 
 	/**
 	 * @param viewer
@@ -111,26 +111,24 @@ public class IconCellHighlighter extends FocusCellHighlighter {
 	}
 
 	@Override
-	protected void focusCellChanged(ViewerCell cell) {
-		super.focusCellChanged(cell);
-
+	protected void focusCellChanged(ViewerCell cell, ViewerCell oldCell) {
+		super.focusCellChanged(cell, oldCell);
+		
 		// Redraw new area
 		if (cell != null) {
 			Rectangle rect = cell.getBounds();
 			int x = cell.getColumnIndex() == 0 ? 0 : rect.x;
-			int width = cell.getColumnIndex() == 0 ? rect.x + rect.width
-					: rect.width;
+			int width = cell.getColumnIndex() == 0 ? rect.x + rect.width : rect.width;
 			cell.getControl().redraw(x, rect.y, width, rect.height, true);
 		}
 
 		if (oldCell != null) {
 			Rectangle rect = oldCell.getBounds();
 			int x = oldCell.getColumnIndex() == 0 ? 0 : rect.x;
-			int width = oldCell.getColumnIndex() == 0 ? rect.x + rect.width
-					: rect.width;
+			int width = oldCell.getColumnIndex() == 0 ? rect.x + rect.width : rect.width;
 			oldCell.getControl().redraw(x, rect.y, width, rect.height, true);
 		}
-
-		this.oldCell = cell;
 	}
+	
+	
 }

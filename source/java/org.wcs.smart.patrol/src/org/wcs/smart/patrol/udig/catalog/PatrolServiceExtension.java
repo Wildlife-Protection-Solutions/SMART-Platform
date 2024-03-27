@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.udig.catalog;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
@@ -109,7 +110,7 @@ public class PatrolServiceExtension implements ServiceExtension {
 		}
 		String url = "smart://smartdb/patrol/" + (String)params.get(PATROL_UUID_KEY); //$NON-NLS-1$
 		try{
-			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(url), CorePlugin.RELAXED_HANDLER); 
 		}catch (Throwable t){
 			return null;
 		}

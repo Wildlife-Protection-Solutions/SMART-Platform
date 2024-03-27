@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -80,14 +82,17 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l, IProgressMonitor monitor) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
 		warnings = new ArrayList<>();
 		
 		List<JSONObject> processed = new ArrayList<JSONObject>();
 		HashMap<String, List<CtPatrolLink>> linkmap = new HashMap<>();
 
+		SubMonitor smonitor = SubMonitor.convert(monitor, features.size());
 		for (JSONObject feature : features){
+			smonitor.worked(1);
+			
 			if (!CtJsonUtil.isTrackPoint(feature)) continue;
 
 			JSONObject properties = (JSONObject) feature.get(CtJsonObservationParser.PROPERTIES_KEY);

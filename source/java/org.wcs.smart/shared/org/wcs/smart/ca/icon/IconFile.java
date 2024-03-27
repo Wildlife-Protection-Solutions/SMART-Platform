@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.icon;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -143,7 +144,7 @@ public class IconFile extends ISmartAttachment{
 		if (isSystemIcon()) {
 			try {
 				//extract to a local temp directory
-				URL url = new URL(getFilename());
+				URL url =  URI.create(getFilename()).toURL();
 				Path temp = null;
 				String ext = SharedUtils.getFilenameExtension(getFilename());
 				if (getUuid() != null) {

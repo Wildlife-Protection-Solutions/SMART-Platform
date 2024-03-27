@@ -22,7 +22,7 @@
 package org.wcs.smart.udig.style;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -118,7 +118,7 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 			}else if (selectedFile.getUuid() == null && !selectedFile.isSystemIcon()) {
 				fname = "file:" + fname; //$NON-NLS-1$
 			}
-			img = SmartUtils.getImage(new URL(fname), PREVIEWSIZE);
+			img = SmartUtils.getImage(URI.create(fname).toURL(), PREVIEWSIZE);
 			imagePreview.setData(IMAGEKEY, img);
 		}catch (Exception ex) {
 			SmartPlugIn.log(ex.getMessage(), ex);
@@ -127,7 +127,7 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 		
 		PointSymbolizerWrapper pointSymbolizerWrapper = SmartIconSymbolizer.this.ruleWrapper.getGeometrySymbolizersWrapper().adapt( PointSymbolizerWrapper.class);
         try {
-        	pointSymbolizerWrapper.setExternalGraphicPath(new URL(fname));
+        	pointSymbolizerWrapper.setExternalGraphicPath(URI.create(fname).toURL());
             editor.refreshTreeViewer(SmartIconSymbolizer.this.ruleWrapper);
             editor.refreshPreviewCanvasOnStyle();
         }catch (Exception ex) {

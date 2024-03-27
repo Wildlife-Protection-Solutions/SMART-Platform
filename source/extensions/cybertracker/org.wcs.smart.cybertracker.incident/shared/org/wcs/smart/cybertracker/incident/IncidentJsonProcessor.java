@@ -31,6 +31,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
@@ -100,14 +102,17 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 	}
 	
 	@Override
-	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l) throws Exception{
+	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale l, IProgressMonitor monitor) throws Exception{
 		newIncidents = new HashSet<>();
 		modifiedIncidents = new HashSet<>();
 		groupMappings = new ArrayList<>();
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
+		SubMonitor smonitor = SubMonitor.convert(monitor, features.size());
+		
 		for (JSONObject feature : features){
+			smonitor.worked(1);
 			if (CtJsonUtil.isTrackPoint(feature)) continue;
 			
 			CtJsonObservationParser parser = new CtJsonObservationParser(l);

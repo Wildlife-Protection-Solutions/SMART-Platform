@@ -107,7 +107,7 @@ public class CaImporter {
 		Path temp = SmartUtils.createTemporaryDirectory();
 		try {		
 			//to validate we only need to unzip a few files to do validation the CA_INFO_FILENAME from the package
-			try(ZipFile archiveFile = new ZipFile(file.normalize().toAbsolutePath().toFile())){
+			try(ZipFile archiveFile = ZipFile.builder().setPath(file.normalize().toAbsolutePath()).get()){
 				ZipArchiveEntry zipEntry = archiveFile.getEntry(ICaDataExportEngine.CA_INFO_FILENAME);
 				if (zipEntry == null) {
 					throw new Exception(Messages.CaImporter_NotCaFile);

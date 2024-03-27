@@ -95,7 +95,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		
 		
 		sb.append(Messages.SmartInstallationInfoPage_SystemLang_Label);
-		sb.append((new Locale(Platform.getNL())).getDisplayName());
+		sb.append((Locale.of(Platform.getNL())).getDisplayName());
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(Messages.SmartInstallationInfoPage_DefaultLang_Label);
 		Language defaultl = null;

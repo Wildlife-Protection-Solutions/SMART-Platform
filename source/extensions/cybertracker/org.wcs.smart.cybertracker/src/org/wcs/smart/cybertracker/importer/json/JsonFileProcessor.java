@@ -179,7 +179,7 @@ public class JsonFileProcessor {
 		
 		FileState returnValue = new FileState(file);
 		
-		final List<JSONObject> features = new ArrayList<>();;
+		final List<JSONObject> features = new ArrayList<>();
 		try {
 			features.addAll(CtJsonUtil.parseFeaturesFromJsonString(json, Locale.getDefault()));
 		}catch (Throwable ex) {
@@ -200,6 +200,8 @@ public class JsonFileProcessor {
 			return returnValue;
 		}
 		
+		SubMonitor smonitor = SubMonitor.convert(monitor, processors.size()*10 + 2);
+
 		session.beginTransaction();
 		try {
 			List<JSONObject> notProc = new ArrayList<JSONObject>();
@@ -207,7 +209,7 @@ public class JsonFileProcessor {
 			
 			StringBuilder statusMsg = new StringBuilder();
 			for (IDesktopJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session, Locale.getDefault());
+				List<JSONObject> processed = p.processJson(features, session, Locale.getDefault(), smonitor.split(10));
 				notProc.removeAll(processed);
 				String msg = p.getStatusMessage(Locale.getDefault());
 				if (msg != null){
@@ -255,7 +257,8 @@ public class JsonFileProcessor {
 				return returnValue;
 			}
 			session.getTransaction().commit();
-
+			smonitor.worked(1);
+			
 			for (IDesktopJsonProcessor p : processors){
 				try{
 					p.afterSave();
@@ -266,6 +269,7 @@ public class JsonFileProcessor {
 					return returnValue;
 				}
 			}
+			smonitor.done();
 			//done ok file loaded
 			returnValue.status = FileStatus.OK;
 			return returnValue;

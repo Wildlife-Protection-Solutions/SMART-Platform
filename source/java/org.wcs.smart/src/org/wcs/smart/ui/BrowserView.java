@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.ui;
 
-import java.net.URL;
+import java.net.URI;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
@@ -55,6 +53,9 @@ import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.E3Utils;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * Very basic web browser.
@@ -161,7 +162,7 @@ public class BrowserView {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(browser.getUrl()));
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(URI.create(browser.getUrl()).toURL());
 				} catch (Exception ex) {
 					SmartPlugIn.displayLog(ex.getMessage(), ex);
 				}

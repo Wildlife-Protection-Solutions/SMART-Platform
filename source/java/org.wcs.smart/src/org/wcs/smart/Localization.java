@@ -66,7 +66,7 @@ public class Localization {
 		prop.load(Localization.class.getResourceAsStream(PROPERTIES));
 		for (Object x: prop.keySet()){
 			String ll = (String) x;
-			adds.add(new Locale(ll));
+			adds.add(Locale.of(ll));
 		}
 		return adds.toArray(new Locale[adds.size()]);
 		

@@ -23,6 +23,7 @@ package org.wcs.smart.report.birt.map.udig;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -87,7 +88,7 @@ public class MapGeoResource extends IGeoResource {
 		this.queryResults = queryResults;
 		super.service = service;
 		try {
-			this.url = new URL(service.getIdentifier(), service.getIdentifier().toExternalForm() + "#" + System.nanoTime(), MapQueryService.RELAXED_HANDLER);			 //$NON-NLS-1$
+			this.url = URL.of(URI.create(service.getIdentifier().toExternalForm() + "#" + System.nanoTime()), MapQueryService.RELAXED_HANDLER);			 //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			Logger.getLogger(MapGeoResource.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}	
@@ -108,7 +109,7 @@ public class MapGeoResource extends IGeoResource {
 		super.service = service;
 		this.id = mapInfo.getLayerName().replaceAll("[^0-9a-zAZ]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		try {
-			this.url = new URL(service.getIdentifier(), service.getIdentifier().toExternalForm() + "#" + id, MapQueryService.RELAXED_HANDLER);			 //$NON-NLS-1$
+			this.url = URL.of(URI.create(service.getIdentifier().toExternalForm() + "#" + id), MapQueryService.RELAXED_HANDLER);			 //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			Logger.getLogger(MapGeoResource.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}	

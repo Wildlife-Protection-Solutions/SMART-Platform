@@ -24,6 +24,7 @@ package org.wcs.smart.report.birt.map.udig;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -52,7 +53,7 @@ public class MapQueryService extends IService {
         @Override
         protected URLConnection openConnection( URL u ) throws IOException {
             try{
-                URL url=new URL(u.toString());
+                URL url=URI.create(u.toString()).toURL();
                 return url.openConnection();
             }catch (MalformedURLException e){
                 return null;
@@ -68,7 +69,7 @@ public class MapQueryService extends IService {
 	
 	public MapQueryService(){
 		try {
-			this.url = new URL(null,  URL + System.nanoTime(), RELAXED_HANDLER);
+			this.url = java.net.URL.of(URI.create(URL + System.nanoTime()), RELAXED_HANDLER);
 		} catch (MalformedURLException e) {
 			Logger.getLogger(MapGeoResourceInfo.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}

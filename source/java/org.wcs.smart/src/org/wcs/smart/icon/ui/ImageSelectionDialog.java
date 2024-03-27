@@ -23,6 +23,7 @@ package org.wcs.smart.icon.ui;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -385,7 +386,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 				((RowData)outer.getLayoutData()).exclude = false;
 			
 				try {
-					outer.setData(PATH_KEY, new URL(path));
+					outer.setData(PATH_KEY, URI.create(path).toURL());
 				} catch (MalformedURLException e1) {
 				}
 				outer.setToolTipText(name);
