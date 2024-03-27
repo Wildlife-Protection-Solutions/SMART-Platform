@@ -409,8 +409,18 @@ public class ConnectUser extends HttpServlet {
 		try{
 			toUpdate = QueryFactory.buildQuery(s, SmartUser.class, "username", olduser).uniqueResult(); //$NON-NLS-1$
 			if (newUser.getPassword() != null){
-				if (!BCrypt.checkpw(newUser.getOldpassword(), toUpdate.getPassword())){
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
+				
+				if (!request.getUserPrincipal().getName().equals(olduser)) {
+					//admin user check password of this user
+					SmartUser adminUser = QueryFactory.buildQuery(s, SmartUser.class, "username", request.getUserPrincipal().getName()).uniqueResult(); //$NON-NLS-1$
+					if (!BCrypt.checkpw(newUser.getOldpassword(), adminUser.getPassword())){
+						throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
+					}
+				}else {
+					//checkpassword of user
+					if (!BCrypt.checkpw(newUser.getOldpassword(), toUpdate.getPassword())){
+						throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
+					}
 				}
 			}
 

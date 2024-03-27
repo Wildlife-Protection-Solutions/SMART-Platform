@@ -53,22 +53,20 @@ public class UsersServlet extends HttpServlet{
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		List<SmartUser> users = null;
-		List<SmartUser> inactiveUsers = null;
 		List<ConservationAreaInfo> cas = null;
 		List<ConservationAreaInfo> dataCas = new ArrayList<ConservationAreaInfo>();
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
+		boolean isAdmin = false;
 		
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
+			isAdmin = SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY); 
+			if (!isAdmin){
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
-			users = HibernateManager.getActiveUsers(session);
 			cas = HibernateManager.getConservationAreaInfos(session);
 			
 			for(ConservationAreaInfo ca : cas){
@@ -76,16 +74,15 @@ public class UsersServlet extends HttpServlet{
 					dataCas.add(ca);
 				}
 			}
-			inactiveUsers = (List<SmartUser>) HibernateManager.getInactiveUsers(session);
+			
+			
 		}finally{
 			session.getTransaction().rollback();
 		}
 		
-		request.setAttribute("users", users); //$NON-NLS-1$
-		request.setAttribute("inactiveusers", inactiveUsers); //$NON-NLS-1$
-		
 		request.setAttribute("cas", cas); //$NON-NLS-1$
 		request.setAttribute("dataCas", dataCas); //$NON-NLS-1$
+		request.setAttribute("isAdmin", isAdmin); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response); //$NON-NLS-1$
 		

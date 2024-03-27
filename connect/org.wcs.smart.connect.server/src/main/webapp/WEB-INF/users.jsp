@@ -46,20 +46,7 @@
 				<div class="table-cell smart-table-cell"></div>
 				<div class="table-cell smart-table-cell"></div>
 			</div>
-			<c:forEach var="user" items="${users}" varStatus="count">
-			<div data-username ="${user.getUsername()}" class="smartuser userrow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
-				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
-				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
-				<div class="table-cell smart-table-cell ">
-					<i data-username = "${user.getUsername()}" data-email="${user.getEmail()}" title="<fmt:message key="users.editusertooltip"/>" class="fa-regular fa-xl fa-pen-to-square icon-btn-default"></i>
-				</div>
- 				<div class="table-cell smart-table-cell ">
- 					<i data-username = "${user.getUsername()}" title="<fmt:message key="users.deactivateusertooltip"/>" class="fa-solid fa-xl fa-user-xmark icon-btn-default"></i>
- 				</div> 
-<%-- 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deleteusertooltip"/>" class="deleteuser delete-icon"></a></div> --%>
-
-			</div>
-			</c:forEach>  
+			
   		</div>
 		
  
@@ -70,18 +57,7 @@
 				<div class="table-cell smart-table-cell"></div>
 				<div class="table-cell smart-table-cell"></div>
 			</div>
-			<c:forEach var="user" items="${inactiveusers}" varStatus="count">
-			<div data-username ="${user.getUsername()}" class="smartinactiveuser inactiveuserrow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
-				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
-				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
-				<div class="table-cell smart-table-cell ">
-					<i data-username = "${user.getUsername()}" title="<fmt:message key="users.activateusertooltip"/>" class="fa-solid fa-xl fa-user-plus icon-btn-default"></i>
-				</div>
-				<div class="table-cell smart-table-cell ">
-					<i data-username = "${user.getUsername()}" title="<fmt:message key="users.deleteusertooltip"/>" class="fa-solid fa-xl fa-xmark icon-btn-default"></i>
-				</div>
-			</div>
-			</c:forEach>  
+			
   		</div>
 
 
@@ -191,6 +167,29 @@
 </div>
 <%@include file="footer.jsp" %>
 
+<div id="editUserPasswordDialog" style="display: none;" class="dialog">
+  <div class="dialog-title"><fmt:message key="users.updatepassworddialogtitle"/></div>
+  <div id="passdialogerror" class="errorsection"></div>
+  <div id="msg"></div>
+  <form id="edituserpasswordform" >
+  	<input type="hidden" name="edit_username_orig"/>
+  	
+  	<label class="block top-spacer"><fmt:message key="users.currentpassword"/></label>
+    <input type="password" name="password0" class="formtext block" />
+    
+    <label style="padding-top:10px" class="block top-spacer"><fmt:message key="users.newpassword1"/></label>
+    <div class="block infotext"><fmt:message key="myaccount.passrequirement"/></div>
+    <input type="password" name="password1" class="formtext block" />
+    <label class="block top-spacer"><fmt:message key="users.newpassword2"/></label>
+    <input type="password" name="password2" class="formtext block" />
+    
+    <div class="block top-spacer" style="text-align:right">
+     <input class="button" type="submit" value="<fmt:message key="users.setuserpasswordbutton"/>" />
+     <input class="button" type="button" id="canceleditpasswordbutton" value="<fmt:message key="users.cancel"/>" />
+    </div>
+  </form>
+</div> <!--  end of edit password dialog -->
+  
 <div id="editUserDialog" style="display: none;" class="dialog">
   <div class="dialog-title"><fmt:message key="users.updatedialogtitle"/></div>
   <div id="dialogerror" class="errorsection"></div>
@@ -202,6 +201,11 @@
     <label class="block top-spacer"><fmt:message key="users.updateuseremaillabel"/></label>
     <input type="text" name="edit_email" class="formtext block" />
     <div class="block top-spacer" style="text-align:right">
+     <c:if test="${isAdmin}">
+     	<input class="button" id="changeuserpassword" type="button" 
+     		value="<fmt:message key="users.changeuserpasswordbutton"/>"
+     		onclick="showEditUserPassword()"/>
+     </c:if>
      <input class="button" type="submit" value="<fmt:message key="users.updateuserbutton"/>" />
      <input class="button" type="button" id="canceledituser" value="<fmt:message key="users.cancel"/>" />
     </div>

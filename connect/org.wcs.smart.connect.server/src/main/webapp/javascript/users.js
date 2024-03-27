@@ -24,39 +24,13 @@ window.onload = function(){
 	
 	refreshDesktopUsers(); //request and show the desktop user info
 	
-	//show user info
-	var elements = document.querySelectorAll(".smartuser");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=showUserInfo;
-	}
-	
-	//delete user
-	elements = document.querySelectorAll(".deleteuser");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=deleteUser;
-	}
-	
-	//edit user
-	elements = document.querySelectorAll(".edituser");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=showEditUserDialog;
-	}
-	
-	//activate user
-	elements = document.querySelectorAll(".activateuser");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=activateUser;
-	}
-	
-	//Deactivate user
-	elements = document.querySelectorAll(".deactivateuser");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=deactivateUser;
-	}
-	
 	//update user dialog
 	document.querySelector("#canceledituser").onclick = function(){closeDialog('editUserDialog');};
 	document.querySelector("#edituserform").onsubmit = editUser;
+	
+	//edit password dialog
+	document.querySelector("#canceleditpasswordbutton").onclick = function(){closeDialog('editUserPasswordDialog');};
+	document.querySelector("#editUserPasswordDialog").onsubmit = editUserPassword;
 	
 	//new user dialog
 	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
@@ -82,6 +56,9 @@ window.onload = function(){
 	
 	document.querySelector("#roledetailinner").style.display = "none";
 	refreshRolesTable();
+	
+	refreshUsers();
+	refreshInactiveUsers();
 }
 
 
@@ -648,6 +625,70 @@ function showEditUserDialog(){
 	
  	return false;
 }
+
+/* edit user */
+function showEditUserPassword(){
+	document.querySelector("input[name=password0]").value = "";
+	document.querySelector("input[name=password1]").value = "";
+	document.querySelector("input[name=password2]").value = "";
+	
+	closeDialog('editUserDialog');
+ 	displayDialog('editUserPasswordDialog', 'main');
+ 	
+}
+
+function editUserPassword(){
+	document.getElementById("passdialogerror").style.display = "none";
+	
+	var username = document.querySelector("input[name=edit_username]").value;
+	var currentpassword = document.querySelector("input[name=password0]").value;
+	var pass1 = document.querySelector("input[name=password1]").value;
+	var pass2 = document.querySelector("input[name=password2]").value;
+	
+	if (pass1 != pass2){
+		document.getElementById("passdialogerror").innerHTML = i18n("users.passworddonotmatch");
+		document.getElementById("passdialogerror").style.display = "block";
+		return false;
+	}
+	if (pass1.length < 8){
+		document.getElementById("passdialogerror").innerHTML = i18n("users.passwordinvalidlength");
+		document.getElementById("passdialogerror").style.display = "block";
+		return false;
+	}
+	
+	var jsonData = {
+			"username" : username,
+			"oldpassword" : currentpassword,
+			"password" : pass1,
+		};
+	
+	hideInfo();
+
+	closeDialog('editUserPasswordDialog');
+	
+	var oReq = new XMLHttpRequest();
+	oReq.smartuser = username;
+	oReq.onload = userPasswordEdited;
+	oReq.open("PUT", USER_URL + encodeURIComponent(username), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	
+	document.querySelector("input[name=password0]").value = "";
+	document.querySelector("input[name=password1]").value = "";
+	document.querySelector("input[name=password2]").value = "";
+	
+	
+	return false;
+}
+
+function userPasswordEdited(){
+	if (this.status == 200) {
+		displayInfo(this.smartuser + ": " + i18n("users.passwordupdateok"));
+	} else {
+		displayError(parseError(i18n("users.passwordupdateerror") + " " + this.smartuser, this.responseText));
+	}
+
+}
 /* edit user */
 function editUser(){
 	var username = document.querySelector("input[name=edit_username]").value;
@@ -982,6 +1023,7 @@ function userDeactivated() {
 }
 
 function clearAndShowEditRoleDialog() {
+	
 	var roleid = this.dataset.roleid;
 	
 	var rolename ="";

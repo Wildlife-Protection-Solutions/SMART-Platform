@@ -51,11 +51,12 @@ function displayConfirmDialog(title, message, onOkay){
 		closeDialog(dialogDiv.id);
 		document.body.removeChild(dialogDiv);
 		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
-		overlaydiv.parentNode.removeChild(overlaydiv);
+		if (overlaydiv != null) overlaydiv.parentNode.removeChild(overlaydiv);
 	}
 	document.body.appendChild(dialogDiv);
 	
-	displayDialogLocation(dialogDiv.id, window.innerWidth / 2 - 150 + window.pageXOffset,   ((window.innerHeight / 2)) - 100 + window.pageYOffset);
+	displayDialogLocation(dialogDiv.id, window.innerWidth / 2 - 150 + window.pageXOffset,
+		   ((window.innerHeight / 2)) - 100 + window.pageYOffset, "300px");
 }
 
 function displayDialogCenter(divId){
@@ -85,7 +86,7 @@ function displayDialogCenter(divId){
  * Displays the dialog represented by divId at
  * the x, y position
  */
-function displayDialogLocation(divId, x, y){
+function displayDialogLocation(divId, x, y, maxwidth){
 	var dialog = document.querySelector("#" + divId);
 	dialog.style.display = "block";
 	dialog.style.position = "absolute";
@@ -93,6 +94,7 @@ function displayDialogLocation(divId, x, y){
 	dialog.style.top = y + "px";
 	dialog.style.left = x + "px";
 	dialog.style['max-height'] = "calc(100% - " + (y + 20) + "px)";
+	if (maxwidth) dialog.style['max-width'] = maxwidth
 	
 	var overlaydiv = document.createElement('div');
 	overlaydiv.setAttribute("class", "overlay-widget");
