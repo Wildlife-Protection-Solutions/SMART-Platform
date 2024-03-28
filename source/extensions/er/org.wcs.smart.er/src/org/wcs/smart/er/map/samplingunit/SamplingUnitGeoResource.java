@@ -23,6 +23,7 @@ package org.wcs.smart.er.map.samplingunit;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -67,7 +68,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 		
 		try{
 			if (serviceIdentifer != null){
-				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+				this.url = URL.of(URI.create(serviceIdentifer.toExternalForm() + "#" + dataType), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 			}
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$

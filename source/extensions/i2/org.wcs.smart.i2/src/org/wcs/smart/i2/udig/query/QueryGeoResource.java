@@ -23,6 +23,7 @@ package org.wcs.smart.i2.udig.query;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -78,9 +79,9 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 		
 		try{
 			if (serviceIdentifer != null){
-				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+				this.url = URL.of(URI.create(serviceIdentifer.toExternalForm() + "#" + typeName), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 				String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString((UUID)service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY)) + "#" + typeName; //$NON-NLS-1$ //$NON-NLS-2$
-				this.fixedURL = new URL(null, part, CorePlugin.RELAXED_HANDLER);
+				this.fixedURL = URL.of(URI.create(part), CorePlugin.RELAXED_HANDLER);
 			}
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("malformed url", e); //$NON-NLS-1$
@@ -90,7 +91,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 	public static  URL generateResourceURL(UUID queryUuid, String dataType) {
 		try{
 			String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString(queryUuid) + "#" + dataType; //$NON-NLS-1$ //$NON-NLS-2$
-			return new URL(null, part, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(part), CorePlugin.RELAXED_HANDLER);
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("malformed url", e); //$NON-NLS-1$
          }	

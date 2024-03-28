@@ -173,7 +173,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		    						l.getStyleBlackboard().put(SLDContent.ID, 
 		    								l.getGeoResource().resolve(IntelRecordAttributeGeoResource.class, null).getAttribute().getAttributeGeometryStyle().toStyle());
 		    						
-		    						l.setName(MessageFormat.format("Data Model: {0}", l.getName()));
+		    						l.setName(MessageFormat.format(Messages.RecordMapPage_DataModel, l.getName()));
 		    					}else {
 		    						
 		    						if (l.getGeoResource().canResolve(IntelRecordGeoResource.class)) {

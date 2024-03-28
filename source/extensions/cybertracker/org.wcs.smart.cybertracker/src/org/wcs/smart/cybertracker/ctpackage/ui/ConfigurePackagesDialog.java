@@ -499,6 +499,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 			this.items = items;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		protected void okPressed() {
 			selection = (T)cmbItems.getStructuredSelection().getFirstElement();

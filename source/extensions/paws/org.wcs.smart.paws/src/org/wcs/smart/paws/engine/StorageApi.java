@@ -24,7 +24,7 @@ package org.wcs.smart.paws.engine;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -76,7 +76,7 @@ public enum StorageApi {
 		String url = service.getStorageUrl() + "/" + containerName; //$NON-NLS-1$
 		
 		TokenCredentials tc = new TokenCredentials(token);
-		ContainerURL  containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
+		ContainerURL  containerURL = new ContainerURL(URI.create(url).toURL(), StorageURL.createPipeline(tc, new PipelineOptions()));
 		return containerURL;
 	}
 	
@@ -167,7 +167,7 @@ public enum StorageApi {
 		String pp = params.toString();	
 		
 		token = null;
-		HttpURLConnection conn = (HttpURLConnection) (new URL(sb.toString())).openConnection();
+		HttpURLConnection conn = (HttpURLConnection) (URI.create(sb.toString()).toURL()).openConnection();
 		try {
 			conn.setRequestMethod("POST"); //$NON-NLS-1$
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); //$NON-NLS-1$ //$NON-NLS-2$

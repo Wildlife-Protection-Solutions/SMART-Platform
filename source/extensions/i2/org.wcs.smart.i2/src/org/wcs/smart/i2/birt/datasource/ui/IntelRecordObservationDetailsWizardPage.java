@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import org.wcs.smart.i2.birt.record.location.RecordLocationObservationDetailsDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /** 
  * Intelligence record observation details wizard page.  A wizard page with no options. 
@@ -43,7 +44,7 @@ public class IntelRecordObservationDetailsWizardPage extends IntelRecordDetailsW
 
 	@Override
 	public String getName(){
-		return "Record Location Observation Details";
+		return Messages.IntelRecordObservationDetailsWizardPage_Name;
 	}
 	
 }

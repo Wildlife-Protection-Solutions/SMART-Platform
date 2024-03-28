@@ -355,6 +355,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
         // itself wil keepup the class loader...
         try {
             System.gc();
+            //finalizers are to be removed so leave this hear until removed from geotools
             System.runFinalization();
         }catch(Throwable t){
         	t.printStackTrace();

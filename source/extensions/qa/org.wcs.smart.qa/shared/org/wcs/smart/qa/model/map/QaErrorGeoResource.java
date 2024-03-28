@@ -23,6 +23,7 @@ package org.wcs.smart.qa.model.map;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -84,7 +85,7 @@ public class QaErrorGeoResource extends IGeoResource implements IFilteringResour
 	@Override
 	public URL getIdentifier() {
 		try {
-			return new URL(null, service.getIdentifier().toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER);  //$NON-NLS-1$
+			return URL.of(URI.create(service.getIdentifier().toExternalForm() + "#" + typeName), CorePlugin.RELAXED_HANDLER);  //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			Logger.getLogger(QaErrorGeoResource.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}

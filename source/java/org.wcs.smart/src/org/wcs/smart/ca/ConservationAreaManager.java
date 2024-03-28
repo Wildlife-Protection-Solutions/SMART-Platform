@@ -309,7 +309,7 @@ public class ConservationAreaManager {
 		Employee del = (Employee) session.get(Employee.class, e.getUuid()); //reload employee see #2178
 		if (del == null) {
 			//employee not found cannot remove
-			return "Employee not found.";			
+			return Messages.ConservationAreaManager_EmployeeNotFound;			
 		}
 				
 		String deleteError = null;

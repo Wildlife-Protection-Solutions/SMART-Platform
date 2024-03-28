@@ -94,7 +94,7 @@ public class SaveNewWaypointJob extends Job {
 						saveSession.persist(pnt);
 						saveSession.persist(wp);
 					}else {
-						throw new IllegalStateException("Cannot save waypoint with uuids");
+						throw new IllegalStateException("Cannot save waypoint with uuid set."); //$NON-NLS-1$
 					}
 					
 					// remove observations with no data

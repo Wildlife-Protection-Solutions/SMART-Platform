@@ -196,23 +196,24 @@ public class QueryDefinitionValidator {
 	 * 
 	 * @return
 	 */
-	public NamedItem findValue(String langCode, String value, String objectType, List<String> warnings,  String caField){
+	public NamedItem findValue(String langCode, String value, 
+			Class<?> hibernateClass, List<String> warnings,  String caField){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c" +  caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String sql = "SELECT c FROM Language a, Label b, " + hibernateClass.getSimpleName() + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c" +  caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		org.hibernate.query.Query<?> query = session.createQuery(sql);
+		org.hibernate.query.Query<NamedItem> query = session.createQuery(sql, NamedItem.class);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<NamedItem> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			warnings.add(MessageFormat.format(Messages.FilterValidator_MultipleImportOptions, new Object[]{objectType, value}));
-			return (NamedItem)results.get(0);
+			warnings.add(MessageFormat.format(Messages.FilterValidator_MultipleImportOptions, new Object[]{hibernateClass.getSimpleName(), value}));
+			return results.get(0);
 		}else{
-			return (NamedItem)results.get(0);
+			return results.get(0);
 		}
 	}
 	
@@ -223,21 +224,21 @@ public class QueryDefinitionValidator {
 	 * 
 	 * @return the matching item or null if nothing found
 	 */
-	public NamedKeyItem findKeyValue(String key, String objectType, String caField){
+	public NamedKeyItem findKeyValue(String key, Class<?> hibernateClass, String caField){
 		
-		String sql = "SELECT c FROM " + objectType + " c WHERE keyId = :keyId and c" + caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String sql = "SELECT c FROM " + hibernateClass.getSimpleName() + " c WHERE keyId = :keyId and c" + caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		org.hibernate.query.Query<?> query = session.createQuery(sql);
+		org.hibernate.query.Query<NamedKeyItem> query = session.createQuery(sql, NamedKeyItem.class);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca",ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<NamedKeyItem> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
 			return null;
 		}else{
-			return (NamedKeyItem)results.get(0);
+			return results.get(0);
 		}
 	}
 	

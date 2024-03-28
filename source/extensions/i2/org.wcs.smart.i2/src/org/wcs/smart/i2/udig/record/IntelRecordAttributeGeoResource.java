@@ -23,6 +23,7 @@ package org.wcs.smart.i2.udig.record;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,7 +58,7 @@ public class IntelRecordAttributeGeoResource extends IGeoResource implements IFi
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + attribute.getKeyId(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = URL.of(URI.create(serviceIdentifer.toExternalForm() + "#" + attribute.getKeyId()), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
              throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }

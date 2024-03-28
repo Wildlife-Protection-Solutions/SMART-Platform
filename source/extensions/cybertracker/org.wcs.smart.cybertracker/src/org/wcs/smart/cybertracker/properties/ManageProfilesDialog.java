@@ -198,6 +198,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	//ideally this doesn't happen but because of sync'ing with connect it might
 	//if things happened in a specific order
 	//https://app.assembla.com/spaces/smart-cs/tickets/3499
+	@SuppressWarnings("unchecked")
 	private boolean hasMultipleDefaults() {
 		Object x = profilesViewer.getInput();
 		if (!(x instanceof List)) return false;

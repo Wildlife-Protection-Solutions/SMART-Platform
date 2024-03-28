@@ -57,8 +57,8 @@ public class ObservationQueryLabelProvider implements
 				case WAYPOINT_LAST_MODIFIED: return Messages.getString("ObservationQueryLabelProvider.LastModifiedLabel", l);	 //$NON-NLS-1$
 				case WAYPOINT_LAST_MODIFIED_BY: return Messages.getString("ObservationQueryLabelProvider.LastModifiedByLabel", l); //$NON-NLS-1$
 				case OBS_GROUP_ID: return Messages.getString("ObservationQueryLabelProvider.ObsGroupColumnName", l); //$NON-NLS-1$
-				case OBSERVATION_UUID: return "Observation UUID";
-				case WAYPOINT_UUID: return "Waypoint UUID";
+				case OBSERVATION_UUID: return Messages.getString("ObservationQueryLabelProvider.ObservationUuidColumnName",l); //$NON-NLS-1$
+				case WAYPOINT_UUID: return Messages.getString("ObservationQueryLabelProvider.WaypointUuidColumnName",l); //$NON-NLS-1$
 			}
 		}
 		return null;

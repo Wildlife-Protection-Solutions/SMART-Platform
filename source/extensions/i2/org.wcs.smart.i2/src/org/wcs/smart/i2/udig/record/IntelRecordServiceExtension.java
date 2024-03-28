@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.udig.record;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,13 +94,13 @@ public class IntelRecordServiceExtension implements ServiceExtension {
 	 */
 	public static URL createURL(Map<String, Serializable> params){
 		Object x = params.get(RECORD_UUID_KEY);
-		if (x == null) x = "new" + UUID.randomUUID().toString();
+		if (x == null) x = "new" + UUID.randomUUID().toString(); //$NON-NLS-1$
 		if (x instanceof UUID uuid) x = uuid.toString();
 		if (!String.class.isAssignableFrom(x.getClass())) return null;
 		
 		String url = "smart://smartdb/intel2/record/" + (String)x; //$NON-NLS-1$
 		try{
-			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(url), CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
 			return null;
 		}

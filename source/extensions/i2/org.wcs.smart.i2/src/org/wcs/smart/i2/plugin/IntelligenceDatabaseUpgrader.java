@@ -634,7 +634,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		try {
 			(new ProfileDesktopReport800Updater()).upgrade(session);
 		} catch (Exception e) {
-			MessageDialog.openError(null, "Profile Report Upgrade Error", "Unable to upgrade Profile BIRT templates. Some templates may need to be manually updated or reset.");
+			MessageDialog.openError(null, Messages.IntelligenceDatabaseUpgrader_ErrorDialogTitle, Messages.IntelligenceDatabaseUpgrader_BIRTUpgradeError);
 			SmartPlugIn.log(e.getMessage(), e);
 		}
 		

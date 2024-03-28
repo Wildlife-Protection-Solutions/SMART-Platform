@@ -15,6 +15,10 @@ public class Messages extends NLS {
 	public static String AttachmentDialog_moveattachmentstooltip;
 
 	public static String AttachmentDialog_ObservationAttachmentLbl;
+	public static String AttachmentPreviewTagComposite_AddTag;
+
+	public static String AttachmentPreviewTagComposite_FileNotFound;
+
 	public static String AttributeDMAdvisor_Error_AttributeNotDeletable;
 	public static String AttributeDMAdvisor_Error_InvalidObjectType;
 	public static String AttributeListItemDMAdvisor_DeleteError;
@@ -288,6 +292,12 @@ public class Messages extends NLS {
 
 	public static String ObservationOptionsPropertyPage_NameRequired;
 
+	public static String ObservationOptionsPropertyPage_NewTag;
+
+	public static String ObservationOptionsPropertyPage_NewTagDefaultName;
+
+	public static String ObservationOptionsPropertyPage_NewTagMessage;
+
 	public static String ObservationOptionsPropertyPage_NewTypeHeader;
 
 	public static String ObservationOptionsPropertyPage_NewTypeHeader2;
@@ -306,6 +316,14 @@ public class Messages extends NLS {
 	public static String ObservationOptionsPropertyPage_SignatureKeyColumn;
 
 	public static String ObservationOptionsPropertyPage_SignatureNameColumn;
+
+	public static String ObservationOptionsPropertyPage_TagKey;
+
+	public static String ObservationOptionsPropertyPage_TagName;
+
+	public static String ObservationOptionsPropertyPage_TagsMessage;
+
+	public static String ObservationOptionsPropertyPage_TagsSection;
 
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
 	public static String ObservationSummaryWizardPage_ObserverLabel;

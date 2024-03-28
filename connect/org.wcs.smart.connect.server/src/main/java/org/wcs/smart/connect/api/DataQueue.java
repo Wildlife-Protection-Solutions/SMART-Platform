@@ -706,7 +706,7 @@ public class DataQueue {
 				String key =ConnectSetting.CA_PROCESSING_OP_PREFIX + UuidUtils.uuidToString(info.getUuid());
 				
 				ConnectSettingProxy temp = new ConnectSettingProxy(key, value ? "true" : "false",  //$NON-NLS-1$ //$NON-NLS-2$
-						info.getLabel(), "enable if you want to process SMART Mobile data for this Conservation Area on Connect (recommended)"); 
+						info.getLabel(), Messages.getString("DataQueue.smartProcessingSettingTooltip", request.getLocale()));  //$NON-NLS-1$
 				settings.add(temp);
 			}
 			

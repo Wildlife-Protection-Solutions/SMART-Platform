@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -425,12 +424,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 					URL page = FileLocator.toFileURL(fileInPlugin);
 					if (page != null){
 						//unpack entire bundle to ensure any relative images are included
-						URL url = new URL(fileInPlugin.getProtocol(), fileInPlugin.getHost(), 
-								fileInPlugin.getPort(), path.removeLastSegments(1).toString());
-						FileLocator.toFileURL(url);
+						URL parent = FileLocator.find(bundle, path.removeLastSegments(1), null);
+						FileLocator.toFileURL(parent);
 						return page;
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					QueryPlugIn.log("Could not load patrol type help page.", e); //$NON-NLS-1$
 				}
 			}

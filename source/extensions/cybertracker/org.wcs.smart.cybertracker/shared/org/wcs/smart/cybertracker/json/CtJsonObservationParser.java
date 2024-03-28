@@ -200,6 +200,7 @@ public class CtJsonObservationParser {
 	 * @param sighting
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Waypoint createWaypoint(JSONObject feature, ConservationArea ca, Session session) throws Exception{
 		
 		warnings = new ArrayList<JsonImportWarning>();
@@ -679,6 +680,7 @@ public class CtJsonObservationParser {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	private List<WaypointObservationAttribute> createWaypointObservationAttribute(List<ObservationInfo> values, Category c, List<WaypointObservationAttribute> defaultAttributes, Session session) throws Exception{
 		
 		List<WaypointObservationAttribute> results = new ArrayList<WaypointObservationAttribute>();

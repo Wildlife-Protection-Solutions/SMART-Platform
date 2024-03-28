@@ -56,8 +56,8 @@ public class ObservationQueryLabelProvider implements
 				case WAYPOINT_OBSERVER: return Messages.FixedQueryColumn_ObserverColumnName;
 				case WAYPOINT_LAST_MODIFIED: return Messages.ObservationQueryLabelProvider_LastModified_ColumnName;
 				case WAYPOINT_LAST_MODIFIED_BY: return Messages.ObservationQueryLabelProvider_LastModifiedBy_ColumnName;
-				case OBSERVATION_UUID: return "Observation UUID";
-				case WAYPOINT_UUID: return "Waypoint UUID";
+				case OBSERVATION_UUID: return Messages.ObservationQueryLabelProvider_ObsUuidColumnName;
+				case WAYPOINT_UUID: return Messages.ObservationQueryLabelProvider_WpUuidColumnName;
 			}
 		}
 		return null;

@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -73,7 +74,7 @@ public enum PawsApi {
 		}
 		
 		//call the service with the json payload
-		URL url = new URL(surl);
+		URL url = URI.create(surl).toURL();
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		try{
 			conn.setRequestMethod("POST"); //$NON-NLS-1$
@@ -140,7 +141,7 @@ public enum PawsApi {
 		}
 		
 		//call the service with the json payload
-		URL url = new URL(surl);
+		URL url = URI.create(surl).toURL();
 		
 		
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();

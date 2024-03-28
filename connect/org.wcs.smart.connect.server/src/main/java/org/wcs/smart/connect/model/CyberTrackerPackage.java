@@ -23,6 +23,8 @@ package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -165,7 +167,7 @@ public class CyberTrackerPackage extends UuidItem{
 	}
 	
 	@Transient
-	public CyberTrackerPackageProxy asProxy(URL rootUrl) throws MalformedURLException {	
+	public CyberTrackerPackageProxy asProxy(URL rootUrl) throws MalformedURLException, URISyntaxException  {	
 		
 		boolean requirespassword = getIsPrivate();
 		if (getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) {
@@ -173,7 +175,8 @@ public class CyberTrackerPackage extends UuidItem{
 		}
 		
 		String path = rootUrl.getPath() + "/noa/" + CyberTrackerNoa.PATH + "/packages/" + UuidUtils.uuidToString(getCtPackageUuid()); //$NON-NLS-1$ //$NON-NLS-2$
-		URL url = new URL(rootUrl.getProtocol(), rootUrl.getHost(), rootUrl.getPort(), path);
+		URL url = (new URI(rootUrl.getProtocol(), null, rootUrl.getHost(), rootUrl.getPort(), path, null, null)).toURL();
+		//URL url = new URL(rootUrl.getProtocol(), rootUrl.getHost(), rootUrl.getPort(), path);
 		
 		CyberTrackerPackageProxy proxy = new CyberTrackerPackageProxy();
 		proxy.setAppLink(ICtPackage.generateSmartMobileAppLink(url, requirespassword));

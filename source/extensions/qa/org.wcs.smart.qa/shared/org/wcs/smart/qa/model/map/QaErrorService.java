@@ -24,6 +24,7 @@ package org.wcs.smart.qa.model.map;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +61,7 @@ public class QaErrorService extends IService {
 	public QaErrorService(Collection<QaError> errors, Locale l) {
 		ds = new QaErrorMemoryDatastore(errors);
 		try {
-			this.url = new URL(null, "smart://smartdb/qa/" + System.nanoTime(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+			this.url = URL.of(URI.create("smart://smartdb/qa/" + System.nanoTime()), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			Logger.getLogger(QaErrorService.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}	

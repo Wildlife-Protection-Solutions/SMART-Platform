@@ -26,16 +26,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -115,7 +115,7 @@ import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 public class CyberTrackerNoa {
 
 	public static final String PATH = "cybertracker"; //$NON-NLS-1$
-	private DateTimeFormatter fileDtFormatter = DateTimeFormatter.ofPattern("MMM dd, uuuu HH:mm:ss" )
+	private DateTimeFormatter fileDtFormatter = DateTimeFormatter.ofPattern("MMM dd, uuuu HH:mm:ss" ) //$NON-NLS-1$
 			.withZone(ZoneOffset.UTC);
 
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
@@ -125,10 +125,10 @@ public class CyberTrackerNoa {
 	@Context private HttpServletRequest request;
 	@Context private HttpHeaders headers;
 		
-	private URL getRootUrl() throws MalformedURLException{
-		URL url = new URL(request.getRequestURL().toString());
+	private URL getRootUrl() throws MalformedURLException, URISyntaxException{
+		URL url = URI.create(request.getRequestURL().toString()).toURL();
 		String sp = context.getContextPath();
-		URL rootUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), sp);
+		URL rootUrl = (new URI(url.getProtocol(), null, url.getHost(), url.getPort(), sp, null, null)).toURL();
 		return rootUrl;
 	}
 	

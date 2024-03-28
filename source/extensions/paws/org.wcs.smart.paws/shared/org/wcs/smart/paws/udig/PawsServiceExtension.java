@@ -22,6 +22,7 @@
 package org.wcs.smart.paws.udig;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -155,7 +156,7 @@ public class PawsServiceExtension implements ServiceExtension {
 		}
 		String url = PROTOCOL + "://" + HOST + "/" + UuidUtils.uuidToString((UUID)params.get(RUN_UUID_KEY)) ; //$NON-NLS-1$ //$NON-NLS-2$
 		try{
-			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(url), CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
 			return null;
 		}

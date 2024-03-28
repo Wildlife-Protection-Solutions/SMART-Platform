@@ -19,7 +19,6 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.util.UuidUtils;
 
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "earthranger")
 public class EarthRangerServlet extends HttpServlet{

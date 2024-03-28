@@ -226,7 +226,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 										Messages.PatrolQueryValidator_CouldNotMatchFilter,
 										new Object[]{filter.asString()}));
 							}
-							NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName(), getCaField(op));
+							NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass(), getCaField(op));
 							if (it != null){
 								((PatrolFilter)filter).setValue(UuidUtils.uuidToString(it.getUuid()));
 								return;
@@ -240,7 +240,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 										Messages.PatrolQueryValidator_CouldNotMatchFilter,
 										new Object[]{filter.asString()}));
 							}
-							NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings, getCaField(op));							
+							NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass(), warnings, getCaField(op));							
 							if (it == null){
 								throw new Exception(MessageFormat.format(
 									Messages.FilterValidator_PatrolFilter_ValueMatchingError,
@@ -308,7 +308,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 									throw new Exception(MessageFormat.format(
 										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
 								}
-								NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName(), getCaField(op));
+								NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass(), getCaField(op));
 								if (it != null){
 									groupBy.getItems()[i] = UuidUtils.uuidToString(it.getUuid());
 									continue;
@@ -322,7 +322,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 									throw new Exception(MessageFormat.format(
 										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
 								}
-								NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings, getCaField(op));
+								NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass(), warnings, getCaField(op));
 								if (it == null) {
 									throw new Exception(
 										MessageFormat.format(

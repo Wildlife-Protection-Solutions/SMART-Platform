@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.model.udig;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -117,7 +118,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 			url += "/" + System.nanoTime(); //$NON-NLS-1$
 		}
 		try{
-			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(url), CorePlugin.RELAXED_HANDLER);
 		}catch (Exception ex){
 			QueryPlugIn.log(Messages.RasterService_urlError + ex.getLocalizedMessage(), ex);
 			return null;

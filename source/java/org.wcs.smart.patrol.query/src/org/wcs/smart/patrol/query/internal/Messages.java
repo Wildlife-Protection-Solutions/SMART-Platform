@@ -147,6 +147,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryEditorTableContent_NumberOfPatrolsLabel;
 	public static String PatrolQueryEditorTableContent_NumberofRecordsLabel;
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
+	public static String PatrolQueryEditorTableContent_RunQuery;
 	public static String PatrolQueryEditorTableContent_RunQueryLink;
 	public static String PatrolQueryLabelProvider_AgencyLabel;
 	public static String PatrolQueryLabelProvider_ConfigurableModel;
@@ -154,13 +155,16 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String PatrolQueryLabelProvider_NumTimeRanges;
+	public static String PatrolQueryLabelProvider_ObservationUUIDColumnName;
 	public static String PatrolQueryLabelProvider_ObsGroupColumnName;
+	public static String PatrolQueryLabelProvider_PatrolUUIDColumnName;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_RawXColumnName;
 	public static String PatrolQueryLabelProvider_RawYColumnName;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
 	public static String PatrolQueryLabelProvider_TrackAreaValueItem;
 	public static String PatrolQueryLabelProvider_TrackColumnName;
+	public static String PatrolQueryLabelProvider_WaypointUUIDColumnName;
 	public static String PatrolQueryMemoryResult_DeleteError;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_ErrorInvalidPatrolFilterValue;

@@ -236,6 +236,7 @@ public class ObservationDialog extends SmartStyledDialog {
 		observationTable = new TableViewer(lower, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		observationTable.setContentProvider(new IStructuredContentProvider() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public Object[] getElements(Object inputElement) {
 				if (inputElement instanceof List) {

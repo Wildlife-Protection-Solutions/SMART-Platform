@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IQueryColumn;
 
 /**
@@ -70,7 +71,7 @@ public class ExportQueryGeometryColumnPage extends WizardPage {
 		
 		main.setLayout(new GridLayout(1, false));
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Select the geometries to export:");
+		lbl.setText(Messages.ExportQueryGeometryColumnPage_SelectGeometries);
 		
 		Composite wrapper = new Composite(main, SWT.NONE);
 		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -92,8 +93,8 @@ public class ExportQueryGeometryColumnPage extends WizardPage {
 			setPageComplete(outputOptions.getCheckedElements().length != 0)
 		);
 		
-		setTitle("Export" + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
-		setMessage("Select the geometries to export");
+		setTitle("Export" + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		setMessage(Messages.ExportQueryGeometryColumnPage_Message);
 		setControl(main);
 	}
 

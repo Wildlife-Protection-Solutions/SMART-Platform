@@ -288,8 +288,8 @@ public class PatrolPackageExporter {
 		}
 		
 		for (Language l : ctpackage.getConservationArea().getLanguages()) {
-			locale = new Locale(l.getCode());
-			locale = new Locale(locale.getLanguage());
+			locale = Locale.of(l.getCode());
+			locale = Locale.of(locale.getLanguage());
 			
 			if (locale.getLanguage().equalsIgnoreCase("en")) continue; //$NON-NLS-1$
 			if (locale.getLanguage().equalsIgnoreCase(Locale.getDefault().getLanguage())) continue;

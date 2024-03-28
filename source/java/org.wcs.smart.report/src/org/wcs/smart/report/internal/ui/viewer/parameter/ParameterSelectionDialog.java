@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
-import java.net.URL;
+import java.net.URI;
 import java.text.Collator;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +139,7 @@ public class ParameterSelectionDialog extends SmartStyledTitleDialog {
 				if (im == null) return null;
 				try {
 					
-					i = ImageDescriptor.createFromURL(new URL(im)).createImage();
+					i = ImageDescriptor.createFromURL(URI.create(im).toURL()).createImage();
 					images.put(element,i);
 					return i;
 				}catch (Exception ex) {

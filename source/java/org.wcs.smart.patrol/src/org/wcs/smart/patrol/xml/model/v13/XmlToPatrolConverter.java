@@ -202,7 +202,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 
 		if (xml.getStation() != null){
-			Station station = (Station) findValue(xml.getStation().getLanguageCode(), xml.getStation().getValue(), "Station"); //$NON-NLS-1$
+			Station station = (Station) findValue(xml.getStation().getLanguageCode(), xml.getStation().getValue(), Station.class);
 			if (station == null){
 				
 				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_StationNoFound, new Object[]{xml.getStation().getValue(),xml.getStation().getLanguageCode()}));			
@@ -212,7 +212,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 		
 		if (xml.getTeam() != null){
-			Team team = (Team) findValue(xml.getTeam().getLanguageCode(), xml.getTeam().getValue(), "Team"); //$NON-NLS-1$
+			Team team = (Team) findValue(xml.getTeam().getLanguageCode(), xml.getTeam().getValue(), Team.class);
 			if (team == null){
 				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_TemNotFound1, new Object[]{xml.getTeam().getValue(),xml.getTeam().getLanguageCode()}));
 			}else{
@@ -291,7 +291,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		leg.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
 
 		if (xml.getMandate() != null){
-			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate"); //$NON-NLS-1$
+			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), PatrolMandate.class);
 			if (m == null){
 				//ERROR
 				throw new Exception(
@@ -820,11 +820,11 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		return HibernateManager.findEmployeeByName(type.getGivenName(), type.getFamilyName(), ca, session);
 	}
 	
-	private NamedItem findValue(String langCode, String value, String objectType){
+	private NamedItem findValue(String langCode, String value, Class<?> hibernateClass){
+
+		String sql = "SELECT c FROM Language a, Label b, " + hibernateClass.getSimpleName() + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Query<?> query = session.createQuery(sql);
+		Query<?> query = session.createQuery(sql, NamedItem.class);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -833,7 +833,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_MultipleOptionsFound, new Object[]{objectType}));
+			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_MultipleOptionsFound, new Object[]{hibernateClass.getSimpleName()}));
 			return (NamedItem)results.get(0);
 		}else{
 			return (NamedItem)results.get(0);

@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.map;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class SurveyQueryServiceExtension implements ServiceExtension {
 			url += "/" + System.nanoTime(); //$NON-NLS-1$
 		}
 		try{
-			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(url), CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
 			return null;
 		}

@@ -140,7 +140,8 @@ public class Attribute extends DmObject{
 	public enum GeometrySource{
 		MANUAL_DRAW, //drawn on a map manually (user clicks point on map)
 		MANUAL_POINT,  //manually enter coordinates (x,y) without aid of map
-		GPS, //taken by a GPS (smart mobile)
+		GPS_MANUAL, //taken by a GPS (smart mobile); users chooses when GPS point take
+		GPS_AUTO, //taken by a GPS (smart mobile); GPS points automatically taken ever x seconds
 		UNKNOWN;
 		
 		public String getLabel(Locale l) {

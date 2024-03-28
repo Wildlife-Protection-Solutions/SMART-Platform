@@ -44,6 +44,7 @@ import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -127,7 +128,7 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 		main.setLayout(new GridLayout(1, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Earth Ranger URL:");
+		l.setText(Messages.EarthRangerPreferencePage_URL);
 		
 		txtUrl = new Text(main, SWT.BORDER );
 		txtUrl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -135,7 +136,7 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 		txtUrl.addListener(SWT.Modify, e->validate());
 		
 		l = new Label(main, SWT.WRAP);
-		l.setText("This will be of the form https://<server>.pamdas.org");
+		l.setText(Messages.EarthRangerPreferencePage_Tooltip);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)l.getLayoutData()).widthHint = 100;
 
@@ -147,7 +148,7 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 	private boolean validate() {
 		String error = null;
 		if (!txtUrl.getText().trim().isBlank() && !txtUrl.getText().trim().startsWith("https://")) { //$NON-NLS-1$
-			error = MessageFormat.format("URL must start with {0}", "https://");
+			error = MessageFormat.format(Messages.EarthRangerPreferencePage_Error, "https://"); //$NON-NLS-1$
 		}
 		setErrorMessage(error);
 		setValid(error == null);
@@ -157,7 +158,7 @@ public class EarthRangerPreferencePage extends PreferencePage implements
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			String text = "";
+			String text = ""; //$NON-NLS-1$
 			try (Session session = HibernateManager.openSession()){
 				
 				ConservationAreaProperty prop = 

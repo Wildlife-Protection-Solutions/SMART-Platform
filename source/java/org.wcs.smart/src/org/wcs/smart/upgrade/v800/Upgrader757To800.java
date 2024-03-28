@@ -214,6 +214,13 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 
 			"ALTER TABLE smart.cm_node add column attachment_tags long varchar", //$NON-NLS-1$
 
+			
+			//update smart.WP_OBSERVATION_ATTRIBUTES set string_value = 'GPS_MANUAL'
+			//where string_value like 'GPS%'
+			//and attribute_uuid in (
+			//select uuid from smart.DM_ATTRIBUTE where att_Type = 'POLYGON' or att_Type = 'LINE'
+			//)
+
 		};
 		
 		for (String s : sql) {
@@ -296,9 +303,9 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 				});
 			}
 			
-			setMessage("Select the most appropriate timezone for each Conservation Area"); 
-			setTitle("Timezone Mapping"); 
-			getShell().setText("Timezone Mapping");
+			setMessage(Messages.Upgrader757To800_TimeZoneMessage); 
+			setTitle(Messages.Upgrader757To800_TimeZoneTitle); 
+			getShell().setText(Messages.Upgrader757To800_TimeZoneTitle);
 			
 			
 			scrolled.setContent(main);

@@ -439,6 +439,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaListView_CaLabel;
 	public static String ConservationAreaListView_ModifyLink;
 	public static String ConservationAreaManager_CompressingTables;
+	public static String ConservationAreaManager_EmployeeNotFound;
 	public static String ConservationAreaManager_Error_DeletingFilestore;
 	public static String ConservationAreaManager_Progress_DeleteCa;
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
@@ -736,6 +737,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_ClearImageText;
 	public static String DialogConstants_csvfiles;
 	public static String DialogConstants_DeleteButton_Label;
+	public static String DialogConstants_DeSelectAll;
 	public static String DialogConstants_DisableAllButton_Label;
 	public static String DialogConstants_DisableButton_Label;
 	public static String DialogConstants_EditButton_Label;
@@ -749,12 +751,16 @@ public class Messages extends NLS {
 	public static String DialogConstants_ImportButton_Label;
 	public static String DialogConstants_LoadingText;
 	public static String DialogConstants_SaveButton_Label;
+	public static String DialogConstants_SelectAll;
 	public static String DialogConstants_xmlfiles;
 	public static String DialogConstants_xmorzipfiles;
 	public static String DialogConstants_zipfiles;
 	public static String DrawOnMapDialog_DialogTitle;
 	public static String DrawPolygonTool_InvalidPolygon;
 	public static String DropItem_removetooltip;
+	public static String EarthRangerPreferencePage_Error;
+	public static String EarthRangerPreferencePage_Tooltip;
+	public static String EarthRangerPreferencePage_URL;
 	public static String EditProjectionDialog_Dialog_Message;
 	public static String EditProjectionDialog_Dialog_Title;
 	public static String EditProjectionDialog_Error_DefLength;
@@ -1441,6 +1447,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_ExactOperator;
 	public static String SmartLabelProvider_GeometryLabel;
 	public static String SmartLabelProvider_GeometrySourceGPS;
+	public static String SmartLabelProvider_GeometrySourceGPSAuto;
 	public static String SmartLabelProvider_GeometrySourceManualDraw;
 	public static String SmartLabelProvider_GeometrySourceManualPoint;
 	public static String SmartLabelProvider_GeometrySourceUnknown;
@@ -1707,6 +1714,8 @@ public class Messages extends NLS {
 	public static String Upgrader630To700_WarningTitle;
 	public static String Upgrader700To741_UpgradeErrorMsage;
 	public static String Upgrader700To741_UpgradeMsg;
+	public static String Upgrader757To800_TimeZoneMessage;
+	public static String Upgrader757To800_TimeZoneTitle;
 	public static String UserLoginInfo_ReadError;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;

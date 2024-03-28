@@ -24,6 +24,8 @@ package org.wcs.smart.connect.api.noa;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -89,10 +91,10 @@ public class SmartCollectNoa {
 	@Context private HttpServletRequest request;
 	@Context private HttpHeaders headers;
 	
-	private URL getRootUrl() throws MalformedURLException{
-		URL url = new URL(request.getRequestURL().toString());
+	private URL getRootUrl() throws MalformedURLException, URISyntaxException{
+		URL url = URI.create(request.getRequestURL().toString()).toURL();
 		String sp = context.getContextPath();
-		URL rootUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), sp);
+		URL rootUrl = (new URI(url.getProtocol(), null, url.getHost(), url.getPort(), sp, null, null)).toURL();
 		return rootUrl;
 	}
 	

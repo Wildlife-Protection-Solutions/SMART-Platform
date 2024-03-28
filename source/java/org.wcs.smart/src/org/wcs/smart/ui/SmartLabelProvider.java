@@ -96,7 +96,8 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			return getAreaTypeName((AreaType)value);
 		}else if (value instanceof Attribute.GeometrySource src) {
 			switch(src) {
-				case GPS: return Messages.SmartLabelProvider_GeometrySourceGPS;
+				case GPS_MANUAL: return Messages.SmartLabelProvider_GeometrySourceGPS;
+				case GPS_AUTO: return Messages.SmartLabelProvider_GeometrySourceGPSAuto;
 				case MANUAL_DRAW: return Messages.SmartLabelProvider_GeometrySourceManualDraw;
 				case MANUAL_POINT: return Messages.SmartLabelProvider_GeometrySourceManualPoint;
 				case UNKNOWN: return Messages.SmartLabelProvider_GeometrySourceUnknown;		

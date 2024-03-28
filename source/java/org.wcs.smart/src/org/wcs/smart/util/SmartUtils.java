@@ -21,13 +21,10 @@
  */
 package org.wcs.smart.util;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.SinglePixelPackedSampleModel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;

@@ -25,7 +25,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -206,10 +205,10 @@ public enum ImageProcessor {
 		
 	}
 	
-	public static void main(String[] args) {
-		Path in = Paths.get("C:\\temp\\input.JPG");
-		Path out = Paths.get("C:\\temp\\input.out.JPG");
-		
-		ImageProcessor.INSTANCE.resizeImage(in, out, 200,200);
-	}
+//	public static void main(String[] args) {
+//		Path in = Paths.get("C:\\temp\\input.JPG");
+//		Path out = Paths.get("C:\\temp\\input.out.JPG");
+//		
+//		ImageProcessor.INSTANCE.resizeImage(in, out, 200,200);
+//	}
 }

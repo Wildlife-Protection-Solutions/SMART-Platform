@@ -74,24 +74,24 @@ public class IntelEntityObservationAttributeFeatureReader implements FeatureRead
 			isArea = true;
 		}
 		
-		String attributeKey = typeName.split("\\.")[1];
+		String attributeKey = typeName.split("\\.")[1]; //$NON-NLS-1$
 		AttributeListItem li = entity.getDmAttributeListItem();
 
-		String query1 = "SELECT observation FROM WaypointObservationAttribute WHERE attributeListItem = :entity ";
-		String query2 = "FROM WaypointObservationAttribute WHERE attribute.keyId = :keyId and attribute.conservationArea = :ca and observation IN (" + query1 + ")";
+		String query1 = "SELECT observation FROM WaypointObservationAttribute WHERE attributeListItem = :entity "; //$NON-NLS-1$
+		String query2 = "FROM WaypointObservationAttribute WHERE attribute.keyId = :keyId and attribute.conservationArea = :ca and observation IN (" + query1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){
-			query2 += "and observation.observationGroup.waypoint.dateTime between :d1 and :d2";
+			query2 += "and observation.observationGroup.waypoint.dateTime between :d1 and :d2"; //$NON-NLS-1$
 		}
 		Query<WaypointObservationAttribute> hquery = session.createQuery(query2, WaypointObservationAttribute.class)
-				.setParameter("entity", li)
-				.setParameter("keyId", attributeKey)
-				.setParameter("ca", entity.getConservationArea());
+				.setParameter("entity", li) //$NON-NLS-1$
+				.setParameter("keyId", attributeKey) //$NON-NLS-1$
+				.setParameter("ca", entity.getConservationArea()); //$NON-NLS-1$
 				
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){
-			hquery.setParameter("d1", dFilter[0]);
-			hquery.setParameter("d2", dFilter[1]);
+			hquery.setParameter("d1", dFilter[0]); //$NON-NLS-1$
+			hquery.setParameter("d2", dFilter[1]); //$NON-NLS-1$
 		}
 
 		fIterator = hquery.unwrap(Query.class).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);

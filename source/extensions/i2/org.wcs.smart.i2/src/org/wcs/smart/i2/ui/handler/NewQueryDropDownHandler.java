@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -104,7 +104,7 @@ public class NewQueryDropDownHandler {
 			MenuItem mi = new MenuItem(menu, SWT.PUSH);
 			try {
 				if (e.getIconURI() != null) {
-					ImageDescriptor id = ImageDescriptor.createFromURL(new URL(e.getIconURI()));
+					ImageDescriptor id = ImageDescriptor.createFromURL(URI.create(e.getIconURI()).toURL());
 					Image img = id.createImage();
 					mi.addListener(SWT.Dispose, evt->img.dispose());
 					mi.setImage(  img  );

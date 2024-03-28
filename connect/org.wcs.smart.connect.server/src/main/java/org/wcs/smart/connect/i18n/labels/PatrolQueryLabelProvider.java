@@ -76,9 +76,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_LASTMODIFIED: return Messages.getString("PatrolQueryLabelProvider.LastModifiedColumn", l); //$NON-NLS-1$
 			case WAYPOINT_LASTMODIFIEDBY: return Messages.getString("PatrolQueryLabelProvider.LastModifiedByColumn", l); //$NON-NLS-1$
 			case OBS_GROUP_ID: return Messages.getString("PatrolQueryLabelProvider.ObsGroupColumnName", l); //$NON-NLS-1$
-			case OBSERVATION_UUID: return "Observation UUID";
-			case PATROL_UUID: return "Patrol UUID";
-			case WAYPOINT_UUID: return "Waypoint UUID";
+			case OBSERVATION_UUID: return Messages.getString("PatrolQueryLabelProvider.ObservationUuidColumnName", l); //$NON-NLS-1$
+			case PATROL_UUID: return Messages.getString("PatrolQueryLabelProvider.PatrolUuidColumnName", l); //$NON-NLS-1$
+			case WAYPOINT_UUID: return Messages.getString("PatrolQueryLabelProvider.WaypointUuidColumnName", l); //$NON-NLS-1$
 			}
 		}
 		if (item instanceof PatrolValueOption){

@@ -34,10 +34,10 @@ public class Messages {
 	//which languages i18n labels are provided for
 	private static Set<Locale> supportedLocales = new HashSet<>();
 	static{
-			supportedLocales.add(new Locale("ar")); //$NON-NLS-1$
-			supportedLocales.add(new Locale("es")); //$NON-NLS-1$
-			supportedLocales.add(new Locale("ka")); //$NON-NLS-1$
-			supportedLocales.add(new Locale("th")); //$NON-NLS-1$
+			supportedLocales.add(Locale.of("ar")); //$NON-NLS-1$
+			supportedLocales.add(Locale.of("es")); //$NON-NLS-1$
+			supportedLocales.add(Locale.of("ka")); //$NON-NLS-1$
+			supportedLocales.add(Locale.of("th")); //$NON-NLS-1$
 	};
 
 	private Messages() {

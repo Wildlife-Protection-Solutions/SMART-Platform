@@ -307,7 +307,7 @@ public class PatrolQueryEditorTableContent {
 		ToolItem runItem = new ToolItem(headerToolbar, SWT.PUSH);
 		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem.addListener(SWT.Selection, e->editor.refreshQuery());
-		runItem.setToolTipText("Run query");
+		runItem.setToolTipText(Messages.PatrolQueryEditorTableContent_RunQuery);
 		
 		headerToolbar.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		

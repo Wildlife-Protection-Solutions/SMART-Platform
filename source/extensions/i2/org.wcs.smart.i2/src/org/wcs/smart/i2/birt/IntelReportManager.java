@@ -186,13 +186,13 @@ public enum IntelReportManager {
 		}else if (dataSetId.equals(RecordLocationDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_RecordLocationDatasetName;
 		}else if (dataSetId.equals(RecordLocationObservationDetailsDataset.DATASET_TYPE)){
-			return "Record Location Observation Details";
+			return Messages.IntelReportManager_RecordLocationObservationDetailsLayerName;
 		}else if (dataSetId.equals(RecordAttachmentDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_RecordAttachmentsDatasetName;
 		}else if (dataSetId.equals(EntitySearchDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_EntitySearchesDatasetName;
 		}else if (dataSetId.equals(EntityLocationObservationAttributeDataset.DATASET_TYPE)) {
-			return "Entity Observation Geometry Attributes";
+			return Messages.IntelReportManager_GeometryAttributesLayerName;
 		}
 		return dataSetId;
 	}

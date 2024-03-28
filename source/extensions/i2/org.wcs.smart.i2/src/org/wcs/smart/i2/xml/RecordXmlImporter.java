@@ -980,7 +980,7 @@ public class RecordXmlImporter {
 					try {
 						src = GeometrySource.valueOf(recordAttribute.getStringValue());	
 					}catch (Exception ex) {
-						warnings.add(MessageFormat.format("Could not parse the value {0} into a valid geometry source for the geometry attribute {1}. The source will be set to unknown.", recordAttribute.getStringValue(), recordAttribute.getAttribute().getName()));
+						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_GeomParseError1, recordAttribute.getStringValue(), recordAttribute.getAttribute().getName()));
 					}
 				
 					try {
@@ -989,7 +989,7 @@ public class RecordXmlImporter {
 						GeometryAttributeValue value = new GeometryAttributeValue(g, src);
 						newValue.setGeometry(value);	
 					}catch (Exception ex) {
-						warnings.add(MessageFormat.format("Could not parse a valid geometry from the value associated with geometry attribute {0}. The attribute value will not be imported.", recordAttribute.getAttribute().getName()));
+						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_GeomParseError2, recordAttribute.getAttribute().getName()));
 					}
 					
 					

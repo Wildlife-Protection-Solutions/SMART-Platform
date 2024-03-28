@@ -22,6 +22,7 @@
 package org.wcs.smart.smartcollect.ui;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -379,7 +380,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					surl += "/noa/smartcollect/packages/" + UuidUtils.uuidToString(ctpackage.getUuid()); //$NON-NLS-1$
 					
 					try {
-						URL url = new URL(surl);
+						URL url = URI.create(surl).toURL();
 						
 						String link = ICtPackage.generateSmartMobileAppLink(url, false);
 						txtUrl.setText(link);

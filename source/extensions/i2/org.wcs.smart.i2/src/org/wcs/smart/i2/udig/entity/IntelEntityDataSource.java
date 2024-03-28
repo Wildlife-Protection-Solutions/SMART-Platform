@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -187,16 +188,16 @@ public class IntelEntityDataSource extends ContentDataStore{
 	}
 	
 	public String getName(String typeName) {
-		if (typeName.equals(LocationLayerType.ATTRIBUTE.name())) return MessageFormat.format("{0}: Entity Attributes", entityId);
-		if (typeName.equals(LocationLayerType.DM_OBS.name())) return MessageFormat.format("{0}: Observations", entityId);
-		if (typeName.equals(LocationLayerType.POINT.name())) return MessageFormat.format("{0}: Record Locations (Point)", entityId);
-		if (typeName.equals(LocationLayerType.POLYGON.name())) return MessageFormat.format("{0}: Record Locations (Polygon)", entityId);
+		if (typeName.equals(LocationLayerType.ATTRIBUTE.name())) return MessageFormat.format(Messages.IntelEntityDataSource_EntityAttributesLayerName, entityId);
+		if (typeName.equals(LocationLayerType.DM_OBS.name())) return MessageFormat.format(Messages.IntelEntityDataSource_ObservationsLayerName, entityId);
+		if (typeName.equals(LocationLayerType.POINT.name())) return MessageFormat.format(Messages.IntelEntityDataSource_RecordObservationLayerNamePoint, entityId);
+		if (typeName.equals(LocationLayerType.POLYGON.name())) return MessageFormat.format(Messages.IntelEntityDataSource_RecordObservationLayerNamePoly, entityId);
 		
 		if (isGeometryAttribute(typeName)) {
-			return MessageFormat.format("{0}: Record Location Observation Attribute - {1}", entityId, attributeMap.get(typeName).getName());
+			return MessageFormat.format(Messages.IntelEntityDataSource_AttributeLocation, entityId, attributeMap.get(typeName).getName());
 		}
 		if (isObservationGeometryAttribute(typeName)){
-			return MessageFormat.format("{0}: Observation Attribute - {1}", entityId, attributeMap.get(typeName).getName());
+			return MessageFormat.format(Messages.IntelEntityDataSource_ObservationAttributeLayerName, entityId, attributeMap.get(typeName).getName());
 		}
 		
 		return null;

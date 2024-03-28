@@ -231,7 +231,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof MissionPropertyFilter){
 					MissionPropertyFilter mpFilter = (MissionPropertyFilter) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(mpFilter.getAttributeKey(), MissionAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
+					NamedKeyItem it = findKeyValue(mpFilter.getAttributeKey(), MissionAttribute.class, ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MisisonAttributeNotFound, new Object[]{mpFilter.getAttributeKey()}));
 					}
@@ -241,7 +241,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SamplingUnitAttributeFilter){
 					SamplingUnitAttributeFilter mpFilter = (SamplingUnitAttributeFilter) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(mpFilter.getSamplingUnitAttributeKey(), SamplingUnitAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
+					NamedKeyItem it = findKeyValue(mpFilter.getSamplingUnitAttributeKey(), SamplingUnitAttribute.class, ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuAttributeNotFound, new Object[]{mpFilter.getSamplingUnitAttributeKey()}));
 					}
@@ -251,7 +251,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SurveyDesignFilter){
 					NamedKeyItem it = findKeyValue(
 							((SurveyDesignFilter) filter).getKey(),
-							SurveyDesign.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
+							SurveyDesign.class, ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SurveyDesignNotFound, new Object[]{((SurveyDesignFilter) filter).getKey()}));
 					}
@@ -275,7 +275,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				if (filter instanceof MissionAttributeGroupBy) {
 					MissionAttributeGroupBy gb = (MissionAttributeGroupBy) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), MissionAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
+					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), MissionAttribute.class, ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionAttributeKeyNotFound, new Object[]{gb.getAttributeKey()}));
 					}
@@ -288,7 +288,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SamplingUnitAttributeGroupBy){
 					SamplingUnitAttributeGroupBy gb = (SamplingUnitAttributeGroupBy) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), SamplingUnitAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
+					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), SamplingUnitAttribute.class, ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuAttributeKeyNotFound, new Object[]{gb.getAttributeKey()}));
 					}

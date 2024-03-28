@@ -22,6 +22,7 @@
 package org.wcs.smart.er.map.samplingunit;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -189,7 +190,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 			url += UuidUtils.uuidToString((UUID)params.get(SamplingUnitSourceFactory.SD_UUID.key)) ;
 		}
 		try{
-			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
+			return URL.of(URI.create(url), CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
 			return null;
 		}

@@ -400,14 +400,14 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	}
 
 	private void createAttachmentTagsSection(Composite container) {
-		SmartUiUtils.createHeaderLabel(container, "Attachment Tags");
+		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_TagsSection);
 		
 		Composite csig = new Composite(container, SWT.NONE);
 		csig.setLayout(new GridLayout(2, false));
 		csig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(csig, SWT.WRAP);
-		l.setText("Tags can be added to attachments to identify or categorize files.");
+		l.setText(Messages.ObservationOptionsPropertyPage_TagsMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).widthHint = 350;
 		
@@ -422,7 +422,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 
 		TableViewerColumn viewerColumn = new TableViewerColumn(tblAttachmentTags,SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
-		column.setText("Name");
+		column.setText(Messages.ObservationOptionsPropertyPage_TagName);
 		column.setResizable(true);
 		column.setMoveable(true);
 		TableColumnLayout layout = (TableColumnLayout) tcomp.getLayout();
@@ -435,7 +435,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		
 		viewerColumn = new TableViewerColumn(tblAttachmentTags,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Key");
+		column.setText(Messages.ObservationOptionsPropertyPage_TagKey);
 		column.setResizable(true);
 		column.setMoveable(true);
 		layout.setColumnData(column, new ColumnWeightData(2,ColumnWeightData.MINIMUM_WIDTH, true));
@@ -578,7 +578,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 
 	private void addAttachmentTag() {
 		SmartStyledInputDialog nameD = new SmartStyledInputDialog(getShell(), 
-				"New Attachment Tag", "Enter the name for the tag", "Attachment Tag",				
+				Messages.ObservationOptionsPropertyPage_NewTag, Messages.ObservationOptionsPropertyPage_NewTagMessage, Messages.ObservationOptionsPropertyPage_NewTagDefaultName,				
 				e->{
 					if(e.trim().isEmpty()) return Messages.ObservationOptionsPropertyPage_NameRequired;
 					return null;

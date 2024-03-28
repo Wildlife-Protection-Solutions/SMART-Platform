@@ -852,7 +852,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
-			valueAggSql.append("." + field + ")"); //$NON-NLS-1$
+			valueAggSql.append("." + field + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$

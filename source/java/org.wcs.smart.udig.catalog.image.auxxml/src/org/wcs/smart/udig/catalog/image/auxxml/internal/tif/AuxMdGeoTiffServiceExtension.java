@@ -15,6 +15,7 @@ package org.wcs.smart.udig.catalog.image.auxxml.internal.tif;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
@@ -78,7 +79,7 @@ public class AuxMdGeoTiffServiceExtension extends GeoTiffServiceExtension {
             Object param = params.get(URL_PARAM);
             if (param instanceof String) {
                 try {
-                    id = new URL((String) param);
+                    id = URI.create((String)param).toURL();
                 } catch (MalformedURLException ex) {
                     return null;
                 }

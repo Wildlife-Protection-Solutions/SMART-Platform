@@ -61,8 +61,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case WAYPOINT_LASTMODIFIED: return Messages.AssetQueryLabelProvider_LastModifiedColumnName;
 			case WAYPOINT_LASTMODIFIEDBY: return Messages.AssetQueryLabelProvider_LastModifiedByColumnName;
 			case OBS_GROUP_ID: return Messages.AssetQueryLabelProvider_ObsGroupColumnName;
-			case WAYPOINT_UUID: return "Waypoint UUID";
-			case OBSERVATION_UUID: return "Observation UUID";
+			case WAYPOINT_UUID: return Messages.AssetQueryLabelProvider_WaypointUUIDColumnName;
+			case OBSERVATION_UUID: return Messages.AssetQueryLabelProvider_ObsUUIDColumnName;
 			}
 		}
 		if (item instanceof AssetValueOption){

@@ -61,21 +61,21 @@ public class IntelEntityRecordObservationAttributeFeatureReader implements Featu
 			isArea = true;
 		}
 		
-		String attributeKey = typeName.split("\\.")[1];
+		String attributeKey = typeName.split("\\.")[1]; //$NON-NLS-1$
 		
 
-		String query = "FROM IntelObservationAttribute WHERE attribute.keyId = :attributeKey AND geom is not NULL AND observation.location in (SELECT id.location FROM IntelEntityLocation WHERE id.entity.uuid = :uuid) ";
+		String query = "FROM IntelObservationAttribute WHERE attribute.keyId = :attributeKey AND geom is not NULL AND observation.location in (SELECT id.location FROM IntelEntityLocation WHERE id.entity.uuid = :uuid) "; //$NON-NLS-1$
 		
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){
-			query += "and observation.location.dateTime between :d1 and :d2";
+			query += "and observation.location.dateTime between :d1 and :d2"; //$NON-NLS-1$
 		}
 		Query<IntelObservationAttribute> hquery = session.createQuery(query, IntelObservationAttribute.class)
-				.setParameter("attributeKey", attributeKey)
-				.setParameter("uuid", entityUuid);
+				.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
+				.setParameter("uuid", entityUuid); //$NON-NLS-1$
 				
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){
-			hquery.setParameter("d1", dFilter[0]);
-			hquery.setParameter("d2", dFilter[1]);
+			hquery.setParameter("d1", dFilter[0]); //$NON-NLS-1$
+			hquery.setParameter("d2", dFilter[1]); //$NON-NLS-1$
 		}
 
 		fIterator = hquery.unwrap(Query.class).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);

@@ -139,7 +139,7 @@ public class AttachmentPreviewTagComposite extends Composite {
 		for (int i = 0; i < fd.getFileNames().length; i ++){
 			Path f = root.resolve(fd.getFileNames()[i]);
 			if (!Files.exists(f)){
-				SmartPlugIn.displayLog(MessageFormat.format("File {0} not found.", f.toAbsolutePath().toString()), null);
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.AttachmentPreviewTagComposite_FileNotFound, f.toAbsolutePath().toString()), null);
 				return;
 			}
 			ISmartAttachment wpa = create.get();
@@ -345,7 +345,7 @@ public class AttachmentPreviewTagComposite extends Composite {
 		
 		if (!readonly && hastags.size() != this.tags.size() && this.canEdit.apply(selection)) {
 			Chips add = new Chips(tagList, SWT.PUSH);
-			add.setText("Add Tag");
+			add.setText(Messages.AttachmentPreviewTagComposite_AddTag);
 			add.setImage(ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.ADD14_ICON));
 			add.setChipsBackground(add.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			add.setHoverBackground(lgreen);

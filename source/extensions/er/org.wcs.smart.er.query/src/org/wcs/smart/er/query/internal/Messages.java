@@ -302,10 +302,13 @@ public class Messages extends NLS {
 	public static String SurveyQueryFactory_DefaultQueryName;
 	public static String SurveyQueryLabelProvider_LastModifiedByLabel;
 	public static String SurveyQueryLabelProvider_LastModifiedLabel;
+	public static String SurveyQueryLabelProvider_MissionUUIDColumnName;
 	public static String SurveyQueryLabelProvider_ObservationGroupColumnName;
+	public static String SurveyQueryLabelProvider_ObsUUIDColumnName;
 	public static String SurveyQueryLabelProvider_RawXColumnLabel;
 	public static String SurveyQueryLabelProvider_RawYColumnLabel;
 	public static String SurveyQueryLabelProvider_TrackGeomColumn;
+	public static String SurveyQueryLabelProvider_WpUUIDColumnName;
 	public static String SurveyQueryService_MissionTrackGeoResource;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryError;

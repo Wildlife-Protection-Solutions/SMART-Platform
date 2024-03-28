@@ -97,12 +97,14 @@ public class Messages extends NLS {
 	public static String AssetQueryLabelProvider_LastModifiedColumnName;
 	public static String AssetQueryLabelProvider_LocationsColumnName;
 	public static String AssetQueryLabelProvider_ObsGroupColumnName;
+	public static String AssetQueryLabelProvider_ObsUUIDColumnName;
 	public static String AssetQueryLabelProvider_SecondsFormat;
 	public static String AssetQueryLabelProvider_StationColumnName;
 	public static String AssetQueryLabelProvider_StationLocationFilterOptoin;
 	public static String AssetQueryLabelProvider_TotalActiveHours;
 	public static String AssetQueryLabelProvider_TotalHoursColumnName;
 	public static String AssetQueryLabelProvider_WaypointColumnNAme;
+	public static String AssetQueryLabelProvider_WaypointUUIDColumnName;
 	public static String AssetQueryOptions_CaGroupByOptionName;
 	public static String AssetQueryOptions_QueryOpStation;
 	public static String AssetQueryTemplateCloner_AssetTypeNotFound;

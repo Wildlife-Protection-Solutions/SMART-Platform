@@ -38,6 +38,8 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class SignatureTypeQueryColumn extends QueryColumn{
 
+	private static final String SEPERATOR = "|"; //$NON-NLS-1$
+	
 	public static final SignatureTypeQueryColumn KEY_COLUMN = new SignatureTypeQueryColumn(Type.KEY);
 	public static final SignatureTypeQueryColumn NAME_COLUMN = new SignatureTypeQueryColumn(Type.NAME);
 	
@@ -50,7 +52,7 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 			switch(this) {
 			case KEY: return "Signature Type Key"; //$NON-NLS-1$
 			case NAME: return "Signature Type Name"; //$NON-NLS-1$
-			case TAGS: return "Attachment Tags";
+			case TAGS: return "Attachment Tags"; //$NON-NLS-1$
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -59,7 +61,7 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 			switch(this) {
 			case KEY: return "attachment:signaturetypekey"; //$NON-NLS-1$
 			case NAME: return "attachment:signaturetypename"; //$NON-NLS-1$
-			case TAGS: return "attachment:tags";
+			case TAGS: return "attachment:tags"; //$NON-NLS-1$
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -87,10 +89,10 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 					
 					if (tagged.getAttachmentTags() != null && !tagged.getAttachmentTags().isEmpty()) {
 						StringBuilder sb = new StringBuilder();
-						sb.append("|");
+						sb.append(SEPERATOR);
 						for (AttachmentTagLink tag : tagged.getAttachmentTags()) {
 							sb.append(tag.getTag().getKeyId());
-							sb.append("|");
+							sb.append(SEPERATOR);
 						}
 						return sb.toString();
 					}

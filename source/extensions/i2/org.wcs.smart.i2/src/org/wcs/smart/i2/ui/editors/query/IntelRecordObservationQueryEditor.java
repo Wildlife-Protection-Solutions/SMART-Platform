@@ -376,7 +376,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 			wsetItem.addListener(SWT.Selection, (event)->{
 				if (getQuery().getUuid() == null) {
-					MessageDialog.openInformation(getSite().getShell(), DialogConstants.ERROR_STRING, "You must save the query before you can add it to the working set.");
+					MessageDialog.openInformation(getSite().getShell(), DialogConstants.ERROR_STRING, Messages.IntelRecordObservationQueryEditor_SaveRequired);
 					return;
 				}
 				WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context);
