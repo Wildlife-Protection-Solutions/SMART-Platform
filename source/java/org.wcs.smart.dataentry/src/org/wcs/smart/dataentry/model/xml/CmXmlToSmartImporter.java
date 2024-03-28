@@ -255,7 +255,7 @@ public class CmXmlToSmartImporter {
 						}
 					}
 					if (existing == null) {
-						warnings.add(MessageFormat.format("An attachment tag with the key ''{0}'' could not found, a new attachment tag will be added to the Conservation Area", keyId));
+						warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_TagNotFound, keyId));
 						existing = LocalAttachmentTagManager.INSTANCE.createTag(SmartDB.getCurrentConservationArea(), keyId);
 						existing.setKeyId(keyId);
 						updateNames(existing, xtag.getName());

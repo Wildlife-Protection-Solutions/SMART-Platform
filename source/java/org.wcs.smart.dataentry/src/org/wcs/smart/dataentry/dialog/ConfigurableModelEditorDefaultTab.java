@@ -502,20 +502,20 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(dialog.getShell(), "Delete", "Are you sure you want to removed the selected nodes. This action cannot be undone.")) {
+		if (!MessageDialog.openQuestion(dialog.getShell(), Messages.ConfigurableModelEditorDefaultTab_DeleteTitle, Messages.ConfigurableModelEditorDefaultTab_DeleteMessage)) {
 			return;
 		}
 		
 		ProgressMonitorDialog ddialog = new ProgressMonitorDialog(dialog.getShell());
 		try {
 			ddialog.run(true, false, monitor->{
-				monitor.beginTask("Deleting selected nodes", toDelete.size() + 2);
+				monitor.beginTask(Messages.ConfigurableModelEditorDefaultTab_taskname, toDelete.size() + 2);
 				for (CmNode node : toDelete) {
 					monitor.subTask(node.getName());
 					deleteNode(node, dialog.getSession());
 					monitor.worked(1);
 				}
-				monitor.subTask("saving...");
+				monitor.subTask(Messages.ConfigurableModelEditorDefaultTab_status);
 				dialog.getSession().flush();
 				monitor.done();
 			});

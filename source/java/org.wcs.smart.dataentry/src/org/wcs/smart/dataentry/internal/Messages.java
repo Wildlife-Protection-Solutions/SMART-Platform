@@ -5,6 +5,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.dataentry.internal.messages"; //$NON-NLS-1$
 	public static String AbstractInfoComposite_AddCategory;
+	public static String AbstractInfoComposite_AddSelected;
+	public static String AbstractInfoComposite_AddSelectedWithKids;
 	public static String AbstractInfoComposite_Button_AddCategory;
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_CategoriesSubTask;
@@ -13,6 +15,7 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_DisplayName;
 	public static String AbstractInfoComposite_DmLoadingTaskName;
 	public static String AbstractInfoComposite_NewGroupDefaultName;
+	public static String AbstractInfoComposite_status;
 	public static String AbstractRenameDialog_ConfiguredName;
 	public static String AbstractRenameDialog_DataModelColumnName;
 	public static String AbstractRenameDialog_LanguageColumnName;
@@ -70,6 +73,8 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip1;
 	public static String CmNodeInfoComposite_SignaturesLabel;
 	public static String CmNodeInfoComposite_SignaturesTooltip;
+	public static String CmNodeInfoComposite_Tags;
+	public static String CmNodeInfoComposite_TagsTooltip;
 	public static String CmRootNodeInfoComposite_IconSetOption;
 	public static String CmRootNodeInfoComposite_InstantGps;
 	public static String CmRootNodeInfoComposite_InstantGpsTooltip;
@@ -119,6 +124,7 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_Reading;
 	public static String CmXmlToSmartImporter_Saving;
 	public static String CmXmlToSmartImporter_SignatureTypeNotFound;
+	public static String CmXmlToSmartImporter_TagNotFound;
 	public static String CmXmlToSmartImporter_Validating;
 	public static String CmXmlToSmartImporter_Warn_DefaultConfigMissing;
 	public static String CmXmlToSmartImporter_Warn_NoConfigAssigned;
@@ -135,13 +141,17 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditDialog_SaveTitle;
 	public static String ConfigurableModelEditDialog_Title;
 	public static String ConfigurableModelEditorDefaultTab_AddToAttributeGroup;
+	public static String ConfigurableModelEditorDefaultTab_DeleteMessage;
+	public static String ConfigurableModelEditorDefaultTab_DeleteTitle;
 	public static String ConfigurableModelEditorDefaultTab_HelpContentTabLabel;
 	public static String ConfigurableModelEditorDefaultTab_InvalidOrder;
 	public static String ConfigurableModelEditorDefaultTab_MissingList;
 	public static String ConfigurableModelEditorDefaultTab_MissingNonList;
 	public static String ConfigurableModelEditorDefaultTab_PropertiesTabLabel;
 	public static String ConfigurableModelEditorDefaultTab_RemoveFromAttributeEGroup;
+	public static String ConfigurableModelEditorDefaultTab_status;
 	public static String ConfigurableModelEditorDefaultTab_TabName;
+	public static String ConfigurableModelEditorDefaultTab_taskname;
 	public static String ConfigurableModelEditorDefaultTab_TooManyCombos;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProcessCmNode;
@@ -172,6 +182,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_Overwrite_Dialog_Message;
 	public static String ConfigurableModelPropertyDialog_Overwrite_Dialog_Title;
 	public static String ConfigurableModelPropertyDialog_ProgressDelete;
+	public static String ConfigurableModelPropertyDialog_savingtaskname;
 	public static String ConfigurableModelPropertyDialog_Success_Dialog_Message;
 	public static String ConfigurableModelPropertyDialog_Success_Dialog_Title;
 	public static String ConfigurableModelPropertyDialog_Success_Message;
@@ -227,6 +238,12 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_NewGroupTooltip;
 	public static String EditTreeDialog_NoPropertiesToDisplay;
 	public static String EditTreeDialog_TreeNodeProperties;
+	public static String GeometryAttributeInfoComposite_CollectionOptions;
+	public static String GeometryAttributeInfoComposite_DataCollectionOptions;
+	public static String GeometryAttributeInfoComposite_GpsPointRecordTime;
+	public static String GeometryAttributeInfoComposite_InvalidSeconds;
+	public static String GeometryAttributeInfoComposite_OneOptionRequired;
+	public static String GeometryAttributeInfoComposite_secondunits;
 	public static String HelpContentComposite_AllFilesOp;
 	public static String HelpContentComposite_assignalltooltip;
 	public static String HelpContentComposite_assignalltooltip2;

@@ -238,8 +238,8 @@ public abstract class AbstractInfoComposite extends Composite {
 				@Override
 				protected void createButtonsForButtonBar(Composite parent) {
 					// create OK and Cancel buttons by default
-					createButton(parent, IDialogConstants.OK_ID, "Add Selected", false);
-					createButton(parent, IDialogConstants.FINISH_ID, "Add Selected With Children", true);
+					createButton(parent, IDialogConstants.OK_ID, Messages.AbstractInfoComposite_AddSelected, false);
+					createButton(parent, IDialogConstants.FINISH_ID, Messages.AbstractInfoComposite_AddSelectedWithKids, true);
 					createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CANCEL_LABEL, false);
 					
 					getButton(IDialogConstants.FINISH_ID).setEnabled(false);
@@ -276,7 +276,7 @@ public abstract class AbstractInfoComposite extends Composite {
 						addCategoriesWithoutKids(toAdd, monitor);
 					}
 					
-					monitor.subTask("saving...");
+					monitor.subTask(Messages.AbstractInfoComposite_status);
 					session.flush();
 					monitor.worked(2);
 					

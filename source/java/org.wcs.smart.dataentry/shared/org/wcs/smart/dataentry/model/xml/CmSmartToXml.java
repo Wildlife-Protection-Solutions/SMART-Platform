@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -423,7 +425,17 @@ public class CmSmartToXml {
 					at.setRegex(ca.getAttribute().getRegex());
 				}
 				
+				
+				CmAttributeOption collectionOps = null;
+				CmAttributeOption autoSecondsOps = null;
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
+					
+					if (option.getOptionId().equals(CmAttributeOption.ID_GEOM_COLLECTION_AUTO_GPS_SEC)) {
+						autoSecondsOps = option;
+					}else if (option.getOptionId().equals(CmAttributeOption.ID_GEOM_COLLECTION_OP)) {
+						collectionOps = option;
+					}
+					
 					AttributeOptionType aot = new AttributeOptionType();
 					aot.setId(option.getOptionId());
 					aot.setStringValue(option.getStringValue());
@@ -461,7 +473,36 @@ public class CmSmartToXml {
 							aot.setStringValue(convertVisibleWhenExpression(option.getStringValue(), node));
 						}
 					}
-					
+				}
+				
+				if (forSmartMobile && ca.getAttribute().getType().isGeometry()) {
+					//re: #3701
+					//ensure the gps settings for geometry exist in output
+					if (autoSecondsOps == null) {
+						CmAttributeOption op = CmAttributeOptionFactory.createGeomCollectionGpsAutoSecOption(ca);
+						AttributeOptionType aot = new AttributeOptionType();
+						aot.setId(op.getOptionId());
+						aot.setDoubleValue(op.getDoubleValue());
+						at.getOption().add(aot);
+
+					}
+					if (collectionOps == null) {
+						collectionOps = CmAttributeOptionFactory.createGeomCollectionOption(ca);
+					}
+					//export these to separate options instead of comma deleted list we use
+					//in SMART
+					List<Attribute.GeometrySource> srcs = CmAttributeOptionFactory.parseGeometryCollectionOption(collectionOps);
+					if (srcs == null) {
+						srcs = new ArrayList<>();
+						for (Attribute.GeometrySource x : Attribute.GeometrySource.values()) srcs.add(x);
+					}
+					for (Attribute.GeometrySource s : srcs) {
+						AttributeOptionType aot = new AttributeOptionType();
+						aot.setId(s.name());
+						aot.setDoubleValue(1.0);
+						at.getOption().add(aot);
+
+					}
 					
 				}
 				

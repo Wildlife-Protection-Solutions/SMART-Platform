@@ -45,6 +45,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.hibernate.Session;
 import org.wcs.smart.LocalAttachmentTagManager;
 import org.wcs.smart.LocalSignatureTypeManager;
@@ -64,8 +66,11 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
+
 
 /**
  * Info composite for {@link CmNode}
@@ -75,7 +80,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
-	private static final String LBLKEY = "LBL";
+	private static final String LBLKEY = "LBL"; //$NON-NLS-1$
 
 	private CmNode node;
 
@@ -261,8 +266,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			new Label(container, SWT.NONE);
 			
 			label = new Label(container, SWT.NONE);
-			label.setText("Attachment Tags:");
-			label.setToolTipText("Select the attachment tags that are valid for this type of observation.");
+			label.setText(Messages.CmNodeInfoComposite_Tags);
+			label.setToolTipText(Messages.CmNodeInfoComposite_TagsTooltip);
 			label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			((GridData)label.getLayoutData()).horizontalIndent = 15;
 			
@@ -270,6 +275,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			
 			chAttachments = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 			chAttachments.setLabelProvider(new NamedItemLabelProvider());
+			chAttachments.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(chAttachments));
+
 			chAttachments.setContentProvider(ArrayContentProvider.getInstance());
 			chAttachments.setInput(tags);
 			chAttachments.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -285,6 +292,18 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				fireModelChanged();
 			});
 			chAttachments.setData(LBLKEY, label);
+			
+			Menu mnu = new Menu(chAttachments.getControl());
+			
+			MenuItem miSelectAll = new MenuItem(mnu, SWT.PUSH);
+			miSelectAll.setText(DialogConstants.SELECT_ALL);
+			miSelectAll.addListener(SWT.Selection, e->chAttachments.setAllChecked(true));
+			
+			MenuItem miDeSelectAll = new MenuItem(mnu, SWT.PUSH);
+			miDeSelectAll.setText(DialogConstants.DESELECT_ALL);
+			miDeSelectAll.addListener(SWT.Selection, e->chAttachments.setAllChecked(false));
+			
+			chAttachments.getControl().setMenu(mnu);
 		}
 		
 		label = new Label(container, SWT.NONE);

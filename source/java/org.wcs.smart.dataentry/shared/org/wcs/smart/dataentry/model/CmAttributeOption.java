@@ -45,6 +45,9 @@ public class CmAttributeOption extends UuidItem {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String ID_GEOM_COLLECTION_OP = "GEOM_COLLECTION_OP"; //$NON-NLS-1$
+	public static final String ID_GEOM_COLLECTION_AUTO_GPS_SEC = "GEOM_AUTO_GPS_SEC"; //$NON-NLS-1$
+	
 	public static final String ID_IS_VISIBLE = "IS_VISIBLE"; //$NON-NLS-1$
 	public static final String ID_DEFAULT_VALUE = "DEFAULT_VALUE"; //$NON-NLS-1$
 	public static final String ID_MULTISELECT = "MULTISELECT"; //$NON-NLS-1$

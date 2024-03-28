@@ -372,7 +372,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Saving configurable model...", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(Messages.ConfigurableModelPropertyDialog_savingtaskname, IProgressMonitor.UNKNOWN);
 					
 					try(Session s = HibernateManager.openSession(new AssociatedImageInterceptor())){
 						s.beginTransaction();

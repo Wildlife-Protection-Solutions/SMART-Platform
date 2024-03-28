@@ -21,9 +21,15 @@
  */
 package org.wcs.smart.dataentry.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -40,6 +46,10 @@ public class CmAttributeOptionFactory {
 	public static Map<String, CmAttributeOption> buildDefaultOptions(CmAttribute attribute, AttributeType type) {
 		Map<String, CmAttributeOption> result = new HashMap<String, CmAttributeOption>();
 		result.put(CmAttributeOption.ID_IS_VISIBLE, createIsVisibleOption(attribute));
+		if (attribute.getAttribute().getType().isGeometry()) {
+			result.put(CmAttributeOption.ID_GEOM_COLLECTION_AUTO_GPS_SEC, createGeomCollectionGpsAutoSecOption(attribute));
+			result.put(CmAttributeOption.ID_GEOM_COLLECTION_OP, createGeomCollectionOption(attribute));
+		}
 		switch (type) {
 		case NUMERIC:
 			result.put(CmAttributeOption.ID_NUMERIC, createNumericOption(attribute));
@@ -71,6 +81,45 @@ public class CmAttributeOptionFactory {
 		return option;
 	}
 
+	public static CmAttributeOption createGeomCollectionGpsAutoSecOption(CmAttribute attribute) {
+		CmAttributeOption option = new CmAttributeOption();
+		option.setCmAttribute(attribute);
+		option.setOptionId(CmAttributeOption.ID_GEOM_COLLECTION_AUTO_GPS_SEC);
+		option.setDoubleValue(120.0);
+		return option;
+	}
+
+	public static CmAttributeOption createGeomCollectionOption(CmAttribute attribute) {
+		CmAttributeOption option = new CmAttributeOption();
+		option.setCmAttribute(attribute);
+		option.setOptionId(CmAttributeOption.ID_GEOM_COLLECTION_OP);
+		List<Attribute.GeometrySource> items = Arrays.asList(Attribute.GeometrySource.GPS_AUTO, Attribute.GeometrySource.GPS_MANUAL, Attribute.GeometrySource.MANUAL_DRAW);
+		String defaultValue = encodeGeometryCollectionOption(items); 
+		option.setStringValue(defaultValue);
+		
+		return option;
+	}
+	
+	public static List<Attribute.GeometrySource> parseGeometryCollectionOption(CmAttributeOption option){
+		if (!option.getOptionId().equals(CmAttributeOption.ID_GEOM_COLLECTION_OP)) return Collections.emptyList();
+		String parts[] = option.getStringValue().split(","); //$NON-NLS-1$
+		List<Attribute.GeometrySource> items = new ArrayList<>(parts.length);
+		for (String part : parts) {
+			try {
+				items.add(Attribute.GeometrySource.valueOf(part));
+			}catch (Exception ex) {}
+		}
+		return items;
+	}
+	
+	public static String encodeGeometryCollectionOption(List<Attribute.GeometrySource> ops){
+		StringJoiner joiner = new StringJoiner(","); //$NON-NLS-1$
+		for (Attribute.GeometrySource o : ops) {
+			joiner.add(o.name());
+		}
+		return joiner.toString();
+	}
+	
 	private static CmAttributeOption createMultiselectOption(CmAttribute attribute) {
 		CmAttributeOption option = new CmAttributeOption();
 		option.setCmAttribute(attribute);
