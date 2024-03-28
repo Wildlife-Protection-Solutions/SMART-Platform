@@ -535,12 +535,16 @@ public class SmartConnect {
 		Long size = null;
 		
 		long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(server);
+		long initWaitTime = waitTime;
+		
 		SubMonitor progress = SubMonitor.convert(monitor);
 		
 		//first request; this one gives us the requested size
 		while(size == null && tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
 			
 			try{
+				progress.checkCanceled();
+				
 				createClient();
 				ResteasyWebTarget target = client.target(url);
 				try(Response r = target.request().get()){
@@ -592,6 +596,8 @@ public class SmartConnect {
 		
 		//try a maximum of 10 times
 		while(tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
+			progress.checkCanceled();
+			
 			downloadRequest(filestore, url, size, progress);
 			
 			if (Files.size(filestore) > size){
@@ -600,9 +606,15 @@ public class SmartConnect {
 			if (Files.size(filestore) == size){
 				return filestore;
 			}
+			
 			tryCount++;
 			Thread.sleep(waitTime);
-			waitTime = waitTime*2;
+			
+			if (waitTime < 1_800_000 ) {
+				//add increment to wait time to max 30 minutes;
+				waitTime = waitTime + initWaitTime;
+			}
+			
 		}
 		throw new Exception(Messages.SmartConnect_DownloadFailed);
 	}
