@@ -285,7 +285,15 @@ public class SurveyPackageExporter {
 	private void metadataToJson(Path outputFile) throws IOException {
 		
 		List<MetadataFieldValue> metadataFields = ((SurveyCtPackage)ctpackage).getMetadataValues();
-		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
+		
+		//can't use collectors tomap because there are duplicate keys for alerts
+		//see:https://app.assembla.com/spaces/smart-cs/tickets/3705
+		//Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
+		Map<String, MetadataFieldValue> map = new HashMap<>();
+		for (MetadataFieldValue v : metadataFields) {
+			map.put(v.getMetadataKey(),v);
+		}
+	
 		
 		String iconset = null;
 		if (map.containsKey(MissionMetadataField.MISSION_ICONSET_KEY)) {
