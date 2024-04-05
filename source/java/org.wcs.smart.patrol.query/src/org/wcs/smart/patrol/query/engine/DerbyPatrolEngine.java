@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -134,6 +135,7 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 					}
 					
 					patrolAttributes = addPatrolAttributesToQueryResult(queryDataTable, c, session);
+					addPatrolMinMaxDateTime(queryDataTable, c, session);
 					
 					progress.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
 					progress.split(1);
@@ -217,6 +219,7 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
 				"pl_start_date", //$NON-NLS-1$
 				"pl_end_date", //$NON-NLS-1$
+				"p_min_datetime", "p_max_datetime", //$NON-NLS-1$ //$NON-NLS-2$
 				//"pld_patrol_day", 
 				"plm_leader",  //$NON-NLS-1$
 				"plm_pilot", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -394,6 +397,11 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 		it.setPilot(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_pilot")), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
 		it.setPatrolLegUuid(UuidUtils.byteToUUID(rs.getBytes("r_pl_uuid"))); //$NON-NLS-1$
+		
+		Timestamp ts = rs.getTimestamp("r_p_min_datetime"); //$NON-NLS-1$
+		if (ts != null) it.setPatrolMinDateTime(ts.toLocalDateTime());
+		ts = rs.getTimestamp("r_p_max_datetime"); //$NON-NLS-1$
+		if (ts != null) it.setPatrolMaxDateTime(ts.toLocalDateTime());
 		
 		if (patrolAttributes != null) {
 			for (String s : patrolAttributes) {

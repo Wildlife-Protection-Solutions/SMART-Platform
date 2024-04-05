@@ -131,6 +131,8 @@ public class QueryResultItemComparator extends ViewerComparator implements IQuer
 			}
 		}else if (type == ColumnType.STRING){
 			compare = SmartUtils.nullStringCaseInsensitiveComparator;
+		}else if (type == ColumnType.TIME){
+			compare = SmartUtils.nullTimeComparator;
 		}
 		if (compare != null){
 			return compare.compare(data1, data2);

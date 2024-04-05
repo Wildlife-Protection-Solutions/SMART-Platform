@@ -93,7 +93,9 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_ID,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_TYPE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_START_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_START_TIME,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_END_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_END_TIME,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_STATION,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_TEAM,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_OBJETIVE,l));

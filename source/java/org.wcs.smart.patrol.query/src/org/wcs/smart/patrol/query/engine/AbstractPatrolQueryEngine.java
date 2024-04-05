@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -126,7 +127,8 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 	 * @return
 	 * @throws SQLException
 	 */
-	protected List<String> addPatrolAttributesToQueryResult(String queryDataTable, Connection c, Session session)
+	protected List<String> addPatrolAttributesToQueryResult(String queryDataTable,			
+			Connection c, Session session)
 			throws SQLException {
 		// patrol attributes
 		// custom patrol attributes
@@ -239,6 +241,93 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		}
 
 		return columns;
+	}
+	
+	protected void addPatrolMinMaxDateTime(String queryDataTable,			
+			Connection c, Session session)
+			throws SQLException {
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("ALTER TABLE " + queryDataTable + " ADD COLUMN p_min_datetime timestamp"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		QueryPlugIn.logSql(sb.toString());
+		try(Statement s = c.createStatement()){
+			s.execute(sb.toString());
+		}
+		
+		sb = new StringBuilder();
+		sb.append("ALTER TABLE " + queryDataTable + " ADD COLUMN p_max_datetime timestamp"); //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sb.toString());
+		try(Statement s = c.createStatement()){
+			s.execute(sb.toString());
+		}
+		
+		String datetimetable = super.createTempTableName();
+		
+		sb = new StringBuilder();
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
+		sb.append(datetimetable);
+		sb.append("(p_uuid char(16) for bit data, p_min_datetime timestamp, p_max_datetime timestamp)"); //$NON-NLS-1$
+		
+		QueryPlugIn.logSql(sb.toString());
+		try(Statement s = c.createStatement()){
+			s.execute(sb.toString());
+		}
+		
+		
+		sb = new StringBuilder();
+		sb.append("INSERT INTO " ); //$NON-NLS-1$
+		sb.append(datetimetable);
+		sb.append("(p_uuid, p_min_datetime, p_max_datetime) "); //$NON-NLS-1$
+		sb.append("SELECT " + tablePrefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("min(timestamp(" + tablePrefix(PatrolLegDay.class) + ".patrol_day || ' ' || " + tablePrefix(PatrolLegDay.class) + ".start_time)) as p_min_datetime, "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("max(timestamp(" + tablePrefix(PatrolLegDay.class) + ".patrol_day || ' ' || " + tablePrefix(PatrolLegDay.class) + ".end_time)) as p_max_datetime "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		sb.append(" FROM "); //$NON-NLS-1$
+		sb.append(queryDataTable + " data "); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(tableNamePrefix(Patrol.class));
+		sb.append(" ON data.p_uuid = " + tablePrefix(Patrol.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(tableNamePrefix(PatrolLeg.class));
+		sb.append(" ON " + tablePrefix(PatrolLeg.class) + ".patrol_uuid = " + tablePrefix(Patrol.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(tableNamePrefix(PatrolLegDay.class));
+		sb.append(" ON " + tablePrefix(PatrolLeg.class) + ".uuid = " + tablePrefix(PatrolLegDay.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("GROUP BY "+ tablePrefix(Patrol.class) +".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+
+		QueryPlugIn.logSql(sb.toString());
+		try(Statement s = c.createStatement()){
+			s.execute(sb.toString());
+		}
+		
+		
+		for(String field : new String[] {"p_min_datetime", "p_max_datetime"}){ //$NON-NLS-1$ //$NON-NLS-2$
+			sb = new StringBuilder();
+			sb.append("UPDATE "); //$NON-NLS-1$
+			sb.append(queryDataTable);
+			sb.append(" SET " + field + " = (SELECT " + field ); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" FROM "); //$NON-NLS-1$
+			sb.append(datetimetable + " a "); //$NON-NLS-1$
+			sb.append("WHERE a.p_uuid = " + queryDataTable + ".p_uuid )"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+			QueryPlugIn.logSql(sb.toString());
+			try(Statement s = c.createStatement()){
+				s.execute(sb.toString());
+			}
+		}
+		
+		sb = new StringBuilder();
+		sb.append("DROP TABLE " + datetimetable); //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+		try(Statement s = c.createStatement()){
+			s.execute(sb.toString());
+		}
+		
+				
 	}
 
 }

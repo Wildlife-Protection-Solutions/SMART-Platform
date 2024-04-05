@@ -79,6 +79,10 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case OBSERVATION_UUID: return Messages.getString("PatrolQueryLabelProvider.ObservationUuidColumnName", l); //$NON-NLS-1$
 			case PATROL_UUID: return Messages.getString("PatrolQueryLabelProvider.PatrolUuidColumnName", l); //$NON-NLS-1$
 			case WAYPOINT_UUID: return Messages.getString("PatrolQueryLabelProvider.WaypointUuidColumnName", l); //$NON-NLS-1$
+			case PATROL_END_TIME: return Messages.getString("PatrolQueryLabelProvider.PatrolEndTimeColumnName", l); //$NON-NLS-1$
+			case PATROL_START_TIME: return Messages.getString("PatrolQueryLabelProvider.PatrolStartTimeColumnName", l); //$NON-NLS-1$
+			default:
+				break;
 			}
 		}
 		if (item instanceof PatrolValueOption){

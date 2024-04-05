@@ -1,16 +1,21 @@
 SET version=8.0.0
+SET outputlocation=C:\data\SMART\Builds\SMART8\%RESULT%
 
+SET keystore_alias=tomcat
+SET keystore_location=C:\data\SMART\Builds\keystore\connect8.refractions.net.jks
+SET keystore_password=*******
+
+REM you can change the java version if required
+REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
+
+echo %outputlocation%
 
 for /f %%i in ('date /t') do set RESULT=%%i
 echo The directory is %RESULT%
 
-SET outputlocation=C:\data\SMART\Builds\SMART8\%RESULT%
-echo %outputlocation%
 MKDIR %outputlocation%
 
-
 REM - I had to do this because maven won't work if these directories/files exist
-
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.paws.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.r.nl\8.0.0
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.nl\8.0.0
@@ -60,12 +65,9 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.nl\8.
 DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.nl\8.0.0
 
 
-
 REM run maven to build packages
-REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
 REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
-call mvn clean install -Pallplatforms,product,update,core,plugins,utils 
--Djarsigner.alias=tomcat -Djarsigner.storepass=**PASSWORDHERE** -Djarsigner.keystore=C:\data\SMART\Builds\keystore\connect8.refractions.net.jks
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils -Djarsigner.alias=%keystore_alias% -Djarsigner.storepass=%keystore_password% -Djarsigner.keystore=%keystore_location%
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%

@@ -81,7 +81,7 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		UNITS;
 		
 		public String getMobleJsonKey() {
-			if (this == ProfileOptionID.CA_PROJECTION_UUID) return "PROJECTION_WKT";
+			if (this == ProfileOptionID.CA_PROJECTION_UUID) return "PROJECTION_WKT"; //$NON-NLS-1$
 			return this.name();
 		}
 	}

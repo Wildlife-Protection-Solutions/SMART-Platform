@@ -329,6 +329,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_PhotoSettingsHeader;
 	public static String CyberTrackerPropertiesComposite_PhotoTab;
 	public static String CyberTrackerPropertiesComposite_PrimaryColor;
+	public static String CyberTrackerPropertiesComposite_ProjectionLabel;
+	public static String CyberTrackerPropertiesComposite_ProjectionTooltip;
 	public static String CyberTrackerPropertiesComposite_pixel;
 	public static String CyberTrackerPropertiesComposite_ResizeMsg;
 	public static String CyberTrackerPropertiesComposite_ResizeOp;
@@ -339,6 +341,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_TrackTimerTimeOp;
 	public static String CyberTrackerPropertiesComposite_UnitOption;
 	public static String CyberTrackerPropertiesComposite_UnitOptionTooltip;
+	public static String CyberTrackerPropertiesComposite_UnSetProjectionOp;
 	public static String CyberTrackerPropertiesComposite_WidthOp;
 	public static String CyberTrackerPropertiesDialog_0;
 	public static String CyberTrackerPropertiesDialog_1;

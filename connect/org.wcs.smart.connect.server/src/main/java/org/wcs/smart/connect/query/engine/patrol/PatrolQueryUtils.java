@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,9 +17,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
@@ -145,6 +149,59 @@ public class PatrolQueryUtils {
 		}
 
 		return columns;
+	}
+	
+	/**
+	 * Adds all the patrol min datetime and max datetime to the query results.
+	 * 
+	 * 
+	 * @param queryDataTable
+	 * @param c
+	 * @param session
+	 * @return
+	 * @throws SQLException
+	 */
+	public static void addPatrolMinMaxDateTime(String queryDataTable, 
+			Connection c, Session session, AbstractQueryEngine engine) throws SQLException {
+		
+		for (String field : new String[]{"p_min_datetime", "p_max_datetime"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			StringBuilder sb = new StringBuilder();
+			sb.append("ALTER TABLE " + queryDataTable + " ADD COLUMN " + field + " timestamp"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			
+			try(Statement s = c.createStatement()){
+				s.execute(sb.toString());
+			}
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("WITH mintimes AS ("); //$NON-NLS-1$
+		sb.append("SELECT " + engine.tablePrefix(Patrol.class) + ".uuid as p_uuid, "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("min((" + engine.tablePrefix(PatrolLegDay.class) + ".patrol_day || ' ' || " + engine.tablePrefix(PatrolLegDay.class) + ".start_time)::timestamp) as p_min_datetime, "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("max((" + engine.tablePrefix(PatrolLegDay.class) + ".patrol_day || ' ' || " + engine.tablePrefix(PatrolLegDay.class) + ".end_time)::timestamp) as p_max_datetime "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		sb.append(" FROM "); //$NON-NLS-1$
+		sb.append(queryDataTable + " data "); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(engine.tableNamePrefix(Patrol.class));
+		sb.append(" ON data.p_uuid = " + engine.tablePrefix(Patrol.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(engine.tableNamePrefix(PatrolLeg.class));
+		sb.append(" ON " + engine.tablePrefix(PatrolLeg.class) + ".patrol_uuid = " + engine.tablePrefix(Patrol.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(engine.tableNamePrefix(PatrolLegDay.class));
+		sb.append(" ON " + engine.tablePrefix(PatrolLeg.class) + ".uuid = " + engine.tablePrefix(PatrolLegDay.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("GROUP BY "+ engine.tablePrefix(Patrol.class) +".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(")"); //$NON-NLS-1$
+		sb.append(" UPDATE " + queryDataTable); //$NON-NLS-1$
+		sb.append(" SET p_min_datetime = a.p_min_datetime, p_max_datetime = a.p_max_datetime "); //$NON-NLS-1$
+		sb.append(" FROM mintimes a "); //$NON-NLS-1$
+		sb.append(" WHERE a.p_uuid = " + queryDataTable + ".p_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		try(Statement s = c.createStatement()){
+			s.execute(sb.toString());
+		}
+		
 	}
 	
 	public static List<PatrolAttribute> getPatrolAttributes(ConservationAreaFilter caFilter,

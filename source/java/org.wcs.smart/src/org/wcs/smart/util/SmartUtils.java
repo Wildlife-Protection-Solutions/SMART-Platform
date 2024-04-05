@@ -178,6 +178,13 @@ public class SmartUtils {
 		}
 	});
 	
+	public static NullComparator nullTimeComparator = new NullComparator(new Comparator<LocalTime>() {
+		@Override
+		public int compare(LocalTime o1, LocalTime o2) {
+			return o1.compareTo(o2);
+		}
+	});
+	
 	public static NullComparator nullDateComparator = new NullComparator(new Comparator<LocalDate>() {
 		@Override
 		public int compare(LocalDate o1, LocalDate o2) {

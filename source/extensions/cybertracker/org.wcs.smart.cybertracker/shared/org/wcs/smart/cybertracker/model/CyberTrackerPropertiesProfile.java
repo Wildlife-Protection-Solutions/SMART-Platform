@@ -427,7 +427,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		case KIOSK_MODE: return kioskMode;
 		case MANUAL_GPS: return manualGps;
 		case MAX_PHOTO_COUNT: return maxPhotoCount;
-//		case PROJECTION: return projection;
+		case PROJECTION: return projection; //removed smart8
 		case CA_PROJECTION_UUID: return null;
 		case SIGHTING_FIX_COUNT: return sightingFixCount;
 		case SKIP_BUTTON_TIMEOUT: return skipButtonTimeout;

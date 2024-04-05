@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -166,7 +167,12 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 		it.setLeader(engine.getEmployeeName((UUID)rs.getObject("plm_leader"), session)); //$NON-NLS-1$
 		it.setPilot(engine.getEmployeeName((UUID)rs.getObject("plm_pilot"), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("track")); //$NON-NLS-1$
-	
+		
+		Timestamp ts = rs.getTimestamp("p_min_datetime"); //$NON-NLS-1$
+		if (ts != null) it.setPatrolMinDateTime(ts.toLocalDateTime());
+		ts = rs.getTimestamp("p_max_datetime"); //$NON-NLS-1$
+		if (ts != null) it.setPatrolMaxDateTime(ts.toLocalDateTime());
+		
 		for (String attribute : engine.getPatrolAttributes()) {
 			it.setPatrolAttribute(attribute.substring(PatrolAttributeQueryColumn.PREFIX.length() + 1), rs.getObject(attribute));
 		}

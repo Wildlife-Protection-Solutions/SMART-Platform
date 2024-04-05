@@ -72,7 +72,8 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}
 		if (value instanceof Attribute.GeometrySource src) {
 			switch(src) {
-				case GPS: return Messages.getString("SmartLabelProvider.SourceGPS", l); //$NON-NLS-1$
+				case GPS_MANUAL: return Messages.getString("SmartLabelProvider.GpsUserSelected", l); //$NON-NLS-1$
+				case GPS_AUTO: return Messages.getString("SmartLabelProvider.GpsAuto", l); //$NON-NLS-1$
 				case MANUAL_DRAW: return Messages.getString("SmartLabelProvider.SourceDrawnMap", l); //$NON-NLS-1$
 				case MANUAL_POINT: return Messages.getString("SmartLabelProvider.SourceInput", l); //$NON-NLS-1$
 				case UNKNOWN: return Messages.getString("SmartLabelProvider.SourceUnknown", l);		 //$NON-NLS-1$

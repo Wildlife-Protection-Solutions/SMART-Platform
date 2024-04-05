@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,6 +86,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	private String transportType;
 	private LocalDate plStartDate;
 	private LocalDate plEndDate;
+	
+	private LocalDateTime minDateTime;
+	private LocalDateTime maxDateTime;
 	
 	private String leader;
 	private String pilot;
@@ -432,6 +436,24 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	}
 	
 	@Override
+	public LocalDateTime getPatrolMaxDateTime() {
+		return maxDateTime;
+	}
+
+	public void setPatrolMaxDateTime(LocalDateTime maxDateTime) {
+		this.maxDateTime = maxDateTime;
+	}
+
+	@Override
+	public LocalDateTime getPatrolMinDateTime() {
+		return minDateTime;
+	}
+
+	public void setPatrolMinDateTime(LocalDateTime minDateTime) {
+		this.minDateTime = minDateTime;
+	}
+	
+	@Override
 	public int hashCode(){
 		return Objects.hash(patrolUuid, patrolLegUuid);
 		
@@ -475,4 +497,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 		return Objects.equals(getPatrolLegUuid(), o.getPatrolLegUuid()) &&
 				Objects.equals(getPatrolUuid(), o.getPatrolUuid());
 	}
+
+	
 }

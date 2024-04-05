@@ -69,7 +69,7 @@ import org.wcs.smart.ui.ProjectionLabelProvider;
  */
 public class CyberTrackerPropertiesComposite extends Composite {
 	
-	private static final String NONE = "Not Set (Use the Conservation Area Display Projection)";
+	private static final String NONE = Messages.CyberTrackerPropertiesComposite_UnSetProjectionOp;
 	private static final String CLEARKEY = "CLEAR"; //$NON-NLS-1$
 	private static final String COLOR_OP_KEY = "COLOROP"; //$NON-NLS-1$
 
@@ -497,8 +497,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 //		controls.add(cbProjection.getControl());
 		
 		Label lblProjection = new Label(gpsContainer, SWT.NONE);
-		lblProjection.setText("Projection:");
-		lblProjection.setToolTipText("The display projection for map coordinates");
+		lblProjection.setText(Messages.CyberTrackerPropertiesComposite_ProjectionLabel);
+		lblProjection.setToolTipText(Messages.CyberTrackerPropertiesComposite_ProjectionTooltip);
 
 		cbProjection = new ComboViewer(gpsContainer, SWT.READ_ONLY);
 		cbProjection.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);

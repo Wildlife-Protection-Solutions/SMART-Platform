@@ -61,7 +61,9 @@ public class FixedQueryColumn extends QueryColumn {
 		PATROL_ID(ColumnType.STRING, "patrol:id"), //$NON-NLS-1$
 		PATROL_TYPE(ColumnType.STRING, "patrol:type"), //$NON-NLS-1$
 		PATROL_START_DATE(ColumnType.DATE, "patrol:startdate"), //$NON-NLS-1$
+		PATROL_START_TIME(ColumnType.TIME,"patrol:starttime"), //$NON-NLS-1$
 		PATROL_END_DATE(ColumnType.DATE, "patrol:enddate"), //$NON-NLS-1$
+		PATROL_END_TIME(ColumnType.TIME,"patrol:endtime"), //$NON-NLS-1$
 		PATROL_STATION(ColumnType.STRING, "patrol:station"), //$NON-NLS-1$
 		PATROL_TEAM(ColumnType.STRING, "patrol:team"), //$NON-NLS-1$
 		PATROL_OBJETIVE(ColumnType.STRING,"patrol:objective"), //$NON-NLS-1$
@@ -72,6 +74,7 @@ public class FixedQueryColumn extends QueryColumn {
 		PATROL_LEG_PILOT(ColumnType.STRING, "patrol:pilot"), //$NON-NLS-1$
 		PATROL_LEG_START_DATE(ColumnType.DATE, "patrolleg:startdate"), //$NON-NLS-1$
 		PATROL_LEG_END_DATE(ColumnType.DATE, "patrolleg:enddate"), //$NON-NLS-1$
+		
 		TRANSPORT_TYPE( ColumnType.STRING,"patrol:transporttype"), //$NON-NLS-1$
 		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
@@ -177,8 +180,14 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getConservationAreaName();
 			case PATROL_UUID:
 				return UuidUtils.uuidToString(item.getPatrolUuid());
-				default:
-					break;
+			case PATROL_START_TIME:
+				if (item.getPatrolMinDateTime() == null) return null;
+				return item.getPatrolMinDateTime().toLocalTime();
+			case PATROL_END_TIME:
+				if (item.getPatrolMaxDateTime() == null) return null;
+				return item.getPatrolMaxDateTime().toLocalTime();
+			default:
+				break;
 			}
 		}
 		if (queryResultItem instanceof WaypointQueryResultItem) {

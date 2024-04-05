@@ -157,6 +157,8 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_NumTimeRanges;
 	public static String PatrolQueryLabelProvider_ObservationUUIDColumnName;
 	public static String PatrolQueryLabelProvider_ObsGroupColumnName;
+	public static String PatrolQueryLabelProvider_PatrolEndTimeColumnName;
+	public static String PatrolQueryLabelProvider_PatrolStartTimeColumnName;
 	public static String PatrolQueryLabelProvider_PatrolUUIDColumnName;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_RawXColumnName;

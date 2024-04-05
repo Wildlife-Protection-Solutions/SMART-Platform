@@ -130,6 +130,8 @@ public class PatrolQueryColumnCache {
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+					if (item == FixedQueryColumn.FixedColumns.PATROL_END_TIME) continue;
+					if (item == FixedQueryColumn.FixedColumns.PATROL_START_TIME) continue;
 
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
@@ -260,7 +262,9 @@ public class PatrolQueryColumnCache {
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
-					
+					if (item == FixedQueryColumn.FixedColumns.PATROL_END_TIME) continue;
+					if (item == FixedQueryColumn.FixedColumns.PATROL_START_TIME) continue;
+
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
 						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||

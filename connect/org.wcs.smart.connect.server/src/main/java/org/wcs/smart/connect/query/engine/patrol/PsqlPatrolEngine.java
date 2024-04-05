@@ -102,7 +102,8 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		fields.append("p_team_uuid,p_objective,pl_mandate_uuid,p_type,"); //$NON-NLS-1$
 		fields.append("p_is_armed,pl_transport_uuid,pl_id,pl_start_date,"); //$NON-NLS-1$
 		fields.append("pl_end_date,plm_leader,plm_pilot,pl_uuid,"); //$NON-NLS-1$
-		fields.append("p_station,p_team,pl_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
+		fields.append("p_station,p_team,pl_mandate,p_transporttype,p_leader,p_pilot,"); //$NON-NLS-1$
+		fields.append("p_min_datetime, p_max_datetime"); //$NON-NLS-1$
 		if (this.patrolAttributes != null) {
 			for (String s : patrolAttributes) {
 				fields.append(","); //$NON-NLS-1$
@@ -301,6 +302,8 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		}	
 		
 		patrolAttributes = PatrolQueryUtils.addPatrolAttributesToQueryResult(queryDataTable, c, session, PsqlPatrolEngine.this);
+		
+		PatrolQueryUtils.addPatrolMinMaxDateTime(queryDataTable, c, session, PsqlPatrolEngine.this);
 
 	}
 
@@ -318,7 +321,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				"p_objective", "pl_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
 				"pl_start_date", //$NON-NLS-1$
-				"pl_end_date", //$NON-NLS-1$
+				"pl_end_date", //$NON-NLS-1$				
 				//"pld_patrol_day", 
 				"plm_leader",  //$NON-NLS-1$
 				"plm_pilot", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

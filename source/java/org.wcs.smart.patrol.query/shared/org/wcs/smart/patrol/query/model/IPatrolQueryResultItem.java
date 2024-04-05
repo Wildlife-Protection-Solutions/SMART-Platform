@@ -23,6 +23,7 @@
 package org.wcs.smart.patrol.query.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.wcs.smart.patrol.model.PatrolType;
@@ -50,6 +51,9 @@ public interface IPatrolQueryResultItem extends IResultItem {
 	public String getConservationAreaId();
 	public String getConservationAreaName();
 	public UUID getConservationAreaUuid();	
+	
+	public default LocalDateTime getPatrolMaxDateTime() { return null; }
+	public default LocalDateTime getPatrolMinDateTime() { return null; }
 	
 	public Object getPatrolAttribute(String keyId);
 	
