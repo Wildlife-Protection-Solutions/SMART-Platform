@@ -154,6 +154,8 @@ public class Messages extends NLS {
 	public static String EditSamplingUnitDialog_TypeLabel;
 	public static String EditSurveyDesignItemDialog_ErrorMsg;
 	public static String EditSurveyDialog_CannotEdit;
+
+	public static String EditSurveyDialog_CreatedDateLabel;
 	public static String EditSurveyDialog_DesignLabel;
 	public static String EditSurveyDialog_EndLabel;
 	public static String EditSurveyDialog_Error;
@@ -805,6 +807,10 @@ public class Messages extends NLS {
 	public static String SurveyDesignListView_DesignsTabName;
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
+	public static String SurveyDesignListView_MoveError;
+
+	public static String SurveyDesignListView_MoveToSurvey;
+
 	public static String SurveyDesignListView_SurveyMissionTabName;
 	public static String SurveyDesignPage_Label;
 	public static String SurveyDesignPage_Message;

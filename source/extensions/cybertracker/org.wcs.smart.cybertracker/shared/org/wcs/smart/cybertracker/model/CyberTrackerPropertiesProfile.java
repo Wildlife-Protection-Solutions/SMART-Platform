@@ -24,10 +24,15 @@ package org.wcs.smart.cybertracker.model;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -331,14 +336,53 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		getOption(ProfileOptionID.USE_MAP_ON_SKIP).setBooleanValue(useMapOnSkip);
 	}
 	
-	@Transient
-	public int getProjection() {
-		return getIntValue(ProfileOptionID.PROJECTION);
-	}
-	public void setProjection(int prj) {
-		getOption(ProfileOptionID.PROJECTION).setIntegerValue(prj);
-	}
+//	@Transient
+//	public int getProjection() {
+//		return getIntValue(ProfileOptionID.PROJECTION);
+//	}
+//	public void setProjection(int prj) {
+//		getOption(ProfileOptionID.PROJECTION).setIntegerValue(prj);
+//	}
 
+	@Transient
+	public Projection getCaProjection(Session session, boolean getDefaultIfNotFound) {
+		String suuid = getStringValue(ProfileOptionID.CA_PROJECTION_UUID);
+		if (suuid != null) {
+			UUID uuid = null;
+			try {
+				uuid = UuidUtils.stringToUuid(suuid);
+			}catch (Exception ex) {
+			}
+			if (uuid != null) {
+				Projection prj = session.get(Projection.class, uuid);
+				if (prj != null) return prj;			
+				//projection no longer exists
+			}
+		}
+		if (!getDefaultIfNotFound) return null;
+		
+		//can't find projection; lets try to fins the default
+		Projection prj = session.createQuery("FROM Projection WHERE conservationArea = :ca and isDefault = true", Projection.class) //$NON-NLS-1$
+				.setParameter("ca",  getConservationArea()) //$NON-NLS-1$
+				.uniqueResult();
+
+		if (prj != null) return prj;
+		
+		//no default projection; return lat/lon
+		prj = new Projection();
+		prj.setParsedCoordinateReferenceSystem(GeometryUtils.SMART_CRS);
+		prj.setDefinition(GeometryUtils.SMART_CRS.toWKT());
+		
+		return prj;
+	}
+	public void setCaProjection(Projection projection) {
+		String suuid = null;
+		if (projection != null) {
+			suuid =  UuidUtils.uuidToString(projection.getUuid());
+		}
+		getOption(ProfileOptionID.CA_PROJECTION_UUID).setStringValue(suuid);
+	}
+	
 	@Transient
 	public int getMaxPhotoCount() {
 		return getIntValue(ProfileOptionID.MAX_PHOTO_COUNT);
@@ -383,7 +427,8 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		case KIOSK_MODE: return kioskMode;
 		case MANUAL_GPS: return manualGps;
 		case MAX_PHOTO_COUNT: return maxPhotoCount;
-		case PROJECTION: return projection;
+//		case PROJECTION: return projection;
+		case CA_PROJECTION_UUID: return null;
 		case SIGHTING_FIX_COUNT: return sightingFixCount;
 		case SKIP_BUTTON_TIMEOUT: return skipButtonTimeout;
 		case TEST_TIME: return testTime;

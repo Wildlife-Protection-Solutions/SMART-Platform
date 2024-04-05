@@ -22,14 +22,13 @@
 package org.wcs.smart.er.ui;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,6 +63,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
@@ -80,6 +80,8 @@ import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
@@ -90,6 +92,9 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * View for listing survey designs and associated surveys and missions. 
@@ -115,6 +120,8 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	@Inject private IMenuService menuService;
 	@Inject private ESelectionService selService; 
 	@Inject private IEclipseContext context;
+	
+	private MenuItem moveMissionMenu = null;
 	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
 		@Override
@@ -235,6 +242,42 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		lstViewer.getControl().setMenu(menu);
 		designViewer.getControl().setMenu(menu);
 		
+		menu.addListener(SWT.Show, e->{
+			//if (e.widget != lstViewer.getControl()) return;
+			if (moveMissionMenu != null) moveMissionMenu.dispose();
+			if (!lstViewer.getControl().isVisible()) return;
+			Object s = lstViewer.getStructuredSelection().getFirstElement();
+			if (s == null) return;
+			if (!(s instanceof SurveyMissionProxy)) return;
+			if (((SurveyMissionProxy)s).getParent() == null) return;
+			
+			List<Survey> options = null;
+			Mission mission = null;
+			try(Session session = HibernateManager.openSession()){
+				
+				options = session.createQuery("FROM Survey WHERE surveyDesign.uuid = :sd", Survey.class) //$NON-NLS-1$
+						.setParameter("sd", ((SurveyMissionProxy)s).getParent().getDesignUuid()) //$NON-NLS-1$
+						.list();
+				options.sort((a,b)->Collator.getInstance().compare(b.getId(), a.getId()));
+				
+				mission = session.get(Mission.class, ((SurveyMissionProxy)s).getUuid());
+				options.remove(mission.getSurvey());
+			}
+			if (options == null || options.isEmpty()) return;
+			
+			moveMissionMenu = new MenuItem(menu, SWT.CASCADE, 1);
+			moveMissionMenu.setText(Messages.SurveyDesignListView_MoveToSurvey);
+			
+			Menu surveyMenu = new Menu(moveMissionMenu);
+			moveMissionMenu.setMenu(surveyMenu);
+			final Mission fmission = mission;
+			for (Survey op : options) {
+				MenuItem ni = new MenuItem(surveyMenu, SWT.PUSH);
+				ni.setText(op.getId());
+				ni.addListener(SWT.Selection, evt->updateMission(fmission, op));
+			}
+		});
+		
 		/* selection */
 		ViewerSelectionListener sel = new ViewerSelectionListener(selService);
 		lstViewer.addSelectionChangedListener(sel);
@@ -256,6 +299,23 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		bar.setSelection(0);
 	}
 
+	private void updateMission(Mission mission, Survey survey) {
+		try(Session session = HibernateManager.openSession()){
+			mission = session.get(Mission.class, mission.getUuid());
+			if (mission == null) return;
+			survey = session.get(Survey.class, survey.getUuid());
+			if (survey == null) return;
+			
+			session.beginTransaction();
+			try {
+				mission.setSurvey(survey);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignListView_MoveError,  ex.getMessage() ), ex);
+			}
+		}
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+	}
 	
 	@Focus
 	public void setFocus() {

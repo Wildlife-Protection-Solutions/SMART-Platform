@@ -22,6 +22,8 @@
 package org.wcs.smart.er.ui.survey;
 
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -57,7 +59,8 @@ import org.wcs.smart.util.SmartUtils.RegExLevel;
  */
 public class EditSurveyDialog extends SmartStyledTitleDialog{
 
-	private Text txtDesign;
+	private Label lblDesign;
+	private Label lblCreated;
 	private Text txtId;
 	private ControlDecoration cdId;
 	private Session session;
@@ -108,9 +111,8 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		Label l = new Label(part, SWT.NONE);
 		l.setText(Messages.EditSurveyDialog_DesignLabel);
 		
-		txtDesign = new Text(part, SWT.BORDER);
-		txtDesign.setEnabled(false);
-		txtDesign.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblDesign = new Label(part, SWT.NONE);
+		lblDesign.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		l = new Label(part, SWT.NONE);
 		l.setText(Messages.EditSurveyDialog_IdLabel);
@@ -125,6 +127,12 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		});
 		cdId = createDecoration(txtId);
 		
+		l = new Label(part, SWT.NONE);
+		l.setText(Messages.EditSurveyDialog_CreatedDateLabel);
+		
+		lblCreated = new Label(part, SWT.NONE);
+		lblCreated.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 		setTitle(toEdit.getId());
 		getShell().setText(Messages.EditSurveyDialog_ShellTitle);
 		setMessage(Messages.EditSurveyDialog_Message);
@@ -193,7 +201,8 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 	}
 	
 	private void initControls(){
-		txtDesign.setText(toEdit.getSurveyDesign().getName());
+		lblDesign.setText(toEdit.getSurveyDesign().getName());
+		lblCreated.setText(toEdit.getCreatedDateAtLocal().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))  );
 		txtId.setText(toEdit.getId());		
 	}
 	

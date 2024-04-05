@@ -110,6 +110,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 						if (id.open() != InputDialog.OK) return;
 						
 						Survey s = new Survey();
+						s.initCreatedDate();
 						s.setMissions(new ArrayList<Mission>());
 						s.setId(id.getValue());
 						s.setSurveyDesign(sd);

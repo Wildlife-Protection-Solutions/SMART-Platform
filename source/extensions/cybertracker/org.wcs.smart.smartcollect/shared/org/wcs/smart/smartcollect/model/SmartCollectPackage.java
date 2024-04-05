@@ -65,8 +65,7 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 	
 	@Transient
 	public boolean isDataModel() {
-		if (getConfigurableModel() == null) return true;
-		return false;
+		return (getConfigurableModel() == null) ;
 	}
 	
 	@Transient

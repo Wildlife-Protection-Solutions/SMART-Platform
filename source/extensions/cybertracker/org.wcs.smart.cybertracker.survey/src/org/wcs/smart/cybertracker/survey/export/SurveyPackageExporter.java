@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -90,11 +89,7 @@ import org.wcs.smart.util.ZipUtil;
 @SuppressWarnings("deprecation")
 public class SurveyPackageExporter {
 
-	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
-	
 	private static final String METADATA_FILE = "survey_metadata.json"; //$NON-NLS-1$
-	
-	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	
 	
 	public static void exportPackage(SurveyCtPackage ctpackage, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IProgressMonitor monitor) throws Exception{
@@ -181,7 +176,7 @@ public class SurveyPackageExporter {
 				CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, workingDir) ;
 				
 				//write xml
-				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
+				Path cmFile = workingDir.resolve(CtJsonExportUtils.CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
@@ -206,7 +201,7 @@ public class SurveyPackageExporter {
 				
 				
 				sub.split(1);
-				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
+				Path profileFile = workingDir.resolve(CtJsonExportUtils.CT_PROFILE_FILE);
 				
 				profileToJson(ctpackage.getCtProfile(), surveyDesign.getTrackDistanceDirection(), 
 						surveyDesign.getTrackObserver(), profileFile, ctprofileAdditions);
@@ -390,7 +385,7 @@ public class SurveyPackageExporter {
 
 	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
 		projectAdditions.put(CtJsonExportUtils.JSON_INTEGRATE_KEY, CtJsonExportUtils.getEarthRangerUrl(session, ctpackage.getConservationArea()));
-		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
+		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 	
 	@SuppressWarnings("unchecked")

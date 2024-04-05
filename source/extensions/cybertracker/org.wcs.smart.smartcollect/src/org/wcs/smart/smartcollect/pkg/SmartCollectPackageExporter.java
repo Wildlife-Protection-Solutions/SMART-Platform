@@ -59,10 +59,6 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class SmartCollectPackageExporter {
 
-	
-	
-	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
-	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	private static final String SMARTCOLLECT_METADATA_FILE = "smartcollect_metadata.json"; //$NON-NLS-1$
 
 
@@ -151,7 +147,7 @@ public class SmartCollectPackageExporter {
 
 
 				//write xml
-				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
+				Path cmFile = workingDir.resolve(CtJsonExportUtils.CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
@@ -172,7 +168,7 @@ public class SmartCollectPackageExporter {
 				}
 
 				sub.split(1);
-				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
+				Path profileFile = workingDir.resolve(CtJsonExportUtils.CT_PROFILE_FILE);
 				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctPackage.getConservationArea(), session);
 				profileToJson(session.get(CyberTrackerPropertiesProfile.class, ctPackage.getCtProfile().getUuid()), ops.getTrackDistanceDirection(), profileFile, ctprofileAdditions);
 				
@@ -238,7 +234,7 @@ public class SmartCollectPackageExporter {
 	
 	
 	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
+		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 
 	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, 

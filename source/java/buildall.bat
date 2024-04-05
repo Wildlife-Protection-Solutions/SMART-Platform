@@ -64,7 +64,8 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.
 REM run maven to build packages
 REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
 REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
-call mvn clean install -Pallplatforms,product,update,core,plugins,utils
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils 
+-Djarsigner.alias=tomcat -Djarsigner.storepass=**PASSWORDHERE** -Djarsigner.keystore=C:\data\SMART\Builds\keystore\connect8.refractions.net.jks
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%

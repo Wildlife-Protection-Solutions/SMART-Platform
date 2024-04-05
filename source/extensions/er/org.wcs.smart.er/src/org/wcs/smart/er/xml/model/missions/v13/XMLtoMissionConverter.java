@@ -232,7 +232,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 
 	private void createAndSetSurvey(Mission m, MissionType xml) {
 		Survey survey = new Survey();
-		
+		survey.initCreatedDate();
 	
 		survey.setId(xml.getSurvey().getId());
 		

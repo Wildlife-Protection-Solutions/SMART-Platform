@@ -49,12 +49,12 @@ import org.wcs.smart.dataentry.CmCustomListsUtil;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.EditListDialog;
-import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 

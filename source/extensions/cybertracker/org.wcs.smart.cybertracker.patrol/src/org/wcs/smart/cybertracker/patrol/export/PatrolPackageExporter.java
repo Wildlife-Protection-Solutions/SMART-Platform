@@ -98,13 +98,8 @@ import org.wcs.smart.util.ZipUtil;
  * data or other data useful for Cybertracker.
  */
 public class PatrolPackageExporter {
-
-	
-	public static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	
 	public static final String PATROL_METADATA_FILE = "patrol_metadata.json"; //$NON-NLS-1$
-	
-	public static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	
 	public static void exportPackage(PatrolCtPackage ctPackage, 
 			List<IPackageContribution.PackageContribution> updates, 
@@ -195,7 +190,7 @@ public class PatrolPackageExporter {
 					//);
 
 				//write xml
-				Path cmFile = workingDir.resolve(CM_MODEL_FILE);
+				Path cmFile = workingDir.resolve(CtJsonExportUtils.CM_MODEL_FILE);
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
@@ -222,7 +217,7 @@ public class PatrolPackageExporter {
 //				toIncludeInZip.add(metadataFile);
 
 				sub.split(1);
-				Path profileFile = workingDir.resolve(CT_PROFILE_FILE);
+				Path profileFile = workingDir.resolve(CtJsonExportUtils.CT_PROFILE_FILE);
 				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 				profileToJson(session.get(CyberTrackerPropertiesProfile.class, ctpackage.getCtProfile().getUuid()),
 						ops.getTrackDistanceDirection(), ops.getTrackObserver(),
@@ -245,7 +240,7 @@ public class PatrolPackageExporter {
 				projectAdditions.put(CtJsonExportUtils.JSON_INTEGRATE_KEY, CtJsonExportUtils.getEarthRangerUrl(session, ctpackage.getConservationArea()));
 				
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				CtJsonExportUtils.writeProjectJson(ctpackage.getName(), version, CM_MODEL_FILE, logo, 
+				CtJsonExportUtils.writeProjectJson(ctpackage.getName(), version, CtJsonExportUtils.CM_MODEL_FILE, logo, 
 						projectFile, metadataFile, projectAdditions);
 
 				

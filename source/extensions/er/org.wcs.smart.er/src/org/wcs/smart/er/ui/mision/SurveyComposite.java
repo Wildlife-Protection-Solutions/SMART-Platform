@@ -62,9 +62,13 @@ public class SurveyComposite extends MissionComposite{
 	private Survey defaultSurvey;
 	
 	public SurveyComposite(Survey defaultSurvey){
-		this.defaultSurvey = defaultSurvey;
+		super();
+		this.defaultSurvey = defaultSurvey;		
 	}
 	
+	public SurveyComposite(){
+		super();
+	}
 	
 	@Override
 	public Control createControl(Composite parent) {
@@ -119,13 +123,13 @@ public class SurveyComposite extends MissionComposite{
 	/**
 	 * Initializes the controls
 	 * @param mission the current mission
-	 * @param parentSurvey the parent survey
+	 * @param parentDesign the parent survey
 	 * @param s current session
 	 */
-	public void init(Mission mission, SurveyDesign parentSurvey, Session s){
-		init(mission, s);
+	public void init(Mission mission, SurveyDesign parentDesign, Session s){
+		this.defaultSurvey = mission.getSurvey();
 		
-		this.parentSurvey = parentSurvey;
+		this.parentSurvey = parentDesign;
 		this.session = s;
 		
 		refreshSurveys(session);
@@ -137,10 +141,13 @@ public class SurveyComposite extends MissionComposite{
 	}
 	
 	/**
-	 * Does nothing; users should call init(mission, parentSurvey, s)
+	 * mission.getSurvey must be set when calling this function
+	 * 
+	 * calls init(mission, mission.getSurvey().getSurveyDesign(), session)
 	 */
 	@Override
-	public void init(Mission design, Session session) {
+	public void init(Mission mission, Session session) {
+		this.init(mission, mission.getSurvey().getSurveyDesign(), session);
 	}
 
 	private void createSurvey(){

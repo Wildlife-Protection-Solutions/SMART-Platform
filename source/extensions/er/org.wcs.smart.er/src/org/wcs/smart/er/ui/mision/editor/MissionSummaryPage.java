@@ -73,6 +73,7 @@ import org.wcs.smart.er.ui.mision.IdComposite;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
+import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -193,7 +194,15 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		txtSurveyId = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtSurveyId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtSurveyId.setEditable(false);
-		new Label(left, SWT.NONE);
+		
+		if (canEdit){
+			Hyperlink edit = toolkit.createHyperlink(left, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
+			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			edit.setData(SurveyComposite.class);
+			edit.addHyperlinkListener(this);
+		}else{
+			new Label(left, SWT.NONE);
+		}
 		
 		
 		//members id

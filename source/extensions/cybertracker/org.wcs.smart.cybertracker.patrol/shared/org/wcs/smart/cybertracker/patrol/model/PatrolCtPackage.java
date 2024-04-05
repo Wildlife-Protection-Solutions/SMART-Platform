@@ -84,8 +84,7 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, I
 	
 	@Transient
 	public boolean isDataModel() {
-		if (getConfigurableModel() == null) return true;
-		return false;
+		return (getConfigurableModel() == null);
 	}
 	
 	@Transient

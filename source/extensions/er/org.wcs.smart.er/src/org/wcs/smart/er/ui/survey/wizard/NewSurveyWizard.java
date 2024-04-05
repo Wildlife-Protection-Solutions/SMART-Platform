@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.er.ui.survey.wizard;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -67,6 +70,7 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		session = HibernateManager.openSession();
 	
 		newSurvey = new Survey();
+		newSurvey.initCreatedDate();
 		setNeedsProgressMonitor(true);
 		
 		//try to initialize the design

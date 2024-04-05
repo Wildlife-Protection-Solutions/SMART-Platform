@@ -54,7 +54,8 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_4 = "4.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_5 = "5.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_6 = "6.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_6;//current version
+	public static final String DB_VERSION_7 = "7.0"; //$NON-NLS-1$ smart8
+	public static final String DB_VERSION = DB_VERSION_7;//current version
 	
 	// The shared instance
 	private static EcologicalRecordsPlugIn plugin;

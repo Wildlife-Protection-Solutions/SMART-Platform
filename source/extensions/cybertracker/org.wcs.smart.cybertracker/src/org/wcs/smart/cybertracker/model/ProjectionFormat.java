@@ -25,9 +25,13 @@ import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
  * Projection format details for cybertracker profiles.
+ * 
+ * Support for this was removed in SMART8.
+ * 
  * @author Emily
  *
  */
+
 public enum ProjectionFormat {
 	DEGREE_MIN_SEC(Messages.CyberTrackerProperties_ProjectonFormat_DegreeMinSec, 0),
 	DECEMAL_DEGREE(Messages.CyberTrackerProperties_ProjectonFormat_DecemalDegree, 1),

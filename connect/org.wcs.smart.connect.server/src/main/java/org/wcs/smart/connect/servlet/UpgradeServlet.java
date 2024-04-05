@@ -32,6 +32,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1315,6 +1319,9 @@ public class UpgradeServlet extends HttpServlet {
 			throw new HibernateException(e);
 		}
 
+		LocalDateTime utc = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+		String utcs = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss").format(utc); //$NON-NLS-1$
+		
 		s.doWork(new Work() {
 
 			@Override
@@ -1492,6 +1499,11 @@ public class UpgradeServlet extends HttpServlet {
 						
 						"CREATE TRIGGER trg_attachment_tag_link AFTER INSERT OR UPDATE OR DELETE ON smart.attachment_tag_link FOR EACH ROW execute procedure connect.trg_attachment_tag_link()", //$NON-NLS-1$
 
+						//survey created date
+						"ALTER TABLE smart.survey ADD COLUMN date_created timestamp without time zone", //$NON-NLS-1$
+						//2024-04-04 23:18:45
+						"UPDATE smart.survey SET date_created = '" + utcs + "'", //$NON-NLS-1$ //$NON-NLS-2$
+						"alter table smart.survey alter column date_created set not null", //$NON-NLS-1$
 						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
@@ -1512,9 +1524,14 @@ public class UpgradeServlet extends HttpServlet {
 						"update connect.connect_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
 						
+						"update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.er'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.er'", //$NON-NLS-1$
+						
+						
 						"update connect.connect_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 
+						
 
 						"update connect.connect_version set version = '8.0.0', last_updated = now()", //$NON-NLS-1$
 						
@@ -1630,4 +1647,5 @@ public class UpgradeServlet extends HttpServlet {
 		});	
 		
 	}
+
 }

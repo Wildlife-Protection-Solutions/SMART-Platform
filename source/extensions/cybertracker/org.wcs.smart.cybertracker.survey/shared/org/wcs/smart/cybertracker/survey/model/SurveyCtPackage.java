@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.survey.model;
 
 import java.util.ArrayList;
 
+import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -90,9 +91,16 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider, I
 	}
 
 	@Transient
+	public void initConfigurableModel(Session session) {
+		if (getSurveyDesign() == null) return;
+		setSurveyDesign(session.get(SurveyDesign.class, getSurveyDesign().getUuid()));
+		
+	}
+
+	@Transient
 	public boolean isDataModel() {
-		if (getSurveyDesign() == null || getSurveyDesign().getConfigurableModel() == null) return true;
-		return false;
+		if (getSurveyDesign() == null) return true;
+		return getSurveyDesign().getConfigurableModel() == null;
 	}
 	
 	@Override

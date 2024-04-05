@@ -282,6 +282,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 		//create new Survey
 		Survey survey = new Survey();
+		survey.initCreatedDate();
 		survey.setMissions(new ArrayList<>());
 		survey.setSurveyDesign(design);
 		if (id.trim().isBlank()) {
@@ -558,6 +559,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			
 			//create new Survey
 			Survey survey = new Survey();
+			survey.initCreatedDate();
 			survey.setMissions(new ArrayList<>());
 			survey.setSurveyDesign(design);
 			survey.setId(MissionIdGenerator.INSTANCE.generateSurveyId(survey, session, l) );

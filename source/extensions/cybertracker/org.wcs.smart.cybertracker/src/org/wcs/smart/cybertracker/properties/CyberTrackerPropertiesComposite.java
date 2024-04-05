@@ -23,9 +23,7 @@ package org.wcs.smart.cybertracker.properties;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -53,12 +51,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
-import org.wcs.smart.cybertracker.model.ProjectionFormat;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.ProjectionLabelProvider;
 
 /**
  * Composite that contains controls to edit CyberTracker properties.
@@ -68,6 +69,7 @@ import org.wcs.smart.cybertracker.model.ProjectionFormat;
  */
 public class CyberTrackerPropertiesComposite extends Composite {
 	
+	private static final String NONE = "Not Set (Use the Conservation Area Display Projection)";
 	private static final String CLEARKEY = "CLEAR"; //$NON-NLS-1$
 	private static final String COLOR_OP_KEY = "COLOROP"; //$NON-NLS-1$
 
@@ -475,22 +477,42 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});
 		controls.add(btnUseGpsTime);
 		
-		
-		
-		
-		
-		
+//		removed in SMART8; converted to selecting a projection from the list of CA projections		
+//		Label lblProjection = new Label(gpsContainer, SWT.NONE);
+//		lblProjection.setText(Messages.CyberTrackerPropertiesDialog_Projection);
+//		lblProjection.setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);
+//
+//		cbProjection = new ComboViewer(gpsContainer, SWT.READ_ONLY);
+//		cbProjection.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);
+//		cbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+//		cbProjection.setContentProvider(ArrayContentProvider.getInstance());
+//		cbProjection.setLabelProvider(new CyberTrackerProjectionProvider());
+// 		cbProjection.setInput(ProjectionFormat.getIds());
+//		cbProjection.addSelectionChangedListener(new ISelectionChangedListener() {
+//			@Override
+//			public void selectionChanged(SelectionChangedEvent event) {
+//				changesMade();
+//			}
+//		});
+//		controls.add(cbProjection.getControl());
 		
 		Label lblProjection = new Label(gpsContainer, SWT.NONE);
-		lblProjection.setText(Messages.CyberTrackerPropertiesDialog_Projection);
-		lblProjection.setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);
+		lblProjection.setText("Projection:");
+		lblProjection.setToolTipText("The display projection for map coordinates");
 
 		cbProjection = new ComboViewer(gpsContainer, SWT.READ_ONLY);
 		cbProjection.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);
 		cbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cbProjection.setContentProvider(ArrayContentProvider.getInstance());
-		cbProjection.setLabelProvider(new CyberTrackerProjectionProvider());
- 		cbProjection.setInput(ProjectionFormat.getIds());
+		cbProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
+ 		//cbProjection.setInput(ProjectionFormat.getIds());
+		try(Session session = HibernateManager.openSession()){
+			List<Object> values = new ArrayList<>();
+			values.add(NONE);
+			values.addAll(HibernateManager.getCaProjectionList(session));
+			cbProjection.setInput(values);
+		}
+		
 		cbProjection.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -867,7 +889,14 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		cmbTrackTimer.setSelection(new StructuredSelection(ctProperties.getWaypointTimerType()));
 		txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimerValue()));
 		btnUseGpsTime.setSelection(ctProperties.isUseGpsTime());
-		cbProjection.setSelection(new StructuredSelection(ctProperties.getProjection()));
+		try(Session session = HibernateManager.openSession()){
+			Projection prj = ctProperties.getCaProjection(session, false);
+			if (prj == null) {
+				cbProjection.setSelection(new StructuredSelection(NONE));
+			}else {
+				cbProjection.setSelection(new StructuredSelection(prj));
+			}
+		}
 		txtSkipButtonTimeout.setText(String.valueOf(ctProperties.getSkipButtonTimeout()));
 		btnUseMapOnSkip.setSelection(ctProperties.isUseMapOnSkip());
 		btnManualGPS.setSelection(ctProperties.isManualGps());
@@ -934,8 +963,12 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setWaypointTimerType( ((CyberTrackerPropertiesProfileOption.TrackTimerOp)cmbTrackTimer.getStructuredSelection().getFirstElement()) );
 		ctProperties.setWaypointTimerValue(Integer.valueOf(txtTrackTimer.getText()));
 		
-		StructuredSelection selection = (StructuredSelection) cbProjection.getSelection();
-		ctProperties.setProjection((Integer)selection.getFirstElement());
+		Object prj = cbProjection.getStructuredSelection().getFirstElement();
+		if (prj instanceof Projection pprj) {
+			ctProperties.setCaProjection(pprj);
+		}else {
+			ctProperties.setCaProjection(null);
+		}
 		ctProperties.setSkipButtonTimeout(Integer.valueOf(txtSkipButtonTimeout.getText()));
 		ctProperties.setMaxPhotoCount(Integer.valueOf(txtMaxPhotoCount.getText()));
 		ctProperties.setDisableEditing(btnDisableEditing.getSelection());
@@ -1051,8 +1084,9 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	
 	
 
-	
-	private class CyberTrackerProjectionProvider extends LabelProvider {
+	/* 
+	 * removed in SMART8
+	 private class CyberTrackerProjectionProvider extends LabelProvider {
 		
 		Map<Integer, String> id2Name;
 		
@@ -1073,5 +1107,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return super.getText(element);
 		}
 	}
+	*/
 
 }

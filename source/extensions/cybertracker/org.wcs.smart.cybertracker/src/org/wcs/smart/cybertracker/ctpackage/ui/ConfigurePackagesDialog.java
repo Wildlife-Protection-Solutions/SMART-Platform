@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -349,6 +350,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		ICtPackage newpackage = null;
 		try(Session session = HibernateManager.openSession()){
 			ICtPackage tocopy = session.get(items.get(0).getClass(), items.get(0).getUuid());
+			Hibernate.initialize(tocopy);
 			newpackage = tocopy.copy();
 		}
 		editPackage(newpackage);

@@ -561,6 +561,12 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 							e.getUuidList().forEach(md->md.getUuidValue());
 						}
 					});
+					
+					if (init.isDataModel()) {
+						context.set(ConfigurableModel.class, new ConfigurableModel());
+					}else {
+						context.set(ConfigurableModel.class, init.getConfigurableModel());
+					}
 				}
 				eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 				es.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
@@ -587,11 +593,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 					}
 				}
 				
-				if (init.isDataModel()) {
-					context.set(ConfigurableModel.class, new ConfigurableModel());
-				}else {
-					context.set(ConfigurableModel.class, init.getConfigurableModel());
-				}
+
 				IncidentCtPackage finit = init;
 				
 				Display.getDefault().syncExec(()->{

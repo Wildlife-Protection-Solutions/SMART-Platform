@@ -136,14 +136,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		this.cmAlerts = new HashMap<>();
 		this.currentAlerts = new ArrayList<>();
 		
-		if (ctpackage instanceof ICmProvider) {
-			ICmProvider cmprovider = (ICmProvider)ctpackage;
-			if (cmprovider.isDataModel()) {
-				currentModel = new ConfigurableModel();
-			}else {
-				currentModel = cmprovider.getConfigurableModel();
-			}
-		}
+		
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
@@ -401,7 +394,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			
 		});
 		sash.setWeights(new int[] {2,3});
-		initModel();
+		
 		
 		Link link = new Link(main, SWT.NONE);
 		link.setText("<a>" + Messages.ConnectAlertUiController_RefreshLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -409,7 +402,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			refreshAlertTypes(true);
 		});
 		
-		loadAlerts.schedule();
+		loadData.schedule();
 		refreshAlertTypes(false);
 		
 		return main;
@@ -573,13 +566,30 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 	}
 	
 
-	private Job loadAlerts = new Job(Messages.ConnectAlertUiController_LoadingAlerts) {
+	private Job loadData = new Job(Messages.ConnectAlertUiController_LoadingAlerts) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try(Session session = HibernateManager.openSession()){
 				currentAlerts.addAll(CtPackageAlert.fromString((AbstractCtPackage)ctpackage, session));
+				
+				if (ctpackage instanceof ICmProvider) {
+					ICmProvider cmprovider = (ICmProvider)ctpackage;
+					cmprovider.initConfigurableModel(session);
+					
+					if (cmprovider.isDataModel()) {
+						currentModel = new ConfigurableModel();
+					}else {
+						currentModel = cmprovider.getConfigurableModel();
+					}
+				}
 			}
-			Display.getDefault().asyncExec(()->{alertList.refresh();onInitilized.run();});
+			Display.getDefault().asyncExec(()->{
+				alertList.refresh();
+				onInitilized.run();
+				
+				
+				initModel();
+			});
 			
 			return Status.OK_STATUS;
 		}

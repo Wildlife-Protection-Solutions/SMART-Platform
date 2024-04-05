@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -32,6 +33,14 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public interface ICmProvider {
 
+	/**
+	 * a hook for loading the configurable model from the database if required
+	 * before using isDataModel and getConfigurableModel functions. 
+	 * 
+	 * @param session
+	 */
+	public default void initConfigurableModel(Session session) {}
+	
 	public ConfigurableModel getConfigurableModel();
 	
 	public boolean isDataModel();

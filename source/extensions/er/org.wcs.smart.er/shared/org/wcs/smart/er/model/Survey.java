@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.er.model;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.wcs.smart.ca.UuidItem;
@@ -33,6 +37,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Survey model object.  A survey belongs to a 
@@ -53,6 +58,12 @@ public class Survey extends UuidItem {
 	private String id;
 	private SurveyDesign design;
 	private List<Mission> missions;
+
+	private LocalDateTime createdDate;
+
+	public Survey() {
+		
+	}
 	
 	/**
 	 * Survey identified
@@ -94,4 +105,33 @@ public class Survey extends UuidItem {
 		this.missions = missions;
 	}
 		
+	
+	/**
+	 * Gets the created datetime in UTC
+	 * @return
+	 */
+	@Column(name="date_created")
+	public LocalDateTime getCreatedDate() {
+		return createdDate;
+	}
+
+	/**
+	 * @param the last modified date time in UTC
+	 */
+	public void setCreatedDate(LocalDateTime createdDate) {
+		this.createdDate = createdDate;
+	}
+	
+	@Transient
+	public LocalDateTime getCreatedDateAtLocal() {
+		LocalDateTime utc = getCreatedDate();
+		if (utc == null) return null;
+		return utc.toInstant(ZoneOffset.UTC).atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+
+	@Transient
+	public void initCreatedDate() {
+		setCreatedDate(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+	}
+	
 }

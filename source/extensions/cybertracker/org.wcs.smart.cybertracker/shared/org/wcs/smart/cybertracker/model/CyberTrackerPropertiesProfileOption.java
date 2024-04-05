@@ -59,7 +59,8 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		WAYPOINT_TIMER,
 		WAYPOINT_TIMER_TYPE,
 		SKIP_BUTTON_TIMEOUT,
-		PROJECTION,
+		PROJECTION, //support removed SMART8
+		CA_PROJECTION_UUID, //added in SMART8 - link to uuid of ca projection (may no exist if projection remoted)
 		DISABLE_EDITING,
 		TEST_TIME,
 		USE_GPS_TIME,
@@ -77,7 +78,12 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		IMAGE_WIDTH,
 		IMAGE_HEIGHT,
 		INCIDENT_GROUP_UI,
-		UNITS
+		UNITS;
+		
+		public String getMobleJsonKey() {
+			if (this == ProfileOptionID.CA_PROJECTION_UUID) return "PROJECTION_WKT";
+			return this.name();
+		}
 	}
 
 	public enum TrackTimerOp{

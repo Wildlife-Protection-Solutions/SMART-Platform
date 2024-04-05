@@ -23,6 +23,10 @@ package org.wcs.smart.er.updatesite;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -90,26 +94,34 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV3ToV4(session);
 			upgradeV4ToV5(session);
 			upgradeV5ToV6(session);
+			upgradeV6ToV7(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
 			upgradeV4ToV5(session);
 			upgradeV5ToV6(session);
+			upgradeV6ToV7(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_2)){
 			upgradeV2ToV3(session);
 			upgradeV3ToV4(session);
 			upgradeV4ToV5(session);
 			upgradeV5ToV6(session);
+			upgradeV6ToV7(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_3)){
 			upgradeV3ToV4(session);
 			upgradeV4ToV5(session);
 			upgradeV5ToV6(session);
+			upgradeV6ToV7(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_4)){
 			upgradeV4ToV5(session);
 			upgradeV5ToV6(session);
+			upgradeV6ToV7(session);
 		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_5)){
 			upgradeV5ToV6(session);
+			upgradeV6ToV7(session);
+		}else if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_6)){
+			upgradeV6ToV7(session);
 		}
 	}
 	
@@ -399,4 +411,18 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 	}
 	
 
+	private void upgradeV6ToV7(Session session){
+		LocalDateTime utc = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+		String utcs = DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss").format(utc); //$NON-NLS-1$
+		String[] sql = new String[]{
+				"ALTER TABLE smart.survey ADD COLUMN date_created timestamp", //$NON-NLS-1$
+				"UPDATE smart.survey SET date_created = '" + utcs + "'", //$NON-NLS-1$ //$NON-NLS-2$
+				"alter table smart.survey alter column date_created set not null", //$NON-NLS-1$
+		};
+		
+		for (String s : sql){
+			session.createNativeMutationQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_7, session);
+	}
 }

@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.json.IDesktopJsonProcessor;
@@ -112,6 +114,36 @@ public class DesktopMissionJsonProcessor extends MissionJsonProcessor implements
 					throw new UserCancelledException(Messages.MissionJsonProcessor_UserCancelled2);
 				}
 		 }
+	}
+	
+	/**
+	 * Should throw exception if processing should stop 
+	 * 
+	 * @throws UserCancelledException
+	 */
+	@Override
+	protected void assignMissions(Session session) throws UserCancelledException{
+		final boolean[] cancel = new boolean[]{false};
+		//we need to ask the user if they want to create a new patrol or add to an existing patrol
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				try{
+					MissionDialog pd = new MissionDialog(Display.getDefault().getActiveShell(),
+							newMissionLinks, session);
+					if (pd.open() == Window.CANCEL){
+						cancel[0] = true;
+					}else{
+						modifiedMissions.addAll(pd.getMergedMissions());
+						newMissions = pd.getNewMissions();
+					}
+				}catch (Exception ex){
+					CyberTrackerPlugIn.displayError("Error", "Error occured while assigning missions to surveys: " + ex.getMessage(), ex);
+					cancel[0] = true;
+				}
+			}	
+		});
+		if (cancel[0]) throw new UserCancelledException("User cancelled operation while assigning missions to surveys."); 
 	}
 		
 }

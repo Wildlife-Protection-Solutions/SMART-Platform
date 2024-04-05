@@ -78,6 +78,7 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 	 * 
 	 * @throws UserCancelledException
 	 */
+	@Override
 	protected void assignPatrols(Session session) throws UserCancelledException{
 		final boolean[] cancel = new boolean[]{false};
 		//we need to ask the user if they want to create a new patrol or add to an existing patrol

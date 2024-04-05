@@ -60,6 +60,7 @@ import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -91,6 +92,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 @SuppressWarnings("unchecked")
 public class CtJsonExportUtils {
+	
+	public static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
+	public static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	
 	/**
 	 * JSON uuid property key value
@@ -275,21 +279,33 @@ public class CtJsonExportUtils {
 		for (ProfileOptionID option : ProfileOptionID.values()) {
 			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
 			
-			if (opValue == null) {
-				Object defaultValue = profile.getDefaultValue(option);
-				profileObj.put(option.name(), defaultValue);
-			}else {
-				if (isBoolean(option)) {
-					profileObj.put(option.name(), opValue.getBooleanValue());
-				}else if (isColor(option) && opValue.getIntegerValue() != null) {
-					Color c = new Color(opValue.getIntegerValue());
-					profileObj.put(option.name(), Integer.toHexString(c.getRGB()).substring(2));
-				}else if (opValue.getDoubleValue() != null) {
-					profileObj.put(option.name(), opValue.getDoubleValue());
-				}else if (opValue.getIntegerValue() != null) {
-					profileObj.put(option.name(), opValue.getIntegerValue());
-				}else if (opValue.getStringValue() != null) {
-					profileObj.put(option.name(), opValue.getStringValue());
+			if (option == ProfileOptionID.PROJECTION) {
+				//support removed in smart8
+				continue;
+			}else if (option == ProfileOptionID.CA_PROJECTION_UUID) {
+				Projection prj = profile.getCaProjection(session, true);
+				
+				String wkt = prj.getDefinition();
+				profileObj.put(option.getMobleJsonKey(), wkt);
+			
+			} else {
+			
+				if (opValue == null) {
+					Object defaultValue = profile.getDefaultValue(option);
+					profileObj.put(option.name(), defaultValue);
+				}else {
+					if (isBoolean(option)) {
+						profileObj.put(option.getMobleJsonKey(), opValue.getBooleanValue());
+					}else if (isColor(option) && opValue.getIntegerValue() != null) {
+						Color c = new Color(opValue.getIntegerValue());
+						profileObj.put(option.getMobleJsonKey(), Integer.toHexString(c.getRGB()).substring(2));
+					}else if (opValue.getDoubleValue() != null) {
+						profileObj.put(option.getMobleJsonKey(), opValue.getDoubleValue());
+					}else if (opValue.getIntegerValue() != null) {
+						profileObj.put(option.getMobleJsonKey(), opValue.getIntegerValue());
+					}else if (opValue.getStringValue() != null) {
+						profileObj.put(option.getMobleJsonKey(), opValue.getStringValue());
+					}
 				}
 			}
 		}
@@ -401,7 +417,7 @@ public class CtJsonExportUtils {
 		case APP_NAME:
 		case EXIT_PIN:
 		case MAX_PHOTO_COUNT:
-		case PROJECTION:
+		case CA_PROJECTION_UUID:
 		case SIGHTING_FIX_COUNT:
 		case SKIP_BUTTON_TIMEOUT:
 		case WAYPOINT_TIMER_TYPE:

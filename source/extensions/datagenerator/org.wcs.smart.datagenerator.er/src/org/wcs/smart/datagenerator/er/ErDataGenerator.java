@@ -229,6 +229,7 @@ public class ErDataGenerator implements IDataEngine{
 		survey.setSurveyDesign(design);
 		survey.setId(getSurveyId());
 		survey.setMissions(new ArrayList<>());
+		survey.initCreatedDate();
 		
 		session.persist(survey);
 		

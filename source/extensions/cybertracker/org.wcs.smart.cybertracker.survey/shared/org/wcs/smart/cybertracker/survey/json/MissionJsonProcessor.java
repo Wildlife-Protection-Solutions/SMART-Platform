@@ -57,6 +57,7 @@ import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
 import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.survey.model.SurveyMetadata;
+import org.wcs.smart.er.MissionIdGenerator;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -146,6 +147,13 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 	public void cleanUp() {
 		cleanUpFiles(tempFiles);
 	}
+	
+	/**
+	 * Should throw exception if processing should stop 
+	 * 
+	 * @throws UserCancelledException
+	 */
+	protected abstract void assignMissions(Session session) throws UserCancelledException;
 	
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session, Locale locale, IProgressMonitor monitor) throws Exception{
@@ -530,8 +538,9 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 										.resolve(wa.getFilename()));
 							}
 						}
-//						session.save(newGroup);
-						
+
+						if (link.getMission().getUuid() != null) session.persist(newGroup);
+
 						//update patrol links
 						CtMissionWpLink wplink = new CtMissionWpLink();
 						wplink.setLink(link);
@@ -597,6 +606,11 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 			//these features should not be processed.
 			//see ticket: #1877
 			return processedFeatures;
+		}
+		
+		if (!newMissionLinks.isEmpty()){
+			//assign missions to surveys
+			assignMissions(session);			
 		}
 		
 		//try processing track features
@@ -781,6 +795,9 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		mission.setStartDate(dStartDate);
 		mission.setComment(ct.getComment());
 		
+		String missionId = MissionIdGenerator.INSTANCE.generateMissionId(mission, session);
+		mission.setId(missionId);
+		
 		for (Employee member: ct.getMembers()){
 			MissionMember item = new MissionMember();
 			item.setMember(member);
@@ -873,6 +890,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		link.setWaypointLinks(new ArrayList<>());
 		
 		newMissionLinks.put(ctUuid, link);
+		
 		return link;
 	}
 		
@@ -903,9 +921,9 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 				}
 			}
 			if (wp.getUuid() == null) session.persist(wp);
-			//if (session.get(pw.getClass(), pw.getId()) == null) session.persist(pw);;
-			session.persist(pw);
 			if (addToD.getMission().getUuid() == null) session.persist(addToD.getMission());
+			session.persist(pw);
+			session.flush();
 		}
 	}
 

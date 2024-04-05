@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.dataentry.internal;
+package org.wcs.smart.dataentry.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +31,6 @@ import java.util.StringJoiner;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
 
 /**
