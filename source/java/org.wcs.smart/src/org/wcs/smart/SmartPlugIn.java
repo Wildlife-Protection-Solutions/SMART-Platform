@@ -53,6 +53,7 @@ import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSmartServiceLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.upgrade.StartUpDatabaseUpgrader;
+import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -405,14 +406,42 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		String currentVersion = Messages.SmartPlugIn_UnknownVersion;
 		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
 		
+		Integer permissioncnt = -1;
+		
 		try(Session s = HibernateManager.openSession()){
 			currentVersion = HibernateManager.getPlugInVersion(SmartPlugIn.PLUGIN_ID, s);
+			
+			//see comment below
+			String query = "select count(*) from sys.systableperms where tableid in (select tableid from sys.systables where tablename = 'INCIDENT_WAYPOINT')"; //$NON-NLS-1$
+			permissioncnt = (Integer) s.createNativeQuery(query).uniqueResult();
 		}catch (Exception ex){
 			//we cannot determine db version so we don't let the user login
 			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
 		}
 		
 		if (currentVersion.equals(smartDbVersion) ){
+			// hack to fix this bug without also have to release a new Connect version
+			//this should be removed from SMART8 and added to SMART8 upgrade script
+			//https://app.assembla.com/spaces/smart-cs/tickets/3711
+			if (currentVersion.equals(UpgradeEngine.UpgradeFromVersion.V757.toVersion)) {
+				//need to check permissions and upgrade them here
+				if (permissioncnt == 0) {
+					SmartPlugIn.log("upgrading incident waypoint table permissions", null); //$NON-NLS-1$
+					HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+					try {
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							s.createNativeQuery("GRANT ALL PRIVILEGES ON smart.incident_waypoint TO admin,analyst,manager,data_entry").executeUpdate(); //$NON-NLS-1$
+							s.getTransaction().commit();
+						}
+					}catch (Exception ex) {
+						throw ex;
+					}finally {
+						HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
+					}
+				}
+				
+			}
 			isokay = true;
 		}else {
 			//attempt an upgrade and try again

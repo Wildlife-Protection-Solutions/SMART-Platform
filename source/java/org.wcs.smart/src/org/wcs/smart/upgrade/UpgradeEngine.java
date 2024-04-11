@@ -105,6 +105,8 @@ public class UpgradeEngine {
 		V753("7.5.1", "7.5.3", Upgrader751To753.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V754("7.5.3", "7.5.4", Upgrader753To754.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V757("7.5.4", "7.5.7", Upgrader754To757.class); //$NON-NLS-1$ //$NON-NLS-2$
+		//any update scripts added after 7.54->7.5.7 need to include this statement:
+		//"GRANT ALL PRIVILEGES ON smart.incident_waypoint TO admin,analyst,manager,data_entry"
 		
 		public String fromVersion;
 		public String toVersion;
@@ -160,6 +162,7 @@ public class UpgradeEngine {
 		upgradersRun.clear();
 		
 		boolean hasChangeTracking = true;
+		
 		/* --- validate the core version; upgrade as required --- */
 		if (!expectedDbVersion.equals(newDbVersion)) {
 			

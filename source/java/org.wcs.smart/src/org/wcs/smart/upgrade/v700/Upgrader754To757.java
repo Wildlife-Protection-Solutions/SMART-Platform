@@ -104,6 +104,9 @@ public class Upgrader754To757 implements IDatabaseUpgrader {
 			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_wpuuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
 			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_patroluuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
 			
+			"GRANT ALL PRIVILEGES ON smart.incident_waypoint TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.incident_waypoint TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+			
 			//link configurable model to patrol
 			"alter table smart.waypoint add column source_cm_uuid char(16) for bit data", //$NON-NLS-1$
 			//drop and re-create indexes are required
