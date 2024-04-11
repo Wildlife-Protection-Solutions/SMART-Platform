@@ -282,6 +282,8 @@ public class Messages extends NLS {
 
 	public static String ObservationLabelProvider_SignatureTypeNotFound;
 
+	public static String ObservationLabelProvider_TagNotFound;
+
 	public static String ObservationLabelProvider_typemissing;
 
 	public static String ObservationOptionsPropertyPage_ComputationDetails;
@@ -308,6 +310,8 @@ public class Messages extends NLS {
 	public static String ObservationOptionsPropertyPage_ObserverLabel;
 
 	public static String ObservationOptionsPropertyPage_ObserverOp;
+
+	public static String ObservationOptionsPropertyPage_OptionsTabName;
 
 	public static String ObservationOptionsPropertyPage_SignatureHeader;
 

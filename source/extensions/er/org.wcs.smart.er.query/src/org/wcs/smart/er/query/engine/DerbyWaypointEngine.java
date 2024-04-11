@@ -46,6 +46,7 @@ import org.wcs.smart.er.query.model.SurveyWaypointAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointResultItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -417,6 +418,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine implements Waypo
 		} catch (Exception e) {
 			ObservationQueryPlugIn.log(e.getMessage(), e);
 		}
+		((ITaggedAttachment)a).getTagsAsString();
+
 		item.setAttachment(a);
 		return item;
 	}

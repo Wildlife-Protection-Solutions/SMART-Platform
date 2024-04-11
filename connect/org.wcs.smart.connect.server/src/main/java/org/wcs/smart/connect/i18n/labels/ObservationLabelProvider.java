@@ -66,6 +66,7 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case INVALID_TREE_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidtreeitem", l); //$NON-NLS-1$
 		case INVALID_NUMBER_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidnumeric", l); //$NON-NLS-1$
 		case SIGNATURE_TYPE_NOT_FOUND: return Messages.getString("ObservationLabelProvider.SignatureTypeNotFound", l); //$NON-NLS-1$
+		case ATTACHMENT_TAG_NOT_FOUND: return Messages.getString("ObservationLabelProvider.TagNotFound", l); //$NON-NLS-1$
 		case INVALID_CM_UUID: return Messages.getString("ObservationLabelProvider.InvalidCmUuid", l); //$NON-NLS-1$
 		case CM_MISSING: return Messages.getString("ObservationLabelProvider.CmNotFound", l);	 //$NON-NLS-1$
 		case INVALID_GEOMETRY_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidGeoJson", l);  //$NON-NLS-1$

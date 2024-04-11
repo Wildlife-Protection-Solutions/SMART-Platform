@@ -160,6 +160,7 @@ public class DataApi extends HttpServlet{
 				metadata.patrolLegMetadata = lMetadata;
 				metadata.waypointMetadata = wpMetadata;
 				metadata.signatureMetadata = PatrolAttributeMetadata.getSignatureMetadata(s, ca);
+				metadata.attachmentTagsMetadata = PatrolAttributeMetadata.getAttachmentTagsMetadata(s, ca);
 				return metadata;
 
 			}finally {
@@ -320,6 +321,7 @@ public class DataApi extends HttpServlet{
 		List<PatrolAttributeMetadata> patrolLegMetadata;
 		List<PatrolAttributeMetadata> waypointMetadata;
 		PatrolAttributeMetadata signatureMetadata;
+		PatrolAttributeMetadata attachmentTagsMetadata;
 		
 		public List<PatrolAttributeMetadata> getPatrolMetadata(){
 			return patrolMetadata;
@@ -335,6 +337,10 @@ public class DataApi extends HttpServlet{
 		
 		public PatrolAttributeMetadata getSignatureTypes() {
 			return this.signatureMetadata;
+		}
+		
+		public PatrolAttributeMetadata getAttachmentTags() {
+			return this.attachmentTagsMetadata;
 		}
 	}
 	

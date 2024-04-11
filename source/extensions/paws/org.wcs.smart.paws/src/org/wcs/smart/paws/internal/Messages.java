@@ -4,10 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.paws.internal.messages"; //$NON-NLS-1$
-	
-	public static String AddPawsJob_InstallError;
 
-	public static String AddPawsJob_JobName;
 
 	public static String ClassificationComposite_CategoryNotFound;
 
@@ -311,8 +308,6 @@ public class Messages extends NLS {
 	public static String QueryDialog_Title;
 
 	public static String RemovePawsJob_Error;
-
-	public static String RemovePawsJob_TaskName;
 
 	public static String RunDialog_DateErrors;
 

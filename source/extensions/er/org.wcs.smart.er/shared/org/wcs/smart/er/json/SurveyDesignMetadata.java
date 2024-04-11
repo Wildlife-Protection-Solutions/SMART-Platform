@@ -1,9 +1,31 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.json;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.SignatureType;
@@ -35,6 +57,7 @@ public class SurveyDesignMetadata {
 	private List<ListOption> samplingUnits;
 	private List<ListOption> surveys;
 	private List<ListOption> signatures;
+	private List<ListOption> tags;
 	
 	public SurveyDesignMetadata(String id) {
 		this.id = id;
@@ -82,7 +105,9 @@ public class SurveyDesignMetadata {
 	public List<ListOption> getSignatureTypes(){
 		return this.signatures;
 	}
-	
+	public List<ListOption> getAttachmentTags(){
+		return this.tags;
+	}
 	public String getConfigurableModel() {
 		return this.configurableModel;
 	}
@@ -156,6 +181,7 @@ public class SurveyDesignMetadata {
 			}
 			
 			md.signatures = getSignatureMetadata(session, ca);
+			md.tags = getAttachmentTagsMetadata(session, ca);
 		}
 		
 		return items;
@@ -176,6 +202,30 @@ public class SurveyDesignMetadata {
 		if (types.isEmpty()) return null;
 		List<ListOption> items = new ArrayList<>();
 		for (SignatureType type : types) {
+			ListOption op = new ListOption(type.getKeyId());
+			for (Label l : type.getNames()) {
+				op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
+			}
+			items.add(op);
+		}
+		return items;
+	}
+	
+	/**
+	 * will return null if no attachment tags are configured for Conservation Area
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public static List<ListOption> getAttachmentTagsMetadata(Session session, ConservationArea ca) {
+
+		List<ListOption> items = new ArrayList<>();
+		List<AttachmentTag> tags = QueryFactory.buildQuery(session, AttachmentTag.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		if (tags.isEmpty()) return null;
+		
+		for (AttachmentTag type : tags) {
 			ListOption op = new ListOption(type.getKeyId());
 			for (Label l : type.getNames()) {
 				op.addName(new Name(l.getValue(), l.getLanguage().getCode()));

@@ -26,10 +26,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
@@ -47,7 +57,13 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.AttachmentTagManager;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
@@ -56,6 +72,8 @@ import org.wcs.smart.query.common.ui.image.AttachmentTable;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
+import org.wcs.smart.ui.CheckBoxDropDown;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Results page for displaying a list of observations represented
@@ -90,6 +108,8 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 	private Label iconSizeLabel;
 	
 	private QueryResultsEditor editor;
+	
+	private CheckBoxDropDown cmbTagFilter = null;
 	
 	public QueryResultsImagePage(QueryResultsEditor parent) {
 		super();
@@ -198,6 +218,8 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 		btnDown.addListener(SWT.MouseDown, e->mnuIconSize.setVisible(true));
 		iconSizeLabel.addListener(SWT.MouseDown, e->mnuIconSize.setVisible(true));
 		
+		createTagFilter(outer, toolkit);
+		
 		//image results table
 		imageTable = new AttachmentTable(outer, toolkit, this);
 		imageTable.setThumbnailSize(this.iconSize.size);
@@ -207,6 +229,91 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 			lblNumSelected.setText(MessageFormat.format(Messages.QueryResultsImagePage_selectedLabel, imageTable.getSelection().size()));
 			lblNumSelected.getParent().getParent().layout(true, true);
 		});
+	}
+	
+	private void createTagFilter(Composite outer, FormToolkit toolkit) {
+		//section for create tag filter - only populated if some attachment tags
+		//exist for the CA
+		Composite header = toolkit.createComposite(outer, SWT.BORDER);
+		
+		Job loadTags = new Job("load tags") { //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<AttachmentTag> allTags = new ArrayList<>();
+				
+				try(Session session = HibernateManager.openSession()){
+					allTags.addAll(AttachmentTagManager.INSTANCE.getTags(session,SmartDB.getCurrentConservationArea()));
+					Collections.sort(allTags);
+				}
+				
+				AttachmentTag none = new AttachmentTag();
+				none.setKeyId(null);
+				none.setName(Messages.QueryResultsImagePage_NoTag);
+				allTags.add(0,none);
+				
+				outer.getDisplay().asyncExec(()->{
+					if(allTags.isEmpty()) header.dispose();
+					
+					header.setLayout(new GridLayout(5, false));
+					header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					
+					Label l = new Label(header, SWT.NONE);
+					l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+					l.setToolTipText(Messages.QueryResultsImagePage_SearchWarnTooltip);
+					
+					l = new Label(header, SWT.NONE);
+					l.setText(Messages.QueryResultsImagePage_FindByTag);
+					l.setToolTipText(Messages.QueryResultsImagePage_SearchWarnTooltip);
+					
+					Button btnNo = new Button(header, SWT.RADIO);
+					btnNo.setText(Messages.QueryResultsImagePage_No);
+					btnNo.setSelection(true);
+					
+					Button btnYes = new Button(header, SWT.RADIO);
+					btnYes.setText(Messages.QueryResultsImagePage_Yes);
+					btnYes.addListener(SWT.Selection, e->{
+						if (btnYes.getSelection()) {
+							cmbTagFilter.setEnabled(true);
+							updateTagFilter(cmbTagFilter.getCheckObjects());
+							if (cmbTagFilter.getCheckObjects().isEmpty()) cmbTagFilter.showDropDown();
+						}else {
+							cmbTagFilter.setEnabled(false);
+							updateTagFilter(null);								
+						}
+					});
+					
+					cmbTagFilter = new CheckBoxDropDown(header);
+					cmbTagFilter.setContentProvider(ArrayContentProvider.getInstance());
+					cmbTagFilter.setLabelProvider(new NamedItemLabelProvider());
+					cmbTagFilter.setInput(allTags);
+					cmbTagFilter.setEnabled(false);
+					
+					cmbTagFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					cmbTagFilter.addSelectionChangedListener(e->{
+						updateTagFilter(cmbTagFilter.getCheckObjects());
+					});
+					
+				});
+				
+				return Status.OK_STATUS;
+			}
+			
+		};
+		loadTags.schedule();
+	}
+	
+	private void updateTagFilter(Collection<?> tags) {
+		if (tags == null) {
+			imageTable.setImageTagFilter(null);
+			return;
+		}
+		
+		Set<String> keys = new HashSet<>();
+		for (Object x : tags) {
+			keys.add(((AttachmentTag)x).getKeyId());
+		}
+		imageTable.setImageTagFilter(keys);
 	}
 	
 	public void setResult(IPagedImageResultSet results) {

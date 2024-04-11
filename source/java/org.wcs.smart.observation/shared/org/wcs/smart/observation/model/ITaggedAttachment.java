@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.observation.model;
 
+import java.text.Collator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Interface for attachments that can have a tags type
@@ -43,4 +46,22 @@ public interface ITaggedAttachment {
 	 * @param tags
 	 */
 	public void setAttachmentTags(List<AttachmentTagLink> tags);
+	
+	/**
+	 * 
+	 * @return sorted comma delimited list of tags associated with the attachment
+	 */
+	public default String getTagsAsString() {
+		if (getAttachmentTags() == null) return "";  //$NON-NLS-1$
+		
+		List<String> tags = new ArrayList<>();
+		
+		getAttachmentTags().forEach(e->tags.add(e.getTag().getName()));
+		tags.sort((a,b)->Collator.getInstance().compare(a, b));
+		
+		StringJoiner sj = new StringJoiner(", "); //$NON-NLS-1$
+		tags.forEach(t->sj.add(t));
+		
+		return sj.toString();
+	}
 }

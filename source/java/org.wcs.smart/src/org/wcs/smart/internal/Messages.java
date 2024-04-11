@@ -1428,6 +1428,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_areakeyname;
 	public static String SmartLabelProvider_Area;
 	public static String SmartLabelProvider_AreasTableName;
+	public static String SmartLabelProvider_AttachmentTagsLabel;
 	public static String SmartLabelProvider_AttributeNotFound;
 	public static String SmartLabelProvider_AttributeTypeNotFound;
 	public static String SmartLabelProvider_BetweenOperator;

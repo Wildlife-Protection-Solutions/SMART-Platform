@@ -22,7 +22,9 @@
 package org.wcs.smart.query.common.ui.image;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,13 +40,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.wcs.smart.observation.model.AttachmentTagLink;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.SmartUtils;
 
@@ -71,6 +77,8 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	private IPagedImageResultSet resultSet;
 	private int currentIndex = 0;
+	private int imageCount = 0;
+	
 	private int pageSize = 5;
 	private int thumbnailSize = 150;
 	
@@ -78,19 +86,67 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	private int numColumns = 1;
 	
+	private Set<String> imageTagFilter = null;
+	
+	private Composite searchLabel;
+	
 	private Job loadImagesJob = new Job("loading images") { //$NON-NLS-1$
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-					while(true){
-				if (resultSet == null) {
-					return Status.CANCEL_STATUS;
-				}
+			while(true){
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				
+				if (resultSet == null)  return Status.CANCEL_STATUS;
+				
 				monitor.setTaskName(currentIndex + "/" + resultSet.getImageCount()); //$NON-NLS-1$
 				if (currentIndex > resultSet.getImageCount()) {
 					break;
 				}
+				
 				List<IAttachmentResultItem> items = resultSet.getImageData(currentIndex, pageSize);
+				
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				
+				if (imageTagFilter != null) {
+					
+					if (searchLabel == null) {
+						Display.getDefault().asyncExec(()->{
+							if (searchLabel != null && !searchLabel.isDisposed()) return;
+							searchLabel = new Composite(AttachmentTable.this, SWT.BORDER);
+							searchLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							searchLabel.setLayout(new GridLayout());
+							searchLabel.setBackground(searchLabel.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+							searchLabel.moveAbove(AttachmentTable.this.getChildren()[0]);
+							
+							Label temp = new Label(searchLabel, SWT.NONE);
+							temp.setBackground(searchLabel.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+							temp.setText(Messages.AttachmentTable_SearchingText);
+							temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							
+						});
+					}
+					
+					for (Iterator<IAttachmentResultItem> iterator = items.iterator(); iterator.hasNext();) {
+						IAttachmentResultItem iAttachmentResultItem = (IAttachmentResultItem) iterator.next();
+						
+						if (iAttachmentResultItem.getAttachment() instanceof ITaggedAttachment a) {
+							boolean keep = imageTagFilter.contains(null);
+							if (a.getAttachmentTags() != null && !a.getAttachmentTags().isEmpty()) {
+								for(AttachmentTagLink link : a.getAttachmentTags()) {
+									if (imageTagFilter.contains(link.getTag().getKeyId())) {
+										keep = true;
+										break;
+									}
+								}
+							}
+							if (!keep) {
+								iterator.remove();
+							}
+						}
+					}
+				}
 				currentIndex += pageSize;
+				imageCount += items.size();
 				//create spaces for remaining images
 
 				final boolean[] needmore = new boolean[] {false};
@@ -102,15 +158,23 @@ public class AttachmentTable extends Composite implements Listener {
 					}
 					thumb.addFiles(items);
 					thumb.createThumbs();
+					
 					getParent().layout(true, true);
 					layoutAttachments();
 					needmore[0] = needsToLoad();
 				});
 				
-				if (!needmore[0]) break;	
+				if (!needmore[0]) {
+					break;	
+				}
 			}
 			
 			Display.getDefault().syncExec(()->{
+				if (currentIndex >= resultSet.getImageCount()) setFinalSize();
+				if (searchLabel != null && !searchLabel.isDisposed()) {
+					searchLabel.dispose();
+					searchLabel = null;
+				}
 				layoutAttachments();
 				
 			});	
@@ -176,6 +240,16 @@ public class AttachmentTable extends Composite implements Listener {
 		createMenu();
 	}
 
+	/**
+	 * Sets the filter for the image tags. Use null to clear the filter
+	 * @param filter
+	 */
+	public void setImageTagFilter(Set<String> filter) {
+		this.imageTagFilter = filter;
+		loadImagesJob.cancel();
+		setResultSet(this.resultSet);		
+	}
+	
 	private void createMenu() {
 		
 	}
@@ -192,6 +266,7 @@ public class AttachmentTable extends Composite implements Listener {
 	public void setResultSet(IPagedImageResultSet resultSet) {
 		this.resultSet = resultSet;
 		currentIndex = 0;
+		imageCount = 0;
 		Display.getDefault().syncExec(()->{
 			if (thumb != null) {
 				thumb.dispose();
@@ -202,9 +277,6 @@ public class AttachmentTable extends Composite implements Listener {
 			toolkit.adapt(thumb);
 			
 			infoSection.setOrigin(0, 0);
-//			Point thumSize = thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-//			thumSize.x = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x - 5;
-//			thumb.setSize(thumSize);
 			setSize();
 			layoutAttachments();
 		});
@@ -242,6 +314,39 @@ public class AttachmentTable extends Composite implements Listener {
 		boolean more = infoSection.getSize().y + infoSection.getVerticalBar().getSelection() >= thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		boolean more2 = infoSection.getSize().y + infoSection.getVerticalBar().getSelection() >= thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT).y - thumbnailSize && spaces != 0;
 		return more || more2;
+	}
+	
+	private void setFinalSize() {
+		if (searchLabel != null && !searchLabel.isDisposed()) {
+			searchLabel.dispose();
+			searchLabel = null;
+			layout();
+		}
+		int width = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x;	
+		int cols = (int)Math.floor(width / (thumbnailSize + 5 ));  //5 margin between images
+		if (cols < 1) cols = 1;
+		numColumns = cols;
+		thumb.updateLayout(cols);
+		thumb.layout(true);
+		
+		if (resultSet != null) {
+			int rows = (int)Math.ceil(imageCount / (double)cols);
+			int y = (thumbnailSize + 5)* (rows);
+			int heightRequired = y;
+			
+			if (spacer != null) {
+				spacer.dispose();
+				spacer = null;
+			}
+			
+			if (heightRequired > thumb.getSize().y) {
+				spacer = new Composite(infoSection.getBody(), SWT.BORDER);
+				spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				spacer.setVisible(true);
+				((GridData)spacer.getLayoutData()).heightHint = heightRequired - thumb.getSize().y;
+			}
+			infoSection.reflow(true);
+		}
 	}
 	
 	private void setSize() {

@@ -48,9 +48,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 /**
  * Drop down check box viewer for selecting multiple items from a list
@@ -60,7 +60,7 @@ import org.eclipse.swt.widgets.Text;
  */
 public class CheckBoxDropDown extends Composite implements Listener {
 
-	private Text txtInfo;
+	private Label txtInfo;
 	private Button btnDown;
 	
 	private Color borderColor;
@@ -77,6 +77,9 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	
 	private List<ISelectionChangedListener> listeners;
 	protected boolean checkChanged = false;	//if checked items changes
+	
+
+	private long lastDispose = 0;
 	
 	public CheckBoxDropDown(Composite parent) {
 		super(parent, SWT.NONE);
@@ -126,11 +129,15 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		((GridLayout)getLayout()).marginHeight = 3;
 	
 	
-		txtInfo = new Text(this, SWT.NONE);
-		txtInfo.setEditable(false);
+		txtInfo = new Label(this, SWT.NONE);
+//		txtInfo.setEditable(false);
 		txtInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtInfo.setCursor(getShell().getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
-		txtInfo.addListener(SWT.MouseDown, event->dropDown(true));
+		txtInfo.addListener(SWT.MouseDown, event->{
+			if (System.currentTimeMillis() - lastDispose < 50) return;
+			dropDown(!(popup != null && popup.isVisible() ) );			
+		}
+		);
 		txtInfo.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 
@@ -155,6 +162,9 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	
 	@Override
 	public void setEnabled(boolean enabled){
+		cancelEdit();
+		dropDown(false);
+		
 		super.setEnabled(enabled);
 		txtInfo.setEnabled(enabled);
 		btnDown.setEnabled(enabled);
@@ -252,6 +262,10 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		
 	}
 	
+	public void showDropDown() {
+		dropDown(true);
+	}
+	
 	/**
 	 * If overwritten Must populate the table value
 	 * @return
@@ -267,7 +281,10 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    		e.doit = false;
 	    	}
 		});
-		popup.addListener(SWT.Deactivate, (event)->dropDown(false));
+		popup.addListener(SWT.Deactivate, (event)->{
+			dropDown(false); 
+			});
+		
 		popup.addListener(SWT.Paint, event->{
 			Rectangle bounds = popup.getBounds();
             event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
@@ -307,7 +324,6 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	
 	private void createPopupInternal(){
 		this.popup = createPopup(); 
-		popup.addListener(SWT.Deactivate, (event)->dropDown(false));
 		popup.addListener(SWT.Paint, event->{
 			Rectangle bounds = popup.getBounds();
             event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
@@ -342,6 +358,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		
 	    // closing the dropDown
 	    if (!drop) {
+	    	lastDispose = System.currentTimeMillis();
 	    	//update value
 	    	if (checkChanged){
 	    		Object[] selected = getCheckedElements();

@@ -35,12 +35,14 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -479,6 +481,8 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		} catch (Exception e) {
 			ObservationQueryPlugIn.log(e.getMessage(), e);
 		}
+		((ITaggedAttachment)a).getTagsAsString();
+		
 		item.setAttachment(a);
 		return item;
 	}

@@ -52,6 +52,7 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyObservationResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -557,6 +558,8 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine  implements O
 		} catch (Exception e) {
 			ObservationQueryPlugIn.log(e.getMessage(), e);
 		}
+		((ITaggedAttachment)a).getTagsAsString();
+
 		item.setAttachment(a);
 		return item;
 	}

@@ -4,10 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.incident.internal.messages"; //$NON-NLS-1$
-	public static String AddCtIncidentJob_AddJobName;
-	public static String AddCtIncidentJob_ErrorMessage;
-	public static String AddCtIncidentJob_ErrorTitle;
-	public static String AddCtIncidentJob_Progress;
+	
 	public static String CtIncidentDatabaseUpgrader_Progress;
 	public static String CtIncidentPackageConfigurator_ConfigLabel;
 	public static String CtIncidentPackageConfigurator_ConfigurableModelLabel;
@@ -38,11 +35,9 @@ public class Messages extends NLS {
 	public static String IncidentCyberTrackerLabelProvider_CreatedMessage;
 	public static String IncidentCyberTrackerLabelProvider_ModifiedMessage;
 	public static String IncidentJsonProcessor_CanceledMsg;
-	public static String IncidentJsonProcessor_CreatedLabel;
-	public static String IncidentJsonProcessor_ModifiedLabel;
+	
 	public static String IncidentJsonProcessor_NotificationError;
 	public static String IncidentJsonProcessor_NotificationError2;
-	public static String IncidentJsonProcessor_ParseError;
 	public static String IncidentJsonProcessor_WaringsTitle;
 	public static String IncidentJsonProcessor_WarningsMessage;
 	public static String IncidentPackageContribution_CmModelLabel;
@@ -62,7 +57,7 @@ public class Messages extends NLS {
 	public static String IncidentPackageManager_Progress;
 	public static String IncidentPackageUiContribution_cmRequired;
 	public static String IncidentPackageUiContribution_CmRequired;
-	public static String RemoveCtIncidentJob_UninstallJobName;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

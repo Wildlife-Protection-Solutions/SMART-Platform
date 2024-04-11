@@ -4,8 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.r.internal.messages"; //$NON-NLS-1$
-	public static String AddRJob_Error;
-	public static String AddRJob_JobName;
 	public static String HeaderComposite_NameToLongMessage;
 	public static String HeaderComposite_NameToLongTitle;
 	public static String HeaderComposite_QueryType;
@@ -17,7 +15,6 @@ public class Messages extends NLS {
 	public static String QueryListComposite_NameLabel;
 	public static String RDatabaseUpgrader_UpgradeTaskName;
 	public static String RemoveRJob_Error;
-	public static String RemoveRJob_JobName;
 	public static String ResultsPage_cleartooltip;
 	public static String ResultsPage_OutputLabel;
 	public static String ResultsPage_rereuntooltip;

@@ -56,6 +56,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartLabelProvider implements ICoreLabelProvider {
 
+	public static final String ATTACHMENT_TAGS = Messages.SmartLabelProvider_AttachmentTagsLabel;
+	
 	public static final String BOOLEAN_TRUE_LABEL = Messages.Attribute_BooleanAttribute_True_Label;
 	public static final String BOOLEAN_FALSE_LABEL = Messages.Attribute_BooleanAttribute_False_Label;
 	public static final String AGENCY_NAME = Messages.Agency_AgencyName;

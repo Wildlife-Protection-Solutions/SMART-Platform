@@ -39,6 +39,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -140,14 +142,191 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_SignatureHeader);
-		Composite csig = new Composite(container, SWT.NONE);
+		CTabFolder tabs = new CTabFolder(parent, SWT.NONE);
+		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite signaturesPanel = createSignaturesTab(tabs);
+		Composite tagsPanel = createAttachmentTagsSection(tabs);
+		Composite obsOptionsPanel =  createObservationOptions(tabs);
+		Composite editOptionsPanel =  createEditOptions(tabs);
+		
+		CTabItem signatureTab = new CTabItem(tabs, SWT.NONE);
+		signatureTab.setText(Messages.ObservationOptionsPropertyPage_SignatureHeader);
+		signatureTab.setControl(signaturesPanel);
+		
+		CTabItem tagsTab = new CTabItem(tabs, SWT.NONE);
+		tagsTab.setText(Messages.ObservationOptionsPropertyPage_TagsSection);
+		tagsTab.setControl(tagsPanel);
+		
+		CTabItem obsOptionsTab = new CTabItem(tabs, SWT.NONE);
+		obsOptionsTab.setText(Messages.ObservationOptionsPropertyPage_OptionsTabName);
+		obsOptionsTab.setControl(obsOptionsPanel);
+		
+		CTabItem editOptionsTab = new CTabItem(tabs, SWT.NONE);
+		editOptionsTab.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
+		editOptionsTab.setControl(editOptionsPanel);
+		
+		tabs.setSelection(0);
+		
+		//init values
+		if (patrolOption != null){
+			btnTrackDistanceDirection.setSelection(patrolOption.getTrackDistanceDirection());
+			btnTrackObserver.setSelection(patrolOption.getTrackObserver());
+			
+			if (patrolOption.getEditTime() != null){
+				txtEditTime.setText(patrolOption.getEditTime().toString());
+			}else{
+				txtEditTime.setText("-1"); //$NON-NLS-1$
+			}
+		}
+		
+		setTitle(Messages.PatrolOptionsPropertyPage_PageName);
+		setMessage(Messages.PatrolOptionsPropertyPage_DialogMessage);
+		setChangesMade(false);
+		return tabs;
+	}
+	
+	private Composite createObservationOptions(Composite parent) {
+		Composite outer = new Composite(parent, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		
+		
+		SmartUiUtils.createHeaderLabel(outer, Messages.ObservationOptionsPropertyPage_DistanceBearingOpLabel);
+		
+		Composite container = new Composite(outer, SWT.NONE);
+		container.setLayout(new GridLayout(2, false));
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		Link lbl1 = new Link(container, SWT.WRAP);
+		lbl1.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel1);
+		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl1.getLayoutData()).widthHint = 350;
+		lbl1.addListener(SWT.Selection, e->{
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(Messages.ObservationOptionsPropertyPage_ComputationDetails);
+			sb.append("\n\n"); //$NON-NLS-1$
+			sb.append("d = distance (meters)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("b = bearing (degrees)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("RADIUS = " + GeometryUtils.EARTH_RADIUS); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("dR = d / RADIUS"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rb = toRadians(b)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("ry = toRadians(y)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rx = toRadians(x)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rprjy = asin( sin(ry) * cos(dR) + cos(ry) * sin(dR) * cos(rb) ) "); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rprjx = rx + atan2( Math.sin(rb) * sin(dR) * cos(ry), cos(dR) - sin(ry) * sin(rprjy) )"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("prj_x = toDegrees(rprjx)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("prj_y = toDegrees(rprjy)"); //$NON-NLS-1$
+			sb.append("\n\n"); //$NON-NLS-1$
+			
+			MessageDialog md = new MessageDialog(getShell(), Messages.ObservationOptionsPropertyPage_DistanceBearingTitle, null, null, MessageDialog.NONE, 0, IDialogConstants.OK_LABEL) {
+				@Override
+			    protected Control createCustomArea(Composite parent) {
+					parent.getParent().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+					parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+					
+			    	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.BORDER);
+			    	txtWarnings.setEditable(false);
+			    	txtWarnings.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+			    	GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			    	txtWarnings.setLayoutData(gd);
+			    	
+			    	txtWarnings.setText(sb.toString());
+			        return txtWarnings;
+			    }
+			};
+			md.open();
+		});
+		
+		btnTrackDistanceDirection = new Button(container, SWT.CHECK | SWT.WRAP);
+		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnTrackDistanceDirection.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+		});
+		btnTrackDistanceDirection.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
+		
+		SmartUiUtils.createHeaderLabel(outer, Messages.ObservationOptionsPropertyPage_ObserverOp);
+
+		Composite g = new Composite(outer, SWT.NONE);
+		g.setLayout(new GridLayout(2, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lbl = new Label(g, SWT.WRAP);
+		lbl.setText(Messages.ObservationOptionsPropertyPage_ObserverDescription);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 350;
+		
+		btnTrackObserver = new Button(g, SWT.CHECK);
+		btnTrackObserver.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnTrackObserver.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+		});
+		btnTrackObserver.setText(Messages.ObservationOptionsPropertyPage_ObserverLabel);
+		
+		//lbl = new Label(container, SWT.NONE);  //spacer
+		return outer;
+	}
+	
+	private Composite createEditOptions(Composite parent) {
+		
+		Composite g = new Composite(parent, SWT.NONE);
+		g.setLayout(new GridLayout(2, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite header = SmartUiUtils.createHeaderLabel(g, Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lbl = new Label(g, SWT.WRAP);
+		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 350;
+		
+		cdEditTime = createDecoration(lbl);
+		cdEditTime.setDescriptionText(errorEditTimeMessage);
+		cdEditTime.hide();
+		
+		txtEditTime = new Text(g, SWT.BORDER);
+		txtEditTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		((GridData)txtEditTime.getLayoutData()).widthHint = 30;
+		txtEditTime.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setChangesMade(true);
+			}
+		});
+		lbl = new Label(g, SWT.NONE);
+		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel);
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
+		return g;
+	}
+
+	private Composite createSignaturesTab(Composite parent) {
+		
+
+		Composite csig = new Composite(parent, SWT.NONE);
 		csig.setLayout(new GridLayout(2, false));
 		csig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite header = SmartUiUtils.createHeaderLabel(csig, Messages.ObservationOptionsPropertyPage_SignatureHeader);
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
 		
 		Label l = new Label(csig, SWT.WRAP);
 		l.setText(Messages.ObservationOptionsPropertyPage_SignatureInfo);
@@ -155,7 +334,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		((GridData)l.getLayoutData()).widthHint = 350;
 		
 		Composite tcomp = new Composite(csig, SWT.NONE);
-		tcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		tcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tcomp.getLayoutData()).heightHint = 100;
 		tcomp.setLayout(new TableColumnLayout());
 		
@@ -229,7 +408,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		
 		tblSignatures.getControl().setMenu(mnu);
 		
-		
+
 		Composite btns = new Composite(csig, SWT.NONE);
 		btns.setLayout(new GridLayout());
 		btns.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -253,10 +432,6 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		btnDelete.addListener(SWT.Selection, e->deleteSignatureType());
 		btnDelete.setEnabled(false);
 		
-		createAttachmentTagsSection(container);
-		
-		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_DistanceBearingOpLabel);
-		
 		tblSignatures.addSelectionChangedListener(e->{
 			boolean v = !tblSignatures.getSelection().isEmpty();
 			miEdit.setEnabled(v);
@@ -265,146 +440,19 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			miDelete.setEnabled(v);
 			btnDelete.setEnabled(v);
 		});
-		Composite g = new Composite(container, SWT.NONE);
-		g.setLayout(new GridLayout(2, false));
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		
-		Link lbl1 = new Link(g, SWT.WRAP);
-		lbl1.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel1);
-		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		((GridData)lbl1.getLayoutData()).widthHint = 350;
-		lbl1.addListener(SWT.Selection, e->{
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append(Messages.ObservationOptionsPropertyPage_ComputationDetails);
-			sb.append("\n\n"); //$NON-NLS-1$
-			sb.append("d = distance (meters)"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("b = bearing (degrees)"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("RADIUS = " + GeometryUtils.EARTH_RADIUS); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("dR = d / RADIUS"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("rb = toRadians(b)"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("ry = toRadians(y)"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("rx = toRadians(x)"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("rprjy = asin( sin(ry) * cos(dR) + cos(ry) * sin(dR) * cos(rb) ) "); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("rprjx = rx + atan2( Math.sin(rb) * sin(dR) * cos(ry), cos(dR) - sin(ry) * sin(rprjy) )"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("prj_x = toDegrees(rprjx)"); //$NON-NLS-1$
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append("prj_y = toDegrees(rprjy)"); //$NON-NLS-1$
-			sb.append("\n\n"); //$NON-NLS-1$
-			
-			MessageDialog md = new MessageDialog(getShell(), Messages.ObservationOptionsPropertyPage_DistanceBearingTitle, null, null, MessageDialog.NONE, 0, IDialogConstants.OK_LABEL) {
-				@Override
-			    protected Control createCustomArea(Composite parent) {
-					parent.getParent().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-					parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-					
-			    	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.BORDER);
-			    	txtWarnings.setEditable(false);
-			    	txtWarnings.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-			    	GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-			    	txtWarnings.setLayoutData(gd);
-			    	
-			    	txtWarnings.setText(sb.toString());
-			        return txtWarnings;
-			    }
-			};
-			md.open();
-		});
-		
-		btnTrackDistanceDirection = new Button(g, SWT.CHECK | SWT.WRAP);
-		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		btnTrackDistanceDirection.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				setChangesMade(true);
-			}
-		});
-		btnTrackDistanceDirection.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
-		
-		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_ObserverOp);
-
-		g = new Composite(container, SWT.NONE);
-		g.setLayout(new GridLayout(2, false));
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Label lbl = new Label(g, SWT.WRAP);
-		lbl.setText(Messages.ObservationOptionsPropertyPage_ObserverDescription);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		((GridData)lbl.getLayoutData()).widthHint = 350;
-		
-		btnTrackObserver = new Button(g, SWT.CHECK);
-		btnTrackObserver.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		btnTrackObserver.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				setChangesMade(true);
-			}
-		});
-		btnTrackObserver.setText(Messages.ObservationOptionsPropertyPage_ObserverLabel);
-		
-		
-		lbl = new Label(container, SWT.NONE);  //spacer
-		
-		SmartUiUtils.createHeaderLabel(container, Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
-		
-		g = new Composite(container, SWT.NONE);
-		g.setLayout(new GridLayout(2, false));
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		lbl = new Label(g, SWT.WRAP);
-		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		((GridData)lbl.getLayoutData()).widthHint = 350;
-		
-		cdEditTime = createDecoration(lbl);
-		cdEditTime.setDescriptionText(errorEditTimeMessage);
-		cdEditTime.hide();
-		
-		txtEditTime = new Text(g, SWT.BORDER);
-		txtEditTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		((GridData)txtEditTime.getLayoutData()).widthHint = 30;
-		txtEditTime.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				setChangesMade(true);
-			}
-		});
-		lbl = new Label(g, SWT.NONE);
-		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-
-		//init values
-		if (patrolOption != null){
-			btnTrackDistanceDirection.setSelection(patrolOption.getTrackDistanceDirection());
-			btnTrackObserver.setSelection(patrolOption.getTrackObserver());
-			
-			if (patrolOption.getEditTime() != null){
-				txtEditTime.setText(patrolOption.getEditTime().toString());
-			}else{
-				txtEditTime.setText("-1"); //$NON-NLS-1$
-			}
-		}
-		
-		setTitle(Messages.PatrolOptionsPropertyPage_PageName);
-		setMessage(Messages.PatrolOptionsPropertyPage_DialogMessage);
-		setChangesMade(false);
-		return container;
+		return csig;
 	}
 
-	private void createAttachmentTagsSection(Composite container) {
-		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_TagsSection);
+	private Composite createAttachmentTagsSection(Composite container) {
 		
 		Composite csig = new Composite(container, SWT.NONE);
 		csig.setLayout(new GridLayout(2, false));
 		csig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite c = SmartUiUtils.createHeaderLabel(csig, Messages.ObservationOptionsPropertyPage_TagsSection);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Label l = new Label(csig, SWT.WRAP);
 		l.setText(Messages.ObservationOptionsPropertyPage_TagsMessage);
@@ -412,7 +460,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		((GridData)l.getLayoutData()).widthHint = 350;
 		
 		Composite tcomp = new Composite(csig, SWT.NONE);
-		tcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		tcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tcomp.getLayoutData()).heightHint = 100;
 		tcomp.setLayout(new TableColumnLayout());
 		
@@ -518,6 +566,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			miDelete.setEnabled(v);
 			btnDelete.setEnabled(v);
 		});
+		
+		return csig;
 	}
 	
 	private void addSignatureType() {

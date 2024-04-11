@@ -31,6 +31,7 @@ import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.UuidUtils;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -67,8 +68,8 @@ public class ObservationAttachment extends ISmartAttachment implements ISignatur
 		super.attachmentFile = null;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="signature_type_uuid", referencedColumnName="uuid")
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name="signature_type_uuid")
 	public SignatureType getSignatureType(){
 		return this.signatureType;
 	}
@@ -76,7 +77,7 @@ public class ObservationAttachment extends ISmartAttachment implements ISignatur
 		this.signatureType = stype;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="obs_attachment_uuid", referencedColumnName="uuid")
 	public List<AttachmentTagLink> getAttachmentTags(){
 		return this.attachmentTags;

@@ -65,6 +65,7 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case INVALID_TREE_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidtreeitem;
 		case INVALID_NUMBER_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidnumbervalue;
 		case SIGNATURE_TYPE_NOT_FOUND: return Messages.ObservationLabelProvider_SignatureTypeNotFound;
+		case ATTACHMENT_TAG_NOT_FOUND: return Messages.ObservationLabelProvider_TagNotFound;
 		case INVALID_CM_UUID: return Messages.ObservationLabelProvider_InvalidCmUuid;
 		case CM_MISSING: return Messages.ObservationLabelProvider_CmNotFound;
 		case INVALID_GEOMETRY_ATTRIBUTE: return Messages.ObservationLabelProvider_0;

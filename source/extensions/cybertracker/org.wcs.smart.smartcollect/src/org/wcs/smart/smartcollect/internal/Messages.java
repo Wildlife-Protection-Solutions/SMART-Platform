@@ -3,7 +3,9 @@ package org.wcs.smart.smartcollect.internal;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
+	
 	private static final String BUNDLE_NAME = "org.wcs.smart.smartcollect.internal.messages"; //$NON-NLS-1$
+	
 	public static String AddSmartCollectJob_ErrorMessage;
 	public static String AddSmartCollectJob_ErrorTitle;
 	public static String AddSmartCollectJob_InstallJobName;

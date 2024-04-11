@@ -138,6 +138,13 @@ public class CustomQueryEngine {
 			JSONObject attachment = new JSONObject();
 			attachment.put("filename", a.getFilename()); //$NON-NLS-1$
 			attachment.put("signatureType", a.getSignatureType() == null ? null : a.getSignatureType().getKeyId()); //$NON-NLS-1$
+			if (a.getAttachmentTags() != null && !a.getAttachmentTags().isEmpty()) {
+				JSONArray tags = new JSONArray();
+				for (AttachmentTagLink link : a.getAttachmentTags()) {
+					tags.add(link.getTag().getKeyId());
+				}
+				attachment.put("tags", tags); //$NON-NLS-1$
+			}
 			try {
 				a.computeFileLocation(session);
 				attachment.put("size", Files.size(a.getAttachmentFile())); //$NON-NLS-1$
@@ -278,6 +285,15 @@ public class CustomQueryEngine {
 					JSONObject attachment = new JSONObject();
 					attachment.put("filename", a.getFilename()); //$NON-NLS-1$
 //					attachment.put("signatureType", a.getSignatureType() == null ? null : a.getSignatureType().getKeyId());
+					
+					if (a.getAttachmentTags() != null && !a.getAttachmentTags().isEmpty()) {
+						JSONArray tags = new JSONArray();
+						for (AttachmentTagLink linkb : a.getAttachmentTags()) {
+							tags.add(linkb.getTag().getKeyId());
+						}
+						attachment.put("tags", tags); //$NON-NLS-1$
+					}
+					
 					try {
 						a.computeFileLocation(session);
 						attachment.put("size", Files.size(a.getAttachmentFile())); //$NON-NLS-1$

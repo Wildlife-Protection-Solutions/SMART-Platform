@@ -50,6 +50,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Tooltip provider for survey query attachments
@@ -74,6 +75,8 @@ public class SurveyAttachmentTooltipProvider extends Job {
 		SurveyWaypoint wp = null;
 		WaypointObservation o = null;
 		ISignatureAttachment attachment = null;
+		String tags = null;
+		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			
@@ -90,6 +93,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 				}
 				o.getCategory().getFullCategoryName();
 				o.getCategory().getAllAttribute(new ArrayList<>(), null);
+				tags = oba.getTagsAsString();
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
 				attachment = obw;
@@ -104,6 +108,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 					wo.getCategory().getFullCategoryName();
 					wo.getCategory().getAllAttribute(new ArrayList<>(), null);
 				}
+				tags = obw.getTagsAsString();
 				
 			}
 			if (wp != null) {
@@ -122,6 +127,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 		WaypointObservation fo = o;
 		SurveyWaypoint fwp = wp;
 		ISignatureAttachment fattachment = attachment;
+		String ftags = tags;
 		
 		Display.getDefault().syncExec(()->{
 			if (details == null || details.isDisposed()) return;
@@ -138,6 +144,19 @@ public class SurveyAttachmentTooltipProvider extends Job {
 			
 			scroll.setExpandHorizontal(true);
 			scroll.setExpandVertical(true);
+			
+			if (ftags != null && !ftags.isBlank()) {
+				Label l = new Label(main, SWT.NONE);
+				l.setText(SmartLabelProvider.ATTACHMENT_TAGS);
+				l.setBackground(details.getBackground());
+				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+	
+				l = new Label(main, SWT.WRAP);
+				l.setText(ftags);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)l.getLayoutData()).widthHint = 200;
+				l.setBackground(details.getBackground());
+			}
 			
 			Label l = new Label(main, SWT.NONE);
 			l.setText(Messages.SurveyAttachmentTooltipProvider_MissionLbl);

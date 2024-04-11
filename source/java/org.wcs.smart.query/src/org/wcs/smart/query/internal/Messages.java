@@ -14,6 +14,7 @@ public class Messages extends NLS {
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;
 	public static String AbstractValueDropItem_EncounterRatePerRatio;
+	public static String AttachmentTable_SearchingText;
 	public static String AttributeFilter_InvalidAttributePrefix;
 	public static String AttributeFilter_InvalidWaypointObservationPrefix;
 	public static String CategoryFilter_InvalidPrefix;
@@ -523,10 +524,15 @@ public class Messages extends NLS {
 	public static String QueryResultsImagePage_ExportDialogMessage;
 	public static String QueryResultsImagePage_ExportDialogTitle;
 	public static String QueryResultsImagePage_ExportMenuItem;
+	public static String QueryResultsImagePage_FindByTag;
 	public static String QueryResultsImagePage_LargeIconSize;
 	public static String QueryResultsImagePage_MediumIconSize;
+	public static String QueryResultsImagePage_No;
+	public static String QueryResultsImagePage_NoTag;
 	public static String QueryResultsImagePage_selectedLabel;
+	public static String QueryResultsImagePage_SearchWarnTooltip;
 	public static String QueryResultsImagePage_SmallIconSize;
+	public static String QueryResultsImagePage_Yes;
 	public static String QueryResultsTable_InitQueryResultsTableJobName;
 	public static String RasterService_InvalidRasterStyle;
 	public static String RasterService_keyword1;

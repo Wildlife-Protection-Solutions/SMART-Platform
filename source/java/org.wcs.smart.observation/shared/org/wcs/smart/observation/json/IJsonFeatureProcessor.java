@@ -50,6 +50,7 @@ import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SignatureType;
@@ -61,6 +62,7 @@ import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.IObservationLabelProvider;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -106,6 +108,7 @@ public abstract class IJsonFeatureProcessor {
 	public static final String JSON_OBSERVATIONUUID_KEY = "observationUuid"; //$NON-NLS-1$
 	public static final String JSON_OBSERVER_KEY = "observer"; //$NON-NLS-1$
 	public static final String JSON_SIGNATURETYPE_KEY = "signatureType"; //$NON-NLS-1$
+	public static final String JSON_TAGS_KEY = "tags"; //$NON-NLS-1$
 	public static final String JSON_SMARTATTRIBUTES = "smartAttributes";  //$NON-NLS-1$
 	public static final String JSON_PROPERTIES = "properties"; //$NON-NLS-1$
 	public static final String JSON_SMARTDATATYPE = "smartDataType"; //$NON-NLS-1$
@@ -162,6 +165,7 @@ public abstract class IJsonFeatureProcessor {
 		INVALID_GEOMETRY_SRC_ATTRIBUTE,
 		INVALID_NUMBER_ATTRIBUTE,
 		SIGNATURE_TYPE_NOT_FOUND,
+		ATTACHMENT_TAG_NOT_FOUND,
 		CM_MISSING,
 		INVALID_CM_UUID;
 		
@@ -324,6 +328,13 @@ public abstract class IJsonFeatureProcessor {
 				oa.setCopyFromLocation(a.getCopyFromLocation());
 				oa.setObservation(wo);
 				oa.setSignatureType(a.getSignatureType());
+				oa.setAttachmentTags(new ArrayList<>());
+				for (AttachmentTagLink link : a.getAttachmentTags()) {
+					AttachmentTagLink newLink = new AttachmentTagLink();
+					newLink.setObservationAttachment(oa);
+					newLink.setTag(link.getTag());
+					oa.getAttachmentTags().add(newLink);
+				}
 				wo.getAttachments().add(oa);
 			});
 		}
@@ -531,8 +542,12 @@ public abstract class IJsonFeatureProcessor {
 			String fname = (String) jattachment.get("filename"); //$NON-NLS-1$
 			String data = (String)jattachment.get("data"); //base64 encoded //$NON-NLS-1$
 			String sigtype = null;
+			JSONArray tags = null;
 			if (jattachment.containsKey(JSON_SIGNATURETYPE_KEY)) { 
 				sigtype = (String) jattachment.get(JSON_SIGNATURETYPE_KEY);
+			}
+			if (jattachment.containsKey(JSON_TAGS_KEY)) {
+				tags = (JSONArray) jattachment.get(JSON_TAGS_KEY);
 			}
 			//decode data
 			byte[] decoded = DatatypeConverter.parseBase64Binary(data);
@@ -547,6 +562,7 @@ public abstract class IJsonFeatureProcessor {
 			WaypointAttachment attachment = new WaypointAttachment();
 			attachment.setFilename(fname);
 			attachment.setCopyFromLocation(tempFile);
+			attachment.setAttachmentTags(new ArrayList<>());
 			attachments.add(attachment);
 			
 			if (sigtype != null) {
@@ -557,6 +573,25 @@ public abstract class IJsonFeatureProcessor {
 					attachment.setSignatureType(stype);
 				}else {
 					warnings.add(MessageFormat.format(Messages.SIGNATURE_TYPE_NOT_FOUND.getMessage(locale), sigtype));
+				}
+			}
+			
+			if (tags != null) {
+				for (Object tag: tags) {
+					String stag = (String)tag;
+					
+					AttachmentTag at = QueryFactory.buildQuery(session, AttachmentTag.class,
+							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+							new Object[] {"keyId", stag}).uniqueResult(); //$NON-NLS-1$	
+					if (at != null) {
+						AttachmentTagLink link = new AttachmentTagLink();
+						link.setTag(at);
+						link.setWaypointAttachment(attachment);
+						attachment.getAttachmentTags().add(link);
+					}else {
+						warnings.add(MessageFormat.format(Messages.ATTACHMENT_TAG_NOT_FOUND.getMessage(locale), stag));
+					}
+					
 				}
 			}
 		}

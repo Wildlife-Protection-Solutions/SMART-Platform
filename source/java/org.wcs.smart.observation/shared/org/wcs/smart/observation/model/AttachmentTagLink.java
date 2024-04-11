@@ -28,6 +28,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -61,7 +62,7 @@ public class AttachmentTagLink extends UuidItem{
 		this.tag = tag;
 	}
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="wp_attachment_uuid", referencedColumnName="uuid")
 	public WaypointAttachment getWaypointAttachment() {
 		return wpAttachment;
@@ -71,7 +72,7 @@ public class AttachmentTagLink extends UuidItem{
 		this.wpAttachment = wpAttachment;
 	}
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="obs_attachment_uuid", referencedColumnName="uuid")
 	public ObservationAttachment getObservationAttachment() {
 		return obsAttachment;

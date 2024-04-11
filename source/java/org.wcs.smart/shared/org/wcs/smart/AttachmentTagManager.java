@@ -21,6 +21,7 @@
  */
 package org.wcs.smart;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -49,8 +50,13 @@ public class AttachmentTagManager {
 	 * @return
 	 */
 	public List<AttachmentTag> getTags(Session session, ConservationArea ca){
-		return QueryFactory.buildQuery(session, AttachmentTag.class,
+		if ( (session.get(ConservationArea.class, ca.getUuid()).getIsCcaa())) {
+			//TODO:
+			return Collections.emptyList();
+		}else {
+			return QueryFactory.buildQuery(session, AttachmentTag.class,
 				new Object[] {"conservationArea", ca}).list();  //$NON-NLS-1$
+		}
 	}
 	
 	/**

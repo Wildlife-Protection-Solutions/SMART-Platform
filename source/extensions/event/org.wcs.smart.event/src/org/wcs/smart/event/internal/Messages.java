@@ -4,15 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.event.internal.messages"; //$NON-NLS-1$
-	public static String ActionLabelProviderImpl_AndOperator;
-	public static String ActionLabelProviderImpl_BetweenOperator;
-	public static String ActionLabelProviderImpl_ExactOperator;
-	public static String ActionLabelProviderImpl_NotBetweenOperator;
-	public static String ActionLabelProviderImpl_NotOperator;
-	public static String ActionLabelProviderImpl_OrOperator;
-	public static String ActionLabelProviderImpl_StrContainsOperator;
-	public static String ActionLabelProviderImpl_StrEqualsOperator;
-	public static String ActionLabelProviderImpl_StrNotContainsOperator;
 	public static String ActionsPanel_ActionColumnName;
 	public static String ActionsPanel_addTooltip;
 	public static String ActionsPanel_DeleteError;
@@ -31,8 +22,6 @@ public class Messages extends NLS {
 	public static String ActionTypesPanel_ColumnTypeName;
 	public static String ActionTypesPanel_PanelMsg;
 	public static String ActionTypesPanel_ParametersLabel;
-	public static String AddEventJob_InstallError;
-	public static String AddEventJob_JobName;
 	public static String ConfigureEventsDialog_ActionsTab;
 	public static String ConfigureEventsDialog_AllFile;
 	public static String ConfigureEventsDialog_EventsTab;
@@ -59,8 +48,6 @@ public class Messages extends NLS {
 	public static String ConservationAreaCloner_TaskName;
 	public static String ConservationAreaDeleteHandler_TaskName;
 	public static String DefinitionPanel_PanelName;
-	public static String DropItem_removetooltip;
-	public static String DropItemFactory_AnyOptionLabel;
 	public static String DropItemFactory_AttributeListItemNotFound;
 	public static String DropItemFactory_AttributeNotFound;
 	public static String DropItemFactory_AttributeTreeNodeNotFound;
@@ -69,11 +56,8 @@ public class Messages extends NLS {
 	public static String DropItemFactory_FilterExpressionSupported;
 	public static String DropItemFactory_ListItemNotFound;
 	public static String DropItemFactory_TreeNodeNotFound;
-	public static String EventDatabaseUpgrader_SubTaskName;
 	public static String EventDatabaseUpgrader_TaskName;
 	public static String EventProcessingJob_EventProcessingError;
-	public static String EventProcessingJob_FilterEvalError;
-	public static String EventProcessingJob_InvalidOpException;
 	public static String EventProcessingJob_JobName;
 	public static String EventProcessingJob_RemainingTaskLabel;
 	public static String EventsFromXml_ActionTypeNotFound;
@@ -154,7 +138,6 @@ public class Messages extends NLS {
 	public static String NewFilterDialog_SourceRequired;
 	public static String NewFilterDialog_Title;
 	public static String NewFilterDialog_ValidateIdRequire;
-	public static String RemoveEventJob_JobName;
 	public static String RemoveEventJob_UninstallError;
 	static {
 		// initialize resource bundle

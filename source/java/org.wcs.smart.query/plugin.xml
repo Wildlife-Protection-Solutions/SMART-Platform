@@ -97,8 +97,7 @@
             class="org.wcs.smart.query.ui.itempanel.QueryItemView$QueryItemViewWrapper"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
             id="org.wcs.smart.query.parts.filter"
-            name="%queryfilter.view.name"
-            restorable="false">
+            name="%queryfilter.view.name">
       </view>
       <view
             class="org.wcs.smart.query.ui.querylist.QueryListView$QueryListViewWrapper"

@@ -33,11 +33,11 @@
    <extension
          point="org.eclipse.ui.views">
       <view
+            allowMultiple="true"
             class="org.wcs.smart.observation.ui.WaypointInfoView$WaypointInfoViewWrapper"
             icon="images/icons/view16/waypoint_info.png"
             id="org.wcs.smart.observation.waypointInfo"
-            name="%waypointinfo.view.name"
-            restorable="true">
+            name="%waypointinfo.view.name">
       </view>
    </extension>
    <extension

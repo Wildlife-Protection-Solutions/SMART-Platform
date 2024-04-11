@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
@@ -393,4 +394,31 @@ public class PatrolAttributeMetadata {
 		}
 		return item;
 	}
+	
+	/**
+	 * will return null if no attachment tags are configured for Conservation Area
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public static PatrolAttributeMetadata getAttachmentTagsMetadata(Session session, ConservationArea ca) {
+		PatrolAttributeMetadata item = new PatrolAttributeMetadata(IJsonFeatureProcessor.JSON_TAGS_KEY, null);
+		item.names = null;
+		item.requiredWhen = null;
+		item.options = new ArrayList<>();
+		List<AttachmentTag> tags = QueryFactory.buildQuery(session, AttachmentTag.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		if (tags.isEmpty()) return null;
+		
+		for (AttachmentTag type : tags) {
+			ListOption op = new ListOption(type.getKeyId());
+			for (Label l : type.getNames()) {
+				op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
+			}
+			item.addListOption(op);
+		}
+		return item;
+	}
+	
 }

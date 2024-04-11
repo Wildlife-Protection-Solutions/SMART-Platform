@@ -50,6 +50,7 @@ import org.wcs.smart.asset.query.model.AssetWaypointResultItem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -396,6 +397,8 @@ public class AssetWaypointEngine extends AssetQueryEngine implements WaypointQue
 		} catch (Exception e) {
 			AssetQueryPlugIn.log(e.getMessage(), e);
 		}
+		((ITaggedAttachment)a).getTagsAsString();
+
 		item.setAttachment(a);
 		
 		return item;

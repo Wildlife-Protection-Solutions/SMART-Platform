@@ -56,8 +56,8 @@ public class QueryPerspective implements IPerspectiveFactory {
 		//right side - filters and layer manager
 		IFolderLayout folder1 = layout.createFolder(ITEM_FOLDER, IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA);
 		folder1.addView(QueryItemView.ID);
+		folder1.addView(WaypointInfoView.ID);
 		folder1.addView("org.locationtech.udig.project.ui.layerManager"); //$NON-NLS-1$
-		folder1.addView(WaypointInfoView.ID); 
 		
 		//bottom query and info view
 		IFolderLayout folder2 = layout.createFolder(DEF_FOLDER, IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA);

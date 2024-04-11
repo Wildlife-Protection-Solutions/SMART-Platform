@@ -1823,6 +1823,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		btnAddAttachment.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {	
+				if (entity == null) return;
 				FileDialog dialog = new FileDialog(getSite().getShell(), SWT.OPEN | SWT.MULTI);
 				dialog.open();
 				

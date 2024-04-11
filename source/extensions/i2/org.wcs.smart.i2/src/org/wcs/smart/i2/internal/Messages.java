@@ -7,8 +7,6 @@ public class Messages extends NLS {
 	public static String AbstractIntelEntityTypeListWizardPage_DatasetNotSupported;
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
 	public static String AbstractIntelEntityTypeListWizardPage_unauthorized;
-	public static String AddIntelligenceJob_InstallError;
-	public static String AddIntelligenceJob_JobName;
 	public static String AdvancedEntitySearchPanel_addFilterBtn;
 	public static String AdvancedEntitySearchPanel_attributenotfound;
 	public static String AdvancedEntitySearchPanel_AttributeFilterLabel;
