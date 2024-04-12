@@ -45,6 +45,7 @@ public class JsonImportWarning {
 		ATT_CAT_NOT_ASSOCIATED,//2 parameter - attribute name, category name
 		INVALID_CM, // 1 parameter - cm uuid as string
 		INVALID_SIGNATURE, //1 parameter - key
+		TAG_NOT_FOUND, //1 parameter - key
 		INVALID_OBSERVER, //1 parameter - employee uuid as string
 		INVALID_ATTACHMENT, //1 parameter - attachment ordinal
 		INVALID_PHOTO_ATTACHMENT, //1 parameter - attachment ordinal

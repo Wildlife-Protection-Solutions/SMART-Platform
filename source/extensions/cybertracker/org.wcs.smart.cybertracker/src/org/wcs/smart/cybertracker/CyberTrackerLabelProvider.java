@@ -46,6 +46,7 @@ public class CyberTrackerLabelProvider implements ICyberTrackerLabelProvider{
 		if (item ==  JsonImportWarning.Type.DEFAULT_ATTRIBUTE_NOT_FOUND) return Messages.CyberTrackerLabelProvider_ObservationParseError6;
 		if (item ==  JsonImportWarning.Type.INVALID_CM) return Messages.CyberTrackerLabelProvider_ObservationParseError7;
 		if (item ==  JsonImportWarning.Type.INVALID_SIGNATURE) return Messages.CyberTrackerLabelProvider_ObservationParseError8;
+		if (item ==  JsonImportWarning.Type.TAG_NOT_FOUND) return Messages.CyberTrackerLabelProvider_AttachmentTagNotFound; 
 		if (item ==  JsonImportWarning.Type.INVALID_OBSERVER) return Messages.CyberTrackerLabelProvider_ObservationParseError9;
 		if (item ==  JsonImportWarning.Type.INVALID_ATTACHMENT) return Messages.CyberTrackerLabelProvider_ObservationParseError10;
 		if (item ==  JsonImportWarning.Type.INVALID_PHOTO_ATTACHMENT) return Messages.CyberTrackerLabelProvider_ObservationParseError11;

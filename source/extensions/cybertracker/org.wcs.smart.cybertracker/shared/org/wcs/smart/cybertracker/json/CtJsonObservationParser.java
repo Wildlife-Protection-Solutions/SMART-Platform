@@ -30,6 +30,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,7 +50,9 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.AttachmentTagManager;
 import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.ca.AttachmentTag;
 //import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -65,6 +68,7 @@ import org.wcs.smart.cybertracker.json.JsonImportWarning.Type;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 //import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -337,7 +341,9 @@ public class CtJsonObservationParser {
 				if (key.startsWith(CtJsonUtil.JsonKey.AUDIO.key)) {
 					type = AttachmentInfo.AttachmentType.AUDIO;
 				}
-				AttachmentInfo info = new AttachmentInfo(type, (String)e.getValue(), imagecounter++);
+				AttachmentInfo info = new AttachmentInfo(type, (String)e.getValue(), 
+						AttachmentInfo.parseTagsFromData(((String)e.getValue()), session, ca, warnings),
+						imagecounter++);
 				if (key.contains(String.valueOf(CtJsonUtil.KEY_SEP))) {
 					int obsnum = Integer.parseInt(key.split(String.valueOf(CtJsonUtil.KEY_SEP))[1]); 
 				
@@ -366,11 +372,13 @@ public class CtJsonObservationParser {
 				SignatureType stype = SignatureTypeManager.INSTANCE.findType(keyId, ca, session);
 				
 				AttachmentInfo ainfo = null;
+				String imagedata = ((String)e.getValue());
+				List<AttachmentTag> tags = AttachmentInfo.parseTagsFromData(imagedata, session, ca, warnings);
 				if (stype == null) {
 					warnings.add(new JsonImportWarning(Type.INVALID_SIGNATURE, keyId));
-					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue()), imagecounter++);
+					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, imagedata,tags, imagecounter++);
 				}else {
-					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), imagecounter++, stype);
+					ainfo = new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, imagedata, tags, imagecounter++, stype);
 				}
 				List<AttachmentInfo> data = observationAttachments.get(obsnum);
 				if (data == null){
@@ -476,6 +484,12 @@ public class CtJsonObservationParser {
 						oa.setFilename(wa.getFilename());
 						oa.setSignatureType(wa.getSignatureType());
 						oa.setObservation(wp);
+						for (AttachmentTagLink link : wa.getAttachmentTags()) {
+							AttachmentTagLink clone = new AttachmentTagLink();
+							clone.setTag(link.getTag());
+							clone.setObservationAttachment(oa);
+							oa.getAttachmentTags().add(clone);
+						}
 						wp.getAttachments().add(oa);
 					}
 				}
@@ -507,6 +521,13 @@ public class CtJsonObservationParser {
 							oa.setFilename(wa.getFilename());
 							oa.setObservation(wp);
 							oa.setSignatureType(wa.getSignatureType());
+							oa.setAttachmentTags(new ArrayList<>());
+							for (AttachmentTagLink link : wa.getAttachmentTags()) {
+								AttachmentTagLink clone = new AttachmentTagLink();
+								clone.setTag(link.getTag());
+								clone.setObservationAttachment(oa);
+								oa.getAttachmentTags().add(clone);
+							}
 							wp.getAttachments().add(oa);
 						}
 					}
@@ -591,7 +612,7 @@ public class CtJsonObservationParser {
 		}
 	}
 	
-		private WaypointAttachment parseAttachment(AttachmentInfo info) throws Exception{
+	private WaypointAttachment parseAttachment(AttachmentInfo info) throws Exception{
 		if (info.getType() == AttachmentInfo.AttachmentType.PHOTO
 				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 			
@@ -610,12 +631,14 @@ public class CtJsonObservationParser {
 				}
 			}
 								
+			String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
+			Path temp = null;
 			if (ext == null){
 				//don't know the image format so write without an extension and generate a warning
 				warnings.add(new JsonImportWarning(Type.INVALID_PHOTO_ATTACHMENT, info.getImageCount()));
 				
-				String fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
-				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$
+				fileName = PHOTO_KEY + "_" + info.getImageCount(); //$NON-NLS-1$
+				temp = Files.createTempFile("SMART_" + System.nanoTime(), "unknown"); //$NON-NLS-1$ //$NON-NLS-2$
 				try {
 					Files.write(temp, data);
 					tempFiles.add(temp);
@@ -626,16 +649,10 @@ public class CtJsonObservationParser {
 				}
 				
 				
-				WaypointAttachment attachment = new WaypointAttachment();
-				attachment.setCopyFromLocation(temp);
-				attachment.setFilename(fileName);
-				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
-					attachment.setSignatureType(info.getSignatureType());
-				}
-				return attachment;
+				
 			} else {
-				String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
-				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
+				fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
+				temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
 				try {
 					Files.write(temp, data);
 					tempFiles.add(temp);
@@ -644,14 +661,25 @@ public class CtJsonObservationParser {
 					logger.log(Level.WARNING, ex.getMessage(), ex);
 					return null;
 				}
-				WaypointAttachment attachment = new WaypointAttachment();
-				attachment.setCopyFromLocation(temp);
-				attachment.setFilename(fileName);
-				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
-					attachment.setSignatureType(info.getSignatureType());
-				}
-				return attachment;
+				
 			}
+			
+			WaypointAttachment attachment = new WaypointAttachment();
+			attachment.setCopyFromLocation(temp);
+			attachment.setFilename(fileName);
+			if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+				attachment.setSignatureType(info.getSignatureType());
+			}
+			attachment.setAttachmentTags(new ArrayList<>());
+			for (AttachmentTag t : info.getTags()) {
+				AttachmentTagLink link = new AttachmentTagLink();
+				link.setTag(t);
+				link.setWaypointAttachment(attachment);
+				attachment.getAttachmentTags().add(link);
+			}
+			
+			return attachment;
+			
 		} else if (info.getType() == AttachmentInfo.AttachmentType.AUDIO) {
 			String fileName = AUDIO_KEY + "_" + info.getImageCount() + "." + WAVE_EXT; //$NON-NLS-1$//$NON-NLS-2$
 			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT); //$NON-NLS-1$//$NON-NLS-2$
@@ -796,17 +824,56 @@ public class CtJsonObservationParser {
 		private String data;
 		private SignatureType stype;
 		private int count;
+		private List<AttachmentTag> tags;
 		
-		public AttachmentInfo(AttachmentType type, String data, int count, SignatureType stype) {
-			this(type, data, count);
+		public static final List<AttachmentTag> parseTagsFromData(String data, Session session, ConservationArea ca, List<JsonImportWarning> warnings) {
+			
+			int tagsindex = data.indexOf(':');
+			if (tagsindex < 0) return Collections.emptyList();
+			
+			List<AttachmentTag> tags = new ArrayList<>();
+			
+			List<AttachmentTag> dbtags = AttachmentTagManager.INSTANCE.getTags(session, ca);
+					
+			String alltags = data.substring(tagsindex + 1);
+			data = data.substring(0, tagsindex);
+			Set<String> processed = new HashSet<>();
+			
+			for (String t : alltags.split(":")) { //$NON-NLS-1$
+				t = t.strip();
+				if (processed.contains(t)) continue;
+				processed.add(t);
+				
+				AttachmentTag found = null;
+				for (AttachmentTag tag : dbtags) {
+					if (tag.getKeyId().equalsIgnoreCase(t)) {
+						found = tag;
+						break;
+					}
+				}
+				if (found != null) {
+					tags.add(found);
+				}else {
+					warnings.add(new JsonImportWarning(Type.TAG_NOT_FOUND, t));
+				}
+			}
+			return tags;			
+		}
+		
+		
+		public AttachmentInfo(AttachmentType type, String data, List<AttachmentTag> tags,  int count, SignatureType stype) {
+			this(type, data, tags, count);
 			this.stype = stype;
 		}
 		
-		public AttachmentInfo(AttachmentType type, String data, int count) {
+		public AttachmentInfo(AttachmentType type, String data, List<AttachmentTag> tags, int count) {
 			this.data = data;
 			this.type = type;
 			this.stype = null;
+			this.tags = tags;
 			this.count = count;
+			
+			
 		}
 		public int getImageCount() {
 			return this.count;
@@ -819,6 +886,9 @@ public class CtJsonObservationParser {
 		}
 		public AttachmentType getType() {
 			return this.type;
+		}
+		public List<AttachmentTag> getTags(){
+			return this.tags;
 		}
 		
 	}

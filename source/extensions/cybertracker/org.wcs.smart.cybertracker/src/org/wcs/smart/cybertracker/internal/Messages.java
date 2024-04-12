@@ -271,6 +271,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Read_Xml;
 	public static String CyberTrackerImporter_Task_Download;
 	public static String CyberTrackerImporter_Task_ExtractRawData;
+	public static String CyberTrackerLabelProvider_AttachmentTagNotFound;
 	public static String CyberTrackerLabelProvider_JsonParseError1;
 	public static String CyberTrackerLabelProvider_JsonParseError2;
 	public static String CyberTrackerLabelProvider_JsonParseError3;
