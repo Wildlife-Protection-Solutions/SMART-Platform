@@ -30,12 +30,13 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.cybertracker.survey.SurveyCyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.updatesite.ERDatabaseUpgrader;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Connect upgrade operations while upgrade/restore backup.
@@ -57,9 +58,10 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask, 2);
-		progress.subTask( Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask);
 		
+		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()), 2);
+		
+		progress.subTask( MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		//we need to ensure the mission table is installed first
 		(new ERDatabaseUpgrader()).upgrade(progress.split(1));
 		

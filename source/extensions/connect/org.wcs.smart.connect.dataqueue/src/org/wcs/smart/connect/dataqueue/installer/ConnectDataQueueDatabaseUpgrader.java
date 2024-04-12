@@ -29,10 +29,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
-import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Connect upgrade operations while upgrade/restore backup.
@@ -60,7 +61,7 @@ public class ConnectDataQueueDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.ConnectDataQueueDatabaseUpgrader_TaskName);
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

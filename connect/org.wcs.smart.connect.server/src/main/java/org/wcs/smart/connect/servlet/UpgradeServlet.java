@@ -1531,7 +1531,8 @@ public class UpgradeServlet extends HttpServlet {
 						"update connect.connect_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 
-						
+						"insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.independentincident', '1.0')", //$NON-NLS-1$
+						"insert into connect.ca_plugin_version (ca_uuid, plugin_id, version) select uuid, 'org.wcs.smart.independentincident', '1.0' from smart.conservation_area", //$NON-NLS-1$
 
 						"update connect.connect_version set version = '8.0.0', last_updated = now()", //$NON-NLS-1$
 						

@@ -29,11 +29,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Asset upgrade operations while upgrade/restore backup.
@@ -62,7 +63,7 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.AssetDatabaseUpgrader_TaskName);
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

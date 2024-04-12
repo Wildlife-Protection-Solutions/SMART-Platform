@@ -30,9 +30,10 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.smartcollect.SmartCollectPlugIn;
-import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * SMART Collect upgrade operations.
@@ -60,7 +61,7 @@ public class SmartCollectDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.SmartCollectDatabaseUpgrader_UpgradingMessage);
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		try(Session session = HibernateManager.openSession()){
 		
 			session.beginTransaction();

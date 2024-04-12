@@ -101,9 +101,10 @@ public class Upgrader754To757 extends AbstractInteralDatabaseUpgrader {
 			//which is ok
 			//NOTE: this also affects the triggers so when migrating to 8 we need to migrate these
 			//statements and the triggers
-			"create table smart.incident_waypoint(wp_uuid char(16) for bit data not null, patrol_uuid char(16) for bit data, primary key (wp_uuid) )", //$NON-NLS-1$
-			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_wpuuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
-			"ALTER TABLE smart.incident_waypoint add constraint incident_wp_patroluuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			//SMART8: moved this to incident plugin 
+			//"create table smart.incident_waypoint(wp_uuid char(16) for bit data not null, patrol_uuid char(16) for bit data, primary key (wp_uuid) )", //$NON-NLS-1$
+			//"ALTER TABLE smart.incident_waypoint add constraint incident_wp_wpuuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			//"ALTER TABLE smart.incident_waypoint add constraint incident_wp_patroluuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
 			
 			//link configurable model to patrol
 			"alter table smart.waypoint add column source_cm_uuid char(16) for bit data", //$NON-NLS-1$

@@ -31,6 +31,8 @@ import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
+import com.ibm.icu.text.MessageFormat;
+
 /**
  * Database table manager for qa plugin
  * 
@@ -57,6 +59,7 @@ public class QaDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

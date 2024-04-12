@@ -59,7 +59,7 @@ public class CoreDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.CoreDatabaseUpgrader_TaskName);
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		
 		Map<String, String> versions = null;
 		try(Session session = HibernateManager.openSession()){

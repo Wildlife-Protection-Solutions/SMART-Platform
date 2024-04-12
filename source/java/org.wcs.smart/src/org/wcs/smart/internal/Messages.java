@@ -1110,6 +1110,7 @@ public class Messages extends NLS {
 	public static String IdGeneratorManager_SecondToken;
 	public static String IdGeneratorManager_TimestampToken;
 	public static String IdGeneratorManager_YearToken;
+	public static String IDatabaseUpgrader_upgradeinstallmessage;
 	public static String IDropItemFactory_AnyOption;
 	public static String IDTokenPreferencePage_AllTokens;
 	public static String IDTokenPreferencePage_SaveError;

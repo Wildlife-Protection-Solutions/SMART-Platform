@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Interface that can be implemented to perform upgrade/install operations
@@ -36,6 +37,8 @@ import org.osgi.framework.Constants;
  */
 public interface IDatabaseUpgrader {
 
+	public static final String PROGRESS_MESSAGE = Messages.IDatabaseUpgrader_upgradeinstallmessage;
+	
 	/**
 	 * The plugin id for the change log manager, used for installing/uninstalling
 	 * approriate triggers

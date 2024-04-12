@@ -28,11 +28,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * CyberTracker upgrade operations while upgrade/restore backup.
@@ -60,7 +61,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

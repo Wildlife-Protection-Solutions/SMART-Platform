@@ -29,11 +29,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.upgrade.v400.Upgrader331To400;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Ecological Records Query upgrade operations while upgrade/restore backup.
@@ -62,7 +63,7 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.ERDatabaseUpgrader_Info);
+		monitor.subTask(MessageFormat.format(PROGRESS_MESSAGE,  getPluginName()));
 		try(Session session = HibernateManager.openSession()){
 		
 			session.beginTransaction();

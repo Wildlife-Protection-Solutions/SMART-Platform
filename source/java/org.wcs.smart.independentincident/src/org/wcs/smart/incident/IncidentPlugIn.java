@@ -56,6 +56,9 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 	public static final String INTEGRATE_ICON = "org.wcs.smart.incident.integrate.ICON"; //$NON-NLS-1$
 	public static final String INCIDENT32_ICON = "org.wcs.smart.incident.ICON32"; //$NON-NLS-1$
 
+	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_1;
+	
 	// The shared instance
 	private static IncidentPlugIn plugin;
 	

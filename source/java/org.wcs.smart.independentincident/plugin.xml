@@ -1284,6 +1284,15 @@
             toVersion="8.0.0"
             upgrader="org.wcs.smart.independentincident.plugin.DesktopReport800Upgrader">
       </coreUpgrader>
+      <dbUpgrader
+            upgrader="org.wcs.smart.incident.plugin.IncidentDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.incident.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
 
 </plugin>
