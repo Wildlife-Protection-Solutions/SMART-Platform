@@ -165,6 +165,7 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 	private void modified() {
 		fireChange(new Event());
 	}
+	
 	@Override
 	public void initFields(Waypoint incident, Session session) {
 		this.wp = incident;

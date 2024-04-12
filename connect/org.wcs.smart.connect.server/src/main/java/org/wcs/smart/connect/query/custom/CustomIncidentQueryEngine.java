@@ -143,6 +143,7 @@ public class CustomIncidentQueryEngine extends CustomQueryEngine {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public JSONArray convertToJSON(List<Waypoint> pws, Session session) {
 		JSONArray items = new JSONArray(); 
 		for(Waypoint pw : pws) {

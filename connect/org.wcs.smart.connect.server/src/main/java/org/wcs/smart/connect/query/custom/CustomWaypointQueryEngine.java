@@ -126,6 +126,7 @@ public class CustomWaypointQueryEngine extends CustomQueryEngine {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public JSONArray convertToJSON(List<Waypoint> pws, Session session, boolean addSourceDetails) {
 		JSONArray items = new JSONArray(); 
 		for(Waypoint pw : pws) {

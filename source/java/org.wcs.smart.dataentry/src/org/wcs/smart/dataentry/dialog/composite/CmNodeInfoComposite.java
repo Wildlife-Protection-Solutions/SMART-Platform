@@ -261,7 +261,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			}
 		});
 		
-		List<AttachmentTag> tags = LocalAttachmentTagManager.INSTANCE.getTags(session, SmartDB.getCurrentConservationArea());
+		List<AttachmentTag> tags = LocalAttachmentTagManager.INSTANCE.getTags(session, getModel().getConservationArea());
 		if (!tags.isEmpty()) {
 			new Label(container, SWT.NONE);
 			

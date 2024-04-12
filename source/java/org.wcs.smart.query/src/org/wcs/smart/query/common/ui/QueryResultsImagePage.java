@@ -243,7 +243,11 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 				List<AttachmentTag> allTags = new ArrayList<>();
 				
 				try(Session session = HibernateManager.openSession()){
-					allTags.addAll(AttachmentTagManager.INSTANCE.getTags(session,SmartDB.getCurrentConservationArea()));
+					if (SmartDB.isMultipleAnalysis()) {
+						allTags.addAll(AttachmentTagManager.INSTANCE.getTags(session, SmartDB.getConservationAreaConfiguration().getConservationAreas()));
+					}else {
+						allTags.addAll(AttachmentTagManager.INSTANCE.getTags(session, SmartDB.getCurrentConservationArea()));
+					}
 					Collections.sort(allTags);
 				}
 				
