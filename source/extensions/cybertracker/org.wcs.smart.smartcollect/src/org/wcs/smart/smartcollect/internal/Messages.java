@@ -7,9 +7,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.smartcollect.internal.messages"; //$NON-NLS-1$
 	
 	public static String AddSmartCollectJob_ErrorMessage;
-	public static String AddSmartCollectJob_ErrorTitle;
-	public static String AddSmartCollectJob_InstallJobName;
-	public static String AddSmartCollectJob_TaskName;
 	public static String IncidentExporter_progress1;
 	public static String IncidentExporter_progress2;
 	public static String IncidentExporter_progress3;
@@ -36,7 +33,6 @@ public class Messages extends NLS {
 	public static String IncidentMapPage_RawPointLayerName;
 	public static String IncidentMapPage_ReprojectFailed;
 	public static String IncidentMapPage_SaveFailed;
-	public static String IncidentMapPage_UpdateFailed;
 	public static String IncidentSummaryPage_AttachmentsLabel;
 	public static String IncidentSummaryPage_AttachmentsLbl;
 	public static String IncidentSummaryPage_BearingLabel;
@@ -58,21 +54,13 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_SourceLabel;
 	public static String IncidentSummaryPage_TimeLabel;
 	public static String RemoveSmartCollectJob_UninstallError;
-	public static String RemoveSmartCollectJob_UninstallPlugIn;
 	public static String SmartCollectConnectDataContribution_ConnectServerRequired;
 	public static String SmartCollectConnectUrlContribution_ConnectServerRequired;
-	public static String SmartCollectDatabaseUpgrader_UpgradingMessage;
 	public static String SmartCollectDataProcessor_Cancelled;
-	public static String SmartCollectDataProcessor_CreatedMessage;
 	public static String SmartCollectDataProcessor_EmailSendFailed;
 	public static String SmartCollectDataProcessor_EventError;
-	public static String SmartCollectDataProcessor_FeaturesDiscared;
 	public static String SmartCollectDataProcessor_Message;
-	public static String SmartCollectDataProcessor_MissingDeviceId;
-	public static String SmartCollectDataProcessor_NoUserForFeature;
-	public static String SmartCollectDataProcessor_ParseError;
 	public static String SmartCollectDataProcessor_Title;
-	public static String SmartCollectDataProcessor_UserBlacklistedFeaturesDiscarded;
 	public static String SmartCollectDataProcessor_UserBlackListFailed;
 	public static String SmartCollectDataProcessor_UserValidationFailed;
 	public static String SmartCollectDataProcessor_WarningsMessage;
@@ -80,7 +68,6 @@ public class Messages extends NLS {
 	public static String SmartCollectIncidentEditor_MapPageName;
 	public static String SmartCollectIncidentEditor_OpenError1;
 	public static String SmartCollectIncidentEditor_OpenError2;
-	public static String SmartCollectIncidentEditor_PartName;
 	public static String SmartCollectIncidentEditor_SummaryPageName;
 	public static String SmartCollectIncidentProvider_SmartCollectIncident;
 	public static String SmartCollectLabelProvider_ImportWarning1;
@@ -108,12 +95,7 @@ public class Messages extends NLS {
 	public static String SmartCollectPackageConfigurator_PackageMessage;
 	public static String SmartCollectPackageConfigurator_PackageNameLabel;
 	public static String SmartCollectPackageConfigurator_PackageUrlSection;
-	public static String SmartCollectPackageConfigurator_PasswordError;
-	public static String SmartCollectPackageConfigurator_PasswordLbl;
-	public static String SmartCollectPackageConfigurator_PasswordTooltip;
 	public static String SmartCollectPackageConfigurator_PrivatePackage;
-	public static String SmartCollectPackageConfigurator_PrivatePkgLabel;
-	public static String SmartCollectPackageConfigurator_PrivatePkgTooltip;
 	public static String SmartCollectPackageConfigurator_PublicPackage;
 	public static String SmartCollectPackageConfigurator_saverequired;
 	public static String SmartCollectPackageConfigurator_SecuritySection;
@@ -122,9 +104,6 @@ public class Messages extends NLS {
 	public static String SmartCollectPackageConfigurator_UnknownErrorLabel;
 	public static String SmartCollectPackageConfigurator_urlerror;
 	public static String SmartCollectPackageConfigurator_urltooltip;
-	public static String SmartCollectPackageConfigurator_UserGroupOpLabel;
-	public static String SmartCollectPackageConfigurator_UserGroupOpTooltip1;
-	public static String SmartCollectPackageConfigurator_UserGroupOpTooltip2;
 	public static String SmartCollectPackageConfigurator_Version;
 	public static String SmartCollectPackageConfigurator_WarningLabel;
 	public static String SmartCollectPackageExporter_TaskName;

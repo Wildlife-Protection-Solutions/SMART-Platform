@@ -53,8 +53,6 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_AttachmentsAllowed;
 	public static String CmNodeInfoComposite_AttachmentsAllowedTooltip;
 	public static String CmNodeInfoComposite_Category;
-	public static String CmNodeInfoComposite_ClassicOptionsLbl;
-	public static String CmNodeInfoComposite_ClassicOptionsTooltip;
 	public static String CmNodeInfoComposite_CollectMultiplObservations;
 	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip1;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
@@ -82,12 +80,6 @@ public class Messages extends NLS {
 	public static String CmRootNodeInfoComposite_PhotoFirst;
 	public static String CmRootNodeInfoComposite_PhotoFirstTooltip;
 	public static String CmRootNodeInfoComposite_UseErIntegration;
-	public static String CmSmartToXmlConverter_invalidVisibleWhenExpression;
-	public static String CmSmartToXmlConverter_ProcessAttributeConfigs;
-	public static String CmSmartToXmlConverter_ProcessCmNodes;
-	public static String CmSmartToXmlConverter_ProcessExtraData;
-	public static String CmSmartToXmlConverter_ProcessingNode;
-	public static String CmSmartToXmlConverter_ProcessLanguages;
 	public static String CmTemplateCloner_AttributeNotFoundError;
 	public static String CmTemplateCloner_CategoryNotFoundErrpr;
 	public static String CmTemplateCloner_CopyConfigModelName;
@@ -308,12 +300,10 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Title;
 	public static String TreeAttributeInfoComposite_deafultValueTooltip;
 	public static String TreeAttributeInfoComposite_listOpTooltip;
-	public static String TreeAttributeInfoComposite_TreePreLoad_Error;
 	public static String TreeAttributeInfoComposite_TreePreLoad_FirstLevel;
 	public static String TreeAttributeInfoComposite_TreePreLoad_SecondLevel;
 	public static String TreeAttributeInfoComposite_WarnConfigMessage;
 	public static String TreeAttributeInfoComposite_WarnTitle;
-	public static String VisibleWhenDialog_9;
 	public static String VisibleWhenDialog_AdvancedOption;
 	public static String VisibleWhenDialog_AttributeNotAssociatedWithCategory;
 	public static String VisibleWhenDialog_AttributeNotFound;

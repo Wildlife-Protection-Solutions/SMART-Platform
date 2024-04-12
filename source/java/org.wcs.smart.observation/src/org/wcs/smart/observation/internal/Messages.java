@@ -44,7 +44,6 @@ public class Messages extends NLS {
 	public static String AttributeWizardPage_editObsTooltip;
 	public static String AttributeWizardPage_Error_DialogTitle;
 
-	public static String AttributeWizardPage_FileNotFoundError;
 	public static String AttributeWizardPage_PageMessage;
 	public static String AttributeWizardPage_PageName;
 	public static String AttributeWizardPage_PageNumberLabel;
@@ -68,7 +67,6 @@ public class Messages extends NLS {
 
 	public static String CSVImportConfiguration_0;
 	public static String CSVImportConfiguration_1;
-	public static String CSVImportConfiguration_11;
 	public static String CSVImportConfiguration_12;
 	public static String CSVImportConfiguration_2;
 	public static String CSVImportConfiguration_9;
@@ -377,7 +375,6 @@ public class Messages extends NLS {
 
 	public static String WaypointInfoView_ObsGroupHeader;
 
-	public static String WaypointInfoView_SignaturesSection;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
 

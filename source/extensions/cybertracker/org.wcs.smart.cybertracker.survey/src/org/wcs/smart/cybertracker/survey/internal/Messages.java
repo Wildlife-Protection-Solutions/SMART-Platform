@@ -4,7 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.survey.internal.messages"; //$NON-NLS-1$
-	public static String DataQueueCtMissionDatabaseUpgrader_UpgradeTask;
+
 	public static String DataQueueCtMissionJob_ErrorMsg;
 	public static String MissionDialog_ActionLabel;
 	public static String MissionDialog_addExistingLabel;

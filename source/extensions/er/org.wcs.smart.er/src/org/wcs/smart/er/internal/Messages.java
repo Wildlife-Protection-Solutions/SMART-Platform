@@ -6,8 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
 
 	public static String AddERJob_ErrorMsg;
-	public static String AddERJob_ErrorTitle;
-	public static String AddERJob_Title;
 	public static String AddWaypointDialog_EmptyProjectionError;
 	public static String AddWaypointDialog_EmptyWaypointIDError;
 	public static String AddWaypointDialog_EmptyXError;
@@ -18,16 +16,12 @@ public class Messages extends NLS {
 	public static String AddWaypointDialog_InvalidXYError;
 	public static String AddWaypointDialog_InvalidYError;
 	public static String AddWaypointDialog_Message;
-
 	public static String AddWaypointDialog_NoneOption;
 	public static String AddWaypointDialog_ParseCRSError;
 	public static String AddWaypointDialog_Projection;
 	public static String AddWaypointDialog_SamplingUnitLabel;
-
 	public static String AddWaypointDialog_SaveError;
-
 	public static String AddWaypointDialog_SelectOnMap;
-
 	public static String AddWaypointDialog_SuCoordinateError;
 	public static String AddWaypointDialog_Title;
 	public static String AddWaypointDialog_WaypointID;
@@ -60,10 +54,8 @@ public class Messages extends NLS {
 	public static String ConfigurableModelComposite_DataModel;
 	public static String ConfigurableModelComposite_Description;
 	public static String ConfigurableModelComposite_Title;
-
-	public static String ConfigurableModelDeleteAdvisor_InvalidType;
-
 	public static String ConfigurableModelDeleteAdvisor_SurveyCnt;
+	public static String ConfigurableModelDeleteAdvisor_InvalidType;
 	public static String CsvSamplingUnitExporter_idColumnName;
 	public static String CsvSamplingUnitExporter_lengthColumnName;
 	public static String CsvSamplingUnitExporter_Progress;
@@ -78,24 +70,16 @@ public class Messages extends NLS {
 	public static String CsvSamplingUnitExporter_y2ColumnName;
 	public static String CsvSamplingUnitExporter_yColumnName;
 	public static String CsvSamplingUnitImporter_InvalidAttributeType;
-
 	public static String CsvSamplingUnitImporter_InvalidDoubleValue;
 	public static String CsvSamplingUnitImporter_InvalidType;
 	public static String CsvSamplingUnitImporter_Progress1;
-	public static String DateComposite_DateError;
-	public static String DateComposite_Description;
-
 	public static String DateComposite_MaxMissionLength;
-	public static String DateComposite_Title;
-
 	public static String DateComposite_WarnMissionLength;
-	public static String DateComposites_Description;
-	public static String DateComposites_Title;
+	public static String DateComposite_Description;
+	public static String DateComposite_Title;
 	public static String DatesComponent_EndDateLabel;
 	public static String DatesComponent_InvalidDate;
 	public static String DatesComponent_StartDateLabel;
-	public static String DeleteMissionTracksJob_Error;
-	public static String DeleteMissionTracksJob_Title;
 	public static String DeleteSurveyElementHandler_Confirm4;
 	public static String DeleteSurveyElementHandler_Confirm5;
 	public static String DeleteSurveyElementHandler_Confirm6;
@@ -118,10 +102,8 @@ public class Messages extends NLS {
 	public static String DescriptionComposite_Label_Description;
 	public static String DescriptionComposite_Title;
 	public static String DistanceDirectionComposite_Description;
-
 	public static String DistanceDirectionComposite_distancedirectiontooltip;
 	public static String DistanceDirectionComposite_Label1;
-
 	public static String DistanceDirectionComposite_RecordObserverOption;
 	public static String DistanceDirectionComposite_Title;
 	public static String EcologicalRecordsPlugIn_ErrorDialogTitle;
@@ -153,99 +135,55 @@ public class Messages extends NLS {
 	public static String EditSamplingUnitDialog_Title;
 	public static String EditSamplingUnitDialog_TypeLabel;
 	public static String EditSurveyDesignItemDialog_ErrorMsg;
-	public static String EditSurveyDialog_CannotEdit;
-
 	public static String EditSurveyDialog_CreatedDateLabel;
 	public static String EditSurveyDialog_DesignLabel;
-	public static String EditSurveyDialog_EndLabel;
 	public static String EditSurveyDialog_Error;
 	public static String EditSurveyDialog_IdLabel;
 	public static String EditSurveyDialog_InvalidId;
-	public static String EditSurveyDialog_InvalidRange;
-	public static String EditSurveyDialog_InvalidStart;
 	public static String EditSurveyDialog_Message;
-	public static String EditSurveyDialog_MissionDateError;
 	public static String EditSurveyDialog_ShellTitle;
-	public static String EditSurveyDialog_StartLabel;
-	public static String EditSurveyDialog_UndefinedDate;
 	public static String EditSurveyElementHandler_DesignError;
 	public static String EditSurveyElementHandler_MissionError;
 	public static String EmployeeDeleteAdvisor_DeleteError;
 	public static String EmployeeDeleteAdvisor_InvalidObject;
-	public static String ERDatabaseUpgrader_UpgradeTask;
 	public static String ErLabelProvider_cannotchangedate;
-
 	public static String ErLabelProvider_cannotchangesu;
-
 	public static String ErLabelProvider_DescriptionColumn;
-	public static String ErLabelProvider_EndDateColumn;
-
 	public static String ErLabelProvider_ErLabelProvider_MissionJsonMessage19;
-
 	public static String ErLabelProvider_ErLabelProvider_MissionJsonMessage20;
 	public static String ErLabelProvider_KeyColumn;
 	public static String ErLabelProvider_MissionJsonMessage1;
-
 	public static String ErLabelProvider_MissionJsonMessage10;
-
 	public static String ErLabelProvider_MissionJsonMessage11;
-
 	public static String ErLabelProvider_MissionJsonMessage12;
-
 	public static String ErLabelProvider_MissionJsonMessage13;
-
 	public static String ErLabelProvider_MissionJsonMessage14;
-
 	public static String ErLabelProvider_MissionJsonMessage15;
-
 	public static String ErLabelProvider_MissionJsonMessage16;
-
 	public static String ErLabelProvider_MissionJsonMessage17;
-
 	public static String ErLabelProvider_MissionJsonMessage18;
-
 	public static String ErLabelProvider_MissionJsonMessage2;
-
 	public static String ErLabelProvider_MissionJsonMessage3;
-
 	public static String ErLabelProvider_MissionJsonMessage4;
-
 	public static String ErLabelProvider_MissionJsonMessage5;
-
 	public static String ErLabelProvider_MissionJsonMessage6;
-
 	public static String ErLabelProvider_MissionJsonMessage7;
-
 	public static String ErLabelProvider_MissionJsonMessage8;
-
 	public static String ErLabelProvider_MissionJsonMessage9;
-
 	public static String ErLabelProvider_MissionMetadataBearing;
-
 	public static String ErLabelProvider_MissionMetadataComment;
-
 	public static String ErLabelProvider_MissionMetadataDistance;
-
 	public static String ErLabelProvider_MissionMetadataId;
-
 	public static String ErLabelProvider_MissionMetadataLeader;
-
 	public static String ErLabelProvider_MissionMetadataMembers;
-
 	public static String ErLabelProvider_MissionMetadataSamplingUnit;
-
 	public static String ErLabelProvider_NameColumn;
-
 	public static String ErLabelProvider_ObservationExists;
-
 	public static String ErLabelProvider_ObservationNotFound;
 	public static String ErLabelProvider_sd_table_name;
-	public static String ErLabelProvider_StartDateColumn;
 	public static String ErLabelProvider_StatusColumn;
-
 	public static String ErLabelProvider_SurveyLabel;
 	public static String ErLabelProvider_su_table_name;
-
 	public static String ErLabelProvider_WaypointNotFound;
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;
@@ -282,7 +220,6 @@ public class Messages extends NLS {
 	public static String ImportAttributes_Progress1;
 	public static String ImportAttributes_Progress2;
 	public static String ImportAttributes_SuNotFound;
-
 	public static String ImportAttributes_TextToLong;
 	public static String ImportAttributes_WarningsLabel;
 	public static String ImportAttributeWizard_ImportError;
@@ -292,33 +229,19 @@ public class Messages extends NLS {
 	public static String ImportOptionDialog_Message;
 	public static String ImportOptionDialog_NewLabel;
 	public static String ImportOptionDialog_Title;
-
 	public static String ImportSurveyDesignCaPage_ConservationArea;
-
 	public static String ImportSurveyDesignCaPage_Message;
-
 	public static String ImportSurveyDesignDesignsPage_Message;
-
 	public static String ImportSurveyDesignFilesPage_AllFiles;
-
 	public static String ImportSurveyDesignFilesPage_Files;
-
 	public static String ImportSurveyDesignFilesPage_Message;
-
 	public static String ImportSurveyDesignFilesPage_Xml;
-
 	public static String ImportSurveyDesignSourcePage_ConservationArea;
-
 	public static String ImportSurveyDesignSourcePage_File;
-
 	public static String ImportSurveyDesignSourcePage_Message;
-
 	public static String ImportSurveyDesignWizard_Error;
-
 	public static String ImportSurveyDesignWizard_Report_Message;
-
 	public static String ImportSurveyDesignWizard_Report_Title;
-
 	public static String ImportSurveyDesignWizard_Title;
 	public static String ImportWizard_ErrorTitle;
 	public static String ImportWizard_IdNoUnique;
@@ -330,17 +253,11 @@ public class Messages extends NLS {
 	public static String ImportWizard_WindowTitle;
 	public static String ISamplingUnitImporter_AutoGeneratedUnitPrefix;
 	public static String ISamplingUnitImporter_IdInvalid;
-
 	public static String ISamplingUnitImporter_IdNotUnique;
-
 	public static String ISamplingUnitImporter_ListNotFound;
-
 	public static String ISamplingUnitImporter_StringToLong;
-
 	public static String ISamplingUnitImporter_WarningMessage;
-
 	public static String ISamplingUnitImporter_WarningsDialog;
-
 	public static String LazySurveyDesignTreeContentProvider_LoadingLabel;
 	public static String LocationPage_DialogMessage;
 	public static String LocationPage_DirectoryLabel;
@@ -348,18 +265,13 @@ public class Messages extends NLS {
 	public static String LocationPage_Message;
 	public static String LocationPage_Title;
 	public static String MembersScreenOptionComposite_LeaderRequired;
-
 	public static String MembersScreenOptionComposite_MemberRequired;
-
 	public static String MissionAttributeDeleteAdvisor_DeleteError;
 	public static String MissionAttributeDeleteAdvisor_InvalidType;
-	public static String MissionAttributeDialog_CloseDialogTitle;
-	public static String MissionAttributeDialog_CloseMsg;
 	public static String MissionAttributeDialog_DeleteDialogTitle;
 	public static String MissionAttributeDialog_DeleteError;
 	public static String MissionAttributeDialog_DeleteMessage;
 	public static String MissionAttributeDialog_Message;
-	public static String MissionAttributeDialog_SaveError;
 	public static String MissionAttributeDialog_Title;
 	public static String MissionAttributeListItemDeleteAdvisor_DeleteError;
 	public static String MissionAttributeListItemDeleteAdvisor_InvalidObject;
@@ -371,7 +283,6 @@ public class Messages extends NLS {
 	public static String MissionDataImport_TrackLabel;
 	public static String MissionDataSource_SchemaNotSupported;
 	public static String MissionDataSourceFactory_Description;
-
 	public static String MissionDataSourceFactory_MissionNotFound;
 	public static String MissionDataSourceFactory_Name;
 	public static String MissionDataSourceFactory_ParameterName;
@@ -384,26 +295,20 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_DeleteDialog_Title;
 	public static String MissionDayComposite_DeleteWaypoint;
 	public static String MissionDayComposite_Direction1;
-	public static String MissionDayComposite_DisplayingWizard;
 	public static String MissionDayComposite_Distance1;
 	public static String MissionDayComposite_DistanceTraveled;
 	public static String MissionDayComposite_EndTime;
 	public static String MissionDayComposite_Error;
 	public static String MissionDayComposite_Files;
 	public static String MissionDayComposite_ImportWaypoints;
-	public static String MissionDayComposite_ImportWizardError;
 	public static String MissionDayComposite_InvalidHours;
 	public static String MissionDayComposite_InvalidRestMinutes;
 	public static String MissionDayComposite_LastModified_ColumnLabel;
-
 	public static String MissionDayComposite_LastModifiedBy_ColumnLabel;
-
-	public static String MissionDayComposite_LoadingWizard;
 	public static String MissionDayComposite_MoveWaypoint;
 	public static String MissionDayComposite_None;
 	public static String MissionDayComposite_Observation;
 	public static String MissionDayComposite_ObservationsWaypoints;
-
 	public static String MissionDayComposite_PrjLocationColumnLabel;
 	public static String MissionDayComposite_RestMinutes;
 	public static String MissionDayComposite_SamplingUnit;
@@ -412,7 +317,6 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_Time;
 	public static String MissionDayComposite_TotalHours;
 	public static String MissionDayComposite_TrackEditLink;
-
 	public static String MissionDayComposite_Tracks;
 	public static String MissionDayComposite_WaypointID;
 	public static String MissionDayComposite_X;
@@ -435,20 +339,14 @@ public class Messages extends NLS {
 	public static String MissionEditorDialog_SaveWarning;
 	public static String MissionEditorDialog_Title;
 	public static String MissionEmployeeComposite_AddAllButton;
-
 	public static String MissionEmployeeComposite_AllEmployees;
-
 	public static String MissionEmployeeComposite_AllEmployeesLabel;
 	public static String MissionEmployeeComposite_Description;
-
 	public static String MissionEmployeeComposite_filtertooltip;
-
 	public static String MissionEmployeeComposite_loadingteamsjob;
 	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
-
 	public static String MissionEmployeeComposite_ObserverError;
-
 	public static String MissionEmployeeComposite_ObserverErrorTooltip;
 	public static String MissionEmployeeComposite_Title;
 	public static String MissionExporter_0;
@@ -465,18 +363,9 @@ public class Messages extends NLS {
 	public static String MissionExportHandler_8;
 	public static String MissionExportHandler_9;
 	public static String MissionFeatureSource_RawWaypointLayerName;
-
 	public static String MissionFeatureSource_TrackLayerName;
-
 	public static String MissionFeatureSource_WaypointLayerName;
-
-	public static String MissionFilterDialog_Dates;
-	public static String MissionFilterDialog_Message;
-	public static String MissionFilterDialog_Title;
-
 	public static String MissionFilteredComboViewer_tooltip;
-	public static String MissionGeoResourceInfo_TracksTitle;
-	public static String MissionGeoResourceInfo_WaypointsTitle;
 	public static String MissionImportDialog_0;
 	public static String MissionImportDialog_1;
 	public static String MissionImportDialog_2;
@@ -492,7 +381,6 @@ public class Messages extends NLS {
 	public static String MissionImporter_11;
 	public static String MissionImporter_12;
 	public static String MissionImporter_13;
-
 	public static String MissionImporter_14;
 	public static String MissionImporter_2;
 	public static String MissionImporter_3;
@@ -518,43 +406,25 @@ public class Messages extends NLS {
 	public static String MissionMapPage_AddLayersJob_Error;
 	public static String MissionMapPage_AddLayersJob_Title;
 	public static String MissionMapPage_EditMsg;
-
 	public static String MissionMapPage_EditMsgTitle;
-
 	public static String MissionMapPage_MoveDbError;
-
 	public static String MissionMapPage_MoveReprojectError;
-
 	public static String MissionMapPage_RefreshLayersJob_Error;
 	public static String MissionMapPage_RefreshLayersJob_Title;
-
 	public static String MissionMapPage_UndoError;
-
 	public static String MissionMapPage_WaypointLbl;
 	public static String MissionMapSamplingUnitLinearDefaultStyle_LayerName;
-
 	public static String MissionMapSamplingUnitLinearDefaultStyle_MapName;
-
 	public static String MissionMapSamplingUnitPointDefaultStyle_LayerName;
-
 	public static String MissionMapSamplingUnitPointDefaultStyle_MapName;
-
 	public static String MissionMapTrackDefaultStyle_LayerName;
-
 	public static String MissionMapTrackDefaultStyle_MapName;
-
 	public static String MissionMapWaypointDefaultStyle_LayerName;
-
 	public static String MissionMapWaypointDefaultStyle_MapName;
-
 	public static String MissionMapWaypointRawDefaultStyle_LayerName;
-
 	public static String MissionMapWaypointRawDefaultStyle_MapName;
-
 	public static String MissionMetaConfigDialog_Message;
-
 	public static String MissionMetaConfigDialog_Title;
-
 	public static String MissionPropertiesComposite_AllMissionAttributes;
 	public static String MissionPropertiesComposite_DeleteWarning;
 	public static String MissionPropertiesComposite_Description;
@@ -562,15 +432,11 @@ public class Messages extends NLS {
 	public static String MissionPropertiesComposite_Title;
 	public static String MissionPropertyValuesComposite_Description;
 	public static String MissionPropertyValuesComposite_InvalidNumber;
-
 	public static String MissionPropertyValuesComposite_NoPropertiesDefined;
 	public static String MissionPropertyValuesComposite_Title;
 	public static String MissionScreenOption_Comment;
-
 	public static String MissionScreenOption_Leader;
-
 	public static String MissionScreenOption_Members;
-
 	public static String MissionServiceInfo_Description;
 	public static String MissionServiceInfo_Keyword1;
 	public static String MissionServiceInfo_Keyword2;
@@ -600,13 +466,9 @@ public class Messages extends NLS {
 	public static String MissionTrackEditDialog_SaveError;
 	public static String MissionTrackEditDialog_SaveWarning;
 	public static String MissionTrackEditDialog_Title;
-
 	public static String MissionTrackFromWaypointEngine_MultiDayMessage;
-
 	public static String MissionTrackFromWaypointEngine_SingleDayMessage;
-
 	public static String MissionTrackFromWaypointEngine_TwoPointsRequired;
-
 	public static String MissionTrackPointDialog_GeometryError;
 	public static String MoveWaypointDialog_Description;
 	public static String MoveWaypointDialog_MoveToLabel;
@@ -642,20 +504,16 @@ public class Messages extends NLS {
 	public static String PropertiesComposite_NameColumn;
 	public static String PropertiesComposite_Title;
 	public static String PropertiesComposite_ValueColumn;
-	public static String RemoveERJob_Title;
 	public static String RemoveERJob_UninstallError;
 	public static String SamplingUnit_ActiveState;
 	public static String SamplingUnit_InActiveState;
 	public static String SamplingUnit_LinearGeomType;
 	public static String SamplingUnit_PointGeomType;
 	public static String SamplingUnitAttributeDeleteAdvisor_CannotDeleteAttribute;
-	public static String SamplingUnitAttributeDialog_CloseDialogTitle;
 	public static String SamplingUnitAttributeDialog_ConfirmDelete;
-	public static String SamplingUnitAttributeDialog_ConfirmExit;
 	public static String SamplingUnitAttributeDialog_DeleteDialogTitle;
 	public static String SamplingUnitAttributeDialog_DeleteError;
 	public static String SamplingUnitAttributeDialog_Message;
-	public static String SamplingUnitAttributeDialog_SaveError;
 	public static String SamplingUnitAttributeDialog_Title;
 	public static String SamplingUnitAttributeListItemDeleteAdvisor_CannotDelete;
 	public static String SamplingUnitAttributeListItemDeleteAdvisor_InvalidObjectError;
@@ -709,7 +567,6 @@ public class Messages extends NLS {
 	public static String SamplingUnitStateDialog_Title;
 	public static String SaveMissionJob_Error;
 	public static String SaveMissionJob_Title;
-	public static String SaveMissionTracksJob_Title;
 	public static String SaveSurveyDesignJob_Error;
 	public static String SaveSurveyDesignJob_Title;
 	public static String SaveWaypointJob_Error;
@@ -722,7 +579,6 @@ public class Messages extends NLS {
 	public static String ShpSamplingUnitImporter_GeomTypeNotSupported3;
 	public static String ShpSamplingUnitImporter_InvalidGeometryType;
 	public static String ShpSamplingUnitImporter_Progress1;
-
 	public static String ShpSamplingUnitImporter_ProjectionNotFound;
 	public static String ShpSamplingUnitImporter_SamplingUnitTypeError;
 	public static String StatusComposite_Active;
@@ -730,14 +586,9 @@ public class Messages extends NLS {
 	public static String StatusComposite_Inactive;
 	public static String StatusComposite_Title;
 	public static String SurveyComposite_CreateNewSurvey;
-
 	public static String SurveyComposite_Description;
 	public static String SurveyComposite_SurveyLabel;
 	public static String SurveyComposite_Title;
-	public static String SurveyDatePage_DateRangeWarn;
-
-	public static String SurveyDatePage_Message;
-	public static String SurveyDatePage_Title;
 	public static String SurveyDeleteCaHandler_deleteMissionProp;
 	public static String SurveyDeleteCaHandler_deleteMissions;
 	public static String SurveyDeleteCaHandler_deleteSuAttriutes;
@@ -746,7 +597,6 @@ public class Messages extends NLS {
 	public static String SurveyDesign_ActiveStateLabel;
 	public static String SurveyDesign_InActiveStateLabel;
 	public static String SurveyDesignComposite_Description;
-
 	public static String SurveyDesignComposite_NeedsSurveyDesign;
 	public static String SurveyDesignComposite_SdLabel;
 	public static String SurveyDesignComposite_Title;
@@ -792,9 +642,7 @@ public class Messages extends NLS {
 	public static String SurveyDesignExportHandler_SurveyDesignsLabels;
 	public static String SurveyDesignExportHandler_Title;
 	public static String SurveyDesignFromXmlConverter_0;
-
 	public static String SurveyDesignFromXmlConverter_1;
-
 	public static String SurveyDesignFromXmlConverter_MissingSuAttribute;
 	public static String SurveyDesignFilterDialog_Message;
 	public static String SurveyDesignFilterDialog_StateLabel;
@@ -808,21 +656,17 @@ public class Messages extends NLS {
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
 	public static String SurveyDesignListView_MoveError;
-
 	public static String SurveyDesignListView_MoveToSurvey;
-
 	public static String SurveyDesignListView_SurveyMissionTabName;
 	public static String SurveyDesignPage_Label;
 	public static String SurveyDesignPage_Message;
 	public static String SurveyDesignPage_NeedsSurveyDesign;
-
 	public static String SurveyDesignPage_NewDesignItem;
 	public static String SurveyDesignPage_Title;
 	public static String SurveyDesignSamplingUnitAttributeDialog_AllSuLAbel;
 	public static String SurveyDesignSamplingUnitAttributeDialog_ConfirmMsg;
 	public static String SurveyDesignSamplingUnitAttributeDialog_CreateAttributeLabel;
 	public static String SurveyDesignSamplingUnitAttributeDialog_DialogTitle;
-	public static String SurveyDesignSamplingUnitAttributeDialog_ErrorCreatingNew;
 	public static String SurveyDesignSamplingUnitAttributeDialog_ErrorMsg;
 	public static String SurveyDesignSamplingUnitAttributeDialog_Message;
 	public static String SurveyDesignSamplingUnitAttributeDialog_SurveySuLabel;
@@ -831,18 +675,14 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_Description;
 	public static String SurveyDesignSummaryEditorPage_DesignSectionLabel;
 	public static String SurveyDesignSummaryEditorPage_DistanceDirectionLabel1;
-	public static String SurveyDesignSummaryEditorPage_EndDate;
 	public static String SurveyDesignSummaryEditorPage_Key;
 	public static String SurveyDesignSummaryEditorPage_Name;
 	public static String SurveyDesignSummaryEditorPage_NameColumn;
-
 	public static String SurveyDesignSummaryEditorPage_ObservationOptions;
-
 	public static String SurveyDesignSummaryEditorPage_ObserverOption;
 	public static String SurveyDesignSummaryEditorPage_Properties;
 	public static String SurveyDesignSummaryEditorPage_PropertiesDescription;
 	public static String SurveyDesignSummaryEditorPage_PropertiesSectionLabel;
-	public static String SurveyDesignSummaryEditorPage_StartDate;
 	public static String SurveyDesignSummaryEditorPage_Status;
 	public static String SurveyDesignSummaryEditorPage_SummaryPageLabel;
 	public static String SurveyDesignSummaryEditorPage_TranslateLink;
@@ -850,32 +690,23 @@ public class Messages extends NLS {
 	public static String SurveyDesignToXmlConverter_TaskName;
 	public static String SurveyEditorInput_0ID_1Name;
 	public static String SurveyFilterDialog_AllDesignsLabel;
-	public static String SurveyFilterDialog_DatesGroup;
 	public static String SurveyFilterDialog_DesignGroup;
 	public static String SurveyFilterDialog_IdGroup;
 	public static String SurveyFilterDialog_LoadingLabel;
 	public static String SurveyFilterDialog_LoadJobName;
 	public static String SurveyFilterDialog_Message;
-
 	public static String SurveyFilterDialog_MissionDatesFilter;
 	public static String SurveyFilterDialog_SaveDefault;
-
 	public static String SurveyFilterDialog_SelectedLabel;
 	public static String SurveyFilterDialog_StateOnlyLabel;
 	public static String SurveyFilterDialog_SurveyIdFieldLabel;
 	public static String SurveyFilterDialog_Title;
 	public static String SurveyFilterDialog_WarnInfo;
-
 	public static String SurveyFilterDialog_WarnTitle;
-
 	public static String SurveyFilteredComboViewer_Message;
-
 	public static String SurveyFilteredComboViewer_NewSurveyLabel;
-
 	public static String SurveyFilteredComboViewer_Title;
-
 	public static String SurveyFilteredComboViewer_tooltip;
-
 	public static String SurveyIdPage_IdError;
 	public static String SurveyIdPage_IdLabel;
 	public static String SurveyIdPage_Message;
@@ -883,29 +714,22 @@ public class Messages extends NLS {
 	public static String SurveyPermissionManager_InsufficientPrivileges;
 	public static String SurveyPermissionManager_InvalidUserType;
 	public static String SurveyPermissionManager_MissionToOld;
-	public static String SurveyPermissionManager_SurveyToOld;
 	public static String SurveyWaypointSource_Name;
-
 	public static String SurveyWaypointSourceUiProvider_WaypointNotFound;
 	public static String TemplateWizardPage_BlankDesign;
 	public static String TemplateWizardPage_ConservationArea;
-
 	public static String TemplateWizardPage_CopySuLabels;
 	public static String TemplateWizardPage_Description;
-
 	public static String TemplateWizardPage_SurveyDesign;
 	public static String TemplateWizardPage_TemplateDesign;
 	public static String TemplateWizardPage_Title;
 	public static String TracksComposite_CouldNotParseLinestring;
-
 	public static String TracksComposite_CouldNotSplit;
 	public static String TracksComposite_CurrentDayRule;
 	public static String TracksComposite_DeleteMessage;
 	public static String TracksComposite_DeleteTitle;
-
 	public static String TracksComposite_ErrorDialogTitle;
 	public static String TracksComposite_ImportTitle;
-
 	public static String TracksComposite_InvalidId;
 	public static String TracksComposite_MapConfigurationError;
 	public static String TracksComposite_MapError;
@@ -941,11 +765,8 @@ public class Messages extends NLS {
 	public static String XMLtoMissionConverter_12;
 	public static String XMLtoMissionConverter_13;
 	public static String XMLtoMissionConverter_14;
-
 	public static String XMLtoMissionConverter_15;
-
 	public static String XMLtoMissionConverter_16;
-
 	public static String XMLtoMissionConverter_17;
 	public static String XMLtoMissionConverter_2;
 	public static String XMLtoMissionConverter_3;
@@ -955,19 +776,12 @@ public class Messages extends NLS {
 	public static String XMLtoMissionConverter_7;
 	public static String XMLtoMissionConverter_8;
 	public static String XMLtoMissionConverter_9;
-
 	public static String XMLtoMissionConverter_AttachmentError;
-
 	public static String XMLtoMissionConverter_duplicatememberwarning;
-
 	public static String XMLtoMissionConverter_GeometryError;
-
 	public static String XMLtoMissionConverter_GeometrySourceError;
-
 	public static String XMLtoMissionConverter_NoListItemsFound;
-
 	public static String XMLtoMissionConverter_ObserverNotFound;
-
 	public static String XMLtoMissionConverter_SignatureTypeNotFound;
 	
 	static {

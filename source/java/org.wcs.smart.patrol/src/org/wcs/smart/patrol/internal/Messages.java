@@ -288,9 +288,7 @@ public class Messages extends NLS {
 	public static String PatrolDayEditor_PatrolDayTitle;
 	public static String PatrolDayEditor_CanNotEditPatrol;
 	public static String PatrolDayEditor_Error_LoadingPatrolData;
-	public static String PatrolDayEditor_LegSectionNamePrefix;
-
-	public static String PatrolDayEditor_SectionHeaderString;
+		public static String PatrolDayEditor_SectionHeaderString;
 	public static String PatrolDayEditorInput_DayEditor_Tooltip;
 	public static String PatrolDayEditorInput_DayEditorName_Prefix;
 	public static String PatrolEditor_AttachmentError;
@@ -405,9 +403,6 @@ public class Messages extends NLS {
 
 	public static String PatrolLabelProvider_Distance;
 	public static String PatrolLabelProvider_EmployeesMetadata;
-	public static String PatrolLabelProvider_EndDateMetadata;
-
-	
 	public static String PatrolLabelProvider_JSONPROCESSOR_1;
 
 	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE;
@@ -475,7 +470,6 @@ public class Messages extends NLS {
 	public static String PatrolLabelProvider_PatrolTypeColumnName;
 	public static String PatrolLabelProvider_PidMetadata;
 	public static String PatrolLabelProvider_PilotMetadata;
-	public static String PatrolLabelProvider_StationDateMetadata;
 	public static String PatrolLabelProvider_StationMetadata;
 	public static String PatrolLabelProvider_TeamActiveColumnName;
 	public static String PatrolLabelProvider_TeamColumnName;
@@ -506,8 +500,6 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_EndTimeLabel;
 	public static String PatrolLegDayInputComposite_Error_DialogTitle;
 	public static String PatrolLegDayInputComposite_Error_StartTimeError_Tooltip;
-	public static String PatrolLegDayInputComposite_ErrorImportTracksWizard;
-	public static String PatrolLegDayInputComposite_ErrorImportWaypointWizard;
 	public static String PatrolLegDayInputComposite_ImportTrackError_DialogMessage;
 	public static String PatrolLegDayInputComposite_ImportWaypointsLabel;
 	public static String PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1;
@@ -522,8 +514,6 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_Observation_ColumnHeader;
 	public static String PatrolLegDayInputComposite_ObservationsWaypointsLabel;
 	public static String PatrolLegDayInputComposite_PrjLocationColumnHeader;
-	public static String PatrolLegDayInputComposite_Progress_DisplayingImportWizard;
-	public static String PatrolLegDayInputComposite_Progress_LoadingImportWizard;
 	public static String PatrolLegDayInputComposite_RestMinutesLabel;
 	public static String PatrolLegDayInputComposite_SetTrackDialog_Message;
 	public static String PatrolLegDayInputComposite_SetTrackLabel;
@@ -722,8 +712,6 @@ public class Messages extends NLS {
 
 	public static String PatrolPresentationPart_dayslabel;
 
-	public static String PatrolPresentationPart_Days;
-
 	public static String PatrolPresentationPart_DaysAndLegs;
 
 	public static String PatrolPresentationPart_DeleteWaypointOption;
@@ -813,8 +801,6 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Member_Label;
 	public static String PatrolSummaryEditor_MultiLegPatrol_Label;
 	public static String PatrolSummaryEditor_NoDataLabel;
-	public static String PatrolSummaryEditor_NoMandateLabel;
-	public static String PatrolSummaryEditor_NoStationLabel;
 	public static String PatrolSummaryEditor_NoTeamLabel;
 	public static String PatrolSummaryEditor_Objective_Label;
 	public static String PatrolSummaryEditor_OverallStatistics;
@@ -947,7 +933,6 @@ public class Messages extends NLS {
 
 	public static String PresentationHeader_SummaryPageName;
 
-	public static String SavePatrolPartJob_Name;
 	public static String ScreenOption_Armed;
 	public static String ScreenOption_Comment;
 	public static String ScreenOption_Leader;

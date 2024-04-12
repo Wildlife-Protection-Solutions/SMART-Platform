@@ -26,7 +26,6 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.patrol.internal.messages"; //$NON-NLS-1$
 	
-	public static String DataQueueCtPatrolDatabaseUpgrader_UpgradeTask;
 	public static String DataQueueCtPatrolJob_ErrorMsg;
 	public static String PatrolDialog_ActionLabel;
 	public static String PatrolDialog_AddExistingLabel;

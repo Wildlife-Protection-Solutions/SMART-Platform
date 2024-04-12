@@ -15,8 +15,6 @@ public class Messages extends NLS {
 	public static String AbstractValueDropItem_ComputeRate;
 	public static String AbstractValueDropItem_EncounterRatePerRatio;
 	public static String AttachmentTable_SearchingText;
-	public static String AttributeFilter_InvalidAttributePrefix;
-	public static String AttributeFilter_InvalidWaypointObservationPrefix;
 	public static String CategoryFilter_InvalidPrefix;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
 	public static String DerbyFilterToSqlGenerator_OperatorNotSupported;
@@ -30,7 +28,6 @@ public class Messages extends NLS {
 	public static String AreaTreeNode_CustomAreaTreeNode;
 	public static String AreaTreeNode_jobname;
 	public static String AreaTreeNode_LoadingTest;
-	public static String AttributeFilter_AnyListItemOption;
 	public static String AttributeFilter_AttributeNotFound;
 	public static String AttributeFilter_ListItemNotFound;
 	public static String AttributeFilter_TreeNodeNotFound;
@@ -38,13 +35,11 @@ public class Messages extends NLS {
 	public static String AttributeGroupBy_AttributeNotFoundError;
 	public static String AttributeGroupBy_CategoryNotFoundError;
 	public static String AttributeListDropItem_LoadingJobName;
-	public static String AttributeListDropItem_LoadingLabel;
 	public static String AttributeListGroupByDropItem_AllLabel;
 	public static String AttributeListGroupByDropItem_ErrorLoadingListItems;
 	public static String AttributeListGroupByDropItem_FiltersLinkLabel;
 	public static String AttributeListGroupByDropItem_IncludedTooltip;
 	public static String AttributeTreeDropItem_LoadingListItemJobName;
-	public static String AttributeTreeDropItem_LoadingText;
 	public static String AttributeTreeGroupByDropItem_AllLabel;
 	public static String AttributeTreeGroupByDropItem_ErrorLoadingTreeItems;
 	public static String AttributeTreeGroupByDropItem_FiltersLink;
@@ -130,7 +125,6 @@ public class Messages extends NLS {
 	public static String DrawAreaMapDialog_DialogTitle;
 	public static String DrawAreaMapDialog_MapName;
 	public static String DrawAreaMapDialog_refreshJobName;
-	public static String DropItem_deleteitemTooltip;
 	public static String EditObservationDialog_EditMessage;
 	public static String EditObservationDialog_ErrorDialogTitle;
 	public static String EditObservationDialog_NewMessage;
@@ -291,7 +285,6 @@ public class Messages extends NLS {
 	public static String ItemTreeNodeTree_Loading;
 	public static String ItemTreeNodeTree_ShowInactiveFilterItems;
 	public static String MonthDateGroupBy_MonthGroupByName;
-	public static String MultiCaDataModelManagerImpl_MergeError;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;
 	public static String NameCellEditor_CouldNotSaveQueryName;
 	public static String NameCellEditor_UpdateFolderNameJob;
@@ -303,21 +296,6 @@ public class Messages extends NLS {
 	public static String NewQueryWizard_QueryType;
 	public static String OpenRunQueryHandler_Msg;
 	public static String OpenRunQueryHandler_MsgTitle;
-	public static String Operator_AND;
-	public static String Operator_BetweenOp;
-	public static String Operator_Equals;
-	public static String Operator_GreaterThan;
-	public static String Operator_GreaterThanEqual;
-	public static String Operator_LessThan;
-	public static String Operator_LessThanEqual;
-	public static String Operator_NOT;
-	public static String Operator_NotBetweenOp;
-	public static String Operator_NotEqual;
-	public static String Operator_OR;
-	public static String Operator_StrContains;
-	public static String Operator_StrEquals;
-	public static String Operator_StrNotContains;
-	public static String OperatorLabelProvider_ExactOperator;
 	public static String OperatorsTreeNode_OperatorsLabel;
 	public static String PatrolQueryOptions_DateOp_Last30;
 	public static String PatrolQueryOptions_DateOpAll;
@@ -599,7 +577,6 @@ public class Messages extends NLS {
 	public static String GridTiffImageExporter_QueryError;
 	public static String GridTiffImageExporter_TiffExporterName;
 	public static String ListHelpWizardPage_PageTitle;
-	public static String ListItem_Inactive;
 	public static String ShapeQueryExporter_ExporterName;
 	public static String ShapeQueryExporter_GeometryColumnRequired;
 	public static String ShowInTableInfoProvider_Label;

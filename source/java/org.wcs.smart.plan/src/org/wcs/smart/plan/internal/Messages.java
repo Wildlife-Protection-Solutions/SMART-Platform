@@ -4,8 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.plan.internal.messages"; //$NON-NLS-1$
-	public static String AddPlanJob_Error;
-	public static String AddPlanJob_Title;
+	
 	public static String AdministrativePlanTarget_GuiName;
 	public static String AdministrativePlanTargetPropertyPage_Achieved_Label;
 	public static String AdministrativePlanTargetPropertyPage_Description_Label;
@@ -132,7 +131,6 @@ public class Messages extends NLS {
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Message;
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Title;
 	public static String PlanConfigurationPreferencePage_METER_LABEL;
-	public static String PlanDatabaseUpgrader_UpgradeTask;
 	public static String PlanDatesComposite_ClidRangeViolation_Message;
 	public static String PlanDatesComposite_EndDate;
 	public static String PlanDatesComposite_EndDate_Invalid_Error;
@@ -255,7 +253,6 @@ public class Messages extends NLS {
 	public static String PlanTargetResultSetMetadata_PlanIdColumnLabel;
 	public static String PlanTargetResultSetMetadata_StartDateColumnName;
 	public static String PlanTargetResultSetMetadata_StatusDescriptionTargetLabel;
-	public static String PlanTargetResultSetMetadata_StatusKeyTargetLabel;
 	public static String PlanTargetResultSetMetadata_TargetDescriptionColumnLabel;
 	public static String PlanTargetResultSetMetadata_TargetNameColumnLabel;
 	public static String PlanTargetResultSetMetadata_TargetPointsGeomColumnName;
@@ -283,7 +280,6 @@ public class Messages extends NLS {
 	public static String PlanTypeEmployeesComposite_Unknown_Label;
 	public static String PlanTypeEmployeesComposite_VacationSickness_Label;
 	public static String RemovePlanJob_Error;
-	public static String RemovePlanJob_Title;
 	public static String ReportPlan_ErrorEditingPlanTemplate;
 	public static String RevertPlanTemplate_ConfirmDialogTitle;
 	public static String RevertPlanTemplate_Error;

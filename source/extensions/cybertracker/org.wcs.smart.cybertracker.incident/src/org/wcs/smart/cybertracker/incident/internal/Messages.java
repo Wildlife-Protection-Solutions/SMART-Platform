@@ -5,7 +5,6 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.incident.internal.messages"; //$NON-NLS-1$
 	
-	public static String CtIncidentDatabaseUpgrader_Progress;
 	public static String CtIncidentPackageConfigurator_ConfigLabel;
 	public static String CtIncidentPackageConfigurator_ConfigurableModelLabel;
 	public static String CtIncidentPackageConfigurator_ConfigurationSectionHeader;

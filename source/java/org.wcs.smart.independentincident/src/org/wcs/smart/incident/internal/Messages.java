@@ -49,7 +49,6 @@ public class Messages extends NLS {
 	public static String ExportTemplateHandler_ExportTitle;
 	public static String IdComposite_Description1;
 	public static String IdComposite_IdRequired;
-	public static String IdComposite_IntegerRequired;
 	public static String IdComposite_Label;
 	public static String IdComposite_Name;
 	public static String IdComposite_WaypointSourceField;
@@ -104,9 +103,7 @@ public class Messages extends NLS {
 	public static String IncidentEditor_DetailsPageName;
 	public static String IncidentEditor_EditorError1;
 	public static String IncidentEditor_EditorError2;
-	public static String IncidentEditor_EditorPartName;
 	public static String IncidentEditor_MapPageName;
-	public static String IncidentEditorInput_EditorName;
 	public static String IncidentEditorInput_EditorTooltip;
 	public static String IncidentExporter_ExportProgress;
 	public static String IncidentExporter_ExportProgress1;
@@ -158,12 +155,9 @@ public class Messages extends NLS {
 	public static String IncidentLabelProvider_WpNotFound;
 	public static String IncidentManager_IncidentTooOldToEdit;
 	public static String IncidentManager_Insufficientprivleges;
-	public static String IncidentMapLayer_IncidentPositionName;
-	public static String IncidentMapLayer_RawPositionName;
 	public static String IncidentMapPage_EditWarningMsg;
 	public static String IncidentMapPage_EditWarningMsgTitle;
 	public static String IncidentMapPage_Error1;
-	public static String IncidentMapPage_Error2;
 	public static String IncidentMapPage_MapLayerName;
 	public static String IncidentMapPage_RawPointLayerName;
 	public static String IncidentMapPage_reprojectionError;
@@ -254,7 +248,6 @@ public class Messages extends NLS {
 	public static String LocationComposite_yLabel;
 	public static String LocationComposite_YNumberRequired;
 	public static String LocationComposite_YRequired;
-	public static String MapDialog_Title;
 	public static String MultiIncidentExportDialog_ChangeFilter;
 	public static String MultiIncidentExportDialog_CouldNotCreateDirector;
 	public static String MultiIncidentExportDialog_DirectoryNotFound;

@@ -25,11 +25,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.connect.internal.messages"; //$NON-NLS-1$
-	public static String AddConnectJob_ErrorLog;
-	public static String AddConnectJob_ErrorMessage;
-	public static String AddConnectJob_ErrorTitle;
-	public static String AddConnectJob_JobName;
-	public static String AddConnectJob_TaskName;
 	public static String ApplyChangeLogJob_ApplyError;
 	public static String ApplyChangeLogJob_ApplyMessage;
 	public static String ApplyChangeLogJob_ApplyTaskName;
@@ -111,7 +106,6 @@ public class Messages extends NLS {
 	public static String ConnectCaListPage_NoAuthorized;
 	public static String ConnectCaListPage_NoCa;
 	public static String ConnectCaListPage_Title;
-	public static String ConnectDatabaseUpgrader_TaskName;
 	public static String ConnectDialog_ConfigureLabel;
 	public static String ConnectDialog_ConnectingTask;
 	public static String ConnectDialog_DecryptError;
@@ -255,7 +249,6 @@ public class Messages extends NLS {
 	public static String FileUploaderJob_AttemptStatusMessage;
 	public static String FileUploaderJob_CompleteTaskName;
 	public static String FileUploaderJob_ErrorTaskName;
-	public static String FileUploaderJob_StatusCheckSubTaskName;
 	public static String FileUploaderJob_subTaskName;
 	public static String FileUploaderJob_TaskName;
 	public static String FileUploaderJob_ToLong;
@@ -302,9 +295,7 @@ public class Messages extends NLS {
 	public static String RecoverCaHandler_Message;
 	public static String RecoverCaHandler_Shell;
 	public static String RecoverCaHandler_Title;
-	public static String RemoveConnectJob_jobName;
 	public static String RemoveConnectJob_UninstallError;
-	public static String RemoveConnectJob_UninstallError2;
 	public static String ReplicationInfoDialog_ChangeLable;
 	public static String ReplicationInfoDialog_datetime_columnname;
 	public static String ReplicationInfoDialog_DisabledState;

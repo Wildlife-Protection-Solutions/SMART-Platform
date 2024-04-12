@@ -277,7 +277,6 @@ public class Messages extends NLS {
 	public static String BasemapPropertyPage_Progress_Loading;
 	public static String BasemapPropertyPage_RenameButton;
 	public static String BasemapPropertyPage_SetDefaultButton;
-	public static String CaExporter_Error_TempDirDelete;
 	public static String CaExporter_ProgressExportCA;
 	public static String CaExporter_TaskName;
 	public static String CaImporter_Error_CaAlreadyExists;
@@ -405,7 +404,6 @@ public class Messages extends NLS {
 	public static String CcaaUserPropertyPage_verifyDelete1;
 	public static String CcaaUserPropertyPage_verifyDelete2;
 	public static String CcaaUserPropertyPage_verifyDelete3;
-	public static String ChangeLogInstaller_ProgressTaskName;
 	public static String ChangeUserPasswordDialog_ChangeUser_DialogMessage;
 	public static String ChangeUserPasswordDialog_ChangeUser_DialogTitle;
 	public static String ChangeUserPasswordDialog_Dialog_Message;
@@ -430,8 +428,6 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Updated_DialogTitle;
 	public static String ChangeUserPasswordDialog_Username_Label;
 	public static String ChangeUserPasswordDialog_UserNameValidationError;
-	public static String ColorSelector_Button_Color;
-	public static String ColorSelector_Dialog_Title;
 	public static String ConservationAreaClonerEngine_Error_CircularDependency;
 	public static String ConservationAreaClonerEngine_ErrorCleanUpRequired;
 	public static String ConservationAreaClonerEngine_Progress_CopyingCa;
@@ -540,8 +536,7 @@ public class Messages extends NLS {
 	public static String DataModelMergeDialog_ShellTitle;
 	public static String DataModelMergeDialog_Title;
 	public static String DataModelMergeDialog_UsernameErr;
-	public static String DataModelMergeDialog_ValidFileRequiredErr;
-	public static String DataModelMergeDialog_xmlfilelbl;
+	public static String DataModelMergeDialog_ValidFileRequiredErr;	
 	public static String DataModelMerger_SubTask1;
 	public static String DataModelMerger_SubTask2;
 	public static String DataModelMerger_SubTask3;
@@ -578,7 +573,6 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_Error_XmlExport;
 	public static String DataModelPropertyPage_ErrorDialogTitle;
 	public static String DataModelPropertyPage_ExportingTranslationsError;
-	public static String DataModelPropertyPage_ExportSuccess_DialogMessage;
 	public static String DataModelPropertyPage_ExportSuccess_DialogTitle;
 	public static String DataModelPropertyPage_ExportTooltip;
 	public static String DataModelPropertyPage_ExportTranslationsButton;
@@ -614,7 +608,6 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_Progress_ConvertingXml;
 	public static String DataModelPropertyPage_Progress_ExportingXml;
 	public static String DataModelPropertyPage_Progress_WritingXml;
-	public static String DataModelPropertyPage_Progress1;
 	public static String DataModelPropertyPage_PropertiesGroup_Label;
 	public static String DataModelPropertyPage_SaveChanges_DialogMessage;
 	public static String DataModelPropertyPage_SaveChanges_DialogTitle;
@@ -629,7 +622,6 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_TranslationsImportDialogutfrequired;
 	public static String DataModelPropertyPage_WarningDialogTitle;
 	public static String DataModelPropertyPage_WarningsMessage;
-	public static String DataModelPropertyPage_XmlFile_FilterName;
 	public static String DataModelSmartToXmlConverter_Progress_Attributes;
 	public static String DataModelSmartToXmlConverter_Progress_convertingDm;
 	public static String DataModelSmartToXmlConverter_Progress_Languages;
@@ -704,9 +696,7 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_Error_CouldNotCleanup;
 	public static String DerbyRestoreEngine_Error_CouldNotCreateTempBackup;
 	public static String DerbyRestoreEngine_Error_CouldNotCreateTempCopy;
-	public static String DerbyRestoreEngine_Error_CouldNotDeleteCurrentData;
 	public static String DerbyRestoreEngine_Error_CouldNotExtractFile;
-	public static String DerbyRestoreEngine_Error_Failure;
 	public static String DerbyRestoreEngine_Error_NoBackupFile;
 	public static String DerbyRestoreEngine_Error_NoDbInBackupFile;
 	public static String DerbyRestoreEngine_Error_RestoreFailedCouldNotRevert;
@@ -844,13 +834,11 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_addemployeetooltip;
 	public static String EmployeePropertyPage_addmemberserror;
 	public static String EmployeePropertyPage_addmembertooltip;
-	public static String EmployeePropertyPage_ConfirmDeleteMulti;
 	public static String EmployeePropertyPage_CouldNotDeleteEmployee;
 	public static String EmployeePropertyPage_CreateNew_Button;
 	public static String EmployeePropertyPage_createteamtooltip;
 	public static String EmployeePropertyPage_DeleteEmployee_DialogMessage1;
 	public static String EmployeePropertyPage_deleteconfirm;
-	public static String EmployeePropertyPage_deleteemployeetooltip;
 	public static String EmployeePropertyPage_deleteerror;
 	public static String EmployeePropertyPage_deletemembererror;
 	public static String EmployeePropertyPage_deletemembertooltip;
@@ -858,7 +846,6 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_deletetitle;
 	public static String EmployeePropertyPage_DialogMessage;
 	public static String EmployeePropertyPage_editemployeetooltip;
-	public static String EmployeePropertyPage_editteamerror;
 	public static String EmployeePropertyPage_editteammessage;
 	public static String EmployeePropertyPage_editteamtext;
 	public static String EmployeePropertyPage_editteamtitle;
@@ -866,7 +853,6 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_exportemployeetooltip;
 	public static String EmployeePropertyPage_EmployeeTabLbl;
 	public static String EmployeePropertyPage_Error;
-	public static String EmployeePropertyPage_Error_CannotDeleteEmployee;
 	public static String EmployeePropertyPage_importemployeetooltip;
 	public static String EmployeePropertyPage_InActiveFlag;
 	public static String EmployeePropertyPage_InactiveLabel;
@@ -875,7 +861,6 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_MakeInactiveTooltip;
 	public static String EmployeePropertyPage_Membersheader;
 	public static String EmployeePropertyPage_MembersHeader;
-	public static String EmployeePropertyPage_newteamerror;
 	public static String EmployeePropertyPage_newteammessage;
 	public static String EmployeePropertyPage_newteamtext;
 	public static String EmployeePropertyPage_NewTeamName;
@@ -1031,7 +1016,6 @@ public class Messages extends NLS {
 	public static String IconImporter_IconKeyColumnnotFound;
 	public static String IconImporter_IconNameNotFound;
 	public static String IconImporter_IconSetNotFound;
-	public static String IconImporter_KeyExists;
 	public static String IconImporter_LanguageCodeNotFound;
 	public static String IconImporter_NoIconFilesFound;
 	public static String IconPanel_clearLabel;
@@ -1052,8 +1036,6 @@ public class Messages extends NLS {
 	public static String IconPreferencePage_IconsTab;
 	public static String IconPreferencePage_LoadJobName;
 	public static String IconPreferencePage_MakeDefault;
-	public static String IconPreferencePage_NameColumn;
-	public static String IconPreferencePage_NewIconDialogTitle;
 	public static String IconPreferencePage_newiconsettooltip;
 	public static String IconPreferencePage_TemplateIconLabel;
 	public static String IconSelectionDialog_15;
@@ -1084,7 +1066,6 @@ public class Messages extends NLS {
 	public static String IconsetPropertyPage_ExportFormat;
 	public static String IconsetPropertyPage_ExportIconTitle;
 	public static String IconsetPropertyPage_FileExists;
-	public static String IconsetPropertyPage_IconImportError;
 	public static String IconsetPropertyPage_IconImportWarn;
 	public static String IconsetPropertyPage_IconInCa;
 	public static String IconsetPropertyPage_IconsImportedMsg;
@@ -1189,13 +1170,11 @@ public class Messages extends NLS {
 	public static String InactivityTimeoutPreferencePage_InvalidValueMsg;
 	public static String InactivityTimeoutPreferencePage_LogoutMsg;
 	public static String InactivityTimeoutPreferencePage_MinutesLbl;
-	public static String InitCaDataModelDialog_AllFiles_FilterName;
 	public static String InitCaDataModelDialog_Dialog_Title;
 	public static String InitCaDataModelDialog_Error_Cloning;
 	public static String InitCaDataModelDialog_Error_CouldNotReadXml;
 	public static String InitCaDataModelDialog_Error_CouldNotSaveDm;
 	public static String InitCaDataModelDialog_Error_NoDataModel;
-	public static String InitCaDataModelDialog_ImportXML_Button;
 	public static String InitCaDataModelDialog_NoDataModel_Message;
 	public static String InitCaDataModelDialog_Op_CopyExistingCa;
 	public static String InitCaDataModelDialog_Op_ImportCustom;
@@ -1207,7 +1186,6 @@ public class Messages extends NLS {
 	public static String InitCaDataModelDialog_Progress_loadDataModel;
 	public static String InitCaDataModelDialog_Progress_LoadingDefaultDm;
 	public static String InitCaDataModelDialog_Progress_SavingDm;
-	public static String InitCaDataModelDialog_XmlFileFilter_Name;
 	public static String InitializeDialog_Continue_Button;
 	public static String InitializeDialog_CreateCa_Label;
 	public static String InitializeDialog_Import_Label;
@@ -1279,7 +1257,6 @@ public class Messages extends NLS {
 	public static String MapSettings_Error_CreateMapLayer;
 	public static String MapSettings_Error_SaveBasemap;
 	public static String MapSettings_FileImportError;
-	public static String MapSettings_InvalidJson;
 	public static String SmartMapEditorPart_Error_SettingMapProjection;
 	public static String SmartMapEditorPart_MapCoordinate_Label;
 	public static String SmartMapEditorPart_MapCoordinate_XYSeparator;
@@ -1404,13 +1381,9 @@ public class Messages extends NLS {
 	public static String SmartDefaultStylesPreferencePage_Message;
 	public static String SmartFilterDialog_Apply_Button;
 	public static String SmartFilterDialog_Reset_Button;
-	public static String SmartGenerateIconSymbolizer_CCAANotSupported;
 	public static String SmartGenerateIconSymbolizer_Name;
 	public static String SmartIconSymbolizer_FilterSection;
 	public static String SmartIconSymbolizer_GeneralSection;
-	public static String SmartIconSymbolizer_GenerateButton;
-	public static String SmartIconSymbolizer_GenerateButtonTooltip;
-	public static String SmartIconSymbolizer_NotSupported;
 	public static String SmartIconSymbolizer_SelectIconButton;
 	public static String SmartIconSymbolizer_SmartIconPointSymbolizer;
 	public static String SmartInstallationInfoPage_DBLocation_Label;
@@ -1486,10 +1459,8 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_TextAttributeType;
 	public static String SmartLabelProvider_TreeAttributeType;
 	public static String SmartLayerStyleInterceptor_StyleError;
-	public static String SmartPlugIn_CouldNotconnect;
 	public static String SmartPlugIn_Error_Dialog_Title;
 	public static String SmartPlugIn_UnknownVersion;
-	public static String SmartPlugIn_VersionErrorMessage;
 	public static String SmartPointLabelProvider_ConversionFail_Label;
 	public static String SmartProperties_InvalidProperty;
 	public static String SmartSavedStylePage_ApplyError;
@@ -1563,7 +1534,6 @@ public class Messages extends NLS {
 	public static String StartUpAdvancedDialog_DialogContent_Label;
 	public static String StartUpAdvancedDialog_DialogHeader;
 	public static String StartUpAdvancedDialog_DialogTitle;
-	public static String StartUpDatabaseUpgrader_UpgradeError;
 	public static String StartUpDialog_DialogHeader;
 	public static String StartUpDialog_DialogMessage;
 	public static String StartUpDialog_DialogTitle;
@@ -1646,7 +1616,6 @@ public class Messages extends NLS {
 	public static String TracksComposite_ZoomTo;
 	public static String TranslateNameComposite_Button_Translate;
 	public static String TranslateNameComposite_EmptyError;
-	public static String TranslateNameComposite_ErrorDialog_Title;
 	public static String TranslateNameComposite_MaxLengthError;
 	public static String TranslateNamesHandler_Error_TranslatingName;
 	public static String TranslateSimpleListItemDialog_DialogMessage;
@@ -1657,20 +1626,10 @@ public class Messages extends NLS {
 	public static String TranslateSimpleListItemDialog_NameLabel;
 	public static String UpgradeEngine_ChangeLogTaskName;
 	public static String UpgradeEngine_CompressingTaskName;
-	public static String UpgradeEngine_Confirm_Message;
 	public static String UpgradeEngine_Confirm_Title;
 	public static String UpgradeEngine_Error_Message1;
-	public static String UpgradeEngine_IncompatibleVersion;
 	public static String UpgradeEngine_LoadingTaskName;
-	public static String UpgradeEngine_Plugin_Missing;
-	public static String UpgradeEngine_Plugin_UpgradeMessage;
-	public static String UpgradeEngine_Plugin_WrongVersion;
-	public static String UpgradeEngine_pluginssubtask;
-	public static String UpgradeEngine_subprogress1;
 	public static String UpgradeEngine_subprogress2;
-	public static String UpgradeEngine_subprogress3;
-	public static String UpgradeEngine_subprogress5;
-	public static String UpgradeEngine_subprogress6;
 	public static String UpgradeEngine_UpgradeTask;
 	public static String UpgradeEngine_UpgradingTaskName;
 	public static String UpgradeEngine_VersionError;
@@ -1743,7 +1702,6 @@ public class Messages extends NLS {
 	public static String XmlMultiExportDialog_OverwriteWarningLabel;
 	public static String XmlMultiExportDialog_SelectAllLabel;
 	public static String XmlMultiExportDialog_WarnDialog_Title;
-	public static String ZipUtil_Error_UnzipFailed;
 	public static String ZipUtil_Progress_CreatingZip;
 	public static String ZipUtil_Progress_ProcessingFile;
 	

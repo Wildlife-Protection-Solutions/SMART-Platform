@@ -4,11 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.connect.dataqueue.internal.messages"; //$NON-NLS-1$
-	public static String AddConnectDataQueueJob_DQInstallError;
-	public static String AddConnectDataQueueJob_ErrorDialogTitle;
-	public static String AddConnectDataQueueJob_InstallError;
-	public static String AddConnectDataQueueJob_JobName;
-	public static String AddConnectDataQueueJob_ProgressTask;
 	public static String AutoProcessingManager_ServerNotConfigured;
 	public static String AutoProcessingManager_StartupJobName;
 	public static String AutoProcessingManager_Status1;
@@ -31,7 +26,6 @@ public class Messages extends NLS {
 	public static String CaCloneDataQueueOptions_task;
 	public static String CaDataQueueDeleteHandler_taskMessage;
 	public static String ConnectDataQueue_UpdateFailed;
-	public static String ConnectDataQueueDatabaseUpgrader_TaskName;
 	public static String DataQueueItemProcessor_Error1;
 	public static String DataQueueItemProcessor_Error2;
 	public static String DataQueueItemProcessor_Error3;
@@ -153,9 +147,7 @@ public class Messages extends NLS {
 	public static String LoginHandler_JobName;
 	public static String LoginHandler_MessageInfo;
 	public static String LoginHandler_MessageTitle;
-	public static String RemoveConnectDataQueueJob_JobName;
 	public static String RemoveConnectDataQueueJob_UninstallError;
-	public static String RemoveConnectDataQueueJob_UninstallError2;
 	public static String StatusLineContribution_notconfigured;
 	public static String StatusLineContribution_queueEmpty;
 	public static String StatusLineContribution_StatusLineMessageFormat_0date_1message;

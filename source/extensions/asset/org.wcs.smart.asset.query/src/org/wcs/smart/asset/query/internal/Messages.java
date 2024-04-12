@@ -4,9 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.asset.query.internal.messages"; //$NON-NLS-1$
-	public static String AddAssetQueryJob_AddingAssetJobName;
-	public static String AddAssetQueryJob_ErrorMsg;
-	public static String AddAssetQueryJob_ErrorTitle;
 	public static String DeleteObservationResultInfoProvider_CancelBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteMsg;
 	public static String DeleteObservationResultInfoProvider_DeleteObsBtn;
@@ -22,21 +19,15 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_Progress_CategoryData;
 	public static String DerbyObservationEngine_Progress_FetchSize;
 	public static String DerbyObservationEngine_Progress_ListAttributesData;
-	public static String DerbyObservationEngine_Progress_TreeAttributesData;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
-	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
 	public static String DerbySummaryEngine_Progress_RunningQuery;
 	public static String DerbySummaryEngine_ProgressValueProgressLabel;
-	public static String FilterProcessor_DmAttributeFilterTaskName;
-	public static String FilterProcessor_DmAttributeTaskName;
 	public static String FilterProcessor_FiltersTaskName;
 	public static String FixedQueryColumn_CaIdColumnName;
 	public static String FixedQueryColumn_CaNameColumnName;
 	public static String FixedQueryColumn_CommentColumnName;
-	public static String FixedQueryColumn_DirectionColumnName;
-	public static String FixedQueryColumn_DistanceColumnName;
 	public static String FixedQueryColumn_WaypointDateColumnName;
 	public static String FixedQueryColumn_WaypointIdColumnName;
 	public static String FixedQueryColumn_WaypointTimeColumnName;
@@ -51,11 +42,6 @@ public class Messages extends NLS {
 	public static String AssetAttachmentTooltipProvider_SignatureType;
 	public static String AssetAttachmentTooltipProvider_StationLabel;
 	public static String AssetAttachmentTooltipProvider_WpIDLabel;
-	public static String AssetAttributeValueItem_AttributeNotFound;
-	public static String AssetAttributeValueItem_CategoryNotFound;
-	public static String AssetAttributeValueItem_ListItemNotFound;
-	public static String AssetAttributeValueItem_TreeNodeNotFound;
-	public static String AssetCategoryValueItem_CategoryNotFound;
 	public static String AssetDeploymentFilterProcessor_FilterTypeNotSupported;
 	public static String AssetDeploymentFilterProcessor_InvalidDateFilter;
 	public static String AssetDeploymentFilterProcessor_TaskName1;
@@ -86,7 +72,6 @@ public class Messages extends NLS {
 	public static String AssetGroupByDropItem_FiltersLabel;
 	public static String AssetGroupByDropItem_IncludedLabel;
 	public static String AssetGroupByTreeItem_AssetGroupBys;
-	public static String AssetQueryDatabaseUpgrader_UpgradeTaskName;
 	public static String AssetQueryLabelProvider_AssetFilterOption;
 	public static String AssetQueryLabelProvider_AssetsColumnName;
 	public static String AssetQueryLabelProvider_AssetTypeFilterOption;
@@ -139,28 +124,10 @@ public class Messages extends NLS {
 	public static String AssetWaypointQueryType_WaypointQueryTypeName;
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_LoadingObservationColumnJobName;
-	public static String QueryColumn_ObservationCategoryTableHeader1;
 	public static String QueryColumnCache_LoadingWPQueryColumnJobName;
-	public static String QueryDataSource_CannotCreateMapLayer;
-	public static String QueryDataSource_LocationIdTableName;
-	public static String QueryDataSource_StationIDColumnName;
-	public static String QueryDataSourceFactory_Description;
-	public static String QueryDataSourceFactory_DisplayName;
-	public static String QueryDataSourceFactory_queryUuidParameterName;
-	public static String QueryDataSourceFactory_ReadOnlyError;
-	public static String QueryFeatureSource_SchemaError;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterPanel_TreeNodeLabel;
-	public static String QueryGeoResource_Error_NoDatasource;
-	public static String QueryGeoResource_ServiceError;
 	public static String QueryPlugIn_Error_DialogTitle;
-	public static String QueryServiceInfo_Description;
-	public static String QueryServiceInfo_Keyword1;
-	public static String QueryServiceInfo_Keyword2;
-	public static String QueryServiceInfo_Keyword3;
-	public static String QueryServiceInfo_Keyword4;
-	public static String QueryServiceInfo_Keyword5;
-	public static String QueryServiceInfo_ServiceName;
 	public static String QueryTemplateCloner_ProgressCopyObservation;
 	public static String QueryTemplateCloner_ProgressCopySummary;
 	public static String QueryTemplateCloner_ProgressCopyWaypoint;
@@ -176,8 +143,6 @@ public class Messages extends NLS {
 	public static String EditObservationResultInfoProvider_DeleteError;
 	public static String EditObservationResultInfoProvider_EditLabel;
 	public static String RemoveAssetQueryJob_ErrorMsg;
-	public static String RemoveAssetQueryJob_JobName;
-	public static String WaypointFilterProcessor_FilterTaskName;
 	public static String WaypointFilterProcessor_TableTaskName;
 
 	static {

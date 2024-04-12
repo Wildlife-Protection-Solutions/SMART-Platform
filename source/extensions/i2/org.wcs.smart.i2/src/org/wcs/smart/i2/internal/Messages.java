@@ -761,7 +761,6 @@ public class Messages extends NLS {
 	public static String IntelEntityDataSource_ObservationsLayerName;
 	public static String IntelEntityDataSource_RecordObservationLayerNamePoint;
 	public static String IntelEntityDataSource_RecordObservationLayerNamePoly;
-	public static String IntelEntityGeoResourceInfo_Name;
 	public static String IntelEntityLocationWizardPage_SelectType;
 	public static String IntelEntityRecordQueryEditor_DefinitionSection;
 	public static String IntelEntityRecordQueryEditor_FilterTypeTooltip;
@@ -771,8 +770,6 @@ public class Messages extends NLS {
 	public static String IntelEntityRecordWizardPage_SelectType;
 	public static String IntelEntityRelationWizardPage_SelectType;
 	public static String IntelEntitySearchWizardPage_unauthorized;
-	public static String IntelEntityService_DefaultName;
-	public static String IntelEntityService_Title;
 	public static String IntelEntityServiceInfo_description;
 	public static String IntelEntityServiceInfo_keyword1;
 	public static String IntelEntityServiceInfo_keyword2;
@@ -792,7 +789,6 @@ public class Messages extends NLS {
 	public static String IntelligenceDatabaseUpgrader_BIRTUpgradeError;
 	public static String IntelligenceDatabaseUpgrader_ErrorDialogTitle;
 	public static String IntelligenceDatabaseUpgrader_JobName;
-	public static String IntelligenceDatabaseUpgrader_TaskName;
 	public static String IntelligenceDataSourceWizardPage_NotConfigurable;
 	public static String IntelligenceDataSourceWizardPage_Title;
 	public static String IntelligenceDataSourceWizardPage_unauthorized;
@@ -833,7 +829,6 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_EntityLocationRsEntityIdColumn;
 	public static String IntelligenceLabelProviderImpl_EntityLocationRsEntityUuidColumn;
 	public static String IntelligenceLabelProviderImpl_EntityLocationRsEntityUUIDColumn;
-	public static String IntelligenceLabelProviderImpl_EntityLocationRsGeometryColumn;
 	public static String IntelligenceLabelProviderImpl_EntityLocationRsObservationColumn;
 	public static String IntelligenceLabelProviderImpl_EntityObsDetailsColumnArea;
 	public static String IntelligenceLabelProviderImpl_EntityObsDetailsColumnAttribute;
@@ -880,7 +875,6 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_EntityRsPrimaryKeyColumn;
 	public static String IntelligenceLabelProviderImpl_EntityTypeColumnName;
 	public static String IntelligenceLabelProviderImpl_ExactOp;
-	public static String IntelligenceLabelProviderImpl_GeomColumnLabel;
 	public static String IntelligenceLabelProviderImpl_GeometryAttributeAreaLabel;
 	public static String IntelligenceLabelProviderImpl_GeometryAttributePerimeterLabel;
 	public static String IntelligenceLabelProviderImpl_GeometryAttributeSrcLabel;
@@ -934,7 +928,6 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordLocationObsDatasetName;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsCommentColumn;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsDateColumn;
-	public static String IntelligenceLabelProviderImpl_RecordLocationRsGeometryColumn;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsIdColumn;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsObsColumn;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsRecordUuidColumn;
@@ -1331,8 +1324,6 @@ public class Messages extends NLS {
 	public static String QueryFormatPage_FormatOp;
 	public static String QueryFormatPage_Message;
 	public static String QueryFormatPage_Title;
-	public static String QueryGeoResourceInfo_pointQueryLayerName;
-	public static String QueryGeoResourceInfo_polygonQueryLayerName;
 	public static String QueryLazyResultsContentProvider_LoadingResultLbl;
 	public static String QueryLazyResultsTable_CntLabel1;
 	public static String QueryLazyResultsTable_CntLabel2;
@@ -1803,7 +1794,6 @@ public class Messages extends NLS {
 	public static String RelationshipTypesPreferencePage_SrcProfile;
 	public static String RelationshipTypesPreferencePage_TrgProfile;
 	public static String RemoveIntelligenceJob_DeleteFolderError;
-	public static String RemoveIntelligenceJob_JobName;
 	public static String RemoveIntelligenceJob_UninstallError;
 	public static String ReportAddon_ProgressMsg;
 	public static String RunQueryJob_error;

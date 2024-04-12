@@ -4,8 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.data.oda.smart.internal.messages"; //$NON-NLS-1$
-	
-	public static String CustomDataSetWizardPage_PickQuery_Message;
 
 	public static String Report400Upgrader_ErrorMessage;
 	public static String Report400Upgrader_ErrorTitle;
