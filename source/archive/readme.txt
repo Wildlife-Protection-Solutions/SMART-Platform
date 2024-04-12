@@ -1,0 +1,1 @@
+This folder contains plugins that are not longer supported or maintained.
