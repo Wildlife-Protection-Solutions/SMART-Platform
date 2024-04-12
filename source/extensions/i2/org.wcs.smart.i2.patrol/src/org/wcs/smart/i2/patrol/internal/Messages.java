@@ -4,7 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.patrol.internal.messages"; //$NON-NLS-1$
-	public static String DatabaseUpgrader_UpgradeMessage;
+
 	public static String DeleteCaHandler_tasktitle;
 	public static String PatrolEditorContribution_AddError;
 	public static String PatrolEditorContribution_ConfirmRemove;

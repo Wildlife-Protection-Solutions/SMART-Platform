@@ -202,8 +202,6 @@ public class Messages extends NLS {
 
 	public static String PawsApi_TaskNotFoundOnService;
 
-	public static String PawsDatabaseUpgrader_TaskName;
-
 	public static String PawsDownloadResultJob_AuthorizatoinFailed;
 
 	public static String PawsDownloadResultJob_buildrasterstaskname;

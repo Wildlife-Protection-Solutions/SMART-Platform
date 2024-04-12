@@ -13,7 +13,6 @@ public class Messages extends NLS {
 	public static String QueryListComposite_Message1;
 	public static String QueryListComposite_Message2;
 	public static String QueryListComposite_NameLabel;
-	public static String RDatabaseUpgrader_UpgradeTaskName;
 	public static String RemoveRJob_Error;
 	public static String ResultsPage_cleartooltip;
 	public static String ResultsPage_OutputLabel;

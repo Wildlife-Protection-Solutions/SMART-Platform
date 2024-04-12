@@ -56,7 +56,6 @@ public class Messages extends NLS {
 	public static String DropItemFactory_FilterExpressionSupported;
 	public static String DropItemFactory_ListItemNotFound;
 	public static String DropItemFactory_TreeNodeNotFound;
-	public static String EventDatabaseUpgrader_TaskName;
 	public static String EventProcessingJob_EventProcessingError;
 	public static String EventProcessingJob_JobName;
 	public static String EventProcessingJob_RemainingTaskLabel;
