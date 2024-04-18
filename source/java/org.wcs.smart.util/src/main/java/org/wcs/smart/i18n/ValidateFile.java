@@ -53,7 +53,7 @@ public class ValidateFile {
     //public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
 //    public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
 	//public static final String[] LANGUAGES = new String[] { "pt" };
-    public static final String[] LANGUAGES = new String[] { "th" };
+    public static final String[] LANGUAGES = new String[] { "km" };
 
 	public static final String LINE_SEP = "\n";
 
@@ -175,6 +175,13 @@ public class ValidateFile {
 							i++;
 						}
 					}
+				}
+			}
+			if (s.contains("=")) {
+				String key = s.split("=")[0];
+				if (key.strip().contains(" ")) {
+					System.out.println(cnt + ":" + "key contains space" + s);
+
 				}
 			}
 			cnt++;

@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -59,6 +60,8 @@ import org.apache.derby.iapi.services.io.FileUtil;
  */
 public class Packagei18nNew {
 
+    public static final String NATIVE2ASCII = "C:\\Java\\jdk1.8.0_201\\bin\\native2ascii.exe";
+
 	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Version7.X\\svn\\source\\";
 
 //	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\svn\\source\\";
@@ -66,10 +69,10 @@ public class Packagei18nNew {
 	
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
-//	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
+//	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk", "my"};
 //	public static final String[] LANGUAGES = {"hr"};
-//	public static final String[] LANGUAGES = {"my"};
-	public static final String[] LANGUAGES = {"ur"};
+	public static final String[] LANGUAGES = {"km"};
+//	public static final String[] LANGUAGES = {"mk", "cnr"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
@@ -168,6 +171,8 @@ public class Packagei18nNew {
 						Files.createDirectories(toFile.getParent());
 						System.out.println(file.toString() + " to " + toFile.toString());
 						Files.copy(file, toFile);
+						
+						convertasciitoutf8(toFile);
 					}
 					
 				}
@@ -190,6 +195,22 @@ public class Packagei18nNew {
 		Files.walkFileTree(sourceDir, visitor);
 	}
 	
+	private void convertasciitoutf8(Path file) throws IOException {
+		StringBuilder cmd = new StringBuilder();
+    	cmd.append(NATIVE2ASCII);
+    	cmd.append(" -reverse -encoding UTF-8 ");
+    	cmd.append(file.toString());
+    	cmd.append(" " );
+    	cmd.append(file.toString());
+    	
+    	System.out.println(cmd);
+    	
+    	Process pr = Runtime.getRuntime().exec(cmd.toString());
+        InputStream is = pr.getInputStream();
+        while(is.read() != -1){}
+        is = pr.getErrorStream();
+        while(is.read() != -1){}
+	}
 	
 	private void copyDirectory(Path from, Path to) throws IOException{
 		FileUtils.copyDirectory(from.toFile(), to.toFile());
