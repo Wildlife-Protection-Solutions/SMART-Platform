@@ -38,7 +38,7 @@ public class SmartCollectLabelProvider implements ISmartCollectLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-
+		
 		if (item.getClass() == SmartCollectWaypointSource.class) return Messages.getString("SmartCollectLabelProvider_WaypointSourceLabel", l);  //$NON-NLS-1$
 
 		if (item == SmartCollectJsonImportWarning.WarningType.NO_USER) return Messages.getString("SmartCollectLabelProvider_NoUser", l);  //$NON-NLS-1$

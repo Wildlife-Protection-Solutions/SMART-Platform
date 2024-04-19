@@ -539,14 +539,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
 		
 		SmartContext.INSTANCE.setClass(IProfileEventLabelProvider.class, new ProfileEventLabelProvider());
-		
-		SmartContext.INSTANCE.setClass(org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider.class, new ISmartCollectLabelProvider() {
-			@Override
-			public String getLabel(Object item, Locale l) {
-				if (item.getClass() == SmartCollectWaypointSource.class) return Messages.getString("ConnectStartupContextListener.SmartCollectIncidentName", l);  //$NON-NLS-1$
-				return null;
-			}
-		});
+		SmartContext.INSTANCE.setClass(org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider.class, new SmartCollectLabelProvider());
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.ui.IQueryAssetLabelProvider.class, new AssetQueryLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
