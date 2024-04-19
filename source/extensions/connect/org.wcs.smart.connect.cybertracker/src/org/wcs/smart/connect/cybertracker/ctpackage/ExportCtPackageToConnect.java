@@ -41,6 +41,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -117,7 +118,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				@Override
 				public void done(IJobChangeEvent event) { 
 					jobs.remove(event.getJob());
-					checkdone(context.get(Shell.class));
+					checkdone();
 				}
 				
 				@Override
@@ -276,14 +277,14 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 		}
 	}
 	
-	private void checkdone(Shell shell) {
+	private void checkdone() {
 		if (!jobs.isEmpty()) return;
 		
-		shell.getDisplay().syncExec(()->{
+		Display.getDefault().syncExec(()->{
 			if (ok == total) {
-				MessageDialog.openInformation(shell, Messages.ExportCtPackageToConnect_CompleteTitle, MessageFormat.format(Messages.ExportCtPackageToConnect_UplodeCompleteMsg, ok, total));
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ExportCtPackageToConnect_CompleteTitle, MessageFormat.format(Messages.ExportCtPackageToConnect_UplodeCompleteMsg, ok, total));
 			}else {
-				MessageDialog.openInformation(shell, Messages.ExportCtPackageToConnect_CompleteTitle, MessageFormat.format(Messages.ExportCtPackageToConnect_UploadCompleteMsg2, ok, total));
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ExportCtPackageToConnect_CompleteTitle, MessageFormat.format(Messages.ExportCtPackageToConnect_UploadCompleteMsg2, ok, total));
 			}
 		});
 	}

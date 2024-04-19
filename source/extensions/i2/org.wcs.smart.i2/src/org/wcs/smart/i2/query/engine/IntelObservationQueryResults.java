@@ -196,33 +196,37 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		//add attachments
 		if (item.getObservationUuid() != null){
 			IntelObservation obs = session.get(IntelObservation.class, item.getObservationUuid());
-			//TODO can't build another query in this session as scrollable results is using it
+			if (obs != null) {
+				//if obs == null then record has been deleted
 			
-//			List<IntelObservationAttribute> attributes = 
-//					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
-//			for (IntelObservationAttribute a : attributes){
-				for (IntelObservationAttribute a : obs.getObservationAttributes()){
-				if (a.getAttribute().getType() == AttributeType.LIST){
-					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());	
-				}else if (a.getAttribute().getType() == AttributeType.MLIST) {
-					if (a.getAttributeListItems() != null) {
-						item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItems().stream().map(e->e.getAttributeListItem().getName()).collect(Collectors.joining(", "))); //$NON-NLS-1$
+				//TODO can't build another query in this session as scrollable results is using it
+				
+	//			List<IntelObservationAttribute> attributes = 
+	//					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
+	//			for (IntelObservationAttribute a : attributes){
+					for (IntelObservationAttribute a : obs.getObservationAttributes()){
+					if (a.getAttribute().getType() == AttributeType.LIST){
+						item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());	
+					}else if (a.getAttribute().getType() == AttributeType.MLIST) {
+						if (a.getAttributeListItems() != null) {
+							item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItems().stream().map(e->e.getAttributeListItem().getName()).collect(Collectors.joining(", "))); //$NON-NLS-1$
+						}
+					}else if (a.getAttribute().getType() == AttributeType.TREE){
+						item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeTreeNode().getName());
+						
+					}else if (a.getAttribute().getType().isGeometry()){
+						
+						
+						item.addAttribute(GeometryProperty.SOURCE.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getSource());
+						item.addAttribute(GeometryProperty.PERIMETER.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getPerimeter());
+						if (a.getAttribute().getType() == Attribute.AttributeType.POLYGON) {
+							item.addAttribute(GeometryProperty.AREA.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getArea());
+						}
+						item.addAttribute(a.getAttribute().getKeyId(), a.getGeometry().getGeometry());
+						
+					}else{
+						item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeValue());
 					}
-				}else if (a.getAttribute().getType() == AttributeType.TREE){
-					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeTreeNode().getName());
-					
-				}else if (a.getAttribute().getType().isGeometry()){
-					
-					
-					item.addAttribute(GeometryProperty.SOURCE.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getSource());
-					item.addAttribute(GeometryProperty.PERIMETER.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getPerimeter());
-					if (a.getAttribute().getType() == Attribute.AttributeType.POLYGON) {
-						item.addAttribute(GeometryProperty.AREA.generateKey(a.getAttribute().getKeyId()), a.getGeometry().getArea());
-					}
-					item.addAttribute(a.getAttribute().getKeyId(), a.getGeometry().getGeometry());
-					
-				}else{
-					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeValue());
 				}
 			}
 		}
