@@ -43,7 +43,7 @@ public class ConvertToUnicode {
     public static final String NATIVE2ASCII = "C:\\Java\\jdk1.8.0_201\\bin\\native2ascii.exe";
 
 
-	public static final String OUT_DIR = "C:\\temp\\smarti18n\\km_20240418_new_updated\\km_20240418_new_updated";
+	public static final String OUT_DIR = "C:\\temp\\smarti18n\\km_20240419.fromuser\\km_20240419";
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
