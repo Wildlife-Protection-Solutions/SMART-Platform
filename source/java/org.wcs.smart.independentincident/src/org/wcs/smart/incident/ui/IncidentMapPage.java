@@ -90,6 +90,7 @@ import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.ui.map.tool.IInfoToolShellProvider;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Incident editor map page
@@ -149,22 +150,31 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, null);
 		
 		super.dispose();
+		List<IGeoResource> todispose = new ArrayList<>();
+		todispose.addAll(attributeResources);
+		todispose.add(prjResource);
+		todispose.add(pointResource);
 		
-		if (pointResource != null) {
-			pointResource.dispose(new NullProgressMonitor());
-			
+		for (IGeoResource resource : todispose) {
+			if (resource == null) continue;		
+			resource.dispose(new NullProgressMonitor());			
 			try {
-				IService service = pointResource.service(new NullProgressMonitor());
+				IService service = resource.service(new NullProgressMonitor());
 				if (service != null) CatalogPlugin.getDefault().getLocalCatalog().remove(service);
 			} catch (IOException e) {
 				IncidentPlugIn.log(e.getMessage(), e);
 			}
-			
 		}
+		
 		featureCollection = null;
+		prjFeatureCollection = null;
+		prjFeatureType = null;
 		pointStore = null;
 		this.pointResource = null;
+		this.prjResource = null;
 		this.parent = null;
+		this.attributeResources.clear();
+		
 	}
 	
 	/** Creates the map
@@ -203,16 +213,19 @@ public class IncidentMapPage extends SmartMapEditorPart {
         }
 	}
 
+	private HashMap<String, Attribute> attribute2resource = new HashMap<>();
+	
 	/**
 	 * Creates the incident layer
 	 */
 	@SuppressWarnings("unchecked")
 	private void addPointsLayer() {
         try {
+        	attribute2resource.clear();
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 
 			//normal point layer
-			featureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME);
+			featureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME, this.parent.getIncident().getUuid());
 			featureCollection = new ListFeatureCollection(featureType);
 			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
 			pointStore = pointResource.resolve(FeatureStore.class, null);
@@ -220,28 +233,27 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			
 			if (parent.getOptions().getTrackDistanceDirection()) {
 				//projected point layer
-				prjFeatureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME);
+				prjFeatureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME, this.parent.getIncident().getUuid());
 				prjFeatureCollection = new ListFeatureCollection(prjFeatureType);
 				prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(prjFeatureType);
 				prjStore = prjResource.resolve(FeatureStore.class, null);
 				layers.add(0, prjResource);
 			}
 
-			HashMap<String, Attribute> resourceNames = new HashMap<>();
 			try(Session session = HibernateManager.openSession()){
 				List<Attribute> attributes = DataModelManager.INSTANCE.getGeometryAttributes(session);
 			
 				attributes.sort((a,b)->a.getName().compareTo(b.getName()));
 				for (Attribute attribute : attributes) {
-					String type = attribute.getType().name() + "." + attribute.getKeyId(); //$NON-NLS-1$
+					String namepart = attribute.getKeyId() + "_" + UuidUtils.uuidToString(this.parent.getIncident().getUuid()); //$NON-NLS-1$
+					String type = attribute.getType().name() + "." + namepart; //$NON-NLS-1$
 					SimpleFeatureType featuretype = null; 
 					if (attribute.getType() == Attribute.AttributeType.POLYGON) {
 						featuretype = ObservationAttributeFeatureFactory.createObservationPolygonSchema(type);
 					}else if (attribute.getType() == Attribute.AttributeType.LINE) {
 						featuretype = ObservationAttributeFeatureFactory.createObservationLineStringSchema(type);
 					}
-					
-					resourceNames.put(attribute.getKeyId(), attribute);
+					attribute2resource.put(featuretype.getName().getLocalPart(), attribute);
 					IGeoResource attResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featuretype);
 					layers.add(0, attResource);
 					attributeResources.add(attResource);
@@ -274,8 +286,10 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					super.run(monitor);
 					//set custom style for points layer
 					Map<String,String> geoIdToStyle = new HashMap<>();
-    				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_TYEPNAME,  IncidentMapWaypointDefaultStyle.KEY);
-    				geoIdToStyle.put(IncidentFeatureFactory.SMART_INCIDENT_PRJ_TYEPNAME,  IncidentMapWaypointRawDefaultStyle.KEY);
+    				geoIdToStyle.put(featureType.getTypeName(),  IncidentMapWaypointDefaultStyle.KEY);
+    				if (prjFeatureType != null) {
+    					geoIdToStyle.put(prjFeatureType.getTypeName(),  IncidentMapWaypointRawDefaultStyle.KEY);
+    				}
 
     				Map<String, Consumer<Layer>> defaultStyles = new HashMap<>();
     				defaultStyles.put(IncidentMapWaypointDefaultStyle.KEY, (l)->{
@@ -295,7 +309,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
     						prjLayer = l;
     					}else if (type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.POLYGON.name()) || 
     							type.getName().getNamespaceURI().startsWith(Attribute.AttributeType.LINE.name()) ) {
-    						Attribute a = resourceNames.get(type.getName().getLocalPart());
+    						Attribute a = attribute2resource.get(type.getName().getLocalPart());
     						l.setName(a.getName());
     						l.getStyleBlackboard().put(SLDContent.ID, a.getAttributeGeometryStyle().toStyle());
     						attributeLayers.add(l);
@@ -337,7 +351,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			List<SimpleFeature> features = new ArrayList<>();
 			try {
 				FeatureStore<SimpleFeatureType, SimpleFeature> store = r.resolve(FeatureStore.class, null);
-				String attributeKey = store.getName().getLocalPart();
+				Attribute attribute = attribute2resource.get(store.getName().getLocalPart());
 				
 				try(Session session = HibernateManager.openSession()){
 					Waypoint wp = session.get(Waypoint.class, parent.getIncident().getUuid());
@@ -345,7 +359,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						for (WaypointObservationAttribute a : wo.getAttributes()) {
 							if (a.getGeom() == null) continue;
 							if (!a.getAttribute().getType().isGeometry()) continue;
-							if (!a.getAttribute().getKeyId().equalsIgnoreCase(attributeKey)) continue;
+							if (!a.getAttribute().getKeyId().equalsIgnoreCase(attribute.getKeyId())) continue;
 							
 							boolean hasArea = a.getAttribute().getType() == Attribute.AttributeType.POLYGON;
 							SimpleFeatureType type = store.getSchema();

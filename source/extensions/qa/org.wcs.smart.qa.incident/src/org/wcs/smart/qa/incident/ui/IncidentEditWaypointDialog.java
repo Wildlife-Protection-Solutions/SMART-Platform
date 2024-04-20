@@ -126,7 +126,7 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 
 			//create edit feature
 			try{
-				wpSchema = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME);
+				wpSchema = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME, pw.getUuid());
 				SimpleFeature editFeature = IncidentFeatureFactory.createSimpleIncidentFeature(wpSchema, pw);
 				
 				double offset = 0.01;
@@ -139,7 +139,7 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 				
 				
 				if (pw.getDirection() != null && pw.getDistance() != null) {
-					SimpleFeatureType ftype = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME);
+					SimpleFeatureType ftype = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME, pw.getUuid());
 					SimpleFeature sfeature = IncidentFeatureFactory.createSimpleIncidentFeature(ftype, pw);
 					prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(ftype);
 					prjStore = prjResource.resolve(FeatureStore.class, new NullProgressMonitor());

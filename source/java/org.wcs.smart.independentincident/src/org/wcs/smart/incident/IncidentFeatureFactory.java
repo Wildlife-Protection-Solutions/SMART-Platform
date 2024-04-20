@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.incident;
 
+import java.util.UUID;
+
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -53,11 +55,11 @@ public class IncidentFeatureFactory {
 	 * @return
 	 * @throws SchemaException
 	 */
-	public static SimpleFeatureType createSimpleIncidentSchema(String typeName) throws SchemaException{
+	public static SimpleFeatureType createSimpleIncidentSchema(String typeName, UUID uuid) throws SchemaException{
 		if (typeName.equals(SMART_POINT_TYPE_NAME)) {
-			return DataUtilities.createType(SMART_POINT_TYPE_NAME, SMART_POINT_SPEC);
+			return DataUtilities.createType(SMART_POINT_TYPE_NAME + UuidUtils.uuidToString(uuid), SMART_POINT_SPEC);
 		}else if (typeName.equals(SMART_POINT_PRJ_TYPE_NAME)) {
-			return DataUtilities.createType(SMART_POINT_PRJ_TYPE_NAME, SMART_POINT_PRJ_SPEC);
+			return DataUtilities.createType(SMART_POINT_PRJ_TYPE_NAME + UuidUtils.uuidToString(uuid), SMART_POINT_PRJ_SPEC);
 		}
 		return null;
 	}
@@ -70,7 +72,7 @@ public class IncidentFeatureFactory {
 	 * @return
 	 */
 	public static SimpleFeature createSimpleIncidentFeature(SimpleFeatureType ftype, Waypoint incident) {
-		if (ftype.getName().getLocalPart().equals(SMART_INCIDENT_TYEPNAME)) {
+		if (ftype.getName().getLocalPart().equals(SMART_INCIDENT_TYEPNAME + UuidUtils.uuidToString(incident.getUuid()))) {
 			Object data[] = new Object[3];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 			int i = 0;
@@ -79,7 +81,7 @@ public class IncidentFeatureFactory {
 			data[i++] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(incident.getX(), incident.getY()));
 			SimpleFeature f = SimpleFeatureBuilder.build(ftype, data, name);
 			return f;
-		}else if (ftype.getName().getLocalPart().equals(SMART_INCIDENT_PRJ_TYEPNAME)) {
+		}else if (ftype.getName().getLocalPart().equals(SMART_INCIDENT_PRJ_TYEPNAME + UuidUtils.uuidToString(incident.getUuid()))) {
 			Object data[] = new Object[7];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 			int i = 0;
