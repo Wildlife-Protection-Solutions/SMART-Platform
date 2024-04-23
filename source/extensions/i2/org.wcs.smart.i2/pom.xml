@@ -13,6 +13,6 @@
 	<name>SMART Advanced Intelligence Module</name>
 	<artifactId>org.wcs.smart.i2</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.8-SNAPSHOT</version>
+	<version>7.5.9-SNAPSHOT</version>
 	
 </project>
