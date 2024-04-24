@@ -22,25 +22,33 @@ import java.util.Map.Entry;
 public class ValidateFile {
 	private static final String ROOT = "C:\\data\\SMART\\Source\\Trunk\\";
 
-	public static final String IN_DIR[] = { ROOT + "svn\\source\\java", ROOT + "svn\\source\\extensions\\asset",
-			ROOT + "svn\\source\\extensions\\connect", ROOT + "svn\\source\\extensions\\cybertracker",
-			ROOT + "svn\\source\\extensions\\entity", ROOT + "svn\\source\\extensions\\er",
-			ROOT + "svn\\source\\extensions\\event", ROOT + "svn\\source\\extensions\\i2",
-			ROOT + "svn\\source\\extensions\\paws", ROOT + "svn\\source\\extensions\\qa",
+	public static final String IN_DIR[] = { 
+			ROOT + "svn\\source\\java", 
+			ROOT + "svn\\source\\extensions\\asset",
+			ROOT + "svn\\source\\extensions\\connect", 
+			ROOT + "svn\\source\\extensions\\cybertracker",
+			ROOT + "svn\\source\\extensions\\entity", 
+			ROOT + "svn\\source\\extensions\\er",
+			ROOT + "svn\\source\\extensions\\event", 
+			ROOT + "svn\\source\\extensions\\i2",
+			ROOT + "svn\\source\\extensions\\paws", 
+			ROOT + "svn\\source\\extensions\\qa",
 			ROOT + "svn\\source\\extensions\\r", };
 
-	public static final String TRANS_DIR[] = { ROOT + "svn\\source\\translations\\",
+	public static final String TRANS_DIR[] = { 
+			ROOT + "svn\\source\\translations\\",
 			ROOT + "svn\\source\\extensions\\asset\\translations",
 			ROOT + "svn\\source\\extensions\\connect\\translations",
 			ROOT + "svn\\source\\extensions\\cybertracker\\translations",
-			ROOT + "svn\\source\\extensions\\entity\\translations", ROOT + "svn\\source\\extensions\\er\\translations",
-			ROOT + "svn\\source\\extensions\\event\\translations", ROOT + "svn\\source\\extensions\\i2\\translations",
-			ROOT + "svn\\source\\extensions\\paws\\translations", ROOT + "svn\\source\\extensions\\qa\\translations",
+			ROOT + "svn\\source\\extensions\\entity\\translations", 
+			ROOT + "svn\\source\\extensions\\er\\translations",
+			ROOT + "svn\\source\\extensions\\event\\translations", 
+			ROOT + "svn\\source\\extensions\\i2\\translations",
+			ROOT + "svn\\source\\extensions\\paws\\translations", 
+			ROOT + "svn\\source\\extensions\\qa\\translations",
 			ROOT + "svn\\source\\extensions\\r\\translations", };
 
-    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
-//    public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
-//	public static final String[] LANGUAGES = new String[] { "uk" };
+    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
 
 	public static final String LINE_SEP = "\n";
 
@@ -162,6 +170,13 @@ public class ValidateFile {
 							i++;
 						}
 					}
+				}
+			}
+			if (s.contains("=")) {
+				String key = s.split("=")[0];
+				if (key.strip().contains(" ")) {
+					System.out.println(cnt + ":" + "key contains space" + s);
+
 				}
 			}
 			cnt++;

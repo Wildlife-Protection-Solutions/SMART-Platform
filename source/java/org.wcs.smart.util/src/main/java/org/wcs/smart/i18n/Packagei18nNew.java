@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -59,6 +60,8 @@ import org.apache.derby.iapi.services.io.FileUtil;
  */
 public class Packagei18nNew {
 
+    public static final String NATIVE2ASCII = "C:\\Java\\jdk1.8.0_201\\bin\\native2ascii.exe";
+    
 	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\svn\\source\\";
 //	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\udig\\udig-platform\\plugins";
 	
@@ -186,6 +189,22 @@ public class Packagei18nNew {
 		Files.walkFileTree(sourceDir, visitor);
 	}
 	
+	private void convertasciitoutf8(Path file) throws IOException {
+		StringBuilder cmd = new StringBuilder();
+    	cmd.append(NATIVE2ASCII);
+    	cmd.append(" -reverse -encoding UTF-8 ");
+    	cmd.append(file.toString());
+    	cmd.append(" " );
+    	cmd.append(file.toString());
+    	
+    	System.out.println(cmd);
+    	
+    	Process pr = Runtime.getRuntime().exec(cmd.toString());
+        InputStream is = pr.getInputStream();
+        while(is.read() != -1){}
+        is = pr.getErrorStream();
+        while(is.read() != -1){}
+	}
 	
 	private void copyDirectory(Path from, Path to) throws IOException{
 		FileUtils.copyDirectory(from.toFile(), to.toFile());
