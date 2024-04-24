@@ -105,9 +105,6 @@ public enum RecordReportGenerator {
 	
 	@SuppressWarnings("unchecked")
 	public void generateReport(Path file) throws Exception{
-		
-		char dseparater = ((DecimalFormat)DecimalFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
-		
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 		ReportDesignHandle rdh = session.createDesign(file.toFile().getAbsolutePath());
 		ModelOdaAdapter modelAdapter = new ModelOdaAdapter();
@@ -433,7 +430,7 @@ public enum RecordReportGenerator {
 		rdh.getBody().add(entityTable);
 		entityTable.setDataSet(entityDataset);
 		entityTable.setStyleName(tableStyle.getName());
-		((ColumnHandle)entityTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, dseparater + "7in"); //$NON-NLS-1$
+		((ColumnHandle)entityTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "0.7in"); //$NON-NLS-1$
 		
 		computedColumns = DataUtil.generateComputedColumns(entityTable);
 		for (ComputedColumn c : computedColumns){
@@ -441,8 +438,8 @@ public enum RecordReportGenerator {
 		}
 		
 		ImageHandle attachImage = factory.newImage(null);
-		attachImage.setWidth(dseparater + "5in"); //$NON-NLS-1$
-		attachImage.setHeight(dseparater + "5in"); //$NON-NLS-1$
+		attachImage.setWidth("0.5in"); //$NON-NLS-1$
+		attachImage.setHeight("0.5in"); //$NON-NLS-1$
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordEntityDatasetResultSetMetadata.Column.ENTITY_IMAGE.getColumnName(Locale.getDefault()) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -474,7 +471,7 @@ public enum RecordReportGenerator {
 		rdh.getBody().add(attachmentTable);
 		attachmentTable.setDataSet(attachmentDataset);
 		attachmentTable.setStyleName(tableStyle.getName());
-		((ColumnHandle)attachmentTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, dseparater + "7in"); //$NON-NLS-1$
+		((ColumnHandle)attachmentTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "0.7in"); //$NON-NLS-1$
 		
 		computedColumns = DataUtil.generateComputedColumns(attachmentTable);
 		for (ComputedColumn c : computedColumns){
@@ -482,8 +479,8 @@ public enum RecordReportGenerator {
 		}
 		
 		attachImage = factory.newImage(null);
-		attachImage.setWidth(dseparater + "5in"); //$NON-NLS-1$
-		attachImage.setHeight(dseparater + "5in"); //$NON-NLS-1$
+		attachImage.setWidth("0.5in"); //$NON-NLS-1$
+		attachImage.setHeight("0.5in"); //$NON-NLS-1$
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName(Locale.getDefault()) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$

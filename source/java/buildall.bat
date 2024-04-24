@@ -1,4 +1,9 @@
 SET version=8.0.0
+
+
+for /f %%i in ('date /t') do set RESULT=%%i
+echo The directory is %RESULT%
+
 SET outputlocation=C:\data\SMART\Builds\SMART8\%RESULT%
 
 SET keystore_alias=tomcat
@@ -10,8 +15,6 @@ REM set PATH=C:\Java\jdk-11.0.2\bin;%PATH%
 
 echo %outputlocation%
 
-for /f %%i in ('date /t') do set RESULT=%%i
-echo The directory is %RESULT%
 
 MKDIR %outputlocation%
 
@@ -67,7 +70,7 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.
 
 REM run maven to build packages
 REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
-call mvn clean install -Pallplatforms,product,update,core,plugins,utils -Djarsigner.alias=%keystore_alias% -Djarsigner.storepass=%keystore_password% -Djarsigner.keystore=%keystore_location%
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils,eclipse-sign -Djarsigner.alias=%keystore_alias% -Djarsigner.storepass=%keystore_password% -Djarsigner.keystore=%keystore_location%
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%
