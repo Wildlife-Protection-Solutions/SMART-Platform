@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CyberTracker Data Queue Processor Fragment
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker.nl
-Bundle-Version: 8.0.0
+Bundle-Version: 8.0.0.qualifier
 Fragment-Host: org.wcs.smart.connect.dataqueue.cybertracker;bundle-version="8.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: org.wcs.smart

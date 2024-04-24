@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Connect Fragment
 Bundle-SymbolicName: org.wcs.smart.connect.nl
-Bundle-Version: 8.0.0
+Bundle-Version: 8.0.0.qualifier
 Fragment-Host: org.wcs.smart.connect;bundle-version="8.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: org.wcs.smart

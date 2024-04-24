@@ -93,11 +93,6 @@
          The SMART Connect Data Queue plug-in allows SMART Desktop software to processes data files uploaded to a SMART Connect Server.
       </description>
    </category-def>
-   <category-def name="languagepacks" label="SMART Application Language Packs">
-      <description>
-         SMART Application Language Packs
-      </description>
-   </category-def>
    <category-def name="asset" label="SMART Field Sensors (Cameras etc) Plug-in">
       <description>
          The SMART Field Sensor plug-in is designed to allow users to load data from sensors they have deployed to the field. The plug-in is built for generic sensors, but data loading is focused on camera traps. Users can configure the system to automatically read image metadata and generate observation data based on the information in the image.
