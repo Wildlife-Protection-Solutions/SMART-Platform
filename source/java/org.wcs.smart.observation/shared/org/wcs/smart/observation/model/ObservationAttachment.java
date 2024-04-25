@@ -68,7 +68,7 @@ public class ObservationAttachment extends ISmartAttachment implements ISignatur
 		super.attachmentFile = null;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="signature_type_uuid")
 	public SignatureType getSignatureType(){
 		return this.signatureType;
