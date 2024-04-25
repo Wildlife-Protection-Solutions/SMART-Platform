@@ -118,6 +118,8 @@ public class CyberTrackerNoa {
 	private DateTimeFormatter fileDtFormatter = DateTimeFormatter.ofPattern("MMM dd, uuuu HH:mm:ss" ) //$NON-NLS-1$
 			.withZone(ZoneOffset.UTC);
 
+	private final static Object CREATE_ALERT_LOCK = new Object();
+	
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
 	
 	@Context private ServletContext context;
@@ -628,23 +630,35 @@ public class CyberTrackerNoa {
 		newAlert.setSource(Alert.Source.CYBERTRACKER);
 		newAlert.setUserGeneratedId(userGenId);
 		
-		//validate usergenid, is it unique? If so, update the existing one and return instead of saving a new one.
-		Alert existingAlert = ConnectAlert.findAlert(userGenId, request);
+		//validate usergenid, is it unique? 
+		//If so, update the existing one and return instead of saving a new one.
 		try {
+			int returncode = -1;
+			Alert result = null;
+			Alert existingAlert = ConnectAlert.findAlert(userGenId, request);
+			if (existingAlert == null) {
+				synchronized(CREATE_ALERT_LOCK) {
+					//ensure multiple items aren't being created at the same time
+					existingAlert = ConnectAlert.findAlert(userGenId, request);
+					if (existingAlert == null) {
+						ConnectAlert.saveAlert(newAlert, newGeoJsonAlert.getCaUuid(), request);
+						returncode = Response.Status.CREATED.getStatusCode();
+						result = newAlert;
+					}
+				}
+			}
 			if (existingAlert != null) {
 				if (!existingAlert.getCa().getUuid().equals(newGeoJsonAlert.getCaUuid())) throw new SmartConnectException(Response.Status.BAD_REQUEST);
 				newAlert.setTrack(null);
 				ConnectAlert.updateAlert(existingAlert, newAlert, true, request);
-				response.setStatus(Response.Status.OK.getStatusCode());
-				response.flushBuffer();
-				return existingAlert;
-			}else {
-				ConnectAlert.saveAlert(newAlert, newGeoJsonAlert.getCaUuid(), request);
-				response.setStatus(Response.Status.CREATED.getStatusCode());
-				response.flushBuffer();
-				
-				return newAlert;
+				returncode = Response.Status.OK.getStatusCode();
+				result = existingAlert;
 			}
+			
+			response.setStatus(returncode);
+			response.flushBuffer();
+			
+			return result;
 		}catch (SmartConnectException ex) {
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			throw ex;

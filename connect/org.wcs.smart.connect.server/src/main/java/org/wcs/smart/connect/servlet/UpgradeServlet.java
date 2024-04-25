@@ -1505,6 +1505,27 @@ public class UpgradeServlet extends HttpServlet {
 						"UPDATE smart.survey SET date_created = '" + utcs + "'", //$NON-NLS-1$ //$NON-NLS-2$
 						"alter table smart.survey alter column date_created set not null", //$NON-NLS-1$
 						
+						//unique alerts
+						//fix any non-unique user generated ids
+
+						"""
+						with newvalues as (
+							select * from (
+								select uuid, row_number() over (partition by user_generated_id) as rownum
+								from connect.alerts
+								where user_generated_id in (
+									select user_generated_id from connect.alerts group by user_generated_id having count(*) > 1
+									)
+								)foo where rownum > 1
+							)
+							update connect.alerts set user_generated_id = user_generated_id || '_' || (rownum-1) 
+							from newvalues a where a.uuid = alerts.uuid
+						""", //$NON-NLS-1$
+						//create index
+						"alter table connect.alerts add constraint alerts_user_gen_id_unq unique(user_generated_id)", //$NON-NLS-1$
+						
+						
+						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
