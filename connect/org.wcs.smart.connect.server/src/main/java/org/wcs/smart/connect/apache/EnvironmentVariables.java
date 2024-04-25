@@ -26,7 +26,11 @@ import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
+
+import org.apache.xmlbeans.impl.xb.xsdschema.All;
+import org.checkerframework.checker.units.qual.A;
 
 /**
  * Manager to get system configured environment variables.
@@ -67,7 +71,16 @@ public enum EnvironmentVariables {
 		List<String> all = new ArrayList<String>();
 		for(Variable v : Variable.values()){
 			all.add(v.key);
-			all.add(getContext().lookup(v.key).toString());
+			try {
+				Object value = getContext().lookup(v.key);
+				if (value != null) {
+					all.add(value.toString());
+				}else {
+					all.add("!!undefined!!"); //$NON-NLS-1$
+				}
+			}catch (NameNotFoundException ex) {
+				all.add("!!undefined!!"); //$NON-NLS-1$
+			}
 		}
 		return all;
 	}
