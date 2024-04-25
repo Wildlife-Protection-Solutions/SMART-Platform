@@ -28,6 +28,8 @@
 		<!-- this file still references javax.servlet.ServletContext --> 
 		
 		<resteasy.version>5.0.9.Final</resteasy.version>
+		<!--  match with resteasy requirements -->
+		<jackson.version>2.12.7</jackson.version>
 		<!-- must stay on 9 until reateasy can be upgraded -->
 		<tomcat.catalina.version>9.0.86</tomcat.catalina.version>
 		
