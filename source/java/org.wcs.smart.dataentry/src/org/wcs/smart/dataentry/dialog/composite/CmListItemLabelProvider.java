@@ -81,6 +81,7 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 			Image img = null;
 			if (f == null || !Files.exists(f)) {
 				if (node.getListItem().getIcon() == null) return null;
+				
 				IconFile icon = node.getListItem().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
 				if (icon == null) return null;
 				///get image from icon store

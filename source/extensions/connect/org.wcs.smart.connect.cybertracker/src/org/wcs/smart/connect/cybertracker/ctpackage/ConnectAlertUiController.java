@@ -66,6 +66,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.api.model.AlertType;
@@ -612,6 +613,8 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 					currentModel.getUuid();
 					ArrayDeque<CmNode> nodes = new ArrayDeque<>();
 					nodes.addAll(currentModel.getNodes());
+					Hibernate.initialize(currentModel.getIconSet());
+					
 					while(!nodes.isEmpty()) {
 						CmNode n = nodes.removeFirst();
 						n.getNames().size();
@@ -632,9 +635,8 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 										li.getNames().size();
 										li.getImageFile();
 										if (li.getListItem().getIcon() != null) {
-											li.getListItem().getIcon().getFiles().forEach(f->{
-												li.getListItem().getIcon().getIconFile(f.getIconSet()).computeFileLocation(s);
-											});
+											IconFile file = li.getListItem().getIcon().getIconFile(li.getConfig().getModel().getIconSet());
+											if (file != null) file.computeFileLocation(s);
 										}
 									}
 								}
@@ -668,6 +670,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 					if (modelViewer.getControl().isDisposed()) return;
 					modelViewer.setLabelProvider(new ConnectCmTreeLabelProvider());
 					modelViewer.setInput(currentModel);
+					modelViewer.refresh();
 					onInitilized.run();
 				});
 

@@ -74,6 +74,7 @@ public class Icon extends NamedKeyItem{
 	
 	@Transient
 	public IconFile getIconFile(IconSet set) {
+		if (set == null) return null;
 		if (getFiles() == null) return null;
 		for (IconFile f : getFiles()) {
 			if (f.getIconSet() == set) return f;
