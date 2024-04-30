@@ -1,4 +1,4 @@
-labels_vi = {
+labels_Vi = {
  "alert.alertcreated": "Alert created",
  "alert.alertdeleted": "Alert deleted: ",
  "alert.alertid": "Alert ID: ",

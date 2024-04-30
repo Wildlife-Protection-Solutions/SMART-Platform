@@ -12,13 +12,15 @@ import java.util.HashMap;
 
 public class Mergei18n {
 
-	public static final String[] languages = new String[]{"th"};
+//	public static final String[] languages = new String[]{"ar", "es", "ka", "pt", "th"};
+	public static final String[] languages = new String[]{"ar", "es", "fr", "hi", "in",  "ka", "km", "lo", "ms", "ru", "pt", "th", "Vi", "zh"};
 	
-	public static final String ROOT = "C:\\data\\SMART\\Source\\trunk\\connect\\org.wcs.smart.connect.server";
+	public static final String ROOT = "C:\\data\\SMART\\Source\\Trunk\\svn\\connect\\org.wcs.smart.connect.server";
+	
 	
 	private void processWebMessages() throws IOException{
 		System.out.println("Web Processing Messages");
-		String path = ROOT + "\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+		String path = ROOT + "\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\";
 		String enFile = path + "web_messages_en.properties";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -30,7 +32,7 @@ public class Mergei18n {
 	
 	private void processMessages() throws IOException{
 		System.out.println("Processing Messages");
-		String path = ROOT + "\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+		String path = ROOT + "\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\";
 		String enFile = path + "messages.properties";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -63,6 +65,10 @@ public class Mergei18n {
 			HashMap<String, String> writevalues = new HashMap<>();
 			
 			Path langpath = Paths.get(langFile);
+			if (!Files.exists(langpath)) {
+				System.out.println("FILE NOT FOUND: "  + langpath.toString());
+				continue;
+			}
 			try(BufferedReader reader = Files.newBufferedReader(langpath)){
 				String line = null;
 				while((line = reader.readLine()) != null){
@@ -87,7 +93,7 @@ public class Mergei18n {
 			for (String key : values.keySet()){
 				if (!writevalues.containsKey(key)){
 					System.out.println("adding:" + key);
-					writevalues.put(key, "**NEW**" + values.get(key));
+					//writevalues.put(key, "**NEW**" + values.get(key));
 				}
 			}
 			
@@ -166,6 +172,12 @@ public class Mergei18n {
 		
 			HashMap<String, String> newvalues = new HashMap<>();
 			Path langPath = Paths.get(tFile);
+			
+			if (!Files.exists(langPath)) {
+				System.out.println("FILE NOT FOUND: "  + langPath.toString());
+				continue;
+			}
+			
 			try(BufferedReader reader = Files.newBufferedReader(langPath)){
 				String line = null;
 				reader.readLine();	//skip the first labels_en line
@@ -219,20 +231,27 @@ public class Mergei18n {
 			ArrayList<String> keys = new ArrayList<String>();
 			keys.addAll(newvalues.keySet());
 			keys.sort((a,b)->a.compareTo(b));
+			boolean first = true;
 			try(BufferedWriter writer = Files.newBufferedWriter(langPath)){
 				writer.append("labels_" + languages[i] + " = {\n");
 				for (String key : keys){
+					
 					String value = newvalues.get(key);
+					if (!first) {
+						writer.append(",");
+						writer.append("\n");							
+					}
+					first = false;
 					writer.append(" \"");
 					writer.append(key);
 					writer.append("\"");
 					writer.append(": ");
 					writer.append("\"");
 					writer.append(value);
-					writer.append("\",");
-					writer.append("\n");
+					writer.append("\"");
 				}
-				writer.append("}\\n");
+				writer.append("\n");
+				writer.append("}");
 			}
 		}
 	}
