@@ -108,8 +108,10 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 					counter++;
 				}
 				qc.setName(name);
+			}else {
+				qc.setName(qc.getName().strip());
 			}
-			names.add(qc.getName().toUpperCase(Locale.ROOT));
+			names.add(qc.getName().strip().toUpperCase(Locale.ROOT));
 		}
 	}
 	

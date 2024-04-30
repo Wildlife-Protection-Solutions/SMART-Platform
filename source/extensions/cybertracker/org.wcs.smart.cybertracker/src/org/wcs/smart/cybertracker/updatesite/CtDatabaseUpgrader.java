@@ -125,8 +125,9 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 
-		//ensure deafult profiles exist for each CA
+		//ensure default profiles exist for each CA
 		//is the first time installing the plugin #3502
+		
 		for (ConservationArea ca : session.createQuery("FROM ConservationArea", ConservationArea.class).list()) { //$NON-NLS-1$
 			if (ca.getIsCcaa()) continue;
 			CyberTrackerHibernateManager.getDefaultProfile(session, ca);
@@ -231,7 +232,19 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		String[] sql = new String[] {
 			"ALTER TABLE smart.ct_metadata_value ADD COLUMN is_required boolean default false not null", //$NON-NLS-1$
 			"delete from smart.ct_properties_profile_option where option_id in ('AUTO_NEXT','USE_LARGE_TABS','USE_LARGE_TITLES','LARGE_SCROLL_BARS','USE_TITLE_BAR','SHOW_EDIT','SHOW_GPS','SIMPLE_CAMERA','USE_SD_CARD','RESET_ON_SYNC','RESET_ON_NEXT','SIGHTING_ACCURACY','TRACK_ACCURACY','GPS_TIME_ZONE','UTM_ZONE','DILUTION_OF_PRECISION','FIELD_MAP_FILENAME','LOCK100','DATA_FORMAT')", //$NON-NLS-1$
-			"drop table smart.cm_ct_properties_profile" //$NON-NLS-1$
+			"drop table smart.cm_ct_properties_profile", //$NON-NLS-1$
+			
+			//ensure each ca only has one default profile - I tested at least
+			//one backup with mutliple default profiles per ca
+			"""
+				update smart.ct_properties_profile set is_default = false
+				where uuid not in (
+					select min(uuid) 
+					from smart.ct_properties_profile
+					where is_default group by ca_uuid
+					) and is_default = true
+			""", //$NON-NLS-1$
+			
 		};
 		
 		for (String s : sql) {

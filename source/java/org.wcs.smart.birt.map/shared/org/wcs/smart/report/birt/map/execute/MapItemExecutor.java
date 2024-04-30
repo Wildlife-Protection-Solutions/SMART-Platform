@@ -548,15 +548,17 @@ public class MapItemExecutor implements IReportItemExecutor {
 			zoomToBounds = bounds.getEnvelope();
 
 		} else if (bounds.getOption() == BoundsOption.ALL_QUERY_LAYERS) {
-			for (Layer l : addCommand.getLayers()) {
-				if (zoomToBounds == null) {
-					ReferencedEnvelope env = l.getBounds(new NullProgressMonitor(),
-							renderedMap.getViewportModel().getCRS());
-					if (!env.isNull())
-						zoomToBounds = env;
-				} else {
-					zoomToBounds.expandToInclude(
-							l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS()));
+			if (addCommand != null) {
+				for (Layer l : addCommand.getLayers()) {
+					if (zoomToBounds == null) {
+						ReferencedEnvelope env = l.getBounds(new NullProgressMonitor(),
+								renderedMap.getViewportModel().getCRS());
+						if (!env.isNull())
+							zoomToBounds = env;
+					} else {
+						zoomToBounds.expandToInclude(
+								l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS()));
+					}
 				}
 			}
 			if (zoomToBounds == null) {
