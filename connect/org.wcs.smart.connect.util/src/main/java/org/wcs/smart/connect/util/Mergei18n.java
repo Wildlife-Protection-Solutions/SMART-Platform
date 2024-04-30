@@ -3,6 +3,7 @@ package org.wcs.smart.connect.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,9 +47,10 @@ public class Mergei18n {
 		HashMap<String, String> values = new HashMap<>();
 		
 		Path p = Paths.get(enFile);
-		try(BufferedReader reader = Files.newBufferedReader(p)){
+		try(BufferedReader reader = Files.newBufferedReader(p, StandardCharsets.UTF_8)){
 			String line = null;
 			while((line = reader.readLine()) != null){
+				System.out.println(line);
 				if (line.trim().isEmpty()) continue;
 				int index = line.indexOf("=");
 				if (index < 0) {
@@ -58,6 +60,7 @@ public class Mergei18n {
 				String key = line.substring(0, index);
 				String value = line.substring(index + 1);
 				values.put(key, value);
+				System.out.println(line);
 			}
 		}
 		
@@ -222,7 +225,7 @@ public class Mergei18n {
 			for (String key : values.keySet()){
 				if (!newvalues.containsKey(key)){
 					System.out.println("adding:" + key);
-					newvalues.put(key, "**NEW**" + values.get(key));
+					//newvalues.put(key, "**NEW**" + values.get(key));
 				}
 			}
 			
