@@ -1524,7 +1524,16 @@ public class UpgradeServlet extends HttpServlet {
 						//create index
 						"alter table connect.alerts add constraint alerts_user_gen_id_unq unique(user_generated_id)", //$NON-NLS-1$
 						
-						
+						//remove duplicate default mobile profiles
+						//i tested on backup with this issue
+						"""
+						update smart.ct_properties_profile set is_default = false
+						where uuid not in (
+							select min(uuid::varchar)::uuid
+							from smart.ct_properties_profile
+							where is_default group by ca_uuid
+							) and is_default = true
+						""", //$NON-NLS-1$
 						
 						//versions
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
