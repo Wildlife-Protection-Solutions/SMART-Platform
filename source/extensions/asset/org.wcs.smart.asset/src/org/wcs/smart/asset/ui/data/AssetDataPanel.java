@@ -295,6 +295,11 @@ public abstract class AssetDataPanel {
 		for (Control c : details.getChildren()) c.dispose();
 		rows = new ArrayList<>();
 		
+		if (waypointsToDisplay == null) {
+			toolkit.createLabel(details, DialogConstants.LOADING_TEXT);
+			details.layout();
+			return;
+		}
 		if (waypointsToDisplay.size() == 0) {
 			toolkit.createLabel(details, Messages.AssetDataPanel_NoDataLabel);
 			details.layout();
@@ -632,54 +637,56 @@ public abstract class AssetDataPanel {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetWaypointMapping> waypoints = new ArrayList<>();
-			final int pageSize = displaySettings.getPageSize().getPageSize();
-			try(Session session = HibernateManager.openSession()){
-				for(int i = startIndex; i < Math.min(startIndex + pageSize,  waypointsToDisplay.size()); i ++) {
-					
-					Waypoint wp = session.get(Waypoint.class, waypointsToDisplay.get(i));
-					if (wp == null) {
-						//deleted - need to add deleted item
-						waypoints.add(new AssetWaypointMapping(null, Collections.emptyList()));						
-						continue;
-					}
-					if (wp.getLastModifiedBy() != null) SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
-					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
-							.setParameter("uuid", waypointsToDisplay.get(i)) //$NON-NLS-1$
-							.list();
-							
-					
-					if (wp.getAttachments() != null) {
-						wp.getAttachments().forEach(a->{try {
-							a.computeFileLocation(session);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}});
-					}
-					if (wp.getAllObservations() != null) {
-						wp.getAllObservations().forEach(e->{
-							e.getCategory().getFullCategoryName();	
-							if (e.getAttachments() != null) e.getAttachments().forEach(a->{try {
+			if (waypointsToDisplay != null) {
+				final int pageSize = displaySettings.getPageSize().getPageSize();
+				try(Session session = HibernateManager.openSession()){
+					for(int i = startIndex; i < Math.min(startIndex + pageSize,  waypointsToDisplay.size()); i ++) {
+						
+						Waypoint wp = session.get(Waypoint.class, waypointsToDisplay.get(i));
+						if (wp == null) {
+							//deleted - need to add deleted item
+							waypoints.add(new AssetWaypointMapping(null, Collections.emptyList()));						
+							continue;
+						}
+						if (wp.getLastModifiedBy() != null) SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
+						List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
+								.setParameter("uuid", waypointsToDisplay.get(i)) //$NON-NLS-1$
+								.list();
+								
+						
+						if (wp.getAttachments() != null) {
+							wp.getAttachments().forEach(a->{try {
 								a.computeFileLocation(session);
-							} catch (Exception e1) {
-								e1.printStackTrace();
+							} catch (Exception e) {
+								e.printStackTrace();
 							}});
-							if (e.getAttributes() != null) {
-								e.getAttributes().forEach(a->{
-									a.getAttribute().getName();
-									a.getAttributeValueAsString(Locale.getDefault());
-									a.getAttributeListItems().size();
-								});
-							}
-						} );
+						}
+						if (wp.getAllObservations() != null) {
+							wp.getAllObservations().forEach(e->{
+								e.getCategory().getFullCategoryName();	
+								if (e.getAttachments() != null) e.getAttachments().forEach(a->{try {
+									a.computeFileLocation(session);
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}});
+								if (e.getAttributes() != null) {
+									e.getAttributes().forEach(a->{
+										a.getAttribute().getName();
+										a.getAttributeValueAsString(Locale.getDefault());
+										a.getAttributeListItems().size();
+									});
+								}
+							} );
+						}
+						aws.forEach(aw->{
+							aw.getAssetDeployment().getAsset().getId();
+							aw.getAssetDeployment().getAsset().getAssetType();
+							aw.getAssetDeployment().getStationLocation().getId();
+							aw.getAssetDeployment().getStationLocation().getStation().getId();
+							aw.getAttachments().forEach(a->a.getWaypointAttachment());
+						});
+						waypoints.add(new AssetWaypointMapping(wp, aws));
 					}
-					aws.forEach(aw->{
-						aw.getAssetDeployment().getAsset().getId();
-						aw.getAssetDeployment().getAsset().getAssetType();
-						aw.getAssetDeployment().getStationLocation().getId();
-						aw.getAssetDeployment().getStationLocation().getStation().getId();
-						aw.getAttachments().forEach(a->a.getWaypointAttachment());
-					});
-					waypoints.add(new AssetWaypointMapping(wp, aws));
 				}
 			}
 			Display.getDefault().syncExec(()->{createWidgetPanel(waypoints);});

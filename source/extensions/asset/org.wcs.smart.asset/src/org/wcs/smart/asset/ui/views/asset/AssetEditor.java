@@ -225,7 +225,9 @@ public class AssetEditor extends EditorPart implements MapPart {
 		parentContext.get(IEventBroker.class).post(isNew? AssetEvents.ASSET_NEW : AssetEvents.ASSET_MODIFIED, data);
 		
 		refreshStatus();
-		if (deploymentPage != null) deploymentPage.refreshSummaryStatistics();
+		if (deploymentPage != null) {
+			deploymentPage.initializePanel(getAsset());
+		}
 	}
 	
 	@Override
@@ -778,7 +780,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 	}
 	
 	private void initializeEventsPanel(Asset asset) {
-		if (tblEvents == null) return;
+		if (asset == null || tblEvents == null) return;
 		Job j = new Job(Messages.AssetEditor_loadHistoryJobName) {
 
 			@Override

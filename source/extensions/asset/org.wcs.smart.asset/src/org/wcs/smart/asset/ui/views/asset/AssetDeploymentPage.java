@@ -143,6 +143,8 @@ public class AssetDeploymentPage {
 	private ScrolledComposite scrollDetails;
 	private Composite detailsPane;
 	private List<AssetTypeDeploymentAttribute> allDeploymentAttributes;
+	private Menu mnuTblDeployments;
+	private ToolBar deploymentToolbar;
 	
 	private FormToolkit toolkit;
 	
@@ -212,39 +214,40 @@ public class AssetDeploymentPage {
 		ToolItem itemExport = null;
 		ToolItem itemImport = null;
 		
-		if (canEdit()) {
-			ToolBar toolbar = new ToolBar(headerPanel, SWT.FLAT);
-			toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+			deploymentToolbar = new ToolBar(headerPanel, SWT.FLAT);
+			deploymentToolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			deploymentToolbar.setEnabled(false);
 			
-			itemImport = new ToolItem(toolbar, SWT.PUSH);
+			itemImport = new ToolItem(deploymentToolbar, SWT.PUSH);
 			itemImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 			itemImport.setToolTipText(Messages.AssetDeploymentPage_importTooltip);
 			itemImport.addListener(SWT.Selection, e->importDeployments());
 			
-			itemExport = new ToolItem(toolbar, SWT.PUSH);
+			itemExport = new ToolItem(deploymentToolbar, SWT.PUSH);
 			itemExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 			itemExport.setToolTipText(Messages.AssetDeploymentPage_exportTooltip);
 			itemExport.addListener(SWT.Selection, e->exportSelectedDeployments());
 			itemExport.setEnabled(false);
 			
-			itemDelete = new ToolItem(toolbar, SWT.PUSH);
+			itemDelete = new ToolItem(deploymentToolbar, SWT.PUSH);
 			itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			itemDelete.setToolTipText(Messages.AssetDeploymentPage_deleteTooltip);
 			itemDelete.addListener(SWT.Selection, e->deleteSelectedDeployments());
 			itemDelete.setEnabled(false);
 			
-			itemEdit = new ToolItem(toolbar, SWT.PUSH);
+			itemEdit = new ToolItem(deploymentToolbar, SWT.PUSH);
 			itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			itemEdit.setToolTipText(Messages.AssetDeploymentPage_edittooltip);
 			itemEdit.addListener(SWT.Selection, e->editSelectedDeployments());
 			itemEdit.setEnabled(false);
 			
-			ToolItem itemAdd = new ToolItem(toolbar, SWT.PUSH);
+			ToolItem itemAdd = new ToolItem(deploymentToolbar, SWT.PUSH);
 			itemAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			itemAdd.setToolTipText(Messages.AssetDeploymentPage_createTooltip);
 			itemAdd.addListener(SWT.Selection, e->addDeployment());
 			
-		}
+		
 		
 		SashForm bodyPanel = new SashForm(historyPanel, SWT.HORIZONTAL);
 		bodyPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -292,7 +295,7 @@ public class AssetDeploymentPage {
 			}
 		});
 		
-		if (canEdit()) {
+		
 			final ToolItem fitemDelete = itemDelete;
 			final ToolItem fitemEdit = itemEdit;
 
@@ -305,7 +308,8 @@ public class AssetDeploymentPage {
 			});
 			
 			Menu mnuDeployments = new Menu(tblDeployments.getControl());
-			
+			mnuTblDeployments=mnuDeployments; 
+			mnuDeployments.setVisible(false);
 			MenuItem mnuAddDisruption = new MenuItem(mnuDeployments, SWT.PUSH);
 			mnuAddDisruption.setText(Messages.AssetDeploymentPage_NewDistruptionLbl);
 			mnuAddDisruption.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
@@ -339,8 +343,10 @@ public class AssetDeploymentPage {
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			mnuDelete.addListener(SWT.Selection, e->deleteSelectedDeployments());
 			mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-			
-			tblDeployments.getControl().setMenu(mnuDeployments);
+		
+			if (canEdit()) {
+				tblDeployments.getControl().setMenu(mnuDeployments);
+			}
 			
 			mnuDeployments.addMenuListener(new MenuListener() {
 				@Override
@@ -353,7 +359,7 @@ public class AssetDeploymentPage {
 				@Override
 				public void menuHidden(MenuEvent e) { }
 			});
-		}
+		
 		
 		Composite detailsPaneOuter = new Composite(bodyPanel, SWT.BORDER);
 		detailsPaneOuter.setLayout(new GridLayout());
@@ -421,6 +427,7 @@ public class AssetDeploymentPage {
 	}
 	
 	private boolean canEdit() {
+		if (parentEditor.getAsset() == null) return false;
 		return (!parentEditor.getAsset().getIsRetired() && AssetSecurityManager.INSTANCE.canImportData()) ;
 	}
 	
@@ -494,6 +501,8 @@ public class AssetDeploymentPage {
 			addItem.setToolTipText(Messages.AssetDeploymentPage_addDisruptionTooltip);
 			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			addItem.addListener(SWT.Selection, e->addDisruption());
+			
+			
 		}
 		
 
@@ -535,6 +544,8 @@ public class AssetDeploymentPage {
 				deleteItem.addListener(SWT.Selection, e->{
 					deleteDisruption(d);
 				});
+				
+				
 			}
 			
 			Composite parent = toolkit.createComposite(dateDetails);
@@ -556,6 +567,14 @@ public class AssetDeploymentPage {
 	
 	
 	public void initializePanel(Asset asset) {
+		if (canEdit()) {
+			tblDeployments.getControl().setMenu(mnuTblDeployments);
+			deploymentToolbar.setEnabled(true);
+		}else {
+			tblDeployments.getControl().setMenu(null);
+			deploymentToolbar.setEnabled(false);
+		}
+		
 		loadHistoryDataJob.setSystem(true);
 		loadHistoryDataJob.schedule();
 		refreshSummaryStatistics();
@@ -915,13 +934,16 @@ public class AssetDeploymentPage {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (assetSummaryValues == null) return org.eclipse.core.runtime.Status.OK_STATUS; 
 			
+			Asset asset = parentEditor.getAsset();
+			if (asset == null) return Status.OK_STATUS;
+			
 			final Map<IAssetSummary, Label> copy = new HashMap<>();
 			copy.putAll(assetSummaryValues);
 			
 			HashMap<Label, String> values = new HashMap<>();
 			try(Session s = HibernateManager.openSession()){
 				for (Entry<IAssetSummary, Label> item : copy.entrySet()) {
-					String result = item.getKey().getSummaryValue(parentEditor.getAsset(), s);
+					String result = item.getKey().getSummaryValue(asset, s);
 					values.put(item.getValue(), result);
 				}			
 			}
@@ -945,10 +967,12 @@ public class AssetDeploymentPage {
 	Job loadHistoryDataJob = new Job(Messages.AssetDeploymentPage_loadingdataJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
+			Asset asset = parentEditor.getAsset();
+			if (asset == null) {
+				return Status.OK_STATUS;
+			}
 			List<AssetDeploymentTableColumn> tableColumns = new ArrayList<>();
 			allDeployments = new ArrayList<>();
-			Asset asset = parentEditor.getAsset();
 			allDeploymentAttributes = new ArrayList<>();
 			
 			try(Session s = HibernateManager.openSession()){

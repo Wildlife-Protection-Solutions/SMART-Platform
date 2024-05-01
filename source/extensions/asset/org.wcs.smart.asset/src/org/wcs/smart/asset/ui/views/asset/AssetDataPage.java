@@ -133,6 +133,11 @@ public class AssetDataPage {
 		Job loadData = new Job(Messages.AssetDataPage_loadDataJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				if (parentEditor.getAsset() == null) {
+					dataPanel.setWaypoints(null);
+					return Status.OK_STATUS;
+				}
+				
 				if (parentEditor.getAsset().getUuid() == null) {
 					dataPanel.setWaypoints(Collections.emptyList());
 					return Status.OK_STATUS;
