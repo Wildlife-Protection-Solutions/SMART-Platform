@@ -218,7 +218,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 	private static final String TBLRECORD_LBLPROVIDER_KEY = "LBLPROVIDER"; //$NON-NLS-1$
 
-	public static final String ID = "org.wcs.smart.i2.editor.entity"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.i2.editor.entity";   //$NON-NLS-1$
 
 	private static final int THUMB_SIZE = 150;
 	private Font boldFont = null;
@@ -1263,14 +1263,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 		toolkit.createLabel(c, Messages.EntityEditor_ModifiedLabel);
 		lblModified= toolkit.createLabel(c, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now()));
 		lblModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
 
-		toolkit.createLabel(c, "Created By:");
-		lblCreatedBy = toolkit.createLabel(c, "");
+		toolkit.createLabel(c, Messages.EntityEditor_CreatedByLbl);
+		lblCreatedBy = toolkit.createLabel(c, ""); //$NON-NLS-1$
 		lblCreatedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(c, "Modified By:");
-		lblModifiedBy = toolkit.createLabel(c, "");
+		toolkit.createLabel(c, Messages.EntityEditor_LastModifiedByLbl);
+		lblModifiedBy = toolkit.createLabel(c, ""); //$NON-NLS-1$
 		lblModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 	}

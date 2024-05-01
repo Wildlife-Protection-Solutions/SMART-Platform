@@ -223,6 +223,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_ActiveLabel;
 	public static String EntityEditor_AddAttachmentBtn;
 	public static String EntityEditor_AttributeTitle;
+	public static String EntityEditor_CreatedByLbl;
 	public static String EntityEditor_CreatedLabel;
 	public static String EntityEditor_DataModelAttGroup;
 	public static String EntityEditor_DeleteCloseWarning;
@@ -247,6 +248,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_HiddenTooltip;
 	public static String EntityEditor_HistoryLabel;
 	public static String EntityEditor_InsufficientprovilegesToView;
+	public static String EntityEditor_LastModifiedByLbl;
 	public static String EntityEditor_LinkNotFound;
 	public static String EntityEditor_ListItemAtt;
 	public static String EntityEditor_MapTitle;
