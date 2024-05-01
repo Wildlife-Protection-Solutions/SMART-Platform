@@ -173,12 +173,12 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     			String extension = ""; //$NON-NLS-1$
     			if (pos > 0){
     				basename = name.substring(0, pos);
-    				extension = name.substring(pos);
+    				extension = URLUtils.cleanFilename(name.substring(pos+1));
     			}
     			
     			
     			//clean any special characters from filename
-				String filename = URLUtils.cleanFilename(to.getFileName().toString());
+				String filename = URLUtils.cleanFilename(basename) + "." + extension; //$NON-NLS-1$
 				to = to.getParent().resolve(filename);
 				
     			Pattern p = Pattern.compile("(.*)_(\\d+)"); //$NON-NLS-1$
@@ -193,7 +193,7 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     				}
     				
     				//clean filename
-    				to = to.getParent().resolve(URLUtils.cleanFilename(basename + extension));
+    				to = to.getParent().resolve(URLUtils.cleanFilename(basename) +  "." + extension); //$NON-NLS-1$
     			}
     			
     			if (this.encrypt && attachment.isEncrypted()) {
