@@ -82,8 +82,8 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 				case TYPE: return entity.getEntityType().getName();
 				case DATE_CREATED: return entity.getDateCreatedAtLocal();
 				case DATE_MODIFIED: return entity.getDateModifiedAtLocal();
-				case CREATED_BY: return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), l);
-				case MODIFIED_BY: return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), l);
+				case CREATED_BY: return entity.getCreatedBy() == null ? "" :  SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), l); //$NON-NLS-1$
+				case MODIFIED_BY: return entity.getLastModifiedBy() == null ? "" :  SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), l); //$NON-NLS-1$
 				case PRIMARY_IMAGE: 
 					if (entity.getPrimaryAttachment() == null){
 						return null;

@@ -129,6 +129,8 @@ import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -240,6 +242,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private Label lblCreated;
 	private Label lblModified;
+	private Label lblCreatedBy;
+	private Label lblModifiedBy;
 	private Label lblIdentifier;
 	private Label lblType;
 	private Label lblTypeImage;
@@ -312,6 +316,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 					Display.getDefault().syncExec(()->closeEditor(false));
 					return Status.OK_STATUS;
 				}
+				Hibernate.initialize(temp.getCreatedBy());
+				Hibernate.initialize(temp.getLastModifiedBy());
 				temp.getProfile().getName();
 				temp.getEntityType().getIcon();
 				if (temp.getEntityType().getDmAttribute() != null) {
@@ -1257,6 +1263,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		toolkit.createLabel(c, Messages.EntityEditor_ModifiedLabel);
 		lblModified= toolkit.createLabel(c, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now()));
 		lblModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+
+		toolkit.createLabel(c, "Created By:");
+		lblCreatedBy = toolkit.createLabel(c, "");
+		lblCreatedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(c, "Modified By:");
+		lblModifiedBy = toolkit.createLabel(c, "");
+		lblModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 	}
 	
 	
@@ -2022,6 +2038,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 		 
 		lblCreated.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateCreatedAtLocal()));
 		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModifiedAtLocal()));
+		
+		if (entity.getCreatedBy() != null) {
+			lblCreatedBy.setText(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), Locale.getDefault()));
+		}
+		if (entity.getLastModifiedBy() != null) {
+			lblModifiedBy.setText(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), Locale.getDefault()));
+		}
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
 		
