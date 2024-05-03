@@ -38,12 +38,17 @@ import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.eclipse.datatools.connectivity.oda.design.ColumnDefinition;
+import org.eclipse.datatools.connectivity.oda.design.DataElementAttributes;
+import org.eclipse.datatools.connectivity.oda.design.DataElementUIHints;
 import org.eclipse.datatools.connectivity.oda.design.DataSetDesign;
 import org.eclipse.datatools.connectivity.oda.design.DataSetParameters;
 import org.eclipse.datatools.connectivity.oda.design.DesignFactory;
+import org.eclipse.datatools.connectivity.oda.design.OutputElementAttributes;
 import org.eclipse.datatools.connectivity.oda.design.ParameterDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
+import org.eclipse.datatools.connectivity.oda.design.ValueFormatHints;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -61,6 +66,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
@@ -425,8 +431,9 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 */
 	protected void updateResultSetDesign(IResultSetMetaData md,
 			DataSetDesign dataSetDesign) throws OdaException {
-		ResultSetColumns columns = DesignSessionUtil
-				.toResultSetColumnsDesign(md);
+
+		
+		ResultSetColumns columns = toResultSetColumnsDesign(md);
 
 		ResultSetDefinition resultSetDefn = DesignFactory.eINSTANCE
 				.createResultSetDefinition();
@@ -437,6 +444,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		// dataSetDesign
 		dataSetDesign.setPrimaryResultSet(resultSetDefn);
 		dataSetDesign.getResultSets().setDerivedMetaData(true);
+		
 	}
 
 	/**
@@ -490,5 +498,60 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 
 	protected boolean canAddQuery(QueryEditorInput in) {
 		return in.getType().supportsReports();
+	}
+	
+	public static ResultSetColumns toResultSetColumnsDesign(IResultSetMetaData md) throws OdaException {
+		//copied from: ResultSetColumns columns = DesignSessionUtil.toResultSetColumnsDesign(md);
+		
+		if (md == null || md.getColumnCount() == 0)
+			return null; // nothing to convert
+
+		ResultSetColumns rsColumns = DesignFactory.eINSTANCE.createResultSetColumns();
+		int columnCount = md.getColumnCount();
+		for (int i = 1; i <= columnCount; i++) {
+			ColumnDefinition columnDef = DesignFactory.eINSTANCE.createColumnDefinition();
+
+			DataElementAttributes columnAttrs = DesignFactory.eINSTANCE.createDataElementAttributes();
+			columnAttrs.setPosition(i);
+			columnAttrs.setNativeDataTypeCode(md.getColumnType(i));
+
+			ValueFormatHints formatHints = DesignFactory.eINSTANCE.createValueFormatHints();
+			OutputElementAttributes outAttrs = DesignFactory.eINSTANCE.createOutputElementAttributes();
+
+			try {
+				String columnName = md.getColumnName(i);
+				String columnLabel = md.getColumnLabel(i);
+				
+				columnAttrs.setName(columnName);
+				columnAttrs.setNullability( DesignSessionUtil.convertResultColumnNullability( md.isNullable(i) ));
+				columnAttrs.setPrecision(md.getPrecision(i));
+				columnAttrs.setScale(md.getScale(i));
+				
+				DataElementUIHints hints = DesignFactory.eINSTANCE.createDataElementUIHints();
+				hints.setDisplayName(columnLabel );
+				columnAttrs.setUiHints(hints);
+				
+				//leave this out otherwise it seems to cause different behaviour in different cases
+				//outAttrs.setLabel(columnLabel);
+
+				formatHints.setDisplaySize(md.getColumnDisplayLength(i));
+				if (columnLabel != null)
+					columnAttrs.setUiDisplayName(columnLabel);
+				
+				
+			} catch (UnsupportedOperationException ex) {
+				SmartPlugIn.log("Some optional metadata of column " + i + " are not available.", ex);  //$NON-NLS-1$//$NON-NLS-2$
+			} catch (OdaException odaEx) {
+				SmartPlugIn.log("Some optional metadata of column " + i + " are not available.", odaEx); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
+			columnDef.setAttributes(columnAttrs);
+			outAttrs.setFormattingHints(formatHints);
+			columnDef.setUsageHints(outAttrs);
+
+			rsColumns.getResultColumnDefinitions().add(columnDef);
+		}
+
+		return rsColumns;
 	}
 }

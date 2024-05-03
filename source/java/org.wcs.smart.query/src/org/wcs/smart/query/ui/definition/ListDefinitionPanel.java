@@ -195,7 +195,7 @@ public abstract class ListDefinitionPanel implements IQueryDefinitionPanel{
 	public void addItem(DropItem item) {
 		if (this.isUnique){
 			for (DropItem it: items){
-				if (it.asQueryPart().equals(item.asQueryPart()))
+				if (it.asQueryPart() != null &&  it.asQueryPart().equals(item.asQueryPart()))
 					return;
 			}
 		}
