@@ -234,7 +234,7 @@ public class SmartCollectPackageExporter {
 	
 	
 	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
+		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctPackage.getConservationArea().getUuid());
 	}
 
 	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, 

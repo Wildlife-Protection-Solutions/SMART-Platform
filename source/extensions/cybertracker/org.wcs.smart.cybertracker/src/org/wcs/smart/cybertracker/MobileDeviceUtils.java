@@ -33,7 +33,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Interface for interacting with command line tools for exporting and importing
@@ -161,7 +163,7 @@ public class MobileDeviceUtils {
 	  * @return
 	  * @throws Exception
 	  */
-	public static void importFromDevice(Path target) throws Exception{
+	public static void importFromDevice(Path target, ConservationArea ca) throws Exception{
 		if (!CyberTrackerPlugIn.getDefault().isWindows()) {
 			throw new Exception(Messages.MobileDeviceUtils_OsNotSupported);
 		}
@@ -174,11 +176,13 @@ public class MobileDeviceUtils {
 			throw new Exception(Messages.MobileDeviceUtils_ExtractError, ex);
 		}
 		
+		String cauuid = UuidUtils.uuidToString(ca.getUuid());
+		
 		List<String> items = new ArrayList<>();
 		items.add(exe.toString());
 		items.add("/deleteAfterDownload"); //$NON-NLS-1$
 		items.add("/download"); //$NON-NLS-1$
-		items.add("\\" + DATA_FOLDER + "\\*.json"); //$NON-NLS-1$ //$NON-NLS-2$
+		items.add("\\" + DATA_FOLDER + "\\*" + cauuid + "*.json"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		items.add(target.toString());
 			
 		ProcessBuilder pb = new ProcessBuilder(items);

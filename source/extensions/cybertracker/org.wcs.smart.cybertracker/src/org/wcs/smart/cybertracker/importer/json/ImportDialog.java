@@ -153,7 +153,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 		((GridLayout)emptyStack.getLayout()).marginHeight = 0;
 		
 		l = new Label(emptyStack, SWT.WRAP);
-		l.setText(MessageFormat.format(Messages.ImportDialog_DeviceMsg, MobileDeviceUtils.DATA_FOLDER));
+		l.setText(MessageFormat.format(Messages.ImportDialog_DeviceMsg1, MobileDeviceUtils.DATA_FOLDER));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 200;
 		
@@ -395,7 +395,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 
 			//import from device
 			try {
-				MobileDeviceUtils.importFromDevice(importPath);
+				MobileDeviceUtils.importFromDevice(importPath, SmartDB.getCurrentConservationArea());
 			}catch (Exception ex) {
 				CyberTrackerPlugIn.displayError(Messages.ImportDialog_Error, Messages.ImportDialog_DeviceImportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}

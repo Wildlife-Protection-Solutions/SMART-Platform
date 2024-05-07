@@ -241,7 +241,7 @@ public class PatrolPackageExporter {
 				
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
 				CtJsonExportUtils.writeProjectJson(ctpackage.getName(), version, CtJsonExportUtils.CM_MODEL_FILE, logo, 
-						projectFile, metadataFile, projectAdditions);
+						projectFile, metadataFile, projectAdditions, ctpackage.getConservationArea().getUuid());
 
 				
 				//add all files in working directory to package

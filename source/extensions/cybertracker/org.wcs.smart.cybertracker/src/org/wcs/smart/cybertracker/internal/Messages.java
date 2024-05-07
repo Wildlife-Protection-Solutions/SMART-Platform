@@ -281,7 +281,7 @@ public class Messages extends NLS {
 	public static String ImportDialog_deletefiletooltip;
 	public static String ImportDialog_DetailsBtn;
 	public static String ImportDialog_DeviceImportError;
-	public static String ImportDialog_DeviceMsg;
+	public static String ImportDialog_DeviceMsg1;
 	public static String ImportDialog_DeviceOption;
 	public static String ImportDialog_DialogMessage1;
 	public static String ImportDialog_DialogTitle1;
