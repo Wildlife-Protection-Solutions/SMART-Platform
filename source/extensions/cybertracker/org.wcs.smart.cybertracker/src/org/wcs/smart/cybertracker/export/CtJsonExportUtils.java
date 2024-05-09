@@ -47,7 +47,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
+import org.geotools.metadata.iso.citation.Citations;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.wkt.Formattable;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -286,8 +288,20 @@ public class CtJsonExportUtils {
 				continue;
 			}else if (option == ProfileOptionID.CA_PROJECTION_UUID) {
 				Projection prj = profile.getCaProjection(session, true);
-				profileObj.put(option.getMobleJsonKey(), prj.getDefinition());
 				
+				//convert definition to ESRI WKT
+				//https://docs.geotools.org/latest/userguide/library/referencing/crs.html
+				try {
+					CoordinateReferenceSystem crs = CRS.parseWKT(prj.getDefinition());
+					Formattable f = (Formattable) crs;
+					String wkt = f.toWKT(Citations.ESRI, 0); // use 0 indent for single line
+					profileObj.put(option.getMobleJsonKey(), wkt);
+				}catch (Exception ex) {
+					//fallback regular wkt
+					profileObj.put(option.getMobleJsonKey(), prj.getDefinition());
+					CyberTrackerPlugIn.log(ex.getMessage(), ex);
+					
+				}
 				//also add EPSG if we can
 				try {
 					CoordinateReferenceSystem crs = CRS.parseWKT(prj.getDefinition());
