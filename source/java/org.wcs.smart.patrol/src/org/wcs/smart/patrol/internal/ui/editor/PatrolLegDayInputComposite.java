@@ -1286,6 +1286,7 @@ public class PatrolLegDayInputComposite {
 					try(Session session = HibernateManager.openSession()){
 						PatrolLeg leg = session.get(PatrolLeg.class, patrolLegDate.getPatrolLeg().getUuid());
 						for (PatrolLegMember m : leg.getMembers()){
+							Hibernate.initialize(m.getMember());
 							emps.add(m.getMember());
 						}
 						emps.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a).toUpperCase(), SmartLabelProvider.getFullLabel(b).toUpperCase()));

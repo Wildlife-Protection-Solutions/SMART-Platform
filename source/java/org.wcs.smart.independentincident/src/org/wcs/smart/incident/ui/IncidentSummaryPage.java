@@ -73,6 +73,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -692,6 +693,7 @@ public class IncidentSummaryPage extends EditorPart {
 					}
 					
 					if (employees != null){
+						employees.forEach(e->Hibernate.initialize(e));
 						employees.sort((a,b)->
 							Collator.getInstance().compare(
 								SmartLabelProvider.getFullLabel(a).toUpperCase(), 
