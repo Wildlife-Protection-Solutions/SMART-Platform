@@ -47,10 +47,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.udig.catalog.URLUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.Employee;
@@ -284,9 +286,18 @@ public class CtJsonExportUtils {
 				continue;
 			}else if (option == ProfileOptionID.CA_PROJECTION_UUID) {
 				Projection prj = profile.getCaProjection(session, true);
+				profileObj.put(option.getMobleJsonKey(), prj.getDefinition());
 				
-				String wkt = prj.getDefinition();
-				profileObj.put(option.getMobleJsonKey(), wkt);
+				//also add EPSG if we can
+				try {
+					CoordinateReferenceSystem crs = CRS.parseWKT(prj.getDefinition());
+					Integer value = CRS.lookupEpsgCode(crs, true);
+					if (value != null) {
+						profileObj.put("PROJECTION_EPSG", value); //$NON-NLS-1$
+					}
+				}catch (Exception ex) {
+					//eat this - no epsg code could be found
+				}
 			
 			} else {
 			
