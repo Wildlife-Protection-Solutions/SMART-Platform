@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Independent Incident Data Queue Processor
+Bundle-Name: Connect SMART Mobile Data Queue Processor
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker;singleton:=true
 Bundle-Version: 8.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-21
