@@ -690,6 +690,8 @@ public class CtJsonObservationParser {
 			WaypointAttachment attachment = new WaypointAttachment();
 			attachment.setCopyFromLocation(temp);
 			attachment.setFilename(fileName);
+			attachment.setAttachmentTags(new ArrayList<>());
+
 			return attachment;
 
 		} else {

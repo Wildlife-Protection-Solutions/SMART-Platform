@@ -130,10 +130,12 @@ public class ApplyChangeLogJob extends Job {
 						if (isLoggedIn){
 							//otherwise we are running from login screen and we don't care about dialogs
 							for (Shell s : Display.getDefault().getShells()){
+								if (!s.isVisible()) continue; //not visible shells
 								if ((s.getStyle() & SWT.APPLICATION_MODAL) == SWT.APPLICATION_MODAL ||
 										(s.getStyle() & SWT.SYSTEM_MODAL) == SWT.SYSTEM_MODAL ||
 										(s.getStyle() & SWT.PRIMARY_MODAL) == SWT.PRIMARY_MODAL){
 									closed[0] = false;
+									
 								}
 							}
 						}
