@@ -51,6 +51,7 @@ import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
+import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
 import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
@@ -87,6 +88,9 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public abstract class MissionJsonProcessor implements IJsonProcessor {
+	
+	//if CA of mission link doesn't match the CA being processed
+	public static final Object CA_ERROR = new Object();
 	
 	private DateTimeFormatter DATEFORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd"); //$NON-NLS-1$
 	private DateTimeFormatter TIMEFORMAT = DateTimeFormatter.ofPattern("HH:mm:ss"); //$NON-NLS-1$
@@ -197,6 +201,12 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 				CtMissionLink link = (CtMissionLink) session.get(CtMissionLink.class, ctMissionUuid);
 				if (link == null){
 					link = newMissionLinks.get(ctMissionUuid);
+				}else if (!link.getMission().getSurvey().getSurveyDesign().getConservationArea().equals(this.ca)) {
+					//error data in file is being loaded into a patrol in a different ca
+					//this is an error
+					String message = SmartContext.INSTANCE.getClass(ISurveyCyberTrackerLabelProvider.class).getLabel(CA_ERROR, locale);
+					throw new SmartMobileProcessingError(MessageFormat.format(message, this.ca.getNameLabel(), 
+							link.getMission().getSurvey().getSurveyDesign().getConservationArea().getNameLabel()));
 				}
 				
 				//ensure valid observation id
@@ -504,6 +514,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 						//copy attachments
 						if (wp.getAttachments() != null) {
 							if (mwpg.getWaypoint().getAttachments() == null) mwpg.getWaypoint().setAttachments(new ArrayList<>());						
+							
 							for (WaypointAttachment wa : wp.getAttachments()) {
 								wa.setWaypoint(mwpg.getWaypoint());
 								mwpg.getWaypoint().getAttachments().add(wa);
@@ -512,6 +523,15 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 										.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(link.getMission(), session))
 										.resolve(wa.getFilename()));
 							
+							}
+							for(WaypointObservation wo : wp.getAllObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment a : wo.getAttachments()){
+										a.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
+												.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(link.getMission(), session))
+												.resolve(a.getFilename()));
+									}
+								}
 							}
 						}
 					}else if (mwp != null) {
@@ -537,6 +557,15 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 										.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(link.getMission(), session))
 										.resolve(wa.getFilename()));
 							}
+							for(WaypointObservation wo : wp.getAllObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment a : wo.getAttachments()){
+										a.computeFileLocation(Paths.get(ca.getFileDataStoreLocation())
+												.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(link.getMission(), session))
+												.resolve(a.getFilename()));
+									}
+								}
+							}
 						}
 
 						if (link.getMission().getUuid() != null) session.persist(newGroup);
@@ -558,8 +587,9 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 						//add these observation to the selected patrol leg
 						addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
 						
-						//if (link.getMission().getUuid() != null) session.saveOrUpdate(wp);
-						if (wp.getUuid() == null) session.persist(wp);
+						if (link.getMission().getUuid() != null) {
+							if (wp.getUuid() == null) session.persist(wp);
+						}
 						
 						//update patrol links
 						CtMissionWpLink wplink = new CtMissionWpLink();
@@ -614,7 +644,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		}
 		
 		//try processing track features
-		MissionJsonTrackProcessor trackProcessor = new MissionJsonTrackProcessor();
+		MissionJsonTrackProcessor trackProcessor = new MissionJsonTrackProcessor(this.ca);
 		processedFeatures.addAll(trackProcessor.processJson(features, session, locale, smonitor.split(features.size())));
 		modifiedMissions.addAll(trackProcessor.getModifiedMissions());
 		processTrackWarnings(trackProcessor.getWarnings());

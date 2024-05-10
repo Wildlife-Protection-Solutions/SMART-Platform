@@ -40,11 +40,13 @@ import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 import org.wcs.smart.cybertracker.json.JsonTrackUtils;
+import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.er.model.Mission;
@@ -79,8 +81,10 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	protected Set<Mission> modifiedMissions;
 	protected List<JsonImportWarning> warnings;
 	protected Locale locale;
+	private ConservationArea ca;
 	
-	public MissionJsonTrackProcessor() {
+	public MissionJsonTrackProcessor(ConservationArea ca) {
+		this.ca = ca;
 	}
 
 	public Set<Mission> getModifiedMissions(){
@@ -142,6 +146,13 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 				if (matches.size() == 1){
 					//this is simple
 					MissionDay md = matches.iterator().next();
+					
+					if (!md.getMission().getSurvey().getSurveyDesign().getConservationArea().equals(this.ca)) {
+						String message = SmartContext.INSTANCE.getClass(ISurveyCyberTrackerLabelProvider.class).getLabel(MissionJsonProcessor.CA_ERROR, locale);
+						throw new SmartMobileProcessingError(MessageFormat.format(message, this.ca.getNameLabel(), 
+							md.getMission().getSurvey().getSurveyDesign().getConservationArea().getNameLabel()));
+					}
+					
 					addPointToMisisonTracks(md, new Coordinate(x,y), dt);
 					processed.add(feature);
 					

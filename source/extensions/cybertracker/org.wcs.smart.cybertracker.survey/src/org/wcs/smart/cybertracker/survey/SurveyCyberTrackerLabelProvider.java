@@ -50,6 +50,9 @@ public class SurveyCyberTrackerLabelProvider implements ISurveyCyberTrackerLabel
 		if (item == MissionJsonProcessor.StatusMessage.MODIFIED) return Messages.SurveyCyberTrackerLabelProvider_ModifiedMessage;
 		
 		if (item == MissionJsonTrackProcessor.TRACK_LBL) return Messages.SurveyCyberTrackerLabelProvider_TrackId;
+		
+		if (item == MissionJsonProcessor.CA_ERROR) return Messages.SurveyCyberTrackerLabelProvider_InvalidCa;
+
 		return null;
 	}
 

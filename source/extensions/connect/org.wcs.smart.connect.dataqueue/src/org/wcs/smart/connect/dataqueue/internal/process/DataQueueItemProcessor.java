@@ -134,7 +134,8 @@ public class DataQueueItemProcessor extends Job {
 				
 				if (processingStatus.getStatus() == LocalDataQueueItem.Status.REQUEUED){
 					requeue = true;
-					processingStatus = new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.DataQueueItemProcessor_RequeueOnServer);
+					processingStatus = new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, 
+							processingStatus.getMessage()); 
 				}
 					
 			}catch (Exception ex){
@@ -217,6 +218,9 @@ public class DataQueueItemProcessor extends Job {
 	
 	private IItemProcessor.ProcessingStatus processItem(IProgressMonitor monitor) throws Exception{
 		IItemProcessor processor = getItemProcessor();
+		if (processor == null) {
+			return new IItemProcessor.ProcessingStatus(LocalDataQueueItem.Status.REQUEUED, MessageFormat.format(Messages.DataQueueItemProcessor_Error4, item.getType()));
+		}
 		return processor.process(item, monitor);
 	}
 	
@@ -227,7 +231,7 @@ public class DataQueueItemProcessor extends Job {
 				return p;
 			}
 		}
-		throw new Exception(MessageFormat.format(Messages.DataQueueItemProcessor_Error4, item.getType()));
+		return null;
 	}
 	
 	private void updateLocalStatus(LocalDataQueueItem.Status newStatus, String errorMsg){

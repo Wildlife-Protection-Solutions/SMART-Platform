@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.patrol.json;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -40,12 +41,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 import org.wcs.smart.cybertracker.json.JsonTrackUtils;
+import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
+import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -74,7 +79,10 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 	private Set<Patrol> modifiedPatrols;
 	private List<JsonImportWarning> warnings;
 	
-	public PatrolJsonTrackProcessor() {
+	private ConservationArea ca;
+	
+	public PatrolJsonTrackProcessor(ConservationArea ca) {
+		this.ca = ca;
 	}
 
 	public Set<Patrol> getModifiedPatrols(){
@@ -156,14 +164,18 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			if (matches.isEmpty()) continue;
 			
 			if (matches.size() == 1){
-				for (PatrolLegDay pld : matches) {
+				PatrolLegDay pld = matches.get(0);
+				if (!pld.getPatrolLeg().getPatrol().getConservationArea().equals(this.ca)) {
+					String message = SmartContext.INSTANCE.getClass(IPatrolCyberTrackerLabelProvider.class).getLabel(PatrolJsonProcessor.CA_ERROR, l);
+					throw new SmartMobileProcessingError(MessageFormat.format(message, this.ca.getNameLabel(), pld.getPatrolLeg().getPatrol().getConservationArea().getNameLabel()));					
+				}else {
 					Track t = pld.getTrack();
 					if (t == null){
 						t = new Track();
 						pld.setTrack(t);
 						t.setPatrolLegDay(pld);
 					}
-					
+						
 					List<LineString> lineStrings = new ArrayList<>(t.getLineStrings());
 					if (!lineStrings.isEmpty()) {
 						LineString newLs = JsonTrackUtils.addPointToTrack(lineStrings.get(lineStrings.size()-1), new Coordinate(x,y), dt);
@@ -173,11 +185,11 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 						LineString newLs = JsonTrackUtils.addPointToTrack(null, new Coordinate(x,y), dt);
 						t.setLineStrings(Arrays.asList(newLs));
 					}
-	
+		
 					processed.add(feature);
 						
 					if (pld.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
-				}
+				}			
 			}else{
 				StringBuilder sb = new StringBuilder();
 				for (PatrolLegDay pld : matches){

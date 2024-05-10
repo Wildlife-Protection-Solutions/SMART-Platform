@@ -63,6 +63,8 @@ public class Messages extends NLS {
 	public static String SurveyCtPackageManager_DefaultPackageName;
 	public static String SurveyCtPackageManager_PackageType;
 	public static String SurveyCyberTrackerLabelProvider_CreatedMessage;
+
+	public static String SurveyCyberTrackerLabelProvider_InvalidCa;
 	public static String SurveyCyberTrackerLabelProvider_JsonProcessingWarning1;
 	public static String SurveyCyberTrackerLabelProvider_JsonProcessingWarning2;
 	public static String SurveyCyberTrackerLabelProvider_JsonProcessingWarning3;

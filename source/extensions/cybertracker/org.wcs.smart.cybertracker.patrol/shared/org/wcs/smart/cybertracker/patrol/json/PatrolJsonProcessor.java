@@ -91,6 +91,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	//TODO: patrols without transport type cannot be saved
 	//at this point those are warning in the JsonPatrol but nothing
 	//is done yet
+	//if CA of patrol link doesn't match the CA being processed
 	public static final Object CA_ERROR = new Object();
 	
 	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
@@ -638,7 +639,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		
 		
 		//try processing track features
-		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
+		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor(this.ca);
 		processedFeatures.addAll(trackProcessor.processJson(features, session, locale, smonitor.split(features.size())));
 		modifiedPatrols.addAll(trackProcessor.getModifiedPatrols());
 		processTrackWarnings(trackProcessor.getWarnings());
