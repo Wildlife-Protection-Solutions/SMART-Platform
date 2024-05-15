@@ -2,7 +2,6 @@
     xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    
     <!-- mvn eclipse:eclipse -Dwtpversion=2.0 -->
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -10,31 +9,29 @@
         <artifactId>org.wcs.smart.connect</artifactId>
         <version>8.0.0-SNAPSHOT</version>
     </parent>
-    
     <groupId>org.wcs.smart.connect.server</groupId>
     <artifactId>org.wcs.smart.connect.server</artifactId>
     <name>SMART Connect Server</name>
     <packaging>war</packaging>
-    
     <properties>
-		<timestamp>${maven.build.timestamp}</timestamp>
-   		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
     </properties>
     <build>
-    	<finalName>server</finalName>
-    	<resources>
-    		<resource>
-    			<directory>src/main/resources</directory>
-    			<filtering>true</filtering>
-    		</resource>
-    		<resource>
-    			<directory>src/main/java</directory>
-    			<includes>
+        <finalName>server</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
                     <include>**/*.properties</include>
                 </includes>
-    		</resource>
-    	</resources>
-    	 <plugins>
+            </resource>
+        </resources>
+        <plugins>
             <!-- Set JDK Compiler Level -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -54,18 +51,18 @@
 					-->
                 </configuration>
             </plugin>
-  
             <plugin>
                 <groupId>io.openapitools.swagger</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
-               
                 <executions>
                     <execution>
-                    	<id>generate-core-api</id>
-                        <goals><goal>generate</goal></goals>
-                         <configuration>
-                             <resourcePackages>
-                                 <resourcePackage>org.wcs.smart.connect.api</resourcePackage>
+                        <id>generate-core-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <resourcePackages>
+                                <resourcePackage>org.wcs.smart.connect.api</resourcePackage>
                             </resourcePackages>
                             <outputDirectory>${basedir}/swagger/</outputDirectory>
                             <outputFilename>smartconnect-api-${project.version}</outputFilename>
@@ -73,10 +70,11 @@
                             <prettyPrint>true</prettyPrint>
                         </configuration>
                     </execution>
-                    
                     <execution>
-                    	<id>generate-noa-api</id>
-                        <goals><goal>generate</goal></goals>
+                        <id>generate-noa-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
                         <configuration>
                             <resourcePackages>
                                 <resourcePackage>org.wcs.smart.connect.api.noa</resourcePackage>
@@ -89,17 +87,15 @@
                     </execution>
                 </executions>
             </plugin>
-           
         </plugins>
     </build>
-    
     <dependencies>
-		<dependency>
-			<groupId>jakarta.activation</groupId>
-			<artifactId>jakarta.activation-api</artifactId>
-			<version>2.1.3</version>
-		</dependency>
-  		<dependency>
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+        <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>2.2.20</version>
@@ -111,22 +107,22 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
-    	<dependency>
+        <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-servlet-initializer</artifactId>
             <version>${resteasy.version}</version>
         </dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson2-provider</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>${resteasy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
+            <version>${resteasy.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-multipart-provider</artifactId>
             <version>${resteasy.version}</version>
@@ -141,7 +137,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- java zoneddatetime support; ticket #3721 --> 
+        <!-- java zoneddatetime support; ticket #3721 -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
@@ -152,7 +148,7 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
-         <!--javamail -->
+        <!--javamail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
@@ -173,23 +169,23 @@
             <version>${hibernate.version}</version>
         </dependency>
         <dependency>
-        	<groupId>org.hibernate.orm</groupId>
-        	<artifactId>hibernate-jcache</artifactId>
-        	<version>${hibernate.version}</version>
-        </dependency>	
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jcache</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
         <dependency>
             <groupId>de.svenkubiak</groupId>
             <artifactId>jBCrypt</artifactId>
             <version>${jbcrypt.version}</version>
-            <scope>provided</scope>            
+            <scope>provided</scope>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-catalina</artifactId>
             <version>${tomcat.catalina.version}</version>
             <scope>provided</scope>
         </dependency>
-         <!-- SMART -->
+        <!-- SMART -->
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.core</artifactId>
@@ -270,7 +266,7 @@
             <artifactId>org.wcs.smart.core.er.query</artifactId>
             <version>${smart.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.incident</artifactId>
             <version>${smart.version}</version>
@@ -295,7 +291,7 @@
             <artifactId>org.wcs.smart.core.connect.cybertracker</artifactId>
             <version>${smart.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.birt.map</artifactId>
             <version>${smart.version}</version>
@@ -325,7 +321,6 @@
             <artifactId>org.wcs.smart.core.reporttable</artifactId>
             <version>${smart.version}</version>
         </dependency>
-       
         <dependency>
             <groupId>org.wcs.smart.core</groupId>
             <artifactId>org.wcs.smart.core.cybertracker.patrol</artifactId>
@@ -431,7 +426,7 @@
                 <exclusion>
                     <groupId>javax</groupId>
                     <artifactId>javaee-api</artifactId>
-                </exclusion>    
+                </exclusion>
                 <exclusion>
                     <groupId>org.eclipse.emf</groupId>
                     <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
@@ -444,9 +439,6 @@
                     <groupId>org.eclipse.emf</groupId>
                     <artifactId>org.eclipse.emf.common</artifactId>
                 </exclusion>
-                
-            
-                
             </exclusions>
         </dependency>
         <dependency>
@@ -465,7 +457,7 @@
             <version>${geotools.version}</version>
         </dependency>
         <dependency>
-        	<!-- required for Graticule mapgraphic -->
+            <!-- required for Graticule mapgraphic -->
             <groupId>org.geotools</groupId>
             <artifactId>gt-grid</artifactId>
             <version>${geotools.version}</version>
@@ -517,7 +509,6 @@
                     <groupId>org.eclipse.emf</groupId>
                     <artifactId>org.eclipse.emf.common</artifactId>
                 </exclusion>
-                
             </exclusions>
         </dependency>
         <dependency>
@@ -630,53 +621,60 @@
             <artifactId>org.locationtech.udig.render.wms.basic</artifactId>
             <version>${udig.version}</version>
         </dependency>
-      		<dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.ui.workbench</artifactId>
-			<version>${org.eclipse.ui.workbench.version}</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.eclipse.emf</groupId>
-					<artifactId>org.eclipse.emf.ecore</artifactId>
-				</exclusion>
-				<exclusion>
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.ui.workbench</artifactId>
+            <version>${org.eclipse.ui.workbench.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.ecore</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.eclipse.emf</groupId>
                     <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
                 </exclusion>
-				<exclusion>
-					<groupId>org.eclipse.platform</groupId>
-					<artifactId>org.eclipse.equinox.common</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.eclipse.platform</groupId>
-					<artifactId>org.eclipse.equinox.registry</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.eclipse.platform</groupId>
-					<artifactId>org.eclipse.osgi</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.eclipse.platform</groupId>
-					<artifactId>org.eclipse.swt</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jna</groupId>
-					<artifactId>com.sun.jna</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jna</groupId>
-					<artifactId>com.sun.jna.platform</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.annotation</groupId>
-					<artifactId>javax.annotation-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis-ext</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-    </dependencies>    
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.registry</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.swt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jna</groupId>
+                    <artifactId>com.sun.jna</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jna</groupId>
+                    <artifactId>com.sun.jna.platform</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.annotation</groupId>
+                    <artifactId>javax.annotation-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis-ext</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+        <!-- required for reports with images; support Display class loading-->
+        <dependency>
+            <groupId>swt</groupId>
+            <artifactId>swt-win32</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+    </dependencies>
 </project>
