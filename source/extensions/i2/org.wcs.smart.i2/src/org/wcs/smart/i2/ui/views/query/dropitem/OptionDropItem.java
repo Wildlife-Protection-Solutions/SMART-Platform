@@ -155,13 +155,13 @@ public class OptionDropItem extends DropItem {
 				queryChanged();
 			}
 		});
-		if (currentOption == null){
+		if (currentOption == null && options.length > 0){
 			currentOption = options[0];
 		}
 		
 		combo.getControl().setEnabled(canEdit);
 		
-		combo.setSelection(new StructuredSelection(currentOption));
+		if (currentOption != null) combo.setSelection(new StructuredSelection(currentOption));
 		initDrag(combo.getControl());
 		
 		combo.getControl().pack();
