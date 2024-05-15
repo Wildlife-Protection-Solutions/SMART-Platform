@@ -96,6 +96,8 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IPagedQueryResultSet.SortDirection;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -566,8 +568,19 @@ public class QueryApi extends HttpServlet{
 			prjProvider = new ProjectionProvider(prj);
 		}
 		 
+		if (result instanceof IPagedQueryResultSet) {
+			IPagedQueryResultSet rresult = (IPagedQueryResultSet) result;
+			IQueryColumn sortColumn = null;
+			for (IQueryColumn c : rresult.getQueryColumns()) {
+				if (c.getColumnName().equalsIgnoreCase(sortColumnName) || c.getKey().equalsIgnoreCase(sortColumnName)) {
+					sortColumn = c;
+					break;
+				}
+			}
+			
+			((IPagedQueryResultSet) result).setSorting(sortColumn, sortDirectionInt == QueryApi.Direction.UP ? SortDirection.UP : SortDirection.DOWN);
+		}
 		if (result instanceof IntelObservationQueryResults){
-			((IntelObservationQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 			
 			if (format.equalsIgnoreCase(GeoJsonStreamingExporter.FORMAT_KEY)){
 				
@@ -582,9 +595,7 @@ public class QueryApi extends HttpServlet{
 		}
 		
 		if (result instanceof IPagedQueryResultSet){
-			//TODO: sorting
-//			((IntelEntityRecordQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
-//			((IntelEntityRecordQueryResults)result).configureSort(s);
+
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
 				
 				CsvExporter exporter = new CsvExporter((IPagedQueryResultSet)result, prjProvider,

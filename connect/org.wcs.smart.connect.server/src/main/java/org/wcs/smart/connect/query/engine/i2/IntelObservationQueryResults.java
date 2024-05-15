@@ -418,23 +418,6 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 		return " desc"; //$NON-NLS-1$
 	}
 
-	public void setSorting(String name, QueryApi.Direction dir) {
-		this.sortColumn = null;
-		this.sortDirection = SortDirection.UP;
-		for (IQueryColumn c : getQueryColumns()) {
-			if (c.getColumnName().equalsIgnoreCase(name)) {
-				this.sortColumn = c;
-				break;
-			}
-		}
-
-		if (dir == QueryApi.Direction.UP) {
-			sortDirection = SortDirection.UP;
-		}else {
-			sortDirection = SortDirection.DOWN;
-		}
-	}
-
 	@Override
 	public void dispose(Session session) throws SQLException {
 		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$

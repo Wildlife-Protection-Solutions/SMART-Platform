@@ -99,12 +99,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 	public String getQueryDataTable(){
 		return this.resultsTable;
 	}
-	
-	
-	public void setSortColumn(IQueryColumn sortColumn, IPagedQueryResultSet.SortDirection sortDirection){
-		this.sortColumn = sortColumn;
-		this.sortDirection = sortDirection;
-	}
+
 	
 	@Override
 	public List<IQueryColumn> getQueryColumns(){
@@ -242,9 +237,6 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 		}else if (sortColumn instanceof IntelRecordAttributeQueryColumn) {
 			IntelRecordAttributeQueryColumn col = ((IntelRecordAttributeQueryColumn)sortColumn);
 			
-
-			
-			
 			if (col.getAttribute().getAttribute() != null) {
 				if (col.getAttribute().getAttribute().getType() == AttributeType.BOOLEAN ||
 					col.getAttribute().getAttribute().getType() == AttributeType.DATE ||
@@ -296,34 +288,27 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 					s3.append( resultsTable );
 					s3.append(" r on r.record_uuid = v.record_uuid"); //$NON-NLS-1$
 					
-					session.beginTransaction();
-					try {
-						session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
-								.addScalar("element_uuid")//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
-								.list();
-						for (UUID item : items) {
-							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, item);
+					List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
+							.list();
+					for (UUID item : items) {
+						IntelAttributeListItem li = session.get(IntelAttributeListItem.class, item);
 							
-							StringBuilder s2 = new StringBuilder();
-							s2.append("UPDATE "); //$NON-NLS-1$
-							s2.append(resultsTable);
-							s2.append(" SET sort_column = :value "); //$NON-NLS-1$
-							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
-							s2.append(resultsTable + " a"); //$NON-NLS-1$
-							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
-							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
-							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
-							
-							session.createNativeMutationQuery(s2.toString())
-								.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
-								.setParameter("value", li.getName()) //$NON-NLS-1$
-								.executeUpdate();
-							
-						}
-					}finally {
-						session.getTransaction().commit();
+						StringBuilder s2 = new StringBuilder();
+						s2.append("UPDATE "); //$NON-NLS-1$
+						s2.append(resultsTable);
+						s2.append(" SET sort_column = :value "); //$NON-NLS-1$
+						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
+						s2.append(resultsTable + " a"); //$NON-NLS-1$
+						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
+						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
+						s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
+						
+						session.createNativeMutationQuery(s2.toString())
+							.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
+							.setParameter("value", li.getName()) //$NON-NLS-1$
+							.executeUpdate();
 					}
 					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (col.getAttribute().getAttribute().getType() == AttributeType.EMPLOYEE) {
@@ -340,35 +325,30 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 					s3.append( resultsTable );
 					s3.append(" r on r.record_uuid = v.record_uuid"); //$NON-NLS-1$
 					
-					session.beginTransaction();
-					try {
-						session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
-								.addScalar("element_uuid")//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
-								.list();
-						for (UUID item : items) {
-							Employee e = session.get(Employee.class, item);
+					List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
+							.list();
+					for (UUID item : items) {
+						Employee e = session.get(Employee.class, item);
 							
-							StringBuilder s2 = new StringBuilder();
-							s2.append("UPDATE "); //$NON-NLS-1$
-							s2.append(resultsTable);
-							s2.append(" SET sort_column = :value "); //$NON-NLS-1$
-							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
-							s2.append(resultsTable + " a"); //$NON-NLS-1$
-							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
-							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
-							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
+						StringBuilder s2 = new StringBuilder();
+						s2.append("UPDATE "); //$NON-NLS-1$
+						s2.append(resultsTable);
+						s2.append(" SET sort_column = :value "); //$NON-NLS-1$
+						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
+						s2.append(resultsTable + " a"); //$NON-NLS-1$
+						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
+						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
+						s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
-							session.createNativeMutationQuery(s2.toString())
-								.setParameter("uuid", e.getUuid()) //$NON-NLS-1$
-								.setParameter("value", SmartLabelProvider.getFullName(e, l)) //$NON-NLS-1$
-								.executeUpdate();
+						session.createNativeMutationQuery(s2.toString())
+							.setParameter("uuid", e.getUuid()) //$NON-NLS-1$
+							.setParameter("value", SmartLabelProvider.getFullName(e, l)) //$NON-NLS-1$
+							.executeUpdate();
 							
-						}
-					}finally {
-						session.getTransaction().commit();
 					}
+
 					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else if (col.getAttribute().getEntityType() != null) {
@@ -385,37 +365,33 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 				s3.append( resultsTable );
 				s3.append(" r on r.record_uuid = v.record_uuid"); //$NON-NLS-1$
 				
-				session.beginTransaction();
-				try {
-					session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				session.createNativeMutationQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
-							.addScalar("element_uuid")//, PostgresUUIDType.INSTANCE) //$NON-NLS-1$
-							.list();
-					for (UUID item : items) {
-						IntelEntity li = session.get(IntelEntity.class, item);
+				List<UUID> items = session.createNativeQuery(s3.toString(), UUID.class)
+						.list();
+				for (UUID item : items) {
+					IntelEntity li = session.get(IntelEntity.class, item);
 						
-						StringBuilder s2 = new StringBuilder();
-						s2.append("UPDATE "); //$NON-NLS-1$
-						s2.append(resultsTable);
-						s2.append(" SET sort_column = :value "); //$NON-NLS-1$
-						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
-						s2.append(resultsTable + " a"); //$NON-NLS-1$
-						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
-						s2.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-						s2.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
-						s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
-						
-						session.createNativeMutationQuery(s2.toString())
-							.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
-							.setParameter("value", li.getIdAttributeAsText()) //$NON-NLS-1$
-							.executeUpdate();
-						
-					}
-				}finally {
-					session.getTransaction().commit();
+					StringBuilder s2 = new StringBuilder();
+					s2.append("UPDATE "); //$NON-NLS-1$
+					s2.append(resultsTable);
+					s2.append(" SET sort_column = :value "); //$NON-NLS-1$
+					s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
+					s2.append(resultsTable + " a"); //$NON-NLS-1$
+					s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
+					s2.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					s2.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
+					s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
+					
+					session.createNativeMutationQuery(s2.toString())
+						.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
+						.setParameter("value", li.getIdAttributeAsText()) //$NON-NLS-1$
+						.executeUpdate();
+					
 				}
+				
 				return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}

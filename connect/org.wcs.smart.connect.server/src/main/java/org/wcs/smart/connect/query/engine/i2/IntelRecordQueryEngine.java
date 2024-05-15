@@ -154,7 +154,6 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		session.createNativeMutationQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		List<UUID> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable, UUID.class) //$NON-NLS-1$
-				.addScalar("profile_uuid")//,  PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 				.list();
 		for (UUID u : uuids) {
 			IntelProfile p = session.get(IntelProfile.class, u);
@@ -172,7 +171,6 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 			.executeUpdate();
 		
 		List<UUID> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null ", UUID.class) //$NON-NLS-1$ //$NON-NLS-2$
-				.addScalar("source_uuid")//, PostgresUUIDType.INSTANCE).list(); //$NON-NLS-1$
 				.list();
 		for (UUID u : uuids) {
 			IntelRecordSource p = session.get(IntelRecordSource.class, u);

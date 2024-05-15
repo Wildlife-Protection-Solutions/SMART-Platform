@@ -690,7 +690,6 @@ public class WaypointFilterProcessor {
 		logString(UuidUtils.uuidToString(itemProvider.getQueryConservationArea().getUuid()));
 		
 		NativeQuery<UUID> query = s.createNativeQuery(sql.toString(), UUID.class);
-		query.addScalar("uuid");//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid());//, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		query.setParameter("keyid", filter.getKey()); //$NON-NLS-1$
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
