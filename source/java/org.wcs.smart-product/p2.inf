@@ -1,6 +1,8 @@
 instructions.configure=\
-  addRepository(name:Local SMART Core Update Site (8.0.0),type:0,location:jar${#58}file${#58}./updatesite/site_8.0.0.zip!/,enabled:true);\
-  addRepository(name:Local SMART Core Update Site (8.0.0),type:1,location:jar${#58}file${#58}./updatesite/site_8.0.0.zip!/,enabled:true);\
+  addRepository(name:Local SMART Core Update Site (8.0.0),type:0,location:jar${#58}file${#58}./updatesite/smartsite-8.0.0.zip!/,enabled:true);\
+  addRepository(name:Local SMART Core Update Site (8.0.0),type:1,location:jar${#58}file${#58}./updatesite/smartsite-8.0.0.zip!/,enabled:true);\
+  addRepository(name:Local SMART Utilities Update Site (8.0.0),type:0,location:jar${#58}file${#58}./updatesite/smartutils-8.0.0.zip!/,enabled:true);\
+  addRepository(name:Local SMART Utilities Update Site (8.0.0),type:1,location:jar${#58}file${#58}./updatesite/smartutils-8.0.0.zip!/,enabled:true);\
   addRepository(name:Online Update Site (8.0),type:0,location:https://smartupdatesite.z13.web.core.windows.net/updatesite/8.0,enabled:true);\
   addRepository(name:Online Update Site(8.0),type:1,location:https://smartupdatesite.z13.web.core.windows.net/updatesite/8.0,enabled:true);\  
   org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/eclipsec.exe);

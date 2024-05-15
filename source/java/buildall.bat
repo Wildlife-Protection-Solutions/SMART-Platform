@@ -1,4 +1,6 @@
 SET version=8.0.0
+SET builddate=%date:~5,2%%date:~8,2%%date:~0,4%
+SET currentpath=%cd%
 
 
 for /f %%i in ('date /t') do set RESULT=%%i
@@ -70,7 +72,7 @@ DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.
 
 REM run maven to build packages
 REM call mvn clean install -Pallplatforms,product,update,core,plugins,utils,languagepacks
-call mvn clean install -Pallplatforms,product,update,core,plugins,utils,eclipse-sign -Djarsigner.alias=%keystore_alias% -Djarsigner.storepass=%keystore_password% -Djarsigner.keystore=%keystore_location%
+call mvn clean install -Pallplatforms,product,update,core,plugins,utils,eclipse-sign,languagepacks -Djarsigner.alias=%keystore_alias% -Djarsigner.storepass=%keystore_password% -Djarsigner.keystore=%keystore_location%
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%
@@ -87,27 +89,95 @@ copy .\org.wcs.smart.updatesite\target\org.wcs.smart.updatesite-%version%-SNAPSH
 del %outputlocation%\org.wcs.smart.utils.updatesite-%version%-SNAPSHOT.zip
 copy .\org.wcs.smart.utils.updatesite\target\org.wcs.smart.utils.updatesite-%version%-SNAPSHOT.zip %outputlocation%
 
-REM del %outputlocation%\org.wcs.smart.migrationtools.updatesite-%version%-SNAPSHOT.zip
-REM copy .\org.wcs.smart.migrationtools.updatesite\target\org.wcs.smart.migrationtools.updatesite-%version%-SNAPSHOT.zip %outputlocation%
-
 del %outputlocation%\org.wcs.smart.translations.updatesite-%version%-SNAPSHOT.zip
 copy .\org.wcs.smart.translations.updatesite\target\org.wcs.smart.translations.updatesite-%version%-SNAPSHOT.zip %outputlocation%
 
+move %outputlocation%\org.wcs.smart.updatesite-%version%-SNAPSHOT.zip %outputlocation%\org.wcs.smart.updatesite-%version%-%builddate%.zip
+move %outputlocation%\org.wcs.smart.translations.updatesite-%version%-SNAPSHOT.zip %outputlocation%\org.wcs.smart.translations.updatesite-%version%-%builddate%.zip
+move %outputlocation%\org.wcs.smart.utils.updatesite-%version%-SNAPSHOT.zip %outputlocation%\smartutils-%version%.zip
 
-move %outputlocation%\org.wcs.smart.updatesite-%version%-SNAPSHOT.zip %outputlocation%\site_%version%.zip
-REM move %outputlocation%\org.wcs.smart.migrationtools.updatesite-%version%-SNAPSHOT.zip %outputlocation%\migrationtools_%version%.zip
-move %outputlocation%\org.wcs.smart.translations.updatesite-%version%-SNAPSHOT.zip %outputlocation%\languagepacks_%version%.zip
-move %outputlocation%\org.wcs.smart.utils.updatesite-%version%-SNAPSHOT.zip %outputlocation%\smartutils_%version%.zip
+
+
+REM Combine site & translations into single package
+
+cd %outputlocation%
+
+mkdir temp
+
+mkdir "temp/org.wcs.smart.updatesite-%version%-%builddate%"
+
+copy "org.wcs.smart.updatesite-%version%-%builddate%.zip" "temp/org.wcs.smart.updatesite-%version%-%builddate%/org.wcs.smart.updatesite-%version%-%builddate%.zip"
+
+cd temp/org.wcs.smart.updatesite-%version%-%builddate%
+
+tar -xf org.wcs.smart.updatesite-%version%-%builddate%.zip
+
+del org.wcs.smart.updatesite-%version%-%builddate%.zip 
+
+cd ../../
+
+mkdir "temp/org.wcs.smart.translations.updatesite-%version%-%builddate%"
+
+copy "org.wcs.smart.translations.updatesite-%version%-%builddate%.zip" "temp/org.wcs.smart.translations.updatesite-%version%-%builddate%/org.wcs.smart.translations.updatesite-%version%-%builddate%.zip"
+
+cd temp/org.wcs.smart.translations.updatesite-%version%-%builddate%
+
+tar -xf org.wcs.smart.translations.updatesite-%version%-%builddate%.zip 
+
+del org.wcs.smart.translations.updatesite-%version%-%builddate%.zip 
+
+cd ..
+
+echo artifact.repository.factory.order=compositeArtifacts.xml,\! > p2.index
+echo version=1 >> p2.index
+echo metadata.repository.factory.order=compositeContent.xml,\! >> p2.index
+
+echo ^<?xml version='1.0' encoding='UTF-8'?^> > compositeArtifacts.xml
+echo ^<?compositeArtifactRepository version='1.0.0'?^> >> compositeArtifacts.xml
+echo ^<repository name='SMART 8.0.0 Update Site' >> compositeArtifacts.xml
+echo     type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' version='1.0.0'^> >> compositeArtifacts.xml
+echo   ^<properties size='1'^> >> compositeArtifacts.xml
+echo     ^<property name='p2.timestamp' value='%builddate%0000'/^> >> compositeArtifacts.xml
+echo   ^</properties^> >> compositeArtifacts.xml
+echo   ^<children size='2'^> >> compositeArtifacts.xml
+echo     ^<child location='org.wcs.smart.updatesite-%version%-%builddate%'/^>  >> compositeArtifacts.xml
+echo     ^<child location='org.wcs.smart.translations.updatesite-%version%-%builddate%'/^>  >> compositeArtifacts.xml    
+echo   ^</children^> >> compositeArtifacts.xml    
+echo ^</repository^> >> compositeArtifacts.xml  
+
+
+echo ^<?xml version='1.0' encoding='UTF-8'?^> > compositeContent.xml
+echo ^<?compositeMetadataRepository version='1.0.0'?^> >> compositeContent.xml
+echo ^<repository name='SMART 8.0.0 Update Site' >> compositeContent.xml
+echo    type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'^> >> compositeContent.xml
+echo   ^<properties size='1'^> >> compositeContent.xml
+echo     ^<property name='p2.timestamp' value='%builddate%0000'/^> >> compositeContent.xml
+echo   ^</properties^> >> compositeContent.xml
+echo   ^<children size='2'^> >> compositeContent.xml
+echo     ^<child location='org.wcs.smart.updatesite-%version%-%builddate%'/^>  >> compositeContent.xml
+echo     ^<child location='org.wcs.smart.translations.updatesite-%version%-%builddate%'/^>  >> compositeContent.xml    
+echo   ^</children^> >> compositeContent.xml    
+echo ^</repository^> >> compositeContent.xml  
+
+
+tar -a -c -f "../smartsite-%version%.zip" *
+
+cd ..
+
+rmdir temp /s /q
+
+
 
 @RD /s /q %outputlocation%\smartapp-win32.win32.x86_64
 
 powershell Expand-Archive %outputlocation%\smartapp-win32.win32.x86_64.zip %outputlocation%\smartapp-win32.win32.x86_64
 
-del %outputlocation%\smartapp-win32.win32.x86_64\SMARTc.exe
-mkdir %outputlocation%\smartapp-win32.win32.x86_64\updatesite
-copy %outputlocation%\site_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite
-copy %outputlocation%\languagepacks_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite
-copy %outputlocation%\smartutils_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite
-REM copy %outputlocation%\migrationtools_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite
+cd %outputlocation%
+del "smartapp-win32.win32.x86_64\SMARTc.exe"
+mkdir "smartapp-win32.win32.x86_64\updatesite"
+copy "smartsite-%version%.zip" "smartapp-win32.win32.x86_64\updatesite\smartsite-%version%.zip"
+copy "smartutils-%version%.zip" "smartapp-win32.win32.x86_64\updatesite\smartutils-%version%.zip"
+
+cd %currentpath%
 
 REM complete - start smart and install plugins/restore backup
