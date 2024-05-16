@@ -213,11 +213,17 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 					}
 					
 				});
+				
 				gc.getColumn().setText(prop.getLongName());
 				tcl.setColumnData(gc.getColumn(), new ColumnWeightData(100, 150, true));
 			}
 			pp.addPropertyUpdatedListener(()->{
-				Display.getDefault().asyncExec(()->{if (!tblViewer.getControl().isDisposed()) tblViewer.refresh();});	
+				Display.getDefault().asyncExec(()->{
+					if (!tblViewer.getControl().isDisposed()) {
+						tblViewer.refresh(true);
+						updateDetails();
+					}
+				});	
 			});
 		}
 		
