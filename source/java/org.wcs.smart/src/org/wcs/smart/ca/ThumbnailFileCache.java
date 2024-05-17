@@ -98,6 +98,7 @@ public class ThumbnailFileCache {
 	 * @param data
 	 */
 	public void putData(String id, byte[] data) {
+		if (id == null) return;
 		long offset = put(data);
 		if (offset == -1) return;
 		
@@ -110,6 +111,7 @@ public class ThumbnailFileCache {
 	 * @return
 	 */
 	public byte[] getData(String id) {
+		if (id == null) return null;
 		if (!key2location.containsKey(id)) return null;
 		long offset = key2location.get(id);
 		if (offset < -1) return null;

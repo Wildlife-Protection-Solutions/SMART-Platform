@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -51,6 +52,7 @@ import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * For managing icons in the desktop and creating/caching thumbnails.
  * 
@@ -316,7 +318,12 @@ public enum IconManager {
 			return file.getIcon().getKeyId() + "_" + file.getIconSet().getKeyId() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else {
 			//only available to this conservation area
-			return file.getUuid().toString() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$
+			if (file.getUuid() == null) {
+				//don't cache this file
+				return null;
+			}else {
+				return file.getUuid().toString() + "_" + size.size + ".png"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
 	}
 	
@@ -351,7 +358,7 @@ public enum IconManager {
 					//write data to out
 					saver.save(out, SWT.IMAGE_PNG);
 					data = out.toByteArray();
-					
+
 					cache.putData(name2, data);
 					return data;
 				}
