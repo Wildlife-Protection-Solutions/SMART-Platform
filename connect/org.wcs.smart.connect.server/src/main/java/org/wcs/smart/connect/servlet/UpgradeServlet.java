@@ -1455,6 +1455,10 @@ public class UpgradeServlet extends HttpServlet {
 						"drop table smart.entity_attribute",  //$NON-NLS-1$
 						"drop table smart.entity_type",  //$NON-NLS-1$
 						
+						"DROP FUNCTION connect.trg_entity()", //$NON-NLS-1$
+						"DROP FUNCTION connect.trg_entity_attribute()", //$NON-NLS-1$
+						"DROP FUNCTION connect.trg_entity_attribute_value()", //$NON-NLS-1$
+						
 						"delete from  connect.connect_plugin_version where plugin_id = 'org.wcs.smart.entity'", //$NON-NLS-1$
 						"delete from  connect.connect_plugin_version where plugin_id = 'org.wcs.smart.entity.query'", //$NON-NLS-1$
 						"delete from  connect.ca_plugin_version where plugin_id = 'org.wcs.smart.entity'", //$NON-NLS-1$
