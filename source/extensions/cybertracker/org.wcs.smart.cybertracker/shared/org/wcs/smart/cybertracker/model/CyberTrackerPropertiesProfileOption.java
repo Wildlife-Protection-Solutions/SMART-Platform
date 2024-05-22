@@ -53,7 +53,12 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 	
 	public enum Mode{
 		ENABLED,
-		DISABLED
+		DISABLED;
+		
+		public Object getJsonValue() {
+			if (this == ENABLED) return Boolean.TRUE;
+			return Boolean.FALSE;
+		}
 	}
 	
 	public enum ProfileOptionID {

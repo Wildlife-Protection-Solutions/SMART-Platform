@@ -6,7 +6,6 @@
    <feature id="org.wcs.smart.paws.feature.nl">
       <category name="paws"/>
    </feature>
-   
    <feature id="org.wcs.smart.datagenerator.er.feature">
       <category name="datagenerator"/>
    </feature>
@@ -15,6 +14,9 @@
    </feature>
    <feature id="org.wcs.smart.i2.migrate.feature">
       <category name="datamigration"/>
+   </feature>
+   <feature id="org.wcs.smart.wcomm.feature">
+      <category name="wcomm"/>
    </feature>
    <category-def name="paws" label="SMART PAWS Plug-in">
       <description>
@@ -27,4 +29,5 @@
       </description>
    </category-def>
    <category-def name="datamigration" label="Data MigrationTools"/>
+   <category-def name="wcomm" label="SMART WCoMM Data"/>
 </site>

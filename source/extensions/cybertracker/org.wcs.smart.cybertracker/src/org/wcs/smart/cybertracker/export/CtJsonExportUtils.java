@@ -71,6 +71,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.Mode;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
@@ -312,7 +313,17 @@ public class CtJsonExportUtils {
 				}catch (Exception ex) {
 					//eat this - no epsg code could be found
 				}
-			
+			}else if (option == ProfileOptionID.HISTORY_MODE || 
+					option == ProfileOptionID.ARCHIVE_MODE ) {
+				
+				CyberTrackerPropertiesProfileOption.Mode mode = null; 
+				if (opValue == null) {
+					mode = (Mode) profile.getDefaultValue(option);
+				}else {
+					mode =  CyberTrackerPropertiesProfileOption.Mode.valueOf(opValue.getStringValue());
+				}
+				profileObj.put(option.getMobleJsonKey(), mode.getJsonValue());
+				
 			} else {
 			
 				if (opValue == null) {
