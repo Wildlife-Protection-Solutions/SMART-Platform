@@ -638,6 +638,9 @@
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.feature</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er.feature</module>
+				
+				<module>../extensions/wcomm/org.wcs.smart.wcomm</module>
+				<module>../extensions/wcomm/org.wcs.smart.wcomm.feature</module>
 			</modules>
 		</profile>
 		<profile>
