@@ -49,8 +49,13 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 	public enum Unit{
 		METRIC,
 		IMPERIAL;
-		
 	}
+	
+	public enum Mode{
+		ENABLED,
+		DISABLED
+	}
+	
 	public enum ProfileOptionID {
 		APP_NAME,
 		KIOSK_MODE,
@@ -78,7 +83,9 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		IMAGE_WIDTH,
 		IMAGE_HEIGHT,
 		INCIDENT_GROUP_UI,
-		UNITS;
+		UNITS,
+		ARCHIVE_MODE,
+		HISTORY_MODE;
 		
 		public String getMobleJsonKey() {
 			if (this == ProfileOptionID.CA_PROJECTION_UUID) return "PROJECTION_WKT"; //$NON-NLS-1$

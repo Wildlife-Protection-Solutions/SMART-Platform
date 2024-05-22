@@ -57,6 +57,7 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.Mode;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.ProjectionLabelProvider;
@@ -142,6 +143,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	
 	private ComboViewer cmbSizes;
 	private ComboViewer cmbUnits;
+	private ComboViewer cmbArchive;
+	private ComboViewer cmbHistory;
 	private Text txtWidth, txtHeight;
 	private ControlDecoration cdImageWidth, cdImageHeight;
 	private Button btnOpResize;
@@ -380,6 +383,44 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		cmbUnits.addSelectionChangedListener(e->changesMade());
 		controls.add(cmbUnits.getControl());
 
+		Label historyMode= new Label(generalContainer, SWT.NONE);
+		historyMode.setText(Messages.CyberTrackerPropertiesComposite_HistoryModeLbl);
+		historyMode.setToolTipText(Messages.CyberTrackerPropertiesComposite_HistoryModeTooltip);
+
+		cmbHistory = new ComboViewer(generalContainer, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.SINGLE);
+		cmbHistory.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				switch ((CyberTrackerPropertiesProfileOption.Mode)element) {
+				case ENABLED: return Messages.CyberTrackerPropertiesComposite_EnabledOp;
+				case DISABLED: return Messages.CyberTrackerPropertiesComposite_DisabledOp;
+				}
+				return super.getText(element);
+			}
+		});
+		cmbHistory.setContentProvider(ArrayContentProvider.getInstance());
+		cmbHistory.setInput(CyberTrackerPropertiesProfileOption.Mode.values());
+		cmbHistory.addSelectionChangedListener(e->changesMade());
+		controls.add(cmbHistory.getControl());
+		
+		Label archiveMode= new Label(generalContainer, SWT.NONE);
+		archiveMode.setText(Messages.CyberTrackerPropertiesComposite_ArchiveModeLbl);
+		archiveMode.setToolTipText(Messages.CyberTrackerPropertiesComposite_ArchiveModeTooltip);
+
+		cmbArchive = new ComboViewer(generalContainer, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.SINGLE);
+		cmbArchive.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				switch ((CyberTrackerPropertiesProfileOption.Mode)element) {
+				case ENABLED: return Messages.CyberTrackerPropertiesComposite_EnabledOp;
+				case DISABLED: return Messages.CyberTrackerPropertiesComposite_DisabledOp;
+				}
+				return super.getText(element);
+			}
+		});
+		cmbArchive.setContentProvider(ArrayContentProvider.getInstance());
+		cmbArchive.setInput(CyberTrackerPropertiesProfileOption.Mode.values());
+		cmbArchive.addSelectionChangedListener(e->changesMade());
+		controls.add(cmbArchive.getControl());
+		
 		llGeneral = SmartUiUtils.createSubHeaderLabel(gpsContainer, Messages.CyberTrackerPropertiesComposite_GPSSettingsHeader);
 		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
@@ -879,6 +920,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		isPopulating = true;
 		btnKioskMode.setSelection(ctProperties.isKioskMode());
 		cmbUnits.setSelection(new StructuredSelection(ctProperties.getUnits()));
+		cmbArchive.setSelection(new StructuredSelection(ctProperties.getArchiveMode()));
+		cmbHistory.setSelection(new StructuredSelection(ctProperties.getHistoryMode()));
 		btnUseIncidentGroup.setSelection(ctProperties.getUseIncidentGroupUi());
 		btnCanPause.setSelection(ctProperties.isCanPause());
 		btnDisableEditing.setSelection(ctProperties.isDisableEditing());
@@ -954,7 +997,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		}
 		ctProperties.setUnits((CyberTrackerPropertiesProfileOption.Unit)cmbUnits.getStructuredSelection().getFirstElement());
-		
+		ctProperties.setArchiveMode( (Mode) cmbArchive.getStructuredSelection().getFirstElement()  );
+		ctProperties.setHistoryMode( (Mode) cmbHistory.getStructuredSelection().getFirstElement()  );
 		ctProperties.setUserIncidentGroupUi(btnUseIncidentGroup.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
 		ctProperties.setCanPause(btnCanPause.getSelection());

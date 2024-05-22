@@ -224,6 +224,24 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	}
 	
 	@Transient
+	public CyberTrackerPropertiesProfileOption.Mode getHistoryMode() {
+		return CyberTrackerPropertiesProfileOption.Mode.valueOf(getStringValue(ProfileOptionID.HISTORY_MODE).toUpperCase());
+	}
+	
+	public void setHistoryMode(CyberTrackerPropertiesProfileOption.Mode mode) {
+		getOption(ProfileOptionID.HISTORY_MODE).setStringValue(mode.name());
+	}
+	
+	@Transient
+	public CyberTrackerPropertiesProfileOption.Mode getArchiveMode() {
+		return CyberTrackerPropertiesProfileOption.Mode.valueOf(getStringValue(ProfileOptionID.ARCHIVE_MODE).toUpperCase());
+	}
+	
+	public void setArchiveMode(CyberTrackerPropertiesProfileOption.Mode mode) {
+		getOption(ProfileOptionID.ARCHIVE_MODE).setStringValue(mode.name());
+	}
+	
+	@Transient
 	public boolean getUseIncidentGroupUi() {
 		return getBooleanValue(ProfileOptionID.INCIDENT_GROUP_UI);
 	}
@@ -403,6 +421,8 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public Integer getImageHeight() {
 		return getIntValue(ProfileOptionID.IMAGE_HEIGHT);
 	}
+
+	
 	@Transient
 	public void setResizePhoto(boolean resize, int w, int h) {
 		getOption(ProfileOptionID.RESIZE_IMAGE).setBooleanValue(resize);
@@ -444,6 +464,8 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		case IMAGE_HEIGHT: return 1200;
 		case IMAGE_WIDTH: return 1600;
 		case RESIZE_IMAGE: return false;
+		case ARCHIVE_MODE: return CyberTrackerPropertiesProfileOption.Mode.DISABLED.name();
+		case HISTORY_MODE: return CyberTrackerPropertiesProfileOption.Mode.ENABLED.name();
 		}
 		return null;
 	}
