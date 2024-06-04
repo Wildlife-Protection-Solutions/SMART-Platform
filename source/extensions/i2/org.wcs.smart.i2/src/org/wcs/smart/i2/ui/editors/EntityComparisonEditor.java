@@ -47,6 +47,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -97,7 +98,7 @@ public class EntityComparisonEditor extends EditorPart{
 	
 	@Override
 	public void dispose(){
-		if (getTitleImage() != null) getTitleImage().dispose();
+		super.dispose();
 	}
 	
 	@Override
@@ -331,9 +332,9 @@ public class EntityComparisonEditor extends EditorPart{
 				c.dispose();
 			}
 			EntityComparisonEditor.this.setPartName(input.getName());
-			if (getTitleImage() != null) getTitleImage().dispose();
 			
-			EntityComparisonEditor.this.setTitleImage(Resources.INSTANCE.getImage(input.getType()));
+			Image icon = Resources.INSTANCE.getImage(input.getType());
+			if (icon != null) EntityComparisonEditor.this.setTitleImage(icon);
 			
 			ScrolledForm form = toolkit.createScrolledForm(this);
 			form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
