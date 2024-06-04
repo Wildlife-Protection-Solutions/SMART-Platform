@@ -875,7 +875,7 @@ public class SmartUtils {
 	 * @throws TranscoderException
 	 */
 	public static Image getSvgLogoNoText(Display display, Integer size) {
-		try(InputStream reader = SmartPlugIn.class.getResourceAsStream("/images/smartonly.svg")){ //$NON-NLS-1$
+		try(InputStream reader = SmartPlugIn.class.getResourceAsStream("/images/smart_imageonly.svg")){ //$NON-NLS-1$
 			return readSvg(display, reader, size);
 		}catch (Exception ex) {
 			SmartPlugIn.log(ex.getMessage(), ex);
