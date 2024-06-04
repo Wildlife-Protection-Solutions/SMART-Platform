@@ -142,15 +142,15 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			if (matches.size() == 2) {
 				//if matches start point of one, and end point of other 
 				//then add to the end point one
-				LocalTime dlt = dt.toLocalTime();
+				LocalTime dlt = dt.toLocalTime().withNano(0);
 				
 				PatrolLegDay first = matches.get(0);
 				PatrolLegDay second = matches.get(1);
 				
-				LocalTime firste = first.getEndTime();
-				LocalTime firsts = first.getStartTime();
-				LocalTime seconde = second.getEndTime();
-				LocalTime seconds = second.getStartTime();
+				LocalTime firste = first.getEndTime().withNano(0);
+				LocalTime firsts = first.getStartTime().withNano(0);
+				LocalTime seconde = second.getEndTime().withNano(0);
+				LocalTime seconds = second.getStartTime().withNano(0);
 				
 				if (firste.equals(dlt) && seconds.equals(dlt)) {
 					//remove second

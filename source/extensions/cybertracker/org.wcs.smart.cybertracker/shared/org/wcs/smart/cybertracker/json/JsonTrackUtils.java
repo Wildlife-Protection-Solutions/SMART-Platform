@@ -42,7 +42,7 @@ public class JsonTrackUtils {
 
 	public static LineString addPointToTrack(LineString track, Coordinate pnt, LocalDateTime pntTime){
 		
-		long z = SharedUtils.toLongTime(pntTime);
+		long z = SharedUtils.toLongTime(pntTime.withNano(0));
 		Coordinate[] c = null;
 		if (track == null){
 			c = new Coordinate[] {new Coordinate(pnt.x, pnt.y, z)};
