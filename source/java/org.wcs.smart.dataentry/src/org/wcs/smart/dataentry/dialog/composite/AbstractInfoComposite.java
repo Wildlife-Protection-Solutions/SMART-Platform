@@ -392,6 +392,19 @@ public abstract class AbstractInfoComposite extends Composite {
 				CmNode node = new CmNode();
 				node.setModel(getModel());
 				node.setName(c.getName());
+				
+				if (getModel().getIconSet() != null) {
+					IconFile i = c.getIcon().getIconFile(getModel().getIconSet());
+					if (i != null) {
+						try {
+							i.computeFileLocation(session);
+							node.setImageFile(i.getAttachmentFile());
+						}catch (Exception ex) {
+							SmartPlugIn.log(ex.getMessage(), ex);
+						}
+					}
+				}
+				
 				for (org.wcs.smart.ca.Label l : c.getNames()) {
 					node.updateName(l.getLanguage(), l.getValue());
 				}
