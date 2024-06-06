@@ -32,9 +32,15 @@ import org.locationtech.jts.geom.PrecisionModel;
  */
 public class GeometryFactoryProvider {
 
-	private static final GeometryFactory gf = new GeometryFactory(new PrecisionModel(10_000_000_000d));
+	private static final GeometryFactory gfpm = new GeometryFactory(new PrecisionModel(10_000_000_000d));
+
+	private static final GeometryFactory gf = new GeometryFactory();
 
 	public static GeometryFactory getFactory() {
+		return gfpm;
+	}
+	
+	public static GeometryFactory getFactoryWithoutPrecisionModel() {
 		return gf;
 	}
 }
