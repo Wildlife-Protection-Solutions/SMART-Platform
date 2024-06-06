@@ -100,8 +100,17 @@ public class GeometryUtils {
 	} 
 	
 	private static WKBReader wkbreader(){
-		return new WKBReader(GeometryFactoryProvider.getFactory());
+		return wkbreader(false);
 	}
+	
+	private static WKBReader wkbreader(boolean withoutPm){
+		if (withoutPm) {
+			return new WKBReader(GeometryFactoryProvider.getFactoryWithoutPrecisionModel());
+		}else {
+			return new WKBReader(GeometryFactoryProvider.getFactory());
+		}
+	}
+	
 	
 	private static WKBWriter wkbwriter(){
 		return new WKBWriter();
@@ -251,16 +260,30 @@ public class GeometryUtils {
 			g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
 			g2 = gFromWKB(wkb2.getBytes(1, (int)wkb2.length()));
 		}catch (Throwable e) {
-			throw new RuntimeException( e );
+			throw new RuntimeException(e);
 		}
 		
 		try {
 			Geometry g3 = g2.intersection(g1);
 			return new SerialBlob(wkbwriter().write(g3));
 		}catch(TopologyException te) {
-			throw new RuntimeException ("A topology exception occured - try checking track geometries for cases where GPS units were not turned off at rest points and cleaning these tracks", te );
+			//lets try with full precision;			
+			try {
+				g1 = wkbreader(true).read(wkb1.getBytes(1, (int)wkb1.length()));
+				g2 = wkbreader(true).read(wkb2.getBytes(1, (int)wkb2.length()));
+			}catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+			try {
+				Geometry g3 = g2.intersection(g1);
+				return new SerialBlob(wkbwriter().write(g3));
+			}catch (TopologyException te2) {
+				throw new RuntimeException ("A topology exception occured - try checking track geometries for cases where GPS units were not turned off at rest points and cleaning these tracks", te ); //$NON-NLS-1$
+			}catch (Throwable e) {
+				throw new RuntimeException(e);
+			}
 		}catch (Throwable e){
- 			throw new RuntimeException ( e );
+ 			throw new RuntimeException(e);
 		}
 		
 	}
