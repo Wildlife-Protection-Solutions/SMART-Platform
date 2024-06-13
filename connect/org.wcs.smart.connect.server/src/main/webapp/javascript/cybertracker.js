@@ -202,26 +202,32 @@ function createPackageTable(){
  				[packages[i].name, packages[i].caLabel, packages[i].type,
  				 packages[i].isPrivate ? "PRIVATE" : "PUBLIC",
  				upDate.toLocaleString(), rDate.toLocaleString(),
+ 				null,
  				linkhtml, 
  				packages[i].version, null, null], 
  				"ctrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.packageuuid = packages[i].uuid;
  		
+ 		var qrelement = document.createElement("div");
+ 		qrelement.id = "qr-" + packages[i].uuid;
+	 	row.childNodes[6].appendChild(qrelement);
+ 		
+ 		new QRCode(qrelement, {text: packages[i].appLink, width:128, height:128});
  		
 	 	var downloadca = document.createElement("i");
 	 	downloadca.className="fa-solid fa-xl fa-download icon-btn-default";
 	 	downloadca.title="download package";
 	 	downloadca.dataset.uuid = packages[i].uuid;
 	 	downloadca.onclick = downloadPackage;
-	 	row.childNodes[8].appendChild(downloadca);
+	 	row.childNodes[9].appendChild(downloadca);
  		
  		var deleteicon = document.createElement("i");
  		deleteicon.className="fa-solid fa-xl fa-xmark icon-btn-default";
  		deleteicon.title="delete package";
  		deleteicon.dataset.uuid = packages[i].uuid;
  		deleteicon.onclick = deletePackageValidate;
- 		row.childNodes[9].appendChild(deleteicon);
+ 		row.childNodes[10].appendChild(deleteicon);
  	}
 }
 

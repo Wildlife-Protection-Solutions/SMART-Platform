@@ -9,6 +9,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/cybertracker.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/qrcode.min.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
@@ -38,10 +39,11 @@
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.name"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.ca"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.type"/></div>
-			  <div class="table-cell smart-table-cell">Public/Private</div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.publicprivate"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.upload"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revisiondate"/></div>
-			  <div class="table-cell smart-table-cell">Link</div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.qrcode"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.link"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revision"/></div>
 			  <div class="table-cell smart-table-cell"></div>
 			  <div class="table-cell smart-table-cell"></div>
