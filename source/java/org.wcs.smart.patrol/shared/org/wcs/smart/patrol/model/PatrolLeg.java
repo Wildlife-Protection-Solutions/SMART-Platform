@@ -35,6 +35,7 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLOrder;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.util.SharedUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -251,7 +252,7 @@ public class PatrolLeg extends UuidItem {
 		}
 		
 		LocalTime startTime = !days.isEmpty() ? days.get(0).getStartTime() : LocalTime.MIN;
-		LocalTime endTime = !days.isEmpty() ? days.get(days.size() - 1).getEndTime() : LocalTime.MAX;
+		LocalTime endTime = !days.isEmpty() ? days.get(days.size() - 1).getEndTime() : SharedUtils.END_OF_DAY;
 		
 		//lets make a hash set of existing leg days; 
 		//we try to re-use these so associated data is not lost
@@ -267,12 +268,12 @@ public class PatrolLeg extends UuidItem {
 			PatrolLegDay existing = current.remove(working);
 			if (existing != null){
 				if (existing.getStartTime() == null) existing.setStartTime(LocalTime.MIN);
-				if (existing.getEndTime() == null) existing.setEndTime(LocalTime.MAX);
+				if (existing.getEndTime() == null) existing.setEndTime(SharedUtils.END_OF_DAY);
 			}else{
 				PatrolLegDay previousDay = new PatrolLegDay();
 				previousDay.setDate( working );
 				previousDay.setStartTime( LocalTime.MIN );
-				previousDay.setEndTime( LocalTime.MAX );
+				previousDay.setEndTime( SharedUtils.END_OF_DAY );
 				previousDay.setPatrolLeg(this);
 				this.days.add(previousDay);
 				
@@ -318,7 +319,7 @@ public class PatrolLeg extends UuidItem {
 				//remove this day
 				lastDay.setPatrolLeg(null);
 				this.days.remove(lastDay);
-				this.days.get(this.days.size() - 1).setEndTime(LocalTime.MAX);
+				this.days.get(this.days.size() - 1).setEndTime(SharedUtils.END_OF_DAY);
 				setEndDate( this.days.get(this.days.size() - 1).getDate()  );
 				
 			}

@@ -1087,7 +1087,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		for (PatrolLegDay d : leg.getPatrolLegDays()) {
 			if (d.getDate().equals(date.toLocalDate())) {
-				if (d.getEndTime().equals(LocalTime.MAX) || date.toLocalTime().isAfter(d.getEndTime())) {
+				if (d.getEndTime().equals(SharedUtils.END_OF_DAY) || date.toLocalTime().isAfter(d.getEndTime())) {
 					d.setEndTime(date.toLocalTime());
 				}
 				addTrackPoint(d, position);
@@ -1153,7 +1153,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
 		}
-		if (toUpdate.getEndTime().equals(LocalTime.MAX) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+		if (toUpdate.getEndTime().equals(SharedUtils.END_OF_DAY) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
 			toUpdate.setEndTime(date.toLocalTime());
 		}
 		modifiedFeatures.add(leg.getPatrol());
@@ -1468,12 +1468,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			PatrolLegDay existing = current.remove(working);
 			if (existing != null){
 				if (existing.getStartTime() == null) existing.setStartTime(LocalTime.MIN);
-				if (existing.getEndTime() == null) existing.setEndTime(LocalTime.MAX);
+				if (existing.getEndTime() == null) existing.setEndTime(SharedUtils.END_OF_DAY);
 			}else{
 				PatrolLegDay previousDay = new PatrolLegDay();
 				previousDay.setDate( working );
 				previousDay.setStartTime( LocalTime.MIN );
-				previousDay.setEndTime( LocalTime.MAX );
+				previousDay.setEndTime( SharedUtils.END_OF_DAY );
 				previousDay.setPatrolLeg(leg);
 				days.add(previousDay);
 				

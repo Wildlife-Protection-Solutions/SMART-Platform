@@ -181,7 +181,6 @@ public class PatrolLegDay extends UuidItem {
 		if (restMinutes != null){
 			time = time - restMinutes * 60;
 		}
-//		if (time == -1 && endTime.toSecondOfDay() == LocalTime.MAX.toSecondOfDay()) time = 0;
 		
 		time = time / (60*60);
 		return time;

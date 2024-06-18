@@ -35,6 +35,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.TrackUtil;
 
 /**
@@ -100,7 +101,7 @@ public class PatrolUtils {
 				pld.setPatrolLeg(leg);
 				pld.setDate(working);
 				pld.setStartTime(LocalTime.MIN);
-				pld.setEndTime(LocalTime.MAX);
+				pld.setEndTime(SharedUtils.END_OF_DAY);
 				leg.getPatrolLegDays().add(pld);
 				leg.setEndDate(working);
 				
