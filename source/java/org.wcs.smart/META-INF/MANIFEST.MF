@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART
 Bundle-SymbolicName: org.wcs.smart;singleton:=true
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.1.0.qualifier
 Bundle-ClassPath: .,
  lib/jBCrypt-0.4.3.jar,
  lib/opencsv-2.3.jar,
@@ -121,7 +121,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.user,
  org.wcs.smart.util
 Require-Bundle: javax.inject;bundle-version="1.0.0";visibility:=reexport,
- org.wcs.smart.hibernate.libs;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.hibernate.libs;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
  org.eclipse.core.runtime;bundle-version="3.31.0";visibility:=reexport,
  org.eclipse.swt;bundle-version="3.125.0";visibility:=reexport,
  org.eclipse.jface;bundle-version="3.33.0";visibility:=reexport,

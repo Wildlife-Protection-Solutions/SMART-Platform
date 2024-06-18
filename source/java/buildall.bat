@@ -1,4 +1,4 @@
-SET version=8.0.0
+SET version=8.1.0
 SET builddate=%date:~5,2%%date:~8,2%%date:~0,4%
 SET currentpath=%cd%
 
@@ -21,53 +21,53 @@ echo %outputlocation%
 MKDIR %outputlocation%
 
 REM - I had to do this because maven won't work if these directories/files exist
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.paws.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.r.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.er.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.patrol.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.patrol.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.migrate.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.i2.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.report.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.report.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.incident.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.patrol.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.plan.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.survey.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.smartcollect.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.cybertracker.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.i2.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.patrol.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.independentincident.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.er.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.cybertracker.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.asset.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.asset.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.birt.map.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.dataentry.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.help.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.independentincident.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.observation.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.observation.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.p2.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.patrol.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.patrol.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.plan.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.birt.query.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.nl\8.0.0
-DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.nl\8.0.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.paws.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.r.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.er.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.qa.patrol.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.patrol.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.i2.migrate.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.event.i2.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.er.report.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.entity.report.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.incident.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.patrol.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.plan.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.cybertracker.survey.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.smartcollect.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.cybertracker.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.i2.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.patrol.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.independentincident.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.er.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.connect.dataqueue.cybertracker.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.asset.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.asset.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.birt.map.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.dataentry.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.help.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.independentincident.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.observation.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.observation.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.p2.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.patrol.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.patrol.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.plan.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.birt.query.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.report.nl\8.1.0
+DEL /s /q C:\Users\Emily\.m2\repository\org\wcs\smart\org.wcs.smart.reporttable.nl\8.1.0
 
 
 REM run maven to build packages
@@ -134,7 +134,7 @@ echo metadata.repository.factory.order=compositeContent.xml,\! >> p2.index
 
 echo ^<?xml version='1.0' encoding='UTF-8'?^> > compositeArtifacts.xml
 echo ^<?compositeArtifactRepository version='1.0.0'?^> >> compositeArtifacts.xml
-echo ^<repository name='SMART 8.0.0 Update Site' >> compositeArtifacts.xml
+echo ^<repository name='SMART 8.1.0 Update Site' >> compositeArtifacts.xml
 echo     type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' version='1.0.0'^> >> compositeArtifacts.xml
 echo   ^<properties size='1'^> >> compositeArtifacts.xml
 echo     ^<property name='p2.timestamp' value='%builddate%0000'/^> >> compositeArtifacts.xml
@@ -148,7 +148,7 @@ echo ^</repository^> >> compositeArtifacts.xml
 
 echo ^<?xml version='1.0' encoding='UTF-8'?^> > compositeContent.xml
 echo ^<?compositeMetadataRepository version='1.0.0'?^> >> compositeContent.xml
-echo ^<repository name='SMART 8.0.0 Update Site' >> compositeContent.xml
+echo ^<repository name='SMART 8.1.0 Update Site' >> compositeContent.xml
 echo    type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'^> >> compositeContent.xml
 echo   ^<properties size='1'^> >> compositeContent.xml
 echo     ^<property name='p2.timestamp' value='%builddate%0000'/^> >> compositeContent.xml

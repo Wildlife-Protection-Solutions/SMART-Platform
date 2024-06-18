@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.feature.nl"
       label="SMART Connect DataQueue Module Language Pack"
-      version="8.0.0.qualifier"
+      version="8.1.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="8.0.0.qualifier">
+      license-feature-version="8.1.0.qualifier">
 
    <copyright>
       Copyright (c): 2012, 2013 Wildlife Conservation Society

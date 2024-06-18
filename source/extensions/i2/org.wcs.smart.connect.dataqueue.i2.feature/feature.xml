@@ -2,11 +2,11 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.i2.feature"
       label="SMART Connect DataQueue - Profiles Processor"
-      version="8.0.0.qualifier"
+      version="8.1.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="8.0.0.qualifier">
+      license-feature-version="8.1.0.qualifier">
 
    <description>
       Allows for the processing of profile data in the Connect data queue.
@@ -17,8 +17,8 @@
    </copyright>
 
    <requires>
-      <import feature="org.wcs.smart.i2.feature" version="7.0.0.qualifier"/>
-      <import feature="org.wcs.smart.connect.dataqueue.feature" version="8.0.0" match="compatible"/>
+      <import feature="org.wcs.smart.i2.feature" version="8.1.0.qualifier"/>
+      <import feature="org.wcs.smart.connect.dataqueue.feature" version="8.1.0" match="compatible"/>
    </requires>
 
    <plugin

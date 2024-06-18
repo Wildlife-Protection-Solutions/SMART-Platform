@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART CONNECT Tools
 Bundle-SymbolicName: org.wcs.smart.connect;singleton:=true
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.1.0.qualifier
 Bundle-Activator: org.wcs.smart.connect.ConnectPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
- org.wcs.smart.p2;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
  org.apache.commons.codec
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy

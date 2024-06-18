@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Help Translation
 Bundle-SymbolicName: org.wcs.smart.help.nl
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.1.0.qualifier
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.help;bundle-version="8.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Fragment-Host: org.wcs.smart.help;bundle-version="8.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.wcs.smart.help.nl

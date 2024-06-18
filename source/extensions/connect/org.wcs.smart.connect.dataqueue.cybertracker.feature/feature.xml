@@ -2,17 +2,17 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.cybertracker.feature"
       label="SMART Connect DataQueue - SMART Mobile Processors"
-      version="8.0.0.qualifier"
+      version="8.1.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="8.0.0.qualifier">
+      license-feature-version="8.1.0.qualifier">
 
    <description>
       Core processing tools for processing JSON data sent by CyberTracker to Connect. Includes support for processing Patrol data.
    </description>
 
    <requires>
-      <import feature="org.wcs.smart.connect.cybertracker.feature" version="8.0.0" match="compatible"/>
+      <import feature="org.wcs.smart.connect.cybertracker.feature" version="8.1.0" match="compatible"/>
    </requires>
 
    <plugin
