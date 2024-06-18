@@ -736,6 +736,7 @@ public class PatrolLegDayInputComposite {
 				
 			if (patrolLegDate.getWaypoints().remove(w)) {
 				PatrolWaypoint pw = new PatrolWaypoint();
+				w.getWaypoint().setDateTime(moveTo.getDate().atTime(w.getWaypoint().getDateTime().toLocalTime()));
 				pw.setWaypoint(w.getWaypoint());
 				pw.setPatrolLegDay(moveTo);
 				moveTo.getWaypoints().add(pw);
