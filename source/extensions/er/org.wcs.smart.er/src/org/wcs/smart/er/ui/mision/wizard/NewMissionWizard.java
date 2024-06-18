@@ -61,6 +61,7 @@ import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Wizard for creating a new mission.
@@ -175,7 +176,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 				MissionDay md = new MissionDay();
 				md.setDate(working);
 				md.setStartTime(LocalTime.MIN);
-				md.setEndTime(LocalTime.MAX);
+				md.setEndTime(SharedUtils.END_OF_DAY);
 				md.setRestMinutes(0);
 				md.setTracks(new ArrayList<MissionTrack>());
 				md.setWaypoints(new ArrayList<SurveyWaypoint>());

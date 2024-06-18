@@ -378,7 +378,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		if (toUpdate == null) throw new Exception(Messages.MISSIONDAY_MISSING.getMessage(l));
 		if (toUpdate.getWaypoints() == null) toUpdate.setWaypoints(new ArrayList<>());
-		if (toUpdate.getEndTime().equals(LocalTime.MAX) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+		if (toUpdate.getEndTime().equals(SharedUtils.END_OF_DAY) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
 			toUpdate.setEndTime(date.toLocalTime());
 		}
 
@@ -647,7 +647,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		for (MissionDay d : mission.getMissionDays()) {
 			if (d.getDate().equals(date.toLocalDate())) {
-				if (d.getEndTime().equals(LocalTime.MAX) ||  date.toLocalTime().isAfter(d.getEndTime())) {
+				if (d.getEndTime().equals(SharedUtils.END_OF_DAY) ||  date.toLocalTime().isAfter(d.getEndTime())) {
 					d.setEndTime(date.toLocalTime());
 				}
 				addTrackPoint(d, position, su, l);
@@ -694,7 +694,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
 		}
-		if (toUpdate.getEndTime().equals(LocalTime.MAX) ||  toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+		if (toUpdate.getEndTime().equals(SharedUtils.END_OF_DAY) ||  toUpdate.getEndTime().isBefore(date.toLocalTime())) {
 			toUpdate.setEndTime(date.toLocalTime());
 		}
 		SamplingUnit su = null;
@@ -877,7 +877,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 				MissionDay md = new MissionDay();
 				md.setDate(working);
 				md.setStartTime(LocalTime.MIN);
-				md.setEndTime(LocalTime.MAX);
+				md.setEndTime(SharedUtils.END_OF_DAY);
 				md.setRestMinutes(0);
 				md.setTracks(new ArrayList<MissionTrack>());
 				md.setWaypoints(new ArrayList<SurveyWaypoint>());

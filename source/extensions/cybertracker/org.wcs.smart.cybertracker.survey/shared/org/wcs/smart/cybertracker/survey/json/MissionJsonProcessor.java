@@ -352,14 +352,14 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 						while(c.isBefore(end)) {
 							LocalDate ld = LocalDate.from(c);
 							if (ld.isEqual(lde)) {
-								MissionDay cd = findDay(link.getMission(), ld, true, LocalTime.MAX, session);
+								MissionDay cd = findDay(link.getMission(), ld, true, null, session);
 								long resttime = Math.round( ChronoUnit.SECONDS.between(c,end) / 60.0 );
 								resttime += cd.getRestMinutes() == null ? 0 : cd.getRestMinutes();
 								cd.setRestMinutes((int)resttime);
 								//time from ld to end 
 								break;
 							}else {
-								MissionDay cd = findDay(link.getMission(), ld, true, LocalTime.MAX, session);
+								MissionDay cd = findDay(link.getMission(), ld, true,null, session);
 								//time from start to end of day c to end of day
 								LocalDateTime endofday = c.withHour(23).withMinute(59).withSecond(59).withNano(999999);
 								long resttime = Math.round( ChronoUnit.SECONDS.between(c,endofday) / 60.0 );
