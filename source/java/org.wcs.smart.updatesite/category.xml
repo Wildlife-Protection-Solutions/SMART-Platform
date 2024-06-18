@@ -1,67 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.plan.feature_8.0.0.qualifier.jar" id="org.wcs.smart.plan.feature" version="8.0.0.qualifier">
-      <category name="planning"/>
+   <feature id="org.wcs.smart.feature">
+      <category name="smart"/>
    </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature_8.0.0.qualifier.jar" id="org.wcs.smart.independentincident.feature" version="8.0.0.qualifier">
-      <category name="independentincident"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="8.0.0.qualifier">
-      <category name="smartmobile"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.survey.feature" version="8.0.0.qualifier">
-      <category name="smartmobile"/>
-   </feature>
-   <feature url="features/org.wcs.smart.er.feature_8.0.0.qualifier.jar" id="org.wcs.smart.er.feature" version="8.0.0.qualifier">
+   <feature id="org.wcs.smart.er.feature">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.er.feature" version="8.0.0.qualifier">
-      <category name="connectdq"/>
-   </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.feature" version="8.0.0.qualifier">
-      <category name="connectdq"/>
-   </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature" version="8.0.0.qualifier">
-      <category name="connectdq"/>
-   </feature>
-   <feature url="features/org.wcs.smart.connect.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.feature" version="8.0.0.qualifier">
-      <category name="connect"/>
-   </feature>
-   <feature url="features/org.wcs.smart.connect.cybertracker.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.cybertracker.feature" version="8.0.0.qualifier">
-      <category name="connect"/>
-   </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="8.0.0.qualifier">
-      <category name="connectdq"/>
-   </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.i2.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.i2.feature" version="8.0.0.qualifier">
-      <category name="connectdq"/>
-   </feature>
-   <feature url="features/org.wcs.smart.asset.feature_8.0.0.qualifier.jar" id="org.wcs.smart.asset.feature" version="8.0.0.qualifier">
-      <category name="asset"/>
-   </feature>
-   <feature url="features/org.wcs.smart.r.feature_8.0.0.qualifier.jar" id="org.wcs.smart.r.feature" version="8.0.0.qualifier">
-      <category name="r"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.plan.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="8.0.0.qualifier">
+   <feature id="org.wcs.smart.cybertracker.patrol.feature">
       <category name="smartmobile"/>
    </feature>
-   <feature url="features/org.wcs.smart.event.feature_8.0.0.qualifier.jar" id="org.wcs.smart.event.feature" version="8.0.0.qualifier">
-      <category name="events"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.feature" version="8.0.0.qualifier">
+   <feature id="org.wcs.smart.cybertracker.survey.feature">
       <category name="smartmobile"/>
-   </feature>
-   <feature id="org.wcs.smart.smartcollect.feature">
-      <category name="smartcollect"/>
-   </feature>
-   <feature id="org.wcs.smart.cybertracker.incident.feature">
-      <category name="smartmobile"/>
-   </feature>
-   <feature id="org.wcs.smart.event.i2.feature">
-      <category name="events"/>
-   </feature>
-   <feature id="org.wcs.smart.i2.feature">
-      <category name="profiles"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
@@ -118,4 +67,5 @@
          Tools to support public data collection via the SMART Collect app.
       </description>
    </category-def>
+   <category-def name="smart" label="SMART Core"/>
 </site>
