@@ -947,12 +947,16 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			doRemove(session, session.get(Waypoint.class, u));
 		}
 		doflush(session);
-		
-		//evict patrol object and reload to ensure legs 
-		//are recent before recalculating type
-		//#3630
-		session.evict(p);
-		session.get(Patrol.class, p.getUuid()).recalculateType();
+
+		if (p.getUuid() == null) {
+			p.recalculateType();
+		}else {
+			//evict patrol object and reload to ensure legs 
+			//are recent before recalculating type
+			//#3630
+			session.evict(p);
+			session.get(Patrol.class, p.getUuid()).recalculateType();
+		}
 		return true;			
 	}
 
