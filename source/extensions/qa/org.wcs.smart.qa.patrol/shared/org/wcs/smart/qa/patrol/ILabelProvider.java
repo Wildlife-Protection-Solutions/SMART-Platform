@@ -49,8 +49,13 @@ public abstract class ILabelProvider {
 		PatrolTrackDataProvider_LegLabel,
 		PatrolWaypointDataProvider_WpNotFound,
 		PatrolWaypointDataProvider_Name,
+		PatrolDataProvider_Name,
+		PatrolDataProvider_PatrolNotFound,
 		PatrolWaypointDataProvider_WpIdLabel,
 		LoadingString,
+		EmptyEndPatrolDaysType_Name,
+		EmptyEndPatrolDaysType_Desc,
+		EmptyEndPatrolDaysType_EmptyDays
 		
 	}
 	

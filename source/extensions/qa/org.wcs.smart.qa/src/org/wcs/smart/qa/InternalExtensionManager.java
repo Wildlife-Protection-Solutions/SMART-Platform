@@ -55,6 +55,7 @@ public enum InternalExtensionManager {
 	INSTANCE;
 	
 	private volatile HashMap<String, List<QaActionInfo>> providerActions = null;
+	private volatile HashMap<String, List<QaActionInfo>> routineActions = null;
 
 	private List<QaRoutine> autoRoutines = null;
 	
@@ -166,44 +167,64 @@ public enum InternalExtensionManager {
 	}
 
 	
-	public List<QaActionInfo> getQaActions(IQaDataProvider provider, IEclipseContext context){
+	public List<QaActionInfo> getQaDataProviderActions(IQaDataProvider provider, IEclipseContext context){
 		if (providerActions == null){
 			synchronized (INSTANCE) {
 				if (providerActions == null){
-			
-					HashMap<String, List<QaActionInfo>> temp = new HashMap<>();
-					
-					IExtensionRegistry registry = RegistryFactory.getRegistry();
-					IExtensionPoint pnt = registry.getExtensionPoint(RoutineExtensionManager.QA_ROUTINE_TYPE_EXTENSION_ID);
-					IConfigurationElement[] config = pnt.getConfigurationElements();
-					for (IConfigurationElement e : config) {
-						if (e.getName().equals("data_provider")){ //$NON-NLS-1$
-							try{
-								String id = ((IQaDataProvider)e.createExecutableExtension("class")).getId(); //$NON-NLS-1$
-								IConfigurationElement[] kids = e.getChildren("qa_action"); //$NON-NLS-1$
-								List<QaActionInfo> actions = new ArrayList<>();
-								for (IConfigurationElement kid : kids){
-									IQaAction action = (IQaAction)kid.createExecutableExtension("class"); //$NON-NLS-1$
-									
-									String image = kid.getAttribute("image"); //$NON-NLS-1$
-									ImageDescriptor descriptor = null;
-									if (image != null) {
-										descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(e.getNamespaceIdentifier(), image);
-									}
-									actions.add(new QaActionInfo(action, descriptor));
-									ContextInjectionFactory.inject(action, context);
-								}
-								temp.put(id, actions);
-							}catch (Exception ex){
-								QaPlugIn.log(ex.getMessage(), ex);
-							}
-						}
-					}
-					this.providerActions = temp;
+					this.providerActions = getActions("data_provider", context); //$NON-NLS-1$					
 				}
 			}
 		}
 		return providerActions.get(provider.getId());
+	}
+	
+	public List<QaActionInfo> getQaRoutineActions(IQaRoutineType routine, IEclipseContext context){
+		if (routineActions == null){
+			synchronized (INSTANCE) {
+				if (routineActions == null){
+					this.routineActions = getActions("qa_routine", context); //$NON-NLS-1$
+				}
+			}
+		}
+		return routineActions.get(routine.getId());
+	}
+	
+	private HashMap<String, List<QaActionInfo>> getActions(String type, IEclipseContext context){
+		HashMap<String, List<QaActionInfo>> temp = new HashMap<>();
+		
+		IExtensionRegistry registry = RegistryFactory.getRegistry();
+		IExtensionPoint pnt = registry.getExtensionPoint(RoutineExtensionManager.QA_ROUTINE_TYPE_EXTENSION_ID);
+		IConfigurationElement[] config = pnt.getConfigurationElements();
+		for (IConfigurationElement e : config) {
+			if (e.getName().equals(type)){
+				try{
+					Object x = e.createExecutableExtension("class"); //$NON-NLS-1$
+					String id = null;
+					if (x instanceof IQaDataProvider) {
+						id = ((IQaDataProvider) x).getId();
+					}else if (x instanceof IQaRoutineType) {
+						id = ((IQaRoutineType) x).getId();
+					}
+					IConfigurationElement[] kids = e.getChildren("qa_action"); //$NON-NLS-1$
+					List<QaActionInfo> actions = new ArrayList<>();
+					for (IConfigurationElement kid : kids){
+						IQaAction action = (IQaAction)kid.createExecutableExtension("class"); //$NON-NLS-1$
+						
+						String image = kid.getAttribute("image"); //$NON-NLS-1$
+						ImageDescriptor descriptor = null;
+						if (image != null) {
+							descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(e.getNamespaceIdentifier(), image);
+						}
+						actions.add(new QaActionInfo(action, descriptor));
+						ContextInjectionFactory.inject(action, context);
+					}
+					temp.put(id, actions);
+				}catch (Exception ex){
+					QaPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+		return temp;
 	}
 	
 	/**

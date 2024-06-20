@@ -41,6 +41,21 @@
                class="org.wcs.smart.qa.patrol.ui.PatrolSpeedParameterCollector">
          </parameter_collector>
       </qa_routine>
+      <data_provider
+            class="org.wcs.smart.qa.patrol.routine.PatrolDataProvider"
+            image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png">
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/shared16/goto.png">
+         </qa_action>
+      </data_provider>
+      <qa_routine
+            class="org.wcs.smart.qa.patrol.routine.EmptyEndPatrolDaysType">
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.DeleteEmptyEndPatrolDaysAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
+         </qa_action>
+      </qa_routine>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.libs.interceptor">

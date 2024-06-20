@@ -24,6 +24,7 @@ package org.wcs.smart.qa.patrol.ui;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -42,6 +43,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.patrol.internal.Messages;
+import org.wcs.smart.qa.patrol.routine.PatrolDataProvider;
 import org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider;
 import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
 
@@ -64,46 +66,61 @@ public class OpenSourcePatrolAction implements IQaAction {
 	public boolean doAction(List<QaError> items) {
 		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
-		if (item.getDataProviderId().equals(PatrolWaypointDataProvider.ID)){
-			PatrolWaypoint pw = null;
-			try(Session s = HibernateManager.openSession()){
+		
+		Patrol p = null;
+		UUID wpUuid = null;
+		UUID legDayUuid = null;
+		try(Session s = HibernateManager.openSession()){
+		
+			if (item.getDataProviderId().equals(PatrolWaypointDataProvider.ID)){
+				PatrolWaypoint pw = null;
+				
 				pw = QueryFactory.buildQuery(s, PatrolWaypoint.class, "id.waypoint.uuid", item.getSourceId()).uniqueResult(); //$NON-NLS-1$
-				if (pw != null){
-					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-					p.getId();
-					p.getUuid();
-					p.getStartDate();
-					p.getEndDate();
+				if (pw == null){
+					//not found
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_WpNotFound, item.getErrorId()));
+					return false;
+				}
+				p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+				wpUuid = pw.getWaypoint().getUuid();
+				
+			}else if (item.getDataProviderId().equals(PatrolTrackDataProvider.ID)){
+				Track track = s.get(Track.class, item.getSourceId());
+				if (track == null){
+					//not found
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_TrackNotFound, item.getErrorId()));
+					return false;
+				}
+				
+				p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
+				legDayUuid = track.getPatrolLegDay().getUuid();
+
+			}else if (item.getDataProviderId().equals(PatrolDataProvider.ID)){
+				p = s.get(Patrol.class,item.getSourceId());
+				
+				if (p == null){
+					//not found
+					MessageDialog.openError(Display.getDefault().getActiveShell(),
+							Messages.OpenSourcePatrolAction_NotFoundDialogTitle, 
+							MessageFormat.format(Messages.OpenSourcePatrolAction_PatrolNotFound, item.getErrorId()));
+					return false;
 				}
 			}
-			if (pw == null){
-				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_WpNotFound, item.getErrorId()));
+		
+			if (p == null) {
 				return false;
-			}else{
-				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(pw.getPatrolLegDay().getPatrolLeg().getPatrol()), pw.getWaypoint().getUuid(), context.get(MWindow.class));	
 			}
-		}else if (item.getDataProviderId().equals(PatrolTrackDataProvider.ID)){
-			Track track = null;
 			
-			try(Session s = HibernateManager.openSession()){
-				track = (Track) s.get(Track.class, item.getSourceId());
-				if (track != null){
-					Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
-					p.getId();
-					p.getUuid();
-					p.getStartDate();
-					p.getEndDate();
-				}
-			}
-			if (track == null){
-				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_TrackNotFound, item.getErrorId()));
-				return false;
-			}else{
-				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(track.getPatrolLegDay().getPatrolLeg().getPatrol()), track.getPatrolLegDay().getUuid(), context.get(MWindow.class));	
-			}
+			p.getId();
+			p.getUuid();
+			p.getStartDate();
+			p.getEndDate();
 		}
+		
+		
+		PatrolEditorInput pi = new PatrolEditorInput(p);
+		(new OpenPatrolHandler()).openPatrol(pi, wpUuid, legDayUuid, context.get(MWindow.class));
+		
 		return false;
 	}
 

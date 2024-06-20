@@ -25,6 +25,15 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.qa.patrol.internal.messages"; //$NON-NLS-1$
+	public static String DeleteEmptyEndPatrolDaysAction_ActionName;
+	public static String DeleteEmptyEndPatrolDaysAction_ConfirmMessage;
+	public static String DeleteEmptyEndPatrolDaysAction_DeletePatrolConfirm;
+	public static String DeleteEmptyEndPatrolDaysAction_EmptyDaysRemovedStatus;
+	public static String DeleteEmptyEndPatrolDaysAction_GeneralError;
+	public static String DeleteEmptyEndPatrolDaysAction_PatrolDeletedErrorStatus;
+	public static String DeleteEmptyEndPatrolDaysAction_PatrolDeletedStatus;
+	public static String DeleteEmptyEndPatrolDaysAction_PatrolNotFoundError;
+	public static String DeleteEmptyEndPatrolDaysAction_RemoteError;
 	public static String DeletePatrolTrackAction_ActionName;
 	public static String DeletePatrolTrackAction_DeleteConfirmMessage;
 	public static String DeletePatrolTrackAction_DeleteDialogTitle;
@@ -47,10 +56,14 @@ public class Messages extends NLS {
 	public static String EditWaypointAction_ActionName;
 	public static String OpenSourcePatrolAction_ActionName;
 	public static String OpenSourcePatrolAction_NotFoundDialogTitle;
+	public static String OpenSourcePatrolAction_PatrolNotFound;
 	public static String OpenSourcePatrolAction_TrackNotFound;
 	public static String OpenSourcePatrolAction_WpNotFound;
 	public static String PatrolEditWaypointDialog_interpolateToolTooltip;
 	public static String PatrolEditWaypointDialog_WpNotFound;
+	public static String PatrolLabelProvider_EmptyEndDaysRoutineDesc;
+	public static String PatrolLabelProvider_EmptyEndDaysRoutineName;
+	public static String PatrolLabelProvider_EmpytDaysMsg;
 	public static String PatrolLabelProvider_ErrorValidatingPatrolTrack;
 	public static String PatrolLabelProvider_InvalidMaxSpeed;
 	public static String PatrolLabelProvider_LegLabel;
@@ -58,6 +71,8 @@ public class Messages extends NLS {
 	public static String PatrolLabelProvider_MaxSpeedDescription;
 	public static String PatrolLabelProvider_MaxSpeedLbl;
 	public static String PatrolLabelProvider_MaxSpeedName;
+	public static String PatrolLabelProvider_PatrolDataProviderName;
+	public static String PatrolLabelProvider_PatrolNotFoundMsg;
 	public static String PatrolLabelProvider_PatrolProviderName;
 	public static String PatrolLabelProvider_PatrolTypes;
 	public static String PatrolLabelProvider_SpeedUnits;

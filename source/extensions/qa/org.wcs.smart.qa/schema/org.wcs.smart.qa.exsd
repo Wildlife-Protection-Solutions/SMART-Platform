@@ -51,7 +51,8 @@
    <element name="qa_routine">
       <complexType>
          <sequence minOccurs="0" maxOccurs="1">
-            <element ref="parameter_collector"/>
+            <element ref="parameter_collector" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="qa_action" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>

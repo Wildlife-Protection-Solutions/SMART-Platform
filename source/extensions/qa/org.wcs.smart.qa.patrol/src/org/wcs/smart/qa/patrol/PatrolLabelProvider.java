@@ -68,8 +68,16 @@ public class PatrolLabelProvider extends ILabelProvider {
 			return Messages.PatrolLabelProvider_WaypointIdLbl;
 		case PatrolSpeedRoutineType_TrackError:
 			return Messages.PatrolLabelProvider_ErrorValidatingPatrolTrack;
-		default:
-			break;
+		case EmptyEndPatrolDaysType_Name: 
+			return Messages.PatrolLabelProvider_EmptyEndDaysRoutineName;
+		case EmptyEndPatrolDaysType_Desc: 
+			return Messages.PatrolLabelProvider_EmptyEndDaysRoutineDesc;
+		case PatrolDataProvider_Name:
+			return Messages.PatrolLabelProvider_PatrolDataProviderName;
+		case PatrolDataProvider_PatrolNotFound:
+			return Messages.PatrolLabelProvider_PatrolNotFoundMsg;
+		case EmptyEndPatrolDaysType_EmptyDays:
+			return Messages.PatrolLabelProvider_EmpytDaysMsg;
 		}
 		return ""; //$NON-NLS-1$
 	}

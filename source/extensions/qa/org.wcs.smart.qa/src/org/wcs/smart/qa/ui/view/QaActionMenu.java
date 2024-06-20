@@ -74,6 +74,7 @@ public abstract class QaActionMenu implements MenuListener {
 		boolean isSingle = ((IStructuredSelection)selectionProvider.getSelection()).size() == 1;
 		
 		Map<String, QaActionInfo> actions = new HashMap<>();
+		
 		boolean isFirst = true;
 		for (Iterator<?> iterator = ((IStructuredSelection)selectionProvider.getSelection()).iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
@@ -82,18 +83,31 @@ public abstract class QaActionMenu implements MenuListener {
 			QaError errorItem = (QaError)item;
 			
 			if (isFirst){
-				for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaActions(errorItem.getDataProvider(), context)){
+				for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaDataProviderActions(errorItem.getDataProvider(), context)){
 					if(isSingle || action.getAction().supportsMultiple()){
 						actions.put(action.getAction().getId(), action);
 					}
 				}
+				
+				for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaRoutineActions(errorItem.getQaRoutine().getRoutineType(), context)){
+					if(isSingle || action.getAction().supportsMultiple()){
+						actions.put(action.getAction().getId(), action);
+					}
+				}
+				
 				isFirst = false;
 			}else{
+				//TODO: add qa routine actions here
 				List<String> toRemove = new ArrayList<>();
 				for (Iterator<String> iterator2 = actions.keySet().iterator(); iterator2.hasNext();) {
 					String ea = (String) iterator2.next();
 					boolean found = false;
-					for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaActions(errorItem.getDataProvider(), context)){
+					for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaDataProviderActions(errorItem.getDataProvider(), context)){
+						if(action.getAction().supportsMultiple()){
+							if (action.getAction().getId().equals(ea)) found = true;
+						}
+					}
+					for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaRoutineActions(errorItem.getQaRoutine().getRoutineType(), context)){
 						if(action.getAction().supportsMultiple()){
 							if (action.getAction().getId().equals(ea)) found = true;
 						}

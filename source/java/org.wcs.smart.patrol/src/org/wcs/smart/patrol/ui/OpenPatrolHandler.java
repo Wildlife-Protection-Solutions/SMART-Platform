@@ -120,10 +120,6 @@ public class OpenPatrolHandler {
 		openPatrol(patrolInput, null, null, activeWindow);
 	}
 	
-	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput, UUID waypointUuid, MWindow activeWindow){
-		openPatrol(patrolInput, waypointUuid, null, activeWindow);
-	}
-	
 	private boolean checkDates(PatrolEditorInput pi, Shell activeShell){
 		Patrol patrol = null;
 		boolean canEdit = false;

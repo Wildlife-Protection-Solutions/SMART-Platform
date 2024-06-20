@@ -69,6 +69,16 @@ public class QaPatrolLabelProvider extends ILabelProvider {
 			return Messages.getString("QaPatrolLabelProvider.WpIdLabel", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_TrackError:
 			return Messages.getString("QaPatrolLabelProvider.TrackValidationError", l); //$NON-NLS-1$
+		case EmptyEndPatrolDaysType_Name: 
+			return Messages.getString("QaPatrolLabelProvider.EmptyEndPatrolDaysRoutineName", l); //$NON-NLS-1$
+		case EmptyEndPatrolDaysType_Desc: 
+			return Messages.getString("QaPatrolLabelProvider.EmptyEndPatrolDaysRoutineDesc", l); //$NON-NLS-1$
+		case PatrolDataProvider_Name:
+			return Messages.getString("QaPatrolLabelProvider.PatrolDataProvider", l); //$NON-NLS-1$
+		case PatrolDataProvider_PatrolNotFound:
+			return Messages.getString("QaPatrolLabelProvider.PatrolNotFound", l); //$NON-NLS-1$
+		case EmptyEndPatrolDaysType_EmptyDays:
+			return Messages.getString("QaPatrolLabelProvider.MissingDaysMessage", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

@@ -29,6 +29,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaError;
 
 /**
@@ -46,8 +47,12 @@ public enum ActionEngine {
 	 */
 	public boolean performActions(List<QaError> actionItems, String actionId, IEclipseContext context){
 		
-		Set<IQaDataProvider> providers = new HashSet<IQaDataProvider>();
-		actionItems.forEach(i -> providers.add(i.getDataProvider()));
+		Set<IQaDataProvider> providers = new HashSet<>();
+		Set<IQaRoutineType> routines = new HashSet<>();
+		actionItems.forEach(i -> {
+			providers.add(i.getDataProvider());
+			routines.add(i.getQaRoutine().getRoutineType());
+		});
 		boolean changes = false;
 		boolean found = false;
 		
@@ -63,7 +68,17 @@ public enum ActionEngine {
 		//extension point actions
 		if (!found){
 			for (IQaDataProvider p : providers){
-				for (QaActionInfo n : InternalExtensionManager.INSTANCE.getQaActions(p, context)){
+				for (QaActionInfo n : InternalExtensionManager.INSTANCE.getQaDataProviderActions(p, context)){
+					if (n.getAction().getId().equals(actionId)){
+						//inject the newest context into the action bug #2703
+						ContextInjectionFactory.inject(n.getAction(), context);
+						changes = changes || n.getAction().doAction(actionItems);
+						break;
+					}
+				}
+			}
+			for (IQaRoutineType p : routines){
+				for (QaActionInfo n : InternalExtensionManager.INSTANCE.getQaRoutineActions(p, context)){
 					if (n.getAction().getId().equals(actionId)){
 						//inject the newest context into the action bug #2703
 						ContextInjectionFactory.inject(n.getAction(), context);
@@ -73,6 +88,7 @@ public enum ActionEngine {
 				}
 			}
 		}
+		
 		//update status and fix message of all linked items as they are all the same
 		for (QaError item : actionItems){
 			for (QaError link : item.getLinks()){

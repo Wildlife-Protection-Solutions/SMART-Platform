@@ -246,7 +246,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		detailsComposite.setLayout(new GridLayout());
 		
 		IQaAction gotoSource = null;
-		for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaActions(r.getDataProvider(), getContext())){
+		for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaDataProviderActions(r.getDataProvider(), getContext())){
 			if (action.getAction().getId().equals(IQaAction.GOTO_ACTION_ID)){
 				gotoSource = action.getAction();
 				break;
