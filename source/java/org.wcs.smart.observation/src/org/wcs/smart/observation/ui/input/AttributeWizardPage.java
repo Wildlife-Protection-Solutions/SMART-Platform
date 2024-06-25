@@ -269,7 +269,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				if (wo.getCategory().equals(thisCategory)) categoryObservations.add(wo);
 			}
 		}
-		if (!thisCategory.getIsMultiple()){
+
+		//categoryObservations.size() check related to ticket: #3764
+		if (!thisCategory.getIsMultiple() && categoryObservations.size() < 2){
 			if (categoryObservations != null && categoryObservations.size() > 0){
 				WaypointObservation ob = categoryObservations.iterator().next();
 				editObservation(ob);
@@ -281,9 +283,6 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			GridLayout gl2 = new GridLayout(2, false);
 			gl2.marginWidth = gl2.marginHeight = 0;
 			buttons.setLayout(gl2);
-			
-//			Label l = new Label(buttons, SWT.SEPARATOR | SWT.HORIZONTAL);
-//			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			btnAdd = new Button(buttons, SWT.PUSH);
 			btnAdd.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
@@ -767,7 +766,17 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			return true;
 		}
 		
-		if (!thisCategory.getIsMultiple()){
+		//find all existing observations
+		//categoryObservations.size() check below related to ticket: #3764
+		Collection<WaypointObservation> categoryObservations = new ArrayList<>();
+		Waypoint wp = getWizardInternal().getWaypoint();
+		for (WaypointObservationGroup g : wp.getObservationGroups()) {
+			for (WaypointObservation wo : g.getObservations()) {
+				if (wo.getCategory().equals(thisCategory)) categoryObservations.add(wo);
+			}
+		}
+		
+		if (!thisCategory.getIsMultiple() && categoryObservations.size() < 2){
 			//create single observation
 			WaypointObservation wo = createObservationAndClear();
 			if (wo == null){
@@ -788,6 +797,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 				return true;
 			}
+			
 		}else{
 			//save multiple observations
 			if (observationModified()){
