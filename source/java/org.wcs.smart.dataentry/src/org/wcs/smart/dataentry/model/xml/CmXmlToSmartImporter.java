@@ -660,7 +660,7 @@ public class CmXmlToSmartImporter {
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());
 			cmNode.setCollectMultipleObservations(xmlNode.isCollectMultipleObs());
-			cmNode.setUseSingleGpsPoint(xmlNode.isUseSingleGpsPoint());
+			
 			cmNode.setNodeOrder(i);
 			cmNode.setParent(parent);
 			cmNode.setChildren(processCmNodes(xmlNode.getNode(), cm, cmNode, monitor));

@@ -346,7 +346,6 @@ public class ConfigurableModelFactory {
 		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setIntegrateIncidentType(toCopy.getIntegrateIncidentType());
-		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		clonedNode.setDisplayMode(toCopy.getDisplayMode());
 		cloneImages(toCopy, clonedNode);
 		copyLabels(toCopy, clonedNode);

@@ -88,7 +88,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnPhoto;
 	private Button btnPhotoRequired;
 	private Button btnCollectMultiple;
-	private Button btnSingleGpsPoint;
+	
 	private ImageSelectionControl imageControl;
 	private CheckboxTableViewer chSignatures;
 	private CheckboxTableViewer chAttachments;
@@ -331,27 +331,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						
 					}
 				}
-				btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(getSourceObject()));
 				fireModelChanged();
 			}
 		});
 
-		
-		label = new Label(container, SWT.NONE);
-
-		btnSingleGpsPoint = new Button(container, SWT.CHECK);
-		btnSingleGpsPoint.setText(Messages.CmNodeInfoComposite_RecordSingleGpsPoint);
-		btnSingleGpsPoint.setToolTipText(Messages.CmNodeInfoComposite_RecordSingleGpsPointTooltip1);
-		btnSingleGpsPoint.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)btnSingleGpsPoint.getLayoutData()).horizontalIndent = 15;
-		btnSingleGpsPoint.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				getSourceObject().setUseSingleGpsPoint(btnSingleGpsPoint.getSelection());
-				fireModelChanged();
-			}
-		});
-		
 		
 		label = new Label(container, SWT.NONE);
 		label.setText(Messages.EditListDialog_DisplayMode);
@@ -454,10 +437,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 					}
 					if (btnCollectMultiple != null)
 						btnCollectMultiple.setSelection(n.isCollectMultipleObservations());
-					if (btnSingleGpsPoint != null) {
-						btnSingleGpsPoint.setSelection(getUseSingleGpsPointValue(n));
-						btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(n));
-					}
+					
 					if (node.getModel().getUseEarthRanger()) {
 						lblErOp.setEnabled(true);
 						cmbErOpViewer.getControl().setEnabled(true);
@@ -540,14 +520,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	private boolean getPhotoRequiredValue(CmNode node) {
 		return node.isPhotoRequired() && !node.getModel().isPhotoFirst();
-	}
-
-	private boolean isUseSingleGpsPointEnabled(CmNode node) {
-		return node.isCollectMultipleObservations() && !node.getModel().isInstantGps() && !node.getModel().isPhotoFirst();
-	}
-
-	private boolean getUseSingleGpsPointValue(CmNode node) {
-		return node.isUseSingleGpsPoint() || node.getModel().isInstantGps() || node.getModel().isPhotoFirst();
 	}
 	
 	@Override

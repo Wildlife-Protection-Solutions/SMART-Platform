@@ -63,6 +63,7 @@ import org.wcs.smart.upgrade.v700.Upgrader751To753;
 import org.wcs.smart.upgrade.v700.Upgrader753To754;
 import org.wcs.smart.upgrade.v700.Upgrader754To757;
 import org.wcs.smart.upgrade.v800.Upgrader757To800;
+import org.wcs.smart.upgrade.v800.Upgrader800To801;
 
 
 /**
@@ -102,7 +103,8 @@ public class UpgradeEngine {
 		V753("7.5.1", "7.5.3", Upgrader751To753.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V754("7.5.3", "7.5.4", Upgrader753To754.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V757("7.5.4", "7.5.7", Upgrader754To757.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V800("7.5.7", "8.0.0", Upgrader757To800.class); //$NON-NLS-1$ //$NON-NLS-2$
+		V800("7.5.7", "8.0.0", Upgrader757To800.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V801("8.0.0", "8.0.1", Upgrader800To801.class); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		public String fromVersion;
 		public String toVersion;
