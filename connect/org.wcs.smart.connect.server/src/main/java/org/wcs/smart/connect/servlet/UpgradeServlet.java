@@ -140,6 +140,10 @@ public class UpgradeServlet extends HttpServlet {
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb757to800(s, warnings);
 						updated = true;
+					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						//7.5.5/6 shouldn't exist as we didn't upgrade version number
+						upgradeDb800to801(s, warnings);
+						updated = true;
 					}else {
 						request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
 						request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
@@ -1674,6 +1678,40 @@ public class UpgradeServlet extends HttpServlet {
 					
 					//re-enable triggers
 					c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$
+					
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});	
+		
+	}
+	
+	
+	private void upgradeDb800to801(Session s, List<String> warnings) {
+		
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					//disable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+
+					String[] sql = new String[] {
+						"ALTER TABLE SMART.CM_NODE DROP COLUMN use_single_gps_point", //$NON-NLS-1$
+						
+						//versions
+						"update connect.connect_plugin_version set version = '8.0.1' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '8.0.1' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+
+						"update connect.connect_version set version = '8.0.1', last_updated = now()", //$NON-NLS-1$
+					};
+					
+					for (String s : sql) {
+						c.createStatement().executeUpdate(s);
+					}
+					
 					
 				}catch (Exception ex) {
 					throw new SQLException (ex);

@@ -394,9 +394,7 @@ public class CmSmartToXml {
 			nt.setId(node.getUuid().toString()); //this will allow to reference this item in extradata
 		}
 		nt.setCollectMultipleObs(node.isCollectMultipleObservations());
-		nt.setUseSingleGpsPoint(node.isUseSingleGpsPoint());
-		
-		node.isUseSingleGpsPoint(); //only include if valid
+
 		if (node.getCmAttributes() != null){
 			for (CmAttribute ca : node.getCmAttributes()) {
 				AttributeType at = new AttributeType();

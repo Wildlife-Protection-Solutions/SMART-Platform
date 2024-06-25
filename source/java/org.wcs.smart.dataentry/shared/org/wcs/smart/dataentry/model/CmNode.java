@@ -189,14 +189,6 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 		this.collectMultipleObservations = Boolean.TRUE.equals(collectMultipleObservations); //null <==> false
 	}
 
-	@Column(name = "use_single_gps_point")
-	public boolean isUseSingleGpsPoint() {
-		return useSingleGpsPoint;
-	}	
-	public void setUseSingleGpsPoint(Boolean useSingleGpsPoint) {
-		this.useSingleGpsPoint = Boolean.TRUE.equals(useSingleGpsPoint); //null <==> false
-	}
-
 	/**
 	 * {@link DisplayMode} makes sense only for Groups
 	 */

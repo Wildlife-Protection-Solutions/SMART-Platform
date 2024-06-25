@@ -42,7 +42,6 @@ import jakarta.xml.bind.annotation.XmlType;
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="integrateIncidentType" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="collectMultipleObs" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="useSingleGpsPoint" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="imageFile" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="isCustomImage" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
@@ -86,8 +85,6 @@ public class NodeType {
     protected String id;
     @XmlAttribute(name = "collectMultipleObs")
     protected Boolean collectMultipleObs;
-    @XmlAttribute(name = "useSingleGpsPoint")
-    protected Boolean useSingleGpsPoint;
     @XmlAttribute(name = "imageFile")
     protected String imageFile;
     @XmlAttribute(name = "isCustomImage")
@@ -452,30 +449,6 @@ public class NodeType {
      */
     public void setCollectMultipleObs(Boolean value) {
         this.collectMultipleObs = value;
-    }
-
-    /**
-     * Gets the value of the useSingleGpsPoint property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
-     */
-    public Boolean isUseSingleGpsPoint() {
-        return useSingleGpsPoint;
-    }
-
-    /**
-     * Sets the value of the useSingleGpsPoint property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
-     */
-    public void setUseSingleGpsPoint(Boolean value) {
-        this.useSingleGpsPoint = value;
     }
 
     /**

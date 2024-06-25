@@ -67,8 +67,6 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_OptionsSection;	
 	public static String CmNodeInfoComposite_PhotoRequired;
 	public static String CmNodeInfoComposite_PhotoRequiredTooltip;
-	public static String CmNodeInfoComposite_RecordSingleGpsPoint;
-	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip1;
 	public static String CmNodeInfoComposite_SignaturesLabel;
 	public static String CmNodeInfoComposite_SignaturesTooltip;
 	public static String CmNodeInfoComposite_Tags;
