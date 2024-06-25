@@ -121,6 +121,12 @@ public class LocationRoutineType implements IQaRoutineType {
 	}
 	
 	@Override
+	public boolean canRunAutomatically() {
+		return true;
+	}
+
+	
+	@Override
 	public String getParameterSummary(QaRoutine routine, Locale l, Session session){
 		QaRoutineParameter p = routine.findParameter(LOCATION_PARAM_ID);
 		if (p == null) return ""; //$NON-NLS-1$

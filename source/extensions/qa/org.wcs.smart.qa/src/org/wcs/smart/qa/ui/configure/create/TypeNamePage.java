@@ -60,7 +60,9 @@ public class TypeNamePage extends WizardPage{
 	private Text txtName ;
 	private Text txtDescription ;
 	private ComboViewer cmbType;
+	
 	private Button btnAuto;
+	private Label lblAuto;
 	
 	private ControlDecoration cdType;
 	private ControlDecoration cdName;
@@ -119,11 +121,19 @@ public class TypeNamePage extends WizardPage{
 		cdName.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		cdName.hide();
 		
-		Label lblAuto = new Label(all, SWT.NONE);
-		lblAuto.setText(RoutinesListDialog.RoutineColumn.AUTO.guiName + ":"); //$NON-NLS-1$
-		lblAuto.setToolTipText(RoutinesListDialog.RoutineColumn.AUTO.tooltip);
+		Label lblAuto1 = new Label(all, SWT.NONE);
+		lblAuto1.setText(RoutinesListDialog.RoutineColumn.AUTO.guiName + ":"); //$NON-NLS-1$
+		lblAuto1.setToolTipText(RoutinesListDialog.RoutineColumn.AUTO.tooltip);
 
-		btnAuto = new Button(all, SWT.CHECK);
+		Composite temp = new Composite(all, SWT.NONE);
+		temp.setLayout(new GridLayout(2, false));
+		((GridLayout)temp.getLayout()).marginWidth = 0;
+		((GridLayout)temp.getLayout()).marginHeight = 0;
+		btnAuto = new Button(temp, SWT.CHECK);
+		lblAuto = new Label(temp, SWT.NONE);
+		lblAuto.setVisible(false);
+		lblAuto.setText(Messages.TypeNamePage_AutoExecuteNotSupported);
+		lblAuto.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblDesc = new Label(all, SWT.NONE);
 		lblDesc.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
@@ -162,6 +172,9 @@ public class TypeNamePage extends WizardPage{
 	}
 	
 	private void validate(){
+		IQaRoutineType type = (IQaRoutineType) cmbType.getStructuredSelection().getFirstElement();
+		btnAuto.setEnabled( type != null && type.canRunAutomatically() );
+		lblAuto.setVisible( type == null || !type.canRunAutomatically() );
 		validate(true);
 	}
 
@@ -174,7 +187,9 @@ public class TypeNamePage extends WizardPage{
 		if (getSelectedType() == null) return null;
 		
 		QaRoutine r = new QaRoutine();
-		r.setAutoCheck(btnAuto.getSelection());
+		if (getSelectedType().canRunAutomatically()) {
+			r.setAutoCheck(btnAuto.getSelection());
+		}
 		String name = txtName.getText().trim();
 		r.setName(name);
 		r.updateName(SmartDB.getCurrentLanguage(), name);

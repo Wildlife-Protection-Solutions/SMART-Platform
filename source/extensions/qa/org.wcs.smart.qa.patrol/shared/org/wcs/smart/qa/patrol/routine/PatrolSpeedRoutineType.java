@@ -96,6 +96,12 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 	}
 	
 	@Override
+	public boolean canRunAutomatically() {
+		return true;
+	}
+
+	
+	@Override
 	public String getParameterSummary(QaRoutine routine, Locale l, Session session){
 		QaRoutineParameter speedParameter = routine.findParameter(MAX_SPEED_PARAM_ID);
 		QaRoutineParameter typeParameter = routine.findParameter(PATROL_TYPES_PARAM_ID);

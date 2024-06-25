@@ -18,6 +18,7 @@ public class Messages extends NLS {
 	public static String AutoValidateJob_JobName;
 	public static String AutoValidateJob_Status1;
 	public static String CaDeleteHandler_TaskName;
+	public static String EditRoutineDialog_AutoExecuteNotSupported;
 	public static String EditRoutineDialog_DialogTitle;
 	public static String EditRoutineDialog_GeneralTab;
 	public static String EditRoutineDialog_NameRequired;
@@ -141,6 +142,7 @@ public class Messages extends NLS {
 	public static String TableMapQaErrorComposite_StatusColumName;
 	public static String TableMapQaErrorComposite_StatusLabel;
 	public static String TableMapQaErrorComposite_ZoomToLabel;
+	public static String TypeNamePage_AutoExecuteNotSupported;
 	public static String TypeNamePage_NameRequired;
 	public static String TypeNamePage_PageMessage;
 	public static String TypeNamePage_PageTitle;

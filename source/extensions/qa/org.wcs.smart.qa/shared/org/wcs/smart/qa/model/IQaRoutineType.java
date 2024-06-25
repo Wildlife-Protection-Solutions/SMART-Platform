@@ -74,4 +74,13 @@ public interface IQaRoutineType {
 	 * @return
 	 */
 	public String getParameterSummary(QaRoutine routine, Locale l, Session session);
+	
+
+	/**
+	 * If the QA routine can run automatically when data is created.
+	 * @return
+	 */
+	public default boolean canRunAutomatically() {
+		return false;
+	}
 }

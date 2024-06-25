@@ -84,21 +84,25 @@ public class ValidationEngine {
 		exceptions = new ArrayList<>();
 		Collection<QaError> errors = new ArrayList<QaError>();
 		for (ValidationTask t : tasks){
+			
 			m.setTaskName(MessageFormat.format(ILabelProvider.getLabel(Key.ValidationEngine_SubTaskName, t.getLocale()), t.getDataProvider().getName(l), t.getRoutine().getName()));
 			try{
 				QaRoutine r = (QaRoutine) session.get(QaRoutine.class, t.getRoutine().getUuid());
-				t.setQaRoutine(r);
 				
-				Collection<QaError> localErrors = r.getRoutineType().validateData(t, session, m.newChild(1));
+				if (r.getRoutineType().canRunAutomatically()) {
+					t.setQaRoutine(r);
 				
-				for(QaError newError : localErrors){
-					for (QaError existing : errors){
-						if (newError.getDataProviderId().equals(existing.getDataProviderId()) && newError.getSourceId().equals(existing.getSourceId())){
-							newError.addLink(existing);
-							existing.addLink(newError);
+					Collection<QaError> localErrors = r.getRoutineType().validateData(t, session, m.newChild(1));
+				
+					for(QaError newError : localErrors){
+						for (QaError existing : errors){
+							if (newError.getDataProviderId().equals(existing.getDataProviderId()) && newError.getSourceId().equals(existing.getSourceId())){
+								newError.addLink(existing);
+								existing.addLink(newError);
+							}
 						}
+						errors.add(newError);
 					}
-					errors.add(newError);
 				}
 			}catch (Exception ex){
 				exceptions.add(ex);

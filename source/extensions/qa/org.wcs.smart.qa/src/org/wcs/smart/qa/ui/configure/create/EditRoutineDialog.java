@@ -102,7 +102,10 @@ public class EditRoutineDialog extends SmartStyledTitleDialog{
 		if (routine.getDescription() != null){
 			txtDescription.setText(routine.getDescription());
 		}
-		btnAuto.setSelection(routine.getAutoCheck());
+		if (btnAuto != null) {
+			btnAuto.setSelection(routine.getAutoCheck());
+			btnAuto.setEnabled(routine.getRoutineType().canRunAutomatically());
+		}
 		lblType2.setText(routine.getRoutineType().getName(Locale.getDefault()));
 		
 		collector = InternalExtensionManager.INSTANCE.newParameterCollector(routine.getRoutineTypeId());
@@ -134,7 +137,9 @@ public class EditRoutineDialog extends SmartStyledTitleDialog{
 				}else{
 					r.setDescription(txtDescription.getText().trim());
 				}
-				r.setAutoCheck(btnAuto.getSelection());
+				if (btnAuto != null) {
+					r.setAutoCheck(btnAuto.getSelection());
+				}
 				
 				if (collector != null){
 					collector.updateParameters(r);
@@ -246,8 +251,14 @@ public class EditRoutineDialog extends SmartStyledTitleDialog{
 		lblAuto.setText(RoutinesListDialog.RoutineColumn.AUTO.guiName + ":"); //$NON-NLS-1$
 		lblAuto.setToolTipText(RoutinesListDialog.RoutineColumn.AUTO.tooltip);
 
-		btnAuto = new Button(top, SWT.CHECK);
-		btnAuto.addListener(SWT.Selection, e->validate());
+		
+		if (!routine.getRoutineType().canRunAutomatically()) {
+			Label l = new Label(top, SWT.NONE);
+			l.setText(Messages.EditRoutineDialog_AutoExecuteNotSupported);
+		}else {
+			btnAuto = new Button(top, SWT.CHECK);
+			btnAuto.addListener(SWT.Selection, e->validate());
+		}
 		
 		Label lblDesc = new Label(top, SWT.NONE);
 		lblDesc.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
