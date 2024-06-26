@@ -26,7 +26,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="AttachmentTagType" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttachmentTagType" maxOccurs="unbounded"/>
+ *         &lt;element name="attachmentTagType" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttachmentTagType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,12 +37,12 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AttachmentTagTypeList", propOrder = {
-    "AttachmentTagType"
+    "attachmentTagType"
 })
 public class AttachmentTagTypeList {
 
     @XmlElement(required = true)
-    protected List<AttachmentTagType> AttachmentTagType;
+    protected List<AttachmentTagType> attachmentTagType;
 
     /**
      * Gets the value of the AttachmentTagType property.
@@ -67,10 +67,10 @@ public class AttachmentTagTypeList {
      * 
      */
     public List<AttachmentTagType> getAttachmentTagType() {
-        if (AttachmentTagType == null) {
-            AttachmentTagType = new ArrayList<AttachmentTagType>();
+        if (attachmentTagType == null) {
+        	attachmentTagType = new ArrayList<AttachmentTagType>();
         }
-        return this.AttachmentTagType;
+        return this.attachmentTagType;
     }
 
 }
