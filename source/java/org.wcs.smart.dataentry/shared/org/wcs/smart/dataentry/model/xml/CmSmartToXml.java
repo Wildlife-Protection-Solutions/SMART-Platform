@@ -106,6 +106,7 @@ public class CmSmartToXml {
 	private Map<String, Path> filesToInclude;
 	private Set<UUID> signatures;
 	private Set<UUID> attachmenttags;
+	private Map<UUID, Integer> tagorder;
 
 	
 	public CmSmartToXml(Session session) {
@@ -231,20 +232,28 @@ public class CmSmartToXml {
 			nodes.addAll(node.getChildren());
 		}
 		attachmenttags = new HashSet<>();
+		tagorder = new HashMap<UUID, Integer>();
+		
 		if (!alltags.isEmpty()) {
 		
 			xmlModel.setAttachmentTags(new AttachmentTagTypeList());
-			
+			List<AttachmentTag> allTags = new ArrayList<>();
 			for (UUID uuid : alltags) {
 				AttachmentTag stype = session.get(AttachmentTag.class, uuid);
-				if (stype != null) {
-					org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType xtype = new org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType();
-					xtype.setUuid(UuidUtils.uuidToString(stype.getUuid()));
-					setNames(xtype.getName(), stype.getNames());
-					xtype.setKeyid(stype.getKeyId());
-					xmlModel.getAttachmentTags().getAttachmentTagType().add(xtype);
-					attachmenttags.add(stype.getUuid());
-				}
+				if (stype != null) allTags.add(stype);
+			}
+			Collections.sort(allTags);
+			for (int i = 0; i < allTags.size(); i ++) {
+				tagorder.put(allTags.get(i).getUuid(), i);
+			}
+			
+			for (AttachmentTag stype : allTags) {
+				org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType xtype = new org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType();
+				xtype.setUuid(UuidUtils.uuidToString(stype.getUuid()));
+				setNames(xtype.getName(), stype.getNames());
+				xtype.setKeyid(stype.getKeyId());
+				xmlModel.getAttachmentTags().getAttachmentTagType().add(xtype);
+				attachmenttags.add(stype.getUuid());
 			}
 		}
 	}
@@ -378,11 +387,14 @@ public class CmSmartToXml {
 			nt.setDisplayMode(node.getDisplayMode().name());
 		}
 		if (node.getCategory() != null && !node.getAttachmentTagUuids().isEmpty()) {
-			for (UUID uuid : node.getAttachmentTagUuids()) {
+			//sort attachments 
+			List<UUID> tagsuuids = new ArrayList<>(node.getAttachmentTagUuids());
+			tagsuuids.sort((a,b)->tagorder.get(a).compareTo(tagorder.get(b)));
+			for (UUID uuid : tagsuuids) {
 				if (attachmenttags.contains(uuid)) {
 					org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType xs = new org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType();
 					xs.setUuid(UuidUtils.uuidToString(uuid));
-					nt.getAttachmentTags().add(xs);
+					nt.getAttachmentTag().add(xs);
 				}
 			}
 		}

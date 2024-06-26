@@ -484,6 +484,8 @@ public class CtJsonObservationParser {
 						oa.setFilename(wa.getFilename());
 						oa.setSignatureType(wa.getSignatureType());
 						oa.setObservation(wp);
+						oa.setAttachmentTags(new ArrayList<>());
+
 						for (AttachmentTagLink link : wa.getAttachmentTags()) {
 							AttachmentTagLink clone = new AttachmentTagLink();
 							clone.setTag(link.getTag());

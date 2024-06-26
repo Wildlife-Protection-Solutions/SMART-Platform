@@ -644,9 +644,9 @@ public class CmXmlToSmartImporter {
 					}
 					cmNode.setSignatures(bits);
 				}
-				if (xmlNode.getAttachmentTags() != null) {
+				if (xmlNode.getAttachmentTag() != null) {
 					Set<AttachmentTag> bits = new HashSet<>();
-					for (org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType s : xmlNode.getAttachmentTags()) {
+					for (org.wcs.smart.dataentry.model.xml.generated.AttachmentTagType s : xmlNode.getAttachmentTag()) {
 						if (attachmentTags.containsKey(s.getUuid())) {
 							bits.add(attachmentTags.get(s.getUuid()));
 						}

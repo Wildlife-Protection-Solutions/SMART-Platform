@@ -303,17 +303,19 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (createdFeatures.isEmpty())
 			return null;
  
+		int size = 0;
 		StringBuilder sb = new StringBuilder();
 		for (Set<Waypoint> items : createdFeatures.values()) {
 			for (Waypoint wp : items) {
 				sb.append(wp.getId());
 				sb.append(", "); //$NON-NLS-1$
+				size++;
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		return MessageFormat.format(Messages.COMPLETE_MSG.getMessage(l), createdFeatures.size(), sb.toString());
+		return MessageFormat.format(Messages.COMPLETE_MSG.getMessage(l), size, sb.toString());
 	}
 	
 	

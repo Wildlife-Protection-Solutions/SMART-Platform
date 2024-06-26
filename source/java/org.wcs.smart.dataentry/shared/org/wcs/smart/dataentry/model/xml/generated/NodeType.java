@@ -31,7 +31,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *         &lt;element name="node" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NodeType" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="attribute" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttributeType" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="signature" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}SignatureType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="attachmentTags" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttachmentTagType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="attachmentTag" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttachmentTagType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="categoryKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="categoryHkey" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -57,7 +57,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "node",
     "attribute",
     "signature",
-    "attachmentTags"
+    "attachmentTag"
 })
 public class NodeType {
 
@@ -66,7 +66,7 @@ public class NodeType {
     protected List<NodeType> node;
     protected List<AttributeType> attribute;
     protected List<SignatureType> signature;
-    protected List<AttachmentTagType> attachmentTags;
+    protected List<AttachmentTagType> attachmentTag;
     @XmlAttribute(name = "categoryKey")
     protected String categoryKey;
     @XmlAttribute(name = "categoryHkey")
@@ -207,7 +207,7 @@ public class NodeType {
     }
     
     /**
-     * Gets the value of the attachmentTags property.
+     * Gets the value of the attachmentTag property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
@@ -218,7 +218,7 @@ public class NodeType {
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getAttachmentTags().add(newItem);
+     *    getAttachmentTag().add(newItem);
      * </pre>
      * 
      * 
@@ -228,11 +228,11 @@ public class NodeType {
      * 
      * 
      */
-    public List<AttachmentTagType> getAttachmentTags() {
-        if (attachmentTags == null) {
-        	attachmentTags = new ArrayList<AttachmentTagType>();
+    public List<AttachmentTagType> getAttachmentTag() {
+        if (attachmentTag == null) {
+        	attachmentTag = new ArrayList<AttachmentTagType>();
         }
-        return this.attachmentTags;
+        return this.attachmentTag;
     }
 
     /**
