@@ -11,5 +11,5 @@
 
   <artifactId>org.wcs.smart.independentincident.feature</artifactId>
   <packaging>eclipse-feature</packaging>
-  <version>8.0.0-SNAPSHOT</version>
+  <version>8.0.1-SNAPSHOT</version>
 </project>
