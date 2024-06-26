@@ -238,10 +238,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		if (uuid != null){
 			Employee x = (Employee) session.get(Employee.class, uuid);
 			if (x != null) {
-				return SmartLabelProvider.getShortLabel(x);
+				return getEmployeeName(x);
 			}
 		}
 		return null;
+	}
+	
+	protected String getEmployeeName(Employee x) {
+		return SmartLabelProvider.getShortLabel(x);
 	}
 	
 	protected String getName(UUID uuid, UUID cauuid, Session session){

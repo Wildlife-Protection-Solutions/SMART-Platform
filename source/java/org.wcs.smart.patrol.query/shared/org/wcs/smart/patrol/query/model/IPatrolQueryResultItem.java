@@ -33,6 +33,7 @@ public interface IPatrolQueryResultItem extends IResultItem {
 	
 	public String getPatrolId();
 	public String getLeader();
+	public String getMembers();
 	public String getPilot();
 	public LocalDate getPatrolStartDate() ;
 	public LocalDate getPatrolEndDate() ;

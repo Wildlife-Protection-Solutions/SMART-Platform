@@ -151,7 +151,11 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 			MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, outputPrj.getParsedCoordinateReferenceSystem(), true);
 			for (SimpleFeature f : features){
 				SimpleFeature copy = SimpleFeatureBuilder.copy(f);
-				copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
+				if (f.getDefaultGeometry() != null) {
+					copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
+				}else {
+					copy.setDefaultGeometry(null);
+				}
 				reprojected.add(copy);
 			}
 		}

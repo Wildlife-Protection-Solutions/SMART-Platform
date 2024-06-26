@@ -112,7 +112,7 @@ public class ErMissionQueryResult extends AbstractDbFeatureResultSet<SurveyQuery
 		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();
-			SurveyQueryResultItem it = asQueryResultItem(rs);
+			SurveyQueryResultItem it = asQueryResultItem(rs, session);
 			items.add(it);
 		}
 		session.doWork(new Work(){
@@ -200,7 +200,7 @@ public class ErMissionQueryResult extends AbstractDbFeatureResultSet<SurveyQuery
 		});
 	}
 	
-	protected GeomSurveyQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected GeomSurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		GeomSurveyQueryResultItem it = new GeomSurveyQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
@@ -210,7 +210,8 @@ public class ErMissionQueryResult extends AbstractDbFeatureResultSet<SurveyQuery
 		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
-		
+		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
+		it.setMissionMembers( ((PsqlErEngine)engine).getMissionMembersAsString(session, (UUID)rs.getObject("mission_uuid"))); //$NON-NLS-1$
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$

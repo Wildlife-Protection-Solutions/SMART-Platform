@@ -168,6 +168,9 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 		it.setPilot(engine.getEmployeeName((UUID)rs.getObject("plm_pilot"), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("track")); //$NON-NLS-1$
 		
+		UUID plUuid = (UUID)rs.getObject("pl_uuid"); //$NON-NLS-1$
+		it.setMembers( engine.getPatrolMembersAsString(session, plUuid));
+	
 		Timestamp ts = rs.getTimestamp("p_min_datetime"); //$NON-NLS-1$
 		if (ts != null) it.setPatrolMinDateTime(ts.toLocalDateTime());
 		ts = rs.getTimestamp("p_max_datetime"); //$NON-NLS-1$

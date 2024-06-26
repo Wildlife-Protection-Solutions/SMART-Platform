@@ -46,20 +46,20 @@ public class ObsWaypointQueryResult extends WaypointQueryResult<WaypointQueryRes
 		
 	protected WaypointAttachmentQueryResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		WaypointAttachmentQueryResultItem item = new WaypointAttachmentQueryResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
-	protected WaypointQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected WaypointQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		WaypointQueryResultItem item = new WaypointQueryResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	
 	@Override
-	protected void setFields(WaypointQueryResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(WaypointQueryResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 	}
 //	

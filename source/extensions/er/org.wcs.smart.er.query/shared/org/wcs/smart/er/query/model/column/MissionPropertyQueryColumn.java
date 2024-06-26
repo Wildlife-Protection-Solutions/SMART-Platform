@@ -83,6 +83,7 @@ public class MissionPropertyQueryColumn extends QueryColumn {
 	public QueryColumn clone() {
 		QueryColumn clone = new MissionPropertyQueryColumn(getName(), getKey(), getType());
 		clone.setEdit(canEdit());
+		clone.setCanSort(canSort());
 		return clone;
 	}
 

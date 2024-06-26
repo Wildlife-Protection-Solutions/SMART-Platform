@@ -34,6 +34,7 @@ public class GeometryAttributeQueryColumn extends AttributeQueryColumn implement
 			newColumn = new GeometryAttributeQueryColumn(getName(), getAttributeId(), getGeometryProperty(), getAttributeType());
 		}
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 }

@@ -67,12 +67,21 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine implements IWO
 	private String queryDataTable;
 	private SimpleQuery query;
 	private List<String> patrolAttributes = null;
-	
+	private HashMap<UUID,String> membersCache = new HashMap<>();
+
 	public PsqlPatrolWaypointEngine(){
 	}
 
 	public String getQueryDataTable(){
 		return this.queryDataTable;
+	}
+	
+	
+	protected String getPatrolMembersAsString(Session session, UUID patrolLegUuid) {
+		if (membersCache.containsKey(patrolLegUuid)) return membersCache.get(patrolLegUuid);
+		String value = PatrolQueryUtils.getPatrolMembersAsString(session, patrolLegUuid, this);
+		membersCache.put(patrolLegUuid, value);
+		return value;			
 	}
 	
 	@Override

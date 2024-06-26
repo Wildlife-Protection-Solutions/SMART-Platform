@@ -41,13 +41,14 @@ public interface ISurveyQueryResultItem extends IResultItem{
 	
 	public UUID getConservationAreaUuid();
 
-
 	public String getConservationAreaId();
 	
 	public String getConservationAreaName();
 
 	public String getMissionLeader();
-
+	
+	public String getMissionMembers();
+	
 	public Object getMissionPropertyValue(String attributeKey);
 
 	public void addMissionPropertyValue(String attributeKey, Object value);

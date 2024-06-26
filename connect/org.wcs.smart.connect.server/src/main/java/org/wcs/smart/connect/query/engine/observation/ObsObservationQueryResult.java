@@ -44,20 +44,20 @@ public class ObsObservationQueryResult extends ObservationQueryResult<Observatio
 	@Override
 	protected ObservationAttachmentQueryResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		ObservationAttachmentQueryResultItem item = new ObservationAttachmentQueryResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
 	@Override
-	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		ObservationQueryResultItem item = new ObservationQueryResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	@Override
-	protected void setFields(ObservationQueryResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(ObservationQueryResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 	}
 	@Override

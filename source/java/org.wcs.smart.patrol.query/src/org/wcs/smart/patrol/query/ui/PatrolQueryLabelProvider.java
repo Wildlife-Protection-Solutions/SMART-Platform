@@ -66,6 +66,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case PATROL_END_TIME: return Messages.PatrolQueryLabelProvider_PatrolEndTimeColumnName;
 			case PATROL_LEG_ID: return Messages.FixedQueryColumn_LegIdColumnName;
 			case PATROL_LEG_LEADER: return Messages.FixedQueryColumn_LeaderColumnName;
+			case PATROL_LEG_MEMBERS: return Messages.PatrolQueryLabelProvider_MembersColumnName;
 			case PATROL_LEG_PILOT: return Messages.FixedQueryColumn_PilotColumnName;
 			case PATROL_LEG_START_DATE: return Messages.FixedQueryColumn_LegStartDateColumnName;
 			case PATROL_LEG_END_DATE: return Messages.FixedQueryColumn_LegEndDateColumnName;

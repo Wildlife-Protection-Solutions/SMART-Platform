@@ -52,21 +52,21 @@ public class AssetObservationResult extends ObservationQueryResult<AssetObservat
 
 	protected AssetObservationAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		AssetObservationAttachmentResultItem item = new AssetObservationAttachmentResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
 
 	@Override
-	protected AssetObservationResultItem asQueryResultItem(ResultSet rs) throws SQLException {
+	protected AssetObservationResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException {
 		AssetObservationResultItem item = new AssetObservationResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	
-	protected void setFields(AssetObservationResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(AssetObservationResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		it.setAssets(rs.getString("asset_asset")); //$NON-NLS-1$
 		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$

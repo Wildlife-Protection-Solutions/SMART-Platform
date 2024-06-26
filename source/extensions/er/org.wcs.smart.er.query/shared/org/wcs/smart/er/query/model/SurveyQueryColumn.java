@@ -64,6 +64,7 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_START( ColumnType.DATE, "mission:startdate"),  //$NON-NLS-1$
 		MISSION_END( ColumnType.DATE, "mission:enddate"), //$NON-NLS-1$
 		MISSION_LEADER(ColumnType.STRING, "mission:leader"), //$NON-NLS-1$
+		MISSION_MEMBERS(ColumnType.STRING, "mission:members"), //$NON-NLS-1$
 		MISSION_UUID(ColumnType.STRING, "mission:uuid"), //$NON-NLS-1$
 		
 		MISSION_TRACKTYPE( ColumnType.STRING, "mission:tracktype"),  //$NON-NLS-1$
@@ -121,6 +122,9 @@ public class SurveyQueryColumn extends QueryColumn {
 		super(column.getGuiName(l), column.key, column.type);
 		this.column = column;
 		this.l = l;
+		if (this.column == FixedColumns.MISSION_MEMBERS) {
+			setCanSort(false);
+		}
 	}
 
 	@Override
@@ -146,6 +150,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_START: return item.getMissionStart();
 				case MISSION_END: return item.getMissionEnd();
 				case MISSION_LEADER: return item.getMissionLeader();
+				case MISSION_MEMBERS: return item.getMissionMembers();
 				default: break;
 			}
 		}
@@ -213,6 +218,7 @@ public class SurveyQueryColumn extends QueryColumn {
 	public QueryColumn clone() {
 		SurveyQueryColumn newColumn = new SurveyQueryColumn(this.column, l);
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 

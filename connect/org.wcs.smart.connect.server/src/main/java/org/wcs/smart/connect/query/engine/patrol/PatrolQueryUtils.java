@@ -11,9 +11,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -27,6 +29,23 @@ import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 public class PatrolQueryUtils {
+
+	
+	public static String getPatrolMembersAsString(Session session, UUID patrolLegUuid, AbstractQueryEngine engine) {
+		List<Employee> members = session
+				.createQuery("SELECT id.member FROM PatrolLegMember WHERE id.patrolLeg.uuid = :uuid", Employee.class) //$NON-NLS-1$
+				.setParameter("uuid", patrolLegUuid) //$NON-NLS-1$
+				.list();
+		members.sort((a, b) -> engine.getEmployeeName(a).compareTo(engine.getEmployeeName(b)));
+
+		StringJoiner joiner = new StringJoiner(", "); //$NON-NLS-1$
+		members.forEach(e -> joiner.add(engine.getEmployeeName(e)));
+
+		String value = joiner.toString();
+
+		return value;
+	}
+	
 
 	/**
 	 * Adds all the custom patrol query attributes to the results table and populates the values. Returns

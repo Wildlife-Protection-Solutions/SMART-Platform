@@ -163,6 +163,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_MEMBERS, l));
 		
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
@@ -228,6 +229,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_MEMBERS, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE, l));
@@ -282,6 +284,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_MEMBERS, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE, l));

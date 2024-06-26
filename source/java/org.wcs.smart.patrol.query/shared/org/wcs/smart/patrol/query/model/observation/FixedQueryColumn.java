@@ -72,9 +72,9 @@ public class FixedQueryColumn extends QueryColumn {
 		PATROL_LEG_ID(ColumnType.STRING, "patrol:legid"), //$NON-NLS-1$
 		PATROL_LEG_LEADER(ColumnType.STRING, "patrol:leader"), //$NON-NLS-1$
 		PATROL_LEG_PILOT(ColumnType.STRING, "patrol:pilot"), //$NON-NLS-1$
+		PATROL_LEG_MEMBERS(ColumnType.STRING, "patrolleg:members"), //$NON-NLS-1$
 		PATROL_LEG_START_DATE(ColumnType.DATE, "patrolleg:startdate"), //$NON-NLS-1$
 		PATROL_LEG_END_DATE(ColumnType.DATE, "patrolleg:enddate"), //$NON-NLS-1$
-		
 		TRANSPORT_TYPE( ColumnType.STRING,"patrol:transporttype"), //$NON-NLS-1$
 		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
@@ -118,6 +118,9 @@ public class FixedQueryColumn extends QueryColumn {
 	public FixedQueryColumn(FixedColumns column, Locale l) {
 		super(SmartContext.INSTANCE.getClass(IQueryPatrolLabelProvider.class).getLabel(column,l), column.key, column.type);
 		this.column = column;
+		if (this.column == FixedColumns.PATROL_LEG_MEMBERS){
+			setCanSort(false);
+		}
 		this.l = l;
 	}
 
@@ -164,6 +167,8 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getLeader();
 			case PATROL_LEG_PILOT:
 				return item.getPilot();
+			case PATROL_LEG_MEMBERS:
+				return item.getMembers();
 			case PATROL_LEG_START_DATE:
 				return item.getPatrolLegStartDate();
 			case PATROL_LEG_END_DATE:
@@ -246,6 +251,7 @@ public class FixedQueryColumn extends QueryColumn {
 	public QueryColumn clone() {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column, l);
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 	
@@ -262,8 +268,7 @@ public class FixedQueryColumn extends QueryColumn {
 			key = "wp:y"; //$NON-NLS-1$
 		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey() )){
 			key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
-		}
-		
+		}		
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {

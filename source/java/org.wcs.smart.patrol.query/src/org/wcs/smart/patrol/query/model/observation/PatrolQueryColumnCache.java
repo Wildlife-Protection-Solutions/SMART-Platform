@@ -414,7 +414,6 @@ public class PatrolQueryColumnCache {
 											item == FixedQueryColumn.FixedColumns.TRANSPORT_TYPE ){
 										c.setEdit(true);
 									}
-									
 									cols.add(c);
 								}
 									

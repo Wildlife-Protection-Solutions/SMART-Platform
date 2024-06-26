@@ -88,6 +88,7 @@ public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 	public QueryColumn clone() {
 		QueryColumn clone = new SamplingUnitAttributeQueryColumn(getName(), getKey(), getType());
 		clone.setEdit(canEdit());
+		clone.setCanSort(canSort());
 		return clone;
 	}
 

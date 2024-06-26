@@ -70,6 +70,7 @@ public class SurveyQueryResultItem implements ISurveyQueryResultItem, IGeometryR
 	private LocalDate missionEnd;
 	private UUID missionUuid;
 	private String missionLeader;
+	private String missionMembers;
 	
 	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
 	
@@ -92,6 +93,23 @@ public class SurveyQueryResultItem implements ISurveyQueryResultItem, IGeometryR
 		return this.missionLeader;
 	}
 	
+	/**
+	 * Sets the mission members attribute
+	 * 
+	 * @param leader
+	 */
+	public void setMissionMembers(String members){
+		this.missionMembers = members;
+	}
+	
+	/**
+	 * Get the mission members
+	 * 
+	 * @return
+	 */
+	public String getMissionMembers(){
+		return this.missionMembers;
+	}
 		
 	/**
 	 * Finds the mission property with the associated

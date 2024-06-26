@@ -91,27 +91,28 @@ public class ErObservationQueryResult extends ObservationQueryResult<SurveyObser
 	@Override
 	protected SurveyObservationAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		SurveyObservationAttachmentResultItem item = new SurveyObservationAttachmentResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
 	@Override
-	protected SurveyObservationResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected SurveyObservationResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		SurveyObservationResultItem item = new SurveyObservationResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	
 	@Override
-	protected void setFields(SurveyObservationResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(SurveyObservationResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
 		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
+		it.setMissionMembers( ((PsqlErEngine)engine).getMissionMembersAsString(session, (UUID)rs.getObject("mission_uuid"))); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$

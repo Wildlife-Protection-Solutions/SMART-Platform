@@ -51,6 +51,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_START){ return Messages.SurveyQueryColumn_MissionStartLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_END){ return Messages.SurveyQueryColumn_MissionEndLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_LEADER){ return Messages.SurveyQueryColumn_MissionLeaderLabel;}
+		if (item == SurveyQueryColumn.FixedColumns.MISSION_MEMBERS){ return Messages.SurveyQueryLabelProvider_MissionMembersName;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_TRACKTYPE){ return Messages.SurveyQueryColumn_TrackTypeLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE){ return Messages.SurveyQueryColumn_TrackDateLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_TRACKID){ return Messages.SurveyQueryColumn_TrackIdLabel;}

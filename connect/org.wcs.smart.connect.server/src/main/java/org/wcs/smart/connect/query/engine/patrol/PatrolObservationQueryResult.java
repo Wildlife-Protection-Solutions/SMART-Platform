@@ -63,19 +63,19 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 	
 	protected PatrolObservationAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		PatrolObservationAttachmentResultItem item = new PatrolObservationAttachmentResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
-	protected PatrolObservationResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected PatrolObservationResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		PatrolObservationResultItem item = new PatrolObservationResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	
-	protected void setFields(PatrolObservationResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(PatrolObservationResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		
 		it.setPatrolUuid((UUID)rs.getObject("p_uuid")); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
@@ -92,6 +92,9 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$	
+		
+		UUID plUuid = (UUID)rs.getObject("pl_uuid"); //$NON-NLS-1$
+		it.setMembers( ((PsqlPatrolObservationEngine)engine).getPatrolMembersAsString(session, plUuid));
 		
 		List<String> patrolAttributes = ((PsqlPatrolObservationEngine)engine).getPatrolAttributes();
 		if (patrolAttributes != null) {
@@ -110,7 +113,7 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","pl_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"p_legid","p_leader", //$NON-NLS-1$ //$NON-NLS-2$
+				"p_legid","p_leader", "pl_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_pilot","wp_uuid","wp_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_lastmodified","wp_lastmodifiedbyname", //$NON-NLS-1$ //$NON-NLS-2$

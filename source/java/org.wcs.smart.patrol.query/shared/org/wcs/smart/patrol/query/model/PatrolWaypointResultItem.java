@@ -60,6 +60,7 @@ public class PatrolWaypointResultItem extends WaypointQueryResultItem implements
 	
 	private String leader;
 	private String pilot;
+	private String members;
 	
 	private Map<String, Object> patrolAttributes = new HashMap<>();
 	
@@ -84,6 +85,20 @@ public class PatrolWaypointResultItem extends WaypointQueryResultItem implements
 	public void setLeader(String leader){
 		this.leader = leader;
 	}
+	
+	/**
+	 * @return the patrol-leg members
+	 */
+	public String getMembers(){
+		return this.members;
+	}
+	/**
+	 * @param members the patrol members
+	 */
+	public void setMembers(String members){
+		this.members = members;
+	}
+	
 	/**
 	 * @return the patrol-leg pilot
 	 */

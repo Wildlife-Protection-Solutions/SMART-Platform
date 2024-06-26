@@ -366,12 +366,15 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		if (uuid != null){
 			Employee x = (Employee) session.get(Employee.class, uuid);
 			if (x != null) {
-				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(x, locale);
+				return getEmployeeName(x);
 			}
 		}
 		return null;
 	}
 
+	public String getEmployeeName(Employee x){
+		return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(x, locale);
+	}
 	
 	/**
 	 * Returns the database data type for a given 

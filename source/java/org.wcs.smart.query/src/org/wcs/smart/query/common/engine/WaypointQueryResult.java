@@ -223,7 +223,7 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 		}
 		for(int x = from; x < to; x++) {
 			rs.next();
-			T it = engine.asQueryResultItem(rs, null);
+			T it = engine.asQueryResultItem(rs, session);
 			items.add(it);
 		}
 		

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.model;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -152,7 +154,13 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		});
 
 		//we don't care about projection here; this is just for visibility
-		List<QueryColumn> cols = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null);
+		List<QueryColumn> cols = new ArrayList<>(((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null));
+		//remove geometry columns from the list as they are not visible to user
+		for (Iterator<QueryColumn> iterator = cols.iterator(); iterator.hasNext();) {
+			QueryColumn queryColumn = iterator.next();
+			if (queryColumn.isDefaultGeometryColumn()) iterator.remove();
+			
+		}
 		columnViewer.setInput(cols);
 		columnViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override

@@ -27,10 +27,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
@@ -117,6 +120,24 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		}
 	}
 	
+	//TODO: don't cache everything?
+	private HashMap<UUID,String> membersCache = new HashMap<>();
+	protected String getPatrolMembersAsString(Session session, UUID patrolLegUuid) {
+		if (membersCache.containsKey(patrolLegUuid)) return membersCache.get(patrolLegUuid);
+			
+		List<Employee> members = session.createQuery("SELECT id.member FROM PatrolLegMember WHERE id.patrolLeg.uuid = :uuid", Employee.class) //$NON-NLS-1$
+		.setParameter("uuid", patrolLegUuid) //$NON-NLS-1$
+		.list();
+		members.sort((a,b)->getEmployeeName(a).compareTo(getEmployeeName(b)));
+			
+		StringJoiner joiner = new StringJoiner(", "); //$NON-NLS-1$
+		members.forEach(e->joiner.add(getEmployeeName(e)));
+			
+		String value = joiner.toString();
+		membersCache.put(patrolLegUuid, value);
+		return value;
+			
+	}
 	
 	/**
 	 * Adds all the custom patrol query attributes to the results table and populates the values. Returns

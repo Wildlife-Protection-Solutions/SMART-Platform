@@ -29,9 +29,6 @@ import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.All;
-import org.checkerframework.checker.units.qual.A;
-
 /**
  * Manager to get system configured environment variables.
  * 

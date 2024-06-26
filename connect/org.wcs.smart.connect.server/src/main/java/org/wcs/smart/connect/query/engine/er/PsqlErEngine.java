@@ -27,11 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.NamedPreparedStatement;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.er.model.Mission;
@@ -62,8 +65,26 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 	//the keyid as the column id
 	private HashMap<String, String> missionColumnMap = null;
 	private HashMap<String, String> suColumnMap = null;
-	
+	private HashMap<UUID,String> membersCache = new HashMap<>();
+
 	public abstract String getQueryDataTable();
+	
+	public String getMissionMembersAsString(Session session, UUID missionUuid) {
+		if (membersCache.containsKey(missionUuid)) return membersCache.get(missionUuid);
+		List<Employee> members = session
+				.createQuery("SELECT id.member FROM MissionMember WHERE id.mission.uuid = :uuid", Employee.class) //$NON-NLS-1$
+				.setParameter("uuid", missionUuid) //$NON-NLS-1$
+				.list();
+		members.sort((a, b) -> getEmployeeName(a).compareTo(getEmployeeName(b)));
+
+		StringJoiner joiner = new StringJoiner(", "); //$NON-NLS-1$
+		members.forEach(e -> joiner.add(getEmployeeName(e)));
+
+		String value = joiner.toString();
+		membersCache.put(missionUuid, value);
+		return value;
+	}
+	
 	
 	protected void populateMissionLeader(Connection c, Session session, String queryDataTable) throws SQLException{
 		StringBuilder sql = new StringBuilder();

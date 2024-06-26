@@ -175,6 +175,10 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 					//looking for fixed columns that have at least one value
 					for (FixedQueryColumn.FixedColumns fc : FixedQueryColumn.FixedColumns.values()) {
 						String dbColumn = FixedQueryColumn.getDbColumnName(fc.getKey());
+						if (fc == FixedQueryColumn.FixedColumns.PATROL_LEG_MEMBERS) {
+							dbColumn = "pl_uuid"; //$NON-NLS-1$
+						}
+						
 						if (checkColumnHasValues(c, queryDataTable, dbColumn)) {
 							dataColumns.add(fc.getKey());
 						}
@@ -631,7 +635,7 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","p_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"p_legid","p_leader", //$NON-NLS-1$ //$NON-NLS-2$
+				"pl_uuid", "p_legid","p_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_pilot","wp_uuid","wp_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_lastmodified","wp_lastmodifiedbyname", //$NON-NLS-1$ //$NON-NLS-2$
@@ -714,6 +718,7 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		}else{
 			it.setObservationUuid(UuidUtils.byteToUUID(t)); 
 		}
+		it.setMembers(getPatrolMembersAsString(session, UuidUtils.byteToUUID(rs.getBytes("pl_uuid")))); //$NON-NLS-1$
 		
 		t = rs.getBytes("wp_group_uuid"); //$NON-NLS-1$
 		if (t == null){
@@ -741,7 +746,7 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		}
 		return it;
 	}
-
+	
 	
 	public int getCategoryCount(){
 		return this.categoryCount;

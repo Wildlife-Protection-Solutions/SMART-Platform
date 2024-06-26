@@ -173,6 +173,7 @@ public class FixedQueryColumn extends QueryColumn {
 	public QueryColumn clone() {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column, this.l);
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 

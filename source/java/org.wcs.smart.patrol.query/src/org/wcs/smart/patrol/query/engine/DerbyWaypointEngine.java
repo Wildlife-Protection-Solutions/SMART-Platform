@@ -469,6 +469,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
+		it.setMembers(getPatrolMembersAsString(session, UuidUtils.byteToUUID(rs.getBytes("pl_uuid")))); //$NON-NLS-1$
 		if (patrolAttributes != null) {
 			for (String s : patrolAttributes) {
 				it.setPatrolAttribute(s.substring(PatrolAttributeQueryColumn.PREFIX.length()+1), rs.getObject(s));

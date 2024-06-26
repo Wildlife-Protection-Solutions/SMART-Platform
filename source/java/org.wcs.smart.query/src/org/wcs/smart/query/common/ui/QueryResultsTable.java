@@ -132,20 +132,25 @@ public abstract class QueryResultsTable {
 
 	public void updateColumnsVisibility(final SimpleQuery query, final IProjectionProvider prjProvider) {
 		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
-		if (tableViewerColumns != null) {
-			for (QueryTableViewerColumn column : tableViewerColumns){
-				column.getColumn().setProjectionProvider(prjProvider);
-				for (QueryColumn c : cols){
-					if (column.getColumn().equals(c)){
-						if (isColumnDisplayed(query, c)){
-							column.show();
-						}else{
-							column.hide();
-						}
-						break;
+		if (table == null || tableViewerColumns == null) return;
+			
+		table.getControl().setVisible(false);
+		try {
+		for (QueryTableViewerColumn column : tableViewerColumns){
+			column.getColumn().setProjectionProvider(prjProvider);
+			for (QueryColumn c : cols){
+				if (column.getColumn().equals(c)){
+					if (isColumnDisplayed(query, c)){
+						column.show();
+					}else{
+						column.hide();
 					}
+					break;
 				}
 			}
+		}
+		}finally {
+			table.getControl().setVisible(true);
 		}
 	}
 	

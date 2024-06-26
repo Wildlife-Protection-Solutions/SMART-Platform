@@ -440,12 +440,13 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine implements Waypo
 		
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
 		
-		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
+		UUID missionUuid = UuidUtils.byteToUUID(rs.getBytes("mission_uuid")); //$NON-NLS-1$
+		it.setMissionUuid(missionUuid); 
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
-		
+		it.setMissionMembers(  getMissionMembersAsString(session, missionUuid)  );
 		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		

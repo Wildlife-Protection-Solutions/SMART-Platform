@@ -143,6 +143,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_InvalidBufferValue;
 	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
+	public static String PatrolQueryLabelProvider_MembersColumnName;
 	public static String PatrolQueryLabelProvider_NumTimeRanges;
 	public static String PatrolQueryLabelProvider_ObservationUUIDColumnName;
 	public static String PatrolQueryLabelProvider_ObsGroupColumnName;

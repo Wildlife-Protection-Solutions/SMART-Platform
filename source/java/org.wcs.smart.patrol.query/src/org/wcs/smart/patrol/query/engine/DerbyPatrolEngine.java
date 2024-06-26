@@ -398,6 +398,8 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
 		it.setPatrolLegUuid(UuidUtils.byteToUUID(rs.getBytes("r_pl_uuid"))); //$NON-NLS-1$
 		
+		it.setMembers(getPatrolMembersAsString(session, UuidUtils.byteToUUID(rs.getBytes("r_pl_uuid")))); //$NON-NLS-1$
+		
 		Timestamp ts = rs.getTimestamp("r_p_min_datetime"); //$NON-NLS-1$
 		if (ts != null) it.setPatrolMinDateTime(ts.toLocalDateTime());
 		ts = rs.getTimestamp("r_p_max_datetime"); //$NON-NLS-1$

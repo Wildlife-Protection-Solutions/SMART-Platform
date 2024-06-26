@@ -278,6 +278,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryFactory_DefaultQueryName;
 	public static String SurveyQueryLabelProvider_LastModifiedByLabel;
 	public static String SurveyQueryLabelProvider_LastModifiedLabel;
+	public static String SurveyQueryLabelProvider_MissionMembersName;
 	public static String SurveyQueryLabelProvider_MissionUUIDColumnName;
 	public static String SurveyQueryLabelProvider_ObservationGroupColumnName;
 	public static String SurveyQueryLabelProvider_ObsUUIDColumnName;

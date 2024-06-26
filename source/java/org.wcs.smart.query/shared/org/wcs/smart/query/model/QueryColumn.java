@@ -78,6 +78,7 @@ public abstract class QueryColumn implements Cloneable{
 	private ColumnType type;
 	private boolean isVisible = true;
 	private boolean canEdit = false;
+	private boolean canSort = true;
 	
 	protected IProjectionProvider prjProvider;
 	
@@ -274,6 +275,24 @@ public abstract class QueryColumn implements Cloneable{
 	public boolean canEdit(){
 		return canEdit;
 	}
+	
+	/**
+	 * 
+	 * @return true if column can be sorted, false otherwise;
+	 */
+	public boolean canSort(){
+		return canSort;
+	}
+	
+	/**
+	 * Sets the sort state of the column
+	 * @param canSort
+	 * @return
+	 */
+	public void setCanSort(boolean canSort){
+		this.canSort = canSort;
+	}
+	
 	
 	/**
 	 * Sets the editable state of the column

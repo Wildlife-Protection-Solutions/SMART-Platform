@@ -69,7 +69,7 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 	
 	protected abstract IAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException;
 	
-	protected abstract T asQueryResultItem(ResultSet rs) throws SQLException;
+	protected abstract T asQueryResultItem(ResultSet rs, Session session) throws SQLException;
 	
 	public String getDefaultSortBy() {
 		StringBuilder sb = new StringBuilder();
@@ -137,7 +137,7 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 		int to = super.getTo(from, pageSize);
 		for(int x = from; x < to; x++) {
 			rs.next();
-			items.add(asQueryResultItem(rs));
+			items.add(asQueryResultItem(rs, session));
 		}
 		return items;
 	}
@@ -158,7 +158,7 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 		return ((WaypointQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
-	protected void setFields(T it, ResultSet rs) throws SQLException{
+	protected void setFields(T it, ResultSet rs, Session session) throws SQLException{
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$

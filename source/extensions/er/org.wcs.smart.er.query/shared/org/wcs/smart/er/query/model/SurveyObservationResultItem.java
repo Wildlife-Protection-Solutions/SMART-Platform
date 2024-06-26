@@ -49,6 +49,7 @@ public class SurveyObservationResultItem extends ObservationQueryResultItem impl
 	private LocalDate missionEnd;
 	private UUID missionUuid;
 	private String missionLeader;
+	private String missionMembers;
 	
 	private UUID samplingUnitUuid;
 	private String samplingUnitId;
@@ -74,6 +75,23 @@ public class SurveyObservationResultItem extends ObservationQueryResultItem impl
 		return this.missionLeader;
 	}
 	
+	/**
+	 * Sets the mission members attribute
+	 * 
+	 * @param leader
+	 */
+	public void setMissionMembers(String members){
+		this.missionMembers = members;
+	}
+	
+	/**
+	 * Get the mission members
+	 * 
+	 * @return
+	 */
+	public String getMissionMembers(){
+		return this.missionMembers;
+	}
 		
 	/**
 	 * Finds the mission property with the associated

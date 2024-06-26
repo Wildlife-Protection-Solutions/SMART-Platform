@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.er.query.model.SurveyObservationResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
+import org.wcs.smart.er.query.model.SurveyQueryColumn.FixedColumns;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
@@ -145,7 +146,12 @@ public class DerbyPagedObservationResult extends ObservationQueryResult<SurveyOb
 		if (dataColumns == null) return true;
 		if (column instanceof SamplingUnitAttributeQueryColumn) return true;
 		if (column instanceof MissionPropertyQueryColumn) return true;
-		return dataColumns.contains(column.getKey());
+		String key = column.getKey();
+		if (key.equals(FixedColumns.MISSION_MEMBERS.getKey())) {
+			//use mission uuid as proxy; we don't have members in the output table
+			key = FixedColumns.MISSION_UUID.getKey();
+		}
+		return dataColumns.contains(key);
 	}
 	
 	@Override

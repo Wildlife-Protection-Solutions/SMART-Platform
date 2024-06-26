@@ -64,20 +64,20 @@ public class PatrolWaypointQueryResult extends WaypointQueryResult<PatrolWaypoin
 	
 	protected PatrolWaypointAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		PatrolWaypointAttachmentResultItem item = new PatrolWaypointAttachmentResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
-	protected PatrolWaypointResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected PatrolWaypointResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		PatrolWaypointResultItem item = new PatrolWaypointResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	
 	@Override
-	protected void setFields(PatrolWaypointResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(PatrolWaypointResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		
 		it.setPatrolUuid((UUID)rs.getObject("p_uuid")); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
@@ -94,6 +94,9 @@ public class PatrolWaypointQueryResult extends WaypointQueryResult<PatrolWaypoin
 
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
+		
+		UUID plUuid = (UUID)rs.getObject("pl_uuid"); //$NON-NLS-1$
+		it.setMembers( ((PsqlPatrolWaypointEngine)engine).getPatrolMembersAsString(session, plUuid));
 		
 		List<String> patrolAttributes = ((PsqlPatrolWaypointEngine)engine).getPatrolAttributes();
 		if (patrolAttributes != null) {

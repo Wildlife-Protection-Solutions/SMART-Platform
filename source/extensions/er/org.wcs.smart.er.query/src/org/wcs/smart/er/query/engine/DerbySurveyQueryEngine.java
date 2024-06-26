@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.er.query.engine;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.UUID;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -113,6 +120,25 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		}else{
 			return new WaypointFilterProcessor(queryDataTable, this, designFilter, query);
 		}
+	}
+	
+	//TODO: don't cache everything?
+	private HashMap<UUID,String> membersCache = new HashMap<>();
+	protected String getMissionMembersAsString(Session session, UUID missionUuid) {
+		if (membersCache.containsKey(missionUuid)) return membersCache.get(missionUuid);
+			
+		List<Employee> members = session.createQuery("SELECT id.member FROM MissionMember WHERE id.mission.uuid = :uuid", Employee.class) //$NON-NLS-1$
+		.setParameter("uuid", missionUuid) //$NON-NLS-1$
+		.list();
+		members.sort((a,b)->getEmployeeName(a).compareTo(getEmployeeName(b)));
+			
+		StringJoiner joiner = new StringJoiner(", "); //$NON-NLS-1$
+		members.forEach(e->joiner.add(getEmployeeName(e)));
+			
+		String value = joiner.toString();
+		membersCache.put(missionUuid, value);
+		return value;
+			
 	}
 	
 }

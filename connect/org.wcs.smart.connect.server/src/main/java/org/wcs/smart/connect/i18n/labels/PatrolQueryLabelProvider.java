@@ -59,6 +59,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case PATROL_LEG_ID: return Messages.getString("PatrolQueryLabelProvider.LegId", l); //$NON-NLS-1$
 			case PATROL_LEG_LEADER: return Messages.getString("PatrolQueryLabelProvider.Leader", l); //$NON-NLS-1$
 			case PATROL_LEG_PILOT: return Messages.getString("PatrolQueryLabelProvider.Pilot", l); //$NON-NLS-1$
+			case PATROL_LEG_MEMBERS: return Messages.getString("PatrolQueryLabelProvider.Members", l); //$NON-NLS-1$
 			case PATROL_LEG_START_DATE: return Messages.getString("PatrolQueryLabelProvider.LegStartdate", l); //$NON-NLS-1$
 			case PATROL_LEG_END_DATE: return Messages.getString("PatrolQueryLabelProvider.LegEnddate", l); //$NON-NLS-1$
 			case TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.Transporttype", l); //$NON-NLS-1$

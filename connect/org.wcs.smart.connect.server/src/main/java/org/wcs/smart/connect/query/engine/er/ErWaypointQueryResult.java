@@ -90,21 +90,21 @@ public class ErWaypointQueryResult extends WaypointQueryResult<SurveyWaypointRes
 	@Override
 	protected SurveyWaypointAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		SurveyWaypointAttachmentResultItem item = new SurveyWaypointAttachmentResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
 	@Override
-	protected SurveyWaypointResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected SurveyWaypointResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		SurveyWaypointResultItem item = new SurveyWaypointResultItem();
-		setFields(item, rs);
+		setFields(item, rs, session);
 		return item;
 	}
 	
 	@Override
-	protected void setFields(SurveyWaypointResultItem it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(SurveyWaypointResultItem it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
@@ -114,6 +114,7 @@ public class ErWaypointQueryResult extends WaypointQueryResult<SurveyWaypointRes
 		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
+		it.setMissionMembers( ((PsqlErEngine)engine).getMissionMembersAsString(session, (UUID)rs.getObject("mission_uuid"))); //$NON-NLS-1$
 		
 		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$		

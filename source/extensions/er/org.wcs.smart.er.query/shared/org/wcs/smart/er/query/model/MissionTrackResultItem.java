@@ -396,4 +396,9 @@ public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQuery
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public String getMissionMembers() {
+		throw new UnsupportedOperationException();
+	}
+	
 }

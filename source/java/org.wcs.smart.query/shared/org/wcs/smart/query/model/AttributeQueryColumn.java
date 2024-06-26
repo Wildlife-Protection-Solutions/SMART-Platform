@@ -218,6 +218,7 @@ public class AttributeQueryColumn extends QueryColumn {
 			newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getGeometryProperty(), getAttributeType());
 		}
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 	

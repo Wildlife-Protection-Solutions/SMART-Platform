@@ -262,8 +262,8 @@ public abstract class ObservationQueryResult<T extends ObservationQueryResultIte
 		return POINT_GEOM_TYPE;
 	}
 	
-	protected void setFields(T it, ResultSet rs) throws SQLException{
-		super.setFields(it, rs);
+	protected void setFields(T it, ResultSet rs, Session session) throws SQLException{
+		super.setFields(it, rs, session);
 		
 		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
 		UUID obuuid = (UUID) rs.getObject("ob_uuid"); //$NON-NLS-1$

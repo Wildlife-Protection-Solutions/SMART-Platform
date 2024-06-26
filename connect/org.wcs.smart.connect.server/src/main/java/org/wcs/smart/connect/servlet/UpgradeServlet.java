@@ -140,7 +140,7 @@ public class UpgradeServlet extends HttpServlet {
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb757to800(s, warnings);
 						updated = true;
-					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ 
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb800to801(s, warnings);
 						updated = true;

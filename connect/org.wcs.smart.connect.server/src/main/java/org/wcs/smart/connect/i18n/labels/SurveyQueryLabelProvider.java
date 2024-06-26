@@ -51,6 +51,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_START){ return Messages.getString("SurveyQueryLabelProvider.MissionStartDateLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_END){ return Messages.getString("SurveyQueryLabelProvider.MissionEndDateLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_LEADER){ return Messages.getString("SurveyQueryLabelProvider.LeaderLabel", l);} //$NON-NLS-1$
+		if (item == SurveyQueryColumn.FixedColumns.MISSION_MEMBERS){ return Messages.getString("SurveyQueryLabelProvider.Members", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_TRACKTYPE){ return Messages.getString("SurveyQueryLabelProvider.TrackTypeLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE){ return Messages.getString("SurveyQueryLabelProvider.TrackDateLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_TRACKID){ return Messages.getString("SurveyQueryLabelProvider.TrackIdLabel", l);} //$NON-NLS-1$

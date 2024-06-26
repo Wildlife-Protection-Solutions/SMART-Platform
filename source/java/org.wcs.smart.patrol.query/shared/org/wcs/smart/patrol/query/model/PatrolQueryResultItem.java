@@ -92,6 +92,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	
 	private String leader;
 	private String pilot;
+	private String members;
 	
 	private List<byte[]> tracks = null;
 	
@@ -129,6 +130,18 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 		this.pilot = pilot;
 	}
 	
+	/**
+	 * @return the patrol-leg members
+	 */
+	public String getMembers(){
+		return this.members;
+	}
+	/**
+	 * @param members the patrol members
+	 */
+	public void setMembers(String members){
+		this.members = members;
+	}
 	
 	/**
 	 * @param patrolId patrol id

@@ -39,7 +39,7 @@ public class AssetWaypointResult extends WaypointQueryResult<AssetWaypointResult
 	}
 	
 	@Override	
-	protected AssetWaypointResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+	protected AssetWaypointResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		AssetWaypointResultItem it = new AssetWaypointResultItem();
 		((AssetWaypointEngine)engine).setFields(it, rs);
 		return it;

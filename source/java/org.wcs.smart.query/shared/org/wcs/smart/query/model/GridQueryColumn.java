@@ -103,6 +103,7 @@ public class GridQueryColumn extends QueryColumn{
 	public QueryColumn clone() {
 		GridQueryColumn newColumn = new GridQueryColumn(this.column, l);
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 

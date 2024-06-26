@@ -88,6 +88,7 @@ public class CategoryQueryColumn extends QueryColumn{
 	public QueryColumn clone() {
 		CategoryQueryColumn newColumn = new CategoryQueryColumn(getName(), level);
 		newColumn.setEdit(canEdit());
+		newColumn.setCanSort(canSort());
 		return newColumn;
 	}
 	

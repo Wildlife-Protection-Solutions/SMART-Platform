@@ -67,7 +67,15 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	private String filterTable;
 	private String queryDataTable;
 	private List<String> patrolAttributes = null;
+	private HashMap<UUID,String> membersCache = new HashMap<>();
 
+	
+	protected String getPatrolMembersAsString(Session session, UUID patrolLegUuid) {
+		if (membersCache.containsKey(patrolLegUuid)) return membersCache.get(patrolLegUuid);
+		String value = PatrolQueryUtils.getPatrolMembersAsString(session, patrolLegUuid, this);
+		membersCache.put(patrolLegUuid, value);
+		return value;			
+	}
 	
 	public static IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, AbstractQueryEngine engine) {
 		if (filterType == FilterType.OBSERVATION){

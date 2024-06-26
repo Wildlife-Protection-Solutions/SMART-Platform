@@ -25,8 +25,6 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.SmartUtils;
 
@@ -66,13 +64,8 @@ public class QueryTableViewerColumn {
 			tcolumn.getColumn().setToolTipText(column.getName());
 		}
 		
-		if (sorter != null) {
-			tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					sorter.setSortColumn(QueryTableViewerColumn.this);
-				}	
-			});
+		if (sorter != null && this.column.canSort()) {
+			tcolumn.getColumn().addListener(SWT.Selection, e->sorter.setSortColumn(QueryTableViewerColumn.this)); 
 		}
 	}
 	
