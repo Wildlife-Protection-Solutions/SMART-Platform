@@ -507,7 +507,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * 
 	 * @param waypoints
 	 */
-	public Job save(Collection<SurveyWaypoint> waypoints) {
+	public void save(Collection<SurveyWaypoint> waypoints) {
 		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
 		saveWaypointJob.setWaypoints(waypoints);
 		saveWaypointJob.schedule();
@@ -516,7 +516,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		} catch (InterruptedException e) {
 			EcologicalRecordsPlugIn.log("InterruptedException while saving waypoints", e); //$NON-NLS-1$
 		}
-		return saveWaypointJob;
 	}
 	
 	/**
