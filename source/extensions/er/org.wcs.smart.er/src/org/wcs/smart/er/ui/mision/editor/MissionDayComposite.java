@@ -109,6 +109,7 @@ import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
+import org.wcs.smart.observation.model.ITaggedAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -863,16 +864,35 @@ public class MissionDayComposite {
 	protected void moveSelectedWaypoints() {
 		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), missionDay);
 		if (dialog.open() == Window.OK) {
-			IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
-			
 			MissionDay moveTo = dialog.getMoveToDate();
+			
+			IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
 			List<SurveyWaypoint> toUpdate = new ArrayList<SurveyWaypoint>();
-			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-				SurveyWaypoint w = (SurveyWaypoint) iterator.next();
-				toUpdate.add(w);
-				Waypoint wp = w.getWaypoint();
-				wp.setDateTime(moveTo.getDate().atTime(wp.getDateTime().toLocalTime()));
-				w.setMissionDay(moveTo);
+			try(Session session = HibernateManager.openSession()){
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					SurveyWaypoint w = (SurveyWaypoint) iterator.next();
+					
+					w = session.get(SurveyWaypoint.class, w.getId());
+					w.setWaypoint(session.get(Waypoint.class, w.getWaypoint().getUuid()));
+					Hibernate.initialize(w.getWaypoint());
+					w.getWaypoint().getAllObservations().forEach(wo->{
+						for (ITaggedAttachment a : wo.getAttachments()) {
+							Hibernate.initialize(a);
+							a.getAttachmentTags().forEach(t->{
+								Hibernate.initialize(t.getTag());
+							});
+						}	
+					});
+					for (WaypointAttachment a : w.getWaypoint().getAttachments()) {
+						Hibernate.initialize(a);
+						a.getAttachmentTags().forEach(t->{
+							Hibernate.initialize(t.getTag());
+						});
+					}
+					toUpdate.add(w);
+					w.getWaypoint().setDateTime(moveTo.getDate().atTime(w.getWaypoint().getDateTime().toLocalTime()));
+					w.setMissionDay(moveTo);
+				}
 			}
 
 			editor.getMissionEditor().save(toUpdate);
