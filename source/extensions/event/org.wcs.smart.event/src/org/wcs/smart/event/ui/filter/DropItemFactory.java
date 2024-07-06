@@ -85,7 +85,8 @@ public enum DropItemFactory {
 			
 			DropItem di = createDropItem(aa)[0];
 			
-			if (aa.getType() == AttributeType.DATE) {
+			if (aa.getType() == AttributeType.DATE ||
+					aa.getType() == AttributeType.TIME) {
 				String[] initData = new String[] {ff.getValue().toString(), ff.getValue2().toString(), ff.getOperator().getGuiValue()};
 				di.initializeData(initData);
 			}else if (aa.getType() == AttributeType.LIST) {

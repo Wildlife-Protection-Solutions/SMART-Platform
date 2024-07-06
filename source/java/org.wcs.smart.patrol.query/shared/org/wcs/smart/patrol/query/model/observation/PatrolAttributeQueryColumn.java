@@ -49,6 +49,7 @@ public class PatrolAttributeQueryColumn extends QueryColumn {
 		switch (pa.getType()) {
 			case BOOLEAN: return ColumnType.BOOLEAN;
 			case DATE: return ColumnType.DATE;
+			case TIME: return ColumnType.TIME;
 			case NUMERIC: return ColumnType.NUMBER;
 			case LIST: 
 			case MLIST: 

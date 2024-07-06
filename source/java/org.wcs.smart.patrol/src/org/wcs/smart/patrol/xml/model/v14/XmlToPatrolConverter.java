@@ -256,6 +256,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				case MLIST:
 				case LINE:
 				case POLYGON:
+				case TIME:
 					//not supported
 					break;
 					
@@ -662,6 +663,16 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				}
 				if (!Attribute.isValidDateString(type.getSValue())){
 					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidDateString, new Object[]{type.getSValue(), type.getAttributeKey(), Attribute.DATE_FORMAT}));
+					return null;
+				}
+				attribute.setStringValue(type.getSValue());
+			}else if (dmAttribute.getType() == AttributeType.TIME){
+				if (type.getSValue() == null){
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoStringValue, new Object[]{type.getAttributeKey()}));
+					return null;
+				}
+				if (!Attribute.isValidTimeString(type.getSValue())){
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidTimeString, new Object[]{type.getSValue(), type.getAttributeKey(), Attribute.DATE_FORMAT}));
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());

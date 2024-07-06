@@ -334,6 +334,14 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 						SqlGenerator.logString(updateQuery);
 						session.createNativeQuery(updateQuery, Integer.class).executeUpdate();
 						break;
+					case TIME:
+						updateQuery = "UPDATE " + resultsTable + " SET time_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
+						session.createNativeQuery(updateQuery, Integer.class).executeUpdate();
+						
+						updateQuery = "UPDATE " + resultsTable + " SET time_sort = (SELECT time(a.string_value) FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						SqlGenerator.logString(updateQuery);
+						session.createNativeQuery(updateQuery, Integer.class).executeUpdate();
+						break;
 					case LIST:		
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
 						session.createNativeQuery(updateQuery, Integer.class).executeUpdate();
@@ -394,6 +402,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 					return sql + "dbl_sort" + getSortDirectionSql(); //$NON-NLS-1$
 				case DATE:
 					return sql + "date_sort" + getSortDirectionSql(); //$NON-NLS-1$
+				case TIME:
+					return sql + "time_sort" + getSortDirectionSql(); //$NON-NLS-1$
 				case LIST:
 				case TEXT:
 				case TREE:

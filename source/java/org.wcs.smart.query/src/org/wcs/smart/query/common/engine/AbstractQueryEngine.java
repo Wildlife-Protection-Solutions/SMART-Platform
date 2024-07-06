@@ -278,6 +278,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
+		case TIME:
+			return "varchar(16)"; //$NON-NLS-1$
 		case MLIST: throw new UnsupportedOperationException("Multi-List attribute type not support for column type"); //$NON-NLS-1$
 		case LINE:
 		case POLYGON:

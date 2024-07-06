@@ -248,6 +248,8 @@ public class Messages extends NLS {
 
 	public static String ObservationLabelProvider_invalidbooleanvalue;
 
+	public static String ObservationLabelProvider_invalidetimevalue;
+
 	public static String ObservationLabelProvider_InvalidCmUuid;
 
 	public static String ObservationLabelProvider_InvalidSource;

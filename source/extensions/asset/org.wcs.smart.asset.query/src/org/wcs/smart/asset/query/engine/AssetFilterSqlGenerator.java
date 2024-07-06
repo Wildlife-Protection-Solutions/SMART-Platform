@@ -146,6 +146,10 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			String p1 = engine.addParameterValue((String) filter.getValue()); 
 			String p2 = engine.addParameterValue((String) filter.getValue2()); 
 			return "( " + valuePrefix + ".string_value is not null AND DATE(" + valuePrefix + ".string_value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+		}else if (filter.getAttributeType() == AttributeType.TIME){
+			String p1 = engine.addParameterValue((String) filter.getValue()); 
+			String p2 = engine.addParameterValue((String) filter.getValue2()); 
+			return "( " + valuePrefix + ".string_value is not null AND TIME(" + valuePrefix + ".string_value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as TIME) " + asSql(Operator.AND) + " CAST(" + p2 + " as TIME) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
 			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
 				//any option

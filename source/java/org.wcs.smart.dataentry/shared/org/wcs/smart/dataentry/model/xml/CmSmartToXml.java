@@ -623,6 +623,7 @@ public class CmSmartToXml {
 				sb.append(" "); //$NON-NLS-1$
 				break;
 			case DATE:
+			case TIME:
 				if (afilter.getOperator() ==  Operator.NOT_BETWEEN) {
 					sb.append(" not ("); //$NON-NLS-1$
 				}else {
@@ -642,6 +643,7 @@ public class CmSmartToXml {
 				
 				sb.append(" )"); //$NON-NLS-1$
 				break;
+			
 			case LIST:
 				if (afilter.getValue().toString().equalsIgnoreCase(AttributeFilter.ANY_OPTION_KEY)) {
 					sb.append(" ${"); //$NON-NLS-1$

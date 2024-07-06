@@ -376,8 +376,12 @@ public class ObservationFilterProcessor {
 			case DATE:
 				sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 				params.put("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-				params.put("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
-			
+				params.put("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$			
+				break;
+			case TIME:
+				sql.append(" cast(ia.string_value as time) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as time) and cast(:value2 as time)"); //$NON-NLS-1$ //$NON-NLS-2$
+				params.put("value1", (DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR)).format(filter.getTimeValues()[0])  ); //$NON-NLS-1$
+				params.put("value2", (DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR)).format(filter.getTimeValues()[1])  ); //$NON-NLS-1$			
 				break;
 			case LIST:
 				if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){

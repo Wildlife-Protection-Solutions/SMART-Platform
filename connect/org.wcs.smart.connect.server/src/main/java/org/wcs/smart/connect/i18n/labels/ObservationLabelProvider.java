@@ -60,6 +60,7 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case ATTRIBUTE_NOT_FOUND: return Messages.getString("ObservationLabelProvider_attributenotfound", l); //$NON-NLS-1$
 		case INVALID_BOOLEAN_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidboolean", l); //$NON-NLS-1$
 		case INVALID_DATE_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invaliddate", l); //$NON-NLS-1$
+		case INVALID_TIME_ATTRIBUTE: return "The value {0} is not valid for the time attribute {1}. Observation attribute not imported."; //$NON-NLS-1$
 		case INVALID_LIST_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidlistitem", l); //$NON-NLS-1$
 		case INVALID_MLIST_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidmlistitem", l); //$NON-NLS-1$
 		case INVALID_MLIST2_ATTRIBUTE: return Messages.getString("ObservationLabelProvider_invalidemlist2", l); //$NON-NLS-1$

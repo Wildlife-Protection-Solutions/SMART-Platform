@@ -97,8 +97,8 @@ public class AttributeInfo {
 		case BOOLEAN:
 			return "number_value"; //$NON-NLS-1$
 		case TEXT:
-			return "string_value"; //$NON-NLS-1$
 		case DATE:
+		case TIME:
 			return "string_value"; //$NON-NLS-1$
 		case LINE:
 		case POLYGON:

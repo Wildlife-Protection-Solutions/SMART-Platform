@@ -143,6 +143,9 @@ public class AddAttributeDialog2 extends SmartStyledTitleDialog {
 					case DATE:
 						setMessage(Messages.AddAttributeDialog2_NewDateMsg);
 						break;
+					case TIME:
+						setMessage(Messages.AddAttributeDialog2_NewTimeMsg);
+						break;
 					case LIST:
 						setMessage(Messages.AddAttributeDialog2_NewListMsg);
 						break;

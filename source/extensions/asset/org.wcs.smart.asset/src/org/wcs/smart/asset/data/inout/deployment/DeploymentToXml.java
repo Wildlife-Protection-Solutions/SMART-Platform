@@ -244,6 +244,7 @@ public class DeploymentToXml {
 							xmlaa.setDoubleValue(woa.getNumberValue());
 							break;
 						case DATE:
+						case TIME:
 						case TEXT:
 							xmlaa.getStringValue().add(woa.getStringValue());
 							break;

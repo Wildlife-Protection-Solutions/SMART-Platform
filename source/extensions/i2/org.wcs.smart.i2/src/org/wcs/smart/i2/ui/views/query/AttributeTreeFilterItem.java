@@ -46,7 +46,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateTimeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
@@ -157,7 +157,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		case BOOLEAN:
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		case DATE:
-			return new DropItem[]{new DateDropItem(dropItemName, queryKey, canEdit)};
+			return new DropItem[]{new DateTimeDropItem(DateTimeDropItem.Type.DATE, dropItemName, queryKey, canEdit)};
 		case LIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();

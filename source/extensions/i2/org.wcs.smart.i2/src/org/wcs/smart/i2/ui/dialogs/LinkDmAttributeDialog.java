@@ -63,7 +63,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.views.entity.search.EntitySearchDropPanel;
-import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateTimeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
@@ -303,7 +303,7 @@ public class LinkDmAttributeDialog  extends NameKeyDialog<Attribute>{
 						Operator op = Operator.parse(queryParts[1]);
 						LocalDate d1 = LocalDate.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
 						LocalDate d2 = LocalDate.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
-						((DateDropItem)di).setInitialValue(op, d1, d2);
+						((DateTimeDropItem)di).setInitialValue(op, d1, d2);
 					}else if (ia.getType() == IntelAttribute.AttributeType.LIST){
 						String listKey = p.split(" ")[2]; //$NON-NLS-1$
 						((OptionDropItem)di).setInitialValue(listKey);

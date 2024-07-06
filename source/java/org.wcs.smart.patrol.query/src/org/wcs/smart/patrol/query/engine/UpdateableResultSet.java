@@ -617,6 +617,15 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 					}
 				}
 				break;
+			case TIME:
+				if (newValue instanceof LocalTime){
+					LocalTime newTime = (LocalTime)newValue;
+					if (!newTime.equals(toUpdate.getTimeValue())){
+						toUpdate.setTimeValue(newTime);
+						updated = true;
+					}
+				}
+				break;
 			case LIST:
 				if (newValue instanceof AttributeListItem){
 					AttributeListItem newItem = (AttributeListItem)newValue;

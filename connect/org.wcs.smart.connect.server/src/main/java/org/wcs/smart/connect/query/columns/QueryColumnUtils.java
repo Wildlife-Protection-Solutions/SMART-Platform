@@ -24,6 +24,9 @@ package org.wcs.smart.connect.query.columns;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -211,7 +214,22 @@ public class QueryColumnUtils {
 					@Override
 					public Object getValue(IResultItem item) {
 						if (item instanceof ObservationQueryResultItem){
-							return ((ObservationQueryResultItem) item).getAttributeValue(attribute.keyid);
+							Object x = ((ObservationQueryResultItem) item).getAttributeValue(attribute.keyid);
+							if (x != null) {
+								if(getType() == QueryColumn.ColumnType.DATE) {
+									if (x instanceof String) {
+										//convert strings to dates
+										return LocalDate.parse((String)x, DateTimeFormatter.ISO_LOCAL_DATE);
+									}
+								}else if(getType() == QueryColumn.ColumnType.TIME) {
+									if (x instanceof String) {
+										//convert strings to dates
+										return LocalTime.parse((String)x, DateTimeFormatter.ISO_LOCAL_TIME);
+									}
+								}
+							}
+							
+							return x; 
 						}
 						return null;
 					}

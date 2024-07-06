@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.model;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -156,6 +157,39 @@ public class CmAttributeOption extends UuidItem {
 			return;
 		}
 		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
+	}
+	
+	/**
+	 * Date attribute types are stored
+	 * as in the string field in the ISO8601 format
+	 * of HH:mm:ss (no nano seconts).  This is a transient
+	 * function which converts the string value to 
+	 * a date.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public LocalTime getTimeValue(){
+		if (getStringValue() == null){
+			return null;
+		}
+		return LocalTime.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_TIME);
+		
+	}
+	
+	/**
+	 * This calls setStringValue formating the
+	 * date as required for SMART
+	 * @return
+	 */
+	@Transient
+	public void setTimeValue(LocalTime time){
+		if (time == null){
+			setStringValue(null);
+			return;
+		}
+		time = time.withNano(0);
+		setStringValue(DateTimeFormatter.ISO_LOCAL_TIME.format(time));
 	}
 
 	@Transient

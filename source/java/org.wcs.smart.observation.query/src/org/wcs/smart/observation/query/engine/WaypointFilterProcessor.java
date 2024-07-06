@@ -570,6 +570,19 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(getSqlGenerator().asSql(Operator.AND));
 				sql.append(" cast(" + p2 + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(") "); //$NON-NLS-1$
+			}else if (attfilter.getAttributeType() == AttributeType.TIME){
+				String p1 = engine.addParameterValue(attfilter.getValue());
+				String p2 = engine.addParameterValue(attfilter.getValue2());
+				
+				sql.append("("); //$NON-NLS-1$
+				sql.append(" TIME ("); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttribute.class));
+				sql.append(".string_value ) "); //$NON-NLS-1$
+				sql.append(getSqlGenerator().asSql(attfilter.getOperator()));
+				sql.append(" cast(" + p1 + " as time)"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(getSqlGenerator().asSql(Operator.AND));
+				sql.append(" cast(" + p2 + " as time)"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(") "); //$NON-NLS-1$
 			}else if (attfilter.getAttributeType() == AttributeType.MLIST) {
 				//nothing to do; dealt with as join above
 			}else if (attfilter.getAttributeType().isGeometry()){

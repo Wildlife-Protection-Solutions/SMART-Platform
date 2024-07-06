@@ -325,7 +325,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IQuer
 					if (att.getType() == AttributeType.BOOLEAN ||
 							att.getType() == AttributeType.TEXT ||
 							att.getType() == AttributeType.NUMERIC ||
-							att.getType() == AttributeType.DATE){
+							att.getType() == AttributeType.DATE ||
+							att.getType() == AttributeType.TIME){
 						di[0] = createAttributeDropItem(new CategoryAttribute(c, att));
 					}else if (att.getType() == AttributeType.LIST){
 						CmAttributeListDropItem ddi = new CmAttributeListDropItem(node, new CategoryAttribute(c, att));
@@ -665,10 +666,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IQuer
 				
 				//value filter panel
 				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE,  //$NON-NLS-1$
-						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+						def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session));
 	//			//rate filter panel
 				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE, //$NON-NLS-1$
-						def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); 
+						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 				//column group by
 				proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
 						def == null || def.getColumnGroupByPart() == null ? null : groupByToDropItems(def.getColumnGroupByPart(), session));

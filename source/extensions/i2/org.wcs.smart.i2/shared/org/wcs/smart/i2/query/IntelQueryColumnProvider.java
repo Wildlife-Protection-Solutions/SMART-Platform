@@ -446,6 +446,13 @@ public class IntelQueryColumnProvider {
 				sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[0]));
 				sb.append(" - "); //$NON-NLS-1$
 				sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[1]));
+				sb.append(")"); //$NON-NLS-1$				
+				break;
+			case TIME:
+				sb.append(" ("); //$NON-NLS-1$
+				sb.append(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(filter.getTimeValues()[0]));
+				sb.append(" - "); //$NON-NLS-1$
+				sb.append(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(filter.getTimeValues()[1]));
 				sb.append(")"); //$NON-NLS-1$
 				break;
 			case LIST:

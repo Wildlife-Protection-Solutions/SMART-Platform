@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,6 +65,7 @@ public class Attribute extends DmObject{
 	
 	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 8200;
 	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
+	public static final String TIME_FORMAT = "HH:mm:ss"; //$NON-NLS-1$
 		
 	/**
 	 * Conservation are associated with attribute
@@ -105,6 +107,7 @@ public class Attribute extends DmObject{
 		TREE("t"), //$NON-NLS-1$
 		BOOLEAN("b"), //$NON-NLS-1$
 		DATE("d"), //$NON-NLS-1$
+		TIME("h"), //$NON-NLS-1$
 		POLYGON("p"), //$NON-NLS-1$
 		LINE("i"); //$NON-NLS-1$
 		
@@ -471,6 +474,21 @@ public class Attribute extends DmObject{
 	public static boolean isValidDateString(String date){
 		try{
 			Date.valueOf(date);
+			return true;
+		}catch (Exception ex){
+			return false;
+		}
+	}
+	
+	/**
+	 * Determine if string value is a time or not
+	 * @param date
+	 * @return
+	 */
+	@Transient
+	public static boolean isValidTimeString(String time){
+		try{
+			Time.valueOf(time);
 			return true;
 		}catch (Exception ex){
 			return false;

@@ -23,6 +23,7 @@ package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 
 import org.wcs.smart.SmartPlugIn;
@@ -62,6 +63,8 @@ public class AttributeValidator {
 			return validateTree(attribute, value);
 		}else if (attribute.getType() == AttributeType.DATE){
 			return validateDate(attribute, value);
+		}else if (attribute.getType() == AttributeType.TIME){
+			return validateTime(attribute, value);
 		}else if (attribute.getType().isGeometry()) {
 			return validateGeometry(attribute, value);
 		}
@@ -219,4 +222,14 @@ public class AttributeValidator {
 		return null;
 	}
 	
+	public static String validateTime(Attribute attribute, Object value){
+		if (value != null && !(value instanceof LocalTime)){
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+		}
+	
+		if (attribute.getIsRequired() && value == null){
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		return null;
+	}
 }

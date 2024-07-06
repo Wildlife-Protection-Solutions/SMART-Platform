@@ -32,6 +32,7 @@ public interface IQueryFilter {
 	public static final String ANY_OPTION_KEY = "list.any"; //$NON-NLS-1$
 	
 	public static String DATE_FORMAT_STR = "yyyy-MM-dd"; //$NON-NLS-1$
+	public static String TIME_FORMAT_STR = "HH:mm:ss"; //$NON-NLS-1$
 	
 	public enum FilterType{
 		OBSERVATION("observation"), //$NON-NLS-1$

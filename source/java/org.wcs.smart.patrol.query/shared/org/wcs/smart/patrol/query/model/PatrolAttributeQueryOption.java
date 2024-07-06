@@ -94,6 +94,7 @@ public class PatrolAttributeQueryOption implements IPatrolQueryOption {
 		case TREE:
 		case LINE:
 		case POLYGON:
+		case TIME:
 		}
 		throw new UnsupportedOperationException();
 	}

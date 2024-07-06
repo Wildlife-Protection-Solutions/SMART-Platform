@@ -150,6 +150,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String ATTRIBUTE_DATE_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_DATE_ICON"; //$NON-NLS-1$
 	/**
+	 * Image descriptor for attribute time icon
+	 */
+	public static final String ATTRIBUTE_TIME_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_TIME_ICON"; //$NON-NLS-1$
+	/**
 	 * Image descriptor for attribute polygon icon
 	 */
 	public static final String ATTRIBUTE_POLYGON_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_POLYGON_ICON"; //$NON-NLS-1$
@@ -408,6 +412,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ATTRIBUTE_MULTI_LIST_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_multi_list.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_TREE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_tree.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_DATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_date.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_TIME_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_time.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_LINE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_line.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_POLYGON_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_polygon.png")); //$NON-NLS-1$
 	     

@@ -353,6 +353,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				break;
 			case TEXT:
 			case DATE:
+			case TIME:
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryDataTable);

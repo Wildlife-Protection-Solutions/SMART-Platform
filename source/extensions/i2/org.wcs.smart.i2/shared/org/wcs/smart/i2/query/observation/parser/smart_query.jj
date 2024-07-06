@@ -28,6 +28,7 @@ package org.wcs.smart.i2.query.observation.parser;
 
 import java.util.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import org.wcs.smart.i2.query.observation.filter.*;
 import org.wcs.smart.i2.query.Operator;
@@ -132,7 +133,8 @@ TOKEN :
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
  | < VALUE_KEY: ( "numentities" |  "numrecords" ) >
- | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>
+ | < TIME_STRING : < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT >>  
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
  
@@ -141,6 +143,7 @@ TOKEN :
  | < ATTRIBUTE_KEY_STRING : "dm_attribute:s:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_BOOLEAN : "dm_attribute:b:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_DATE: "dm_attribute:d:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_TIME: "dm_attribute:h:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_LIST: "dm_attribute:l:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_MLIST: "dm_attribute:m:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_TREE: "dm_attribute:t:"(< DM_KEY >)?":"< DM_KEY >>
@@ -440,6 +443,9 @@ IQueryFilter DataModelAttributeFilter():
 	/* date */
 	filter = DmDateExpression()
 	|
+	/* time */
+	filter = DmTimeExpression()
+	|	
 	/* tree or list */
 	filter = DmKeyExpression()
 	
@@ -535,6 +541,44 @@ IQueryFilter DmDateExpression():
 	}	
 }
 
+
+IQueryFilter DmTimeExpression():
+{
+  String key = null;
+  LocalTime time1 = null;
+  LocalTime time2 = null;
+  Operator op = null;
+}
+{
+	(
+		< ATTRIBUTE_KEY_TIME > {key = token.image;}
+		op = DateOp()
+		< TIME_STRING >  {
+		  String timestring = token.image;
+		  try
+		  {
+		    time1 = LocalTime.parse(timestring, DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR));
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + timestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+		< K_AND >
+		< TIME_STRING > {
+		  timestring = token.image;
+		  try
+		  {
+		    time2 = LocalTime.parse(timestring, DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR));
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + timestring + ". Must be in the form HH:mm:ss");
+		  }
+		}
+	)
+	{
+  		return DataModelFilter.create(key, op, time1, time2);
+	}	
+}
 
 IQueryFilter DmStringExpression():
 {

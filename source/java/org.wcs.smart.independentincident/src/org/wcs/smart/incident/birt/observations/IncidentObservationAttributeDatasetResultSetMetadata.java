@@ -48,6 +48,7 @@ public class IncidentObservationAttributeDatasetResultSetMetadata implements IRe
 		NUMBER_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_numbervaluecolumnname, "attribute:numbervalue", java.sql.Types.NUMERIC),  //$NON-NLS-1$
 		BOOLEAN_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_booleanvaluecolumnname, "attribute:booleanvalue", java.sql.Types.BOOLEAN), //$NON-NLS-1$
 		DATE_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_datevaluecolumnname, "attribute:datevalue", java.sql.Types.DATE), //$NON-NLS-1$
+		TIME_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_timevaluecolumnname, "attribute:timevalue", java.sql.Types.TIME),  //$NON-NLS-1$
 		LINE_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_LineGeometyrName, "attribute:linegeometry", IGeometryColumn.Type.MULTILINESTRING.birtDataType), //$NON-NLS-1$
 		POLYGON_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_PolgyonGeometryName, "attribute:polygongeometry", IGeometryColumn.Type.MULTIPOLYGON.birtDataType); //$NON-NLS-1$
 		
@@ -74,6 +75,11 @@ public class IncidentObservationAttributeDatasetResultSetMetadata implements IRe
 			case DATE_VALUE:
 				if (wo.getAttribute().getType() == Attribute.AttributeType.DATE) {
 					return wo.getDateValue();
+				}
+				return null;
+			case TIME_VALUE:
+				if (wo.getAttribute().getType() == Attribute.AttributeType.TIME) {
+					return wo.getTimeValue();
 				}
 				return null;
 			case NUMBER_VALUE: 

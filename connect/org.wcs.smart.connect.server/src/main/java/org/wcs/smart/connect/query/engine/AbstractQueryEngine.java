@@ -397,6 +397,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
+		case TIME:
+			return "varchar(32)"; //$NON-NLS-1$
 		case MLIST:
 			throw new IllegalArgumentException();
 		case LINE:
@@ -1235,6 +1237,26 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 				sql.append(" cast(" + p1 + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(PsqlFilterToSqlGenerator.asSql(Operator.AND));
 				sql.append(" cast(" + p2 + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" ELSE FALSE END ) "); //$NON-NLS-1$					
+			}else if (attfilter.getAttributeType() == AttributeType.TIME){
+
+				String p1 = addParameterValue(attfilter.getValue());
+				String p2 = addParameterValue(attfilter.getValue2());
+				
+				//order of execution in where in postgresql is not determined
+				//so it will try to parse all string values as dates and fail
+				//so here we check the attribute type before parsing the string value.
+
+				sql.append("("); //$NON-NLS-1$
+				sql.append(" CASE WHEN "); //$NON-NLS-1$
+				sql.append(tablePrefix(Attribute.class) + ".att_type = 'TIME' THEN"); //$NON-NLS-1$
+				sql.append(" cast ("); //$NON-NLS-1$
+				sql.append(tablePrefix(WaypointObservationAttribute.class));
+				sql.append(".string_value as time) "); //$NON-NLS-1$
+				sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()));
+				sql.append(" cast(" + p1 + " as time)"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(PsqlFilterToSqlGenerator.asSql(Operator.AND));
+				sql.append(" cast(" + p2 + " as time)"); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(" ELSE FALSE END ) "); //$NON-NLS-1$					
 			}
 		}

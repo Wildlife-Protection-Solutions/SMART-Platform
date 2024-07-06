@@ -22,6 +22,7 @@
 package org.wcs.smart.event;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -174,9 +175,8 @@ public enum EventProcessor {
 					break;
 					
 				case DATE:
-					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd"); //$NON-NLS-1$
-					LocalDate date1 = LocalDate.parse(afilter.getValue().toString(), format );
-					LocalDate date2 = LocalDate.parse(afilter.getValue2().toString(), format );
+					LocalDate date1 = LocalDate.parse(afilter.getValue().toString(), DateTimeFormatter.ISO_LOCAL_DATE );
+					LocalDate date2 = LocalDate.parse(afilter.getValue2().toString(), DateTimeFormatter.ISO_LOCAL_DATE );
 					LocalDate dvalue = attributeValue.getDateValue();
 					boolean isbetween = ( date1.isEqual(dvalue) || dvalue.isAfter(date1)) && (date2.isEqual(dvalue) || dvalue.isBefore(date2));
 					if (afilter.getOperator() == Operator.NOT_BETWEEN) {
@@ -184,7 +184,16 @@ public enum EventProcessor {
 					}
 					equation.add(isbetween);
 					break;
-					
+				case TIME:
+					LocalTime time1 = LocalTime.parse(afilter.getValue().toString(), DateTimeFormatter.ISO_LOCAL_TIME);
+					LocalTime time2 = LocalTime.parse(afilter.getValue2().toString(), DateTimeFormatter.ISO_LOCAL_TIME);
+					LocalTime tvalue = attributeValue.getTimeValue();
+					boolean tisbetween = ( time1.equals(tvalue) || tvalue.isAfter(time1)) && (time2.equals(tvalue) || tvalue.isBefore(time2));
+					if (afilter.getOperator() == Operator.NOT_BETWEEN) {
+						tisbetween = !tisbetween;
+					}
+					equation.add(tisbetween);
+					break;
 				case LIST:
 					String listItemKey = afilter.getValue().toString();
 					if (attributeValue.getAttributeListItem() != null && attributeValue.getAttributeListItem().getKeyId().equalsIgnoreCase(listItemKey.trim())) {

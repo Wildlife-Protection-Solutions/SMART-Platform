@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.query.observation.filter;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -105,6 +106,14 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 		return filter;
 	}
 	
+	//time
+	public static DataModelFilter create(String key, Operator operator, LocalTime time1, LocalTime time2){
+		DataModelFilter filter = createCore(key);
+		filter.operator = operator;
+		filter.timeValues = new LocalTime[]{time1, time2};
+		return filter;
+	}
+	
 	private static DataModelFilter createCore(String key){
 		String bits[] = key.split(":"); //$NON-NLS-1$
 		Attribute.AttributeType type = parseType(bits[1]);
@@ -135,6 +144,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	private String keyValue = null;
 	private List<String> keyValues = null;
 	private LocalDate[] dateValues = null;
+	private LocalTime[] timeValues = null;
 	
 	public DataModelFilter(String categoryKey){
 		this.categoryKey = categoryKey;
@@ -182,6 +192,13 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 		this.dateValues = dates;
 	}
 	
+	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, Operator operator, LocalTime[] times){
+		this(type, attributeKey, categoryKey);
+		this.operator = operator;
+		this.timeValues = times;
+	}
+	
+	
 	public Attribute.AttributeType getAttributeType(){
 		return this.attributeType;
 	}
@@ -212,10 +229,15 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	public Collection<String> getKeyValues(){
 		return this.keyValues;
 	}
+	
 	public LocalDate[] getDateValues(){
 		return this.dateValues;
 	}
 
+	public LocalTime[] getTimeValues(){
+		return this.timeValues;
+	}
+	
 	@Override
 	public String getUniqueColumnIdentifier() {
 		StringBuilder sb = new StringBuilder();
@@ -235,6 +257,13 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 					sb.append(dateValues[0].toString());
 					sb.append("_"); //$NON-NLS-1$
 					sb.append(dateValues[1].toString());
+					break;
+				case TIME:
+					sb.append(operator.name());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(timeValues[0].toString());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(timeValues[1].toString());
 					break;
 				case MLIST:
 					for (String x : keyValues) {
@@ -330,6 +359,17 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 			sb.append(Operator.AND.getKey());
 			sb.append(" "); //$NON-NLS-1$
 			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR).format(dateValues[1]));
+			
+		} else if (attributeType == Attribute.AttributeType.TIME) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(operator.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR).format(timeValues[0]));
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(Operator.AND.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR).format(timeValues[1]));
+			
 		} else if (attributeType.isGeometry()) {
 			sb.append(" "); //$NON-NLS-1$
 			sb.append(geometryProperty.name());

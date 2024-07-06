@@ -264,7 +264,8 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 				case BOOLEAN:
 					break;
 				case DATE:
-					di.initializeData(new Object[] { afilter.getValue(), afilter.getValue2(), afilter.getOperator() });
+				case TIME:
+					di.initializeData(new String[] { afilter.getValue().toString(), afilter.getValue2().toString(), afilter.getOperator().getGuiValue() });
 					break;
 				case LIST:
 					String key = (String) afilter.getValue();
@@ -502,6 +503,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		switch(attribute.getType()) {
 		case BOOLEAN:
 		case DATE:
+		case TIME:
 		case NUMERIC:
 		case TEXT:
 			return new AttributeDropItem(attribute);

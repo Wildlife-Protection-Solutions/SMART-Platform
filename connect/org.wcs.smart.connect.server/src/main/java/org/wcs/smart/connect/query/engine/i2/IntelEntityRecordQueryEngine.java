@@ -278,6 +278,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			{"str_sort", "varchar(" + IntelAttribute.MAX_TEXT_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			{"dbl_sort", "double precision"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"date_sort", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"time_sort", "time"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"entity_id", "varchar(1024)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		

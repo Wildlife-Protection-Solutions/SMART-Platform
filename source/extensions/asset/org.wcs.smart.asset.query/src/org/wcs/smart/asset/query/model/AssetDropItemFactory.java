@@ -328,7 +328,12 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IQuery
 				SumQueryDefinition def = q.getQueryDefinition();
 
 				//value filter panel
-				proxy.setDropItems(AssetFilterPanel.ID, def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+				if (proxy.getQueryType().getKey().equalsIgnoreCase(AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY)) {
+					proxy.setDropItems(AssetFilterPanel.ID, def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+				}else {
+					proxy.setDropItems(BasicFilterDefintionPanel.ID, def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));	
+				}
+				
  
 				//column group by
 				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + AssetSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$

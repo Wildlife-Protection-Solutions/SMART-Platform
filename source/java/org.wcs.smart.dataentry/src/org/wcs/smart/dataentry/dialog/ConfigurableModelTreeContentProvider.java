@@ -101,6 +101,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 	 */
 	public boolean canAddToGroup(CmAttribute attribute) {
 		if (attribute.getAttribute().getType() == Attribute.AttributeType.DATE ||
+				attribute.getAttribute().getType() == Attribute.AttributeType.TIME ||
 				attribute.getAttribute().getType() == Attribute.AttributeType.TREE ||
 				attribute.getAttribute().getType() == Attribute.AttributeType.MLIST) {
 			return false;

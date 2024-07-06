@@ -225,6 +225,9 @@ public class CustomQueryEngine {
 					case DATE:
 						joa.put(VALUE_FIELD, at.getDateValue().toString());
 						break;
+					case TIME:
+						joa.put(VALUE_FIELD, at.getTimeValue().toString());
+						break;
 					case LIST:
 						joa.put(VALUE_FIELD, at.getAttributeListItem().getKeyId());
 						for (Label ll : at.getAttributeListItem().getNames()) {

@@ -48,6 +48,7 @@ public class RecordLocationObservationDetailsDatasetResultSetMetadata implements
 		STRING_VALUE("recordobs:stringvalue", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		NUMBER_VALUE("recordobs:numbervalue", java.sql.Types.DOUBLE), //$NON-NLS-1$
 		DATE_VALUE("recordobs:datevalue", java.sql.Types.DATE), //$NON-NLS-1$
+		TIME_VALUE("recordobs:timevalue", java.sql.Types.TIME), //$NON-NLS-1$
 		BOOLEAN_VALUE("recordobs:booleanvalue", java.sql.Types.BOOLEAN), //$NON-NLS-1$
 		POLYGON_VALUE("recordobs:polygonvalue", IGeometryColumn.Type.MULTIPOLYGON.birtDataType), //$NON-NLS-1$
 		LINESTRING_VALUE("recordobs:linestringvalue", IGeometryColumn.Type.MULTILINESTRING.birtDataType), //$NON-NLS-1$
@@ -76,6 +77,9 @@ public class RecordLocationObservationDetailsDatasetResultSetMetadata implements
 				return null;
 			case DATE_VALUE:
 				if (location.getAttribute().getType() == AttributeType.DATE) return location.getAttributeValue();
+				return null;
+			case TIME_VALUE:
+				if (location.getAttribute().getType() == AttributeType.TIME) return location.getAttributeValue();
 				return null;
 			case LINESTRING_VALUE:
 				if (location.getAttribute().getType() == AttributeType.LINE) return location.getGeometry().getGeometry();

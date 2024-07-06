@@ -96,6 +96,8 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 			return getBooleanCellEditor();
 		case DATE:
 			return getDateCellEditor();
+		case TIME:
+			return getTimeCellEditor();
 		case LIST:
 			return getListCellEditor();
 		case MLIST:

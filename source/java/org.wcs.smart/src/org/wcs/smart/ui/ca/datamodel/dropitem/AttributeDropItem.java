@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.ca.datamodel.dropitem;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -126,7 +127,7 @@ public class AttributeDropItem extends DropItem {
 	public void initializeData(Object data){
 		if (data != null && data instanceof String[]){
 			String[] initd = (String[])data;
-			if (type == AttributeType.DATE){
+			if (type == AttributeType.DATE || type == AttributeType.TIME){
 				this.currentValue = initd[0];
 				this.currentValue2 = initd[1];
 				this.currentOp = initd[2];
@@ -183,6 +184,16 @@ public class AttributeDropItem extends DropItem {
 			querypart.append( Operator.AND.asSmartValue() );
 			querypart.append( " "); //$NON-NLS-1$
 			querypart.append(DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2)));
+		}else if (type == AttributeType.TIME){
+			querypart.append(this.key);
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append(Operator.DATE_OPS[operators.getSelectionIndex()].asSmartValue());
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append(DateTimeFormatter.ISO_LOCAL_TIME.format(SmartUtils.toTime(dtime1)));
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append( Operator.AND.asSmartValue() );
+			querypart.append( " "); //$NON-NLS-1$
+			querypart.append(DateTimeFormatter.ISO_LOCAL_TIME.format(SmartUtils.toTime(dtime2)));
 		}
 		return querypart.toString();
 	}
@@ -283,7 +294,7 @@ public class AttributeDropItem extends DropItem {
 				}
 				operators.select(index);
 			}
-		}else if (type == AttributeType.DATE){
+		}else if (type == AttributeType.DATE || type == AttributeType.TIME){
 			operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 			operators.addModifyListener(new ModifyListener() {
 				@Override
@@ -302,25 +313,42 @@ public class AttributeDropItem extends DropItem {
 			smallerFont = new Font(Display.getCurrent(), fd);
 			operators.setFont(smallerFont);
 			
-			dtime1 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
+			int style = type == AttributeType.DATE ? SWT.DATE : SWT.TIME; 
+			dtime1 = new DateTime(main, SWT.DROP_DOWN |  SWT.MEDIUM | style);
 			dtime1.addListener(SWT.Selection, new Listener(){
 				@Override
 				public void handleEvent(Event event) {
-					String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
-					if (!newValue.equals(currentValue)){
-						queryChanged();
-						currentValue = newValue;
+					if (type == AttributeType.DATE) {
+						String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
+						if (!newValue.equals(currentValue)){
+							queryChanged();
+							currentValue = newValue;
+						}
+					}else if (type == AttributeType.TIME) {
+						String newValue = DateTimeFormatter.ISO_LOCAL_TIME.format(SmartUtils.toTime(dtime1));
+						if (!newValue.equals(currentValue)){
+							queryChanged();
+							currentValue = newValue;
+						}
 					}
 				}});
 			
-			dtime2 = new DateTime(main, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
+			dtime2 = new DateTime(main, SWT.DROP_DOWN | SWT.MEDIUM | style);
 			dtime2.addListener(SWT.Selection, new Listener(){
 				@Override
 				public void handleEvent(Event event) {
-					String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
-					if (!newValue.equals(currentValue2)){
-						queryChanged();
-						currentValue2 = newValue;
+					if (type == AttributeType.DATE) {
+						String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
+						if (!newValue.equals(currentValue2)){
+							queryChanged();
+							currentValue = newValue;
+						}
+					}else if (type == AttributeType.TIME) {
+						String newValue = DateTimeFormatter.ISO_LOCAL_TIME.format(SmartUtils.toTime(dtime2));
+						if (!newValue.equals(currentValue2)){
+							queryChanged();
+							currentValue2 = newValue;
+						}
 					}
 				}});
 			
@@ -345,10 +373,19 @@ public class AttributeDropItem extends DropItem {
 				value.setText(currentValue);
 			}
 			if (dtime1 != null && currentValue != null){
-				SmartUtils.initDateTimeWidget(dtime1, LocalDate.parse(currentValue, DateTimeFormatter.ISO_LOCAL_DATE));	
+				if (type == AttributeType.DATE) {
+					SmartUtils.initDateTimeWidget(dtime1, LocalDate.parse(currentValue, DateTimeFormatter.ISO_LOCAL_DATE));
+				}else if (type == AttributeType.TIME) {
+					SmartUtils.initDateTimeWidget(dtime1, LocalTime.parse(currentValue, DateTimeFormatter.ISO_LOCAL_TIME));
+				}
 			}
 			if (dtime2 != null && currentValue2 != null){
-				SmartUtils.initDateTimeWidget(dtime2, LocalDate.parse(currentValue2, DateTimeFormatter.ISO_LOCAL_DATE));	
+				
+				if (type == AttributeType.DATE) {
+					SmartUtils.initDateTimeWidget(dtime2, LocalDate.parse(currentValue2, DateTimeFormatter.ISO_LOCAL_DATE));
+				}else if (type == AttributeType.TIME) {
+					SmartUtils.initDateTimeWidget(dtime2, LocalTime.parse(currentValue2, DateTimeFormatter.ISO_LOCAL_TIME));
+				}
 			}
 		}
 	}

@@ -452,6 +452,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			case TEXT:value.put(VALUE_FIELD, custom.getStringValue());
 				break;
 			case TREE:
+			case TIME:
 				//not supported
 				break;
 			default:
@@ -743,6 +744,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			case TEXT:value.put(VALUE_FIELD, custom.getStringValue());
 				break;
 			case TREE:
+			case TIME:
 				//not supported
 				break;
 			default:

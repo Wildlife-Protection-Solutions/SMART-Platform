@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -155,6 +156,7 @@ public abstract class IJsonFeatureProcessor {
 		ATTRIBUTE_NOT_FOUND,
 		INVALID_BOOLEAN_ATTRIBUTE,
 		INVALID_DATE_ATTRIBUTE,
+		INVALID_TIME_ATTRIBUTE,
 		INVALID_LIST_ATTRIBUTE,
 		INVALID_MLIST_ATTRIBUTE,
 		INVALID_MLIST2_ATTRIBUTE,
@@ -670,6 +672,15 @@ public abstract class IJsonFeatureProcessor {
 						value.toString(), a.getAttribute().getName()));
 			}
 			break;
+		case TIME:
+			try {
+				a.setTimeValue(parseTime(value));
+			}catch (Exception ex) {
+				throw new Exception(MessageFormat.format(
+						Messages.INVALID_TIME_ATTRIBUTE.getMessage(locale),
+						value.toString(), a.getAttribute().getName()));
+			}
+			break;
 		case LIST:
 			String key = value.toString();
 			AttributeListItem item = null;
@@ -829,13 +840,28 @@ public abstract class IJsonFeatureProcessor {
 	 */
 	protected LocalDate parseDate( Object value ) throws Exception{
 		if (value instanceof String) {
-			return LocalDate.parse((String) value);
+			return LocalDate.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE);
 		} else if (value instanceof LocalDate) {
 			return ((LocalDate) value);
 		}
 		throw new Exception(MessageFormat.format("Could not parse date value from {0}", value.toString())); //$NON-NLS-1$
 	}
 	
+	/**
+	 * Parses the object as a time or throws an exception
+	 * @param value
+	 * @return
+	 * @throws Exception
+	 */
+	protected LocalTime parseTime( Object value ) throws Exception{
+		if (value instanceof String) {
+			return LocalTime.parse((String) value, DateTimeFormatter.ISO_LOCAL_TIME);
+		} else if (value instanceof LocalDate) {
+			return ((LocalTime) value);
+		}
+		throw new Exception(MessageFormat.format("Could not parse time value from {0}", value.toString())); //$NON-NLS-1$
+	}
+
 	/**
 	 * Cobverts the object to a double or throws an exception
 	 * 

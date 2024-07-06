@@ -1004,6 +1004,8 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_GeometryParseError;
 	public static String XmlToPatrolConverter_InvalidDateString;
 	public static String XmlToPatrolConverter_InvalidPatrolId;
+
+	public static String XmlToPatrolConverter_InvalidTimeString;
 	public static String XmlToPatrolConverter_ListItemNotFound;
 	public static String XmlToPatrolConverter_NoValidListItemsFound;
 	public static String XmlToPatrolConverter_ObserverNotFound;

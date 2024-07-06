@@ -98,6 +98,9 @@ public class DerbyPagedWaypointResult extends WaypointQueryResult<SurveyWaypoint
 				case DATE:
 					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
 					break;
+				case TIME:
+					result = "order by TIME(sortKeyTxt)"; //$NON-NLS-1$
+					break;
 				default:
 					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
 					break;

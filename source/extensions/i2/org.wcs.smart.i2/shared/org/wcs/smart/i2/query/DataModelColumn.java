@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
@@ -143,6 +144,8 @@ public class DataModelColumn extends AbstractQueryColumn{
 				return Boolean.FALSE;
 			case DATE:
 				return (LocalDate)value;
+			case TIME:
+				return (LocalTime)value;
 			case NUMERIC:
 				return ((Double)value);
 			case LIST:
@@ -195,6 +198,8 @@ public class DataModelColumn extends AbstractQueryColumn{
 				return Type.BOOLEAN;
 			case DATE:
 				return Type.DATE;
+			case TIME:
+				return Type.TIME;
 			case NUMERIC:
 				return Type.NUMERIC;
 			case TEXT:

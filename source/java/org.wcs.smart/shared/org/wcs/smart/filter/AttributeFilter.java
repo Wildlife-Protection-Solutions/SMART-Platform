@@ -134,6 +134,20 @@ public class AttributeFilter implements IFilter {
 	}
 	
 	/**
+	 * Creates a new time attribute filter
+	 * 
+	 * Date filters are of the form: <DATE> BETWEEN <TIME1> AND <TIME2>
+	 * 
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:h:<key>"
+	 * @param date1 the first time
+	 * @param date2 the second time
+	 * @return
+	 */
+	public static AttributeFilter createTimeFilter(String attributeIdentifier, String date1, String date2, Operator op){
+		return new AttributeFilter(attributeIdentifier, op, date1, date2);
+	}
+	
+	/**
 	 * Creates a new list item attribute filter 
 	 * @param attributeIdentifier the attribute identifier in the form "attribute:l:<key>"
 	 * @param op the list operator
@@ -285,6 +299,8 @@ public class AttributeFilter implements IFilter {
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
 		}else if (attributeType == AttributeType.DATE){
 			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ 
+		}else if (attributeType == AttributeType.TIME){
+			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$
 		}else if (attributeType.isGeometry()) {
 			return fullIdentifier + " " + this.geomProperty.getKey() + " " + op.asSmartValue() + " " + ((Double)value1).toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}

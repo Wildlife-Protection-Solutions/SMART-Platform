@@ -325,6 +325,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			sb.append( asSql(Operator.AND) );
 			sb.append(" CAST(" + p3 + " as DATE) )"); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(" ELSE false END "); //$NON-NLS-1$
+			
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
 			sb.append(" "); //$NON-NLS-1$
 			sb.append(engine.tablePrefix(PatrolAttributeValue.class));

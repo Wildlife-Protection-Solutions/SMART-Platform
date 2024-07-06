@@ -47,6 +47,7 @@ TOKEN :
  | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > > 
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+ | < ATT_TIME_KEY : "attribute:h:"< DM_KEY > >
  | < ATT_GEOM_KEY : "attribute:"("p" | "i")":"< DM_KEY > >  
  | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
@@ -57,8 +58,10 @@ TOKEN :
  | <CM_CAT_ATT_TREE_KEY : "category:"<DM_KEY>":cmattribute:t:"< UUID >":"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
+ | <CAT_ATT_TIME_KEY : "category:"<DM_KEY>":attribute:h:"<DM_KEY>>
  | <CAT_ATT_GEOM_KEY : "category:"<DM_KEY>":attribute:" ("p" | "i") ":"<DM_KEY>>  
- | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>
+ | < TIME_STRING : < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT >>  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < HEX_STRING : (< DIGIT > | < LETTER > )+ >
  | < UUID : (< LETTER > | < DIGIT >)+ >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
@@ -608,6 +611,9 @@ IFilter AttributeExpression():
 	/* date */
 	filter = DateItemExpression()
 	| 
+	/* time */
+	filter = TimeItemExpression()
+	| 
 	/* attribute list items */
 	(
 		< ATT_LIST_KEY > {key = token.image;}		    
@@ -750,6 +756,43 @@ IFilter DateItemExpression():
 		}
 	)
 	{		return filter;
+	}
+}
+
+IFilter TimeItemExpression():
+{
+  IFilter filter = null;
+  String key = null;
+  String time1 = null;
+  String time2 = null;
+  Operator op = null;
+}
+{
+	(
+		(
+			< ATT_TIME_KEY > {key = token.image;}
+			op = DateOp()
+			< TIME_STRING >  {time1 = token.image;}
+			< K_AND >
+			< TIME_STRING > {time2 = token.image;}
+		)
+		{
+  			filter = AttributeFilter.createTimeFilter(key, time1, time2, op);
+		}
+	|
+	  	(
+			< CAT_ATT_TIME_KEY > {key = token.image;}
+			op = DateOp()
+			< TIME_STRING >  {time1 = token.image;}
+			< K_AND >
+			< TIME_STRING > {time2 = token.image;}
+		)
+		{
+  			filter = CategoryAttributeFilter.createTimeFilter(key, time1, time2, op);
+		}
+	)
+	{
+		return filter;
 	}
 }
 

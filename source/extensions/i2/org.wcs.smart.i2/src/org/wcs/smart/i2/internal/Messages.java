@@ -947,6 +947,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordObsDetailsColumnPolgyonValue;
 	public static String IntelligenceLabelProviderImpl_RecordObsDetailsColumnRecordUuid;
 	public static String IntelligenceLabelProviderImpl_RecordObsDetailsColumnStringValue;
+	public static String IntelligenceLabelProviderImpl_RecordObsDetailsColumnTimeValue;
 	public static String IntelligenceLabelProviderImpl_RecordProfileColumnName;
 	public static String IntelligenceLabelProviderImpl_RecordQueryColumnName;
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnCreatedBy;

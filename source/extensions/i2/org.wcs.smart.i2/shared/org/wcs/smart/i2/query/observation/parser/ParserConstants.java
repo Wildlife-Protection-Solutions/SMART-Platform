@@ -83,93 +83,97 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int DATE_STRING = 40;
   /** RegularExpression Id. */
-  int DM_KEY = 41;
+  int TIME_STRING = 41;
   /** RegularExpression Id. */
-  int UUID = 42;
+  int DM_KEY = 42;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 43;
+  int UUID = 43;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_NUMERIC = 44;
+  int CATEGORY_KEY = 44;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_STRING = 45;
+  int ATTRIBUTE_KEY_NUMERIC = 45;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_BOOLEAN = 46;
+  int ATTRIBUTE_KEY_STRING = 46;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_DATE = 47;
+  int ATTRIBUTE_KEY_BOOLEAN = 47;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_LIST = 48;
+  int ATTRIBUTE_KEY_DATE = 48;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_MLIST = 49;
+  int ATTRIBUTE_KEY_TIME = 49;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_TREE = 50;
+  int ATTRIBUTE_KEY_LIST = 50;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_GEOMETRY = 51;
+  int ATTRIBUTE_KEY_MLIST = 51;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_NUMERIC = 52;
+  int ATTRIBUTE_KEY_TREE = 52;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_STRING = 53;
+  int ATTRIBUTE_KEY_GEOMETRY = 53;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_BOOLEAN = 54;
+  int EATTRIBUTE_KEY_NUMERIC = 54;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_DATE = 55;
+  int EATTRIBUTE_KEY_STRING = 55;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_LIST = 56;
+  int EATTRIBUTE_KEY_BOOLEAN = 56;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_EMPLOYEE = 57;
+  int EATTRIBUTE_KEY_DATE = 57;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 58;
+  int EATTRIBUTE_KEY_LIST = 58;
   /** RegularExpression Id. */
-  int AREA_KEY = 59;
+  int EATTRIBUTE_KEY_EMPLOYEE = 59;
   /** RegularExpression Id. */
-  int ENTITY_TYPE_KEY = 60;
+  int AREA_TYPE_KEY = 60;
   /** RegularExpression Id. */
-  int ENTITY_KEY = 61;
+  int AREA_KEY = 61;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_NUMERIC = 62;
+  int ENTITY_TYPE_KEY = 62;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_STRING = 63;
+  int ENTITY_KEY = 63;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_BOOLEAN = 64;
+  int RATTRIBUTE_KEY_NUMERIC = 64;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_DATE = 65;
+  int RATTRIBUTE_KEY_STRING = 65;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_LIST = 66;
+  int RATTRIBUTE_KEY_BOOLEAN = 66;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_EMPLOYEE = 67;
+  int RATTRIBUTE_KEY_DATE = 67;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_ENTITY = 68;
+  int RATTRIBUTE_KEY_LIST = 68;
   /** RegularExpression Id. */
-  int SYSTEM_ATT_KEY = 69;
+  int RATTRIBUTE_KEY_EMPLOYEE = 69;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 70;
+  int RATTRIBUTE_KEY_ENTITY = 70;
   /** RegularExpression Id. */
-  int DATE_GB_KEY = 71;
+  int SYSTEM_ATT_KEY = 71;
   /** RegularExpression Id. */
-  int RECORDSTATUS_GB = 72;
+  int QUERY_SPLITTER = 72;
   /** RegularExpression Id. */
-  int RECORDSOURCE_GB = 73;
+  int DATE_GB_KEY = 73;
   /** RegularExpression Id. */
-  int ENTITYTYPE_GB = 74;
+  int RECORDSTATUS_GB = 74;
   /** RegularExpression Id. */
-  int CA_GB = 75;
+  int RECORDSOURCE_GB = 75;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_POSITION = 76;
+  int ENTITYTYPE_GB = 76;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_DATE = 77;
+  int CA_GB = 77;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_LIST = 78;
+  int EATTRIBUTE_GB_KEY_POSITION = 78;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_EMPLOYEE = 79;
+  int EATTRIBUTE_GB_KEY_DATE = 79;
   /** RegularExpression Id. */
-  int RATTRIBUTE_GB_KEY_DATE = 80;
+  int EATTRIBUTE_GB_KEY_LIST = 80;
   /** RegularExpression Id. */
-  int RATTRIBUTE_GB_KEY_LIST = 81;
+  int EATTRIBUTE_GB_KEY_EMPLOYEE = 81;
   /** RegularExpression Id. */
-  int RATTRIBUTE_GB_KEY_EMPLOYEE = 82;
+  int RATTRIBUTE_GB_KEY_DATE = 82;
   /** RegularExpression Id. */
-  int SYSTEM_ATT_KEY_GB = 83;
+  int RATTRIBUTE_GB_KEY_LIST = 83;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 84;
+  int RATTRIBUTE_GB_KEY_EMPLOYEE = 84;
+  /** RegularExpression Id. */
+  int SYSTEM_ATT_KEY_GB = 85;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 86;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -217,6 +221,7 @@ public interface ParserConstants {
     "<SPECIAL_CHARS>",
     "<VALUE_KEY>",
     "<DATE_STRING>",
+    "<TIME_STRING>",
     "<DM_KEY>",
     "<UUID>",
     "<CATEGORY_KEY>",
@@ -224,6 +229,7 @@ public interface ParserConstants {
     "<ATTRIBUTE_KEY_STRING>",
     "<ATTRIBUTE_KEY_BOOLEAN>",
     "<ATTRIBUTE_KEY_DATE>",
+    "<ATTRIBUTE_KEY_TIME>",
     "<ATTRIBUTE_KEY_LIST>",
     "<ATTRIBUTE_KEY_MLIST>",
     "<ATTRIBUTE_KEY_TREE>",

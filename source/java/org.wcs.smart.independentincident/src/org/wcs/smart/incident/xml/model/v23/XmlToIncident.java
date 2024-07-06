@@ -343,6 +343,16 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());
+			}else if (dmAttribute.getType() == AttributeType.TIME){
+				if (type.getSValue() == null){
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_StringValueNotFound, new Object[]{type.getAttributeKey()}));
+					return null;
+				}
+				if (!Attribute.isValidTimeString(type.getSValue())){
+					warnings.add(MessageFormat.format(Messages.XmlToIncident_InvalidTimeString, new Object[]{type.getSValue(), type.getAttributeKey(), Attribute.TIME_FORMAT}));
+					return null;
+				}
+				attribute.setStringValue(type.getSValue());
 			}else if (dmAttribute.getType() == AttributeType.LIST){
 				if (type.getItemKey() == null || type.getItemKey().size() != 1){
 					warnings.add(MessageFormat.format(Messages.XmlToIncident_NoValueFound, new Object[]{type.getAttributeKey()}));

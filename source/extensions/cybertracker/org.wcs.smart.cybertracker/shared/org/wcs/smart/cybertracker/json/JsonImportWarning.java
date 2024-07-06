@@ -51,7 +51,8 @@ public class JsonImportWarning {
 		INVALID_PHOTO_ATTACHMENT, //1 parameter - attachment ordinal
 		
 		COULD_NOT_PARSE_BOOLEAN, //1 parameter value being parsed
-		COULD_NOT_PARSE_DATE,  //1 parameter value being parsed
+		COULD_NOT_PARSE_DATE,  //3 parameter value being parsed, 2 valid formats
+		COULD_NOT_PARSE_TIME,  //3 parameter value being parsed, 2 valid formats
 		COULD_NOT_PARSE_GEOMETRY,  //1 parameter attribute name
 		INVALID_LINESTRING_GEOMETRY, //1 parameter attribute name
 		INVALID_POLYGON_GEOMETRY,   //1 parameter attribute name

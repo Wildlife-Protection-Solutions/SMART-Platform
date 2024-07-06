@@ -24,6 +24,7 @@ package org.wcs.smart.i2.search;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -386,6 +387,8 @@ public class SearchDataGenerator {
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
 		}else if (a.getType() == Attribute.AttributeType.DATE){
 			value.setDateValue(LocalDate.now());
+		}else if (a.getType() == Attribute.AttributeType.TIME){
+			value.setTimeValue(LocalTime.now());
 		}else if (a.getType() == Attribute.AttributeType.LIST){
 			int index = (int)Math.round((a.getAttributeList().size()-1) * Math.random());
 			value.setAttributeListItem(a.getAttributeList().get(index));

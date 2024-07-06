@@ -898,6 +898,7 @@ public class DataGeneratorView {
 			v.setSelection(new StructuredSelection(ObservationConfiguration.Type.RANDOM));	
 			break;
 		case DATE:
+		case TIME:
 		case NUMERIC:
 		case TEXT:
 			v.setSelection(new StructuredSelection(ObservationConfiguration.Type.EMPTY));

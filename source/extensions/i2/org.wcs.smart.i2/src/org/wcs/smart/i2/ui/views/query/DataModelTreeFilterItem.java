@@ -43,7 +43,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGeometryDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateTimeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.MultiOptionDropItem;
@@ -151,7 +151,9 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		case BOOLEAN:
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		case DATE:
-			return new DropItem[]{new DateDropItem(dropItemName, queryKey, canEdit)};
+			return new DropItem[]{new DateTimeDropItem(DateTimeDropItem.Type.DATE, dropItemName, queryKey, canEdit)};
+		case TIME:
+			return new DropItem[]{new DateTimeDropItem(DateTimeDropItem.Type.TIME, dropItemName, queryKey, canEdit)};
 		case LIST:
 		case MLIST:
 			final List<String> labels = new ArrayList<String>();

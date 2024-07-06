@@ -59,6 +59,7 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case ATTRIBUTE_NOT_FOUND: return Messages.ObservationLabelProvider_attributenotfound;
 		case INVALID_BOOLEAN_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidbooleanvalue;
 		case INVALID_DATE_ATTRIBUTE: return Messages.ObservationLabelProvider_invaluddatevalue;
+		case INVALID_TIME_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidetimevalue;
 		case INVALID_LIST_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidlistitem;
 		case INVALID_MLIST_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidmultilist1;
 		case INVALID_MLIST2_ATTRIBUTE: return Messages.ObservationLabelProvider_invalidmultilist2;

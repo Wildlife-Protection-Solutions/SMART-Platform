@@ -122,6 +122,7 @@ public class AttributeInfoPanel extends Composite {
 	private Composite optionComposite;
 	private Composite booleanComposite;
 	private Composite dateComposite;
+	private Composite timeComposite;
 	private Composite treeComposite;
 	private Composite listComposite;
 	private Composite textComposite;
@@ -760,6 +761,11 @@ public class AttributeInfoPanel extends Composite {
 		dateComposite = new Composite(optionComposite, SWT.NONE);
 		dateComposite.setLayout(new GridLayout(1, false));
 		dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+		/*   Date Attribute Options */
+		timeComposite = new Composite(optionComposite, SWT.NONE);
+		timeComposite.setLayout(new GridLayout(1, false));
+		timeComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
 		/* Geometry Options */
 		geometryComposite = new Composite(optionComposite, SWT.NONE);
@@ -992,6 +998,8 @@ public class AttributeInfoPanel extends Composite {
 			((StackLayout)optionComposite.getLayout()).topControl = treeComposite;
 		}else if (type.equals(AttributeType.DATE)){
 			((StackLayout)optionComposite.getLayout()).topControl = dateComposite;
+		}else if (type.equals(AttributeType.TIME)){
+			((StackLayout)optionComposite.getLayout()).topControl = timeComposite;
 		}else if (type.isGeometry()){
 			((StackLayout)optionComposite.getLayout()).topControl = geometryComposite;
 			geomStylePanel.setType(type);

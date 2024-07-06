@@ -159,6 +159,7 @@ public class AssetUtils {
 						ok = Objects.equals(a.getNumberValue(), matching.getNumberValue());
 						break;
 					case DATE:
+					case TIME:
 					case TEXT:
 						ok = Objects.equals(a.getStringValue(), matching.getStringValue());
 						break;

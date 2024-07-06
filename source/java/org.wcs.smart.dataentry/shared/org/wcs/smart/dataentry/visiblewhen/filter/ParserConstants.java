@@ -85,17 +85,21 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ATT_DATE_KEY = 41;
   /** RegularExpression Id. */
-  int ATT_GEOM_KEY = 42;
+  int ATT_TIME_KEY = 42;
   /** RegularExpression Id. */
-  int DM_KEY = 43;
+  int ATT_GEOM_KEY = 43;
   /** RegularExpression Id. */
-  int DATE_STRING = 44;
+  int DM_KEY = 44;
   /** RegularExpression Id. */
-  int LETTER = 45;
+  int DATE_STRING = 45;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 46;
+  int TIME_STRING = 46;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 47;
+  int LETTER = 47;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 48;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 49;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -144,9 +148,11 @@ public interface ParserConstants {
     "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ATT_TIME_KEY>",
     "<ATT_GEOM_KEY>",
     "<DM_KEY>",
     "<DATE_STRING>",
+    "<TIME_STRING>",
     "<LETTER>",
     "<SPECIAL_CHARS>",
     "<QUOTED_STRING>",

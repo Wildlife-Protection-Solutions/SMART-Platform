@@ -249,6 +249,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 				sb.append(" double "); //$NON-NLS-1$
 				break;
 			case DATE:
+			case TIME:
 			case LIST:
 			case TEXT:
 			case TREE:
@@ -452,12 +453,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 					&& filter.getOperator().operator != Operator.Op.STR_EQUAL) {
 				throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_OpNotSupported3, filter.getOperator().operator.key));
 			}
-//			Date d = null;
-//			try {
-//				d = new SimpleDateFormat(AttributeExpression.JAVA_DATE_FORMAT).parse(filter.getStringValue());
-//			}catch (Exception ex) {}
-//			if (d == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_DateParseError, filter.getStringValue()));
-			
+
 			sb.append("cast(" ); //$NON-NLS-1$
 			sb.append(columnName);
 			sb.append(" as date ) "); //$NON-NLS-1$
@@ -467,6 +463,23 @@ public class CategoryColumnEngine implements IColumnEngine {
 			String key = ":a" + namesToValues.size(); //$NON-NLS-1$
 			sb.append(key);
 			namesToValues.put(key, filter.getStringValue());
+					
+			break;
+		case TIME:
+			if (filter.getOperator().operator != Operator.Op.BEFORE && filter.getOperator().operator != Operator.Op.AFTER
+					&& filter.getOperator().operator != Operator.Op.STR_EQUAL) {
+				throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_OpNotSupported3, filter.getOperator().operator.key));
+			}
+
+			sb.append("cast(" ); //$NON-NLS-1$
+			sb.append(columnName);
+			sb.append(" as timeCat ) "); //$NON-NLS-1$
+			sb.append(filter.getOperator().operator.sql);
+			sb.append(" "); //$NON-NLS-1$
+			
+			String tkey = ":a" + namesToValues.size(); //$NON-NLS-1$
+			sb.append(tkey);
+			namesToValues.put(tkey, filter.getStringValue());
 					
 			break;
 		case LIST:

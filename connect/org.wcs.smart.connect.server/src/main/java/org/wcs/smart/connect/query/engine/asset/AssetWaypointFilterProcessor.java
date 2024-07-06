@@ -445,7 +445,8 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		String q = PsqlFilterToSqlGenerator.INSTANCE.asSql(assetFilter, tprefix, engine);
 		
 		String key = engine.addParameterValue(assetFilter.getAttributeKey());
-		if (assetFilter.getAttributeType() == AttributeType.DATE) {
+		if (assetFilter.getAttributeType() == AttributeType.DATE || 
+				assetFilter.getAttributeType() == AttributeType.TIME) {
 			where.append("CASE WHEN " + prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$ //$NON-NLS-2$
 			where.append(" THEN "); //$NON-NLS-1$
 			where.append(q);

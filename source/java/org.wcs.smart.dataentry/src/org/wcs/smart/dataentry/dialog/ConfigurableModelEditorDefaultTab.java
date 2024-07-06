@@ -76,6 +76,7 @@ import org.wcs.smart.dataentry.dialog.composite.ListAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.MListAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.NumericAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.TextAttributeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.TimeAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.TreeAttributeInfoComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -301,6 +302,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 						}
 					}
 					if (attribute.getAttribute().getType() == Attribute.AttributeType.DATE ||
+							attribute.getAttribute().getType() == Attribute.AttributeType.TIME ||
 							attribute.getAttribute().getType() == Attribute.AttributeType.TREE ||
 							attribute.getAttribute().getType() == Attribute.AttributeType.MLIST) {
 						canAttributeGroup = false;
@@ -453,6 +455,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.DATE, attrComposite);
+		
+		attrComposite = new TimeAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.TIME, attrComposite);
 		
 		container.setWeights(new int[]{40,60});
 		

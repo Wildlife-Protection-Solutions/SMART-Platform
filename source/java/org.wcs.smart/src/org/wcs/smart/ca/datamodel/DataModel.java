@@ -519,6 +519,7 @@ public class DataModel extends SimpleDataModel {
 		switch(type) {
 		case BOOLEAN:return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
 		case DATE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+		case TIME: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TIME_ICON);
 		case LINE: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LINE_ICON);
 		case LIST: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
 		case MLIST: return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_MULTI_LIST_ICON);

@@ -89,33 +89,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ATT_DATE_KEY = 43;
   /** RegularExpression Id. */
-  int ATT_GEOM_KEY = 44;
+  int ATT_TIME_KEY = 44;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 45;
+  int ATT_GEOM_KEY = 45;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 46;
+  int CAT_ATT_STR_KEY = 46;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 47;
+  int CAT_ATT_VALUE_KEY = 47;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 48;
+  int CAT_ATT_BOOL_KEY = 48;
   /** RegularExpression Id. */
-  int CAT_ATT_MLIST_KEY = 49;
+  int CAT_ATT_LIST_KEY = 49;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 50;
+  int CAT_ATT_MLIST_KEY = 50;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 51;
+  int CAT_ATT_TREE_KEY = 51;
   /** RegularExpression Id. */
-  int CAT_ATT_GEOM_KEY = 52;
+  int CAT_ATT_DATE_KEY = 52;
   /** RegularExpression Id. */
-  int DATE_STRING = 53;
+  int CAT_ATT_TIME_KEY = 53;
   /** RegularExpression Id. */
-  int DM_KEY = 54;
+  int CAT_ATT_GEOM_KEY = 54;
   /** RegularExpression Id. */
-  int LETTER = 55;
+  int DATE_STRING = 55;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 56;
+  int TIME_STRING = 56;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 57;
+  int DM_KEY = 57;
+  /** RegularExpression Id. */
+  int LETTER = 58;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 59;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 60;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -166,6 +172,7 @@ public interface ParserConstants {
     "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ATT_TIME_KEY>",
     "<ATT_GEOM_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
@@ -174,8 +181,10 @@ public interface ParserConstants {
     "<CAT_ATT_MLIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
+    "<CAT_ATT_TIME_KEY>",
     "<CAT_ATT_GEOM_KEY>",
     "<DATE_STRING>",
+    "<TIME_STRING>",
     "<DM_KEY>",
     "<LETTER>",
     "<SPECIAL_CHARS>",

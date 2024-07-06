@@ -23,6 +23,7 @@ package org.wcs.smart.query.model;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -112,6 +113,8 @@ public class AttributeQueryColumn extends QueryColumn {
 			ctype = ColumnType.BOOLEAN;
 		}else if (type == AttributeType.DATE) {
 			ctype = ColumnType.DATE;
+		}else if (type == AttributeType.TIME) {
+			ctype = ColumnType.TIME;
 		}else if (type.isGeometry()) {
 			ctype = ColumnType.GEOMETRY;
 		}else {
@@ -136,6 +139,8 @@ public class AttributeQueryColumn extends QueryColumn {
 			ctype = ColumnType.BOOLEAN;
 		}else if (type == AttributeType.DATE) {
 			ctype = ColumnType.DATE;
+		}else if (type == AttributeType.TIME) {
+			ctype = ColumnType.TIME;
 		}else if (type.isGeometry()) {
 			ctype = ColumnType.GEOMETRY;
 		}else {
@@ -197,6 +202,11 @@ public class AttributeQueryColumn extends QueryColumn {
 					if (x instanceof String) {
 						//convert strings to dates
 						return LocalDate.parse((String)x, DateTimeFormatter.ISO_LOCAL_DATE);
+					}
+				}else if(getType() == QueryColumn.ColumnType.TIME) {
+					if (x instanceof String) {
+						//convert strings to dates
+						return LocalTime.parse((String)x, DateTimeFormatter.ISO_LOCAL_TIME);
 					}
 				}
 			}

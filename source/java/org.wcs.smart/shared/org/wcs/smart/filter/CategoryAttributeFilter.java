@@ -62,6 +62,28 @@ public class CategoryAttributeFilter implements IFilter{
 	}
 	
 	/**
+	 * Creates a new time category attribute filter
+	 * 
+	 * Time filters are of the form: <DATE> BETWEEN <TIME1> AND <TIME2>
+	 * 
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:h:<key>"
+	 * @param date1 the first date
+	 * @param date2 the second date
+	 * @return
+	 */
+	public static CategoryAttributeFilter createTimeFilter(String catAttributeIdentifier, String time1, String time2, Operator op){
+		
+		String bits[] = catAttributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
+		
+		CategoryFilter cat = CategoryFilter.createFilter(catPart);
+		AttributeFilter att = AttributeFilter.createTimeFilter(attPart, time1, time2, op);
+		
+		return new CategoryAttributeFilter(cat, att);
+	}
+	
+	/**
 	 * 
 	 */
 	public static CategoryAttributeFilter createStringFilter(String catAttributeIdentifier, Operator op, String value){

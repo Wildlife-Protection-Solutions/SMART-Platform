@@ -466,7 +466,13 @@ public class DataGenerator implements IDataEngine{
 			if (random.nextInt(100) < 50) return Boolean.TRUE;
 			return Boolean.FALSE;
 		case DATE:
-			return LocalDate.now().plusDays(random.nextInt());
+			if (random.nextInt(100) < 50) {
+				return LocalDate.now().plusDays(random.nextInt(5));
+			}else {
+				return LocalDate.now().minusDays(random.nextInt(5));
+			}
+		case TIME:
+			return LocalTime.now().plusMinutes(random.nextInt());
 		case LIST:
 			if (a.getActiveListItems().isEmpty()) return null;
 			return a.getActiveListItems().get(random.nextInt(a.getActiveListItems().size()));

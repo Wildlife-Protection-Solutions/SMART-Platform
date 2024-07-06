@@ -337,6 +337,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnAttributeKey;
 		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.BOOLEAN_VALUE) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnBooleanValue;
 		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.DATE_VALUE) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnDateValue;
+		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.TIME_VALUE) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnTimeValue;
 		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LINESTRING_VALUE) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnLsValue;
 		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.LOCATIONID) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnLocationIdValue;
 		if (item == RecordLocationObservationDetailsDatasetResultSetMetadata.Column.NUMBER_VALUE) return Messages.IntelligenceLabelProviderImpl_RecordObsDetailsColumnNumberValue;

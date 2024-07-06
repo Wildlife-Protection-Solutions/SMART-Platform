@@ -39,7 +39,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateTimeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 
@@ -96,11 +96,11 @@ public class SystemAttributeFilterItem extends BasicTreeFilterItem {
 		if (attribute == SystemAttribute.RECORD_DATE_CREATED ||
 				attribute == SystemAttribute.RECORD_DATE_MODIFIED ||
 				attribute == SystemAttribute.RECORD_DATE) {	
-			DateDropItem di = new DateDropItem(MessageFormat.format("{0} (Record)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
+			DateTimeDropItem di = new DateTimeDropItem( DateTimeDropItem.Type.DATE, MessageFormat.format("{0} (Record)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
 			return new DropItem[] {di};
 		}else if (attribute == SystemAttribute.ENTITY_DATE_CREATED ||
 					attribute == SystemAttribute.ENTITY_DATE_MODIFIED) {	
-				DateDropItem di = new DateDropItem(MessageFormat.format("{0} (Entity)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
+				DateTimeDropItem di = new DateTimeDropItem(DateTimeDropItem.Type.DATE, MessageFormat.format("{0} (Entity)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
 				return new DropItem[] {di};
 		}else if (attribute == SystemAttribute.RECORD_SOURCE) {
 			try(Session session = HibernateManager.openSession()){

@@ -41,9 +41,11 @@ TOKEN :
  | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+ | < ATT_TIME_KEY : "attribute:h:"< DM_KEY > >
  | < ATT_GEOM_KEY : "attribute:"("p" | "i")":"< DM_KEY > >  
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
- | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>
+ | < TIME_STRING : < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT >>  
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>}TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 IFilter ParseQuery():
@@ -175,6 +177,9 @@ IFilter AttributeExpression():
 	| 
 	/* date */
 	filter = DateItemExpression()
+	| 
+	/* time */
+	filter = TimeItemExpression()
 	|	
 	/* attribute list items */
 	(
@@ -230,6 +235,29 @@ IFilter DateItemExpression():
 	)
 	{
   		filter = AttributeFilter.createDateFilter(key, date1, date2, op);
+  		return filter;
+	}
+}
+
+IFilter TimeItemExpression():
+{
+  IFilter filter = null;
+  String key = null;
+  String time1 = null;
+  String time2 = null;
+  Operator op = null;
+}
+{
+	
+	(
+		< ATT_TIME_KEY > {key = token.image;}
+		op = DateOp()
+		< TIME_STRING >  {time1 = token.image;}
+		< K_AND >
+		< TIME_STRING > {time2 = token.image;}
+	)
+	{
+  		filter = AttributeFilter.createDateFilter(key, time1, time2, op);
   		return filter;
 	}
 }

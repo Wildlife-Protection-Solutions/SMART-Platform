@@ -215,7 +215,7 @@ public class PatrolJsonUtils {
 					value = LocalDate.parse((String)value, DATEFORMAT);
 				}else {
 					value = null;
-				}
+				}			
 			}
 			
 			if (value == null) continue;

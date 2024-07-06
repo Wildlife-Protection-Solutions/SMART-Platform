@@ -205,6 +205,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		switch(type) {
 			case BOOLEAN: return Messages.getString("SmartLabelProvider.BooleanAttType",l); //$NON-NLS-1$
 			case DATE: return Messages.getString("SmartLabelProvider.DateAttType",l); //$NON-NLS-1$
+			case TIME: return Messages.getString("SmartLabelProvider.TimeAttType", l); //$NON-NLS-1$
 			case LIST: return Messages.getString("SmartLabelProvider.ListAttType",l); //$NON-NLS-1$
 			case MLIST: return Messages.getString("SmartLabelProvider.MultiListAttType",l); //$NON-NLS-1$
 			case NUMERIC: return Messages.getString("SmartLabelProvider.NumericAttType",l); //$NON-NLS-1$

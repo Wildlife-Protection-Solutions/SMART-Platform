@@ -30,7 +30,9 @@ package org.wcs.smart.asset.map.engine;
 public class AttributeExpression implements IExpression{
 
 	public static final String UI_DATE_FORMAT = "YYYY-MM-DD"; //$NON-NLS-1$
+	public static final String UI_TIME_FORMAT = "HH:MM:SS"; //$NON-NLS-1$
 	public static final String JAVA_DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
+	public static final String JAVA_TIME_FORMAT = "HH:mm:ss"; //$NON-NLS-1$
 	
 	public static AttributeExpression parse(String attributeKey, Operator op, String strValue) {
 		return new AttributeExpression(attributeKey, op, strValue);

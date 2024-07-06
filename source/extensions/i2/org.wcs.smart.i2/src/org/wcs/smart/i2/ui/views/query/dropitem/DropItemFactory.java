@@ -438,7 +438,7 @@ public class DropItemFactory {
 		DropItem di = new SystemAttributeFilterItem(filter.getAttribute()).asDropItem()[0];
 		
 		if (filter.getAttribute().isDate()) {
-			((DateDropItem)di).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+			((DateTimeDropItem)di).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
 		}else {
 			((OptionDropItem)di).setInitialValue(filter.getStringKey());
 		}
@@ -477,7 +477,7 @@ public class DropItemFactory {
 				((TextBoxDropItem)item).setInitialValue(filter.getOperator(), filter.getStringValue());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.DATE){
-				((DateDropItem)item).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+				((DateTimeDropItem)item).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.BOOLEAN){
 				return Collections.singletonList(item);
@@ -523,9 +523,9 @@ public class DropItemFactory {
 			item.setInitialValue(filter.getOperator(), filter.getStringValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.DATE){
-			DateDropItem item = new DateDropItem(name, queryKeyPart, canEdit());
+			DateTimeDropItem item = new DateTimeDropItem(DateTimeDropItem.Type.DATE, name, queryKeyPart, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
-			return Collections.singletonList(item);
+			return Collections.singletonList(item);		
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.BOOLEAN){
 			TextDropItem item = new TextDropItem(name, queryKeyPart);
 			return Collections.singletonList(item);
@@ -606,8 +606,12 @@ public class DropItemFactory {
 			item.setInitialValue(filter.getOperator(), filter.getStringValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.DATE){
-			DateDropItem item = new DateDropItem(name, queryKeyPart, canEdit());
+			DateTimeDropItem item = new DateTimeDropItem(DateTimeDropItem.Type.DATE, name, queryKeyPart, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+			return Collections.singletonList(item);
+		}else if (filter.getAttributeType() == Attribute.AttributeType.TIME){
+			DateTimeDropItem item = new DateTimeDropItem(DateTimeDropItem.Type.TIME, name, queryKeyPart, canEdit());
+			item.setInitialValue(filter.getOperator(), filter.getTimeValues()[0], filter.getTimeValues()[1]);
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.BOOLEAN){
 			TextDropItem item = new TextDropItem(name, queryKeyPart);
@@ -679,7 +683,7 @@ public class DropItemFactory {
 			di = new TextDropItem(a.getName(), key);
 			break;
 		case DATE:
-			di = new DateDropItem(a.getName(), key, true);
+			di = new DateTimeDropItem(DateTimeDropItem.Type.DATE, a.getName(), key, true);
 			break;
 		case LIST:
 			String[] names = new String[a.getAttributeList().size()];

@@ -295,7 +295,8 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		String[][] sortColumns = new String[][]{
 			{"str_sort", "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			{"dbl_sort", "double"}, //$NON-NLS-1$ //$NON-NLS-2$
-			{"date_sort", "date"}		 //$NON-NLS-1$ //$NON-NLS-2$
+			{"date_sort", "date"},		 //$NON-NLS-1$ //$NON-NLS-2$
+			{"time_sort", "time"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		StringBuilder insert = new StringBuilder();

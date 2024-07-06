@@ -52,6 +52,7 @@ public class CyberTrackerLabelProvider implements ICyberTrackerLabelProvider{
 		if (item ==  JsonImportWarning.Type.INVALID_PHOTO_ATTACHMENT) return Messages.CyberTrackerLabelProvider_ObservationParseError11;
 		if (item ==  JsonImportWarning.Type.COULD_NOT_PARSE_BOOLEAN) return Messages.CyberTrackerLabelProvider_ObservationParseError12;
 		if (item ==  JsonImportWarning.Type.COULD_NOT_PARSE_DATE) return Messages.CyberTrackerLabelProvider_ObservationParseError13;
+		if (item ==  JsonImportWarning.Type.COULD_NOT_PARSE_TIME) return Messages.CyberTrackerLabelProvider_ObservationTimeParseError;
 		if (item ==  JsonImportWarning.Type.DUPLICATE_ATTRIBUTES) return Messages.CyberTrackerLabelProvider_ObservationParseError14;
 		if (item ==  JsonImportWarning.Type.OBS_ATTRIBUTE_PARSE_ERROR) return Messages.CyberTrackerLabelProvider_ObservationParseError15;
 		if (item ==  JsonImportWarning.Type.DEFAULT_ATTRIBUTE_PARSE_ERROR) return Messages.CyberTrackerLabelProvider_ObservationParseError16;

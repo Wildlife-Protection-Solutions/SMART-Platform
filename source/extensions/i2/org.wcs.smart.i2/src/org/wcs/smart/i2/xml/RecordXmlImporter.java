@@ -888,6 +888,7 @@ public class RecordXmlImporter {
 					newValue.setNumberValue(recordAttribute.getNumberValue());
 					break;
 				case DATE:
+				case TIME:
 				case TEXT:
 					if (recordAttribute.getStringValue() == null) continue;
 					newValue.setStringValue(recordAttribute.getStringValue());

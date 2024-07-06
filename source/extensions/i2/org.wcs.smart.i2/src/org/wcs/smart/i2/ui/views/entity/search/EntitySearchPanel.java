@@ -83,7 +83,7 @@ import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateTimeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
@@ -259,12 +259,12 @@ public abstract class EntitySearchPanel extends Composite {
 				}else {
 				
 					String[] queryParts = p.split(" "); //$NON-NLS-1$
-					DropItem di = new DateDropItem(getName(sa), queryParts[0], true);
+					DropItem di = new DateTimeDropItem(DateTimeDropItem.Type.DATE, getName(sa), queryParts[0], true);
 					Operator op = Operator.parse(queryParts[1]);
 					try {
 						LocalDate d1 = LocalDate.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
 						LocalDate d2 = LocalDate.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
-						((DateDropItem)di).setInitialValue(op, d1, d2);
+						((DateTimeDropItem)di).setInitialValue(op, d1, d2);
 						toAdd.add(di);
 					}catch (Exception ex) {
 						toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_InvalidDates, queryParts[2], queryParts[4])));
@@ -342,7 +342,7 @@ public abstract class EntitySearchPanel extends Composite {
 							Operator op = Operator.parse(queryParts[1]);
 							LocalDate d1 = LocalDate.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
 							LocalDate d2 = LocalDate.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
-							((DateDropItem)di).setInitialValue(op, d1, d2);
+							((DateTimeDropItem)di).setInitialValue(op, d1, d2);
 						}else if (ia.getType() == IntelAttribute.AttributeType.LIST){
 							String listKey = p.split(" ")[2]; //$NON-NLS-1$
 							((OptionDropItem)di).setInitialValue(listKey);
@@ -565,7 +565,7 @@ public abstract class EntitySearchPanel extends Composite {
 	
 	private DropItem createSystemAttributeDropItem(SystemAttributeFilter.SystemAttribute attribute){
 		String key = SystemAttributeFilter.SA_KEY + DropItemFactory.ITEM_SEPARATOR + IntelAttribute.AttributeType.DATE + DropItemFactory.ITEM_SEPARATOR + attribute.name().toLowerCase(Locale.ROOT);
-		return new DateDropItem(getName(attribute), key, true);
+		return new DateTimeDropItem(DateTimeDropItem.Type.DATE, getName(attribute), key, true);
 	}
 	
 	private String getName(SystemAttributeFilter.SystemAttribute attribute) {

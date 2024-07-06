@@ -506,7 +506,8 @@ public class AssetFilterProcessor implements IFilterProcessor {
 				String q = PsqlFilterToSqlGenerator.INSTANCE.asSql(aFilter, tprefix, engine);
 				
 				String key = engine.addParameterValue(aFilter.getAttributeKey());
-				if (aFilter.getAttributeType() == AttributeType.DATE) {
+				if (aFilter.getAttributeType() == AttributeType.DATE || 
+						aFilter.getAttributeType() == AttributeType.TIME ) {
 					where.append("CASE WHEN " + prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$ //$NON-NLS-2$
 					where.append(" THEN "); //$NON-NLS-1$
 					where.append(q);

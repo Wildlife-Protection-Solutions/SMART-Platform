@@ -174,6 +174,7 @@ public class Messages extends NLS {
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_numbervaluecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_PolgyonGeometryName;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_stringvaluecolumnname;
+	public static String IncidentObservationAttributeDatasetResultSetMetadata_timevaluecolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_uuidcolumnname;
 	public static String IncidentObservationAttributeDatasetResultSetMetadata_valueasstringcolumnname;
 	public static String IncidentObservationDatasetResultSetMetadata_catfullcolumnname;
@@ -274,6 +275,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_InvalidDateString;
 	public static String XmlToIncident_InvalidGeometry;
 	public static String XmlToIncident_InvalidSource;
+	public static String XmlToIncident_InvalidTimeString;
 	public static String XmlToIncident_ListValueNotFound;
 	public static String XmlToIncident_MultpleAttributeValues;
 	public static String XmlToIncident_NoValidItemsForMultiList;

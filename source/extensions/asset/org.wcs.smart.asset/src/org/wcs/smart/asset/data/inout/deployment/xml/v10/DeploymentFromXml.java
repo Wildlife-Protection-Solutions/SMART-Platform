@@ -338,6 +338,7 @@ public class DeploymentFromXml {
 									 woa.setNumberValue(xmla.getDoubleValue());
 									 break;
 								case DATE:
+								case TIME:
 								case TEXT:
 									if (xmla.getStringValue().size() == 1)
 										woa.setStringValue(xmla.getStringValue().get(0));
@@ -539,6 +540,7 @@ public class DeploymentFromXml {
 						ok = (a.getNumberValue() != null && a.getNumberValue().equals(test.getNumberValue())) || (a.getNumberValue() == null && test.getNumberValue() == null);
 						break;
 					case DATE:
+					case TIME:
 					case TEXT:
 						ok = (a.getStringValue() != null && a.getStringValue().equals(test.getStringValue())) || (a.getStringValue() == null && test.getStringValue() == null); 
 						break;

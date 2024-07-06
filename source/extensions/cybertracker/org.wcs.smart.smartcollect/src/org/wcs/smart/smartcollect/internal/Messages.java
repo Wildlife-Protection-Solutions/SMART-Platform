@@ -137,6 +137,8 @@ public class Messages extends NLS {
 	public static String XmlToIncident_GeometryError;
 	public static String XmlToIncident_GeometrySourceError;
 	public static String XmlToIncident_InvalidDate;
+
+	public static String XmlToIncident_InvalidTime;
 	public static String XmlToIncident_ListKeyNotFound;
 	public static String XmlToIncident_MultiKeys;
 	public static String XmlToIncident_MultiValues;

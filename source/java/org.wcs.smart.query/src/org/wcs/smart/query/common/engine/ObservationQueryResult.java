@@ -114,6 +114,9 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 				case DATE:
 					result = "order by DATE(" + TXT_SORT + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 					break;
+				case TIME:
+					result = "order by TIME(" + TXT_SORT + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+					break;
 				default:
 					result = "order by UPPER(" + TXT_SORT + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 					break;
@@ -154,6 +157,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 			case LIST:
 			case TREE:
 			case DATE:
+			case TIME:
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(getResultsTable());
@@ -195,6 +199,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 				break;
 			case TEXT:
 			case DATE:
+			case TIME:
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(getResultsTable());

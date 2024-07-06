@@ -116,7 +116,10 @@ public class CtJsonUtil {
 	
 	//date attributes come through in a different format; only applicable to date attributes
 	public static final String JSON_ATTRIBUTE_DATE_FORMAT_STR = "yyyy/MM/dd";  //$NON-NLS-1$
-	
+	//time attributes come through in a different format; only applicable to date attributes
+	public static final String JSON_ATTRIBUTE_TIME_FORMAT_STR = "HH:mm:ss";  //$NON-NLS-1$
+		
+		
 	//example string: "2019-12-30T22:48:26.0-08:00"
 	private static final String JSON_DATE_FORMAT_STRX = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
 	public static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSS"; //$NON-NLS-1$
@@ -302,15 +305,36 @@ public class CtJsonUtil {
 			try {
 				date = CtJsonUtil.parseJsonDateTime((String)value);				
 			}catch (Exception ex) {}
-			try {
-				date = LocalDate.parse((String)value, DateTimeFormatter.ofPattern(JSON_ATTRIBUTE_DATE_FORMAT_STR)).atStartOfDay();
-			}catch (Exception ex) {}
 			
 			if (date == null) {
-				warnings.add(new JsonImportWarning(Type.COULD_NOT_PARSE_DATE, value.toString()));
+				try {
+					date = LocalDate.parse((String)value, DateTimeFormatter.ofPattern(JSON_ATTRIBUTE_DATE_FORMAT_STR)).atStartOfDay();
+				}catch (Exception ex) {}
+			}
+			
+			if (date == null) {
+				warnings.add(new JsonImportWarning(Type.COULD_NOT_PARSE_DATE, value.toString(), JSON_ATTRIBUTE_DATE_FORMAT_STR, JSON_DATE_FORMAT_STRX ));
 				return false;
 			}
 			toUpdate.setDateValue(date.toLocalDate());
+			
+		}else if (att.getType() == AttributeType.TIME){
+			LocalTime time = null;
+			try {
+				time = CtJsonUtil.parseJsonDateTime((String)value).toLocalTime();				
+			}catch (Exception ex) {}
+			
+			if (time == null) {
+				try {
+					time = LocalTime.parse((String)value, DateTimeFormatter.ofPattern(JSON_ATTRIBUTE_TIME_FORMAT_STR));
+				}catch (Exception ex) {}
+			}
+			
+			if (time == null) {
+				warnings.add(new JsonImportWarning(Type.COULD_NOT_PARSE_TIME, value.toString(), JSON_ATTRIBUTE_TIME_FORMAT_STR, JSON_DATE_FORMAT_STRX ));
+				return false;
+			}
+			toUpdate.setTimeValue(time);
 			
 		}else if (att.getType() == AttributeType.LIST){
 			String listElement = (String) value;

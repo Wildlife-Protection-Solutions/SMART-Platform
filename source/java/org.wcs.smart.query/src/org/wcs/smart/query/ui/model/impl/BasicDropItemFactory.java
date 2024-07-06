@@ -151,7 +151,8 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 		if (ca.getAttribute().getType() == AttributeType.BOOLEAN || 
 				ca.getAttribute().getType() == AttributeType.NUMERIC ||
 				ca.getAttribute().getType() == AttributeType.TEXT ||
-				ca.getAttribute().getType() == AttributeType.DATE ){
+				ca.getAttribute().getType() == AttributeType.DATE || 
+				ca.getAttribute().getType() == AttributeType.TIME){
 			return new AttributeDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.LIST ){
 			return new AttributeListQueryDropItem(ca);
@@ -169,7 +170,8 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 		if (attribute.getType() == AttributeType.BOOLEAN || 
 				attribute.getType() == AttributeType.NUMERIC ||
 				attribute.getType() == AttributeType.TEXT ||
-				attribute.getType() == AttributeType.DATE ){
+				attribute.getType() == AttributeType.DATE ||
+				attribute.getType() == AttributeType.TIME ){
 			return new AttributeDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.LIST ){
 			return new AttributeListQueryDropItem(attribute);
@@ -479,6 +481,8 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 			}
 			it.initializeData(ali);
 		}else if (attributeType == AttributeType.DATE){
+			it.initializeData(new String[]{(String)value1, (String)filter.getValue2(), filter.getOperator().getGuiValue()});
+		}else if (attributeType == AttributeType.TIME){
 			it.initializeData(new String[]{(String)value1, (String)filter.getValue2(), filter.getOperator().getGuiValue()});
 		}else if (attributeType == AttributeType.MLIST) {
 			List<ListItem> init = new ArrayList<>();

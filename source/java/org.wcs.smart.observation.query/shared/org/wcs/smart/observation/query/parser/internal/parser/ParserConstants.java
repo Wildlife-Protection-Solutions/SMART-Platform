@@ -87,85 +87,91 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ATT_DATE_KEY = 42;
   /** RegularExpression Id. */
-  int ATT_GEOM_KEY = 43;
+  int ATT_TIME_KEY = 43;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 44;
+  int ATT_GEOM_KEY = 44;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 45;
+  int CAT_ATT_STR_KEY = 45;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 46;
+  int CAT_ATT_VALUE_KEY = 46;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 47;
+  int CAT_ATT_BOOL_KEY = 47;
   /** RegularExpression Id. */
-  int CAT_ATT_MLIST_KEY = 48;
+  int CAT_ATT_LIST_KEY = 48;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 49;
+  int CAT_ATT_MLIST_KEY = 49;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 50;
+  int CAT_ATT_TREE_KEY = 50;
   /** RegularExpression Id. */
-  int CAT_ATT_GEOM_KEY = 51;
+  int CAT_ATT_DATE_KEY = 51;
   /** RegularExpression Id. */
-  int DM_KEY = 52;
+  int CAT_ATT_TIME_KEY = 52;
   /** RegularExpression Id. */
-  int BYTE_STRING = 53;
+  int CAT_ATT_GEOM_KEY = 53;
   /** RegularExpression Id. */
-  int DATE_STRING = 54;
+  int DM_KEY = 54;
   /** RegularExpression Id. */
-  int LETTER = 55;
+  int BYTE_STRING = 55;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 56;
+  int DATE_STRING = 56;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 57;
+  int TIME_STRING = 57;
   /** RegularExpression Id. */
-  int AREA_KEY = 58;
+  int LETTER = 58;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 59;
+  int SPECIAL_CHARS = 59;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 60;
+  int AREA_TYPE_KEY = 60;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_KEY = 61;
+  int AREA_KEY = 61;
   /** RegularExpression Id. */
-  int WAYPOINT_ID_KEY = 62;
+  int OBSERVATION_FILTER_TYPE_KEY = 62;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_KEY = 63;
+  int WAYPOINT_FILTER_TYPE_KEY = 63;
   /** RegularExpression Id. */
-  int WAYPOINT_CM_KEY = 64;
+  int WAYPOINT_SOURCE_KEY = 64;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 65;
+  int WAYPOINT_ID_KEY = 65;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 66;
+  int WAYPOINT_OBSERVER_KEY = 66;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 67;
+  int WAYPOINT_CM_KEY = 67;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_GEOMETRY_KEY = 68;
+  int SUM_CAT_VALUE_KEY = 68;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_GEOMETRY_KEY = 69;
+  int SUM_ATTRIBUTE_VALUE_KEY = 69;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 70;
+  int SUM_CAT_ATT_VALUE_KEY = 70;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 71;
+  int SUM_ATTRIBUTE_GEOMETRY_KEY = 71;
   /** RegularExpression Id. */
-  int AGG = 72;
+  int SUM_CAT_ATT_GEOMETRY_KEY = 72;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 73;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 73;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 74;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 74;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 75;
+  int AGG = 75;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 76;
+  int DATE_GROUPBY_ITEM = 76;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 77;
+  int QUERY_SPLITTER = 77;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 78;
+  int CATEGORY_GROUPBY_ITEM = 78;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_GROUP_BY = 79;
+  int AREA_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int WAYPOINT_CM_GROUP_BY = 80;
+  int ATTRIBUTE_GROUPBY_ITEM = 80;
   /** RegularExpression Id. */
-  int CA_GROUP_BY = 81;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 81;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 82;
+  int WAYPOINT_SOURCE_GROUP_BY = 82;
+  /** RegularExpression Id. */
+  int WAYPOINT_CM_GROUP_BY = 83;
+  /** RegularExpression Id. */
+  int CA_GROUP_BY = 84;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 85;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -215,6 +221,7 @@ public interface ParserConstants {
     "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ATT_TIME_KEY>",
     "<ATT_GEOM_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
@@ -223,10 +230,12 @@ public interface ParserConstants {
     "<CAT_ATT_MLIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
+    "<CAT_ATT_TIME_KEY>",
     "<CAT_ATT_GEOM_KEY>",
     "<DM_KEY>",
     "<BYTE_STRING>",
     "<DATE_STRING>",
+    "<TIME_STRING>",
     "<LETTER>",
     "<SPECIAL_CHARS>",
     "<AREA_TYPE_KEY>",

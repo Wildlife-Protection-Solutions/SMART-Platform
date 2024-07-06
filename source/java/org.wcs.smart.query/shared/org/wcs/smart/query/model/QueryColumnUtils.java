@@ -101,6 +101,23 @@ public abstract class QueryColumnUtils implements Cloneable{
 					x = ((LocalDateTime) x).toLocalDate();
 				}
 			}
+		}else if (column.getType() == QueryColumn.ColumnType.TIME) {
+			
+			if (descriptor.getType().getBinding().equals(String.class)){
+				LocalTime date = null;
+				if (x instanceof LocalTime) {
+					date = (LocalTime) x;
+				}else if (x instanceof LocalDateTime) {
+					date = ((LocalDateTime) x).toLocalTime();
+				}
+				if (date != null) {
+					x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(date);
+				}
+			}else if (descriptor.getType().getBinding().equals(LocalTime.class)) {
+				if (x instanceof LocalDateTime) {
+					x = ((LocalDateTime) x).toLocalTime();
+				}
+			}
 			
 			
 		}else if (column.getType() == QueryColumn.ColumnType.GEOMETRY) {

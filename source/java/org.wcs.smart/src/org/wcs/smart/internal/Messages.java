@@ -56,6 +56,7 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog2_NewMultiListMsg;
 	public static String AddAttributeDialog2_NewNumberMsg;
 	public static String AddAttributeDialog2_NewTextMsg;
+	public static String AddAttributeDialog2_NewTimeMsg;
 	public static String AddAttributeDialog2_NewTreeMsg;
 	public static String Agency_AgencyName;
 	public static String AgencyCsvImporter_Error_IncorrectFieldsNumber;
@@ -1457,6 +1458,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_StationsTableName;
 	public static String SmartLabelProvider_TeamsColumnLabel;
 	public static String SmartLabelProvider_TextAttributeType;
+	public static String SmartLabelProvider_TimeAttributeType;
 	public static String SmartLabelProvider_TreeAttributeType;
 	public static String SmartLayerStyleInterceptor_StyleError;
 	public static String SmartPlugIn_Error_Dialog_Title;

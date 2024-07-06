@@ -54,6 +54,8 @@ public class AttributeFieldFactory {
 			return new TreeAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.DATE){
 			return new DateAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.TIME){
+			return new TimeAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.POLYGON){
 			return new GeometryAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.LINE){

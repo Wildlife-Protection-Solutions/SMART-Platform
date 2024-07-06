@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -243,6 +244,7 @@ public class IntelObservationAttribute extends UuidItem{
 			case BOOLEAN:
 			case NUMERIC:return getNumberValue();
 			case DATE: return getDateValue();
+			case TIME: return getTimeValue();
 			case LIST: return getAttributeListItem();
 			case MLIST: {
 				if (getAttributeListItems() == null) return Collections.emptySet();
@@ -288,6 +290,39 @@ public class IntelObservationAttribute extends UuidItem{
 		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 	
+	/**
+	 * Date attribute types are stored
+	 * as in the string field in the ISO8601.
+	 * This is a transient
+	 * function which converts the string value to 
+	 * a time.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public LocalTime getTimeValue(){
+		if (getStringValue() == null){
+			return null;
+		}
+		return LocalTime.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_TIME);
+	}
+	
+	/**
+	 * This calls setStringValue formating the
+	 * time as required for SMART
+	 * @return
+	 */
+	@Transient
+	public void setTimeValue(LocalTime time){
+		if (time == null){
+			setStringValue(null);
+			return;
+		}
+		//derby doesn't support nano seconds
+		time = time.withNano(0);
+		setStringValue(DateTimeFormatter.ISO_LOCAL_TIME.format(time));
+	}
+	
 	
 	/**
 	 * The string representation of the attribute value based
@@ -313,6 +348,11 @@ public class IntelObservationAttribute extends UuidItem{
 		case DATE:
 			if (getStringValue() != null){
 				text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
+			}
+			break;
+		case TIME:
+			if (getStringValue() != null){
+				text = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(getTimeValue());
 			}
 			break;
 		case NUMERIC:
@@ -398,6 +438,15 @@ public class IntelObservationAttribute extends UuidItem{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for date attribute"); //$NON-NLS-1$
 			}
 			break;
+		case TIME:
+			if (newValue == null){
+				setTimeValue(null);
+			}else if (newValue instanceof LocalTime){
+				setTimeValue((LocalTime)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for time attribute"); //$NON-NLS-1$
+			}
+			break;			
 		case LIST:
 			if (newValue == null){
 				setAttributeListItem(null);

@@ -328,6 +328,8 @@ public class CategoryColumnComposite extends Composite {
 				part = "[" + a.getKeyId() + " < =|<>|<|>|<=|>= > <VALUE>]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (a.getType() == AttributeType.DATE) {
 				part = "[" + a.getKeyId() + " <equals|before|after> <" + AttributeExpression.UI_DATE_FORMAT + ">]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}else if (a.getType() == AttributeType.TIME) {
+				part = "[" + a.getKeyId() + " <equals|before|after> <" + AttributeExpression.UI_TIME_FORMAT + ">]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		if (part != null) {

@@ -309,6 +309,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		switch(type) {
 			case BOOLEAN: return Messages.SmartLabelProvider_BooleanAttributeType;
 			case DATE: return Messages.SmartLabelProvider_DateAttributeType;
+			case TIME: return Messages.SmartLabelProvider_TimeAttributeType;
 			case LIST: return Messages.SmartLabelProvider_ListAttributeType;
 			case MLIST: return Messages.SmartLabelProvider_MultiListAttributeType;
 			case NUMERIC: return Messages.SmartLabelProvider_NumericAttributeType;
