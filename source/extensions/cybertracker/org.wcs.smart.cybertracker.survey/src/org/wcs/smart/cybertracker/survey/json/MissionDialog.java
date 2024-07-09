@@ -423,7 +423,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			sl.setText(Messages.MissionDialog_SurveyLabel);
 			sl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 			
-			SurveyFilteredComboViewer surveyViewer = new SurveyFilteredComboViewer(op, e.getValue().getNewSurveyDesign(), true, false);
+			SurveyFilteredComboViewer surveyViewer = new SurveyFilteredComboViewer(op, e.getValue().getNewSurveyDesign(), true, false, session);
 			surveyViewer.setEnabled(true);
 			surveyViewer.addSelectionChangedListener(listener);
 			surveyViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -437,7 +437,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			
 			ArrayList<Mission> mm = new ArrayList<>(moreMissions);
 			mm.remove(e.getValue().getMission());
-			MissionFilteredComboViewer viewer = new MissionFilteredComboViewer(op, mm);
+			MissionFilteredComboViewer viewer = new MissionFilteredComboViewer(op, mm, session);
 			
 			String[] dkeys = missions.values().stream().map(item->item.getNewSurveyDesign()).distinct().map(item->item.getKeyId()).toArray(String[]::new);
 			viewer.getFilter().setSurveyState(null);
