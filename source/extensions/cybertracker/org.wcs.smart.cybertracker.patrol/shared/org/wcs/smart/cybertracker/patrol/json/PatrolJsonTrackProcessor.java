@@ -198,7 +198,7 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 				sb.deleteCharAt(sb.length() - 1);
 				sb.deleteCharAt(sb.length() - 1);
 				
-				warnings.add(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dt), sb.toString()));
+				warnings.add(new PatrolJsonImportWarning(PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(dt), sb.toString()));
 			}
 		}
 		return processed;

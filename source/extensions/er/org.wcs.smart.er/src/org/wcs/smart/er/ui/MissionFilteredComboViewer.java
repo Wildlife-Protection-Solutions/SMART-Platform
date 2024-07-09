@@ -54,6 +54,22 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> {
 	private LabelProvider missionLblProvider;
 	private List<Mission> additionalMissions;
 	
+	//optional; can be null
+	private Session session;
+	
+	/**
+	 * 
+	 * @param parent
+	 * @param addMissions list of missions not yet in database that should be
+	 * added to list (irregardless of filter)  Can be null
+	 * @param session optional
+	 */
+	public MissionFilteredComboViewer(Composite parent, List<Mission> addMissions, Session session) {
+		super(parent);
+		this.session = session;
+		this.additionalMissions = addMissions;
+	}
+	
 	/**
 	 * 
 	 * @param parent
@@ -74,6 +90,7 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> {
 	
 	@Override
 	public void updateContent() {
+		System.out.println("update");
 		LoadMissionIdJob job = getJob();
 		job.cancel();
 		Mission currentPatrol = getSelection();
@@ -144,57 +161,64 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> {
             if (viewer == null || viewer.getControl().isDisposed() || isDisposed()){
                 return Status.OK_STATUS;
             }
-            getDisplay().asyncExec(new Runnable(){
-                @Override
-                public void run() {
-                    if (viewer.getControl().isDisposed()){
-                        return ;
-                    }
-                    viewer.setInput(data);
-                    if (preselectedMission != null) {
-//                    	setStopSelectionPropogation(true);
-                    	viewer.setSelection(new StructuredSelection(preselectedMission));
-                    }
-                    MissionFilteredComboViewer.this.getParent().getParent().layout(true);
-                }});
+            getDisplay().asyncExec(()->{
+            	if (viewer.getControl().isDisposed()) return;
+                viewer.setInput(data);
+                if (preselectedMission != null) {
+                	viewer.setSelection(new StructuredSelection(preselectedMission));
+                }
+                MissionFilteredComboViewer.this.getParent().getParent().layout(true);
+            });
             return Status.OK_STATUS;
         }
  
         private List<Mission> loadMissionIds() {
-        	try(Session s = HibernateManager.openSession()){
-        		List<SurveyMissionProxy> items = getFilter().executeQuery(s);
+        	if (session == null) {
+        		try(Session s = HibernateManager.openSession()){
+        			return loadMissionIds(s);
+        		}
+        	}else {
+        		synchronized (session) {
+        			return loadMissionIds(session);	
+				}
         		
-        		List<Mission> missions = new ArrayList<Mission>();
-        		boolean defaultPresent = preselectedMission == null; //indicated if default patrol id is in filtered list
-        		for (SurveyMissionProxy survey : items) {
-        			for (SurveyMissionProxy mission : survey.getMissions()) {
-        			
-	        			Mission p = new Mission();
-	        			p.setUuid(mission.getUuid());
-	        			p.setId(mission.getId());
-	        			p.setStartDate(mission.getStartDate());
-	        			p.setEndDate(mission.getEndDate());
-	        			
-	        			defaultPresent = defaultPresent || p.equals(preselectedMission);
-	        			missions.add(p);
-        			}
-        		}
-        		if (additionalMissions != null){
-        			for (Mission m : additionalMissions){
-        				if (m == preselectedMission){
-        					defaultPresent = true;
-        				}
-        			}
-        			missions.addAll(additionalMissions);
-        		}
-        		
-        		if (!defaultPresent) {
-        			//we don't want to reset selection to null if previously selected patrol is not in filtered list
-        			//this is why we add it to result list
-        			missions.add(preselectedMission);
-        		}
-        		return missions;
         	}
+        }
+        		
+        private List<Mission> loadMissionIds(Session session) {
+        	List<SurveyMissionProxy> items = getFilter().executeQuery(session);
+        		
+        	List<Mission> missions = new ArrayList<Mission>();
+        	boolean defaultPresent = preselectedMission == null; //indicated if default patrol id is in filtered list
+        	for (SurveyMissionProxy survey : items) {
+        		for (SurveyMissionProxy mission : survey.getMissions()) {
+        			
+	        		Mission p = new Mission();
+	        		p.setUuid(mission.getUuid());
+	        		p.setId(mission.getId());
+	        		p.setStartDate(mission.getStartDate());
+	        		p.setEndDate(mission.getEndDate());
+	        		
+	        		defaultPresent = defaultPresent || p.equals(preselectedMission);
+	        		missions.add(p);
+        		}
+        	}
+        	if (additionalMissions != null){
+        		for (Mission m : additionalMissions){
+        			if (m == preselectedMission){
+        				defaultPresent = true;
+        			}
+        		}
+        		missions.addAll(additionalMissions);
+        	}
+        		
+        	if (!defaultPresent) {
+        		//we don't want to reset selection to null if previously selected patrol is not in filtered list
+        		//this is why we add it to result list
+        		missions.add(preselectedMission);
+        	}
+        	return missions;
+        	
         }
         
         public void setPreselectedPatrol(Mission preselectedMission) {

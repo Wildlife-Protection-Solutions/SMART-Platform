@@ -75,6 +75,22 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 	private List<Survey> additionalSurveys;
 	
 	private boolean includeMissionDateFilter;
+	
+	//optional; can be null
+	private Session session;
+	
+	/**
+	 * 
+	 * @param parent
+	 * @param sd initial survey design; must be provided
+	 * @param createNew if users can create new surveys;  a single
+	 * @param session optional; can be null
+	 * new survey listener can be added to detect these new surveys
+	 */
+	public SurveyFilteredComboViewer(Composite parent, final SurveyDesign sd, boolean createNew,
+			boolean includeMissionDateFilter) {
+		this(parent, sd, createNew, includeMissionDateFilter, null);
+	}
 	/**
 	 * 
 	 * @param parent
@@ -83,9 +99,10 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 	 * new survey listener can be added to detect these new surveys
 	 */
 	public SurveyFilteredComboViewer(Composite parent, final SurveyDesign sd, boolean createNew,
-			boolean includeMissionDateFilter) {
+			boolean includeMissionDateFilter, Session session) {
 		super(parent);
 		this.createNew = createNew;
+		this.session = session;
 		this.createdSurveys = new ArrayList<Survey>();
 
 		getFilter().setSurveyState(null);
@@ -240,49 +257,54 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
             	input.add(Messages.SurveyFilteredComboViewer_NewSurveyLabel);
             }
             
-            getDisplay().asyncExec(new Runnable(){
-                @Override
-                public void run() {
-                    if (viewer.getControl().isDisposed()){
-                        return ;
-                    }
-                    viewer.setInput(input);
+            getDisplay().asyncExec(()->{
+                if (viewer.getControl().isDisposed()) return;
+                viewer.setInput(input);
                     
-                    if (preselectedSurvey != null && input.contains(preselectedSurvey)) {
-                    	viewer.setSelection(new StructuredSelection(preselectedSurvey));
-                    }
-                    SurveyFilteredComboViewer.this.getParent().getParent().layout(true);
-                }});
+                if (preselectedSurvey != null && input.contains(preselectedSurvey)) {
+                	viewer.setSelection(new StructuredSelection(preselectedSurvey));
+                }
+                SurveyFilteredComboViewer.this.getParent().getParent().layout(true);
+            });
+            
             return Status.OK_STATUS;
         }
  
         private List<Survey> loadSurveyIds() {
-        		//{survey uuid, survey id, start date, survey design name, sd uuid}
-        	try(Session session = HibernateManager.openSession()){
-        		List<SurveyMissionProxy> pp = getFilter().executeQuery(session);
-        		
-        		List<Survey> surveys = new ArrayList<Survey>(pp.size()+1);
-        		
-        		for (SurveyMissionProxy p  : pp) {
-        		
-        			Survey temp = new Survey();
-        			temp.setUuid(p.getUuid());
-        			temp.setId(p.getId());
-
-        			SurveyDesign tmp = new SurveyDesign();
-        			tmp.setName(p.getDesignName());
-        			tmp.setUuid(p.getDesignUuid());
-
-        			temp.setSurveyDesign(tmp);
-        			
-        			surveys.add(temp);
+        	if (session == null) {
+        		try(Session s = HibernateManager.openSession()){
+        			return loadSurveyIds(s);
         		}
-        		if (additionalSurveys != null){
-        			surveys.addAll(additionalSurveys);
-        		}
+        	}else {
+        		synchronized (session) {
+        			return loadSurveyIds(session);	
+				}
         		
-        		return surveys;
         	}
+        }
+        
+        private List<Survey> loadSurveyIds(Session session) {
+        	//{survey uuid, survey id, start date, survey design name, sd uuid}
+        	List<SurveyMissionProxy> pp = getFilter().executeQuery(session);
+        	List<Survey> surveys = new ArrayList<Survey>(pp.size()+1);
+        	for (SurveyMissionProxy p  : pp) {
+        		
+        		Survey temp = new Survey();
+        		temp.setUuid(p.getUuid());
+        		temp.setId(p.getId());
+
+        		SurveyDesign tmp = new SurveyDesign();
+        		tmp.setName(p.getDesignName());
+        		tmp.setUuid(p.getDesignUuid());
+
+        		temp.setSurveyDesign(tmp);
+        			
+        		surveys.add(temp);
+        	}
+        	if (additionalSurveys != null){
+        		surveys.addAll(additionalSurveys);
+        	}
+        	return surveys;
         }
         
         public void setPreselectedSurvey(Survey preselectedSurvey) {

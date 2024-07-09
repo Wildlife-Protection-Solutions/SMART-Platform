@@ -348,7 +348,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			List<Patrol> newPs = new ArrayList<Patrol>();
 			newPatrols.stream().forEach(plc -> newPs.add(plc.getPatrol()));
 			newPs.remove(p);
-			PatrolFilteredComboViewer viewer = new PatrolFilteredComboViewer(op, newPs);
+			PatrolFilteredComboViewer viewer = new PatrolFilteredComboViewer(op, newPs, session);
 			viewer.setEnabled(false);
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
