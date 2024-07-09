@@ -51,7 +51,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
 import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
@@ -80,6 +80,24 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 	private boolean stopSelectionPropogation = false;
 	private List<ISelectionChangedListener> changeListeners = new ArrayList<ISelectionChangedListener>();
 	
+	//optional
+	private Session session;
+	
+	/**
+	 * 
+	 * @param parent
+	 * @param newPatrols collection of patrols that don't exist in the database, but should be added to the list
+	 * irregardless of the current filter
+	 */
+	public PatrolFilteredComboViewer(Composite parent, List<Patrol> newPatrols, Session session) {
+		super(parent, SWT.NONE);
+		this.newPatrols = newPatrols;
+		this.session = session;
+		createControls();
+		
+		
+	}
+	
 	/**
 	 * 
 	 * @param parent
@@ -87,13 +105,12 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 	 * irregardless of the current filter
 	 */
 	public PatrolFilteredComboViewer(Composite parent, List<Patrol> newPatrols) {
-		this(parent);
-		this.newPatrols = newPatrols;
+		this(parent, newPatrols, null);
 	}
 	
+	
 	public PatrolFilteredComboViewer(Composite parent) {
-		super(parent, SWT.NONE);
-		createControls();
+		this(parent, null, null);
 	}
 
 	@Override
@@ -254,37 +271,46 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         }
  
         private List<Patrol> loadPatrolIds() {
-        	
-        	try(Session s = PatrolHibernateManager.openSession()) {
-        		Query<Tuple> query = filter.buildQuery(s);
-        		List<Tuple> results = query.list();
-        		List<Patrol> patrols = new ArrayList<Patrol>(results.size()+1);
-        		boolean defaultPresent = preselectedPatrol == null; //indicated if default patrol id is in filtered list
-        		for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
-        			Tuple data =  iterator.next();
-        			Patrol p = new Patrol();
-        			p.setUuid((UUID)data.get(0));
-        			p.setId((String)data.get(1));
-        			p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data.get(2));
-        			defaultPresent = defaultPresent || p.equals(preselectedPatrol);
-        			patrols.add(p);
+        	if (session == null) {
+        		try(Session s = HibernateManager.openSession()){
+        			return loadPatrolIds(s);
         		}
-        		if (newPatrols != null){
-        			for (Patrol p : newPatrols){
-        				if (preselectedPatrol == p){
-        					defaultPresent = true;
-        					break;
-        				}
-        			}
-        			patrols.addAll(newPatrols);
-        		}
-        		if (!defaultPresent) {
-        			//we don't want to reset selection to null if previously selected patrol is not in filtered list
-        			//this is why we add it to result list
-        			patrols.add(preselectedPatrol);
-        		}
-        		return patrols;
+        	}else {
+        		synchronized (session) {
+        			return loadPatrolIds(session);
+				}
         	}
+        }
+        
+        private List<Patrol> loadPatrolIds(Session session) {        	
+        	Query<Tuple> query = filter.buildQuery(session);
+        	List<Tuple> results = query.list();
+        	List<Patrol> patrols = new ArrayList<Patrol>(results.size()+1);
+        	boolean defaultPresent = preselectedPatrol == null; //indicated if default patrol id is in filtered list
+        	for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
+        		Tuple data =  iterator.next();
+        		Patrol p = new Patrol();
+        		p.setUuid((UUID)data.get(0));
+        		p.setId((String)data.get(1));
+        		p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data.get(2));
+        		defaultPresent = defaultPresent || p.equals(preselectedPatrol);
+        		patrols.add(p);
+        	}
+        	if (newPatrols != null){
+        		for (Patrol p : newPatrols){
+        			if (preselectedPatrol == p){
+        				defaultPresent = true;
+        				break;
+        			}
+        		}
+        		patrols.addAll(newPatrols);
+        	}
+        	if (!defaultPresent) {
+        		//we don't want to reset selection to null if previously selected patrol is not in filtered list
+        		//this is why we add it to result list
+        		patrols.add(preselectedPatrol);
+        	}
+        	return patrols;
         }
         
         public void setPreselectedPatrol(Patrol preselectedPatrol) {
