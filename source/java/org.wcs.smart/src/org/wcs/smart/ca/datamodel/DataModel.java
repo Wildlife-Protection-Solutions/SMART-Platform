@@ -551,7 +551,7 @@ public class DataModel extends SimpleDataModel {
 	public static void processAttributeTree(Attribute attribute, Consumer<AttributeTreeNode> consumer) {
 		for (AttributeTreeNode node : attribute.getTree()) {
 			node.accept(e->{
-				consumer.accept(e);
+				consumer.accept((AttributeTreeNode)e);
 				return true;
 			});
 		}

@@ -60,7 +60,7 @@ import jakarta.persistence.criteria.Root;
  */
 public class HibernateManager {
 	
-	public static final String DATABASE_VERSION = "8.0.1"; //$NON-NLS-1$
+	public static final String DATABASE_VERSION = "8.1.0"; //$NON-NLS-1$
 	public static final String FILESTORE_VERSION = "8.0.0"; //$NON-NLS-1$
 	
 	public static final String CONTEXT_KEY = "SessionFactory"; //$NON-NLS-1$

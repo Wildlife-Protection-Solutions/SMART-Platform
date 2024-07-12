@@ -53,12 +53,12 @@ public class PatrolProfileRecordPatrolData implements IPatrolOptionData {
 	}
 	
 	@Override
-	public List<ListItem> getValues(Session session, String[] keys) {
-		return getAllValues(session);
+	public List<ListItem> getListValues(Session session, String[] keys) {
+		return getListValues(session);
 	}
 
 	@Override
-	public List<ListItem> getAllValues(Session session) {
+	public List<ListItem> getListValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		
 		List<IntelProfile> profiles = ProfilesManager.INSTANCE.getProfiles(session, true);

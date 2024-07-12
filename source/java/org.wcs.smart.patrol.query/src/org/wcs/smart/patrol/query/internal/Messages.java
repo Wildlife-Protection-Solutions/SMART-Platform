@@ -207,6 +207,9 @@ public class Messages extends NLS {
 	public static String PatrolSummaryQueryType_GroupByNotSupported;
 	public static String PatrolSummaryQueryType_invalidGroupByOptions;
 	public static String PatrolSummaryQueryType_SummaryQueryTypeName;
+	public static String PatrolTreeDropItem_loading;
+	public static String PatrolTreeDropItem_novalue;
+	public static String PatrolTreeGroupByDropItem_TreeLevel;
 	public static String PatrolValueDropItem_ExcludeDaysWithoutDataOption;
 	public static String PatrolValueItemLabelProvider_AllLabel;
 	public static String PatrolValueItemLabelProvider_DataOnlyLabel;

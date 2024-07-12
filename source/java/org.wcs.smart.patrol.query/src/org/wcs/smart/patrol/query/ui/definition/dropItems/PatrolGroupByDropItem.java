@@ -59,11 +59,11 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 
-	private IPatrolOptionData data;
-	private IPatrolQueryOption groupBy;
-	private List<ListItem> filteredValues = new ArrayList<ListItem>();
+	protected IPatrolOptionData data;
+	protected IPatrolQueryOption groupBy;
+	protected List<ListItem> filteredValues = new ArrayList<ListItem>();
 	private ToolTip toolTip;
-	
+	private Label lbl;
 	private Font smallerFont;
 	
 	/**
@@ -155,8 +155,8 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 		
-		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText( formatStringForLabel(groupBy.getGuiName(Locale.getDefault())));
+		lbl = new Label(comp, SWT.NONE);
+		lbl.setText( formatStringForLabel(getText()));
 		initDrag(lbl);
 		
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
@@ -182,6 +182,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 							filteredValues.add(dialog.getSelectedItems()[i]);
 						}
 					}
+					updateLabel();
 					updateToolTipMessage();
 					PatrolGroupByDropItem.this.queryChanged();
 				}
@@ -206,9 +207,16 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 			}});
 	}
 	
-	private void updateToolTipMessage(){
+	protected void updateLabel() {
+		lbl.setText(formatStringForLabel(getText()));
+		lbl.getParent().getParent().layout(true);
+		getTargetPanel().redraw();
+	}
+	
+	protected void updateToolTipMessage(){
+		
 		StringBuilder tipStr = new StringBuilder();
-		if (filteredValues == null){
+		if (filteredValues == null || filteredValues.isEmpty()){
 			tipStr.append(Messages.PatrolGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filteredValues){
@@ -231,7 +239,8 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				items = data.getAllValues(s);
+				
+				items = data.getListValues(s);
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.PatrolGroupByDropItem_Error_LoadingListItems, ex);
 			}finally {

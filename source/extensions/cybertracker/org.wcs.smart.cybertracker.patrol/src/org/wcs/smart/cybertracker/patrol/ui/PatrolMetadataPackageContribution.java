@@ -30,8 +30,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -85,13 +87,17 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.TreeEditorField;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -498,7 +504,23 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					btnSelected.addListener(SWT.Selection,e->{
 						cmb.getControl().setEnabled(!btnSelected.getSelection());
 					});				
+				}else if (attribute.getType() == AttributeType.TREE) {
+					Composite temp = new Composite(core, SWT.NONE);
+					temp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					temp.setLayout(new GridLayout());
+					((GridLayout)temp.getLayout()).marginWidth = 0;
+					((GridLayout)temp.getLayout()).marginHeight = 0;
 					
+					
+					TreeEditorField<PatrolAttributeTreeNode> field = new TreeEditorField<>();
+					field.createComposite(temp, new AttributeTreeContentProvider(true, false), new TreeNodeLabelProvider(IconManager.Size.SMALL));
+					field.setEnabled(false);
+					field.setInput(attribute.getAttributeTree());
+					field.addSelectionChangedListener(e->fireChanged());
+					btnSelected.addListener(SWT.Selection,e->{
+						field.setEnabled(!btnSelected.getSelection());
+					});	
+					data[2] = field;
 				}else if (attribute.getType() == AttributeType.BOOLEAN) {
 					
 					Composite part = new Composite(core, SWT.NONE);
@@ -705,6 +727,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updatePackage(ICtPackage ctpackage, Session session) {		
 		PatrolCtPackage ppackage = (PatrolCtPackage)ctpackage;
@@ -815,6 +838,14 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				}else {
 					v.setUuidValue(null);
 				}
+			}else if (pa.getType() == AttributeType.TREE) {
+				TreeEditorField<PatrolAttributeTreeNode> field = (TreeEditorField<PatrolAttributeTreeNode>)fields[2];
+				PatrolAttributeTreeNode node = field.getValue();
+				if (node != null) {
+					v.setUuidValue(node.getUuid());
+				}else {
+					v.setUuidValue(null);
+				}
 			}else if (pa.getType() == AttributeType.TEXT) {
 				v.setStringValue(((Text)fields[2]).getText());
 			}else if (pa.getType() == AttributeType.NUMERIC) {
@@ -862,6 +893,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		
 	private Job loadValues = new Job("loading metadata values") { //$NON-NLS-1$
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -877,6 +909,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			if ( ((PatrolCtPackage)ctpackage).getMetadataValues() != null) {
 				metadataValues.addAll(((PatrolCtPackage)ctpackage).getMetadataValues());
 			}
+			
+			Map<UUID, PatrolAttribute> pAttributes = new HashMap<>();
 			
 			try(Session s = HibernateManager.openSession()){
 				eteams.addAll(QueryFactory.buildQuery(s, EmployeeTeam.class,
@@ -903,6 +937,14 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				employees.addAll(QueryFactory.buildQuery(s, Employee.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"endEmploymentDate", null}).list()); //$NON-NLS-1$
+				
+				List<PatrolAttribute> attributes = QueryFactory.buildQuery(s, PatrolAttribute.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isActive", true}).list(); //$NON-NLS-1$
+				attributes.forEach(e->{
+					e.loadTree(s);
+					pAttributes.put(e.getUuid(), e);
+				});
 			}
 			
 			eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
@@ -1041,6 +1083,26 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 										cmb.setSelection(new StructuredSelection("")); //$NON-NLS-1$
 										cmb.getTableCombo().setText(""); //$NON-NLS-1$
 									}
+								}else if (pa.getType() == AttributeType.TREE) {
+									TreeEditorField<PatrolAttributeTreeNode> field =(TreeEditorField<PatrolAttributeTreeNode>)fields[2];
+									field.setInput( pAttributes.get(pa.getUuid()).getAttributeTree() );
+									
+									if (v.getUuidValue() != null) {
+										List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+										toProcess.addAll(pAttributes.get(pa.getUuid()).getAttributeTree());
+										
+										while(!toProcess.isEmpty()) {
+											PatrolAttributeTreeNode temp = toProcess.remove(0);
+											if (v.getUuidValue().equals(temp.getUuid())) {
+												field.setSelectedValue(temp);
+												break;
+											}
+											toProcess.addAll(temp.getChildren());
+										}										
+									}else {
+										field.setSelectedValue(null);
+									}
+									
 								}else if (pa.getType() == AttributeType.TEXT) {
 									((Text)fields[2]).setText(v.getStringValue());
 								}else if (pa.getType() == AttributeType.NUMERIC) {

@@ -83,9 +83,9 @@ public class TreeEditorField<T>  {
 	private Listener focusListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
-			if (event.widget.isDisposed()){
-				return;
-			}
+			if (event.widget.isDisposed()) return;
+			if (tree.getTreeViewer().getControl().isDisposed()) return;
+			
 			if (!(event.widget == btnDownArrow || 
 				  event.widget == txtText || 
 				  event.widget == tree.getTreeViewer().getControl() || 
@@ -120,6 +120,7 @@ public class TreeEditorField<T>  {
 	/**
 	 * Gets the value selected from the tree
 	 */
+	@SuppressWarnings("unchecked")
 	public T getValue() {
 		return  (T)txtText.getData();
 	}
@@ -266,6 +267,7 @@ public class TreeEditorField<T>  {
 		});
 		
 		txtText.addTraverseListener(new TraverseListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.keyCode == SWT.CR ){
@@ -344,6 +346,7 @@ public class TreeEditorField<T>  {
 		}else{
 			tree.positionAndShow(dropDownComposite, null, null, new ISelectionListener() {
 				
+				@SuppressWarnings("unchecked")
 				@Override
 				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 					if (selection == null){

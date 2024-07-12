@@ -167,67 +167,71 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROL_ATTRIBUTE_LIST_KEY = 82;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_NUMBER_KEY = 83;
+  int PATROL_ATTRIBUTE_TREE_KEY = 83;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_DATE_KEY = 84;
+  int PATROL_ATTRIBUTE_NUMBER_KEY = 84;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION = 85;
+  int PATROL_ATTRIBUTE_DATE_KEY = 85;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_BOOL_KEY = 86;
+  int PATROL_CONTRIBUTION = 86;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_STRING_KEY = 87;
+  int PATROL_CONTRIBUTION_BOOL_KEY = 87;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 88;
+  int PATROL_CONTRIBUTION_STRING_KEY = 88;
   /** RegularExpression Id. */
-  int AREA_KEY = 89;
+  int AREA_TYPE_KEY = 89;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 90;
+  int AREA_KEY = 90;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 91;
+  int OBSERVATION_FILTER_TYPE_KEY = 91;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 92;
+  int WAYPOINT_FILTER_TYPE_KEY = 92;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 93;
+  int PATROL_VALUE_ITEM = 93;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ENCOUNTERRATE_KEY = 94;
+  int PATROL_VALUE_KEY = 94;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 95;
+  int PATROL_VALUE_ENCOUNTERRATE_KEY = 95;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 96;
+  int SUM_CAT_VALUE_KEY = 96;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 97;
+  int SUM_ATTRIBUTE_VALUE_KEY = 97;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_GEOMETRY_KEY = 98;
+  int SUM_CAT_ATT_VALUE_KEY = 98;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_GEOMETRY_KEY = 99;
+  int SUM_ATTRIBUTE_GEOMETRY_KEY = 99;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 100;
+  int SUM_CAT_ATT_GEOMETRY_KEY = 100;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 101;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 101;
   /** RegularExpression Id. */
-  int AGG = 102;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 102;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 103;
+  int AGG = 103;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 104;
+  int DATE_GROUPBY_ITEM = 104;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 105;
+  int QUERY_SPLITTER = 105;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 106;
+  int PATROL_UUID_GROUPBY_OPTION = 106;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 107;
+  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 107;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 108;
+  int PATROL_STRING_GROUPBY_OPTION = 108;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 109;
+  int CATEGORY_GROUPBY_ITEM = 109;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 110;
+  int AREA_GROUPBY_ITEM = 110;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 111;
+  int ATTRIBUTE_GROUPBY_ITEM = 111;
   /** RegularExpression Id. */
-  int PATROL_ATTRIBUTE_LIST_GROUPBYITEM = 112;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 112;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 113;
+  int PATROL_ATTRIBUTE_LIST_GROUPBYITEM = 113;
+  /** RegularExpression Id. */
+  int PATROL_ATTRIBUTE_TREE_GROUPBYITEM = 114;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 115;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -317,6 +321,7 @@ public interface ParserConstants {
     "<PATROL_ATTRIBUTE_BOOLEAN_KEY>",
     "<PATROL_ATTRIBUTE_STRING_KEY>",
     "<PATROL_ATTRIBUTE_LIST_KEY>",
+    "<PATROL_ATTRIBUTE_TREE_KEY>",
     "<PATROL_ATTRIBUTE_NUMBER_KEY>",
     "<PATROL_ATTRIBUTE_DATE_KEY>",
     "\"patrol:contribution\"",
@@ -347,6 +352,7 @@ public interface ParserConstants {
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
     "<PATROL_ATTRIBUTE_LIST_GROUPBYITEM>",
+    "<PATROL_ATTRIBUTE_TREE_GROUPBYITEM>",
     "<QUOTED_STRING>",
   };
 

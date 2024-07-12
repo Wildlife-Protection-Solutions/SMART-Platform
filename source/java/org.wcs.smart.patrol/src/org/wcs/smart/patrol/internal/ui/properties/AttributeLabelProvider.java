@@ -31,8 +31,8 @@ import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.patrol.model.PatrolAttribute;
-import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 
 /**
  * Patrol attribute label provider.  Provides images and labels
@@ -105,15 +105,15 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 				}
 				return value;
 			}
-		}else if (element instanceof PatrolAttributeListItem){
+		}else if (element instanceof NamedKeyItem){
 			if (language == null){
-				return ((PatrolAttributeListItem)element).getName();
+				return ((NamedKeyItem)element).getName();
 			}else{
-				String value = ((PatrolAttributeListItem)element).findNameNull(language);
+				String value = ((NamedKeyItem)element).findNameNull(language);
 				if (value == null){
-					value = ((PatrolAttributeListItem)element).getName();
+					value = ((NamedKeyItem)element).getName();
 				}
-				return value + " [" + ((PatrolAttributeListItem)element).getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				return value + " [" + ((NamedKeyItem)element).getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return super.getText(element);

@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.birt;
 
 import java.nio.file.Path;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;

@@ -744,6 +744,11 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 			case TEXT:value.put(VALUE_FIELD, custom.getStringValue());
 				break;
 			case TREE:
+				value.put(VALUE_FIELD, custom.getAttributeTreeNode().getHkey());
+				for (Label ll : custom.getAttributeTreeNode().getNames()) {
+					value.put(LABEL_FIELD + "_" + ll.getLanguage().getCode(), ll.getValue()); //$NON-NLS-1$
+				}
+				break;
 			case TIME:
 				//not supported
 				break;
@@ -751,6 +756,7 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 				break;
 			
 			}
+			customAttribute.add(value);
 		}
 		
 		JSONArray legs = new JSONArray();

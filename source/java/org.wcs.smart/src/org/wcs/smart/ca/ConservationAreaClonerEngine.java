@@ -241,6 +241,7 @@ public class ConservationAreaClonerEngine {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public <T extends UuidItem> T getNewConservationItem(T templateItem) {
 		return  (T) templateToNewObjectMap.get(templateItem);
 	}

@@ -23,9 +23,10 @@ package org.wcs.smart.patrol.model;
 
 import java.util.List;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
 import org.hibernate.annotations.SQLOrder;
+import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyIconItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -40,7 +41,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 
 /**
@@ -60,6 +63,7 @@ public class PatrolAttribute extends NamedKeyIconItem{
 		Attribute.AttributeType.NUMERIC,
 		Attribute.AttributeType.TEXT,
 		Attribute.AttributeType.LIST,
+		Attribute.AttributeType.TREE,
 		Attribute.AttributeType.BOOLEAN,
 		Attribute.AttributeType.DATE,
 	};
@@ -68,6 +72,8 @@ public class PatrolAttribute extends NamedKeyIconItem{
 	private Attribute.AttributeType type;
 	private boolean isActive;
 	private List<PatrolAttributeListItem> attributeList = null;
+	private List<PatrolAttributeTreeNode> attributeTree = null;
+	
 	/**
 	 * 
 	 * @return the conservation area associated with the attribute
@@ -115,7 +121,6 @@ public class PatrolAttribute extends NamedKeyIconItem{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
 	@SQLOrder("list_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<PatrolAttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}
@@ -125,5 +130,39 @@ public class PatrolAttribute extends NamedKeyIconItem{
 	 */
 	public void setAttributeList(List<PatrolAttributeListItem> attributeList){
 		this.attributeList = attributeList;
+	}
+	
+	/**
+	 * @return set to list items
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@SQLRestriction("parent_uuid is null")
+	@OrderBy("node_order")
+	public List<PatrolAttributeTreeNode> getAttributeTree(){
+		return this.attributeTree;
+	}
+	/**
+	 * 
+	 * @param attributeList the set of valid list elements
+	 */
+	public void setAttributeTree(List<PatrolAttributeTreeNode> attributeTree){
+		this.attributeTree = attributeTree;
+	}
+	
+	@Transient
+	public void loadTree(Session session) {
+		if (getType() != Attribute.AttributeType.TREE) return;
+		if (getAttributeTree() == null) return;
+		getAttributeTree().forEach(t->{
+			t.accept(n->{
+				Hibernate.initialize(n);
+				if (n.getIcon() != null) {
+					n.getIcon().getFiles().forEach(f->{
+						f.computeFileLocation(session);
+					});
+				}
+				return true;
+			});
+		});
 	}
 }

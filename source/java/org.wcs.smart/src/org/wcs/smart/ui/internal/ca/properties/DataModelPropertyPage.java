@@ -85,7 +85,6 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.DataModelTranslationExporter;
 import org.wcs.smart.ca.datamodel.DataModelTranslationImporter;
-import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -673,13 +672,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 									}
 									if (a.getTree() != null) {
 										a.getTree().forEach(n->{
-											n.accept(new ITreeNodeVisitor() {
-												@Override
-												public boolean visit(AttributeTreeNode node) {
-													if (node.getIcon() != null) node.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
-													return true;
-												}
-												
+											n.accept(node->{
+												if (node.getIcon() != null) node.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+												return true;
 											});
 										});
 									}

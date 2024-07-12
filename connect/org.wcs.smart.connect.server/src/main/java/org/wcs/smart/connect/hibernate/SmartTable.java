@@ -195,6 +195,7 @@ import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolFolder;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -336,6 +337,7 @@ public enum SmartTable {
 	PATROLFOLDER(PatrolFolder.class,null),
 	PATROLATTRIBUTE(PatrolAttribute.class, null),
 	PATROLATTRIBUTELIST(PatrolAttributeListItem.class, ".attribute.conservationArea"),
+	PATROLATTRIBUTETREE(PatrolAttributeTreeNode.class, ".attribute.conservationArea"),
 	PATROLATTRIBUTEVALUE(PatrolAttributeValue.class, ".id.patrol.conservationArea"),
 	PLAN(Plan.class,null),
 	PLANTARGET(PlanTarget.class,null),

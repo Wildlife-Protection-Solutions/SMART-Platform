@@ -178,6 +178,7 @@ TOKEN :
  | < PATROL_ATTRIBUTE_BOOLEAN_KEY : "patrol:attribute:b:"< DM_KEY> >
  | < PATROL_ATTRIBUTE_STRING_KEY : "patrol:attribute:s:"< DM_KEY > >
  | < PATROL_ATTRIBUTE_LIST_KEY : "patrol:attribute:l:"< DM_KEY > >
+ | < PATROL_ATTRIBUTE_TREE_KEY : "patrol:attribute:t:"< DM_KEY > >
  | < PATROL_ATTRIBUTE_NUMBER_KEY : "patrol:attribute:n:"< DM_KEY > >
  | < PATROL_ATTRIBUTE_DATE_KEY : "patrol:attribute:d:"< DM_KEY > >
  | < PATROL_CONTRIBUTION : "patrol:contribution" >
@@ -236,7 +237,8 @@ TOKEN :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_MLIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > 
-|	< PATROL_ATTRIBUTE_LIST_GROUPBYITEM : "patrol:attribute:l:"< DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+|	< PATROL_ATTRIBUTE_LIST_GROUPBYITEM : "patrol:attribute:l:" < DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+|	< PATROL_ATTRIBUTE_TREE_GROUPBYITEM : "patrol:attribute:t:" < DM_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 }
 
 
@@ -536,7 +538,12 @@ IGroupBy GroupByItem() :
 		< PATROL_ATTRIBUTE_LIST_GROUPBYITEM > 	
 		{
 		  	item = PatrolAttributeGroupBy.createGroupBy(token.image);
-		}	 
+		}
+	|
+		< PATROL_ATTRIBUTE_TREE_GROUPBYITEM > 	
+		{
+		  	item = PatrolAttributeGroupBy.createGroupBy(token.image);
+		}
 	)
 	{
 		 return item;
@@ -996,6 +1003,19 @@ IFilter StringExpression():
  		(
 			(
   				< PATROL_ATTRIBUTE_LIST_KEY >
+ 			) 
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = PatrolAttributeFilter.createFilter(key, op, value);
+		}
+	|
+ 		(
+			(
+  				< PATROL_ATTRIBUTE_TREE_KEY >
  			) 
  			{key = token.image;}
 	     	op = StringOp()

@@ -47,6 +47,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -54,7 +55,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -64,7 +65,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AttributeTreeDropItem extends DropItem {
 
-	private static AttributeTreeLabelProvider lProvider = null;
+	private TreeNodeLabelProvider lProvider = null;
 	
 	protected String text;
 	protected String key;
@@ -317,7 +318,7 @@ public class AttributeTreeDropItem extends DropItem {
 		
 		treeviewer.getTreeViewer().setContentProvider(getContentProvider());
 		if (lProvider == null){
-			lProvider = new AttributeTreeLabelProvider();
+			lProvider = new TreeNodeLabelProvider(IconManager.Size.ICON);
 		}
 		treeviewer.getTreeViewer().setLabelProvider(lProvider);
 		treeviewer.getTreeViewer().setInput(input);	

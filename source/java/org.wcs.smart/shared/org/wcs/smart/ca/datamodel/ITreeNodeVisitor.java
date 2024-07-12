@@ -28,7 +28,7 @@ package org.wcs.smart.ca.datamodel;
  * @author Emily
  *
  */
-public interface ITreeNodeVisitor {
+public interface ITreeNodeVisitor<T extends ITreeNode<T>> {
 
 	/**
 	 * Parent is visited first
@@ -36,5 +36,5 @@ public interface ITreeNodeVisitor {
 	 * @param node
 	 * @return false if the children should not be visited, true if should continue to visit children
 	 */
-	public boolean visit(AttributeTreeNode node);
+	public boolean visit(ITreeNode<T> node);
 }

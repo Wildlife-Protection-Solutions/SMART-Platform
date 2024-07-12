@@ -53,7 +53,7 @@ public class LocalAttachmentTagManager extends AttachmentTagManager{
 	public void deleteTag(AttachmentTag tag, Session session) throws Exception {
 		
 		if (!DeleteManager.canDelete(tag, session)) {
-			throw new Exception("Cannot delete attachment tag.");
+			throw new Exception("Cannot delete attachment tag."); //$NON-NLS-1$
 		}
 		
 		if (tag.getUuid() == null) return;

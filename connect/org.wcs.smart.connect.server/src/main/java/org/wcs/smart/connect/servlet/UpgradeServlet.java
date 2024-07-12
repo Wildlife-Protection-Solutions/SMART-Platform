@@ -135,14 +135,23 @@ public class UpgradeServlet extends HttpServlet {
 						//7.5.4 shouldn't exist as we didn't upgrade version number
 						upgradeDb754to757(s);
 						upgradeDb757to800(s, warnings);
+						upgradeDb800to801(s, warnings);
+						upgradeDb801to810(s, warnings);
 						updated = true;
 					}else if (version.equals("7.5.5") || version.equals("7.5.6") || version.equals("7.5.7")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb757to800(s, warnings);
+						upgradeDb800to801(s, warnings);
+						upgradeDb801to810(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ 
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb800to801(s, warnings);
+						upgradeDb801to810(s, warnings);
+						updated = true;
+					}else if (version.equals("8.0.1")) { //$NON-NLS-1$ 
+						//7.5.5/6 shouldn't exist as we didn't upgrade version number
+						upgradeDb801to810(s, warnings);
 						updated = true;
 					}else {
 						request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
@@ -1706,6 +1715,7 @@ public class UpgradeServlet extends HttpServlet {
 						"update connect.ca_plugin_version set version = '8.0.1' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 
 						"update connect.connect_version set version = '8.0.1', last_updated = now()", //$NON-NLS-1$
+
 					};
 					
 					for (String s : sql) {
@@ -1720,5 +1730,102 @@ public class UpgradeServlet extends HttpServlet {
 		});	
 		
 	}
+	
+	private void upgradeDb801to810(Session s, List<String> warnings) {
+		
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					//disable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+
+					String[] sql = new String[] {
+
+							// support for patrol tree attribute
+							"""
+							CREATE TABLE smart.patrol_attribute_tree(
+								uuid uuid,
+								patrol_attribute_uuid uuid, 
+								keyid varchar(128), 
+								node_order smallint, 
+								parent_uuid uuid, 
+								is_active boolean, 
+								hkey varchar(32672), 
+								icon_uuid uuid, primary key (uuid))""",  //$NON-NLS-1$
+							
+							"""
+							ALTER TABLE smart.patrol_attribute_tree 
+							ADD CONSTRAINT patrol_att_tree_patrol_att_uuid_fk 
+							FOREIGN KEY(patrol_attribute_uuid) 
+							REFERENCES SMART.PATROL_ATTRIBUTE (UUID) 
+							ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+							""", //$NON-NLS-1$
+							
+							"""
+							ALTER TABLE smart.patrol_attribute_tree 
+							ADD CONSTRAINT patrol_att_tree_parent_uuid_fk 
+							FOREIGN KEY(parent_uuid) REFERENCES smart.patrol_attribute_tree (UUID) 
+							ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE""", //$NON-NLS-1$
+							
+							"""
+							ALTER TABLE smart.patrol_attribute_tree 
+							ADD CONSTRAINT patrol_att_tree_icon_uuid_fk 
+							FOREIGN KEY(icon_uuid) 
+							REFERENCES smart.icon (UUID) 
+							ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE""", //$NON-NLS-1$
+							
+							"ALTER TABLE smart.patrol_attribute_value ADD COLUMN tree_node_uuid uuid", //$NON-NLS-1$
+							
+							"""
+							ALTER TABLE smart.patrol_attribute_value 
+							ADD CONSTRAINT patrol_att_value_tree_node_uuid_fk 
+							FOREIGN KEY(tree_node_uuid) REFERENCES smart.patrol_attribute_tree (UUID) 
+							ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE""", //$NON-NLS-1$
+											
+							//trigger
+							"""								
+							CREATE OR REPLACE FUNCTION connect.trg_patrol_attribute_tree() RETURNS trigger AS $$ 
+									DECLARE
+										ROW RECORD;
+									BEGIN
+										IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN 
+											ROW = NEW; 
+										ELSIF (TG_OP = 'DELETE') THEN 
+											ROW = OLD; 
+										END IF; 
+										INSERT INTO connect.change_log 
+											(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+											SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, t.CA_UUID
+											FROM smart.patrol_attribute t WHERE t.uuid = ROW.patrol_attribute_uuid;
+										RETURN ROW;
+									END$$ LANGUAGE 'plpgsql'
+							""", //$NON-NLS-1$
+							
+							"CREATE TRIGGER trg_patrol_attribute_tree AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_attribute_tree FOR EACH ROW execute procedure connect.trg_patrol_attribute_tree()", //$NON-NLS-1$
+
+							
+							//versions
+							"update connect.connect_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+
+							"update connect.connect_version set version = '8.1.0', last_updated = now()", //$NON-NLS-1$
+
+					};
+					
+					for (String s : sql) {
+						c.createStatement().executeUpdate(s);
+					}
+					
+					
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});	
+		
+	}
+
 
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.hibernate.Session;
@@ -43,6 +44,7 @@ import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -241,6 +243,7 @@ public class PatrolAttributeMetadata {
 	private List<Name> names;
 	private Attribute.AttributeType type;
 	private List<ListOption> options;
+	private List<TreeNode> nodes;
 	private String requiredWhen;
 	private String linkTo;
 	
@@ -287,8 +290,17 @@ public class PatrolAttributeMetadata {
 		return this.options;
 	}
 	
+	public List<TreeNode> getTreeNodes(){
+		return this.nodes;
+	}
+	
+	
 	public void setListOptions(List<ListOption> options) {
 		this.options = options;
+	}
+	
+	public void  setTreeNodes(List<TreeNode> nodes){
+		this.nodes = nodes;
 	}
 	
 	public void setRequired(boolean isRequired) {
@@ -304,6 +316,12 @@ public class PatrolAttributeMetadata {
 	
 	public void addListOption(ListOption op) {
 		this.options.add(op);
+	}
+	
+	public void addTreeNode(TreeNode op) {
+		if (this.nodes == null) this.nodes = new ArrayList<>();
+		
+		this.nodes.add(op);
 	}
 	
 	@JsonInclude(Include.NON_NULL)
@@ -325,6 +343,39 @@ public class PatrolAttributeMetadata {
 		}
 		public List<Name> getNames(){
 			return this.names;
+		}
+	}
+	
+	@JsonInclude(Include.NON_NULL)
+	public static class TreeNode{
+		private String id;
+		private List<Name> names;
+		private List<TreeNode> kids;
+		
+		public TreeNode(String id) {
+			this.id = id;
+			this.names = new ArrayList<>();			
+		}
+		
+		public void addKid(TreeNode node) {
+			if (kids == null) kids = new ArrayList<>();
+			this.kids.add(node);
+		}
+		
+		public void addName(Name name) {
+			this.names.add(name);
+		}
+		
+		public String getId() {
+			return this.id;
+		}
+		
+		public List<Name> getNames(){
+			return this.names;
+		}
+		
+		public List<TreeNode> getTreeNodes(){
+			return this.kids;
 		}
 	}
 	
@@ -363,6 +414,30 @@ public class PatrolAttributeMetadata {
 				}
 				item.addListOption(op);
 			}
+			
+		}
+		if (attribute.getType() == Attribute.AttributeType.TREE) {
+			List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+			
+			toProcess.addAll(attribute.getAttributeTree());
+			Map<PatrolAttributeTreeNode, TreeNode> map = new HashMap<>();
+			while(!toProcess.isEmpty()) {
+				PatrolAttributeTreeNode node = toProcess.remove(0);
+			
+				TreeNode op = new TreeNode(node.getHkey());
+				for (Label l : node.getNames()) {
+					op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
+				}
+				map.put(node, op);
+				if (node.getParent() == null) {
+					item.addTreeNode(op);
+				}else {
+					map.get(node.getParent()).addKid(op);
+				}
+				toProcess.addAll(node.getChildren());
+				
+			}
+			
 			
 		}
 		return item;

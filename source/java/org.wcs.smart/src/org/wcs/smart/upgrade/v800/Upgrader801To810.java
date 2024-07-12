@@ -42,7 +42,7 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @author Emily
  *
  */
-public class Upgrader800To801 extends AbstractInteralDatabaseUpgrader { 
+public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader { 
 	
 	private Exception thrownException = null;
 
@@ -56,8 +56,8 @@ public class Upgrader800To801 extends AbstractInteralDatabaseUpgrader {
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
 		monitor.subTask(MessageFormat.format(Messages.Upgrader700To741_UpgradeMsg, 
-				UpgradeEngine.UpgradeFromVersion.V801.fromVersion, 
-				UpgradeEngine.UpgradeFromVersion.V801.toVersion));  
+				UpgradeEngine.UpgradeFromVersion.V810.fromVersion, 
+				UpgradeEngine.UpgradeFromVersion.V810.toVersion));  
 		
 		
 		try(Session s = HibernateManager.openSession()){
@@ -73,9 +73,9 @@ public class Upgrader800To801 extends AbstractInteralDatabaseUpgrader {
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
-						thrownException = new Exception(MessageFormat.format(Messages.Upgrader700To741_UpgradeErrorMsage,
-								UpgradeEngine.UpgradeFromVersion.V801.fromVersion, 
-								UpgradeEngine.UpgradeFromVersion.V801.toVersion), e); 
+						thrownException = new Exception(MessageFormat.format(Messages.Upgrader700To741_UpgradeErrorMsage, 
+								UpgradeEngine.UpgradeFromVersion.V810.fromVersion, 
+								UpgradeEngine.UpgradeFromVersion.V810.toVersion), e); 
 					}
 				}
 			});
@@ -90,7 +90,13 @@ public class Upgrader800To801 extends AbstractInteralDatabaseUpgrader {
 			throws Exception {
 
 		String[] sql = new String[] {		
-			"ALTER TABLE smart.cm_node DROP COLUMN use_single_gps_point",  //$NON-NLS-1$
+			"CREATE TABLE smart.patrol_attribute_tree (uuid char(16) for bit data , patrol_attribute_uuid char(16) for bit data, keyid varchar(128), node_order smallint, parent_uuid char(16) for bit data, is_active boolean, hkey varchar(32672), icon_uuid char(16) for bit data, primary key (uuid))",  //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_attribute_tree ADD CONSTRAINT patrol_att_tree_patrol_att_uuid_fk FOREIGN KEY(patrol_attribute_uuid) REFERENCES SMART.PATROL_ATTRIBUTE (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_attribute_tree ADD CONSTRAINT patrol_att_tree_parent_uuid_fk FOREIGN KEY(parent_uuid) REFERENCES smart.patrol_attribute_tree (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_attribute_tree ADD CONSTRAINT patrol_att_tree_icon_uuid_fk FOREIGN KEY(icon_uuid) REFERENCES smart.icon (UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.patrol_attribute_value ADD COLUMN tree_node_uuid char(16) for bit data", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_attribute_value ADD CONSTRAINT patrol_att_value_tree_node_uuid_fk FOREIGN KEY(tree_node_uuid) REFERENCES smart.patrol_attribute_tree (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

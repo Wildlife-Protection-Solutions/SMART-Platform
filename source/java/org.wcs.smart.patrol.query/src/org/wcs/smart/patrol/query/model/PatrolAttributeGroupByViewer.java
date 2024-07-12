@@ -22,12 +22,16 @@
 package org.wcs.smart.patrol.query.model;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.patrol.model.PatrolAttribute;
-import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
@@ -38,7 +42,8 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
- * Group by viewer for custom patrol attributes 
+ * Group by viewer for custom patrol attributes. Supports tree and list attributes.
+ * 
  * @author Emily
  *
  */
@@ -56,21 +61,38 @@ public class PatrolAttributeGroupByViewer extends AbstractGroupByViewer<PatrolAt
 	public List<ListItem> getItems(Session session) {
 		try {
 			PatrolOptionData data = new PatrolOptionData(  getQueryOption(session) );
-			if (groupBy.getItems() != null){
-				return data.getValues(session, groupBy.getItems());
+			if (groupBy.getAttributeType() == Attribute.AttributeType.LIST) {
+				if (groupBy.getItems() != null){
+					return data.getListValues(session, groupBy.getItems());
+				}else {
+					return data.getListValues(session);
+				}
 			}
-			List<ListItem> items = data.getAllValues(session);
-			return items;		
+			if (groupBy.getAttributeType() == Attribute.AttributeType.TREE) {
+				
+				List<? extends ITreeNode<?>> nodes = data.getValuesTree(session, groupBy.getLevel());
+				if (groupBy.getItems() == null || groupBy.getItems().length == 0){
+					return nodes.stream().map(e->new ListItem(null, e.getName(), e.getHkey())).collect(Collectors.toList());
+				}
+				Set<String> keys = new HashSet<>();
+				for (String x : groupBy.getItems()) keys.add(x);
+				
+				return nodes.stream().filter(e->keys.contains(e.getHkey())).
+						map(e->new ListItem(null, e.getName(), e.getHkey())).collect(Collectors.toList());				
+			}
 		}catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
+		return null;		
 	}
 
 	private PatrolAttributeQueryOption getQueryOption(Session session) throws Exception{
 		PatrolAttributeGroupBy gb = (PatrolAttributeGroupBy)groupBy;
 
 		PatrolAttribute pa = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session,  gb.getAttributeKey());
-		if (pa == null || pa.getType() != Attribute.AttributeType.LIST) 
+		if (pa == null || (
+				pa.getType() != Attribute.AttributeType.LIST &&
+				pa.getType() != Attribute.AttributeType.TREE)) 
 			throw new Exception(MessageFormat.format(Messages.PatrolAttributeGroupByViewer_PatrolAttributeNotFound, gb.getAttributeKey()));
 		
 		return new PatrolAttributeQueryOption(pa);
@@ -85,25 +107,31 @@ public class PatrolAttributeGroupByViewer extends AbstractGroupByViewer<PatrolAt
 		try {
 		
 			PatrolAttributeQueryOption option = getQueryOption(session);
+			PatrolOptionData data = new PatrolOptionData(option);
+			
 			DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolGroupByDropItem(option);
 
 			if (items != null){
-				ListItem[] initItems = new ListItem[items.length];
+				Set<String> keys = new HashSet<>();
+				for(String i : items) keys.add(i);
 				
-				for (int i = 0; i < initItems.length; i++) {
-					PatrolAttributeListItem found = null;
-					for (PatrolAttributeListItem li : option.getPatrolAttribute().getAttributeList()) {
-						if (li.getKeyId().equalsIgnoreCase(items[i])){
-							found = li;
-							break;
-						}
-					}
-					if (found != null) {
-						initItems[i] = new ListItem(null, found.getName(), found.getKeyId());
-					}
+				if (option.getPatrolAttribute().getType() == Attribute.AttributeType.LIST) {
+					List<ListItem> allItems = new ArrayList<>(data.getListValues(session));
+					List<ListItem> inits = allItems.stream().filter(e->keys.contains(e.getKey())).collect(Collectors.toList());
+					it.initializeData(new Object[]{data, inits.toArray(new ListItem[inits.size()])});
+				}else if (option.getPatrolAttribute().getType() == Attribute.AttributeType.TREE) {
+					int level = groupBy.getLevel();
+					List<? extends ITreeNode<?>> matched = data.getValuesTree(session, level);
+					List<ListItem> inits = matched.stream()
+							.filter(e->keys.contains(e.getHkey()))
+							.map(e->new ListItem(null, e.getName(),e.getHkey()))
+							.collect(Collectors.toList());
+					it.initializeData(new Object[]{data, inits.toArray(new ListItem[inits.size()]), level});
 				}
-
-				it.initializeData(new Object[]{new PatrolOptionData(option), initItems});
+			}else {
+				if (option.getPatrolAttribute().getType() == Attribute.AttributeType.TREE) {
+					it.initializeData(new Object[]{data, null, groupBy.getLevel()});
+				}
 			}
 			return it;
 		} catch (Exception ex) {

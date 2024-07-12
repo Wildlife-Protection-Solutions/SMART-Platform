@@ -68,6 +68,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -342,7 +343,7 @@ public class DataModelApi extends HttpServlet{
 							if (ra.getTree() != null) {
 								ra.getTree().forEach(node->
 									node.accept(v->{
-										v.getNames().size();
+										((AttributeTreeNode)v).getNames().size();
 										return true;
 									})
 								);
@@ -360,7 +361,7 @@ public class DataModelApi extends HttpServlet{
 							updateAndSaveIcon(a, a.getConservationArea(), session);
 							if (a.getAttributeList() != null) a.getAttributeList().forEach(li->updateAndSaveIcon(li, a.getConservationArea(), session));
 							if (a.getTree() != null)a.getTree().forEach(node->node.accept(v->{
-								updateAndSaveIcon(v, a.getConservationArea(), session);
+								updateAndSaveIcon((AttributeTreeNode)v, a.getConservationArea(), session);
 								return true;
 							}));
 							if (a.getUuid() == null){

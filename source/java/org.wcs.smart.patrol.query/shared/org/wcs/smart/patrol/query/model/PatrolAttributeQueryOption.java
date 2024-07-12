@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 
 /**
  * Query option representing custom patrol attributes
@@ -88,10 +89,10 @@ public class PatrolAttributeQueryOption implements IPatrolQueryOption {
 		case BOOLEAN: return PatrolQueryOptionType.BOOLEAN;
 		case DATE: return PatrolQueryOptionType.DATE;
 		case LIST: return PatrolQueryOptionType.KEY;
+		case TREE: return PatrolQueryOptionType.HKEY;
 		case NUMERIC: return PatrolQueryOptionType.NUMBER;
 		case TEXT: return PatrolQueryOptionType.STRING;
 		case MLIST:
-		case TREE:
 		case LINE:
 		case POLYGON:
 		case TIME:
@@ -131,6 +132,10 @@ public class PatrolAttributeQueryOption implements IPatrolQueryOption {
 				if (item.getUuid().equals(uuid)) return item.getName();
 			}
 		}
+		if (temp.getType() == Attribute.AttributeType.TREE) {
+			PatrolAttributeTreeNode node = session.get(PatrolAttributeTreeNode.class, uuid);
+			if (node != null) return node.getName();
+		}
 		return null;
 	}
 	
@@ -154,13 +159,19 @@ public class PatrolAttributeQueryOption implements IPatrolQueryOption {
 	
 	/**
 	 * Given a particular uuid return the source 
-	 * object (returns a Team, Station etc. object)
+	 * object. Looks up patrol attribute list item and
+	 * patrol attribute tree nodes
 	 * @param session
 	 * @param uuid
 	 * @return
 	 */
 	public Object getObject(Session session, UUID uuid){
-		return session.get(PatrolAttributeListItem.class, uuid);
+		if (pattribute.getType() == Attribute.AttributeType.LIST) {
+			return session.get(PatrolAttributeListItem.class, uuid);
+		}else if (pattribute.getType() == Attribute.AttributeType.TREE) {
+			return session.get(PatrolAttributeTreeNode.class, uuid);
+		}
+		return null;
 	}
 	
 

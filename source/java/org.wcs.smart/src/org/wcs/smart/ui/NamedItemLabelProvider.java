@@ -40,6 +40,10 @@ public class NamedItemLabelProvider extends LabelProvider {
 		this.currentLanguage = language;
 	}
 	
+	public Language getLanguage() {
+		return this.currentLanguage;
+	}
+	
 	@Override
 	public String getText(Object element) {
 		if (element instanceof NamedItem) {

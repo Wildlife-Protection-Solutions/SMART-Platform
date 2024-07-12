@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.ui;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
@@ -33,12 +34,16 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
  */
 public interface IPatrolOptionData {
 
-	public List<ListItem> getValues(Session session, String[] keys);
+	public List<ListItem> getListValues(Session session, String[] keys);
 	
-	public List<ListItem> getAllValues(Session session);
+	public List<ListItem> getListValues(Session session);
 	
 	public ListItem getDefaultListItem();
 
 	public boolean isDependOnQueryConfiguration();
+
+	public default List<? extends ITreeNode<?>> getValuesTree(Session session){
+		return null;
+	}
 
 }

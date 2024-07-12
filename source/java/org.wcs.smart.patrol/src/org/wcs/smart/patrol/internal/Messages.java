@@ -270,6 +270,40 @@ public class Messages extends NLS {
 	public static String PatrolAttributeDialog_message;
 	public static String PatrolAttributeDialog_shelltitle;
 	public static String PatrolAttributeDialog_title;
+	public static String PatrolAttributeTreeComposite_addtooltip;
+
+	public static String PatrolAttributeTreeComposite_collapseAllBtn;
+
+	public static String PatrolAttributeTreeComposite_confirmtitle;
+
+	public static String PatrolAttributeTreeComposite_deleteerror;
+
+	public static String PatrolAttributeTreeComposite_deletesubtask;
+
+	public static String PatrolAttributeTreeComposite_deletetaskname;
+
+	public static String PatrolAttributeTreeComposite_deletetooltip;
+
+	public static String PatrolAttributeTreeComposite_disablealltooltip;
+
+	public static String PatrolAttributeTreeComposite_disabletooltip;
+
+	public static String PatrolAttributeTreeComposite_edittooltip;
+
+	public static String PatrolAttributeTreeComposite_enablealltooltip;
+
+	public static String PatrolAttributeTreeComposite_expandallBtn;
+
+	public static String PatrolAttributeTreeComposite_IconLbl;
+
+	public static String PatrolAttributeTreeComposite_SortAllBtn;
+
+	public static String PatrolAttributeTreeComposite_sortalltooltip;
+
+	public static String PatrolAttributeTreeComposite_TreeNodeLbl;
+
+	public static String PatrolAttributeTreeComposite_verifydeletemsg;
+
 	public static String PatrolAttributeWizardPage_Message;
 	public static String PatrolAttributeWizardPage_Title;
 	public static String PatrolCaDeleteHandler_DeletePatrolAttributes;
@@ -1014,6 +1048,8 @@ public class Messages extends NLS {
 
 	public static String XmlToPatrolConverter_SourceParseError;
 	public static String XmlToPatrolConverter_TreeAttributesNotSupported;
+
+	public static String XmlToPatrolConverter_TreeNodeNotFound;
 	public static String XmlToPatrolConverter2_ReadError;
 	public static String XmlToPatrolConverter_Warning_AttachmentFileNotFound;
 	public static String XmlToPatrolConverter_Warning_AttributeNotFound;

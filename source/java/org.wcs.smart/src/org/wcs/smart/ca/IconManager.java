@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -52,7 +51,6 @@ import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.util.UuidUtils;
 /**
  * For managing icons in the desktop and creating/caching thumbnails.
  * 

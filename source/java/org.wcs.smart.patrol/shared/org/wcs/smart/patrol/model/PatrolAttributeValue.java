@@ -56,6 +56,8 @@ public class PatrolAttributeValue {
 	private PatrolAttributeValuePk id = new PatrolAttributeValuePk();
 
 	private PatrolAttributeListItem listItem;
+	private PatrolAttributeTreeNode treeNode;
+	
 	private String sValue;
 	private Double dValue;
 	
@@ -97,6 +99,15 @@ public class PatrolAttributeValue {
 		this.listItem = item;
 	}
 
+	@ManyToOne(fetch =FetchType.LAZY)
+	@JoinColumn(name="tree_node_uuid", referencedColumnName="uuid")
+	public PatrolAttributeTreeNode getAttributeTreeNode(){
+		return this.treeNode;
+	}
+	public void setAttributeTreeNode(PatrolAttributeTreeNode treeNode){
+		this.treeNode = treeNode;
+	}
+	
 	@Column(name="string_value")
 	public String getStringValue(){
 		return this.sValue;
@@ -149,6 +160,8 @@ public class PatrolAttributeValue {
 			return getStringValue();
 		}else if (type == AttributeType.LIST){
 			return getAttributeListItem();
+		}else if (type == AttributeType.TREE){
+			return getAttributeTreeNode();
 		}else if (type == AttributeType.DATE){
 			return getDateValue();
 		}
@@ -200,6 +213,15 @@ public class PatrolAttributeValue {
 				setAttributeListItem((PatrolAttributeListItem)newValue);
 			}else{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for list attribute"); //$NON-NLS-1$
+			}
+			break;
+		case TREE:
+			if (newValue == null){
+				setAttributeTreeNode(null);
+			}else if (newValue instanceof PatrolAttributeTreeNode value){
+				setAttributeTreeNode(value);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for tree attribute"); //$NON-NLS-1$
 			}
 			break;
 		case NUMERIC:
@@ -307,10 +329,16 @@ public class PatrolAttributeValue {
 				text = getAttributeListItem().getName();
 			}
 			break;
+		case TREE:
+			if (getAttributeTreeNode() != null) {
+				//TODO: ??full name??
+				text = getAttributeTreeNode().getName();
+			}
+			break;
+		case TIME:
+			throw new IllegalStateException("time attributes not supported for patrol attributes"); //$NON-NLS-1$
 		case MLIST:
 			throw new IllegalStateException("multi list attributes not supported for patrol attributes"); //$NON-NLS-1$
-		case TREE:
-			throw new IllegalStateException("tree attributes not supported for patrol attributes"); //$NON-NLS-1$
 		case LINE:
 		case POLYGON:
 			throw new IllegalStateException("geometry attributes not supported for patrol attributes"); //$NON-NLS-1$

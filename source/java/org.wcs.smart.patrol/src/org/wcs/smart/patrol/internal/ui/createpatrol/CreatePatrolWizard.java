@@ -175,7 +175,10 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"isActive", true}).list(); //$NON-NLS-1$	
 			
-			attributes.forEach(a->HibernateManager.load(a.getAttributeList()));
+			attributes.forEach(a->{
+				HibernateManager.load(a.getAttributeList());
+				a.loadTree(session);
+			});
 		}
 		for (NewPatrolWizardPage p : thisitems) {
 			if (!p.getName().equals(PatrolAttributeWizardPage.ID)) continue;

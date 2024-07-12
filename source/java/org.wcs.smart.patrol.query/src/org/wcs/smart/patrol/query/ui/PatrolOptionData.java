@@ -38,6 +38,9 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -65,7 +68,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
 /**
- * Patrol optoin data for fixed patrol options.
+ * Patrol option data for fixed patrol options.
  * 
  * @author Emily
  *
@@ -81,13 +84,14 @@ public class PatrolOptionData implements IPatrolOptionData{
 	/**
 	 * Given a set of keys (hex encoded uuids or string keys), returns
 	 * a list of listitems that represent the objects
-	 * with the given keys.
+	 * with the given keys. ONLY works for list based attributes (mandate, 
+	 * custom patrol list attributes). For tree attributes use getValuesTree.
 	 * 
 	 * @param session
 	 * @param keys
 	 * @return
 	 */
-	public List<ListItem> getValues(Session session, String[] keys){
+	public List<ListItem> getListValues(Session session, String[] keys){
 		List<ListItem> results = new ArrayList<ListItem>();
 		
 		Set<String> skeys = new HashSet<>();
@@ -97,9 +101,11 @@ public class PatrolOptionData implements IPatrolOptionData{
 			PatrolAttributeQueryOption op = (PatrolAttributeQueryOption)option;
 			
 			PatrolAttribute temp = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session, op.getPatrolAttribute().getKeyId());
-			for (PatrolAttributeListItem it : temp.getAttributeList()) {
-				if (skeys.contains(it.getKeyId())) {
-					results.add(new ListItem(null, it.getName(), it.getKeyId(), it.getName()));
+			if (temp.getType() == Attribute.AttributeType.LIST) {
+				for (PatrolAttributeListItem it : temp.getAttributeList()) {
+					if (skeys.contains(it.getKeyId())) {
+						results.add(new ListItem(null, it.getName(), it.getKeyId(), it.getName()));
+					}
 				}
 			}
 		} else {
@@ -208,19 +214,24 @@ public class PatrolOptionData implements IPatrolOptionData{
 		return results;
 	}
 
+	
 	/**
+	 * ONLY works for list based attributes (mandate, 
+	 * custom patrol list attributes). For tree attributes use getValuesTree.
 	 * @param session
 	 * @return a list of listitems that represent all
 	 * active values for a given object 
 	 */
-	public List<ListItem> getAllValues(Session session){
+	public List<ListItem> getListValues(Session session){
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		
 		if (option instanceof PatrolAttributeQueryOption) {
 			PatrolAttributeQueryOption op = (PatrolAttributeQueryOption)option;
 			PatrolAttribute temp = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session, op.getPatrolAttribute().getKeyId());
-			for (PatrolAttributeListItem it : temp.getAttributeList()) {
-				items.add(new ListItem(null, it.getName(), it.getKeyId(), it.getName()));
+			if (temp.getType() == Attribute.AttributeType.LIST) {
+				for (PatrolAttributeListItem it : temp.getAttributeList()) {
+					items.add(new ListItem(null, it.getName(), it.getKeyId(), it.getName()));
+				}
 			}
 		}else if (option == PatrolQueryOption.ID){
 			List<String> pids = PatrolHibernateManager.getPatrolIds(session);
@@ -285,6 +296,55 @@ public class PatrolOptionData implements IPatrolOptionData{
 		}
 		Collections.sort(items);
 		return items;
+	}
+	
+	/**
+	 * Returns all tree nodes associated with the given attribute
+	 */
+	public List<? extends ITreeNode<?>> getValuesTree(Session session){
+		if (option instanceof PatrolAttributeQueryOption) {
+			PatrolAttributeQueryOption op = (PatrolAttributeQueryOption)option;
+			
+			PatrolAttribute temp = PatrolQueryHibernateManager.getInstance().
+					getPatrolAttribute(session, op.getPatrolAttribute().getKeyId());
+			
+			if (temp.getType() == Attribute.AttributeType.TREE) {
+				temp.loadTree(session);
+				return temp.getAttributeTree();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Gets all tree nodes associated with the attribute at a given level
+	 * 
+	 * @param session
+	 * @param level
+	 * @return
+	 */
+	public List<? extends ITreeNode<?>> getValuesTree(Session session, int level){
+		if (option instanceof PatrolAttributeQueryOption) {
+			PatrolAttributeQueryOption op = (PatrolAttributeQueryOption)option;
+			
+			PatrolAttribute temp = PatrolQueryHibernateManager.getInstance().
+					getPatrolAttribute(session, op.getPatrolAttribute().getKeyId());
+			
+			if (temp.getType() == Attribute.AttributeType.TREE) {
+				temp.loadTree(session);
+				
+				List<ITreeNode<?>> matched = new ArrayList<>();
+				temp.getAttributeTree().forEach(n->{
+					n.accept(t->{
+						if (Category.hkeyLength(t.getHkey()) == level) matched.add(t);
+						return true;
+					});
+				});
+				
+				return matched;
+			}
+		}
+		return null;
 	}
 
 	@Override

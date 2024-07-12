@@ -34,7 +34,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
 import org.wcs.smart.util.SmartUtils;
 
@@ -79,7 +79,7 @@ public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> imple
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		super.createComposite(parent, new AttributeTreeContentProvider(true, false),
-				new AttributeTreeLabelProvider(IconManager.Size.ICON));
+				new TreeNodeLabelProvider(IconManager.Size.ICON));
 		
 		super.setInput(this.attribute);
 	}

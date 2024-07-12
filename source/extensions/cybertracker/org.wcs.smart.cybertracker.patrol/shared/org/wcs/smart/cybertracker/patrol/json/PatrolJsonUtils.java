@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -210,6 +211,12 @@ public class PatrolJsonUtils {
 					}
 				}
 				if (!(value instanceof PatrolAttributeListItem)) value = null;
+			}else if (pa.getType() == Attribute.AttributeType.TREE) {
+				UUID uuid = UuidUtils.stringToUuid( (String)value );
+				PatrolAttributeTreeNode node = session.get(PatrolAttributeTreeNode.class, uuid);
+				if (node != null && node.getAttribute().equals(pa)) {
+					value = node;
+				}
 			}else if (pa.getType() == Attribute.AttributeType.DATE) {
 				if (!value.toString().isBlank()) {
 					value = LocalDate.parse((String)value, DATEFORMAT);

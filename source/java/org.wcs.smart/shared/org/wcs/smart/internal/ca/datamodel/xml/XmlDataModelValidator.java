@@ -88,7 +88,7 @@ public class XmlDataModelValidator {
 					for (AttributeTreeNode node : attribute.getTree()) {
 						node.accept(n->{
 							try {
-								validate(n, n.getParent() == null? attribute.getTree() : n.getParent().getChildren());
+								validate((DmObject)n, n.getParent() == null? attribute.getTree() : n.getParent().getChildren());
 							}catch (ParseException ex) {
 								exception = ex;
 								return false;

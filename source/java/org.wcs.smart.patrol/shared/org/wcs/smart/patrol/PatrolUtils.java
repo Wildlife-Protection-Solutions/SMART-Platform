@@ -27,11 +27,20 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
@@ -146,5 +155,119 @@ public class PatrolUtils {
 		}
 		return dates;
 	}
+	
+	/**
+	 * Find the attribute tree node with the given hkey associated with the given patrol attribute
+	 * Will return null if not found.
+	 * 
+	 * @param attribute
+	 * @param hkey
+	 * @param session
+	 */
+	public static PatrolAttributeTreeNode findAttributeTreeNode(PatrolAttribute attribute, String hkey, Session session) {
+		return QueryFactory.buildQuery(session, PatrolAttributeTreeNode.class, 
+				new Object[] {"attribute", attribute}, //$NON-NLS-1$
+				new Object[] {"hkey", hkey}).uniqueResult(); //$NON-NLS-1$		
+			
+	}
 
+	
+	/**
+	 * For ccaa analysis; merges patrol attributes from various ca's 
+	 * into a single patrol attribute object.
+	 * If the patrolAttributes are of different types (Tree/list etc) this will 
+	 * return null. List items and tree nodes are also merged.
+	 * Icons are not merged at this time.
+	 * @param toMerge
+	 * @return
+	 */
+	public static PatrolAttribute mergeAttributes(List<PatrolAttribute> toMerge) {
+		PatrolAttribute pa = toMerge.get(0);
+		
+		//validate all are the same type otherwise return null
+		for(PatrolAttribute p : toMerge) {
+			if (p.getType() != pa.getType()) return null;
+		}
+		
+		//make a clone and sort out list items
+		PatrolAttribute temp = new PatrolAttribute();
+		temp.setKeyId(pa.getKeyId());
+		temp.setIsActive(true);
+		temp.setName(pa.getName());
+		temp.setType(pa.getType());
+
+		if (pa.getType() == Attribute.AttributeType.LIST) {
+			temp.setAttributeList(mergeListAttributes(toMerge, temp));			
+		}
+		if (pa.getType() == Attribute.AttributeType.TREE) {
+			temp.setAttributeTree(mergeTreeAttributes(toMerge, temp));			
+		}
+		return temp;
+	}
+	private static List<PatrolAttributeListItem> mergeListAttributes(List<PatrolAttribute> toMerge, PatrolAttribute rattribute) {
+		Map<String, PatrolAttributeListItem> listItems = new HashMap<>();
+		
+		for (PatrolAttribute attribute : toMerge) {
+			if (attribute.getAttributeList() == null) continue;
+			
+			for (PatrolAttributeListItem li : attribute.getAttributeList()) {
+				if (listItems.get(li.getKeyId()) != null) continue;
+				
+				PatrolAttributeListItem clone = new PatrolAttributeListItem();
+				clone.setIsActive(true);
+				clone.setKeyId(li.getKeyId());
+				clone.setName(li.getName());
+				clone.setListOrder(li.getListOrder());
+				clone.setAttribute(rattribute);
+				//TODO: icons?
+				listItems.put(li.getKeyId(), clone);
+				
+			}
+		}
+		
+		List<PatrolAttributeListItem> sortedItems = new ArrayList<>();
+		sortedItems.addAll(listItems.values());
+		Collections.sort(sortedItems);
+		return sortedItems;
+	}
+	
+	
+	private static List<PatrolAttributeTreeNode> mergeTreeAttributes(List<PatrolAttribute> toMerge, PatrolAttribute rattribute) {
+		Map<String, PatrolAttributeTreeNode> treeNodes = new HashMap<>();
+		
+		for (PatrolAttribute attribute : toMerge) {
+			if (attribute.getAttributeTree() == null) continue;
+			
+			List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+			toProcess.addAll(attribute.getAttributeTree());
+			
+			while(!toProcess.isEmpty()) {
+				PatrolAttributeTreeNode tnode = toProcess.remove(0);
+				toProcess.addAll(tnode.getChildren());
+				
+				if (treeNodes.get(tnode.getHkey()) != null) continue;
+				
+				PatrolAttributeTreeNode clone = new PatrolAttributeTreeNode();
+				clone.setIsActive(true);
+				clone.setChildren(new ArrayList<>());
+				clone.setKeyId(tnode.getKeyId());
+				clone.setHkey(tnode.getHkey());
+				clone.setName(tnode.getName());
+				clone.setNodeOrder(tnode.getNodeOrder());
+				clone.setAttribute(rattribute);
+				//TODO: icons?				
+				if (tnode.getParent() != null) {
+					clone.setParent(treeNodes.get(tnode.getParent().getHkey()));
+					clone.getParent().getChildren().add(clone);
+				}
+				
+				treeNodes.put(tnode.getHkey(), clone);
+				
+			}
+		}
+		
+		List<PatrolAttributeTreeNode> sortedItems = treeNodes.values().stream().filter(f->f.getParent() == null).collect(Collectors.toList());
+		Collections.sort(sortedItems);
+		return sortedItems;
+	}
 }

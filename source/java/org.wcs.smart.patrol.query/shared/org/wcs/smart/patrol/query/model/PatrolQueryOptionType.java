@@ -11,6 +11,7 @@ public enum PatrolQueryOptionType{
 	UUID, 
 	STRING,
 	KEY,
+	HKEY, //for trees
 	NUMBER,
 	DATE
 }

@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -86,9 +85,11 @@ import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -1027,12 +1028,12 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(PatrolAttributeGroupBy item){
 		List<ListItem> results = new ArrayList<ListItem>();
 		
-		Set<String> keys = null;
+		Set<String> tkeys = null;
 		if (item.getItems() != null) {
-			keys = new HashSet<>();
-			for (String i : item.getItems()) keys.add(i);
+			tkeys = new HashSet<>();
+			for (String i : item.getItems()) tkeys.add(i);
 		}
-		
+		final Set<String> keys = tkeys;
 		List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
 		if (caUuids.size() == 1) {
 
@@ -1040,16 +1041,32 @@ public class SummaryItemLabelProvider {
 			PatrolAttribute pa = QueryFactory.buildQuery(s, PatrolAttribute.class,
 					new Object[] {"keyId", item.getAttributeKey()}, //$NON-NLS-1$
 					new Object[] {"conservationArea.uuid", caUuids.get(0)}).uniqueResult(); //$NON-NLS-1$
-			
-			if (pa == null || pa.getType() != AttributeType.LIST) return results;
-			
-
-			
-			for (PatrolAttributeListItem li : pa.getAttributeList()) {
-				if (keys == null || keys.contains(li.getKeyId())) {
-					results.add(new ListItem(null, li.getName(), li.getKeyId()));
+			if (pa == null) return results;
+			if (pa.getType() == AttributeType.LIST) {
+				for (PatrolAttributeListItem li : pa.getAttributeList()) {
+					if (keys == null || keys.contains(li.getKeyId())) {
+						results.add(new ListItem(null, li.getName(), li.getKeyId()));
+					}	
 				}	
 			}
+			if (pa.getType() == AttributeType.TREE) {
+				List<PatrolAttributeTreeNode> nodes = new ArrayList<>();
+				pa.getAttributeTree().forEach(n->{
+					n.accept(t->{
+						if (Category.hkeyLength(t.getHkey()) == item.getLevel()) {
+							nodes.add((PatrolAttributeTreeNode) t);
+						}
+						return true;
+					});
+				});
+				nodes.stream()
+				.filter(n-> (keys == null || keys.contains(n.getHkey())))
+				.map(n->new ListItem(null, n.getName(), n.getHkey()))
+				.forEach(r->results.add(r));
+			}
+			
+			return results;
+			
 		}else {
 			//merge together items
 			
@@ -1059,18 +1076,31 @@ public class SummaryItemLabelProvider {
 					.list();
 			if (pas.isEmpty()) return results;
 			
-			for (PatrolAttribute pa : pas) if (pa.getType() != AttributeType.LIST) return results;
-			
-			HashMap<String, ListItem> items = new HashMap<>();
-			for (PatrolAttribute pa : pas) {
-				for (PatrolAttributeListItem li : pa.getAttributeList()) {
-					if ( (keys == null || keys.contains(li.getKeyId())) &&  !items.containsKey(li.getKeyId())) {
-						ListItem litem = new ListItem(null, li.getKeyId(), li.getName());
-						items.put(li.getKeyId(), litem);
-					}
-				}
+			PatrolAttribute merged = PatrolUtils.mergeAttributes(pas);
+			if (merged == null) return results;
+			if (merged.getType() == AttributeType.LIST) {
+				
+				merged.getAttributeList().stream()
+					.filter(f->(keys == null || keys.contains(f.getKeyId())))
+					.map(e->new ListItem(null, e.getName(),e.getKeyId()))
+					.forEach(e->results.add(e));
+						
 			}
-			results.addAll(items.values());
+			if (merged.getType() == AttributeType.TREE) {
+				List<PatrolAttributeTreeNode> nodes = new ArrayList<>();
+				merged.getAttributeTree().forEach(n->{
+					n.accept(t->{
+						if (Category.hkeyLength(t.getHkey()) == item.getLevel()) {
+							nodes.add((PatrolAttributeTreeNode) t);
+						}
+						return true;
+					});
+				});
+				nodes.stream()
+				  .filter(n-> (keys == null || keys.contains(n.getHkey())))
+				  .map(n->new ListItem(null, n.getName(), n.getHkey()))
+				  .forEach(r->results.add(r));	
+			}
 		}
 		sortItems(results);
 		return results;

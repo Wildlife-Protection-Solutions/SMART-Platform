@@ -1,0 +1,839 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui.properties;
+
+import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PatternFilter;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
+import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
+
+/**
+ * Class that creates an attribute tree viewer for
+ * a given attribute.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class PatrolAttributeTreeComposite extends Composite{
+
+	
+	private TreeViewer viewer = null;
+	private AttributeTreeChangeListener listener = null;
+	
+	private PatrolAttribute attribute;
+	
+	private List<PatrolAttributeTreeNode> deletedNodes = new ArrayList<>();
+	private TreeNodeLabelProvider labelProvider = new TreeNodeLabelProvider(IconManager.Size.ICON);
+	
+	public PatrolAttributeTreeComposite(Composite parent){
+		super(parent, SWT.NONE);
+		createTree();
+		
+	}
+	/**
+	 * Sets the listener fired when modifications occur.  
+	 * @param listener
+	 */
+	public void setListener(AttributeTreeChangeListener listener){
+		this.listener = listener;
+	}
+	
+	private void fireChangeListener(){
+		if (listener != null){
+			listener.treeModified();
+		}
+	}
+	
+	/**
+	 * Update the key associated with the attribute.
+	 * <p>
+	 * This is done so if the attribute key is updated
+	 * then tree nodes are imported the correct
+	 * file will be searched for.
+	 * </p>
+	 * 
+	 * @param newKey new attribute key
+	 */
+	public void updateAttributeKey(String newKey){
+		if (this.attribute != null){
+			this.attribute.setKeyId(newKey);
+		}
+	}
+	
+	public void refresh(Language newLanguage){
+		labelProvider.setLanguage(newLanguage);
+		viewer.refresh();
+	}
+	
+	
+	/**
+	 * Sets the attribute input to the attribute tree.  Attribute
+	 * tree nodes are cloned for working on; this is done inside a progress
+	 * monitor.  When complete the cloned nodes should be merged back
+	 * into the original nodes.
+	 * 
+	 * @param attribute
+	 * @param currentSession current hibernate session
+	 */
+	public void setInput(PatrolAttribute attribute){
+
+		this.attribute = attribute;
+		
+		final List<PatrolAttributeTreeNode> clonedroots = new ArrayList<>();
+		
+		if (attribute.getAttributeTree() == null){
+			viewer.setInput(clonedroots);
+			refreshTree();
+		}else{
+			viewer.setInput(PatrolAttributeTreeComposite.this.attribute.getAttributeTree());
+			refreshTree();
+			fireChangeListener();
+		}
+	}
+
+	/**
+	 * 
+	 * @return the list of root nodes
+	 */
+	@SuppressWarnings("unchecked")
+	public List<PatrolAttributeTreeNode> getRootNodes(){
+		if (viewer.getInput() instanceof List){
+			return (List<PatrolAttributeTreeNode>)viewer.getInput();
+		}else{
+			return null;
+		}
+	}
+	
+
+	
+	/**
+	 * 
+	 * @param parent
+	 * @param currentLanguage
+	 * 
+	 * @return composite that describes the attribute tree
+	 */
+	public Composite createTree(){
+		setLayout(new GridLayout());
+		
+		Composite comp = new Composite(this, SWT.NONE);
+		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		comp.setLayout(new GridLayout(2, false));
+		
+		
+		PatternFilter patternFilter = new PatternFilter(){			
+			protected boolean isChildMatch(Viewer viewer, Object element) {
+				Object parent = ((AttributeTreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
+				if (parent != null) {
+					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
+				}
+				return false;
+			}
+			
+			@Override
+			protected boolean isLeafMatch(Viewer viewer, Object element) {
+				String labelText = labelProvider.getText(element);
+				if (labelText == null) {
+					return false;
+				}
+				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
+			}
+			
+		};
+		FilteredTree fTree = new FilteredTree(comp,
+				SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION, patternFilter, true, false);
+		viewer = fTree.getViewer();
+	
+		viewer.setContentProvider(new AttributeTreeContentProvider(false, false));
+		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
+		((GridData)viewer.getTree().getLayoutData()).heightHint = 80;
+		((GridData)viewer.getTree().getLayoutData()).widthHint = 100;
+		viewer.setAutoExpandLevel(2);
+		viewer.setInput(DialogConstants.LOADING_TEXT);
+		viewer.getTree().setHeaderVisible(true);
+		viewer.getTree().setLinesVisible(false);
+		
+		TreeViewerColumn labelColumn = new TreeViewerColumn(viewer, SWT.NONE);
+		labelColumn.getColumn().setText(Messages.PatrolAttributeTreeComposite_TreeNodeLbl);
+		labelColumn.getColumn().setWidth(150);
+		labelColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return labelProvider.getText(element);
+			}
+			@Override
+			public void dispose() {
+				super.dispose();
+				labelProvider.dispose();
+			}
+			
+			@Override
+			public Color getForeground(Object element) {
+				return labelProvider.getForeground(element);
+			}
+		});
+		
+		TreeViewerColumn iconColumn = new TreeViewerColumn(viewer, SWT.NONE);
+		iconColumn.getColumn().setText(Messages.PatrolAttributeTreeComposite_IconLbl);
+		iconColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return null;
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				return labelProvider.getImage(element);
+			}
+		});
+		iconColumn.getColumn().setWidth(32);
+			
+		int operations = DND.DROP_MOVE;
+		Transfer[] transferTypes = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+		viewer.addDragSupport(operations, transferTypes, new AttributeTreeDragListener(viewer));
+		viewer.addDropSupport(operations, transferTypes, new AttributeTreeDropListener(viewer));
+
+		Composite buttonPanel = new Composite(comp, SWT.NONE);
+		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		buttonPanel.setLayout(new GridLayout(1, false));
+
+		final Button btnAdd = createButton(buttonPanel, DialogConstants.ADD_BUTTON_TEXT,
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setEnabled(true);
+		btnAdd.setToolTipText(Messages.PatrolAttributeTreeComposite_addtooltip);
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addItem(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+		});
+
+		final Button btnEdit = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT,
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setEnabled(false);
+		btnEdit.setToolTipText(Messages.PatrolAttributeTreeComposite_edittooltip);
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				editItem(viewer, labelProvider.getLanguage());
+			}
+		});
+
+		final Button btnSort = createButton(buttonPanel, Messages.PatrolAttributeTreeComposite_SortAllBtn, null);
+		btnSort.setToolTipText(Messages.PatrolAttributeTreeComposite_sortalltooltip);
+		btnSort.addSelectionListener(new SelectionAdapter() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<PatrolAttributeTreeNode> nodes = (List<PatrolAttributeTreeNode>) viewer.getInput();
+				List<PatrolAttributeTreeNode> toSort = new ArrayList<PatrolAttributeTreeNode>();
+				Language lang = labelProvider.getLanguage();
+
+				sortNodes(nodes, lang);
+				toSort.addAll(nodes);
+				while (toSort.size() > 0) {
+					PatrolAttributeTreeNode p = toSort.remove(0);
+					sortNodes(p.getChildren(), lang);
+					toSort.addAll(p.getChildren());
+				}
+				refreshTree();
+			}
+		});
+
+		Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		final Button btnDisable = createButton(buttonPanel, DialogConstants.DISABLE_BUTTON_TEXT,
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		btnDisable.setToolTipText(Messages.PatrolAttributeTreeComposite_disabletooltip);
+		btnDisable.setEnabled(false);
+		btnDisable.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				disableItem(viewer, !btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT));
+
+				if (btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)) {
+					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+				} else {
+					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+				}
+			}
+		});
+
+		final Button btnDisableAll = createButton(buttonPanel, DialogConstants.DISABLEALL_BUTTON_TEXT,
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		btnDisableAll.setToolTipText(Messages.PatrolAttributeTreeComposite_disablealltooltip);
+		btnDisableAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (PatrolAttributeTreeNode node : getRootNodes()) {
+					disableNode(node, false);
+				}
+				viewer.refresh();
+				fireChangeListener();
+				viewer.setSelection(viewer.getSelection());
+			}
+		});
+
+		final Button btnEnableeAll = createButton(buttonPanel, DialogConstants.ENABLEALL_BUTTON_TEXT,
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+		btnEnableeAll.setToolTipText(Messages.PatrolAttributeTreeComposite_enablealltooltip);
+		btnEnableeAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (PatrolAttributeTreeNode node : getRootNodes()) {
+					enableAll(node);
+				}
+				viewer.refresh();
+				fireChangeListener();
+				viewer.setSelection(viewer.getSelection());
+			}
+		});
+
+		lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		final Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT,
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setEnabled(false);
+		btnDelete.setToolTipText(Messages.PatrolAttributeTreeComposite_deletetooltip);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteNodes();
+			}
+		});
+
+		Menu tmp = new Menu(viewer.getControl());
+		MenuItem miAdd = new MenuItem(tmp, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e -> addItem(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+
+		MenuItem miEdit = new MenuItem(tmp, SWT.PUSH);
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.addListener(SWT.Selection, e -> editItem(viewer, labelProvider.getLanguage()));
+
+		MenuItem miDelete = new MenuItem(tmp, SWT.PUSH);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.addListener(SWT.Selection, e -> deleteNodes());
+
+		new MenuItem(tmp, SWT.SEPARATOR);
+
+		MenuItem miExpand = new MenuItem(tmp, SWT.PUSH);
+		miExpand.setText(Messages.PatrolAttributeTreeComposite_expandallBtn);
+		miExpand.addListener(SWT.Selection, e -> viewer.expandAll());
+
+		MenuItem miCollapse = new MenuItem(tmp, SWT.PUSH);
+		miCollapse.setText(Messages.PatrolAttributeTreeComposite_collapseAllBtn);
+		miCollapse.addListener(SWT.Selection, e -> viewer.collapseAll());
+
+		viewer.getControl().setMenu(tmp);
+
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (viewer.getSelection().isEmpty()) {
+					btnEdit.setEnabled(false);
+					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					miDelete.setEnabled(false);
+					miEdit.setEnabled(false);
+					return;
+				}
+				Object x = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
+				if (x instanceof AttributeTreeContentProvider.RootNode) {
+					btnEdit.setEnabled(false);
+					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					miDelete.setEnabled(false);
+					miEdit.setEnabled(false);
+				} else if (x instanceof PatrolAttributeTreeNode) {
+					btnEdit.setEnabled(true);
+					btnDisable.setEnabled(true);
+					btnDelete.setEnabled(true);
+					miDelete.setEnabled(true);
+					miEdit.setEnabled(true);
+					if (((PatrolAttributeTreeNode) x).getIsActive()) {
+						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+						btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+					} else {
+						btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+						btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+					}
+				}
+				
+			}
+		});
+		
+		return comp;
+	}
+	
+	private Button createButton(Composite parent, String text, Image icon) {
+		Button btnMoveDown = new Button(parent, SWT.NONE);
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveDown.setText(text);
+		btnMoveDown.setImage(icon);
+		btnMoveDown.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		return btnMoveDown;
+	}
+	
+	private void sortNodes(List<PatrolAttributeTreeNode> nodes, final Language lang){
+		nodes.sort((a,b)->Collator.getInstance().compare(a.findName(lang).toUpperCase(), b.findName(lang).toUpperCase()));
+		
+		for (int i = 0; i < nodes.size();i++){
+			nodes.get(i).setNodeOrder(i);
+		}
+	}
+	
+	private void deleteNodes() {
+		
+		final ArrayList<PatrolAttributeTreeNode> toDelete = new ArrayList<PatrolAttributeTreeNode>();
+		
+		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof PatrolAttributeTreeNode){
+				List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+				toProcess.add((PatrolAttributeTreeNode)x);
+				while(toProcess.size() > 0){
+					PatrolAttributeTreeNode item = toProcess.remove(0);
+					toDelete.remove(item);
+					toDelete.add(0, item);
+					if (item.getChildren() != null){
+						toProcess.addAll(item.getChildren());
+					}
+				}
+			}
+		}
+		
+		if(toDelete.size() == 0){
+			return;
+		}
+		
+		String deleteQuestion = null;
+		deleteQuestion = MessageFormat.format(Messages.PatrolAttributeTreeComposite_verifydeletemsg,toDelete.size());				
+		boolean confirm = MessageDialog.openConfirm(viewer.getTree().getShell(), Messages.PatrolAttributeTreeComposite_confirmtitle, deleteQuestion);
+		if (!confirm) return;
+		
+				
+		runInProgressDialog(new IRunnableWithProgress() {
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+				InterruptedException {
+				monitor.beginTask(Messages.PatrolAttributeTreeComposite_deletetaskname, toDelete.size());
+				final Display shell = Display.getDefault();
+				StringBuilder errors = new StringBuilder();
+				
+				try(Session session = HibernateManager.openSession()){
+					for (PatrolAttributeTreeNode node : toDelete){
+						monitor.subTask(MessageFormat.format(Messages.PatrolAttributeTreeComposite_deletesubtask, node.getName()));
+						boolean delete = false;
+						try{
+							DeleteManager.canDelete(node, session);						
+							delete = true;
+						}catch (final Exception ex){
+							errors.append(MessageFormat.format(Messages.PatrolAttributeTreeComposite_deleteerror + "\n", node.getName(), ex.getMessage())); //$NON-NLS-1$
+						}	
+						if (delete){
+							if (node.getParent() != null){
+								node.getParent().getChildren().remove(node);
+								node.setParent(null);
+								node.setAttribute(null);
+							}else{
+								getRootNodes().remove(node);
+								node.setAttribute(null);
+							}
+							deletedNodes.add(node);
+						}
+						
+						monitor.worked(1);
+					}
+				}
+					
+				shell.syncExec(()->{
+					if (!errors.isEmpty()) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), 
+									DialogConstants.ERROR_STRING, errors.toString());
+					}
+					refreshTree();
+					fireChangeListener();
+				});
+				
+			}
+		});
+	}
+	
+	public List<PatrolAttributeTreeNode> getDeletedNodes(){
+		return this.deletedNodes;
+	}
+	public void clearDeletedNodes(){
+		this.deletedNodes.clear();
+	}
+	/*
+	 * Run a taks in a progress monitor
+	 * @param runnable
+	 */
+	private void runInProgressDialog(IRunnableWithProgress runnable){
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(viewer.getTree().getShell());
+		try {
+			dialog.run(true, true, runnable);		
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(ex.getMessage(), ex);
+		}
+	}
+	
+	/*
+	 * Enables the attribute tree node and all its children
+	 */
+	private void enableAll(PatrolAttributeTreeNode node){
+		node.setIsActive(true);
+		if (node.getChildren() == null) return;
+		for (PatrolAttributeTreeNode child: node.getChildren()){
+			enableAll(child);
+		}		
+	}
+	
+	/*
+	 * disable items in the tree
+	 */
+	private void disableItem(TreeViewer viewer, boolean enabled){
+		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof PatrolAttributeTreeNode){
+				disableNode((PatrolAttributeTreeNode)x, enabled);	
+			}	
+		}
+		viewer.refresh();
+		fireChangeListener();
+	}
+	
+	/*
+	 * disables or enables a tree node
+	 * 
+	 * @param enabled true if the node is to be activated; false to de-activate
+	 */
+	public void disableNode(PatrolAttributeTreeNode node, boolean enabled){
+		if (!enabled){
+			//disable node and all children
+			node.setIsActive(enabled);
+			if (node.getChildren() != null){
+				for(PatrolAttributeTreeNode child: node.getChildren()){
+					disableNode(child, enabled);
+				}
+			}
+		}else{
+			//enable category and parent
+			if (node.getIsActive()){
+				return ;
+			}
+			node.setIsActive(enabled);
+			if (node.getParent() != null){
+				disableNode(node.getParent(), enabled);
+			}
+		}
+	}
+	
+	/*
+	 * edits an item in the tree
+	 */
+	private void editItem(TreeViewer viewer, Language currentLanguage){
+		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		if (x instanceof PatrolAttributeTreeNode node){
+			List<? extends NamedKeyItem> siblings = null;
+			if ( node.getParent() == null){
+				siblings = getRootNodes();
+			}else{
+				siblings = node.getParent().getChildren();
+			}
+			AttributeItemDialog dd = new AttributeItemDialog(Display.getCurrent().getActiveShell(), 
+					node, siblings, currentLanguage);
+			int ret = dd.open();
+			if (ret == Window.CANCEL) return;
+			
+			labelProvider.clearImageCache(node);
+			
+		}
+		refreshTree();
+		fireChangeListener();
+	}
+	
+	/*
+	 * adds item to tree
+	 */
+	private void addItem(Language currentLanguage){
+		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		
+		if (x == null || x instanceof AttributeTreeContentProvider.RootNode || x instanceof PatrolAttributeTreeNode){
+			List<? extends NamedKeyItem> siblings = null;
+			PatrolAttributeTreeNode parent = null;
+			if (x == null || x instanceof AttributeTreeContentProvider.RootNode){
+				siblings = getRootNodes();
+			}else{
+				siblings = ((PatrolAttributeTreeNode)x).getChildren();
+				parent = ((PatrolAttributeTreeNode)x);
+			}
+			
+			PatrolAttributeTreeNode it = new PatrolAttributeTreeNode();
+			it.setParent(parent);
+			it.setAttribute(attribute);
+			
+			AttributeItemDialog dd = new AttributeItemDialog(Display.getCurrent().getActiveShell(), it, siblings, currentLanguage);
+			int ret = dd.open();
+			if (ret == Window.CANCEL){
+				return;
+			}
+			
+			
+			if (parent != null){
+				if (parent.getChildren() == null){
+					parent.setChildren(new ArrayList<>());
+				}
+				parent.getChildren().add(it);
+				it.setIsActive(parent.getIsActive());
+			}else{
+				getRootNodes().add(it);
+				it.setIsActive(true);
+			}
+			if (x != null) viewer.setExpandedState(x, true);
+			
+			
+			if (siblings == null){
+				it.setNodeOrder(0);
+			}else{
+				it.setNodeOrder(siblings.size());
+			}
+		
+			refreshTree();
+			fireChangeListener();
+		}
+	}
+	
+	/*
+	 * refresh the tree
+	 */
+	private void refreshTree() {
+		viewer.refresh();
+		
+		viewer.getTree().getColumn(0).pack();
+		viewer.getTree().getColumn(1).pack();
+	}
+	
+	public interface AttributeTreeChangeListener{
+		public void treeModified();
+	}
+
+}
+
+
+/**
+ * Drag listener for attribute tree
+ * 
+ * @author Emily
+ * 
+ */
+class AttributeTreeDragListener implements DragSourceListener {
+
+	private TreeViewer viewer;
+
+	public AttributeTreeDragListener(TreeViewer viewer) {
+		this.viewer = viewer;
+	}
+
+	/**
+	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart(org.eclipse.swt.dnd.DragSourceEvent)
+	 */
+	@Override
+	public void dragStart(DragSourceEvent event) {
+		LocalSelectionTransfer.getTransfer()
+				.setSelection(viewer.getSelection());
+		event.doit = true;
+
+	}
+
+	/**
+	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
+	 */
+	@Override
+	public void dragSetData(DragSourceEvent event) {
+		if (LocalSelectionTransfer.getTransfer()
+				.isSupportedType(event.dataType)) {
+			event.data = viewer.getSelection();
+		}
+
+	}
+
+	/**
+	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
+	 */
+	@Override
+	public void dragFinished(DragSourceEvent event) {
+		LocalSelectionTransfer.getTransfer().setSelection(null);
+		viewer.refresh();
+	}
+
+}
+
+/**
+ * Drop listener for attribute tree
+ * 
+ * @author Emily
+ * 
+ */
+class AttributeTreeDropListener extends ViewerDropAdapter {
+
+	/**
+	 * @param viewer
+	 */
+	protected AttributeTreeDropListener(TreeViewer viewer) {
+		super(viewer);
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
+	 */
+	@Override
+	public boolean performDrop(Object data) {
+
+		StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer
+				.getTransfer().getSelection();
+		if (selection == null) {
+			return false;
+		}
+		Object obj = selection.getFirstElement();
+		int loc = getCurrentLocation();
+		if (obj instanceof PatrolAttributeTreeNode tomove
+				&& getCurrentTarget() instanceof PatrolAttributeTreeNode target) {
+			
+			PatrolAttributeTreeNode srcparent = tomove.getParent();
+			
+			tomove.getParent().getChildren().remove(tomove);
+			tomove.setParent(target.getParent());
+			int index = target.getParent().getChildren().indexOf(target);
+			if (index < 0) index = 0;
+			if(loc == LOCATION_AFTER) {
+				index++;
+				if (index > target.getParent().getChildren().size()) index = target.getParent().getChildren().size();
+			}
+			target.getParent().getChildren().add(index, tomove);
+			
+			//reorder srcparent
+			//reorder target.getParent
+			for (PatrolAttributeTreeNode toorder : Arrays.asList(srcparent, target.getParent())) {
+				for (int i = 0; i < toorder.getChildren().size(); i++) {
+					toorder.getChildren().get(i).setNodeOrder(i);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object,
+	 *      int, org.eclipse.swt.dnd.TransferData)
+	 */
+	@Override
+	public boolean validateDrop(Object target, int operation,
+			TransferData transferType) {
+
+		StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer
+				.getTransfer().getSelection();
+		if (selection == null) {
+			return false;
+		}
+		Object obj = selection.getFirstElement();
+
+		if (obj instanceof PatrolAttributeTreeNode) {
+			PatrolAttributeTreeNode toMove = (PatrolAttributeTreeNode) obj;
+
+			if (target instanceof PatrolAttributeTreeNode) {
+				PatrolAttributeTreeNode toMoveTo = (PatrolAttributeTreeNode) target;
+				if ((toMoveTo.getParent() == null && toMove.getParent() == null)
+						|| (toMoveTo.getParent() != null
+								&& toMove.getParent() != null && toMoveTo
+								.getParent().equals(toMove.getParent()))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+}
+

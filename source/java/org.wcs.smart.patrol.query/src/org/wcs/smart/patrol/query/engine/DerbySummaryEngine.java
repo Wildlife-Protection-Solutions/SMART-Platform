@@ -55,6 +55,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -1606,6 +1607,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				
 				String valueprefix = tablePrefix(PatrolAttributeValue.class) + "_" + itemcnt; //$NON-NLS-1$
 				String listprefix = tablePrefix(PatrolAttributeListItem.class) + "_" + itemcnt; //$NON-NLS-1$
+				String treeprefix = tablePrefix(PatrolAttributeTreeNode.class) + "_" + itemcnt; //$NON-NLS-1$
 				String attributeprefix = tablePrefix(PatrolAttribute.class) + "_" + itemcnt; //$NON-NLS-1$
 				
 				fromSql.append(" join "); //$NON-NLS-1$
@@ -1625,16 +1627,33 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				fromSql.append(attributeprefix + ".keyid = " + p1); //$NON-NLS-1$
 				
 				fromSql.append(" join "); //$NON-NLS-1$
-				fromSql.append(tableName(PatrolAttributeListItem.class));
-				fromSql.append(" "); //$NON-NLS-1$
-				fromSql.append(listprefix);
-				fromSql.append(" on "); //$NON-NLS-1$
-				fromSql.append(listprefix);
-				fromSql.append(".uuid = " ); //$NON-NLS-1$
-				fromSql.append(valueprefix);
-				fromSql.append(".list_item_uuid " ); //$NON-NLS-1$
 				
-				groupByInnerSql.append(listprefix + ".keyid" + " as gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				if (option.getAttributeType() == Attribute.AttributeType.LIST) {
+					fromSql.append(tableName(PatrolAttributeListItem.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(listprefix);
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(listprefix);
+					fromSql.append(".uuid = " ); //$NON-NLS-1$
+					fromSql.append(valueprefix);
+					fromSql.append(".list_item_uuid " ); //$NON-NLS-1$
+					
+					groupByInnerSql.append(listprefix + ".keyid" + " as gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				}else if (option.getAttributeType() == Attribute.AttributeType.TREE) {
+					fromSql.append(tableName(PatrolAttributeTreeNode.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(treeprefix);
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(treeprefix);
+					fromSql.append(".uuid = " ); //$NON-NLS-1$
+					fromSql.append(valueprefix);
+					fromSql.append(".tree_node_uuid " ); //$NON-NLS-1$
+					
+					groupByInnerSql.append("smart.trimHkeyToLevel("); //$NON-NLS-1$
+					groupByInnerSql.append(option.getLevel() + ", "); //$NON-NLS-1$
+					groupByInnerSql.append(treeprefix + ".hkey"); //$NON-NLS-1$
+					groupByInnerSql.append(") as gp_" + itemcnt); //$NON-NLS-1$
+				}
 				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);

@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -78,6 +79,7 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tablePrefix.put(PatrolAttribute.class, "spa"); //$NON-NLS-1$
 		tablePrefix.put(PatrolAttributeValue.class, "spav"); //$NON-NLS-1$
 		tablePrefix.put(PatrolAttributeListItem.class, "spali"); //$NON-NLS-1$
+		tablePrefix.put(PatrolAttributeTreeNode.class, "spatn"); //$NON-NLS-1$
 
 	}
 
@@ -98,6 +100,7 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tableNames.put(PatrolAttribute.class, "smart.patrol_attribute"); //$NON-NLS-1$
 		tableNames.put(PatrolAttributeValue.class, "smart.patrol_attribute_value"); //$NON-NLS-1$
 		tableNames.put(PatrolAttributeListItem.class, "smart.patrol_attribute_list"); //$NON-NLS-1$
+		tableNames.put(PatrolAttributeTreeNode.class, "smart.patrol_attribute_tree"); //$NON-NLS-1$
 	}
 
 
@@ -165,6 +168,8 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 				type = "varchar(10)"; //$NON-NLS-1$
 			} else if (pattribute.getType() == AttributeType.LIST) {
 				type = "varchar(1024)"; //$NON-NLS-1$
+			} else if (pattribute.getType() == AttributeType.TREE) {
+				type = "varchar(1024)"; //$NON-NLS-1$
 			} else if (pattribute.getType() == AttributeType.TEXT) {
 
 			} else {
@@ -215,6 +220,51 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 								UUID puuid = UuidUtils.byteToUUID(rs.getBytes(2));
 	
 								psUpdate.setString(1, li.getName());
+								psUpdate.setBytes(2, UuidUtils.uuidToByte(puuid));
+								psUpdate.addBatch();
+							}
+						}
+					}
+					psUpdate.executeBatch();
+				}
+			}else if (pattribute.getType() == AttributeType.TREE) {
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT distinct "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".tree_node_uuid, b.p_uuid"); //$NON-NLS-1$
+				sql.append(" FROM "); //$NON-NLS-1$
+				sql.append(queryDataTable + " b join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(PatrolAttributeValue.class));
+				sql.append(" on b.p_uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".patrol_uuid"); //$NON-NLS-1$
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(PatrolAttribute.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttribute.class) + ".uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".patrol_attribute_uuid"); //$NON-NLS-1$
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttributeValue.class) + ".tree_node_uuid IS NOT NULL "); //$NON-NLS-1$
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(tablePrefix(PatrolAttribute.class) + ".keyid = ? "); //$NON-NLS-1$
+					
+				StringBuilder sb = new StringBuilder();
+				sb.append("UPDATE "); //$NON-NLS-1$
+				sb.append(queryDataTable);
+				sb.append(" SET "); //$NON-NLS-1$
+				sb.append(cname);
+				sb.append(" = ? "); //$NON-NLS-1$
+				sb.append(" WHERE p_uuid = ?"); //$NON-NLS-1$
+
+				try (PreparedStatement psUpdate = c.prepareStatement(sb.toString())) {
+					try(PreparedStatement psQuery = c.prepareStatement(sql.toString())){
+						psQuery.setString(1, pattribute.getKeyId());						
+						try (ResultSet rs = psQuery.executeQuery()) {
+							while (rs.next()) {
+								UUID liuuid = UuidUtils.byteToUUID(rs.getBytes(1));
+								PatrolAttributeTreeNode node = session.get(PatrolAttributeTreeNode.class, liuuid);
+		
+								UUID puuid = UuidUtils.byteToUUID(rs.getBytes(2));
+		
+								psUpdate.setString(1, node.getName());
 								psUpdate.setBytes(2, UuidUtils.uuidToByte(puuid));
 								psUpdate.addBatch();
 							}

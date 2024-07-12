@@ -50,18 +50,17 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -70,11 +69,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconManager;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -86,6 +87,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.ui.IconPanel;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
@@ -109,10 +111,15 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 	
 	private ToolItem tiAdd, tiEdit, tiDelete, tiUp, tiDown;
 	
-	private Composite listPanel;
+	
 	private IconPanel iconComp;
 	
 	private PatrolAttribute pAttribute;
+	
+	private Composite stackPanel;
+	private PatrolAttributeTreeComposite treePanel;
+	private Composite listPanel;
+	
 	private Collection<PatrolAttribute> siblings;
 	
 	private List<PatrolAttributeListItem> deleted;
@@ -185,22 +192,13 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			}
 		});
 		cmbType.setInput(PatrolAttribute.SUPPORTED_TYPES);
-		
-		Combo combo = cmbType.getCombo();
-		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		if (pAttribute.getUuid() != null) combo.setEnabled(false);
-		
-		combo.addSelectionListener(new SelectionAdapter() {	
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (getType() == Attribute.AttributeType.LIST){
-					listPanel.setVisible(true);
-				}else{
-					listPanel.setVisible(false);
-				}
-				validate();
-			}
+		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		cmbType.getControl().setEnabled(pAttribute.getUuid() == null);
+		cmbType.getControl().addListener(SWT.Selection, e->{
+			selectPanel();					
+			validate();
 		});
+		
 		
 		nameKeyControls = new NameKeyComposite();
 		nameKeyControls.createControls(composite, true, pAttribute.getUuid() == null, new IChangeListener() {
@@ -224,10 +222,15 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		iconComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		iconComp.addListener(SWT.Selection, e->setDirty(true));
 		
+		
+		stackPanel = new Composite(composite, SWT.NONE);
+		stackPanel.setLayout(new StackLayout());
+		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		
+		
 		if (pAttribute.getUuid() == null || pAttribute.getType() == AttributeType.LIST) {
-			listPanel = new Composite(composite, SWT.NONE);
+			listPanel = new Composite(stackPanel, SWT.NONE);
 			listPanel.setLayout(new GridLayout(2, false));
-			listPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 			
 			Composite wrapper = new Composite(listPanel, SWT.NONE);
 			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -341,6 +344,11 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			tiDown.setToolTipText(Messages.EditPatrolAttributeDialog_movedowntooltip);
 			tiDown.addSelectionListener(this);
 		}
+		if (pAttribute.getUuid() == null || pAttribute.getType() == AttributeType.TREE) {
+			treePanel = new PatrolAttributeTreeComposite(stackPanel);
+			treePanel.refresh(nameKeyControls.getSelectedLanguage());
+		}
+		selectPanel();
 		
 		if (pAttribute.getKeyId() == null){
 			getShell().setText(Messages.EditPatrolAttributeDialog_newshelltext);
@@ -356,6 +364,16 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		return composite;
 	}
 	
+	private void selectPanel() {
+		if (getType() == Attribute.AttributeType.LIST) {
+			((StackLayout)stackPanel.getLayout()).topControl = listPanel;
+		}else if (getType() == Attribute.AttributeType.TREE) {
+			((StackLayout)stackPanel.getLayout()).topControl = treePanel;
+		}else {
+			((StackLayout)stackPanel.getLayout()).topControl = null;
+		}
+		stackPanel.layout();
+	}
 	
 	private void validate(){
 		boolean error = nameKeyControls.validate();
@@ -423,13 +441,36 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 						.executeUpdate();
 					session.flush();
 				}
+				if (pAttribute.getType() == AttributeType.TREE) {
+					for (PatrolAttributeTreeNode delete : treePanel.getDeletedNodes()) {
+						if (delete.getUuid() != null) {
+						
+							//remove any references to this item
+							session.createMutationQuery("DELETE FROM PatrolAttributeValue WHERE attributeTreeNode = :item") //$NON-NLS-1$
+								.setParameter("item", delete) //$NON-NLS-1$
+								.executeUpdate();
+							session.flush();	
+						}						
+					}					
+				}
 				if (pAttribute.getIcon() != null) HibernateManager.saveOrMerge(session, pAttribute.getIcon());
-				if (pAttribute.getAttributeList() != null) {
+				
+				if (pAttribute.getType() == AttributeType.LIST && pAttribute.getAttributeList() != null) {
 					for (PatrolAttributeListItem item : pAttribute.getAttributeList()) {
 						if (item.getUuid() == null) session.persist(item);
 						HibernateManager.saveOrMerge(session, item.getIcon());
 					}
 				}
+				if (pAttribute.getType() == AttributeType.TREE) {
+					List<PatrolAttributeTreeNode> nodes = new ArrayList<>();
+					nodes.addAll(treePanel.getRootNodes());
+					while(!nodes.isEmpty()) {
+						PatrolAttributeTreeNode node = nodes.remove(0);
+						if (node.getUuid() == null) session.persist(node);
+						HibernateManager.saveOrMerge(session, node.getIcon());
+					}
+				} 
+				
 				session.merge(pAttribute);
 				
 				session.getTransaction().commit();
@@ -600,6 +641,21 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 							}
 						});
 					}
+					if (pAttribute.getAttributeTree() != null) {
+						pAttribute.getAttributeTree().forEach(t->{
+							t.accept(v->{
+								((NamedItem)v).getNames().forEach(n->n.getValue());
+								if (v.getIcon() != null) {
+									v.getIcon().getFiles().forEach(f->{
+										f.getIcon().getName();
+										f.computeFileLocation(session);
+										Hibernate.initialize(f.getIconSet());
+									});
+								}
+								return true;
+							});
+						});
+					}
 					
 					
 					
@@ -617,10 +673,16 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 					if (pAttribute.getAttributeList() == null) pAttribute.setAttributeList(new ArrayList<>());
 					lstViewer.setInput(pAttribute.getAttributeList());	
 				}
+				if (pAttribute.getType() == AttributeType.TREE) {
+					if (pAttribute.getAttributeTree() == null) pAttribute.setAttributeTree(new ArrayList<>());
+					treePanel.setInput(pAttribute);
+					treePanel.setListener(()->setDirty(true));
+				}
 				if (pAttribute.getUuid() != null) {
 					setTitle(pAttribute.getName());
 				}
 				
+				selectPanel();
 				configureButtons();
 				setDirty(false);
 			});

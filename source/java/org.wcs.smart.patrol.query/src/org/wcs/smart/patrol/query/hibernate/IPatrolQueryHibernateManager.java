@@ -105,7 +105,18 @@ public interface IPatrolQueryHibernateManager {
 	 */
 	public List<ListItem> getActiveTransportTypes(Session session);
 	
+	/**
+	 * Gets all the custom patrol attributes for the Conservation Area
+	 * @param session
+	 * @return
+	 */
 	public List<PatrolAttribute> getCustomPatrolAttributes(Session session);
 	
-	public PatrolAttribute getPatrolAttribute(Session session, String value);
+	/**
+	 * Gets the patrol attribute with the given key 
+	 * @param session
+	 * @param keyId
+	 * @return
+	 */
+	public PatrolAttribute getPatrolAttribute(Session session, String keyId);
 }

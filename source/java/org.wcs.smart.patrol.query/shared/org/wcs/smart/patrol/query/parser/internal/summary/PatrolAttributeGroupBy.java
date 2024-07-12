@@ -39,6 +39,7 @@ public class PatrolAttributeGroupBy implements IGroupBy {
 	 * Creates a new patrol group by option
 	 * @param key patrol group by key of the form
 	 * "patrol:attribute:l:<key>:<listkey>,<listkey>,<listkey>"
+	 * "patrol:attribute:t:<key>:<level>:<nodehkey>,<nodehkey>,<nodehkey>"
 	 * 
 	 * Where <key> is the patrol attribute key and listkey
 	 * is key for the individual list values
@@ -52,6 +53,9 @@ public class PatrolAttributeGroupBy implements IGroupBy {
 	private String[] items;
 	private String attributeKey;
 	private Attribute.AttributeType attributeType;
+
+	//for trees
+	private int level = -1;
 	
 	/**
 	 * Creates a new patrol group by option
@@ -62,15 +66,28 @@ public class PatrolAttributeGroupBy implements IGroupBy {
 		
 		this.attributeKey = bits[3];
 		this.attributeType = Attribute.decodeAttributeTypeKey(bits[2]);
-		assert(attributeType == Attribute.AttributeType.LIST);
 		
-		if (bits.length > 4){
-			items = new String[bits.length - 4];
-			for (int i = 4; i < bits.length; i ++){
-				items[i-4] = bits[i];
+		if (this.attributeType == Attribute.AttributeType.LIST) {
+			if (bits.length > 4){
+				items = new String[bits.length - 4];
+				for (int i = 4; i < bits.length; i ++){
+					items[i-4] = bits[i];
+				}
+			}else{
+				items = null;
 			}
-		}else{
-			items = null;
+		}else if (this.attributeType == Attribute.AttributeType.TREE) {
+			this.level = Integer.parseInt(bits[4]);
+			if (bits.length > 5){
+				items = new String[bits.length - 5];
+				for (int i = 5; i < bits.length; i ++){
+					items[i-5] = bits[i];
+				}
+			}else{
+				items = null;
+			}
+		}else {
+			throw new RuntimeException("invalid attribute group by"); //$NON-NLS-1$
 		}
 	}
 	
@@ -84,6 +101,10 @@ public class PatrolAttributeGroupBy implements IGroupBy {
 		sb.append(":"); //$NON-NLS-1$
 		sb.append(attributeKey);
 		sb.append(":"); //$NON-NLS-1$
+		if (attributeType == Attribute.AttributeType.TREE) {
+			sb.append(level);
+			sb.append(":"); //$NON-NLS-1$
+		}
 		return sb.toString();
 	}
 	
@@ -117,6 +138,17 @@ public class PatrolAttributeGroupBy implements IGroupBy {
 		return this.attributeKey;
 	}
 	
+	public Attribute.AttributeType getAttributeType() {
+		return this.attributeType;
+	}
+	
+	/**
+	 * tree level for tree group bys
+	 * @return
+	 */
+	public int getLevel() {
+		return this.level;
+	}
 	/**
 	 * 
 	 * @return the patrol group by items

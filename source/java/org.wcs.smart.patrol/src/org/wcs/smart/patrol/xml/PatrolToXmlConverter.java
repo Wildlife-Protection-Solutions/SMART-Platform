@@ -105,6 +105,7 @@ public class PatrolToXmlConverter {
 			if (av.getStringValue() != null) axml.setStringValue(av.getStringValue());
 			if (av.getNumberValue() != null) axml.setDoubleValue(av.getNumberValue());
 			if (av.getAttributeListItem() != null) axml.setStringValue(av.getAttributeListItem().getKeyId());
+			if (av.getAttributeTreeNode() != null) axml.setStringValue(av.getAttributeTreeNode().getHkey());
 			
 			xml.getAttributes().add(axml);
 		}

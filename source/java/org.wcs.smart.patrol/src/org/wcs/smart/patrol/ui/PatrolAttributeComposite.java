@@ -35,12 +35,14 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
@@ -74,6 +76,8 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 		field2attribute = new HashMap<>();
 		
 		for(PatrolAttribute pa : attributes) {
+			//convert patrol attribute to data model attribute so we can use the
+			//attribute fields setup for editing
 			Attribute temp = new Attribute();
 			temp.setName(pa.getName());
 			if (pa.getName().length() > 25) {
@@ -82,7 +86,7 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 			temp.setType(pa.getType());
 			temp.setKeyId(pa.getKeyId());
 			temp.setIcon(pa.getIcon());
-			if (pa.getAttributeList() != null) {
+			if (pa.getType() == Attribute.AttributeType.LIST) {
 				temp.setAttributeList(new ArrayList<>());
 				for (PatrolAttributeListItem item : pa.getAttributeList()) {
 					AttributeListItem clone = new AttributeListItem();
@@ -95,6 +99,43 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 					clone.setIcon(item.getIcon());
 				}
 			}
+			if (pa.getType() == Attribute.AttributeType.TREE) {
+				temp.setTree(new ArrayList<>());
+				temp.setActiveTreeNodes(new ArrayList<>());
+				List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+				toProcess.addAll(pa.getAttributeTree());
+				
+				HashMap<PatrolAttributeTreeNode, AttributeTreeNode> cloneMap = new HashMap<>();
+				
+				while(!toProcess.isEmpty()) {
+					PatrolAttributeTreeNode n = toProcess.remove(0);
+					
+					AttributeTreeNode clone = new AttributeTreeNode();
+					clone.setAttribute(temp);
+					clone.setIsActive(n.getIsActive());
+					clone.setUuid(n.getUuid());
+					clone.setKeyId(n.getKeyId());
+					clone.setHkey(n.getHkey());
+					clone.setIcon(n.getIcon());
+					clone.setName(n.getName());
+					clone.setActiveChildren(new ArrayList<>());
+					clone.setChildren(new ArrayList<>());
+					cloneMap.put(n,  clone);
+					
+					if (n.getParent() == null) {
+						temp.getTree().add(clone);
+						if (clone.getIsActive()) temp.getActiveTreeNodes().add(clone);
+					}else {
+						AttributeTreeNode tparent = cloneMap.get(n.getParent());
+						clone.setParent(tparent);
+						tparent.getChildren().add(clone);
+						if (clone.getIsActive()) tparent.getActiveChildren().add(clone);
+					}
+					toProcess.addAll(n.getChildren());
+					
+				}
+			}
+			
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(temp);
 			field2attribute.put(field, pa);
 			field.createComposite(ctemp);
@@ -128,6 +169,16 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 						temp.setKeyId(((PatrolAttributeListItem) x).getKeyId());
 						temp.setUuid(((PatrolAttributeListItem) x).getUuid());
 						x = temp;
+					}
+					if (x instanceof PatrolAttributeTreeNode node) {
+						AttributeTreeNode temp = new AttributeTreeNode();
+						temp.setName(node.getName());
+						temp.setKeyId(node.getKeyId());
+						temp.setUuid(node.getUuid());
+						temp.setHkey(node.getHkey());
+						temp.setIcon(node.getIcon());
+						x=temp;
+						
 					}
 					field.setValue(x);
 					break;
@@ -183,6 +234,9 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 							break;
 						}
 					}
+				}else if (v instanceof AttributeTreeNode node) {
+					PatrolAttributeTreeNode temp = session.get(PatrolAttributeTreeNode.class, node.getUuid());
+					v = temp;
 				}
 				value.setAttributeValue(v);
 			}else {

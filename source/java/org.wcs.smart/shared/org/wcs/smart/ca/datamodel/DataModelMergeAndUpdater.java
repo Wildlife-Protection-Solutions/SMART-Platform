@@ -133,7 +133,7 @@ public class DataModelMergeAndUpdater {
 			if (a.getAttributeList() != null) a.getAttributeList().forEach(item->updateIconCa(item, sourceDm.getConservationArea()));
 			if (a.getTree() != null) {
 				a.getTree().forEach(node->{
-					node.accept(e->{updateIconCa(e, sourceDm.getConservationArea()); return true;});
+					node.accept(e->{updateIconCa((DmObject)e, sourceDm.getConservationArea()); return true;});
 				});
 			}
 		});

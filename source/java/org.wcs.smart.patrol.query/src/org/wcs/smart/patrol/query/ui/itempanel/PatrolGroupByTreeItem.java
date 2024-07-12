@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
@@ -62,7 +63,7 @@ public class PatrolGroupByTreeItem implements IItemTreeNode{
 	@Override
 	public ITreeContentProvider getContentProvider() {
 		if (provider == null){
-			provider = new PatrolOptionContentProvider();
+			provider = new PatrolOptionContentProvider(true);
 		}
 		return provider;
 	}
@@ -84,6 +85,8 @@ public class PatrolGroupByTreeItem implements IItemTreeNode{
 				return ((IPatrolQueryOption) element).getGuiName(Locale.getDefault());
 			}else if (element instanceof IExtensionGroupByViewer){
 				return ((IExtensionGroupByViewer) element).getName();
+			}else if (element instanceof NamedKeyItem item) {
+				return item.getName();
 			}
 			return super.getText(element);
 		}

@@ -66,11 +66,13 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -253,6 +255,9 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					custom.setNumberValue(av.getDoubleValue());
 					break;
 				case TREE:
+					PatrolAttributeTreeNode node = findTreeNode(pa, av.getStringValue());
+					custom.setAttributeTreeNode(node);
+					break;
 				case MLIST:
 				case LINE:
 				case POLYGON:
@@ -262,6 +267,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					
 			}
 			if (pa.getType() == AttributeType.LIST && custom.getAttributeListItem() == null) continue;
+			if (pa.getType() == AttributeType.TREE && custom.getAttributeTreeNode() == null) continue;
 			
 			patrol.getCustomAttributes().add(custom);
 		}
@@ -279,6 +285,14 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_ListItemNotFound, pa.getName(), key));
 		return null;
 	}
+	
+	private PatrolAttributeTreeNode findTreeNode(PatrolAttribute pa, String key) {
+		PatrolAttributeTreeNode node = PatrolUtils.findAttributeTreeNode(pa, key, session);	
+		if (node != null) return node;
+		warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_TreeNodeNotFound, pa.getName(), key));
+		return null;
+	}
+	
 	
 	private PatrolAttribute findAttribute(String key) {
 		PatrolAttribute a = QueryFactory.buildQuery(session, PatrolAttribute.class, 

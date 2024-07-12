@@ -221,7 +221,9 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			try(Session session = HibernateManager.openSession()){
 				List<PatrolAttribute> pas = PatrolQueryHibernateManager.getInstance().getCustomPatrolAttributes(session);
 				Collections.sort(pas, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-				return pas.stream().filter(e->e.getType() == AttributeType.LIST)
+				
+				pas.forEach(e->e.loadTree(session));
+				return pas.stream().filter(e->e.getType() == AttributeType.LIST || e.getType() == AttributeType.TREE)
 						.map(e->new PatrolAttributeQueryOption(e)).collect(Collectors.toList());
 			}
 		}

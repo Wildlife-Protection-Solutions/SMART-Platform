@@ -575,6 +575,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 					//search observation attributes
 				
 					Object[] found = ObservationAttributeFeatureFactory.findWaypointObservationAttributes(env, dmAttributeResources.toArray(new IGeoResource[dmAttributeResources.size()]));
+					@SuppressWarnings("unchecked")
 					List<WaypointObservationAttribute> matched = (List<WaypointObservationAttribute>) found[0];
 					Coordinate c = (Coordinate) found[1];
 					

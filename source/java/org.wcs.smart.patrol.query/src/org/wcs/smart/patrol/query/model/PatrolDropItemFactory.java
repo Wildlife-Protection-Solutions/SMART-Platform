@@ -39,11 +39,13 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.filter.BooleanFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
@@ -75,6 +77,8 @@ import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolInputDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolTreeDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolTreeGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
@@ -152,6 +156,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			}else{
 				items = new DropItem[]{createPatrolFilterDropItem((IPatrolQueryOption) source)};
 			}
+		}else if (source instanceof PatrolAttributeTreeNode) {
+			if (queryItemPanelId == SummaryFilterPanel.ID){
+				items = new DropItem[]{createPatrolGroupByDropItem((PatrolAttributeTreeNode) source)};
+			}
 		} else if (source instanceof IDateGroupBy) {
 			items = new DropItem[]{createDateGroupByDropItem(
 							(IDateGroupBy) source)};
@@ -228,12 +236,25 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 	 * @return
 	 */
 	public DropItem createPatrolGroupByDropItem(PatrolAttributeQueryOption item){
-		if (item.getPatrolAttribute().getType() != AttributeType.LIST) return null;
-		DropItem di = new PatrolGroupByDropItem(item);
-		di.initializeData(new Object[]{new PatrolOptionData(item)});
-		return di;
+		if (item.getPatrolAttribute().getType() == AttributeType.LIST) {
+			DropItem di = new PatrolGroupByDropItem(item);
+			di.initializeData(new Object[]{new PatrolOptionData(item)});
+			return di;
+		}else if (item.getPatrolAttribute().getType() == AttributeType.TREE) {
+			DropItem di = new PatrolTreeGroupByDropItem(item, -1);
+			di.initializeData(new Object[]{new PatrolOptionData(item)});
+			return di;
+		}
+		return null;
 	}
-	
+	public DropItem createPatrolGroupByDropItem(PatrolAttributeTreeNode node){
+		PatrolAttributeQueryOption op = new PatrolAttributeQueryOption(node.getAttribute());
+		
+		DropItem di = new PatrolTreeGroupByDropItem(op, Category.hkeyLength(node.getHkey()));
+		di.initializeData(new Object[]{new PatrolOptionData(op), new ListItem[] {new ListItem(null, node.getName(), node.getHkey())}});
+		return di;
+		
+	}
 	/**
 	 * Creates a patrol drop item.
 	 * @param option
@@ -278,6 +299,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			case KEY:
 				item = new PatrolListDropItem(option);
 				break;
+			case HKEY:
+				item = new PatrolTreeDropItem<ITreeNode<?>>(option);
+				break;
 			case NUMBER:
 				item = new PatrolInputDropItem(option);
 				break;
@@ -288,7 +312,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 				break;
 			}
 		}
-		if (item instanceof PatrolListDropItem &&
+		if ((item instanceof PatrolListDropItem ||
+				item instanceof PatrolTreeDropItem )
+				&&
 				option instanceof IPatrolQueryOption){
 			item.initializeData(new Object[]{new PatrolOptionData((IPatrolQueryOption)option)});
 		}
@@ -756,7 +782,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			String listkey = SharedUtils.stripQuotes(f.getValue1().toString());
 			ListItem li = new ListItem(null, listkey, listkey);
 			it.initializeData(new Object[]{new PatrolOptionData(op), li});
-			
+		}else if (pa.getType() == Attribute.AttributeType.TREE) {
+			String hkey = SharedUtils.stripQuotes(f.getValue1().toString());
+			ListItem li = new ListItem(null, hkey, hkey);
+			it.initializeData(new Object[]{new PatrolOptionData(op), li});
 		}else {
 			String[] data = new String[3];
 			if (f.getOperator() != null) data[0] = f.getOperator().getGuiValue();

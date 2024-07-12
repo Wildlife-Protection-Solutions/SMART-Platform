@@ -190,7 +190,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(attribute.getName());
-		sb.append(" - " + Messages.AttributeTreeGroupByDropItem_TreeLevelLabel ); //$NON-NLS-1$
+		sb.append(" - " + Messages.AttributeTreeGroupByDropItem_TreeLevelLabel + " " ); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(this.level);
 		
 		if (category != null){

@@ -37,7 +37,7 @@ import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootN
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -47,7 +47,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
+public class CmTreeLabelProvider extends TreeNodeLabelProvider {
 
 	private List<Image> images = new ArrayList<>();
 	

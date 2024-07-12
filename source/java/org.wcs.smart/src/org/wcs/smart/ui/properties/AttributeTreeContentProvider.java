@@ -26,7 +26,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 
 /**
  * Content provided for an attribute tree 
@@ -37,7 +37,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 public class AttributeTreeContentProvider implements ITreeContentProvider {
 
 	private RootNode root ;
-	private List<AttributeTreeNode> rootNodes;
+	private List<? extends ITreeNode<?>> rootNodes;
 	private boolean active;
 	private boolean showRoot;
 	private String singleInput;
@@ -80,14 +80,14 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.rootNodes = null;
 		this.singleInput = null;
-		if (newInput instanceof Attribute){
+		if (newInput instanceof Attribute dmAttribute){
 			if (active){
-				rootNodes = ((Attribute) newInput).getActiveTreeNodes();
+				rootNodes = dmAttribute.getActiveTreeNodes();
 			}else{
-				rootNodes = ((Attribute) newInput).getTree();
+				rootNodes = dmAttribute.getTree();
 			}
 		}else if (newInput instanceof List){
-			this.rootNodes = (List<AttributeTreeNode>) newInput;
+			this.rootNodes = (List<ITreeNode<?>>) newInput;
 		}else if (newInput instanceof String){
 			singleInput = (String)newInput;
 		}
@@ -111,15 +111,15 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		List<AttributeTreeNode> kids = null;
+		List<? extends ITreeNode<?>> kids = null;
 		if (parentElement instanceof RootNode){
 			kids = rootNodes;
 		}
-		if (parentElement instanceof AttributeTreeNode){
+		if (parentElement instanceof ITreeNode<?> node){
 			if (!active){
-				kids = ((AttributeTreeNode)parentElement).getChildren();
+				kids = node.getChildren();
 			}else{
-				kids = ((AttributeTreeNode)parentElement).getActiveChildren();
+				kids = node.getActiveChildren();
 			}
 		}
 		if (kids != null && kids.size() > 0){
@@ -133,11 +133,9 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof AttributeTreeNode){
-			if (((AttributeTreeNode)element).getParent() == null){
-				return root;
-			}
-			return ((AttributeTreeNode)element).getParent();
+		if (element instanceof ITreeNode<?> node){
+			if (node.getParent() == null) return root;
+			return node.getParent();				
 		}
 		return null;
 	}

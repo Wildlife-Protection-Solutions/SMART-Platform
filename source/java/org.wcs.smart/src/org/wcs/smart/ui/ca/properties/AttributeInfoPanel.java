@@ -1355,7 +1355,7 @@ public class AttributeInfoPanel extends Composite {
 								}
 								session.flush();
 								//icons
-								ITreeNodeVisitor v = node-> {
+								ITreeNodeVisitor<AttributeTreeNode> v = node-> {
 									if (node.getIcon() != null) {
 										if (node.getIcon().getUuid() != null) {
 											Icon merged = (Icon) session.merge(node.getIcon());

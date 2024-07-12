@@ -70,6 +70,7 @@ SumQueryDefinition SumQuery() throws ParseException {ValuePart values = null;
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
+    case PATROL_ATTRIBUTE_TREE_KEY:
     case PATROL_ATTRIBUTE_NUMBER_KEY:
     case PATROL_ATTRIBUTE_DATE_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
@@ -129,6 +130,7 @@ SumQueryDefinition SumQuery() throws ParseException {ValuePart values = null;
       case PATROL_ATTRIBUTE_BOOLEAN_KEY:
       case PATROL_ATTRIBUTE_STRING_KEY:
       case PATROL_ATTRIBUTE_LIST_KEY:
+      case PATROL_ATTRIBUTE_TREE_KEY:
       case PATROL_ATTRIBUTE_NUMBER_KEY:
       case PATROL_ATTRIBUTE_DATE_KEY:
       case PATROL_CONTRIBUTION_BOOL_KEY:
@@ -207,6 +209,7 @@ gridSize = Double.parseDouble(token.image);
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
+    case PATROL_ATTRIBUTE_TREE_KEY:
     case PATROL_ATTRIBUTE_NUMBER_KEY:
     case PATROL_ATTRIBUTE_DATE_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
@@ -264,6 +267,7 @@ gridSize = Double.parseDouble(token.image);
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
+    case PATROL_ATTRIBUTE_TREE_KEY:
     case PATROL_ATTRIBUTE_NUMBER_KEY:
     case PATROL_ATTRIBUTE_DATE_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
@@ -326,6 +330,7 @@ zeroOp = PatrolGridQueryDefinition.ZeroFilterOption.fromKey(token.image);
       case PATROL_ATTRIBUTE_BOOLEAN_KEY:
       case PATROL_ATTRIBUTE_STRING_KEY:
       case PATROL_ATTRIBUTE_LIST_KEY:
+      case PATROL_ATTRIBUTE_TREE_KEY:
       case PATROL_ATTRIBUTE_NUMBER_KEY:
       case PATROL_ATTRIBUTE_DATE_KEY:
       case PATROL_CONTRIBUTION_BOOL_KEY:
@@ -501,7 +506,8 @@ item = AttributeValueItem.createCategoryAttributeItem( token.image );
     case AREA_GROUPBY_ITEM:
     case ATTRIBUTE_GROUPBY_ITEM:
     case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
-    case PATROL_ATTRIBUTE_LIST_GROUPBYITEM:{
+    case PATROL_ATTRIBUTE_LIST_GROUPBYITEM:
+    case PATROL_ATTRIBUTE_TREE_GROUPBYITEM:{
       item = GroupByItem();
 items.add(item);
       break;
@@ -582,6 +588,11 @@ item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
       }
     case PATROL_ATTRIBUTE_LIST_GROUPBYITEM:{
       jj_consume_token(PATROL_ATTRIBUTE_LIST_GROUPBYITEM);
+item = PatrolAttributeGroupBy.createGroupBy(token.image);
+      break;
+      }
+    case PATROL_ATTRIBUTE_TREE_GROUPBYITEM:{
+      jj_consume_token(PATROL_ATTRIBUTE_TREE_GROUPBYITEM);
 item = PatrolAttributeGroupBy.createGroupBy(token.image);
       break;
       }
@@ -675,6 +686,7 @@ hasNot = true;
     case PATROL_ATTRIBUTE_BOOLEAN_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
+    case PATROL_ATTRIBUTE_TREE_KEY:
     case PATROL_ATTRIBUTE_NUMBER_KEY:
     case PATROL_ATTRIBUTE_DATE_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
@@ -843,6 +855,7 @@ filter = PatrolAttributeFilter.createFilter(key, op, value);
     case WAYPOINT_CM_KEY:
     case PATROL_ATTRIBUTE_STRING_KEY:
     case PATROL_ATTRIBUTE_LIST_KEY:
+    case PATROL_ATTRIBUTE_TREE_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:{
       /* String comparison */
               filter = StringExpression();
@@ -1225,6 +1238,15 @@ value = token.image;
 filter = PatrolAttributeFilter.createFilter(key, op, value);
       break;
       }
+    case PATROL_ATTRIBUTE_TREE_KEY:{
+      jj_consume_token(PATROL_ATTRIBUTE_TREE_KEY);
+key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+value = token.image;
+filter = PatrolAttributeFilter.createFilter(key, op, value);
+      break;
+      }
     default:
       jj_la1[28] = jj_gen;
       jj_consume_token(-1);
@@ -1418,10 +1440,10 @@ fulltoken = fulltoken + " " + token.image;
 	   jj_la1_1 = new int[] {0xe27ffff0,0xe27ffff0,0x0,0xe27ffff0,0xe27ffff0,0xe27ffff0,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xe07ffff0,0x20010080,0x402000,0x8040,0x0,0x0,0xe07fffe0,0x100800,0x201000,0x40000000,0xc0004020,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x2dfffbf,0x2dfffbf,0x0,0x2dfffbf,0x2dfffbf,0x2dfffbf,0x0,0x0,0xd0000000,0x0,0x0,0xd0000000,0x0,0x0,0x0,0x0,0x0,0x0,0x2dfffbf,0x410000,0x0,0x80000,0x0,0x0,0xdfffbf,0x100000,0x0,0xffbf,0x86ffbf,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x5bfffbf,0x5bfffbf,0x0,0x5bfffbf,0x5bfffbf,0x5bfffbf,0x0,0x0,0xa0000000,0x0,0x0,0xa0000000,0x0,0x0,0x0,0x0,0x0,0x0,0x5bfffbf,0x810000,0x0,0x100000,0x0,0x0,0x1bfffbf,0x200000,0x0,0xffbf,0x10effbf,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_3() {
-	   jj_la1_3 = new int[] {0x0,0x0,0x100,0x0,0x0,0x0,0x100,0x0,0x3f,0x0,0x0,0x3f,0x1fe80,0x0,0xa00,0x1fe80,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_3 = new int[] {0x0,0x0,0x200,0x0,0x0,0x0,0x200,0x0,0x7f,0x0,0x0,0x7f,0x7fd00,0x0,0x1400,0x7fd00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -1546,7 +1568,7 @@ fulltoken = fulltoken + " " + token.image;
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[114];
+	 boolean[] la1tokens = new boolean[116];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -1569,7 +1591,7 @@ fulltoken = fulltoken + " " + token.image;
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 114; i++) {
+	 for (int i = 0; i < 116; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

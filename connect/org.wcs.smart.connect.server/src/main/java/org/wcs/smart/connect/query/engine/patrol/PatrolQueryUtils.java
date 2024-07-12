@@ -5,11 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -19,9 +17,11 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -73,6 +73,8 @@ public class PatrolQueryUtils {
 			} else if (pattribute.getType() == AttributeType.DATE) {
 				type = "varchar(10)"; //$NON-NLS-1$
 			} else if (pattribute.getType() == AttributeType.LIST) {
+				type = "varchar(1024)"; //$NON-NLS-1$
+			} else if (pattribute.getType() == AttributeType.TREE) {
 				type = "varchar(1024)"; //$NON-NLS-1$
 			} else if (pattribute.getType() == AttributeType.TEXT) {
 
@@ -130,6 +132,52 @@ public class PatrolQueryUtils {
 					}
 					psUpdate.executeBatch();
 				}
+
+			}else if (pattribute.getType() == AttributeType.TREE) {
+					StringBuilder sql = new StringBuilder();
+					sql.append("SELECT distinct "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(PatrolAttributeValue.class) + ".tree_node_uuid, b.p_uuid"); //$NON-NLS-1$
+					sql.append(" FROM "); //$NON-NLS-1$
+					sql.append(queryDataTable + " b join "); //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(PatrolAttributeValue.class));
+					sql.append(" on b.p_uuid = "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(PatrolAttributeValue.class) + ".patrol_uuid"); //$NON-NLS-1$
+					sql.append(" join "); //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(PatrolAttribute.class));
+					sql.append(" on "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(PatrolAttribute.class) + ".uuid = "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(PatrolAttributeValue.class) + ".patrol_attribute_uuid"); //$NON-NLS-1$
+					sql.append(" WHERE "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(PatrolAttributeValue.class) + ".tree_node_uuid IS NOT NULL "); //$NON-NLS-1$
+					sql.append(" AND "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(PatrolAttribute.class) + ".keyid = ? "); //$NON-NLS-1$
+					
+					StringBuilder sb = new StringBuilder();
+					sb.append("UPDATE "); //$NON-NLS-1$
+					sb.append(queryDataTable);
+					sb.append(" SET "); //$NON-NLS-1$
+					sb.append(cname);
+					sb.append(" = ? "); //$NON-NLS-1$
+					sb.append(" WHERE p_uuid = ?"); //$NON-NLS-1$
+
+					try (PreparedStatement psUpdate = c.prepareStatement(sb.toString())) {
+						try(PreparedStatement psQuery = c.prepareStatement(sql.toString())){
+							psQuery.setString(1, pattribute.getKeyId());						
+							try (ResultSet rs = psQuery.executeQuery()) {
+								while (rs.next()) {
+									UUID liuuid = (UUID)rs.getObject(1);
+									PatrolAttributeTreeNode li = session.get(PatrolAttributeTreeNode.class, liuuid);
+		
+									UUID puuid = (UUID)rs.getObject(2);
+		
+									psUpdate.setString(1, li.getName());
+									psUpdate.setObject(2, puuid);
+									psUpdate.addBatch();
+								}
+							}
+						}
+						psUpdate.executeBatch();
+					}
 
 			} else {
 				StringBuilder sql = new StringBuilder();
@@ -226,77 +274,36 @@ public class PatrolQueryUtils {
 	public static List<PatrolAttribute> getPatrolAttributes(ConservationAreaFilter caFilter,
 			Session session){
 		
+		//no cas; no attributes
 		if (caFilter.getConservationAreaFilterIds().isEmpty()) return Collections.emptyList();
 		
+		//single ca
 		if (caFilter.getConservationAreaFilterIds().size() == 1) {
 			List<PatrolAttribute> pas = QueryFactory.buildQuery(session, PatrolAttribute.class, 
 					new Object[] {"conservationArea.uuid", caFilter.getConservationAreaFilterIds().get(0)}).list(); //$NON-NLS-1$
 			return pas;
-		}else {
-			
-			List<PatrolAttribute> pas = session.createQuery("FROM PatrolAttribute a WHERE a.conservationArea.uuid in (:cas)", //$NON-NLS-1$
-					PatrolAttribute.class)
-					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
-					.list();
-			
-			HashMap<String, PatrolAttribute> attributes = new HashMap<>();
-			HashSet<String> toExclude = new HashSet<>();
-			
-			for (PatrolAttribute pa : pas) {
-				PatrolAttribute current = attributes.get(pa.getKeyId());
-				if (current == null && !toExclude.contains(pa.getKeyId())) {
-					PatrolAttribute temp = new PatrolAttribute();
-					temp.setKeyId(pa.getKeyId());
-					temp.setIsActive(true);
-					temp.setName(pa.getName());
-					temp.setType(pa.getType());
-					if (pa.getAttributeList() != null) {
-						temp.setAttributeList(new ArrayList<>());
-						for (PatrolAttributeListItem li : pa.getAttributeList()) {
-							PatrolAttributeListItem clone = new PatrolAttributeListItem();
-							clone.setIsActive(true);
-							clone.setKeyId(li.getKeyId());
-							clone.setName(li.getName());
-							clone.setListOrder(li.getListOrder());
-							temp.getAttributeList().add(clone);
-						}
-					}
-					attributes.put(pa.getKeyId(), temp);
-				}else {
-					if (pa.getType() != current.getType()) {
-						toExclude.add(pa.getKeyId());
-						attributes.remove(pa.getKeyId());
-					}else {
-						//merge list items
-						if (pa.getAttributeList() != null) {
-							HashMap<String, PatrolAttributeListItem> items = new HashMap<>();
-							for (PatrolAttributeListItem i : current.getAttributeList()) items.put(i.getKeyId(), i);
-							
-							for (PatrolAttributeListItem i : pa.getAttributeList()) {
-								if (!items.containsKey(i.getKeyId())) {
-									PatrolAttributeListItem clone = new PatrolAttributeListItem();
-									clone.setIsActive(true);
-									clone.setKeyId(i.getKeyId());
-									clone.setName(i.getName());
-									clone.setListOrder(i.getListOrder());
-									items.put(clone.getKeyId(), clone);
-								}
-							}
-							
-							current.getAttributeList().clear();
-							current.getAttributeList().addAll(items.values());
-						}
-					}
-				}
-			}
-			
-			pas = new ArrayList<>(attributes.values());
-			for (PatrolAttribute pa : pas) {
-				if (pa.getAttributeList() != null) Collections.sort(pa.getAttributeList(), (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			}
-			Collections.sort(pas, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			
-			return pas;
 		}
+		
+		//multi ca - merge attributes
+		List<PatrolAttribute> pas = session.createQuery("FROM PatrolAttribute a WHERE a.conservationArea.uuid in (:cas)", //$NON-NLS-1$
+				PatrolAttribute.class)
+				.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+				.list();
+		
+		HashMap<String, List<PatrolAttribute>> attributes = new HashMap<>();
+		for (PatrolAttribute pa : pas) {
+			if (!attributes.containsKey(pa.getKeyId())) {
+				attributes.put(pa.getKeyId(), new ArrayList<>());
+			}
+			attributes.get(pa.getKeyId()).add(pa);			
+		}
+		
+		List<PatrolAttribute> results = new ArrayList<>();
+		for (List<PatrolAttribute> items : attributes.values()) {
+			PatrolAttribute pa = PatrolUtils.mergeAttributes(items);
+			if (pa != null) results.add(pa);
+		}
+		Collections.sort(results);
+		return results;
 	}
 }

@@ -672,6 +672,11 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 					if (value == null) {
 						throw new Exception(MessageFormat.format("List item with key {0} not found for custom patrol attribute {1}.", key, custom.getName())); //$NON-NLS-1$
 					}
+				}else if (custom.getType() == AttributeType.TREE) {
+					value = PatrolUtils.findAttributeTreeNode(custom,  jsonValue.toString(), session);
+					if (value == null) {
+						throw new Exception(MessageFormat.format("Tree node with hkey {0} not found for custom patrol attribute {1}.", key, custom.getName())); //$NON-NLS-1$
+					}
 					
 				}else if (custom.getType() == AttributeType.NUMERIC) {
 					value = parseNumeric(jsonValue);

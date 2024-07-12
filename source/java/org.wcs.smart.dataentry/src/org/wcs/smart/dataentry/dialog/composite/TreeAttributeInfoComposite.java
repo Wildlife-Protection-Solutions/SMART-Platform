@@ -55,7 +55,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
@@ -101,7 +101,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				//default value field
 				defaultValueTreeField.setInput(getSourceObject().getAttribute());
 				defaultValueTreeField.clear();
-				((AttributeTreeLabelProvider)defaultValueTreeField.getDropDown().getTreeViewer().getLabelProvider()).setLanguage(language);
+				((TreeNodeLabelProvider)defaultValueTreeField.getDropDown().getTreeViewer().getLabelProvider()).setLanguage(language);
 				defaultValueTreeField.getDropDown().getTreeViewer().refresh();
 				
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
@@ -157,7 +157,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 			}
 		};
 		
-		defaultValueTreeField.createComposite(container, new AttributeTreeContentProvider(true, false), new AttributeTreeLabelProvider());
+		defaultValueTreeField.createComposite(container, new AttributeTreeContentProvider(true, false), new TreeNodeLabelProvider());
 		
 		getShell().addDisposeListener(new DisposeListener() {
 			@Override

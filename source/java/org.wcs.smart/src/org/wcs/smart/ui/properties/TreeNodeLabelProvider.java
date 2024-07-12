@@ -31,18 +31,19 @@ import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
 
 /**
   * Label provided for attribute tree
+  * 
   * @author Emily
   *
   */
-public  class AttributeTreeLabelProvider extends LabelProvider implements IColorProvider {
+public class TreeNodeLabelProvider extends LabelProvider implements IColorProvider {
 
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
@@ -56,11 +57,11 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	 * Creates new data model provided
 	 * @param lang the working language; if null default is used
 	 */
-	public AttributeTreeLabelProvider(Language lang){
+	public TreeNodeLabelProvider(Language lang){
 		this(lang, null);
 	}
 		
-	public AttributeTreeLabelProvider(){
+	public TreeNodeLabelProvider(){
 		this(null, null);
 	}
 	
@@ -68,11 +69,11 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	 * Size of icon to display, if less than 0 icons are hidden
 	 * @param iconSize
 	 */
-	public AttributeTreeLabelProvider(IconManager.Size iconSize){
+	public TreeNodeLabelProvider(IconManager.Size iconSize){
 		this(null, iconSize);
 	}
 	
-	public AttributeTreeLabelProvider(Language lang, IconManager.Size iconSize){
+	public TreeNodeLabelProvider(Language lang, IconManager.Size iconSize){
 		this.currentLang = lang;
 		if (iconSize != null) this.iconCache = new IconCache(null, iconSize);
 	}
@@ -106,8 +107,7 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 			return Messages.AttributeTreeLabelProvider_RootNode_Label;
 		}
 		
-		if (element instanceof DmObject){
-			DmObject obj = (DmObject)element;
+		if (element instanceof NamedKeyItem obj){
 			if (currentLang != null){
 				String l = obj.findNameNull(currentLang);
 				if (l == null){
@@ -125,8 +125,8 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 	@Override
 	public Color getForeground(Object element) {
 		boolean active = true;
-		if (element instanceof AttributeTreeNode){
-			active = ((AttributeTreeNode)element).getIsActive();
+		if (element instanceof ITreeNode node){
+			active = node.getIsActive();
 		}
 		
 		if (active){
@@ -146,6 +146,10 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 		if (iconCache == null) return null;
 		if (element instanceof IconItem) return iconCache.getImage((IconItem) element);
 		return null;
+	}
+	
+	public void clearImageCache(Object element) {
+		if (element instanceof IconItem ii)	iconCache.clearCache(ii);
 	}
 
 }

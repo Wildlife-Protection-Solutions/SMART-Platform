@@ -46,6 +46,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconSet;
@@ -388,12 +389,10 @@ public class ImportAttributeProcessor {
 				a.getAttributeList().forEach(li -> li.getNames().forEach(l->lcodes.add(l.getLanguage().getCode())));
 			}
 			if (a.getTree() != null) {
-				for (AttributeTreeNode node : a.getTree()) {
-					 node.accept(e->{
-						e.getNames().forEach(l->lcodes.add(l.getLanguage().getCode()));
-						return true;
-					});
-				}
+				DataModel.processAttributeTree(a, 
+					 e-> e.getNames().forEach(l->lcodes.add(l.getLanguage().getCode()))
+				);
+				
 			}
 		});
 		

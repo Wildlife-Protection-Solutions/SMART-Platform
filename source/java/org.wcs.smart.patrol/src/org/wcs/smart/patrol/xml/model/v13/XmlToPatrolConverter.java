@@ -251,6 +251,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				case MLIST:
 				case LINE:
 				case POLYGON:
+				case TIME:
 					//not supported
 					break;
 					

@@ -46,10 +46,14 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -75,6 +79,7 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -592,6 +597,9 @@ public class PatrolPackageExporter {
 		case LIST:
 			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 			break;
+		case TREE:
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+			break;
 		case NUMERIC:
 			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
 			break;
@@ -634,24 +642,67 @@ public class PatrolPackageExporter {
 			JSONArray optionOptions = new JSONArray();
 			
 			for(PatrolAttributeListItem item : pa.getAttributeList()) {
-			
-				JSONObject ttype = new JSONObject();
-				ttype.put("uuid", UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
-				ttype.put("key", item.getKeyId()); //$NON-NLS-1$
-				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, item.findName(pa.getConservationArea().getDefaultLanguage())); 
-				for (Label l : item.getNames()) {
-					ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
-					
-				}
-				CtJsonExportUtils.addIconToJson(item, set, ttype, workingDir, session);
+				JSONObject ttype = convertNamedKeyItem(item, set, pa.getConservationArea(), workingDir, session);
 				optionOptions.add(ttype);
 			}
 			optionType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
 		}
+		
+		if (pa.getType() == Attribute.AttributeType.TREE) {
+			//TODO: populate tree options
+			
+			JSONArray optionOptions = new JSONArray();
+			Map<PatrolAttributeTreeNode, JSONObject> parents = new HashMap<>();
+			
+			List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+			toProcess.addAll(pa.getAttributeTree());
+			while(!toProcess.isEmpty()) {
+				PatrolAttributeTreeNode node = toProcess.remove(0);
+				
+				JSONObject ttype = convertNamedKeyItem(node, set, pa.getConservationArea(), workingDir, session);
+				if (node.getParent() == null) {
+					optionOptions.add(ttype);
+				}else {
+					JSONObject parentNode = parents.get(node.getParent());
+					JSONArray array = (JSONArray) parentNode.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
+					if (array == null) {
+						array = new JSONArray();
+						parentNode.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, array);
+					}
+					array.add(ttype);					
+				}
+				
+				parents.put(node, ttype);
+				toProcess.addAll(node.getChildren());		
+			}
+			optionType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
+		}
+		
 		
 		JSONObject attributeOp = new JSONObject();
 		attributeOp.put(PatrolJsonUtils.ATTRIBUTE_PREFIX + UuidUtils.uuidToString(pa.getUuid()), optionType);
 		return attributeOp;
 	}
 	
+	@SuppressWarnings("unchecked")
+	private JSONObject convertNamedKeyItem(NamedKeyItem item, 
+			IconSet set, ConservationArea ca, Path workingDir, Session session) throws IOException {
+		
+		JSONObject ttype = new JSONObject(); 
+		ttype.put("uuid", UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
+		if (item instanceof ITreeNode<?> tn) {
+			ttype.put("key", tn.getHkey()); //$NON-NLS-1$
+		}else {
+			ttype.put("key", item.getKeyId()); //$NON-NLS-1$
+		}
+		ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, item.findName(ca.getDefaultLanguage())); 
+		for (Label l : item.getNames()) {
+			ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
+			
+		}
+		if (item instanceof IconItem iitem) {
+			CtJsonExportUtils.addIconToJson(iitem, set, ttype, workingDir, session);
+		}
+		return ttype;
+	}
 }

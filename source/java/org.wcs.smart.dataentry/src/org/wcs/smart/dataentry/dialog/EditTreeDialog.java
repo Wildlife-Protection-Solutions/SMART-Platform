@@ -85,7 +85,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -405,7 +405,7 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 		((GridData)tree.getTree().getLayoutData()).heightHint = 300;
 		
 		tree.setContentProvider(new AttributeTreeContentProvider(true, false));
-		tree.setLabelProvider(new AttributeTreeLabelProvider());
+		tree.setLabelProvider(new TreeNodeLabelProvider());
 		tree.setInput(attribute.getAttribute());
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			

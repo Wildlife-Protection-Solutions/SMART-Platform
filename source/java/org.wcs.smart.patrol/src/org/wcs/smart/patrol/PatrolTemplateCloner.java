@@ -33,6 +33,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -98,14 +99,49 @@ public class PatrolTemplateCloner implements
 					cloneitem.setIsActive(li.getIsActive());
 					cloneitem.setKeyId(li.getKeyId());
 					cloneitem.setListOrder(li.getListOrder());
+					//TODO: test this
+					cloneitem.setIcon(engine.getNewConservationItem(li.getIcon()));
 					engine.copyLabels(li, cloneitem);
 					clone.getAttributeList().add(cloneitem);
+
 				}
+			}
+			if (a.getType() == AttributeType.TREE && a.getAttributeTree() != null) {
+				clone.setAttributeTree(new ArrayList<>());
+				cloneAttributeTreeNodes(clone, null, a.getAttributeTree(), engine);				
 			}
 			engine.copyLabels(a, clone);
 			engine.getSession().persist(clone);
 		}
 		engine.getSession().flush();
+	}
+	
+	//recusive clone of all tree nodes
+	private void cloneAttributeTreeNodes(PatrolAttribute attribute, PatrolAttributeTreeNode clonedParent,
+			List<PatrolAttributeTreeNode> kidsToClone, ConservationAreaClonerEngine engine) {
+		
+		for(PatrolAttributeTreeNode v : kidsToClone) {
+			PatrolAttributeTreeNode tclone = new PatrolAttributeTreeNode();
+			tclone.setAttribute(attribute);
+			tclone.setIsActive(v.getIsActive());
+			tclone.setKeyId(v.getKeyId());
+			tclone.setHkey(v.getHkey());
+			tclone.setNodeOrder(v.getNodeOrder());
+			tclone.setChildren(new ArrayList<>());
+			//TODO: test this
+			tclone.setIcon(engine.getNewConservationItem(v.getIcon()));
+
+			engine.copyLabels(v, tclone);
+			
+			if (clonedParent != null) {
+				tclone.setParent(clonedParent);
+				clonedParent.getChildren().add(tclone);
+			}else {
+				attribute.getAttributeTree().add(tclone);
+			}
+			
+			cloneAttributeTreeNodes(attribute, tclone, v.getChildren(), engine);
+		}
 	}
 	
 	/*

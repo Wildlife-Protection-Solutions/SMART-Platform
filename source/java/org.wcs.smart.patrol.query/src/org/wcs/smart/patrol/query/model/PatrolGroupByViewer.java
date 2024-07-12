@@ -32,9 +32,9 @@ public class PatrolGroupByViewer extends AbstractGroupByViewer<PatrolGroupBy> {
 	@Override
 	public List<ListItem> getItems(Session session) {
 		if (groupBy.getItems() != null){
-			return data.getValues(session, groupBy.getItems());
+			return data.getListValues(session, groupBy.getItems());
 		}
-		List<ListItem> items = data.getAllValues(session);
+		List<ListItem> items = data.getListValues(session);
 		return items;		
 	}
 

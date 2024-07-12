@@ -45,9 +45,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.ITreeNode;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 
 /**
  * Tree viewer that displays a tree in a box similar
@@ -185,7 +185,7 @@ public class TreeDropDownViewer {
 	 * 
 	 * @param att
 	 */
-	public void setAttribute(List<AttributeTreeNode> rootNodes){
+	public void setAttribute(List<? extends ITreeNode<?>> rootNodes){
 		attributeTreeViewer.setInput(rootNodes);
 		attributeTreeViewer.expandToLevel(1);
 		attributeTreeViewer.refresh();
@@ -221,7 +221,7 @@ public class TreeDropDownViewer {
 		attributeTreeViewer = fTree.getViewer();
 		//attributeTreeViewer = new TreeViewer(main, SWT.H_SCROLL | SWT.V_SCROLL);
 		attributeTreeViewer.setContentProvider(new AttributeTreeContentProvider(true, false));
-		attributeTreeViewer.setLabelProvider(new AttributeTreeLabelProvider());
+		attributeTreeViewer.setLabelProvider(new TreeNodeLabelProvider());
 		
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 

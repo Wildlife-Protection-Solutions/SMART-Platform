@@ -86,7 +86,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -107,7 +107,7 @@ public class AttributeTree {
 	private AttributeInfoPanel info;
 	
 	private List<AttributeTreeNode> deletedNodes = new ArrayList<AttributeTreeNode>();
-	private AttributeTreeLabelProvider labelProvider = new AttributeTreeLabelProvider();
+	private TreeNodeLabelProvider labelProvider = new TreeNodeLabelProvider();
 	
 	public AttributeTree(AttributeInfoPanel info, boolean isEditable){
 		this.isEditable = isEditable;

@@ -53,7 +53,7 @@ import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.ui.editors.query.FilterDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -63,7 +63,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AttributeTreeDropItem extends DropItem {
 
-	private static AttributeTreeLabelProvider lProvider = null;
+	private static TreeNodeLabelProvider lProvider = null;
 	
 	protected String text;
 	protected String queryKey;
@@ -240,7 +240,7 @@ public class AttributeTreeDropItem extends DropItem {
 		AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(false, false);
 		treeviewer.getTreeViewer().setContentProvider(cProvider);
 		if (lProvider == null){
-			lProvider = new AttributeTreeLabelProvider();
+			lProvider = new TreeNodeLabelProvider();
 		}
 		treeviewer.getTreeViewer().setLabelProvider(lProvider);
 		treeviewer.getTreeViewer().setInput(input);	

@@ -37,6 +37,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -302,6 +303,13 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			sb.append(engine.tablePrefix(PatrolAttributeListItem.class) + ".uuid = "); //$NON-NLS-1$
 			sb.append(engine.tablePrefix(PatrolAttributeValue.class) + ".list_item_uuid "); //$NON-NLS-1$
 		}
+		if (filter.getAttributeType() == AttributeType.TREE) {
+			sb.append(" join "); //$NON-NLS-1$
+			sb.append(engine.tableNamePrefix(PatrolAttributeTreeNode.class));
+			sb.append(" on "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeTreeNode.class) + ".uuid = "); //$NON-NLS-1$
+			sb.append(engine.tablePrefix(PatrolAttributeValue.class) + ".tree_node_uuid "); //$NON-NLS-1$
+		}
 		sb.append(" WHERE "); //$NON-NLS-1$
 		sb.append(engine.tablePrefix(PatrolAttribute.class) + ".keyid =  "); //$NON-NLS-1$
 		sb.append( p1 );
@@ -342,6 +350,12 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			sb.append(" = "); //$NON-NLS-1$
 			String p2 = engine.addParameterValue(SharedUtils.stripQuotes(filter.getValue1().toString()));
 			sb.append(p2);
+		}else if (filter.getAttributeType() == AttributeType.TREE) {
+			String prefix = engine.tablePrefix(PatrolAttributeTreeNode.class);
+			String keyPart = SharedUtils.stripQuotes(filter.getValue1().toString());
+			p1 = engine.addParameterValue(keyPart); 
+			String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$ 
+			sb.append("( " + prefix + ".hkey >= "+ p1 + " and " + prefix + ".hkey < " + p2 + ") "); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$			
 		}else if (filter.getAttributeType() == AttributeType.TEXT) {
 			sb.append(" LOWER(" + engine.tablePrefix(PatrolAttributeValue.class) + ".string_value) "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(asSql(filter.getOperator()));

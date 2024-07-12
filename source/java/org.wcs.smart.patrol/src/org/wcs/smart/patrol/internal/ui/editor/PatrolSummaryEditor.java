@@ -722,10 +722,14 @@ public class PatrolSummaryEditor extends EditorPart {
 			((GridLayout)core.getLayout()).marginHeight = 0;
 		
 			List<PatrolAttribute> editAttributes = new ArrayList<>();
+			
+			PatrolAttributeComposite editcompoiste = new PatrolAttributeComposite(editAttributes);
 			for (PatrolAttribute pa : attributes) {
 				if (pa.getAttributeList() != null) {
 					pa.getAttributeList().forEach(li->li.getName());
 				}
+				pa.loadTree(session);
+				
 				PatrolAttributeValue value = null;
 				for (PatrolAttributeValue v : patrol.getCustomAttributes()) {
 					if (v.getPatrolAttribute().equals(pa)) {
@@ -758,13 +762,19 @@ public class PatrolSummaryEditor extends EditorPart {
 					field.adapt(toolkit);
 					field.setValue(value == null ? null : value.getAttributeListItem());
 					field.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}else if (pa.getType() == AttributeType.TREE) {
+					TextImageField field = new TextImageField(core);
+					field.setNoValueLabel(""); //$NON-NLS-1$
+					field.adapt(toolkit);
+					field.setValue(value == null ? null : value.getAttributeTreeNode());
+					field.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}else {
 					Text txt = toolkit.createText(core, attributeValue, SWT.WRAP);
 					txt.setEditable(false);
 					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}
 
-				Hyperlink link = createEditLink(toolkit, core, new PatrolAttributeComposite(editAttributes));
+				Hyperlink link = createEditLink(toolkit, core, editcompoiste);
 				link.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 			}
 		}

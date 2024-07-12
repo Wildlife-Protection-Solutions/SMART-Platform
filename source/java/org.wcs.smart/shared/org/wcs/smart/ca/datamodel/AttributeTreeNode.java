@@ -49,11 +49,9 @@ import jakarta.persistence.Transient;
  */
 @Entity
 @Table(name = "dm_attribute_tree", schema="smart")
-public class AttributeTreeNode extends DmObject implements HkeyObject{
+public class AttributeTreeNode extends DmObject implements HkeyObject, ITreeNode<AttributeTreeNode>{
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final String FULL_NAME_SEPARATOR = " - "; //$NON-NLS-1$
 	
 	private Attribute attribute = null;
 	private int nodeOrder;
@@ -92,34 +90,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	public void setNodeOrder(int nodeOrder){
 		this.nodeOrder = nodeOrder;
 	}
-	
-	/**
-	 * Updates the hkey of this object
-	 * and children tree nodes.
-	 */
-	public void updateHkey(){
-		setHkey(computeHkey());
-		
-		if (getChildren() != null){
-			for (AttributeTreeNode child : getChildren()){
-				child.updateHkey();
-			}
-		}
-	}
-	
-	
-	/**
-	 * Computes the hkey for the given category.
-	 * 
-	 * @return the hkey for this category.
-	 */
-	private String computeHkey(){
-		if (parent == null){
-			return this.getKeyId() + HkeyObject.HKEY_SEPERATOR;
-		}
-		return parent.computeHkey() + this.getKeyId() + HkeyObject.HKEY_SEPERATOR;
-	}
-	
+
 	@Column(name="hkey")
 	public String getHkey(){
 		return this.hkey;
@@ -244,12 +215,4 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		return clone;
 	}
 
-	@Transient
-	public void accept(ITreeNodeVisitor visitor) {
-		if (!visitor.visit(this)) return;
-		if (getChildren() == null) return;
-		for (AttributeTreeNode kid : getChildren()) {
-			kid.accept(visitor);
-		}
-	}
 }
