@@ -73,7 +73,9 @@ public class Upgrader800To801 extends AbstractInteralDatabaseUpgrader {
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
-						thrownException = new Exception(MessageFormat.format(Messages.Upgrader700To741_UpgradeErrorMsage, UpgradeEngine.UpgradeFromVersion.V800.fromVersion, UpgradeEngine.UpgradeFromVersion.V800.toVersion), e); 
+						thrownException = new Exception(MessageFormat.format(Messages.Upgrader700To741_UpgradeErrorMsage, 
+								UpgradeEngine.UpgradeFromVersion.V801.fromVersion, 
+								UpgradeEngine.UpgradeFromVersion.V801.toVersion), e); 
 					}
 				}
 			});
