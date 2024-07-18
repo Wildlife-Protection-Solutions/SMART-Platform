@@ -44,6 +44,8 @@ import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.routine.ValidationTask;
 
+import jakarta.persistence.LockTimeoutException;
+
 /**
  * Auto validation job/manager
  * 
@@ -82,14 +84,19 @@ public class AutoValidateJob extends Job{
 		
 		while(!tasks.isEmpty()){
 			ValidationEngine engine = new ValidationEngine(Locale.getDefault());
+			
+			//list of tasks to run
+			List<ValidationTask> toRun = new ArrayList<>();
 			synchronized (tasks) {
-				for (ValidationTask t : tasks){
-					engine.addValidationTask(t);
-				}
-				tasks.clear();
+				toRun.addAll(tasks);
 			}
 			
+			//add to engine
+			for (ValidationTask t : toRun){
+				engine.addValidationTask(t);
+			}
 			
+			//run			
 			try(Session session = HibernateManager.openSession()){
 				Collection<QaError> errors = engine.validate(session, progress.setWorkRemaining(100).split(1));
 				session.beginTransaction();
@@ -97,7 +104,23 @@ public class AutoValidateJob extends Job{
 					session.persist(error);
 				}
 				session.getTransaction().commit();
+				//if successful remove tasks for list
+				tasks.removeAll(toRun);
+				 				
 			}catch(Exception ex){
+				boolean timeout = false;
+				if (ex instanceof LockTimeoutException) {
+					timeout = true;
+				}else if (ex.getMessage().contains("Table 'SMART.CONNECT_CHANGE_LOG' cannot be locked in 'EXCLUSIVE' mode.")) {
+					timeout = true;
+				}
+				if (timeout) {
+					QaPlugIn.log("Lock timeout with QA routine, waiting 5 seconds and trying again. ", null);
+					schedule(5000);
+					return Status.OK_STATUS;
+				}
+				
+				tasks.removeAll(toRun);
 				QaPlugIn.displayLog(Messages.AutoValidateJob_DataError + ex.getMessage(), ex);
 			}
 			if (monitor.isCanceled()) break;
