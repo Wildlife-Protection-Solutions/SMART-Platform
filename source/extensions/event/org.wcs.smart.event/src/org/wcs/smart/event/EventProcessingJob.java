@@ -40,6 +40,8 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 
+import jakarta.persistence.LockTimeoutException;
+
 /**
  * Job for processing observation events. There is a single job
  * accessed through the getInstance() function.
@@ -70,7 +72,7 @@ public class EventProcessingJob extends Job {
 			if (schedule) schedule();
 		}
 	}
-		
+
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		while(!observations.isEmpty()) {
@@ -94,6 +96,11 @@ public class EventProcessingJob extends Job {
 						EventPlugIn.displayLog(MessageFormat.format(Messages.EventProcessingJob_EventProcessingError, ex.getMessage()), ex);
 					}
 				}
+			}catch (LockTimeoutException | org.hibernate.exception.LockTimeoutException ex2) {
+				EventPlugIn.log("Lock time with event processing - trying again in 5 seconds", null);
+				observations.add(0, o);
+				schedule(5000);
+				return Status.OK_STATUS;
 			}
 		}
 		return Status.OK_STATUS;

@@ -37,6 +37,8 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 
+import jakarta.persistence.LockTimeoutException;
+
 public class IncidentToPatrolProcessorJob extends Job{
 
 	private static IncidentToPatrolProcessorJob instance = new IncidentToPatrolProcessorJob();
@@ -71,6 +73,15 @@ public class IncidentToPatrolProcessorJob extends Job{
 						}
 					});
 				}
+			}catch(LockTimeoutException timeout) {
+				//Ticket: 3773 
+				//some lock is prevent this tasks from finishing
+				//log a warning and reschedule task
+				//I can reproduce this when I load two smart mobile patrols at the same time
+				//for the first one, select create a new patrol, for the second one just wait
+				//eventually this error will come up
+				IncidentPlugIn.log("Timeout linking incidents to patrol. Trying again in 30 seconds", null);
+				schedule(30*1000);
 			}
 				
 		}catch (Exception ex) {
