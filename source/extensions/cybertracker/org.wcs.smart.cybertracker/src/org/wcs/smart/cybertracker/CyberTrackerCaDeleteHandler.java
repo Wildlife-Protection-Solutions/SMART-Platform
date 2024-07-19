@@ -49,6 +49,11 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteCTProperties(ConservationArea ca, Session session) {
+		
+		session.createMutationQuery("delete from SmartMobileDevice where conservationArea = :ca") //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.executeUpdate();
+		
 		session.createMutationQuery("delete from CyberTrackerPropertiesOption where conservationArea = :ca") //$NON-NLS-1$
 		.setParameter("ca", ca) //$NON-NLS-1$
 		.executeUpdate();
@@ -66,6 +71,8 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 		session.createMutationQuery("DELETE FROM NavigationLayer WHERE conservationArea = :ca") //$NON-NLS-1$
 		.setParameter("ca", ca) //$NON-NLS-1$
 		.executeUpdate();
+		
+		session.flush();
 	}
 
 	private void deleteCTRegistryKey(ConservationArea ca) throws Exception {

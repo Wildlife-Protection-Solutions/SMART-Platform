@@ -130,6 +130,8 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 					continue;
 				}
 				
+				String deviceId = (String) properties.get(CtJsonObservationParser.DEVICE_ID);
+
 				CtIncidentLink currentLink = null;
 				CtIncidentLink rootLink = null;
 
@@ -153,6 +155,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 					if (currentLink == null) {
 						currentLink = new CtIncidentLink();
 						currentLink.setIncidentGroupId(groupUuid);
+						currentLink.setDeviceId(deviceId);
 					}
 					
 				}else {
@@ -163,6 +166,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 					if (rootLink == null) {
 						rootLink = new CtIncidentLink();
 						rootLink.setRootId(rootUuid);
+						rootLink.setDeviceId(deviceId);
 						//rootLink.setWaypoint(waypoint);
 						groupMappings.add(rootLink);
 					}
@@ -172,6 +176,7 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 						currentLink = new CtIncidentLink();	
 						currentLink.setRootId(rootUuid);
 						currentLink.setIncidentGroupId(groupUuid);
+						currentLink.setDeviceId(deviceId);
 						//currentLink.setObservationGroup();
 						currentLink.setWaypoint(rootLink.getWaypoint());
 						groupMappings.add(rootLink);

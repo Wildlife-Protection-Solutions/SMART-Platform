@@ -132,6 +132,8 @@ public class SmartMobileJsonFileProcessor {
 	}
 
 	private void postProcess() {
+		if (SmartMobileJsonProcessorManager.INSTANCE.getPostProcessors().length == 0) return;
+		
 		try (Session session = factory.openSession()){
 			for (IJsonPostProcessor p : SmartMobileJsonProcessorManager.INSTANCE.getPostProcessors()) {
 				try {

@@ -12,9 +12,6 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.incident.DesktopIncidentJsonProcessor">
       </JsonProcessor>
-      <JsonPostProcessor
-            class="org.wcs.smart.cybertracker.incident.IncidentJsonPostProcessor">
-      </JsonPostProcessor>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.ctpackage">
@@ -156,6 +153,18 @@
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="4.0.0">
       </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.device">
+      <device_id_provider
+            provider="org.wcs.smart.cybertracker.incident.SmartMobileIncidentDeviceProvider">
+      </device_id_provider>
+   </extension>
+   <extension
+         point="org.wcs.smart.incident.contribution">
+      <uieditor
+            class="org.wcs.smart.cybertracker.incident.IncidentEditorContribution">
+      </uieditor>
    </extension>
 
 </plugin>

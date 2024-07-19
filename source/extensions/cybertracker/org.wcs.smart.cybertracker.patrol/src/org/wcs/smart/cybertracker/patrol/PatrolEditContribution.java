@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,43 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.json;
+package org.wcs.smart.cybertracker.patrol;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
-import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
-
+import org.wcs.smart.patrol.IPatrolEditContribution;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 /**
- * Removes all ct to SMART links where the
- * patrols are older than 6 months
+ * Contribution for maintaining SMARTMobile links when patrols are modified
  * 
- * @author Emily
- * @since 7.0.0
- *
+ * @since 8.1.0
  */
-public class PatrolJsonPostProcessor implements IJsonPostProcessor {
+public class PatrolEditContribution implements IPatrolEditContribution {
+
+	public PatrolEditContribution() {
+	}
 
 	@Override
-	public void postProcess(Session session) {
-		//clean up all links that are associated with a patrol that
-		//is older than two months old
-		StringBuilder hql = new StringBuilder();
-		hql.append( "FROM CtPatrolLink l " ); //$NON-NLS-1$
-		hql.append( "WHERE " ); //$NON-NLS-1$
-		hql.append( "l.patrolLeg.patrol.endDate < :now " ); //$NON-NLS-1$
-					
-		List<CtPatrolLink> links = session.createQuery(hql.toString(), CtPatrolLink.class)
-				.setParameter("now", LocalDate.now().minusMonths(IJsonProcessor.CLEANUP_MONTHS) ) //$NON-NLS-1$
+	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol) {
+	}
+
+	/**
+	 * creating a new patrol leg with the details from the current patrol
+	 * leg
+	 * 
+	 * @param currentLeg
+	 * @param toLeg
+	 */
+	//called when patrols are merged/split
+	public void mergePatrolMovePatrolLeg(PatrolLeg currentLeg, PatrolLeg toLeg, Session session) {
+		List<CtPatrolLink> links = session.createQuery("FROM CtPatrolLink where patrolLeg = :leg", CtPatrolLink.class) //$NON-NLS-1$
+				.setParameter("leg", currentLeg) //$NON-NLS-1$
 				.list();
-					
-		for (CtPatrolLink l : links) {
-			session.remove(l);
+		for (CtPatrolLink link : links) {
+			link.setPatrolLeg(toLeg);
 		}
 		
 	}
-
 }

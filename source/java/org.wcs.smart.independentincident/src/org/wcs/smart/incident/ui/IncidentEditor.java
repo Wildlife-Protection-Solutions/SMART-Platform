@@ -237,6 +237,12 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 			setPageText(mapIndex, Messages.IncidentEditor_MapPageName);
 			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
+			if (IncidentContributionPageEditor.hasContributions()){
+				IncidentContributionPageEditor contributionPage = new IncidentContributionPageEditor(IncidentEditor.this);
+				int index = addPage(contributionPage, getEditorInput());
+				setPageText(index, Messages.IncidentEditor_othertabname);
+			}
+			
 			//-- event managers --
 			IncidentEventManager.getInstance().addListener(listener);
 			WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, wlistener);

@@ -24,7 +24,9 @@ package org.wcs.smart.patrol.internal.ui;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -54,6 +56,7 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 
 	private List<PatrolLeg> legsToMove;
 	private Patrol newPatrol;
+	private Map<PatrolLeg,PatrolLeg> legMapping;
 	private Text txtPatrolId;
 	private Patrol originalPatrol;
 	
@@ -107,6 +110,8 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 	@Override
 	protected void okPressed() {
 		//Make a new Patrol to put everything into:
+		legMapping = new HashMap<>();
+		
 		newPatrol = originalPatrol.simpleClone();
 		newPatrol.setLegs(new ArrayList<PatrolLeg>());
 		newPatrol.setId(txtPatrolId.getText());
@@ -117,6 +122,8 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 		
 		for(PatrolLeg pl : legsToMove){
 			PatrolLeg legClone = pl.simpleClone();
+			
+			legMapping.put(legClone, pl);
 			legClone.setPatrolLegDays(new ArrayList<PatrolLegDay>());
 			if (pl.getPatrolLegDays() != null && pl.getPatrolLegDays().size() > 0){
 				// Clone Leg Days as well
@@ -149,6 +156,14 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 	 */
 	public Patrol getNewPatrol() {
 		return newPatrol;
+	}
+	
+	/**
+	 * 
+	 * @return mapping from the new patrol leg to the original patrol leg
+	 */
+	public Map<PatrolLeg, PatrolLeg> getLegMapping() {
+		return legMapping;
 	}
 
 }

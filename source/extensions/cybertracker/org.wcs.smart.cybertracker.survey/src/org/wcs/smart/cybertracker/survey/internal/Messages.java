@@ -6,6 +6,12 @@ public class Messages extends NLS {
 	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.survey.internal.messages"; //$NON-NLS-1$
 
 	public static String DataQueueCtMissionJob_ErrorMsg;
+
+	public static String DesktopMissionJsonProcessor_0;
+
+	public static String DesktopMissionJsonProcessor_MissionSurveyError;
+
+	public static String DesktopMissionJsonProcessor_UserCancelled;
 	public static String MissionDialog_ActionLabel;
 	public static String MissionDialog_addExistingLabel;
 	public static String MissionDialog_DateWarning;
@@ -28,6 +34,10 @@ public class Messages extends NLS {
 	public static String MissionDialog_SurveyRequired;
 	public static String MissionDialog_SurveyRequired2;
 	public static String MissionDialog_Title;
+	public static String MissionEditorContribution_loadingmobiledetails;
+
+	public static String MissionEditorContribution_missionobject;
+
 	public static String MissionJsonProcessor_ErrorTitle;
 	public static String MissionJsonProcessor_UserCancelled2;
 	public static String MissionJsonProcessor_WarningMsg;

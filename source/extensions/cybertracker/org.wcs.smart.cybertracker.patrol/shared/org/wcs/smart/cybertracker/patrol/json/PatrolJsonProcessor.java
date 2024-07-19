@@ -389,7 +389,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 						//update last observation count
 						link.setLastObservationCnt(observationCounter);
 						processedFeatures.add(feature);
-						modifiedPatrols.add(link.getPatrolLeg().getPatrol());
+						if (link.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 						continue;				
 					}
 					
@@ -457,7 +457,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 							if (addWaypointToLastObservation(link.getPatrolLeg(), wp, session) == null) continue;
 							link.setLastObservationCnt(observationCounter);
 							processedFeatures.add(feature);
-							modifiedPatrols.add(link.getPatrolLeg().getPatrol());
+							if (link.getPatrolLeg().getPatrol().getUuid() != null)  modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 							continue;
 						}
 					

@@ -28,11 +28,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.cybertracker.incident.IncidentJsonPostProcessor;
 import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.patrol.json.PatrolJsonPostProcessor;
-import org.wcs.smart.cybertracker.survey.json.MissionJsonPostProcessor;
 
 public enum SmartMobileJsonProcessorManager {
 	
@@ -81,10 +78,6 @@ public enum SmartMobileJsonProcessorManager {
 	}
 	
 	public IJsonPostProcessor[] getPostProcessors(){
-		return new IJsonPostProcessor[] {
-			new PatrolJsonPostProcessor(),
-			new IncidentJsonPostProcessor(),
-			new MissionJsonPostProcessor()
-		};
+		return new IJsonPostProcessor[] {};
 	}
 }

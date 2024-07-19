@@ -27,7 +27,8 @@ public class CtIncidentLink extends UuidItem {
 	
 	private UUID ctIncidentGroupId;
 	private UUID ctRootId;
-
+	private String deviceId;
+	
 	private Waypoint waypoint;
 	private WaypointObservationGroup obsGroup;
 	
@@ -38,6 +39,15 @@ public class CtIncidentLink extends UuidItem {
 	
 	public void setRootId(UUID ctRootId) {
 		this.ctRootId = ctRootId;
+	}
+	
+	@Column(name="ct_device_id")
+	public String getDeviceId() {
+		return this.deviceId;
+	}
+	
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
 	}
 	
 	@Column(name="ct_group_id")

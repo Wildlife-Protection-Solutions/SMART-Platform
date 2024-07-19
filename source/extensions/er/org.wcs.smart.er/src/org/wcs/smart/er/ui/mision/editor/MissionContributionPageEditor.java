@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.editor;
+package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -29,7 +29,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -46,34 +45,30 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.PatrolEventManager.EventType;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
-import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.ui.IMissionEditorContribution;
 
 /**
- * The contribution page of the patrol editor.  This page
+ * The contribution page of the mission editor.  This page
  * is only added if there exists at least on plugin that
- * implements the IPatrolEditorContribution extension point.
+ * implements the IMissionEditorContribution extension point.
  * 
  * @author Emily
+ * @since 8.1.0
  *
  */
-public class PatrolContributionPageEditor extends EditorPart{
+public class MissionContributionPageEditor extends EditorPart{
 
-	private PatrolEditor editor = null;
+	private MissionEditor editor = null;
 	private FormToolkit toolkit;
-	private List<IPatrolEditorContribution> parts ;
+	private List<IMissionEditorContribution> parts;
 	
 	/**
 	 * Creates new page
 	 * @param editor
 	 */
-	public PatrolContributionPageEditor(PatrolEditor editor){
+	public MissionContributionPageEditor(MissionEditor editor){
 		this.editor = editor;
 	}
 	
@@ -126,12 +121,12 @@ public class PatrolContributionPageEditor extends EditorPart{
 			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 			lblImage.setImage(x);
 			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
+			lblWarning.setText(MessageFormat.format(Messages.MissionContributionPageEditor_CannotEditoMission, new Object[]{ canEdit }));
 		}
 		
 		parts = findContributions();
 	
-		for (IPatrolEditorContribution part : parts){
+		for (IMissionEditorContribution part : parts){
 			final Section sec = toolkit.createSection(main.getBody(), Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
 			sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			sec.addExpansionListener(new ExpansionAdapter() {
@@ -149,48 +144,35 @@ public class PatrolContributionPageEditor extends EditorPart{
 			Composite info = part.createControl(toolkit, sec, editor.canEdit()==null);
 			sec.setClient(info);
 
-			part.setPatrol(editor.getPatrol());
+			part.setMission(editor.getMission());
 		}
-		
-		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, (attribute, source)->{
-			boolean dorun = false;
-			if (source instanceof Patrol p) {
-				dorun = p.getUuid().equals(editor.getPatrolUuid());
-			}else if (source instanceof PatrolLeg pl) {
-				dorun = pl.getPatrol().getUuid().equals(editor.getPatrolUuid());
-			}
-			if (dorun) refresh();
-		});
 	}
-
+	
 	/**
 	 * refresh the page
 	 */
 	public void refresh() {
-		parts.forEach(p->p.setPatrol(editor.getPatrol()));
+		parts.forEach(p->p.setMission(editor.getMission()));
 	}
-	
-	
+
 	@Override
 	public void setFocus() {
 
 	}
 	
-	private List<IPatrolEditorContribution> findContributions(){
-		List<IPatrolEditorContribution> items = new ArrayList<IPatrolEditorContribution>();
+	private List<IMissionEditorContribution> findContributions(){
+		List<IMissionEditorContribution> items = new ArrayList<IMissionEditorContribution>();
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IPatrolEditorContribution.EXTENSION_ID);
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IMissionEditorContribution.EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("uieditor")){ //$NON-NLS-1$
-					IPatrolEditorContribution page = (IPatrolEditorContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
-					ContextInjectionFactory.inject(page, editor.getContext());
+					IMissionEditorContribution page = (IMissionEditorContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
 					items.add(page);
 				}
 			}
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.CreatePatrolWizard_ErrorCreatingWizardPages, ex);
-			return null;
+			EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
 		}
 		return items;
 	}
@@ -202,7 +184,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 	 */
 	public static boolean hasContributions(){
 		if (Platform.getExtensionRegistry() == null) return false;
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IPatrolEditorContribution.EXTENSION_ID);
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IMissionEditorContribution.EXTENSION_ID);
 		if (config.length > 0){
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("uieditor")){ //$NON-NLS-1$

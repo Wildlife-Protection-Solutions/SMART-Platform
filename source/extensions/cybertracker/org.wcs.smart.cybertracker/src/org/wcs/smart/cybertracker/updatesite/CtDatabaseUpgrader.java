@@ -94,7 +94,8 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			update50to60(session);
 			update60to70(session);
 			update70to75(session);
-			update75to80(session);			
+			update75to80(session);
+			update80o81(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)) {
 			(new CtDatabaseUpgrader30To40()).upgrade(session);
 			update40to50(session);
@@ -102,27 +103,36 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			update60to70(session);
 			update70to75(session);
 			update75to80(session);
+			update80o81(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
 			update40to50(session);
 			update50to60(session);
 			update60to70(session);
 			update70to75(session);
 			update75to80(session);
+			update80o81(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_5_0)) {
 			update50to60(session);
 			update60to70(session);
 			update70to75(session);
 			update75to80(session);
+			update80o81(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_6_0)) {
 			update60to70(session);
 			update70to75(session);
 			update75to80(session);
+			update80o81(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_7_0)) {
 			update70to75(session);
 			update75to80(session);
+			update80o81(session);
 		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_7_5)) {
 			update75to80(session);
+			update80o81(session);
+		}else if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_8_0)) {
+			update80o81(session);
 		}
+		
 		
 
 		//ensure default profiles exist for each CA
@@ -254,6 +264,21 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_8_0, session);
 	}
 	
+	private void update80o81(Session session) {
+		String[] sql = new String[] {
+			"CREATE TABLE smart.ct_device(uuid char(16) for bit data not null, device_id varchar(128), ca_uuid char(16) for bit data not null, icon_uuid char(16) for bit data, name varchar(1024), primary key (uuid, ca_uuid)) ", //$NON-NLS-1$
+			"ALTER TABLE smart.ct_device ADD CONSTRAINT ct_device_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.ct_device ADD CONSTRAINT ct_device_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.ct_incident_link add column ct_device_id varchar(36)" //$NON-NLS-1$
+		};
+		
+		for (String s : sql) {
+			session.createNativeMutationQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_8_1, session);
+	}
 	private void createTables(Session session) {
 		final boolean tables[] = {false, false}; //properties table
 		

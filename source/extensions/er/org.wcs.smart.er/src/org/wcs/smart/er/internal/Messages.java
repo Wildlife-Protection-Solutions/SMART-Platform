@@ -275,6 +275,8 @@ public class Messages extends NLS {
 	public static String MissionAttributeDialog_Title;
 	public static String MissionAttributeListItemDeleteAdvisor_DeleteError;
 	public static String MissionAttributeListItemDeleteAdvisor_InvalidObject;
+	public static String MissionContributionPageEditor_CannotEditoMission;
+
 	public static String MissionCsvImportEngine_SavingWaypoints;
 	public static String MissionDataImport_NoWaypoints;
 	public static String MissionDataImport_NumberImported;
@@ -332,6 +334,8 @@ public class Messages extends NLS {
 	public static String MissionEditor_MapPage;
 	public static String MissionEditor_MinuteLabel;
 	public static String MissionEditor_MissionLabel;
+
+	public static String MissionEditor_OtherTabName;
 	public static String MissionEditor_reloadJobName;
 	public static String MissionEditor_SummaryPage;
 	public static String MissionEditorDialog_SaveDialogTitle;

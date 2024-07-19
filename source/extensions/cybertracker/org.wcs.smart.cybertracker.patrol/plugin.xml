@@ -221,9 +221,6 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.patrol.json.DesktopPatrolJsonProcessor">
       </JsonProcessor>
-      <JsonPostProcessor
-            class="org.wcs.smart.cybertracker.patrol.json.PatrolJsonPostProcessor">
-      </JsonPostProcessor>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.ctpackage">
@@ -236,5 +233,20 @@
       <targetprovider
             class="org.wcs.smart.cybertracker.patrol.navigation.PatrolTrackNavigationTargetProvider">
       </targetprovider>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.device">
+      <device_id_provider
+            provider="org.wcs.smart.cybertracker.patrol.SmartMobilePatrolDeviceProvider">
+      </device_id_provider>
+   </extension>
+   <extension
+         point="org.wcs.smart.patrol.contribution">
+      <uieditor
+            class="org.wcs.smart.cybertracker.patrol.ui.PatrolEditorContribution">
+      </uieditor>
+      <edit
+            class="org.wcs.smart.cybertracker.patrol.PatrolEditContribution">
+      </edit>
    </extension>
 </plugin>

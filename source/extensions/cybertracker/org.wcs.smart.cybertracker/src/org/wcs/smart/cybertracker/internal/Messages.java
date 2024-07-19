@@ -443,6 +443,10 @@ public class Messages extends NLS {
 	public static String NavigationLayersDialog_NameColumn;
 	public static String NavigationLayersDialog_ShellTitle;
 	public static String NavigationLayersDialog_TargetList;
+	public static String ObjectDeviceLinkComposite_DeviceColumnName;
+	public static String ObjectDeviceLinkComposite_loadingdevicesjobname;
+	public static String ObjectDeviceLinkComposite_NoDevicesFound;
+	public static String ObjectDeviceLinkComposite_PageHeader;
 	public static String PackageContributionManager_LoadingError;
 	public static String RemoveCyberTrackerTablesJob_Error;
 	public static String RemoveCyberTrackerTablesJob_Title;

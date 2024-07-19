@@ -432,6 +432,21 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		return n;
 	}
 	
+	/**
+	 * Overrides the findNameNull function to check cm attribute names
+	 * first then the attribute names
+	 */
+	@Override
+	@Transient
+	public String findNameNull(Language lang){
+		String n = super.findNameNull(lang);
+		if (n != null && n.length() != 0) return n;
+		if (getAttribute() != null) {
+			return getAttribute().findNameNull(lang);
+		}
+		return null;
+	}
+	
 	public String findDisplayName(Language language, Language defaultl) {
 		//search for custom translations
 		String l = super.findNameNull(language);

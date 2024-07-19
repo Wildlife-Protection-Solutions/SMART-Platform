@@ -5,6 +5,7 @@
    <extension-point id="org.wcs.smart.cybertracker.export.package.contribution" name="Export Package Contribution" schema="schema/org.wcs.smart.cybertracker.export.package.contribution.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.ctpackage" name="Cybertracker Package Extensions" schema="schema/org.wcs.smart.cybertracker.ctpackage.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.navigation" name="Cybertracker Navigation Layer Extensions" schema="schema/org.wcs.smart.cybertracker.navigation.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.device" name="SMART Mobile Device Extensions" schema="schema/org.wcs.smart.cybertracker.device.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -34,6 +35,11 @@
                   name="org.wcs.smart.cybertracker2.separator.import"
                   visible="true">
             </separator>
+            <command
+                  commandId="org.wcs.smart.cybertracker.devices.show"
+                  label="SMART Mobile Devices..."
+                  style="push">
+            </command>
             <command
                   commandId="org.wcs.smart.cybertracker.properties"
                   label="%command.smproperties.label"
@@ -101,6 +107,10 @@
             id="org.wcs.smart.cybertracker.navigation.show"
             name="%command.ctnavigationlayers.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.devices.show"
+            name="Manage Devices...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -127,6 +137,10 @@
       <handler
             class="org.wcs.smart.cybertracker.navigation.ui.ShowCtNavigationHandler$ShowCtNavigationHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.navigation.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.ctpackage.ui.ShowMobileDevicesHandler$ShowMobileDevicesHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.devices.show">
       </handler>
    </extension>
    <extension
@@ -166,6 +180,10 @@
             class="org.wcs.smart.cybertracker.model.NavigationLayer"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.cybertracker.model.SmartMobileDevice"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -190,6 +208,14 @@
       <image
             commandId="org.wcs.smart.cybertracker.navigation.show"
             icon="images/etool16/navigation.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.devices.show"
+            icon="images/etool16/smartmobile.16.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.properties"
+            icon="images/etool16/smartmobile.16.png">
       </image>
    </extension>
    <extension

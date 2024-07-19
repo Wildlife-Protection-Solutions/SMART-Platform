@@ -90,7 +90,6 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> {
 	
 	@Override
 	public void updateContent() {
-		System.out.println("update");
 		LoadMissionIdJob job = getJob();
 		job.cancel();
 		Mission currentPatrol = getSelection();

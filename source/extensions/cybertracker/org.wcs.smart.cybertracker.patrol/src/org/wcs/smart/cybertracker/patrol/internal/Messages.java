@@ -127,6 +127,12 @@ public class Messages extends NLS {
 
 	public static String PatrolCyberTrackerLabelProvider_ModifiedMessage;
 
+	public static String PatrolEditorContribution_loadingmobiledetails;
+
+	public static String PatrolEditorContribution_objectType;
+
+	public static String PatrolEditorContribution_PatrolLegField;
+
 	public static String PatrolMetadataPackageContribution_ArmedLabel;
 
 	public static String PatrolMetadataPackageContribution_CommentLabel;

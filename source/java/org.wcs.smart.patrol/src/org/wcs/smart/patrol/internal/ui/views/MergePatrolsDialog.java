@@ -58,6 +58,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
@@ -257,6 +258,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 			return;
 		}
 		
+		List<IPatrolEditContribution> contributions = IPatrolEditContribution.findContributions();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -280,6 +282,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 								legClone.setPatrolLegDays(new ArrayList<PatrolLegDay>());
 								
 								session.persist(legClone);
+								contributions.forEach(c->c.mergePatrolMovePatrolLeg(pl, legClone, session));
 								
 								if (pl.getPatrolLegDays() != null
 										&& pl.getPatrolLegDays().size() > 0) {
@@ -421,7 +424,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		
 		super.okPressed();
 	}
-	
+
 }
 
 

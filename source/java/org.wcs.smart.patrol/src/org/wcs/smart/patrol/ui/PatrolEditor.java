@@ -124,6 +124,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private ObservationOptions ops = null;
 	private PatrolSummaryEditor summaryEditor;
 	private PatrolMapPageEditor mapPage;
+	private PatrolContributionPageEditor contributionPage;
 	private PatrolPresentationPart presentationPage;
 	private int presentationIndex = -1;
 	private Projection[] projections;
@@ -170,6 +171,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 									createDayPages();
 									updateSummaryPage();
 									mapPage.refresh();
+									if (contributionPage != null) contributionPage.refresh();
 								}});
 							return Status.OK_STATUS;
 						}					
@@ -472,7 +474,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			
 			if (PatrolContributionPageEditor.hasContributions()){
-				PatrolContributionPageEditor contributionPage = new PatrolContributionPageEditor(PatrolEditor.this);
+				contributionPage = new PatrolContributionPageEditor(PatrolEditor.this);
 				int index = addPage(contributionPage, getEditorInput());
 				setPageText(index, Messages.PatrolEditor_OtherPatrolTabName);
 			}

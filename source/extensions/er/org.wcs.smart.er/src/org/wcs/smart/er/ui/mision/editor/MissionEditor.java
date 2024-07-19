@@ -104,6 +104,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private ConfigurableModel configurableModel = null;
 	private ObservationOptions options;
 	private List<SamplingUnit> sUnits;
+	private MissionContributionPageEditor contributionPage;
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private ISurveyEventListener missionDeleteListener = new ISurveyEventListener() {
@@ -177,6 +178,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 										}
 									}});
 									mapPage.refresh();
+									if (contributionPage != null) contributionPage.refresh();
 								return Status.OK_STATUS;
 							}					
 						};
@@ -356,6 +358,12 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, Messages.MissionEditor_MapPage);
 			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			
+			if (MissionContributionPageEditor.hasContributions()){
+				contributionPage = new MissionContributionPageEditor(MissionEditor.this);
+				int index = addPage(contributionPage, getEditorInput());
+				setPageText(index, Messages.MissionEditor_OtherTabName);
+			}
 			
 			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {

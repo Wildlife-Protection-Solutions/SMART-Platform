@@ -84,6 +84,7 @@ public class Messages extends NLS {
 	public static String IncidentAttachmentDatasetResultSetMetadata_signaturenamecolumnname;
 	public static String IncidentAttachmentDatasetResultSetMetadata_waypointuuidcolumnname;
 	public static String IncidentBirtManager_editerror;
+	public static String IncidentContributionPageEditor_cannotedit;
 	public static String IncidentDatasetResultSetMetadata_bearingcolumnname;
 	public static String IncidentDatasetResultSetMetadata_caidcolumnname;
 	public static String IncidentDatasetResultSetMetadata_canamecolumnname;
@@ -104,6 +105,7 @@ public class Messages extends NLS {
 	public static String IncidentEditor_EditorError1;
 	public static String IncidentEditor_EditorError2;
 	public static String IncidentEditor_MapPageName;
+	public static String IncidentEditor_othertabname;
 	public static String IncidentEditorInput_EditorTooltip;
 	public static String IncidentExporter_ExportProgress;
 	public static String IncidentExporter_ExportProgress1;

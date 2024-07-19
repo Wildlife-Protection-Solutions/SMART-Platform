@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.er.mission.contribution" name="Mission Contribution" schema="schema/org.wcs.smart.er.mission.contribution.exsd"/>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action

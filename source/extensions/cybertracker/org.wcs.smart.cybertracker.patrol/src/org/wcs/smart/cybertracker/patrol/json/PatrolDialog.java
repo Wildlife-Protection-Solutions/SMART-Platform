@@ -127,7 +127,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			//process merged patrols
 			for (Entry<UUID, UiData> e : uiItems.entrySet()){
 				if (e.getValue().btnExisting.getSelection()){
-					Patrol addTo = (Patrol)session.get(Patrol.class, e.getValue().cmbPatrol.getSelection().getUuid());
+					Patrol addTo = session.get(Patrol.class, e.getValue().cmbPatrol.getSelection().getUuid());
 					mergePatrol(e.getKey(), patrols.get(e.getKey()), addTo);
 					mergedPatrols.add(addTo);
 				}

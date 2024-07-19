@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.independentincident.provider" name="Incident Source Provider" schema="schema/org.wcs.smart.independentincident.provider.exsd"/>
+   <extension-point id="org.wcs.smart.incident.contribution" name="Incident Editor Contribution" schema="schema/org.wcs.smart.incident.contribution.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view

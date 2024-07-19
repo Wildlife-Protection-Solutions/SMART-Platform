@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,43 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.incident;
+package org.wcs.smart.cybertracker.survey;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.cybertracker.json.IJsonPostProcessor;
-import org.wcs.smart.cybertracker.json.IJsonProcessor;
-import org.wcs.smart.cybertracker.model.CtIncidentLink;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.cybertracker.ISmartMobileDeviceIdProvider;
 
 /**
- * Removes all ct to SMART links where the
- * incidents are older than 6 months
- * 
- * @author Emily
- * @since 7.0.0
- *
+ * Device id provider for devices that provided mission data
+ * @since 8.1.0
  */
-public class IncidentJsonPostProcessor implements IJsonPostProcessor {
+public class SmartMobileMissionDeviceProvider implements ISmartMobileDeviceIdProvider {
 
 	@Override
-	public void postProcess(Session session) {
-		//clean up all links that are associated with a patrol that
-		//is older than two months old
-		StringBuilder hql = new StringBuilder();
-		hql.append( "FROM CtIncidentLink l " ); //$NON-NLS-1$
-		hql.append( "WHERE " ); //$NON-NLS-1$
-		hql.append( "l.waypoint.dateTime < :now " ); //$NON-NLS-1$
-					
-		List<CtIncidentLink> links = session.createQuery(hql.toString(), CtIncidentLink.class)
-				.setParameter("now",  LocalDateTime.now().minusMonths(IJsonProcessor.CLEANUP_MONTHS) ) //$NON-NLS-1$
-				.list();
-					
-		for (CtIncidentLink l : links) {
-			session.remove(l);
-		}
-		
+	public List<String> getDeviceIds(Session session, ConservationArea ca) {
+		return session.createQuery("SELECT distinct l.deviceId FROM CtMissionLink l join l.mission m join m.survey s join s.surveyDesign d WHERE d.conservationArea = :ca", String.class) //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.list();
 	}
 
 }

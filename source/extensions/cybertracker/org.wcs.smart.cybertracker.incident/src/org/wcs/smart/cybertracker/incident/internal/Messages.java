@@ -33,6 +33,10 @@ public class Messages extends NLS {
 	public static String CtIncidentPackageConfigurator_VersionLabel;
 	public static String IncidentCyberTrackerLabelProvider_CreatedMessage;
 	public static String IncidentCyberTrackerLabelProvider_ModifiedMessage;
+
+	public static String IncidentEditorContribution_incidenttype;
+
+	public static String IncidentEditorContribution_loadingmobilddetails;
 	public static String IncidentJsonProcessor_CanceledMsg;
 	
 	public static String IncidentJsonProcessor_NotificationError;

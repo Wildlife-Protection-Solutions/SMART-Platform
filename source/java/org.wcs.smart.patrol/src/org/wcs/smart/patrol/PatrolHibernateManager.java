@@ -403,7 +403,13 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		
 		patrol.recalculateType();
-		HibernateManager.saveOrMerge(session,  patrol);
+		if (patrol.getUuid() == null) {
+			session.persist(patrol);
+		}else {
+			for (PatrolLeg pl :  patrol.getLegs()) {
+				if (pl.getUuid() == null) session.persist(pl);
+			}
+		}
 		
 		if (saveWaypoints){
 			session.flush();
@@ -446,6 +452,8 @@ public class PatrolHibernateManager extends HibernateManager{
 				}
 			}
 		}
+		//TODO: test this and fix in 8.0.1
+		HibernateManager.saveOrMerge(session,  patrol);
 	}
 
 	public static Map<PatrolScreenOptionMeta, ScreenOption> getScreenOptions(ConservationArea ca, Session session) {

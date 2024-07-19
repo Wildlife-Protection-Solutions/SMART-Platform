@@ -138,12 +138,12 @@ public class DesktopMissionJsonProcessor extends MissionJsonProcessor implements
 						newMissions = pd.getNewMissions();
 					}
 				}catch (Exception ex){
-					CyberTrackerPlugIn.displayError("Error", "Error occured while assigning missions to surveys: " + ex.getMessage(), ex);
+					CyberTrackerPlugIn.displayError(Messages.DesktopMissionJsonProcessor_0, Messages.DesktopMissionJsonProcessor_MissionSurveyError + ex.getMessage(), ex);
 					cancel[0] = true;
 				}
 			}	
 		});
-		if (cancel[0]) throw new UserCancelledException("User cancelled operation while assigning missions to surveys."); 
+		if (cancel[0]) throw new UserCancelledException(Messages.DesktopMissionJsonProcessor_UserCancelled); 
 	}
 		
 }

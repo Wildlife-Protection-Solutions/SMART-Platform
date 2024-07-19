@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.er.ui.survey.wizard;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;

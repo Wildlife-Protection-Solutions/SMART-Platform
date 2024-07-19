@@ -90,6 +90,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
+import org.wcs.smart.cybertracker.model.SmartMobileDevice;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
@@ -276,6 +277,7 @@ public enum SmartTable {
 	CYBERTRACKERPROPERTIESOPTION(CyberTrackerPropertiesOption.class, null),
 	CYBERTRACKERPROPERTIESPROFILE(CyberTrackerPropertiesProfile.class, null),
 	CYBERTRACKERPROPERTIESPROFILEOPTION(CyberTrackerPropertiesProfileOption.class, ".profile.conservationArea"),
+	SMARTMOBILEDEVICE(SmartMobileDevice.class, null),
 	CTPATROLLINK(CtPatrolLink.class, ".patrolLeg.patrol.conservationArea"),
 	CTMISSIONLINK(CtMissionLink.class, ".mission.survey.surveyDesign.conservationArea"),
 	CTINCIDENTLINK(CtIncidentLink.class, ".waypoint.conservationArea"),

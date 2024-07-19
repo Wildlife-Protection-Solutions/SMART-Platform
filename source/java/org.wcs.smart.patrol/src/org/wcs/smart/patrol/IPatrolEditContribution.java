@@ -21,8 +21,16 @@
  */
 package org.wcs.smart.patrol;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 
 
 /**
@@ -45,5 +53,41 @@ public interface IPatrolEditContribution {
 	 */
 	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol);
 	
+	/**
+	 * Called when two patrols are merged together or split apart. Both these actions create
+	 * new legs and this allows details associated with the leg to be copied to the new leg
+	 * 
+	 * @param currentLeg
+	 * @param toLeg
+	 * @param session
+	 * 
+	 * @since 8.1.0 
+	 */
+	//added to support the maintenance of smart mobile device ids
+	public default void mergePatrolMovePatrolLeg(PatrolLeg currentLeg, PatrolLeg toLeg, Session session) {}
 
+	
+	/**
+	 * find all contributions registered via extensions
+	 * @return
+	 */
+	public static List<IPatrolEditContribution> findContributions(){
+
+		List<IPatrolEditContribution> items = new ArrayList<IPatrolEditContribution>();
+		if (Platform.getExtensionRegistry() == null) return
+		Collections.emptyList();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IPatrolEditContribution.EXTENSION_ID);
+		try {
+		    for (IConfigurationElement e : config) {
+		        if (e.getName().equals("edit")){ //$NON-NLS-1$
+		            IPatrolEditContribution page = (IPatrolEditContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+		            items.add(page);
+		        }
+		    }
+		}catch (Exception ex){
+		         SmartPatrolPlugIn.displayLog(Messages.CreatePatrolWizard_ErrorCreatingWizardPages, ex);
+		    return null;
+		}
+		return items;
+	} 
 }

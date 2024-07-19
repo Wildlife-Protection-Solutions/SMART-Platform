@@ -1805,10 +1805,28 @@ public class UpgradeServlet extends HttpServlet {
 							
 							"CREATE TRIGGER trg_patrol_attribute_tree AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_attribute_tree FOR EACH ROW execute procedure connect.trg_patrol_attribute_tree()", //$NON-NLS-1$
 
+							//device table
+							"""
+							CREATE TABLE smart.ct_device(
+							  uuid uuid not null, 
+							  device_id varchar(128), 
+							  ca_uuid uuid not null, 
+							  icon_uuid uuid, 
+							  name varchar(1024), 
+							  primary key (uuid, ca_uuid)) 
+							""",  //$NON-NLS-1$
 							
+							"ALTER TABLE smart.ct_device ADD CONSTRAINT ct_device_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+							"ALTER TABLE smart.ct_device ADD CONSTRAINT ct_device_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+							"ALTER TABLE smart.ct_incident_link add column ct_device_id varchar(36)", //$NON-NLS-1$
+							
+							"CREATE TRIGGER trg_ct_Device AFTER INSERT OR UPDATE OR DELETE ON smart.ct_device FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
+
 							//versions
 							"update connect.connect_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+							"update connect.connect_plugin_version set version = '8.1' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '8.1' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$
 
 							"update connect.connect_version set version = '8.1.0', last_updated = now()", //$NON-NLS-1$
 

@@ -322,6 +322,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 	}
 
 	private void createIconTable(SortedMap<String, Set<String>> paths) {
+		if (iconTable.isDisposed()) return;
 		for (Control c : iconTable.getChildren()) c.dispose();
 		
 		FilterComposite txtFilter = new FilterComposite(iconTable, SWT.NONE);

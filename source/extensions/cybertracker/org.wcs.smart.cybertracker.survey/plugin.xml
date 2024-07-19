@@ -130,9 +130,6 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.survey.json.DesktopMissionJsonProcessor">
       </JsonProcessor>
-      <JsonPostProcessor
-            class="org.wcs.smart.cybertracker.survey.json.MissionJsonPostProcessor">
-      </JsonPostProcessor>
    </extension>
    <extension
          point="org.wcs.smart.dbUpgrade">
@@ -172,5 +169,17 @@
       <targetprovider
             class="org.wcs.smart.cybertracker.survey.navigation.SamplingUnitNavigationTargetProvider">
       </targetprovider>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.device">
+      <device_id_provider
+            provider="org.wcs.smart.cybertracker.survey.SmartMobileMissionDeviceProvider">
+      </device_id_provider>
+   </extension>
+   <extension
+         point="org.wcs.smart.er.mission.contribution">
+      <uieditor
+            class="org.wcs.smart.cybertracker.survey.ui.MissionEditorContribution">
+      </uieditor>
    </extension>
 </plugin>
