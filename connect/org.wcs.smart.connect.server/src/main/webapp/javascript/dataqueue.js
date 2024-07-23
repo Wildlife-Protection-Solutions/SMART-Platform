@@ -95,12 +95,22 @@ window.onload = function(){
 					return;
 				}
 				
-				//only the status should be updated
+				//status or uploaded user can be modified
+				
+				//status
 		 		tr.dataset.status = item.status;
-				while (tr.childNodes[4].firstChild) {
-   					 tr.childNodes[4].removeChild(tr.childNodes[4].lastChild);
+				var statusindex = 3;
+				while (tr.childNodes[statusindex].firstChild) {
+   					 tr.childNodes[statusindex].removeChild(tr.childNodes[statusindex].lastChild);
   				}
-				tr.childNodes[4].innerHTML = item.status
+				tr.childNodes[statusindex].innerHTML = item.status
+				
+				//uploaded by
+				var userindex = 5;
+				while (tr.childNodes[userindex].firstChild) {
+					tr.childNodes[userindex].removeChild(tr.childNodes[userindex].lastChild);
+				}
+				tr.childNodes[userindex].innerHTML = item.uploadedBy
 						
 				if (item.status == "COMPLETE_WARN" || (item.status == "QUEUED" && item.statusMessage )){
 					//add a warning icon with tooltip message
@@ -108,7 +118,7 @@ window.onload = function(){
 					img.className = getStatusImage("WARNING");
 					img.style.color = getStatusImageColor("WARNING");
 					img.style.paddingRight="2px";
-					tr.childNodes[4].prepend(img);
+					tr.childNodes[statusindex].prepend(img);
 							
 					if (item.status == "COMPLETE_WARN"){
 						img.title = i18n("dataqueue.processingwarning");
@@ -121,8 +131,8 @@ window.onload = function(){
 				img.className = getStatusImage(item.status);
 				img.style.color = getStatusImageColor(item.status);
 				img.style.paddingRight="2px";
-				tr.childNodes[4].style.whiteSpace = "nowrap";
-				tr.childNodes[4].prepend(img);
+				tr.childNodes[statusindex].style.whiteSpace = "nowrap";
+				tr.childNodes[statusindex].prepend(img);
 			}
         	
         	
@@ -315,7 +325,7 @@ function createFilterTable(){
 		 		
 		 		
 		 		var row = tableCreateRow(parent,
-		 				[null, ca, name, type , status, uploadedDate, null], 
+		 				[null, ca, type , status, uploadedDate, uploadedBy, null], 
 		 				"filerow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
@@ -368,7 +378,7 @@ function createFilterTable(){
 			 		img.className = getStatusImage("WARNING");
 			 		img.style.color = getStatusImageColor("WARNING");
 			 		img.style.paddingRight="2px";
-					row.childNodes[4].prepend(img);
+					row.childNodes[3].prepend(img);
 					
 					if (status == "COMPLETE_WARN"){
 						img.title = i18n("dataqueue.processingwarning");
@@ -381,8 +391,8 @@ function createFilterTable(){
 			 	img.className = getStatusImage(status);
 			 	img.style.color = getStatusImageColor(status);
 			 	img.style.paddingRight="2px";
-				row.childNodes[4].style.whiteSpace = "nowrap";
-			 	row.childNodes[4].prepend(img);
+				row.childNodes[3].style.whiteSpace = "nowrap";
+			 	row.childNodes[3].prepend(img);
 			 	
 		 	}
 		 	

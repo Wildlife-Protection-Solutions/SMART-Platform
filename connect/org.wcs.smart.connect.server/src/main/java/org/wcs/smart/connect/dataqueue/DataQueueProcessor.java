@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileDeviceIdParserManager;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonFileProcessor;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -79,7 +80,12 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 		}
 		
 		//check for duplicate SMART Mobile file
-		if (dqItem.getType().equals( SmartMobileJsonFileProcessor.CT_TYPE ) || dqItem.getType().equals(SmartMobileJsonFileProcessor.CT_ZIP_TYPE)) {
+		if (dqItem.getType().equals( SmartMobileJsonFileProcessor.CT_TYPE ) || 
+				dqItem.getType().equals(SmartMobileJsonFileProcessor.CT_ZIP_TYPE)) {
+			
+			//start job for processing deviceIds
+			SmartMobileDeviceIdParserManager.INSTANCE.startProcessing(dqItem, session.getSessionFactory());
+			
 			session.beginTransaction();
 			
 			try {

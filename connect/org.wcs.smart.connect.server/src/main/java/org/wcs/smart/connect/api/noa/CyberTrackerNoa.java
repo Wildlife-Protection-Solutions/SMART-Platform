@@ -67,6 +67,7 @@ import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.DataQueueEventService;
+import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileDeviceIdParserManager;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonFileProcessor;
 import org.wcs.smart.connect.cybertracker.json.importer.SmartMobileJsonProcessorManager;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
@@ -581,6 +582,11 @@ public class CyberTrackerNoa {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CtDataApi.UpdateError", request.getLocale())); //$NON-NLS-1$
 		}
 		if (thrown != null) throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CtDataApi.WriteError", request.getLocale()) + thrown.getMessage()); //$NON-NLS-1$
+		
+		//process deviceId from files to add to data queue table
+		if (!deleteItem) {
+			SmartMobileDeviceIdParserManager.INSTANCE.startProcessing(item, s.getFactory());
+		}
 		
 		//start json processing & send notification of new file
 		SmartMobileJsonProcessorManager.INSTANCE.startProcessing(s.getFactory());

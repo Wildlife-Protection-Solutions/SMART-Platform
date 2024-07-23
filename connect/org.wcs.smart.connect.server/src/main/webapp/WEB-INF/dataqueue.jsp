@@ -38,24 +38,24 @@
 		</div>
 		
 		<div style="flex-grow: 1; display: flex; overflow: hidden;  border-top: 1px solid #BBBBBB; border-bottom: 1px solid #BBBBBB;">
-			<div style="display: flex; height: 100%; flex-basis:60%;">
+			<div style="display: flex; height: 100%; flex-basis:55%;">
 	  			<div style="overflow: auto; width: 100%">
 					<div id="fileTable" class="catable table-cell smart-table">
 					  	<div class="table-row smart-table-header">
 					  		<div class="table-cell smart-table-cell"></div>
 							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('caName')" ><fmt:message key="dataqueue.calabel"/></a></div>
-							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')" ><fmt:message key="dataqueue.namelabel"/></a></div>
+							<!-- <div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')" ><fmt:message key="dataqueue.namelabel"/></a></div> -->
 							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')" ><fmt:message key="dataqueue.typelabel"/></a></div>
 							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('status')" ><fmt:message key="dataqueue.statuslabel"/></a></div>
 							<!-- <div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('lastModifiedDate')" ><fmt:message key="dataqueue.lastmodifiedlabel"/></a></div> -->
 							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedDate')" ><fmt:message key="dataqueue.uploadeddatelabel"/></a></div>
-							<!-- <div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedBy')" ><fmt:message key="dataqueue.uploadeduserlabel"/></a></div> -->
+							<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('uploadedBy')" ><fmt:message key="dataqueue.uploadeduserlabel"/></a></div> 
 							<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
 						</div>
 		  			</div> 
 		  		</div>
 		  	</div>
-		  	<div style="display: flex; height: 100%; flex-basis:40%;">
+		  	<div style="display: flex; height: 100%; flex-basis:45%;">
 		  	<div style="display: flex; flex-direction: column; width: 100%; overflow:auto; padding-left:5px; padding-right:5px">
 			  		<div class="tabheader pageheader" style="border-radius: 0px; border-bottom:1px solid #BBBBBB;">
 		  				<a id="filedetails" class="tab "><fmt:message key="dataqueue.details"/></a>
