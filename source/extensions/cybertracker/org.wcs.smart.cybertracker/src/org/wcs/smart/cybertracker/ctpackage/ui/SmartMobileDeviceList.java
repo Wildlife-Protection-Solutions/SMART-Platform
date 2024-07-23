@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -79,8 +80,8 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.CybertrackerTemplateCloner;
 import org.wcs.smart.cybertracker.SmartMobileDeviceManager;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.SmartMobileDevice;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -112,8 +113,8 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 	 */
 	private enum Column {
 		ICON(DialogConstants.ICON_TEXT, 1),
-		DEVICE("Device ID", 4),
-		NAME("Name", 6);
+		DEVICE(Messages.SmartMobileDeviceList_IDColumnName, 4),
+		NAME(Messages.SmartMobileDeviceList_NameColumnName, 6);
 		
 		String name;
 		int weight;
@@ -130,12 +131,12 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			try(Session session = HibernateManager.openSession()){
 				
-				SmartMobileDeviceManager.INSTANCE.createMissingDevices(session, currentCa);
+				SmartMobileDeviceManager.INSTANCE.createMissingDevices(session, currentCa, Locale.getDefault());
 				
 				devices = SmartMobileDeviceManager.INSTANCE.getDevices(session, SmartDB.getCurrentConservationArea());
 				devices.forEach(e->Hibernate.initialize(e));
 			}catch (Exception ex) {
-				CyberTrackerPlugIn.log(MessageFormat.format("Error loading devices: {0}",ex.getMessage()), ex);
+				CyberTrackerPlugIn.log(MessageFormat.format(Messages.SmartMobileDeviceList_LoadError,ex.getMessage()), ex);
 				return Status.CANCEL_STATUS;
 			}
 			
@@ -270,7 +271,7 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 
 		MenuItem miClear = new MenuItem(menu, SWT.PUSH);
 		miClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		miClear.setText("Clear Image");
+		miClear.setText(Messages.SmartMobileDeviceList_ClearImage);
 		miClear.addListener(SWT.Selection, et->updateIcon(getSelection(), null));
 		
 		MenuItem miDelete = new MenuItem(menu, SWT.NONE);
@@ -289,9 +290,9 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 		}});
 		
 		
-		getShell().setText("SMART Mobile Devices");
-		setMessage("All SMART Mobile Devices used in this Conservation Area");
-		setTitle("SMART Mobile Devices");
+		getShell().setText(Messages.SmartMobileDeviceList_Title);
+		setMessage(Messages.SmartMobileDeviceList_Message);
+		setTitle(Messages.SmartMobileDeviceList_Title);
 		
 		btnAdd.setEnabled(false);
 		btnDelete.setEnabled(false);
@@ -314,8 +315,8 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 		SmartMobileDevice  device = getSelection();
 		if (device == null) return;
 		
-		if (!MessageDialog.openConfirm(getShell(), "Confirm Delete", 
-				MessageFormat.format("Are you sure you want to delete the device {0}?", device.getName()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.SmartMobileDeviceList_ConfirmDeleteTitle, 
+				MessageFormat.format(Messages.SmartMobileDeviceList_ConfirmDeleteMsg, device.getName()))){
 			return;
 		}
 		
@@ -352,7 +353,7 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			} catch (Exception ex) {
 				s.getTransaction().rollback();
-				CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Error saving changes: {0}.",  ex.getMessage()), ex);
+				CyberTrackerPlugIn.displayError(DialogConstants.ERROR_STRING, MessageFormat.format(Messages.SmartMobileDeviceList_SaveError,  ex.getMessage()), ex);
 			}
 		}
 		
@@ -361,7 +362,7 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 	private void addDevice(){
 		SmartMobileDevice device = new SmartMobileDevice();
 		device.setConservationArea(currentCa);
-		device.setName(SmartMobileDeviceManager.INSTANCE.generateDeviceName(devices));
+		device.setName(SmartMobileDeviceManager.INSTANCE.generateDeviceName(devices, Locale.getDefault()));
 		
 		devices.add(device);
 		setChangesMade();
@@ -399,7 +400,7 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 		if (type == Column.NAME) {
 			return device.getName();
 		}else if (type == Column.DEVICE){
-			if (device.getDeviceId() == null) return "";
+			if (device.getDeviceId() == null) return ""; //$NON-NLS-1$
 			return device.getDeviceId().toString();
 		}
 		return ""; //$NON-NLS-1$
@@ -411,7 +412,7 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 				String newName = (String)newValue;
 				if(!SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH)){					
 					//invalid value, show error
-					return 	MessageFormat.format("Name must only contain the characters {0} and have a maximum length of {1}.", 
+					return 	MessageFormat.format(Messages.SmartMobileDeviceList_NameError1, 
 							SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, DmObject.MAX_NAME_LENGTH);
 				}
 			}
@@ -419,7 +420,7 @@ public class SmartMobileDeviceList extends SmartStyledTitleDialog {
 			if (!findValue(type, device).equals((String)newValue)){
 				String newName = (String)newValue;
 				if (newName.length() > SmartMobileDevice.MAX_DEVICE_ID_LENGTH) {
-					return MessageFormat.format("Name must be fewer then {0} characters.",  SmartMobileDevice.MAX_DEVICE_ID_LENGTH);
+					return MessageFormat.format(Messages.SmartMobileDeviceList_NameError2,  SmartMobileDevice.MAX_DEVICE_ID_LENGTH);
 				}
 			}		
 		}

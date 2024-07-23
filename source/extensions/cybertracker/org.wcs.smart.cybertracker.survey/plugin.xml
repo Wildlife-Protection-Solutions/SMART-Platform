@@ -173,7 +173,7 @@
    <extension
          point="org.wcs.smart.cybertracker.device">
       <device_id_provider
-            provider="org.wcs.smart.cybertracker.survey.SmartMobileMissionDeviceProvider">
+            provider="org.wcs.smart.cybertracker.SmartMobileMissionDeviceProvider">
       </device_id_provider>
    </extension>
    <extension

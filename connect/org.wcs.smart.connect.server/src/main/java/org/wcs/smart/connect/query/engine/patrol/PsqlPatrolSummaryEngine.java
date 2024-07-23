@@ -55,6 +55,7 @@ import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
+import org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdParolGroupBy;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -1675,6 +1676,19 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					fromSql.append(" smart.patrol_plan " + planPrefix); //$NON-NLS-1$
 					fromSql.append(" on "); //$NON-NLS-1$
 					fromSql.append("temp.p_uuid = " + planPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (gb instanceof MobileDeviceIdParolGroupBy){
+					
+					String deviceprefix = "did_" + itemcnt; //$NON-NLS-1$
+					groupBySql.append("i_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(" CASE WHEN " + deviceprefix + ".patrol_leg_uuid IS NULL "); //$NON-NLS-1$ //$NON-NLS-2$
+					groupByInnerSql.append("THEN null "); //$NON-NLS-1$ 
+					groupByInnerSql.append("else " + deviceprefix + ".ct_device_id "); //$NON-NLS-1$ //$NON-NLS-2$
+					groupByInnerSql.append("END as i_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" LEFT JOIN "); //$NON-NLS-1$
+					fromSql.append(" smart.ct_patrol_link " + deviceprefix); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append("temp.pl_uuid = " + deviceprefix + ".patrol_leg_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else{
 				//throw new exception; should only be patrol group bys here for now

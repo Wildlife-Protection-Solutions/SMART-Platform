@@ -43,11 +43,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconManager;
+import org.wcs.smart.cybertracker.ctpackage.ui.SmartMobileDeviceList;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.SmartMobileDevice;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -88,20 +92,44 @@ public class ObjectDeviceLinkComposite extends Composite {
 		compNone = toolkit.createComposite(main);
 		compNone.setLayout(new GridLayout());
 		toolkit.createLabel(compNone, MessageFormat.format(Messages.ObjectDeviceLinkComposite_NoDevicesFound, objectType));
-		
-		((StackLayout)main.getLayout()).topControl = compNone;
-		
+				
 		compSingle = toolkit.createComposite(main);
-		compSingle.setLayout(new GridLayout(2, false));
+		compSingle.setLayout(new GridLayout(3, false));
 		lblSingleIcon = toolkit.createLabel(compSingle, ""); //$NON-NLS-1$
-		lblSingleText = toolkit.createLabel(compSingle, ""); //$NON-NLS-1$
+		lblSingleText = toolkit.createLabel(compSingle, DialogConstants.LOADING_TEXT);
+		
+		Hyperlink link = toolkit.createHyperlink(compSingle, Messages.ObjectDeviceLinkComposite_managealiases, SWT.NONE);
+		link.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false));
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				manageDevices();
+			}
+		});
+			
+		((StackLayout)main.getLayout()).topControl = compSingle;
 		
 		compTable = toolkit.createComposite(main);
-		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		TableColumnLayout tableLayout = new TableColumnLayout();
-		compTable.setLayout(tableLayout);
+		compTable.setLayout(new GridLayout(2, false));
+		((GridLayout)compTable.getLayout()).marginWidth = 0;
+		((GridLayout)compTable.getLayout()).marginHeight = 0;
 		
-		tblDevices = new TableViewer(compTable, SWT.FULL_SELECTION | SWT.BORDER);
+		Composite compTableLayout = toolkit.createComposite(compTable);
+		compTableLayout.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		compTableLayout.setLayout(tableLayout);
+		
+		Hyperlink link2 = toolkit.createHyperlink(compTable, Messages.ObjectDeviceLinkComposite_managealiases, SWT.NONE);
+		link2.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				manageDevices();
+			}
+		});
+		link2.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, false, false));
+		
+		
+		tblDevices = new TableViewer(compTableLayout, SWT.FULL_SELECTION | SWT.BORDER);
 		tblDevices.setContentProvider(ArrayContentProvider.getInstance());
 		tblDevices.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblDevices.getTable().setHeaderVisible(true);
@@ -135,7 +163,13 @@ public class ObjectDeviceLinkComposite extends Composite {
 				if (element instanceof String[] link) return link[0];
 				return super.getText(element);
 			}
-		});
+		});		
+	}
+	
+	private void manageDevices() {
+		(new SmartMobileDeviceList(getShell())).open();
+		cache.clearCache();
+		loadDevices.schedule();
 	}
 	
 	private TableViewerColumn createColumn(String name, int weight, TableViewer tbl, ColumnLabelProvider p) {
@@ -165,10 +199,8 @@ public class ObjectDeviceLinkComposite extends Composite {
 	 */
 	public void setData(ConservationArea ca, List<String[]> objId2DeviceId) {
 		this.ca = ca;
-		this.objId2DeviceId = objId2DeviceId;
-		
+		this.objId2DeviceId = objId2DeviceId;		
 		loadDevices.schedule();
-
 	}
 	
 	
@@ -189,6 +221,7 @@ public class ObjectDeviceLinkComposite extends Composite {
 			}else {
 				lblSingleIcon.setImage(cache.getImage(device));
 			}					
+			compSingle.layout(true);
 		}else {
 			((StackLayout)main.getLayout()).topControl = compTable;
 			

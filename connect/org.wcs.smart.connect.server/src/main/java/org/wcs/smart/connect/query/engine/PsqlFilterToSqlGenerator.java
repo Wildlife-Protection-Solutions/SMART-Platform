@@ -48,6 +48,7 @@ import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
+import org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdPatrolQueryFilter;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
@@ -653,6 +654,17 @@ public enum PsqlFilterToSqlGenerator {
 			}
 			String sql = "EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid "+planSqlPart+")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return sql;
+		}
+		if (filter instanceof MobileDeviceIdPatrolQueryFilter){
+			MobileDeviceIdPatrolQueryFilter qfilter = (MobileDeviceIdPatrolQueryFilter)filter;
+			
+			String prefix = engine.tablePrefix(qfilter.getOption().getPatrolAttributeClass());
+			String deviceId = SharedUtils.stripQuotes((String)qfilter.getValue());
+			if (deviceId.equals(MobileDeviceIdPatrolQueryFilter.ANY_KEY)) {
+				return "EXISTS (SELECT * FROM smart.ct_patrol_link l WHERE l.patrol_leg_uuid = "+prefix+".uuid )";  //$NON-NLS-1$ //$NON-NLS-2$ 
+			}else {
+				return "EXISTS (SELECT * FROM smart.ct_patrol_link l WHERE l.patrol_leg_uuid = "+prefix+".uuid AND l.ct_device_id = '" + deviceId + "')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
 		}
 		if (filter instanceof IntelRecordPatrolQueryFilter) {
 			IntelRecordPatrolQueryFilter qfilter = (IntelRecordPatrolQueryFilter)filter;

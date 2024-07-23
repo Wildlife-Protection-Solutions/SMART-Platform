@@ -65,6 +65,9 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
+import org.wcs.smart.cybertracker.SmartMobileDeviceManager;
+import org.wcs.smart.cybertracker.model.SmartMobileDevice;
+import org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdParolGroupBy;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -381,6 +384,8 @@ public class SummaryItemLabelProvider {
 			results = getName((WaypointSourceGroupBy)item);
 		}else if (item instanceof PlanPatrolGroupBy) {
 			results = getName((PlanPatrolGroupBy)item);
+		}else if (item instanceof MobileDeviceIdParolGroupBy) {
+			results = getName((MobileDeviceIdParolGroupBy)item);
 		}else if (item instanceof MissionIdGroupBy){
 			results = getName((MissionIdGroupBy)item);
 		}else if (item instanceof SurveyIdGroupBy){
@@ -1349,4 +1354,34 @@ public class SummaryItemLabelProvider {
 		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NotPartOfPlanHeader", l), PlanPatrolGroupBy.Options.NOT_PARTOF.getKey()));  //$NON-NLS-1$
 		return items;
 	}
+	
+	private List<ListItem> getName(MobileDeviceIdParolGroupBy item){
+		
+		List<ListItem> items = new ArrayList<>();
+
+		Set<String> deviceIds = new HashSet<>();
+		//get devices with aliases
+		for (UUID cauuid : caFilter.getConservationAreaFilterIds()) {
+			ConservationArea ca = s.get(ConservationArea.class, cauuid);
+			if (ca == null) continue;
+		
+			List<SmartMobileDevice> devices = SmartMobileDeviceManager.INSTANCE.getDevices(s, ca);
+			for(SmartMobileDevice d : devices) {
+				if (deviceIds.contains(d.getDeviceId() )) continue;
+			
+				items.add(new ListItem(null, d.getName(), d.getDeviceId()));
+				deviceIds.add(d.getDeviceId());
+			}
+			//get devices without aliases
+			Set<String> x = SmartMobileDeviceManager.INSTANCE.getAllSystemDeviceIds(s, ca);
+			x.removeAll(deviceIds);
+			for (String deviceId : x) {
+				items.add(new ListItem(null, deviceId, deviceId));
+				deviceIds.add(deviceId);
+			}
+		}
+		
+		return items;
+	}
+	
 }

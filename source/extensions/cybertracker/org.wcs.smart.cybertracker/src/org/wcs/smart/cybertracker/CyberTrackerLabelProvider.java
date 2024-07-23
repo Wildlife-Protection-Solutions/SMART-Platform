@@ -62,6 +62,7 @@ public class CyberTrackerLabelProvider implements ICyberTrackerLabelProvider{
 		if (item ==  JsonImportWarning.Type.INVALID_LINESTRING_GEOMETRY) return Messages.CyberTrackerLabelProvider_ObservationParseError19;
 		if (item ==  JsonImportWarning.Type.INVALID_POLYGON_GEOMETRY) return Messages.CyberTrackerLabelProvider_ObservationParseError20;
 	
+		if (item == SmartMobileDeviceManager.DEFAULT_NAME) return Messages.SmartMobileDeviceManager_DefaultLabelName;
 		return null;
 	}
 

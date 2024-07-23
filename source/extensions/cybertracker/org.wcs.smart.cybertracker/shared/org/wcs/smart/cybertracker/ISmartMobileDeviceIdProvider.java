@@ -19,25 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.survey;
+package org.wcs.smart.cybertracker;
 
 import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.cybertracker.ISmartMobileDeviceIdProvider;
 
 /**
- * Device id provider for devices that provided mission data
- * @since 8.1.0
+ * Device id provider for providing smart mobile device ids from 
+ * saved data
  */
-public class SmartMobileMissionDeviceProvider implements ISmartMobileDeviceIdProvider {
+public interface ISmartMobileDeviceIdProvider {
 
-	@Override
-	public List<String> getDeviceIds(Session session, ConservationArea ca) {
-		return session.createQuery("SELECT distinct l.deviceId FROM CtMissionLink l join l.mission m join m.survey s join s.surveyDesign d WHERE d.conservationArea = :ca", String.class) //$NON-NLS-1$
-		.setParameter("ca", ca) //$NON-NLS-1$
-		.list();
-	}
-
+	public static final String EXT_ID = "org.wcs.smart.cybertracker.device"; //$NON-NLS-1$
+	public static final String EXT_NAME = "device_id_provider"; //$NON-NLS-1$
+	
+	/**
+	 * Get the device ids for associated with any data managed by
+	 * this plugin for the conservation area.
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public List<String> getDeviceIds(Session session, ConservationArea ca);
+	
 }

@@ -445,6 +445,7 @@ public class Messages extends NLS {
 	public static String NavigationLayersDialog_TargetList;
 	public static String ObjectDeviceLinkComposite_DeviceColumnName;
 	public static String ObjectDeviceLinkComposite_loadingdevicesjobname;
+	public static String ObjectDeviceLinkComposite_managealiases;
 	public static String ObjectDeviceLinkComposite_NoDevicesFound;
 	public static String ObjectDeviceLinkComposite_PageHeader;
 	public static String PackageContributionManager_LoadingError;
@@ -465,6 +466,20 @@ public class Messages extends NLS {
 	public static String SelectTargetProviderPage_Message;
 	public static String SelectTargetProviderPage_Title;
 	
+	public static String SmartMobileDeviceList_ClearImage;
+	public static String SmartMobileDeviceList_ConfirmDeleteMsg;
+	public static String SmartMobileDeviceList_ConfirmDeleteTitle;
+	public static String SmartMobileDeviceList_IDColumnName;
+	public static String SmartMobileDeviceList_LoadError;
+	public static String SmartMobileDeviceList_Message;
+	public static String SmartMobileDeviceList_NameColumnName;
+	public static String SmartMobileDeviceList_NameError1;
+	public static String SmartMobileDeviceList_NameError2;
+	public static String SmartMobileDeviceList_SaveError;
+	public static String SmartMobileDeviceList_Title;
+	public static String SmartMobileDeviceManager_DefaultLabelName;
+	public static String SmartMobileDeviceManager_LoadError;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.core.cybertracker</artifactId>
 	<name>Cybertracker Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>

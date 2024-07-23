@@ -249,4 +249,15 @@
             class="org.wcs.smart.cybertracker.patrol.PatrolEditContribution">
       </edit>
    </extension>
+   <extension
+         point="org.wcs.smart.patrol.query.contribution">
+      <FilterItem
+            filter="org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdPatrolQueryFilter"
+            viewer="org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdPatrolQueryFilterViewer">
+      </FilterItem>
+      <GroupByItem
+            groupby="org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdParolGroupBy"
+            viewer="org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdGroupByPatrolContribution">
+      </GroupByItem>
+   </extension>
 </plugin>

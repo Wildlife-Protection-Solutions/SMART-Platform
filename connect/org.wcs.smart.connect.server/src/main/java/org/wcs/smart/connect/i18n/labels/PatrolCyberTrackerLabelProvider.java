@@ -27,6 +27,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonImportWarning;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
+import org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdPatrolQueryOption;
 
 
 /**
@@ -51,7 +52,9 @@ public class PatrolCyberTrackerLabelProvider implements IPatrolCyberTrackerLabel
 		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return Messages.getString("PatrolCyberTrackerLabelProvider_ModifiedMessage", l);  //$NON-NLS-1$
 		
 		if (item == PatrolJsonProcessor.CA_ERROR) return Messages.getString("PatrolCyberTrackerLabelProvider_CaNotFound", l);  //$NON-NLS-1$
-		
+
+		if (item == MobileDeviceIdPatrolQueryOption.KEY) return Messages.getString("PatrolCyberTrackerLabelProvider.DeviceIdOption", l); //$NON-NLS-1$
+
 		return null;
 	}
 

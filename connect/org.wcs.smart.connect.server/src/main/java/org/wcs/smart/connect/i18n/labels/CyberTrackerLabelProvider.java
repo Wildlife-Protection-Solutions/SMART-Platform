@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.cybertracker.ICyberTrackerLabelProvider;
+import org.wcs.smart.cybertracker.SmartMobileDeviceManager;
 import org.wcs.smart.cybertracker.json.JsonError;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 
@@ -62,6 +63,9 @@ public class CyberTrackerLabelProvider implements ICyberTrackerLabelProvider{
 		if (item ==  JsonImportWarning.Type.INVALID_LINESTRING_GEOMETRY) return Messages.getString("CyberTrackerLabelProvider_ParseWarn19", l);  //$NON-NLS-1$
 		if (item ==  JsonImportWarning.Type.INVALID_POLYGON_GEOMETRY) return Messages.getString("CyberTrackerLabelProvider_ParseWarn20", l);  //$NON-NLS-1$
 		if (item == JsonImportWarning.Type.TAG_NOT_FOUND) return Messages.getString("CyberTrackerLabelProvider.TagNotFound", l); //$NON-NLS-1$
+		
+		if (item == SmartMobileDeviceManager.DEFAULT_NAME) return Messages.getString("CyberTrackerLabelProvider.DefaultDeviceIdName", l); //$NON-NLS-1$
+
 		return null;
 	}
 

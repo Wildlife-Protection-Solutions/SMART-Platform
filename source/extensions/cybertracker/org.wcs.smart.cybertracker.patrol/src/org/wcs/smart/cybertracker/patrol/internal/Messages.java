@@ -94,6 +94,10 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_viewedittooltip;
 
+	public static String MobileDeviceIdGroupByDropItem_GroupByLabel;
+
+	public static String MobileDeviceIdPatrolQueryOptionData_AnyOption;
+
 	public static String PatrolCTPackageDialog_CancelledMsg;
 	public static String PatrolCTPackageDialog_CancelledTitle;
 	public static String PatrolCTPackageDialog_CmLbl;
@@ -108,6 +112,8 @@ public class Messages extends NLS {
 	public static String PatrolCyberTrackerLabelProvider_CaErrorMessage;
 
 	public static String PatrolCyberTrackerLabelProvider_CreatedMessage;
+
+	public static String PatrolCyberTrackerLabelProvider_DeviceIdQueryOption;
 
 	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning1;
 
