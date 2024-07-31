@@ -157,7 +157,7 @@ public class XmlDataModelImporter {
 	}
 	
 	private void processXmlFile(InputStream is) throws Exception{
-		IXmlToDataModelConverter converter = new org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModelXmlToSimpleDataModelConverter();
+		IXmlToDataModelConverter converter = new org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModelXmlToSimpleDataModelConverter();
 		this.importedModel = converter.convert(is, icons, iconSets, null, l);
 	}
 

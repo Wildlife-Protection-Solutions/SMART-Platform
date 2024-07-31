@@ -129,8 +129,32 @@ public class DataModelXmlToSimpleDataModelConverter implements IXmlToDataModelCo
 					kidca.setAttribute(ca.getAttribute());
 					kidca.setIsActive(ca.getIsActive());
 					kidca.setIsRoot(false);
-					kid.getAllAttributes().add(kidca);
+					kidca.setOrder(kid.getAllAttributes().size() + 1);
+
+					// insert before first root category
+					int index = -1;
+					for (int i = 0; i < kid.getAllAttributes().size(); i++) {
+						if (kid.getAllActiveAttributes().get(i).getIsRoot()) {
+							index = i;
+							break;
+						}
+					}
+					if (index < 0) {
+						kid.getAllAttributes().add(kidca);
+					} else {
+						kid.getAllAttributes().add(index, kidca);
+					}
 				}
+			}
+		}
+		// rest orders
+		toProcess.clear();
+		toProcess.addAll(dm.getCategories());
+		while (!toProcess.isEmpty()) {
+			Category working = toProcess.remove(0);
+			toProcess.addAll(working.getChildren());
+			for (int i = 0; i < working.getAllAttributes().size(); i++) {
+				working.getAllAttributes().get(i).setOrder(i + 1);
 			}
 		}
 				
