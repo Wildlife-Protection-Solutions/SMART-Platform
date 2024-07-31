@@ -26,8 +26,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -98,6 +96,9 @@ import org.wcs.smart.i2.ui.views.entity.search.BasicEntitySearchPanel;
 import org.wcs.smart.i2.ui.views.entity.search.SpatialSearchPanel;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * View for entity search and results

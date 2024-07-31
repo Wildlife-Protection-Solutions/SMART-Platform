@@ -45,7 +45,6 @@ import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.xml.IncidentXmlManager;
@@ -456,17 +455,7 @@ public class XmlToIncident {
 	 * found.  True if attribute found.
 	 */
 	private boolean findCategoryAttribute(Category root, Attribute attribute){
-		for (CategoryAttribute att: root.getAttributes()){
-			if (att.getAttribute().equals(attribute)){
-				return true;
-			}
-		}
-		if (root.getParent() != null){
-			return findCategoryAttribute(root.getParent(), attribute);
-		}else{
-			//attribute not found
-			return false;
-		}
+		return root.hasAttribute(attribute);		
 	}
 	
 	private Category findCategory(String key){

@@ -127,12 +127,12 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		//forgein keys - maximum trigger depth reached
 		//The only way I can resolve this is to drop some foreign key constraints, do the
 		//Maximum depth of nested triggers was exceeded.
-		//session.createNativeMutationQuery("alter table smart.station drop constraint STATION_ICON_UUID_FK").executeUpdate(); //$NON-NLS-1$
+		session.createNativeMutationQuery("alter table smart.station drop constraint STATION_ICON_UUID_FK").executeUpdate(); //$NON-NLS-1$
 		session.createMutationQuery("delete from Icon where conservationArea = :ca") //$NON-NLS-1$
 			.setParameter("ca", ca) //$NON-NLS-1$
 			.executeUpdate();
 		
-		//session.createNativeMutationQuery("ALTER TABLE smart.station ADD CONSTRAINT STATION_ICON_UUID_FK FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE").executeUpdate(); //$NON-NLS-1$
+		session.createNativeMutationQuery("ALTER TABLE smart.station ADD CONSTRAINT STATION_ICON_UUID_FK FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE").executeUpdate(); //$NON-NLS-1$
 	
 	}	
 }

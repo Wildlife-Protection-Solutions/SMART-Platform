@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.views;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -66,6 +65,8 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Entity type list view.  Used in birt editor to make it easier for

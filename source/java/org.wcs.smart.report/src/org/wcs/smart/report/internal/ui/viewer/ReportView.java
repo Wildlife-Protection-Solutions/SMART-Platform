@@ -32,8 +32,6 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -77,6 +75,9 @@ import org.wcs.smart.report.model.Report;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 
 /**

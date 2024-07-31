@@ -26,7 +26,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.util.PdaUtil;
 
 /**
  * Delete handler for deleting all CyberTracker information attached 
@@ -45,7 +44,6 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 		monitor.subTask(Messages.CyberTrackerCaDeleteHandler_DeleteProperties);
 		deleteCTProperties(ca, session);
 		monitor.subTask(Messages.CyberTrackerCaDeleteHandler_DeleteRegistryKey);
-		deleteCTRegistryKey(ca);
 	}
 
 	private void deleteCTProperties(ConservationArea ca, Session session) {
@@ -75,13 +73,4 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 		session.flush();
 	}
 
-	private void deleteCTRegistryKey(ConservationArea ca) throws Exception {
-		try{
-			//TODO: fix or remove this
-			PdaUtil.deleteRegistryKey(ca);
-		}catch (Exception ex){
-			CyberTrackerPlugIn.log("Could not delete registry key", ex); //$NON-NLS-1$
-		}
-	}
-	
 }

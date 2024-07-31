@@ -23,7 +23,6 @@ package org.wcs.smart.asset.query.engine;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +55,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 /**
  * Tooltip provider for asset attachments.
  * 
@@ -101,7 +101,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 					}
 				}
 				o.getCategory().getFullCategoryName();
-				o.getCategory().getAllAttribute(new ArrayList<>(), null);
+				o.getCategory().getAllAttributes().size();
 				tags = oba.getTagsAsString();
 				
 			}else {
@@ -116,7 +116,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 						}
 					}
 					wo.getCategory().getFullCategoryName();
-					wo.getCategory().getAllAttribute(new ArrayList<>(), null);
+					wo.getCategory().getAllAttributes().size();
 				}
 				tags = obw.getTagsAsString();
 			}
@@ -226,7 +226,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 				l.setBackground(details.getBackground());
 				
 				l = new Label(main, SWT.NONE);
-				l.setText(fo.getCategory().getFullCategoryName());
+				l.setText(SmartUtils.formatStringForLabel(fo.getCategory().getFullCategoryName()));
 				l.setBackground(details.getBackground());
 				
 				if (fo.getAttributes() != null) {
@@ -243,11 +243,11 @@ public class AssetAttachmentTooltipProvider extends Job {
 					
 					for (WaypointObservationAttribute a : fo.getAttributesSorted()) {
 						l = new Label(other, SWT.NONE);
-						l.setText(a.getAttribute().getName()+":"); //$NON-NLS-1$
+						l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) + ":"); //$NON-NLS-1$
 						l.setBackground(details.getBackground());
 						
 						l = new Label(other, SWT.NONE);
-						l.setText(a.getAttributeValueAsString(Locale.getDefault()));
+						l.setText(SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
 						l.setBackground(details.getBackground());
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					}
@@ -284,18 +284,18 @@ public class AssetAttachmentTooltipProvider extends Job {
 						WaypointObservation wo = g.getObservations().get(i);
 						
 						l = new Label(c, SWT.NONE);
-						l.setText(wo.getCategory().getFullCategoryName());
+						l.setText(SmartUtils.formatStringForLabel(wo.getCategory().getFullCategoryName()));
 						l.setBackground(details.getBackground());
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 						
 						if (wo.getAttributes() != null) {
 							for (WaypointObservationAttribute a : wo.getAttributesSorted()) {
 								l = new Label(c, SWT.NONE);
-								l.setText(a.getAttribute().getName()+":"); //$NON-NLS-1$
+								l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) + ":"); //$NON-NLS-1$
 								l.setBackground(details.getBackground());
 								
 								l = new Label(c, SWT.NONE);
-								l.setText(a.getAttributeValueAsString(Locale.getDefault()));
+								l.setText(SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
 								l.setBackground(details.getBackground());
 								l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 							}

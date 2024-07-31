@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -277,15 +278,8 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public Collection<Attribute> getAttributes(Session session, String categoryHkey){
-		List<Attribute> attributes = new ArrayList<Attribute>();
 		Category c = getCategory(session, categoryHkey);
-		while (c != null){
-			for(CategoryAttribute a : c.getAttributes()){
-				attributes.add(a.getAttribute());
-			}
-			c = c.getParent();
-		}
-		return attributes;
+		return c.getAllActiveAttributes().stream().map(i->i.getAttribute()).collect(Collectors.toList());
 	}
 	
 	/**
@@ -478,7 +472,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 				visitCategory(child);
 				child.getName();
 			}
-			for (CategoryAttribute ca: cat.getAttributes()){
+			for (CategoryAttribute ca: cat.getAllAttributes()){
 				ca.getAttribute().getName();
 			}	
 		}

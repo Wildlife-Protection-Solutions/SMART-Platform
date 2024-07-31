@@ -351,8 +351,7 @@ public class CategoryColumnComposite extends Composite {
 		try(Session session = HibernateManager.openSession()){
 			Category category = (Category)session.get(Category.class, ((Category)x).getUuid());
 			
-			
-			category.getAllAttribute(allAttributes, true);
+			category.getAllAttributes().forEach(e->allAttributes.add(e.getAttribute()));
 			
 			//remove geometry attributes as we don't support these at this time
 			List<Attribute> toRemove = new ArrayList<>();

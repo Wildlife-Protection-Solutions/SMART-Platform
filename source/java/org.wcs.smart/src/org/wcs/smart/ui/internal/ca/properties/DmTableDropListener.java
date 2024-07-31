@@ -27,11 +27,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 
 /**
- * Drop handler for moving items in a data model tree.
+ * Drop handler for moving items in a data model tree. Only supports Categories.
  * 
  * @author Emily
  * @since 1.0.0
@@ -65,9 +64,6 @@ public class DmTableDropListener extends ViewerDropAdapter {
 		if (obj instanceof Category && getCurrentTarget() instanceof Category){
 			((DataModel)viewer.getInput()).moveCategoryPosition((Category)obj, (Category)getCurrentTarget(), loc == LOCATION_BEFORE);
 			return true;
-		}else if (obj instanceof CategoryAttribute && getCurrentTarget() instanceof CategoryAttribute){
-			((DataModel)viewer.getInput()).moveAttributePosition((CategoryAttribute)obj, (CategoryAttribute)getCurrentTarget(), loc == LOCATION_BEFORE);
-			return true;
 		}
 		return false;
 	}
@@ -97,14 +93,6 @@ public class DmTableDropListener extends ViewerDropAdapter {
 				if ( (c1.getParent() == null && c2.getParent() == null) ||
 					c1.getParent().equals(c2.getParent())) {
 					return true;
-				}
-			}
-		}else if (obj instanceof CategoryAttribute){
-			CategoryAttribute c1 = (CategoryAttribute)obj;
-			if (target instanceof CategoryAttribute){
-				CategoryAttribute c2 = (CategoryAttribute)target;
-				if ( c1.getCategory().equals(c2.getCategory())){
-						return true;
 				}
 			}
 		}

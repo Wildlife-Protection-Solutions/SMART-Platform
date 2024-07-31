@@ -43,7 +43,6 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
-import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -74,23 +73,11 @@ public class CyberTrackerStartupJob extends Job {
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to select CA list and CyberTracker properties.", e)); //$NON-NLS-1$
 		}
-		checkFolderAndRegistry(caList);
+		
 		cleanStorage(caList, propList);
 		return Status.OK_STATUS;
 	}
 
-
-	private void checkFolderAndRegistry(List<ConservationArea> caList) {
-		if (caList == null)
-			return;
-		for (ConservationArea ca : caList) {
-			try {
-				PdaUtil.updateRegistryKey(ca);
-			} catch (Exception e) {
-				CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to create folder or update registry for CA "+ca.getName(), e)); //$NON-NLS-1$
-			}
-		}
-	}
 
 	private void cleanStorage(List<ConservationArea> caList, List<CyberTrackerPropertiesOption> storageOptionList) {
 		if (caList == null || storageOptionList == null)

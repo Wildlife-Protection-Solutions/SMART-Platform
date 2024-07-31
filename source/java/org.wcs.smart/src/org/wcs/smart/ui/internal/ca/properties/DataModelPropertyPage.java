@@ -624,7 +624,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							
 							DataModel sourceDm = null;
 							if (ca.equals(SmartDB.getCurrentConservationArea())) {
-								sourceDm = ((DataModel) viewer.getInput());
+								sourceDm = getDataModel();
 							}else {
 								sourceDm = HibernateManager.loadDataModel(ca, session);
 							}
@@ -735,10 +735,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * Exports the current model as defined (not necessary saved) to an xml file.
 	 */
 	private void exportXml(){
-		
-		WizardDialog dialog = new SmartWizardDialog(getShell(), new ExportDataModelWizard(((DataModel) viewer.getInput())));
+		WizardDialog dialog = new SmartWizardDialog(getShell(), new ExportDataModelWizard(getDataModel()));
 		dialog.open();
-		
 	}
 	
 	/**
@@ -758,6 +756,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					try {
+						//check just to ensure category/attribute relationships
+						//are correct
+						getDataModel().validateAndFixCategoryAttributes();
+						
 						DataModelManager.INSTANCE.updateLastModified(session);
 						currentTransaction.commit();
 						DataModelManager.INSTANCE.fireChangeListeners();
@@ -786,16 +788,19 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 	}
 	
+	private DataModel getDataModel() {
+		return (DataModel)viewer.getInput();
+	}
 	/*
 	 * Disabled data model object
 	 */
 	private void disableElement(){
 		Object o = getViewerSelection();
 		if (o instanceof Category){
-			((DataModel)viewer.getInput()).disableCategory((Category)o, !((Category)o).getIsActive());
+			getDataModel().disableCategory((Category)o, !((Category)o).getIsActive());
 			DataModelManager.INSTANCE.fireEnabledStateListener(getSession(), o);
 		}else if (o instanceof CategoryAttribute){
-			((DataModel)viewer.getInput()).disableAttribute((CategoryAttribute)o, !((CategoryAttribute)o).getIsActive());
+			getDataModel().disableAttribute((CategoryAttribute)o, !((CategoryAttribute)o).getIsActive());
 			DataModelManager.INSTANCE.fireEnabledStateListener(getSession(), o);
 		}
 		updateInfoPanel();
@@ -853,13 +858,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								cat.getParent().getChildren().remove(cat);
 								cat.setParent(null);
 							}else{
-								((DataModel) viewer.getInput()).getCategories().remove(cat);
+								getDataModel().getCategories().remove(cat);
 								if (cat.getUuid() != null){
 									getSession().remove(cat);
 								}
-								getSession().flush();
-								getSession().evict(cat);
 							}
+							getSession().flush();
+							getSession().evict(cat);
 						}
 					}catch (final Exception ex){
 						SmartPlugIn.displayLog(MessageFormat.format(Messages.DataModelPropertyPage_DeleteError, ex.getMessage()), ex);
@@ -869,6 +874,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 		}else if (o instanceof CategoryAttribute){
 			final CategoryAttribute catAtt  = (CategoryAttribute)o;
+			if (!catAtt.getIsRoot()) {
+				//cannot delete non-root nodes
+				return;
+			}
 			String attributeName = catAtt.getAttribute().findNameNull(getLanguage());
 			if (attributeName == null){
 				attributeName = catAtt.getAttribute().findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
@@ -886,15 +895,34 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						if (delete){
 							DataModelManager.INSTANCE.fireDeleteListener(getSession(), catAtt);
 							
-							catAtt.getCategory().getAttributes().remove(catAtt);
-							if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
-								getSession().evict(catAtt);
-								getSession().flush();
-							}else{
-								getSession().remove(catAtt);
-								getSession().flush();
-								getSession().evict(catAtt);
+							//remove from Category and all children
+							List<Category> toProcess = new ArrayList<>();
+							toProcess.add(catAtt.getCategory());
+							Attribute attribute = catAtt.getAttribute();
+							while(!toProcess.isEmpty()) {
+								Category kid = toProcess.remove(0);
+								if (kid.getChildren() != null) toProcess.addAll(kid.getChildren());
+								//find and remove from kid attributes
+								for (CategoryAttribute kida : kid.getAllAttributes()) {
+									if (kida.getAttribute().equals(attribute)) {
+										
+										kida.getCategory().getAllAttributes().remove(kida);
+										
+										if (kida.getCategory().getUuid() == null || kida.getAttribute().getUuid() == null){
+											getSession().evict(kida);
+											getSession().flush();
+										}else{
+											getSession().remove(kida);
+											getSession().flush();
+											getSession().evict(kida);
+										}
+										
+										break;
+									}
+								}
+								
 							}
+							
 						
 							//at this point we should try to delete the attribute as well
 							boolean canDeleteAttribute = false;
@@ -903,7 +931,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 									canDeleteAttribute = true;
 								}
 							}catch (Exception ex){
-								ex.printStackTrace();
 								//something is using this attribute therefore
 								//it cannot be deleted
 								//ex.printStackTrace();
@@ -973,14 +1000,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Object o = getViewerSelection();
 		List<Category> siblings = null;
 		if (o instanceof DataModelContentProvider.RootNode){
-			siblings = ((DataModel) viewer.getInput()).getCategories();
+			siblings = getDataModel().getCategories();
 		}else if (o instanceof Category){
 			siblings = ((Category) o).getChildren();
 		}
 			
 		Category newCat = new Category();
 		newCat.setCategoryOrder(0);
-		newCat.setAttributes(null);
+		newCat.setAllAttributes(new ArrayList<>());
 		newCat.setChildren(null);		
 		newCat.setConservationArea(currentCa);
 		newCat.setIsActive(true);
@@ -996,7 +1023,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		HibernateManager.saveOrMerge(getSession(),  newCat.getIcon());
 		
 		if (o instanceof DataModelContentProvider.RootNode){
-			DataModel dm = (DataModel)viewer.getInput();
+			DataModel dm = getDataModel();
 			newCat.setParent(null);
 			newCat.setCategoryOrder(dm.getCategories().size());
 			dm.getCategories().add(newCat);
@@ -1011,6 +1038,21 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			parentCat.getChildren().add(newCat);
 		}
 		newCat.updateHkey();
+		
+		//add necessary category attribute for parent categories
+		Category parent = newCat.getParent();
+		while(parent != null) {
+			for (CategoryAttribute ca : parent.getRootAttributes()) {
+				CategoryAttribute newca = new CategoryAttribute(newCat, ca.getAttribute());
+				newca.setIsRoot(false);
+				newca.setIsActive(ca.getIsActive());
+				newca.setOrder(newCat.getAllAttributes().size() + 1);
+				newCat.getAllAttributes().add(newca);
+			}
+			parent = parent.getParent();
+		}
+		
+		
 		DataModelManager.INSTANCE.fireAddListener(getSession(), newCat);
 		session.flush();
 		
@@ -1071,13 +1113,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			//warn that this affects everywhere this attribute is used.
 			
-			Set<CategoryAttribute> usages = ((DataModel)viewer.getInput()).findAttribute(((CategoryAttribute)o).getAttribute());
+			Set<CategoryAttribute> usages = getDataModel().findRootAttribute(((CategoryAttribute)o).getAttribute());
 			if (usages.size() > 1){
 				MessageDialog.openWarning(getShell(), Messages.DataModelPropertyPage_ModifyWarning_DialogTitle, Messages.DataModelPropertyPage_ModifyWarning_DialogMessage);
 			}
 			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
 					((CategoryAttribute) o).getAttribute(),
-					((DataModel) viewer.getInput()).getAttributes(),
+					getDataModel().getAttributes(),
 					getLanguage(), getSession());			
 			//show new attribute dialog
 			int ret = d2.open();
@@ -1130,7 +1172,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			att.setConservationArea(currentCa);
 			
 			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(), att,
-					((DataModel) viewer.getInput()).getAttributes(),
+					getDataModel().getAttributes(),
 					currentCa.getDefaultLanguage(), getSession());
 			
 			//show new attribute dialog
@@ -1178,6 +1220,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		session.flush();
 		setChangesMade(true);
+		updateInfoPanel();
 	}
 	
 	/*
@@ -1337,7 +1380,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						
 						
 						if (ca.equals(SmartDB.getCurrentConservationArea())) {
-							sourceDm = ((DataModel) viewer.getInput());							
+							sourceDm = getDataModel();							
 						}else {
 							sourceDm = HibernateManager.loadDataModel(ca, session);
 						}
@@ -1419,7 +1462,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.DataModelPropertyPage_ExportTranslationsProgress, IProgressMonitor.UNKNOWN);;
 					DataModelTranslationExporter exporter = new DataModelTranslationExporter();
-					DataModel dm = ((DataModel) viewer.getInput());
+					DataModel dm = getDataModel();
 					try {
 						exporter.export(p, dm);
 					} catch (IOException ex) {

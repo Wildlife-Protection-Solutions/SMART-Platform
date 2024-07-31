@@ -169,9 +169,69 @@ public class DataModelMergeAndUpdater {
 			}
 			monitor.worked(1);
 		}
+		
+		//ensure correct categoryattribute links are created
+		//8.1.0 -> need categoryattribute objects for all children as well as parents
+		//1. check that the is root node is set correct
+		//for all the categories for all the attributes if an attribute exists further up the 
+		//tree it can't be root
+		List<Category> toProcess = new ArrayList<>();
+		toProcess.addAll(sourceDm.getCategories());
+		while(!toProcess.isEmpty()) {
+			Category c = toProcess.remove(0);
+			toProcess.addAll(c.getChildren());
+			
+			for (CategoryAttribute ca : c.getAllAttributes()) {
+				Category parent = ca.getCategory().getParent();
+				boolean isroot = true;
+				while(parent != null) {
+					if (parent.hasAttribute(ca.getAttribute())) {
+						isroot = false;
+						break;
+					}
+					parent = parent.getParent();
+				}
+				ca.setIsRoot(isroot);
+			}
+		}
+		//now for all root attributes ensure they are in all the kids
+		toProcess.clear();
+		toProcess.addAll(sourceDm.getCategories());
+		while(!toProcess.isEmpty()) {
+			Category c = toProcess.remove(0);
+			toProcess.addAll(c.getChildren());
+			
+			for (CategoryAttribute ca : c.getAllAttributes()) {
+				if (!ca.getIsRoot()) continue;
+				
+				//ensure this attributes exists as not root in all children categores
+				List<Category> kids = new ArrayList<>(ca.getCategory().getChildren());
+				while(!kids.isEmpty()) {
+					Category kid = kids.remove(0);
+					kids.addAll(kid.getChildren());
+					CategoryAttribute tmp = kid.findAttribute(ca.getAttribute());
+					if (tmp == null) {
+						tmp = new CategoryAttribute(kid, ca.getAttribute());
+						tmp.setIsActive(kid.getIsActive() && ca.getIsActive());
+						tmp.setOrder(kid.getAllAttributes().size()+1);
+						kid.getAllAttributes().add(tmp);
+					}
+					tmp.setIsRoot(false);					
+				}
+			}
+		}
+		//sort all attributes
+		toProcess.clear();
+		toProcess.addAll(sourceDm.getCategories());
+		while(!toProcess.isEmpty()) {
+			Category c = toProcess.remove(0);
+			toProcess.addAll(c.getChildren());
+			resortAttribute(c.getAllAttributes());
+			resortCategories(c.getChildren());
+		}
 		resortCategories(sourceDm.getCategories());
+		
 		monitor.done();
-
 		return warnings;
 	}
 	
@@ -224,10 +284,10 @@ public class DataModelMergeAndUpdater {
 		
 		mergeNames(source, target);
 		
-		if (target.getAttributes() != null){
-			for (CategoryAttribute targetAttribute : target.getAttributes()){
+		if (target.getAllAttributes() != null){
+			for (CategoryAttribute targetAttribute : target.getAllAttributes()){
 				boolean found = false;
-				for (CategoryAttribute sourceAttribute : source.getAttributes()){
+				for (CategoryAttribute sourceAttribute : source.getAllAttributes()){
 					if (targetAttribute.getAttribute().getKeyId().equals(sourceAttribute.getAttribute().getKeyId())){
 						mergeCategoryAttribute(sourceAttribute, targetAttribute);
 						found = true;
@@ -240,12 +300,11 @@ public class DataModelMergeAndUpdater {
 						warnings.add(MessageFormat.format(getMessage(I18NMessages.ATT_NOT_FOUND), targetAttribute.getAttribute().getKeyId(),source.getName())); 
 					}else{
 						CategoryAttribute newSourceCa = new CategoryAttribute(source, newSourceAttribute);
-						source.getAttributes().add(newSourceCa);
+						source.getAllAttributes().add(newSourceCa);
 						mergeCategoryAttribute(newSourceCa, targetAttribute);
 					}
 				}
 			}
-			resortAttribute(source.getAttributes());
 		}
 		
 		if (target.getChildren() != null){
@@ -266,7 +325,6 @@ public class DataModelMergeAndUpdater {
 					mergeCategory(newSource, targetChild);
 				}
 			}
-			resortCategories(source.getChildren());
 		}
 	}
 	
@@ -277,7 +335,7 @@ public class DataModelMergeAndUpdater {
 		newSource.setConservationArea(sourceDm.getConservationArea());
 		newSource.setCategoryOrder(target.getCategoryOrder());
 		newSource.setChildren(new ArrayList<Category>());
-		newSource.setAttributes(new ArrayList<CategoryAttribute>());
+		newSource.setAllAttributes(new ArrayList<CategoryAttribute>());
 		setIcon(newSource, target.getIcon());
 		return newSource;
 	}
@@ -285,6 +343,7 @@ public class DataModelMergeAndUpdater {
 	private void mergeCategoryAttribute(CategoryAttribute source, CategoryAttribute target){
 		source.setIsActive(target.getIsActive());
 		source.setOrder(target.getOrder());
+		source.setIsRoot(target.getIsRoot());
 	}
 	
 	private Attribute findAttributeInSource(String keyId){
@@ -595,15 +654,12 @@ public class DataModelMergeAndUpdater {
 		
 	}
 	private void resortAttribute(List<CategoryAttribute> kids){
-		Collections.sort(kids, new Comparator<CategoryAttribute>(){
-			@Override
-			public int compare(CategoryAttribute o1, CategoryAttribute o2) {
-				int ret = ((Integer)o1.getOrder()).compareTo(o2.getOrder());
+		Collections.sort(kids, (a,b)->{
+				int ret = Integer.compare(a.getOrder(), b.getOrder());
 				if (ret != 0) return ret;
-				return compareNames(o1.getAttribute(), o2.getAttribute());
-			}
-		});
-		int order = 0;
+				return compareNames(a.getAttribute(), b.getAttribute());
+			});
+		int order = 1;
 		for (CategoryAttribute i : kids){
 			i.setOrder(order++);
 		}

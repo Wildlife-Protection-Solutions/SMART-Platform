@@ -54,6 +54,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
@@ -439,7 +440,7 @@ public class CmXmlToSmartImporter {
 			List<Attribute> dmAttributes = new ArrayList<>();
 			List<Attribute> cmAttributes = new ArrayList<>();
 			
-			c.getAllAttribute(dmAttributes, true);
+			for (CategoryAttribute ca : c.getAllAttributes()) dmAttributes.add(ca.getAttribute());
 			for (CmAttribute ca : cmNode.getCmAttributes()) {
 				cmAttributes.add(ca.getAttribute());
 			}

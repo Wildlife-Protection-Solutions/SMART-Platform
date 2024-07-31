@@ -219,7 +219,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		for (PatrolLeg pl : newPatrol.getLegs()) {
 			if (pl == patrol.getPatrolLeg()) continue;
 			CtPatrolLink link = new CtPatrolLink();
-			link.setCtUuid(UUID.randomUUID());//TODO:
+			link.setCtUuid(UUID.randomUUID());
 			link.setPatrolLeg(pl);
 			link.setDeviceId(patrol.getDeviceId());
 			link.setLastObservationCnt(-1);

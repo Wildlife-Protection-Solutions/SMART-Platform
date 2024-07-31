@@ -766,7 +766,7 @@ public class SearchDataGenerator {
 					ob.setLocation(loc);
 					ob.setObservationAttributes(new ArrayList<>());
 					
-					for (CategoryAttribute a : cat.getAttributes()){
+					for (CategoryAttribute a : cat.getAllAttributes()){
 						IntelObservationAttribute attributeValue = generateValue(a.getAttribute(), items, session);
 						ob.getObservationAttributes().add(attributeValue);
 						attributeValue.setObservation(ob);

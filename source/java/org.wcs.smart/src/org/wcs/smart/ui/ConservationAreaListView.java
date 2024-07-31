@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.ui;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -57,6 +55,9 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 /**
  * View that displays a list of current active conservation 
  * areas.

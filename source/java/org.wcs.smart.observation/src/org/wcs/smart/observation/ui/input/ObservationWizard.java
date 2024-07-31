@@ -161,13 +161,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					}
 					ob.getCategory().getFullCategoryName();
 					ob.getCategory().getName();
-					for (CategoryAttribute ca : ob.getCategory().getAttributes()) {
+					for (CategoryAttribute ca : ob.getCategory().getAllAttributes()) {
 						ca.getAttribute().getType();
 						ca.getAttribute().getName();
 					}
 					Category temp = ob.getCategory();
 					while(temp != null) {
-						temp.getAttributes().forEach(a->{
+						temp.getAllAttributes().forEach(a->{
 							a.getAttribute().getName();
 							if (a.getAttribute().getAttributeList() != null) {
 								a.getAttribute().getAttributeList().forEach(li->li.getName());
@@ -425,12 +425,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					Category cc = cats.remove(0);
 					cc.getFullCategoryName();
 					cc.getName();
-					cc.getAttributes().size();
-					if (cc.getActiveChildren() != null) cats.addAll(cc.getActiveChildren());
-					
-//					if (cc.getIcon() != null && cc.getIcon().getIconFile(iset) != null) {
-//						cc.getIcon().getIconFile(iset).computeFileLocation(session);
-//					}
+					cc.getAllAttributes().size();
+					if (cc.getActiveChildren() != null) cats.addAll(cc.getActiveChildren());					
 				}
 				
 			}

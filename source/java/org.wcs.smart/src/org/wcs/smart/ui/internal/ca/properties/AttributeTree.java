@@ -86,8 +86,8 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 
 /**
  * Class that creates an attribute tree viewer for

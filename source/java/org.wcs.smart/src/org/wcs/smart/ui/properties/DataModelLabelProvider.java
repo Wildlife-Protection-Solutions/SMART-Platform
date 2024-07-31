@@ -78,8 +78,9 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 		if (element instanceof DataModelContentProvider.RootNode){
 			return Messages.DataModelLabelProvider_RootNode_Label;
 		}
-		if (element instanceof CategoryAttribute){
-			element = ((CategoryAttribute)element).getAttribute();
+		if (element instanceof CategoryAttribute ca){
+			element = ca.getAttribute();
+//			return ca.getAttribute().getName() + " [" + ca.getIsRoot() + ":" + ca.getOrder() + "]";
 		}
 		
 		if (element instanceof DmObject){

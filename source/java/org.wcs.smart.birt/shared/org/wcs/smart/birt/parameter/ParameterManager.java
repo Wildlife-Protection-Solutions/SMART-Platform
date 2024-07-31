@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -79,23 +81,11 @@ public enum ParameterManager {
 					}	
 		        }
 		    }
-		                    
-		                    
-		                    
-//			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
-//			for (IConfigurationElement e : config) {	
-//				if (e.getName().equalsIgnoreCase(PARAMETER_ELEMENT)) {
-//					ISmartBirtParameter p = (ISmartBirtParameter) e.createExecutableExtension(CLASS_ATTRIBUTE);
-//					temp.add(p);
-//					configs.put(p.getKey(), e);
-//				
-//				}
-//			}
+
 			parameters = temp;
 			return parameters;
 		}catch (Exception ex) {
-			ex.printStackTrace();
-			//TODO:
+			Logger.getLogger(ParameterManager.class.getName()).log(Level.WARNING, ex.getMessage(),ex);
 		}
 		return Collections.emptyList();
 	}

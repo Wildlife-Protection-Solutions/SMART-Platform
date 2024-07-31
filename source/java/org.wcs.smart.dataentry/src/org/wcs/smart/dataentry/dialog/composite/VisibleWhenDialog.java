@@ -50,6 +50,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -253,9 +254,14 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			return new ErrorDropItem(MessageFormat.format(Messages.VisibleWhenDialog_AttributeTypeDifferent, afilter.getAttributeKey()));
 		}else {
 			Category c = attribute.getNode().getCategory();
-			List<Attribute> all = new ArrayList<>();
-			c.getAllAttribute(all, null);
-			if (!all.contains(dattribute)) {
+			boolean found = false;
+			for (CategoryAttribute ca : c.getAllAttributes()) {
+				if (ca.getAttribute().equals(dattribute)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
 				return new ErrorDropItem(MessageFormat.format(Messages.VisibleWhenDialog_AttributeNotAssociatedWithCategory,  dattribute.getName(), c.getName()));
 			}else {
 				DropItem di = generateDropItem(dattribute);

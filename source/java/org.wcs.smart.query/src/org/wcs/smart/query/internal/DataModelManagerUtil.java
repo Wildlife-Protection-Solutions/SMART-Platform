@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.query.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -52,14 +55,15 @@ public class DataModelManagerUtil {
 	 * with the given category or subcategory
 	 */
 	public static boolean isActive(Category c, Attribute a){
-		for (CategoryAttribute ca : c.getAttributes()){
-			if (ca.getAttribute().equals(a) && ca.getIsActive()){
-				return true;
-			}
-		}
-		for (Category kid : c.getActiveChildren()){
-			if (isActive(kid,a)){
-				return true;
+		List<Category> toProcess = new ArrayList<>();
+		toProcess.add(c);
+		while(!toProcess.isEmpty()) {
+			toProcess.addAll(c.getChildren());
+			c = toProcess.remove(0);
+			for (CategoryAttribute ca : c.getAllAttributes()){
+				if (ca.getAttribute().equals(a) && ca.getIsActive()){
+					return true;
+				}
 			}
 		}
 		return false;

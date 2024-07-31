@@ -61,7 +61,9 @@ public class CategoryAttribute implements Serializable{
 	
 	private CategoryAttributePk id = new CategoryAttributePk();	
 	private boolean isActive;
+	private boolean isRoot;
 	private int order;
+	
 	
 	/**
 	 * Create new association
@@ -157,6 +159,24 @@ public class CategoryAttribute implements Serializable{
 	public void setIsActive(boolean isActive){
 		this.isActive = isActive;
 	}
+	
+	/**
+	 * Root is the first time the attribute appears in the tree
+	 * hierarchy.
+	 * 
+	 * @return <code>true</code> if association is the root; <code>false</code> otherwise
+	 */
+	@Column(name = "is_root")
+	public boolean getIsRoot(){
+		return this.isRoot;
+	}
+	/**
+	 * 
+	 * @param isRoot the current state of the association
+	 */
+	public void setIsRoot(boolean isRoot){
+		this.isRoot = isRoot;
+	}
 
 	/**
 	 * @param o
@@ -249,6 +269,7 @@ public class CategoryAttribute implements Serializable{
 		CategoryAttribute clone = new CategoryAttribute();
 		
 		clone.setOrder(this.getOrder());
+		clone.setIsRoot(this.getIsRoot());
 		clone.setIsActive(this.getIsActive());
 		clone.setCategory(category);
 		clone.setAttribute(attribute);

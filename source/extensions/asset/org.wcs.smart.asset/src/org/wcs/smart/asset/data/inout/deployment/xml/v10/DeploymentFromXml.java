@@ -67,6 +67,7 @@ import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -596,13 +597,16 @@ public class DeploymentFromXml {
 	}
 	
 	private Attribute findAttribute(Category category, String attributeKey, String attributeType) throws Exception{
-		List<Attribute> all = new ArrayList<>();
-		category.getAllAttribute(all, null);
-		for (Attribute a : all) {
-			if (a.getKeyId().equalsIgnoreCase(attributeKey)) {
-				if (a.getType().name().equalsIgnoreCase(attributeType)) return a;
+		Category c = category;
+		
+		for (CategoryAttribute ca : c.getAllAttributes()) {
+			Attribute a = ca.getAttribute();
+			if (a.getKeyId().equalsIgnoreCase(attributeKey) && 
+					a.getType().name().equalsIgnoreCase(attributeType)) {
+				return a;
 			}
 		}
+		
 		throw new Exception(MessageFormat.format(Messages.DeploymentFromXml_AttributeNotFound, attributeType, attributeKey, category.getName()));
 	}
 	

@@ -279,6 +279,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 			sb.append(".ob_uuid AND a.attribute_uuid = ?"); //$NON-NLS-1$
 			break;
 		case DATE:
+		case TIME:
 		case TEXT:
 			sb.append(" (SELECT a.string_value FROM smart.wp_observation_attributes a WHERE a.observation_uuid = "); //$NON-NLS-1$
 			sb.append(waypointFilterTable);

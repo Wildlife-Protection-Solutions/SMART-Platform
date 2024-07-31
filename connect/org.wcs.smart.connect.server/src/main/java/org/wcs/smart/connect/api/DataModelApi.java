@@ -89,7 +89,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter.IconOption;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelImporter;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel;
 import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

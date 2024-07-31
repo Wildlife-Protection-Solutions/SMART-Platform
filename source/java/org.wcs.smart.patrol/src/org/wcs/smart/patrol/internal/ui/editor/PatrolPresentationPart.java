@@ -1205,7 +1205,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 											pw.getWaypoint().getAllObservations()
 													.forEach(wp -> {
 														wp.getCategory().getFullCategoryName();
-														wp.getCategory().getAllAttribute(new ArrayList<>(), null);
+														wp.getCategory().getAllAttributes().size();
 													});
 											List<WaypointObservation> obs = pw.getWaypoint().getAllObservations();
 											obs.forEach(oo -> oo.getAttributes().forEach(a -> {
@@ -1306,13 +1306,12 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 					
 					sb.append("\n\n"); //$NON-NLS-1$
 					for (WaypointObservationAttribute a : sortedAtts) {
-						sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
+						sb.append(MessageFormat.format("{0}: {1}", SmartUtils.formatStringForLabel(a.getAttribute().getName()), SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())))); //$NON-NLS-1$
 						sb.append("\n"); //$NON-NLS-1$
 					}
 					sb.deleteCharAt(sb.length() - 1);
 				}			
 				
-				if (!wo.getAttributes().isEmpty()) sb.deleteCharAt(sb.length() - 1);
 				return sb.toString();
 			}
 			

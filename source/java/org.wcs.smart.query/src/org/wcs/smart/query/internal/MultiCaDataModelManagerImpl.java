@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
@@ -33,7 +34,6 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.CcaaDataModel;
 import org.wcs.smart.ca.datamodel.CcaaDataModelDesktop;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -314,13 +314,8 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	public Collection<Attribute> getAttributes(Session session, String categoryHkey){
 		List<Attribute> attributes = new ArrayList<Attribute>();
 		Category c = getCategory(session, categoryHkey);
-		while (c != null){
-			for(CategoryAttribute a : c.getAttributes()){
-				attributes.add(a.getAttribute());
-			}
-			c = c.getParent();
-		}
-		return attributes;
+		return c.getAllAttributes().stream().map(e->e.getAttribute()).collect(Collectors.toList());
+		
 	}
 	
 	private Category findCategory(String hkey, List<Category> categories){

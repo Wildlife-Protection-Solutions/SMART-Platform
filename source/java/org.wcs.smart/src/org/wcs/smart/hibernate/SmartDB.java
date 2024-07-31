@@ -64,13 +64,9 @@ public class SmartDB {
 	 *
 	 */
 	public enum DbUser{
-//		LOGIN("login", "smrt"),  //$NON-NLS-1$//$NON-NLS-2$
-		
-//		LOGIN("smart_admin", "smart_derby"),//TODO: remove this
-//		ANALYST("analyst", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
-//		MANAGER("manager", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
-//		DATAENTRY("data_entry", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
-		
+		//in smart 8.0.0 we removed the various derby uses
+		//we now just have one db user and its up to the app
+		//to ensure permissions are implemented correctly
 		ADMIN("smart_admin", "smart_derby"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private final String username;
@@ -88,8 +84,6 @@ public class SmartDB {
 		}
 	};
 	
-	//current database user account
-//	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
 	private static String plainTextPassword = null;
 	private static ConservationArea currentCa = null;

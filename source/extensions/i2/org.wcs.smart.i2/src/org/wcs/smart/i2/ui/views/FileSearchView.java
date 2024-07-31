@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import jakarta.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -74,6 +73,8 @@ import org.wcs.smart.i2.search.attachment.IMatchCollector;
 import org.wcs.smart.i2.search.attachment.SearchResult;
 import org.wcs.smart.i2.ui.AnimatedGif;
 import org.wcs.smart.ui.properties.FilterComposite;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * View for searching smart text attachments

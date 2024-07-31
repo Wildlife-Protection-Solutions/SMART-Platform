@@ -22,10 +22,14 @@ public interface IDataModelItemListener {
 	
 	/**
 	 * This event is called after an item is added to
-	 * the data model.  The session is in open
-	 * transaction.  This is called after the item
+	 * the data model. The session is in open
+	 * transaction. This is called after the item
 	 * is added to the database and all references are updated.
 	 * <p>Exceptions should be dealt with internally.</p>
+	 * 
+	 * In the case of attributes getting added to a category, this
+	 * event only gets called once for the root CategoryAttribute object
+	 * created.
 	 * 
 	 * @param currentSession open session
 	 * @param itemToAdd item added

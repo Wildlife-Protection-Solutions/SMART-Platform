@@ -452,7 +452,6 @@ public class PatrolHibernateManager extends HibernateManager{
 				}
 			}
 		}
-		//TODO: test this and fix in 8.0.1
 		HibernateManager.saveOrMerge(session,  patrol);
 	}
 

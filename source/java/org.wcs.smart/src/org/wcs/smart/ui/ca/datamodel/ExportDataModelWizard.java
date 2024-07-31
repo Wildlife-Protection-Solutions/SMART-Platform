@@ -46,7 +46,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter.IconOption;
-import org.wcs.smart.internal.ca.datamodel.xml.v11.DataModelSmartToXmlConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.v12.DataModelSmartToXmlConverter;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -155,7 +155,7 @@ public class ExportDataModelWizard extends Wizard implements IPageChangingListen
 						
 						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
 						DataModelSmartToXmlConverter converter = new DataModelSmartToXmlConverter(op, monitor.split(1));
-						org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel xml = converter.convert(dataModel);
+						org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel xml = converter.convert(dataModel);
 						
 						Path outputFile = outFile;
 						if (op != IconOption.NONE) {

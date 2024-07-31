@@ -648,9 +648,7 @@ public class PatrolPackageExporter {
 			optionType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
 		}
 		
-		if (pa.getType() == Attribute.AttributeType.TREE) {
-			//TODO: populate tree options
-			
+		if (pa.getType() == Attribute.AttributeType.TREE) {		
 			JSONArray optionOptions = new JSONArray();
 			Map<PatrolAttributeTreeNode, JSONObject> parents = new HashMap<>();
 			

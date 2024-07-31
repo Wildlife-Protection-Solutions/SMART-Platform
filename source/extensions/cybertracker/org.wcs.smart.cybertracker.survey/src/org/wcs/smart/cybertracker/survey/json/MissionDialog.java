@@ -508,12 +508,10 @@ public class MissionDialog extends SmartStyledTitleDialog {
 					
 					double diff = Math.abs( ChronoUnit.DAYS.between(ctP.getStartDate(), p.getEndDate()) );
 					if (diff > 2){
-						//TODO: should be a warning not an error
 						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DateWarning, 
 								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(ctP.getStartDate()), 
 								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(p.getEndDate())));
 						entry.getValue().errItem.show();
-//						error = true;
 					}
 					
 					if (p.getUuid() == null){

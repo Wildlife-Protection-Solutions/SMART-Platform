@@ -97,7 +97,7 @@ public class EventProcessingJob extends Job {
 					}
 				}
 			}catch (LockTimeoutException | org.hibernate.exception.LockTimeoutException ex2) {
-				EventPlugIn.log("Lock time with event processing - trying again in 5 seconds", null);
+				EventPlugIn.log("Lock time with event processing - trying again in 5 seconds", null); //$NON-NLS-1$
 				observations.add(0, o);
 				schedule(5000);
 				return Status.OK_STATUS;

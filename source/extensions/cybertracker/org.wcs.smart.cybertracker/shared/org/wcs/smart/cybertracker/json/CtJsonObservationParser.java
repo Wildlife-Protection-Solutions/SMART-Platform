@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -716,8 +717,7 @@ public class CtJsonObservationParser {
 	private List<WaypointObservationAttribute> createWaypointObservationAttribute(List<ObservationInfo> values, Category c, List<WaypointObservationAttribute> defaultAttributes, Session session) throws Exception{
 		
 		List<WaypointObservationAttribute> results = new ArrayList<WaypointObservationAttribute>();
-		List<Attribute> validAttributes = new ArrayList<Attribute>();
-		c.getAllAttribute(validAttributes, null);
+		Set<Attribute> validAttributes = c.getAllAttributes().stream().map(e->e.getAttribute()).collect(Collectors.toSet());
 		
 		//add default values; these will be overridden if actual values are provided
 		Set<WaypointObservationAttribute> defaultClones = new HashSet<>();

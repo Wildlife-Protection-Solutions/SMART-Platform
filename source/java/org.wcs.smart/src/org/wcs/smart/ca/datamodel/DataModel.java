@@ -26,11 +26,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,7 +71,9 @@ public class DataModel extends SimpleDataModel {
 	 * @param ca
 	 * @param rootCategories
 	 */
-	public DataModel(ConservationArea ca, List<Category> rootCategories, List<Attribute> attributes){
+	public DataModel(ConservationArea ca, 
+			List<Category> rootCategories, 
+			List<Attribute> attributes){
 		super(ca, rootCategories, attributes);
 	}
 	
@@ -133,20 +135,13 @@ public class DataModel extends SimpleDataModel {
 	 * 
 	 * @return list of only active root categories
 	 */
-	public List<Category> getActiveCategories(){
-		ArrayList<Category> tmp = new ArrayList<Category>();
-		if (getCategories() != null){
-			for (Iterator<Category> iterator = getCategories().iterator(); iterator.hasNext();) {
-				Category cat = (Category) iterator.next();
-				if (cat.getIsActive()){
-					tmp.add(cat);
-				}
-			}
-		}
-		return tmp;
+	public List<Category> getActiveCategories(){		
+		if (getCategories() == null) return Collections.emptyList();		
+		return getCategories().stream().filter(f->f.getIsActive()).collect(Collectors.toList());		
 	}
+	
 	/**
-	 * Adds a category to the list of root categores.
+	 * Adds a category to the list of root categories.
 	 * 
 	 * @param category
 	 */
@@ -165,13 +160,13 @@ public class DataModel extends SimpleDataModel {
 	 * 
 	 * @param att attribute to add
 	 * @param cat category to add attribute to; can be null
-	 * @return the newly created {@link CategoryAttribute} association of
-	 * null if no category provided
+	 * @return the newly created {@link CategoryAttribute} association or
+	 * null if no category provided. The root CategoryAttribute is returned, not any of the children
+	 * objects created.
 	 */
 	public CategoryAttribute addNewAttribute(Attribute att, Category cat) throws Exception{
 		attributes.add(att);
 		return addExistingAttribute(att, cat);
-		
 	}
 	
 	/**
@@ -183,112 +178,52 @@ public class DataModel extends SimpleDataModel {
 	 * @return
 	 */
 	public CategoryAttribute addExistingAttribute(Attribute att, Category cat ) throws Exception{
-		if (cat != null) {
-			if (cat.getAttributes() == null) {
-				cat.setAttributes(new ArrayList<CategoryAttribute>());
-			}
-			for (CategoryAttribute catatt : cat.getAttributes()) {
-				if (catatt.getAttribute().equals(att)) {
-					throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExists, new Object[]{att.getName(), cat.getName()}));
-				}
-			}
-			//ensure category does not exist in any child categories
-			List<Category> toCheck = new ArrayList<Category>();
-			toCheck.addAll(cat.getChildren());
-			while(toCheck.size() > 0){
-				Category c = toCheck.remove(0);
-				toCheck.addAll(c.getChildren());
-				if (c.getAttributes() != null){
-					for (CategoryAttribute ca : c.getAttributes()){
-						if (ca.getAttribute().equals(att)){
-							throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsChild, new Object[]{c.getName(), att.getName()}));
-						}
-					}
-				}
-			}
-			//ensure category does not exist in parent category
-			Category c = cat.getParent();
-			while(c != null){
-				if (c.getAttributes() != null){
-					for(CategoryAttribute ca : c.getAttributes()){
-						if (ca.getAttribute().equals(att)){
-							throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsParent, new Object[]{c.getName(), att.getName()}));
-						}
-					}
-				}
-				c = c.getParent();
-			}
-			CategoryAttribute ca = new CategoryAttribute();
-			ca.setAttribute(att);
-			ca.setCategory(cat);
-			ca.setIsActive(true);
-			ca.setOrder(cat.getAttributes().size());
-			cat.getAttributes().add(ca);
-			
-			return ca;
-		}
-		return null;
+		if (cat == null) return null ;
+		return cat.addAttribute(att);	
 	}
 	
 	/**
-	 * Finds all categories associated with the provided attribute.
+	 * Finds all categories associated with this attribute
+	 * as the root attribute
 	 * 
 	 * @param att
 	 * @return
 	 */
-	public Set<CategoryAttribute> findAttribute(Attribute att){
+	public Set<CategoryAttribute> findRootAttribute(Attribute att){
 		HashSet<CategoryAttribute> results = new HashSet<CategoryAttribute>();
-		for (Category cat: getCategories()){
-			searchCategory(cat, att, results);
+		List<Category> toProcess = new ArrayList<>(getCategories());
+		while(!toProcess.isEmpty()) {
+			Category item = toProcess.remove(0);
+			if (item.getChildren() != null) toProcess.addAll(item.getChildren());
+			for (CategoryAttribute ca : item.getRootAttributes()) {
+				if (ca.getIsRoot() && ca.getAttribute().equals(att)) results.add(ca);
+			}
 		}
 		return results;
 	}
-	/**
-	 * Searches a category its children for all categories that are associated
-	 * with the given attribute.
-	 * 
-	 * @param cat category to search
-	 * @param att attribute to find
-	 * @param results map to add results to
-	 */
-	private void searchCategory (Category cat, Attribute att, HashSet<CategoryAttribute> results){
-		if (cat.getAttributes() != null){
-			for (CategoryAttribute rel : cat.getAttributes()){
-				if (rel.getAttribute().equals(att)){
-					results.add(rel);
-				}
-			}
-		}
-		if (cat.getChildren() != null){
-			for (Category child : cat.getChildren()){
-				searchCategory(child, att, results);
-			}
-		}
-	}
-	/**
-	 * Moves an attribute to a new position in the sibling list.
-	 * 
-	 * @param toMove the attribute to move
-	 * @param toMoveTo the attribute to move it to
-	 * @param moveBefore if it should be moved before or after the <b>toMove</b> parameter
-	 */
-	public void moveAttributePosition(CategoryAttribute toMove, CategoryAttribute toMoveTo, boolean moveBefore){
-		if (toMove.equals(toMoveTo)){
-			return;
-		}
-		if (toMove.getCategory() != null){
-			toMove.getCategory().getAttributes().remove(toMove);
-			if (moveBefore){
-				toMove.getCategory().getAttributes().add(toMove.getCategory().getAttributes().indexOf(toMoveTo), toMove);
-			}else{
-				toMove.getCategory().getAttributes().add(toMove.getCategory().getAttributes().indexOf(toMoveTo) + 1, toMove);
-			}
-			
-			for (int i = 0; i < toMove.getCategory().getAttributes().size(); i ++){
-				toMove.getCategory().getAttributes().get(i).setOrder(i);
-			}
-		}
-	}
+//	/**
+//	 * Searches a category and its children for all categories that are associated
+//	 * with the given attribute.
+//	 * 
+//	 * @param cat category to search
+//	 * @param att attribute to find
+//	 * @param results map to add results to
+//	 */
+//	private void searchCategory (Category cat, Attribute att, HashSet<CategoryAttribute> results){
+//		if (cat.getAllAttributes() != null){
+//			for (CategoryAttribute rel : cat.getAttributes()){
+//				if (rel.getAttribute().equals(att)){
+//					results.add(rel);
+//				}
+//			}
+//		}
+//		if (cat.getChildren() != null){
+//			for (Category child : cat.getChildren()){
+//				searchCategory(child, att, results);
+//			}
+//		}
+//	}
+	
 	
 	/**
 	 * Moves an category to a new position in the sibling list.
@@ -330,6 +265,7 @@ public class DataModel extends SimpleDataModel {
 	 */
 	public void disableAttribute(CategoryAttribute cat, boolean enabled){
 		cat.setIsActive(enabled);
+		cat.getCategory().setAttributeActive(cat.getAttribute(), enabled);
 		if (enabled){
 			//enable the parent categories as well
 			disableCategory(cat.getCategory(), enabled);
@@ -349,15 +285,14 @@ public class DataModel extends SimpleDataModel {
 	public void disableCategory(Category cat, boolean enabled){
 		if (!enabled){
 			//disable category and all children
-		
 			cat.setIsActive(enabled);
 			if (cat.getChildren() != null){
 				for(Category child: cat.getChildren()){
 					disableCategory(child, enabled);
 				}
 			}
-			if (cat.getAttributes()!=null){
-				for (CategoryAttribute att: cat.getAttributes()){
+			if (cat.getAllAttributes()!=null){
+				for (CategoryAttribute att: cat.getAllAttributes()){
 					disableAttribute(att, enabled);
 				}
 			}
@@ -370,10 +305,24 @@ public class DataModel extends SimpleDataModel {
 			if (cat.getParent() != null){
 				disableCategory(cat.getParent(), enabled);
 			}
-			//enable all attributes
-			if (cat.getAttributes()!=null){
-				for (CategoryAttribute att: cat.getAttributes()){
-					disableAttribute(att, enabled);
+			//enable all root attributes
+			for (CategoryAttribute ca : cat.getAllAttributes()) {
+				if (ca.getIsRoot()) {
+					disableAttribute(ca, enabled);
+				}else {
+					//set the attribute enabled/disabled value to the value of the root attribute
+					Category parent = ca.getCategory().getParent();
+					while(parent != null) {
+					
+						for (CategoryAttribute ca2 : parent.getRootAttributes()) {
+							if (ca.getAttribute().equals(ca2.getAttribute())) {
+								ca.setIsActive(ca2.getIsActive());
+								parent = null;
+								break;
+							}
+						}
+						if (parent != null) parent = parent.getParent();
+					}
 				}
 			}
 		}
@@ -401,13 +350,18 @@ public class DataModel extends SimpleDataModel {
 	 * 
 	 * @param session database connection
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
-	 * @throws HibernateException if changes cannot be saved
+	 * @throws Exception if changes cannot be saved
 	 */
-	public void save(Session session, IProgressMonitor monitor){
+	public void save(Session session, IProgressMonitor monitor) throws Exception{
 		session.beginTransaction();
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
 		try {
+			progress.subTask(Messages.DataModel_validationtask);
+			validateAndFixCategoryAttributes();
+			
 			for (Attribute att : attributes) {
+				progress.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+
 				if (att.getIcon() != null && att.getIcon().getUuid() == null) {
 					session.persist(att.getIcon());
 				}
@@ -425,13 +379,13 @@ public class DataModel extends SimpleDataModel {
 						}
 					});
 				}
-				progress.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.persist(att);
 				session.flush();
 				progress.worked(1);
 			}
 			session.flush();
 
+			progress.subTask(Messages.DataModel_categoriestask);
 			processCategories(this, (node)->{
 				if (node.getIcon() != null && node.getIcon().getUuid() == null) {
 					node.getIcon().setConservationArea(node.getConservationArea());
@@ -458,6 +412,70 @@ public class DataModel extends SimpleDataModel {
 		
 	}
 
+	//a part of the changes for 8.1.0 which allows ordering
+	//of all attributes (parent and current) for a category
+	//this class ensures that the appropriate database
+	//structures exists 
+	public void validateAndFixCategoryAttributes() throws Exception{
+		List<Category> toProcess = new ArrayList<>(this.getCategories());
+		while(!toProcess.isEmpty()) {
+			Category c = toProcess.remove(0);
+			toProcess.addAll(c.getChildren());
+			validateAndFixCategory(c);
+		}
+		//each root attribute must exist in all children
+		//eat non-root attribute must exist as a root attribute in a parent
+	}
+	private void validateAndFixCategory(Category c) throws Exception{
+		for(CategoryAttribute ca: c.getAllAttributes()) {
+			if (ca.getIsRoot()) {
+				List<Category> toProcess = new ArrayList<>();
+				toProcess.addAll(c.getChildren());
+				while(!toProcess.isEmpty()) {
+					Category kid = toProcess.remove(0);
+					toProcess.addAll(kid.getChildren());
+					CategoryAttribute temp = kid.findAttribute(ca.getAttribute());
+					if (temp == null) {
+						throw new Exception(MessageFormat.format(Messages.DataModel_CategoryConfigError, c.getKeyId(), ca.getAttribute().getKeyId(), kid.getKeyId()));
+					}
+					//fix root setting
+					if (temp.getIsRoot()) {
+						SmartPlugIn.log(MessageFormat.format("Child category attribute {0} {1} is flagged as root, setting to non-root.", kid.getKeyId(), temp.getAttribute().getKeyId()), null); //$NON-NLS-1$
+						temp.setIsRoot(false);
+					}
+					//if the category is active then the active state should match the root
+					//if the category is disabled the active state should be disabled
+					if (kid.getIsActive()) {
+						if (temp.getIsActive() != ca.getIsActive()) {
+							SmartPlugIn.log(MessageFormat.format("Child category attribute {0} {1} does not match root attribute active flag, updating active flag.", kid.getKeyId(), temp.getAttribute().getKeyId()), null); //$NON-NLS-1$
+							temp.setIsActive(ca.getIsActive());
+						}
+					}else {
+						if (temp.getIsActive()) {
+							SmartPlugIn.log(MessageFormat.format("Category attribute {0} {1}; category is disabled, attribute is not. Updating attributing isactive statue", kid.getKeyId(), temp.getAttribute().getKeyId()), null); //$NON-NLS-1$
+							temp.setIsActive(false);
+						}
+					}
+				}
+			}else {
+				//not root
+				boolean isfound = false;
+				Category parent = c.getParent();
+				while(parent != null) {
+					CategoryAttribute next = parent.findAttribute(ca.getAttribute());
+					if (next.getIsRoot()) {
+						isfound = true;
+						break;
+					}
+					parent = parent.getParent();
+				}
+				if (!isfound) {
+					throw new Exception(Messages.DataModel_CategoryConfigError2);
+
+				}
+			}
+		}
+	}
 	
 	/**
 	 * Creates a copy of the current data model for the

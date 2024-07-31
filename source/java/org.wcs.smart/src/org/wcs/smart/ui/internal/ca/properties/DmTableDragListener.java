@@ -25,6 +25,7 @@ import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
+import org.wcs.smart.ca.datamodel.Category;
 
 /**
  * Drag listener for re-ordering item
@@ -47,6 +48,15 @@ public class DmTableDragListener implements DragSourceListener {
 	 */
 	@Override
 	public void dragStart(DragSourceEvent event) {
+		if (viewer.getSelection().isEmpty()) {
+			event.doit = false;
+			return;
+		}
+		
+		if (!(viewer.getStructuredSelection().getFirstElement() instanceof Category)) {
+			event.doit = false;
+			return;
+		}
 		LocalSelectionTransfer.getTransfer().setSelection(viewer.getSelection());
 		event.doit = true;
 

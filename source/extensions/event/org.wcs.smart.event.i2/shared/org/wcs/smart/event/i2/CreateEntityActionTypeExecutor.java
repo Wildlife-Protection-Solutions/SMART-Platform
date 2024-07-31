@@ -50,7 +50,6 @@ import org.wcs.smart.event.model.EActionParameterValue;
 import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.event.model.IActionTypeExecutor;
 import org.wcs.smart.hibernate.QueryFactory;
-
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;

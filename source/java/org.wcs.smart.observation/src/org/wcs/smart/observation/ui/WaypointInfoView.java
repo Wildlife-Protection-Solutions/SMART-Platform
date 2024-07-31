@@ -153,7 +153,7 @@ public class WaypointInfoView {
 							for (WaypointObservationGroup g : currentWp.getObservationGroups()) {
 								for (WaypointObservation wo : g.getObservations()) {
 									wo.getCategory().getFullCategoryName();
-									wo.getCategory().getAllAttribute(new ArrayList<>(), null);
+									wo.getCategory().getAllAttributes().size();
 									for (WaypointObservationAttribute woa : wo.getAttributes()) {
 										woa.getAttribute().getName();
 										woa.getAttributeValueAsString(Locale.getDefault());

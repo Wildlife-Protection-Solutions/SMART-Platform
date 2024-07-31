@@ -50,6 +50,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -325,10 +326,7 @@ public class DataLoader {
 				return;
 			}
 			
-			List<Attribute> allatts = new ArrayList<>();
-			c.getAllAttribute(allatts, null);
-			
-			
+			List<Attribute> allatts = c.getAllAttributes().stream().map(e->e.getAttribute()).toList();
 			List<Attribute> attributes = new ArrayList<>();
 			
 			Attribute speciesAttribute = findAttribute(WcommMapping.Field.WO_SPECIES, categoryKey, allatts);
@@ -426,8 +424,7 @@ public class DataLoader {
 				return;
 			}
 			
-			List<Attribute> allatts = new ArrayList<>();
-			c.getAllAttribute(allatts, null);
+			List<Attribute> allatts = c.getAllAttributes().stream().map(f->f.getAttribute()).toList();
 			
 			HashMap<WcommMapping.Field, Attribute> field2attribute = new HashMap<>();
 	
@@ -539,8 +536,8 @@ public class DataLoader {
 				return;
 			}
 			
-			List<Attribute> allatts = new ArrayList<>();
-			c.getAllAttribute(allatts, null);
+			List<Attribute> allatts = c.getAllAttributes().stream().map(f->f.getAttribute()).toList();
+
 			
 			HashMap<WcommMapping.Field, Attribute> field2attribute = new HashMap<>();
 	
@@ -651,9 +648,8 @@ public class DataLoader {
 				return;
 			}
 			
-			List<Attribute> allatts = new ArrayList<>();
-			c.getAllAttribute(allatts, null);
-			
+			List<Attribute> allatts = c.getAllAttributes().stream().map(f->f.getAttribute()).toList();
+
 			HashMap<WcommMapping.Field, Attribute> field2attribute = new HashMap<>();
 			HashMap<String,WcommMapping.Field> col2field = new HashMap<>();
 			col2field.put(LIVESTOCK_COL, WcommMapping.Field.HWC_LIVESTOCK);
@@ -840,11 +836,9 @@ public class DataLoader {
 				
 				Attribute found = null;
 				if (im.attribute != null) {
-					List<Attribute> all = new ArrayList<>();
-					c.getAllAttribute(all, null);
-					for (Attribute a : all) {
-						if (a.getKeyId().equals(im.attribute)) {
-							found = a;
+					for (CategoryAttribute a : c.getAllAttributes()) {
+						if (a.getAttribute().getKeyId().equals(im.attribute)) {
+							found = a.getAttribute();
 							break;
 						}
 					}

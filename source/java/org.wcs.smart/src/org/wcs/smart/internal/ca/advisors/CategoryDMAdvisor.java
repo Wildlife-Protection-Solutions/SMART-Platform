@@ -35,7 +35,6 @@ import org.wcs.smart.internal.Messages;
  */
 public class CategoryDMAdvisor implements IDeleteAdvisor {
 
-
 	/**
 	 * <p>
 	 * Validates that the category has no attributes and no
@@ -54,7 +53,7 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 			return Messages.CategoryDMAdvisor_Error_NotCategory;
 		}
 		Category category = (Category)object;
-		if (category.getAttributes() != null && category.getAttributes().size() > 0){
+		if (category.getRootAttributes() != null && category.getRootAttributes().size() > 0){
 			return MessageFormat.format(Messages.CategoryDMAdvisor_Error_CategoryReferencedByAttributes, new Object[]{category.getName()});
 		}else if (category.getChildren() != null && category.getChildren().size() > 0){
 			return MessageFormat.format(Messages.CategoryDMAdvisor_Error_CategoryReferencedByChildren, new Object[]{category.getName()});

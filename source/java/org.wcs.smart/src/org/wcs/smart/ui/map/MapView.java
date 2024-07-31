@@ -16,8 +16,6 @@ package org.wcs.smart.ui.map;
 
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -55,6 +53,9 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.LoadBasemapHandler;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.util.E3Utils;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * A map view.

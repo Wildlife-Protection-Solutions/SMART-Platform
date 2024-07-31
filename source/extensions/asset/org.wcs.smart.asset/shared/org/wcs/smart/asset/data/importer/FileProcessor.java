@@ -365,7 +365,7 @@ public class FileProcessor {
 		return false;
 	}
 	private boolean supportsAttribute(Category c, Attribute a) {
-		for (CategoryAttribute ca : c.getAttributes()) {
+		for (CategoryAttribute ca : c.getRootAttributes()) {
 			if (ca.getAttribute().equals(a)) return true;
 		}
 		return false;

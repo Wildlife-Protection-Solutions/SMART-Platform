@@ -34,8 +34,8 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**

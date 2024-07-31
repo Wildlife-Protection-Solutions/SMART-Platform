@@ -63,6 +63,8 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.icon.FixedIconSet;
 import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.cipher.EncryptUtils;
@@ -1822,6 +1824,10 @@ public class UpgradeServlet extends HttpServlet {
 							
 							"CREATE TRIGGER trg_ct_Device AFTER INSERT OR UPDATE OR DELETE ON smart.ct_device FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
 
+							//datamodel attribute ordering
+							"ALTER TABLE smart.dm_cat_att_map ADD COLUMN is_root boolean", //$NON-NLS-1$
+							"UPDATE smart.dm_cat_att_map set is_root = true", //$NON-NLS-1$
+							
 							//versions
 							"update connect.connect_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
@@ -1837,6 +1843,36 @@ public class UpgradeServlet extends HttpServlet {
 					}
 					
 					
+					//populate dm_cat_att_map table
+					//with child category/attribute objects
+					//so we can order them correctly 
+					//https://app.assembla.com/spaces/smart-cs/tickets/3297		
+					String attributeQuery = "select attribute_uuid, is_active from smart.dm_cat_att_map where category_uuid = ? order by att_order"; //$NON-NLS-1$
+					String cateogryQuery = "select uuid, is_active from smart.dm_category where parent_category_uuid = ?"; //$NON-NLS-1$
+					String insertQuery = "insert into smart.dm_cat_att_map (category_uuid, attribute_uuid, is_root, is_active, att_order) values (?,?,?,?,?)"; //$NON-NLS-1$
+					String updateQuery = "update smart.dm_cat_att_map set att_order = ? where attribute_uuid = ? and category_uuid = ?"; //$NON-NLS-1$
+					
+					List<Category> toProcess = new ArrayList<>();
+					try(Statement s = c.createStatement();
+							ResultSet rs = s.executeQuery("SELECT uuid,  is_active FROM smart.dm_category WHERE parent_category_uuid is null")){ //$NON-NLS-1$
+						while(rs.next()) {
+							Category temp = new Category();
+							temp.setUuid((UUID) rs.getObject(1));
+							temp.setIsActive(rs.getBoolean(2));
+							toProcess.add(temp);
+						}
+					}
+					
+					try(PreparedStatement attributeSelect = c.prepareStatement(attributeQuery);
+							PreparedStatement categorySelect = c.prepareStatement(cateogryQuery);
+							PreparedStatement insertStatement = c.prepareStatement(insertQuery);
+							PreparedStatement updateStatement = c.prepareStatement(updateQuery);){
+									
+						for(Category category : toProcess) {
+							processCategory801to810(category, new ArrayList<>(), c, attributeSelect, categorySelect, insertStatement, updateStatement);
+						}
+					}
+					
 				}catch (Exception ex) {
 					throw new SQLException (ex);
 				}
@@ -1845,5 +1881,73 @@ public class UpgradeServlet extends HttpServlet {
 		
 	}
 
+	
+	private void processCategory801to810(Category category, List<CategoryAttribute> parentAttributes, Connection c,
+			PreparedStatement attributeSelect, PreparedStatement categoryKidSelect, 
+			PreparedStatement insertQuery, PreparedStatement updateQuery) throws SQLException {
+
+		int order = 1;
+		
+		//find the existing root attributes for this category
+		List<Attribute> attributes = new ArrayList<>();
+		attributeSelect.setObject(1, category.getUuid());			
+		try(ResultSet rs = attributeSelect.executeQuery()){
+			while(rs.next()) {
+				UUID attribute_uuid = (UUID) rs.getObject(1);
+				boolean isActive = rs.getBoolean(2);
+				Attribute temp = new Attribute();
+				temp.setIsRequired(isActive);
+				temp.setUuid(attribute_uuid);
+				attributes.add(temp);
+			}
+		}
+		
+		for (CategoryAttribute parentAtt: parentAttributes) {
+			insertQuery.setObject(1, category.getUuid());
+			insertQuery.setObject(2, parentAtt.getAttribute().getUuid());
+			insertQuery.setBoolean(3, false); //root
+			insertQuery.setBoolean(4, parentAtt.getIsActive() && category.getIsActive()); //active
+			insertQuery.setInt(5, order++); //order
+			insertQuery.addBatch();
+		}
+		insertQuery.executeBatch();
+		
+		//find the existing root attributes for this category
+		attributeSelect.setObject(1, category.getUuid());			
+		for (Attribute temp : attributes) {
+			CategoryAttribute  cao = new CategoryAttribute();
+			cao.setCategory(category);
+			cao.setAttribute(temp);
+			cao.setOrder(order++);
+			cao.setIsActive(temp.getIsRequired());
+			parentAttributes.add(cao);
+				
+			updateQuery.setInt(1, cao.getOrder());
+			updateQuery.setObject(2, temp.getUuid());
+			updateQuery.setObject(3, category.getUuid());
+			updateQuery.addBatch();
+				
+			
+		}	
+		updateQuery.executeBatch();
+		
+		
+		//process children
+		List<Category> toProcess = new ArrayList<>();
+		categoryKidSelect.setObject(1, category.getUuid());
+		try(ResultSet rs = categoryKidSelect.executeQuery()){
+			while(rs.next()) {
+				UUID category_uuid = (UUID) rs.getObject(1);
+				Category temp = new Category();
+				temp.setUuid(category_uuid);
+				temp.setIsActive(rs.getBoolean(2));
+				toProcess.add(temp);					
+			}
+		}
+		
+		for (Category kid : toProcess) {
+			processCategory801to810(kid, new ArrayList<>(parentAttributes), c, attributeSelect, categoryKidSelect, insertQuery, updateQuery);
+		}
+	}
 
 }

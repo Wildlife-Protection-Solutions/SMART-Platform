@@ -99,7 +99,6 @@ public class PatrolTemplateCloner implements
 					cloneitem.setIsActive(li.getIsActive());
 					cloneitem.setKeyId(li.getKeyId());
 					cloneitem.setListOrder(li.getListOrder());
-					//TODO: test this
 					cloneitem.setIcon(engine.getNewConservationItem(li.getIcon()));
 					engine.copyLabels(li, cloneitem);
 					clone.getAttributeList().add(cloneitem);
@@ -128,7 +127,6 @@ public class PatrolTemplateCloner implements
 			tclone.setHkey(v.getHkey());
 			tclone.setNodeOrder(v.getNodeOrder());
 			tclone.setChildren(new ArrayList<>());
-			//TODO: test this
 			tclone.setIcon(engine.getNewConservationItem(v.getIcon()));
 
 			engine.copyLabels(v, tclone);

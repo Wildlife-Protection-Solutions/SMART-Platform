@@ -576,9 +576,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		for (Patrol newp : newPatrols) {
 			movedLegs.addAll(newp.getLegs());
 		}
-		movedLegs.forEach(f->{
-			System.out.println("movedleg:" + f.getUuid());
-		});
+		
 		try {
 			if (!isNew) PatrolHibernateManager.computeAttachmentLocations(p, session);
 			
@@ -644,7 +642,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					//a patrol leg day further down
 					if (pld.getWaypoints() != null) {
 						for (PatrolWaypoint pw : pld.getWaypoints()) {
-							System.out.println("removing pw: " + pw.getWaypoint().getId() + " : " + pw.getPatrolLegDay().getPatrolLeg().getId() );
 							doRemove(session, pw);
 						}
 						pld.getWaypoints().clear();
@@ -761,9 +758,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 						pwclone.setWaypoint(pw.getWaypoint());
 						pwclone.setPatrolLegDay(found);
 						found.getWaypoints().add(pwclone);
-						
-						System.out.println("new pw: " + pwclone.getWaypoint().getId() + " : " + pwclone.getPatrolLegDay().getPatrolLeg().getId() );
-						
 						doPersist(session, pwclone);
 					}
 					
@@ -840,8 +834,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 						pw2.setWaypoint(pw.getWaypoint());
 						pw2.setPatrolLegDay(moveto);
 						doPersist(session, pw2);
-						System.out.println("new pw: " + pw2.getWaypoint().getId() + " : " + pw2.getPatrolLegDay().getPatrolLeg().getId() );
-
 						moveto.getWaypoints().add(pw2);
 					}	
 					doflush(session);
@@ -869,8 +861,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			for (PatrolLegDay pld : delete.getPatrolLegDays()) {
 				if (pld.getWaypoints() == null) continue;
 				for (PatrolWaypoint pw : pld.getWaypoints()) {
-					System.out.println("remove pw: " + pw.getWaypoint().getId() + " : " + pw.getPatrolLegDay().getPatrolLeg().getId() );
-
 					doRemove(session, pw);
 				}
 				pld.getWaypoints().clear();

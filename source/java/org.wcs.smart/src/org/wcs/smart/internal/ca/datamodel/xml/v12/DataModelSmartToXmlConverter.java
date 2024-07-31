@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.internal.ca.datamodel.xml.v11;
+package org.wcs.smart.internal.ca.datamodel.xml.v12;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -30,8 +30,8 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.AttributeType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.CategoryType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.AttributeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.CategoryType;
 
 /**
  * Converts a database data-model to the xml representation 
@@ -57,12 +57,12 @@ public class DataModelSmartToXmlConverter extends DataModelToXmlConverter{
 	 * @return xml data model
 	 */
 	@Override
-	public org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel convert(SimpleDataModel dm) {
+	public org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel convert(SimpleDataModel dm) {
 		
 		this.dm = dm;
 		
 		monitor.beginTask(Messages.DataModelSmartToXmlConverter_Progress_convertingDm, 3);
-		xml = new org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel();
+		xml = new org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel();
 		
 		monitor.subTask(Messages.DataModelSmartToXmlConverter_Progress_Languages);
 		this.llookup = processLanguages();

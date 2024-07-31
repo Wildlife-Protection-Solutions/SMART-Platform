@@ -56,6 +56,7 @@ import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -856,18 +857,16 @@ public class RecordXmlImporter {
 			UUID attributeUuid = UuidUtils.stringToUuid(recordAttribute.getAttribute().getUuid());
 			
 			Attribute srcAttribute = null;
-			List<Attribute> allAttributes = new ArrayList<Attribute>();
-			newObservation.getCategory().getAllAttribute(allAttributes, null);
-			for (Attribute a : allAttributes){
-				if (a.getUuid().equals(attributeUuid)){
-					srcAttribute = a;
+			for (CategoryAttribute a : newObservation.getCategory().getAllAttributes()){
+				if (a.getAttribute().getUuid().equals(attributeUuid)){
+					srcAttribute = a.getAttribute();
 					break;
 				}
 			}
 			if (srcAttribute == null){
-				for (Attribute a : allAttributes){
-					if (a.getKeyId().equals(recordAttribute.getAttribute().getName())){
-						srcAttribute = a;
+				for (CategoryAttribute a : newObservation.getCategory().getAllAttributes()){
+					if (a.getAttribute().getKeyId().equals(recordAttribute.getAttribute().getName())){
+						srcAttribute = a.getAttribute();
 						break;
 					}
 				}	

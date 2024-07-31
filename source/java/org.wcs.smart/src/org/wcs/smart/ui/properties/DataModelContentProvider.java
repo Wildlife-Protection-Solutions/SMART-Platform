@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -42,8 +41,11 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	protected RootNode root = new RootNode();
 	protected DataModel model;
 
+	//only categories
 	private boolean onlyCategories = false;
+	//if only enabled category and attributes are shown
 	private boolean onlyEnabled = false;
+	//if include parent attributes
 	private boolean allAttributes = false;
 	
 	/**
@@ -135,11 +137,19 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				//add attributes
 
 				if (allAttributes){
-					List<CategoryAttribute> all = new ArrayList<>();
-					category.getAllCategoryAttribute(all, onlyEnabled ? true : null);
-					children.addAll(all);
+					if (onlyEnabled) {
+						children.addAll(category.getAllActiveAttributes());
+					}else {
+						children.addAll(category.getAllAttributes());
+					}
 				}else{
-					children.addAll(category.getAttributes(onlyEnabled ? true : null));
+					if (onlyEnabled) {
+						for(CategoryAttribute ca : category.getRootAttributes()) {
+							if (ca.getIsActive()) children.add(ca);
+						}
+					}else {
+						children.addAll(category.getRootAttributes());
+					}
 				}
 			}
 			return children.toArray();
@@ -167,12 +177,12 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		
-		if (element instanceof Category){
+		if (element instanceof Category category){
 			List<Category> ckids = null;
 			if (onlyEnabled){
-				ckids = ((Category)element).getActiveChildren();
+				ckids = category.getActiveChildren();
 			}else{
-				ckids = ((Category)element).getChildren();
+				ckids = category.getChildren();
 			}
 			if (ckids != null && ckids.size() > 0){
 				return true;
@@ -181,27 +191,19 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			if (!onlyCategories){
 				//also check attributes
 				if (onlyEnabled){
-					if (((Category)element).getAttributes(true).size() > 0){
-						return true;
-					}
-					if (allAttributes){
-						List<Attribute> kids = new ArrayList<Attribute>();
-						((Category)element).getAllAttribute(kids, true);
-						if (kids.size() > 0){
-							return true;
+					if (allAttributes) {
+						return category.getAllActiveAttributes().size() > 0;
+					}else {
+						for (CategoryAttribute ca: category.getRootAttributes()) {
+							if (ca.getIsActive()) return true;
 						}
+						return false;
 					}
-				}else{
-					if (((Category)element).getAttributes() != null && 
-							((Category)element).getAttributes().size() > 0){
-						return true;
-					}
-					if (allAttributes){
-						List<Attribute> kids = new ArrayList<Attribute>();
-						((Category)element).getAllAttribute(kids, null);
-						if (kids.size() > 0){
-							return true;
-						}
+				}else {
+					if (allAttributes) {
+						return category.getAllAttributes().size() > 0;
+					}else {
+						return category.getRootAttributes().size() > 0;
 					}
 				}
 			}

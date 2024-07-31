@@ -135,8 +135,8 @@ public enum XmlManager {
 			 wo.setAttributes(new ArrayList<>());
 			 
 			 HashMap<Attribute, ObservationConfiguration.Type> types = new HashMap<>();
-			 List<Attribute> all = new ArrayList<>();
-			 category.getAllAttribute(all, null);
+			 List<Attribute> all = category.getAllAttributes().stream().map(m->m.getAttribute()).toList();
+			 
 			 
 			 for (AttributeType a : mapping.getAttributes()) {
 				 for (Attribute attribute : all) {

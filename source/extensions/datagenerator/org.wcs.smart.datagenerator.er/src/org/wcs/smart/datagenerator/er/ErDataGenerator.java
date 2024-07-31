@@ -51,11 +51,11 @@ import org.locationtech.jts.shape.random.RandomPointsBuilder;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
-import org.wcs.smart.ca.datamodel.Attribute.GeometrySource;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.datagenerator.er.internal.Messages;
 import org.wcs.smart.datagenerator.er.model.ObservationConfiguration;
@@ -619,7 +619,6 @@ public class ErDataGenerator implements IDataEngine{
 				return random.nextInt(30);
 			}
 		case TEXT:
-			//TODO:
 			String[] randomStrings = new String[] {"cat","dog","fish","sheep","cow","donkey"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			return randomStrings[random.nextInt(randomStrings.length)];
 		case TREE:

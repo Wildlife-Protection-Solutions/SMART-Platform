@@ -54,7 +54,6 @@ public interface IStyledQuery {
 	 */
 	public void setStyle(String style);
 		
-	//TODO:
 	//investigate moving this elsewhere
 	//used by asset summary queries
 	public default List<QueryColumn> computeQueryColumns(Locale l, Session session, 

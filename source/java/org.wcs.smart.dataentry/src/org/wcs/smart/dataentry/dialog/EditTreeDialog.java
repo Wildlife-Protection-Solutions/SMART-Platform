@@ -85,8 +85,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**

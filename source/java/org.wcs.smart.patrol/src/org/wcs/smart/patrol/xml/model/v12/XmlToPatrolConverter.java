@@ -48,7 +48,6 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -630,7 +629,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			}else{
 				Attribute att = results.get(0);
 				//ensure attribute exists for category
-				if (findCategoryAttribute(category, att)){
+				if (category.hasAttribute(att)){
 					return att;
 				}
 			}
@@ -638,24 +637,6 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		return null;
 	}
 	
-	/*
-	 * Searches for a given attribute in the category provided or
-	 * one of the parent categories.  Well return false if attribute not
-	 * found.  True if attribute found.
-	 */
-	private boolean findCategoryAttribute(Category root, Attribute attribute){
-		for (CategoryAttribute att: root.getAttributes()){
-			if (att.getAttribute().equals(attribute)){
-				return true;
-			}
-		}
-		if (root.getParent() != null){
-			return findCategoryAttribute(root.getParent(), attribute);
-		}else{
-			//attribute not found
-			return false;
-		}
-	}
 	
 	private Category findCategory(String key){
 		String[] bits = key.split("\\."); //$NON-NLS-1$

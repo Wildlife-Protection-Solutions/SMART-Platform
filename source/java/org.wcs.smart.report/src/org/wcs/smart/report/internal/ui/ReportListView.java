@@ -23,8 +23,6 @@ package org.wcs.smart.report.internal.ui;
 
 import java.util.Iterator;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -92,6 +90,9 @@ import org.wcs.smart.report.ui.ReportLabelProvider;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * View that displays saved queries to the user.

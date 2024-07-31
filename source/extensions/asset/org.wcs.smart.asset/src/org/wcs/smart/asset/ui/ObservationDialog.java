@@ -73,6 +73,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -86,6 +87,7 @@ import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for editing observation details.
@@ -130,7 +132,7 @@ public class ObservationDialog extends SmartStyledDialog {
 			groups.forEach(g->g.getObservations().forEach(o->{
 				o.getCategory().getName();
 				o.getCategory().getFullCategoryName();
-				o.getCategory().getAllAttribute(new ArrayList<>(), null);
+				o.getCategory().getAllAttributes().size();
 				o.getAttributes().forEach(a->{
 					a.getAttributeValueAsString(Locale.getDefault());
 					a.getAttribute().getName();
@@ -523,7 +525,7 @@ public class ObservationDialog extends SmartStyledDialog {
 			((GridLayout)top.getLayout()).marginHeight = 0;
 			
 			Label l = new Label(top, SWT.WRAP);
-			l.setText(c.getFullCategoryName());
+			l.setText(SmartUtils.formatStringForLabel(c.getFullCategoryName()));
 			FontData fd = l.getFont().getFontData()[0];
 			fd.setStyle(SWT.BOLD);
 			final Font boldFont = new Font(l.getDisplay(), fd);
@@ -550,14 +552,11 @@ public class ObservationDialog extends SmartStyledDialog {
 			attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			scattributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			ArrayList<Attribute> allAttributes = new ArrayList<>();
-			c.getAllAttribute(allAttributes, true);
-			
 			top.addListener(SWT.Resize, e->resize(scattributes, attributes));
 			
 			List<IAttributeField<?>> fields = new ArrayList<>();
-			for (Attribute a :allAttributes){
-				
+			for (CategoryAttribute ca : c.getAllActiveAttributes()){
+				Attribute a = ca.getAttribute();
 				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(a);
 				field.createComposite(attributes);
 				field.addResizeListener(e->resize(scattributes, attributes));

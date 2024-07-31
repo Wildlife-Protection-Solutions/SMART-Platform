@@ -489,7 +489,12 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 						throw new InvocationTargetException(new IllegalStateException(error), error);
 					}
 					monitor.subTask(Messages.InitCaDataModelDialog_Progress_SavingDm);
-					dm.save(getSession(), progress.split(1));
+					try {
+						dm.save(getSession(), progress.split(1));	
+					}catch (Exception ex) {
+						throw new InvocationTargetException(ex);
+					}
+					
 					
 					return ;
 				}
@@ -499,6 +504,9 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 			SmartPlugIn.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getCause().getLocalizedMessage(), ex);
 		}catch(Exception ex){
 			SmartPlugIn.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getCause(), ex);
+		}
+		if (getSession().getTransaction().isActive()) {
+			getSession().getTransaction().rollback();
 		}
 		return false;
 	}

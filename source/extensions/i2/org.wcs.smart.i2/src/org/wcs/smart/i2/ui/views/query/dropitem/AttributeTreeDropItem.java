@@ -53,8 +53,8 @@ import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.ui.editors.query.FilterDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 
 /**
  * Attribute tree drop item

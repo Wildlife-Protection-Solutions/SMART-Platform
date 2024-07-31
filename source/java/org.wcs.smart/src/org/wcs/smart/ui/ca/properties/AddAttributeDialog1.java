@@ -101,7 +101,7 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 	private DataModel dm; // data model being updated
 
 	/* items added */
-	List<CategoryAttribute> addedElements;
+	List<CategoryAttribute> addedElements = new ArrayList<>();
 	private Session session;
 	
 	private Job loadAttributesJob = new Job("Loading Attributes"){ //$NON-NLS-1$
@@ -371,9 +371,8 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 	 * adds all selected attributes to the given category 
 	 * 
 	 */
-	private List<CategoryAttribute> addAttributes(Category cat, DataModel dm) {
+	private void addAttributes(Category cat, DataModel dm) {
 		Object[] checked = checkboxTableViewer.getCheckedElements();
-		addedElements = new ArrayList<CategoryAttribute>();
 		for (int i = 0; i < checked.length; i++) {
 			Object x = checked[i];
 			if (x instanceof Attribute){
@@ -384,7 +383,6 @@ public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 				}
 			}
 		}
-		return addedElements;
 	}
 
 	@Override

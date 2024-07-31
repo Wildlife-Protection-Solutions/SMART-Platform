@@ -394,17 +394,12 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 	 * found.  True if attribute found.
 	 */
 	private boolean findCategoryAttribute(Category root, Attribute attribute){
-		for (CategoryAttribute att: root.getAttributes()){
+		for (CategoryAttribute att: root.getAllAttributes()){
 			if (att.getAttribute().equals(attribute)){
 				return true;
 			}
 		}
-		if (root.getParent() != null){
-			return findCategoryAttribute(root.getParent(), attribute);
-		}else{
-			//attribute not found
-			return false;
-		}
+		return false;
 	}
 	
 	private Category findCategory(String key){

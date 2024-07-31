@@ -23,7 +23,6 @@ package org.wcs.smart.er.query.engine;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -92,7 +91,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 					}
 				}
 				o.getCategory().getFullCategoryName();
-				o.getCategory().getAllAttribute(new ArrayList<>(), null);
+				o.getCategory().getAllAttributes().size();
 				tags = oba.getTagsAsString();
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
@@ -106,7 +105,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 						}
 					}
 					wo.getCategory().getFullCategoryName();
-					wo.getCategory().getAllAttribute(new ArrayList<>(), null);
+					wo.getCategory().getAllAttributes().size();
 				}
 				tags = obw.getTagsAsString();
 				

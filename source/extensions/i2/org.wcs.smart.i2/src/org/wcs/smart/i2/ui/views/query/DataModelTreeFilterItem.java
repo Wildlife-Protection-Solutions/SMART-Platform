@@ -115,10 +115,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 								for (Category kid : c.getChildren()){
 									temp.add(new DataModelTreeFilterItem(kid));
 								}
-								List<CategoryAttribute> cas = new ArrayList<>();
-								c.getAllCategoryAttribute(cas, null);
-								cas.sort((a,b)->((Integer)a.getOrder()).compareTo(b.getOrder()));
-								for (CategoryAttribute ca : cas){
+								for (CategoryAttribute ca : c.getAllAttributes()){
 									temp.add(new DataModelTreeFilterItem(new CategoryAttribute(c, ca.getAttribute())));
 								}
 							}

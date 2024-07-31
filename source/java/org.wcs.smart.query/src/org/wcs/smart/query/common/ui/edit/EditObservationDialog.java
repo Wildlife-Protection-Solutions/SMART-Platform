@@ -45,6 +45,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -56,10 +58,6 @@ import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.ui.properties.CategoryTreeDropDown;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 
 /**
  * Dialog box for editing an observation.  Allows user to
@@ -156,7 +154,7 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		List<Attribute> allAttributes = new ArrayList<>();
+		List<CategoryAttribute> allAttributes = new ArrayList<>();
 		Category category = null;
 		
 		try(Session s = HibernateManager.openSession()){
@@ -171,7 +169,7 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			
 			category = toEdit.getCategory();
 			if (category != null){
-				category.getAllAttribute(allAttributes, true);
+				allAttributes.addAll(category.getAllAttributes());
 			}
 			
 			parent = (Composite)super.createDialogArea(parent);
@@ -179,21 +177,12 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			Composite all = new Composite(parent,  SWT.NONE);
 			all.setLayout(new GridLayout(1, false));
 			all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-			CriteriaBuilder cb = s.getCriteriaBuilder();
-			CriteriaQuery<Category> cQuery = cb.createQuery(Category.class);
-			Root<Category> root =cQuery.from(Category.class);
-			cQuery.where(cb.and(
-					cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-					cb.isNull(root.get("parent")))); //$NON-NLS-1$
-			List<Category> roots = s.createQuery(cQuery).getResultList();
-			List<Category> lazy = new ArrayList<>(roots);
-			while(!lazy.isEmpty()){
-				Category l = lazy.remove(0);
-				lazy.addAll(l.getActiveChildren());
-				l.getName();
-			}
 			
+			List<Category> roots = s.createQuery("FROM Category WHERE parent is null and conservationArea = :ca order by categoryOrder", Category.class) //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.list();
+			DataModel.processCategories(roots, c->c.getActiveChildren().size());
+
 			categoryViewer = new CategoryTreeDropDown();
 			categoryViewer.createComposite(all);
 			all.addListener(SWT.Dispose, e->categoryViewer.dispose());
@@ -202,11 +191,9 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			categoryViewer.addSelectionChangedListener(e-> {
 					try(Session session = HibernateManager.openSession()){
 						Category c = (Category) session.get(Category.class, categoryViewer.getValue().getUuid());
-						List<Attribute> allatts = new ArrayList<>();
-						c.getAllAttribute(allatts, true);
 						if (!c.equals(lastCategory)){
-							loadTrees(allatts);
-							configureAttribute(allatts);
+							loadTrees(c.getAllAttributes());
+							configureAttribute(c.getAllAttributes());
 						}
 						lastCategory = c;
 					}
@@ -240,9 +227,10 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 		return parent;
 	}
 
-	private void loadTrees(List<Attribute> allAttributes){
+	private void loadTrees(List<CategoryAttribute> allAttributes){
 		List<AttributeTreeNode> toload = new ArrayList<>();
-		for (Attribute a : allAttributes){
+		for (CategoryAttribute ca : allAttributes){
+			Attribute a = ca.getAttribute();
 			if (a.getType() != AttributeType.TREE) continue;
 			if (a.getActiveTreeNodes() == null) continue;
 			toload.addAll(a.getActiveTreeNodes());
@@ -257,7 +245,7 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 	private void resize() {
 		attributeComposite.setMinSize(attributeComposite.getSize().x-attributeComposite.getVerticalBar().getSize().x, attributeKidComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 	}
-	private void configureAttribute(List<Attribute> allAttributes){
+	private void configureAttribute(List<CategoryAttribute> allAttributes){
 		if (attributeKidComposite != null){
 			attributeKidComposite.dispose();
 		}
@@ -267,7 +255,8 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 		attributeComposite.setContent(attributeKidComposite);
 		
 		attributeFields = new ArrayList<>();
-		for (Attribute attribute : allAttributes){
+		for (CategoryAttribute cattribute : allAttributes){
+			Attribute attribute = cattribute.getAttribute();
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(attribute);
 			
 			field.createComposite(attributeKidComposite);

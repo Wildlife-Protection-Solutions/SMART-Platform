@@ -501,7 +501,6 @@ public class DataGenerator implements IDataEngine{
 				return random.nextInt(30);
 			}
 		case TEXT:
-			//TODO:
 			String[] randomStrings = new String[] {"cat","dog","fish","sheep","cow","donkey"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			return randomStrings[random.nextInt(randomStrings.length)];
 		case TREE:

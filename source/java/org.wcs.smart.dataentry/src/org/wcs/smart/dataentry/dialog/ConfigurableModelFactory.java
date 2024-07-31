@@ -39,6 +39,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -223,22 +224,14 @@ public class ConfigurableModelFactory {
 			node.setParent(parent);
 			node.setCategory(c);
 			c.getNames().size();
-//			node.setName(c.getName());
-//			for (Label l : c.getNames()){
-//				node.updateName(l.getLanguage(), l.getValue());
-//			}
+
 			
-			List<Attribute> attrList = new ArrayList<Attribute>();
-			c.getAllAttribute(attrList, true);
-			for (Attribute a : attrList) {
+			for (CategoryAttribute ca : c.getAllActiveAttributes()) {
+				Attribute a = ca.getAttribute();
 				CmAttribute cma = new CmAttribute();
 				cma.setNode(node);
 				cma.setAttribute(a);
 				a.getNames().size();
-//				cma.setName(a.getName());
-//				for (Label label : a.getNames()) { //we need a copy, not the same instance of set
-//					cma.updateName(label.getLanguage(), label.getValue());
-//				}
 				cma.setOrder(node.getCmAttributes().size());
 				cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 				node.getCmAttributes().add(cma);

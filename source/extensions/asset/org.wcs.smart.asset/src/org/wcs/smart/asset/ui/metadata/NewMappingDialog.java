@@ -110,7 +110,7 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 							while(!toVisit.isEmpty()) {
 								Category c = toVisit.remove(0);
 								c.getName();
-								c.getAttributes().forEach(e->e.getAttribute().getName());
+								c.getAllAttributes().forEach(e->e.getAttribute().getName());
 								toVisit.addAll(c.getChildren());
 							}
 							monitor.worked(1);

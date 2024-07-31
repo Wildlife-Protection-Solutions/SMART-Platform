@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -106,6 +104,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.datagenerator.er.DataEngineRunnable;
 import org.wcs.smart.datagenerator.er.ErDataGenerator;
@@ -130,6 +129,8 @@ import org.wcs.smart.ui.properties.CategoryTreeDropDown;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -674,14 +675,15 @@ public class ErDataGeneratorView {
 			Category c = null;
 			
 			//load attribute
-			List<Attribute> allatts = new ArrayList<>();
+			List<CategoryAttribute> allatts = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				c = (Category) session.get(Category.class, next.getUuid());
-				c.getAllAttribute(allatts, true);
-
+				c.getAllActiveAttributes().size();
+				
 				//lazy load trees & lists
 				ArrayDeque<AttributeTreeNode> nodes = new ArrayDeque<>();
-				for (Attribute a : allatts) {
+				for (CategoryAttribute ca : allatts) {
+					Attribute a = ca.getAttribute();
 					if (a.getType() == AttributeType.TREE) {
 						nodes.addAll(a.getActiveTreeNodes());
 					}else if (a.getType().isList()) {
@@ -836,7 +838,6 @@ public class ErDataGeneratorView {
 	
 	
 	private void saveConfig() {
-		//TODO: add listener to save immediately on close
 		saveJob.schedule(1000);
 	}
 	
@@ -902,7 +903,7 @@ public class ErDataGeneratorView {
 		saveConfig();
 	}
 	
-	private void updateAttributePanel(Composite attributePanel, Category category, List<Attribute> attributes) {
+	private void updateAttributePanel(Composite attributePanel, Category category, List<CategoryAttribute> attributes) {
 		attributePanel.setRedraw(false);
 		attributePanel.setVisible(false);
 		
@@ -912,7 +913,9 @@ public class ErDataGeneratorView {
 		try {
 			attributePanel.setLayout(new GridLayout(3, false));
 			
-			for (Attribute attribute : attributes) {
+			for (CategoryAttribute cattribute : attributes) {
+				Attribute attribute = cattribute.getAttribute();
+				
 				int index = attributePanel.getChildren().length;
 				ComboViewer v = createObsTypeComboViewer(attributePanel, attribute.getType());
 				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(attribute);

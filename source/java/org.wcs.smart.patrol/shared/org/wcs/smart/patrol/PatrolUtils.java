@@ -195,7 +195,7 @@ public class PatrolUtils {
 		temp.setIsActive(true);
 		temp.setName(pa.getName());
 		temp.setType(pa.getType());
-
+		
 		if (pa.getType() == Attribute.AttributeType.LIST) {
 			temp.setAttributeList(mergeListAttributes(toMerge, temp));			
 		}
@@ -204,6 +204,7 @@ public class PatrolUtils {
 		}
 		return temp;
 	}
+	
 	private static List<PatrolAttributeListItem> mergeListAttributes(List<PatrolAttribute> toMerge, PatrolAttribute rattribute) {
 		Map<String, PatrolAttributeListItem> listItems = new HashMap<>();
 		
@@ -219,7 +220,6 @@ public class PatrolUtils {
 				clone.setName(li.getName());
 				clone.setListOrder(li.getListOrder());
 				clone.setAttribute(rattribute);
-				//TODO: icons?
 				listItems.put(li.getKeyId(), clone);
 				
 			}
@@ -255,7 +255,6 @@ public class PatrolUtils {
 				clone.setName(tnode.getName());
 				clone.setNodeOrder(tnode.getNodeOrder());
 				clone.setAttribute(rattribute);
-				//TODO: icons?				
 				if (tnode.getParent() != null) {
 					clone.setParent(treeNodes.get(tnode.getParent().getHkey()));
 					clone.getParent().getChildren().add(clone);

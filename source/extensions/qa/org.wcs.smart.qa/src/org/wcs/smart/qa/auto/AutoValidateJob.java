@@ -111,11 +111,11 @@ public class AutoValidateJob extends Job{
 				boolean timeout = false;
 				if (ex instanceof LockTimeoutException) {
 					timeout = true;
-				}else if (ex.getMessage().contains("Table 'SMART.CONNECT_CHANGE_LOG' cannot be locked in 'EXCLUSIVE' mode.")) {
+				}else if (ex.getMessage().contains("Table 'SMART.CONNECT_CHANGE_LOG' cannot be locked in 'EXCLUSIVE' mode.")) { //$NON-NLS-1$
 					timeout = true;
 				}
 				if (timeout) {
-					QaPlugIn.log("Lock timeout with QA routine, waiting 5 seconds and trying again. ", null);
+					QaPlugIn.log("Lock timeout with QA routine, waiting 5 seconds and trying again. ", null); //$NON-NLS-1$
 					schedule(5000);
 					return Status.OK_STATUS;
 				}

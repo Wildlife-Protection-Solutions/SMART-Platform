@@ -55,8 +55,8 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
+import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
 
 /**
  * Info composite for {@link CmAttribute} of tree type

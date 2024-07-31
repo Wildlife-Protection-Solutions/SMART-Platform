@@ -163,9 +163,9 @@ public class DataModelMerger {
 		//clone the labels
 		clone.setName(toClone.getName());
 			
-		if (toClone.getAttributes() != null){
-			clone.setAttributes(new ArrayList<CategoryAttribute>());
-			for (CategoryAttribute attribute : toClone.getAttributes()){
+		if (toClone.getAllAttributes() != null){
+			clone.setAllAttributes(new ArrayList<CategoryAttribute>());
+			for (CategoryAttribute attribute : toClone.getAllAttributes()){
 				if (canKeep(attribute, cas, session)){
 					//	find attribute
 					Attribute newAttribute = null;
@@ -177,8 +177,10 @@ public class DataModelMerger {
 					}
 					if (newAttribute !=  null){
 						CategoryAttribute link = new CategoryAttribute(clone, newAttribute);
-						link.setIsActive(true);
-						clone.getAttributes().add(link);
+						link.setIsActive(attribute.getIsActive());
+						link.setOrder(attribute.getOrder());
+						link.setIsRoot(attribute.getIsRoot());
+						clone.getAllAttributes().add(link);
 					}
 				}
 				
@@ -193,7 +195,7 @@ public class DataModelMerger {
 					clone.getChildren().add(kid);
 				}
 			}
-			clone.setActiveChildren(clone.getChildren());
+			
 		}	
 		return clone;
 	}

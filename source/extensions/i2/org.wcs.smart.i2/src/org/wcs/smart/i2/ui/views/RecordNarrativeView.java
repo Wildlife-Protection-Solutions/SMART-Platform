@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -71,6 +69,9 @@ import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.i2.ui.editors.record.EntitySearchShell;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * View for display record narratives or scratchpads.  This are open only from an record editor

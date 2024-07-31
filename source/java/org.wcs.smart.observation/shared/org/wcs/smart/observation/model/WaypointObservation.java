@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -104,7 +106,7 @@ public class WaypointObservation extends UuidItem {
 	}
 	
 	/**
-	 * Gets attribute observation sorted by attribute data model order. 
+	 * Gets attribute observation sorted by category attribute order (new order introduced in smart 8.1.0). 
 	 * Object must be attached to valid session when calling. Returned array
 	 * is not associated with the session.
 	 * 
@@ -112,10 +114,17 @@ public class WaypointObservation extends UuidItem {
 	 */
 	@Transient
 	public List<WaypointObservationAttribute> getAttributesSorted(){
-		List<Attribute> order = new ArrayList<>();
-		getCategory().getAllAttribute(order, null);
+		List<CategoryAttribute> order = getCategory().getAllAttributes();
+		HashMap<Attribute, Integer> index = new HashMap<>();
+		order.forEach(ca->index.put(ca.getAttribute(), ca.getOrder()));
+		
 		List<WaypointObservationAttribute> sorted = new ArrayList<>(getAttributes());
-		sorted.sort((a, b)-> Integer.compare(order.indexOf(a.getAttribute()), order.indexOf(b.getAttribute())) );
+		//ensure each attribute has an index
+		sorted.forEach(a->{
+			if (!index.containsKey(a.getAttribute())) index.put(a.getAttribute(), -1);
+		});
+		//sort
+		sorted.sort((a, b)-> Integer.compare(index.get(a.getAttribute()), index.get(b.getAttribute())));
 		return sorted;
 	}
 	

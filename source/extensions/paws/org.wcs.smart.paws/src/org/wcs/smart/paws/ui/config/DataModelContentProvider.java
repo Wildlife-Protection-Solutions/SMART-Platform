@@ -142,9 +142,8 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			}
 			
 			//add attributes
-			List<CategoryAttribute> all = new ArrayList<>();
-			category.getAllCategoryAttribute(all, onlyActive);
-			for (CategoryAttribute ca : all) {
+			for (CategoryAttribute ca : category.getAllAttributes()) {
+				if (onlyActive && !ca.getIsActive()) continue;
 				if (ca.getAttribute().getType().isList() 
 						|| ca.getAttribute().getType() == Attribute.AttributeType.TREE) {
 					children.add(ca);
@@ -200,7 +199,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 		}else if (element instanceof Category){
 			Category category = (Category)element;
 			if (category.getActiveChildren() != null && category.getActiveChildren().size() > 0) return true;
-			if (category.getAttributes(true).size() > 0) return true;
+			if (category.getAllActiveAttributes().size() > 0) return true;
 		}else if (element instanceof CategoryItemWrapper){
 			if (((CategoryItemWrapper) element).li != null) return false;
 			if (((CategoryItemWrapper) element).node != null) return !((CategoryItemWrapper) element).node.getActiveChildren().isEmpty();

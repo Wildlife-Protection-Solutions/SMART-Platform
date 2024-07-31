@@ -24,8 +24,8 @@ package org.wcs.smart.ca.datamodel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.hibernate.annotations.SQLRestriction;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.icon.Icon;
@@ -66,10 +66,11 @@ public class Category extends DmObject implements HkeyObject{
 	private boolean isMultiple;			//if multiple observations can be recorded
 	private ConservationArea ca; 		//conservation area of category
 	private List<Category> children;	//children categories
-	private List<Category> activeChildren;	//children categories
+	
 	private Category parent;			//parent category
 	private int categoryOrder;			//order of the category in relation to its siblings
 	private List<CategoryAttribute> attributes;	//list of attributes
+	
 	private boolean isActive;			//if active.
 	private String categoryHkey;	//the full key of the category "parent.parent.parent.me"
 	
@@ -208,25 +209,6 @@ RETURNS NULL ON NULL INPUT;
 	}
 	
 	/**
-	 * 
-	 * @return all children categories; <code>null</code> if leaf node
-	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent")
-	@SQLRestriction("is_active")
-	@OrderBy("cat_order")
-	public List<Category> getActiveChildren(){
-		return this.activeChildren;
-	}
-	
-	/**
-	 * 
-	 * @param children children categories
-	 */
-	public void setActiveChildren(List<Category> activeChildren){
-		this.activeChildren = activeChildren;
-	}
-	
-	/**
 	 * The full key of the category.  This key includes
 	 * the key of all the parents.
 	 * <parent>.<parent>. ... .<mykey>
@@ -241,34 +223,6 @@ RETURNS NULL ON NULL INPUT;
 	public void setHkey(String hkey){
 		this.categoryHkey = hkey;
 	}
-	
-	/**
-	 * Updates the hkey of this object and
-	 * children objects.
-	 */
-	public void updateHkey(){
-		setHkey(computeHkey());
-		
-		if (getChildren() != null){
-			for (Category cat: getChildren()){
-				cat.updateHkey();
-			}
-		}
-	}
-	
-	
-	/**
-	 * Computes the hkey for the given category.
-	 * 
-	 * @return the hkey for this category.
-	 */
-	private String computeHkey(){
-		if (parent == null){
-			return this.getKeyId() + HkeyObject.HKEY_SEPERATOR;
-		}
-		return parent.computeHkey() + this.getKeyId() + HkeyObject.HKEY_SEPERATOR;
-	}
-	
 	
 	
 	/**
@@ -295,37 +249,11 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.category", cascade={CascadeType.ALL}, orphanRemoval = false)
 	@OrderBy("att_order")
-	public List<CategoryAttribute> getAttributes(){
+	public List<CategoryAttribute> getAllAttributes(){
 		return this.attributes;
 	}
 	
-	/**
-	 * Gets attributes that are active or inactive  
-	 * @param active <code>true</code> for active only attributes, 
-	 * <code>false</code> for in-active only attributes
-	 * <code>null</code> for all attributes
-	 * @return list of only active or inactive attributes
-	 */
-	@Transient 
-	public List<CategoryAttribute> getAttributes(Boolean active){
-		List<CategoryAttribute> tmp = new ArrayList<CategoryAttribute>();
-		if (getAttributes() == null) return tmp;
-		for(CategoryAttribute ca : getAttributes()){
-			if (active == null || (active != null && ca.getIsActive() == active)){
-				tmp.add(ca);
-			}
-		}
-		return tmp;
-	}
-	
-	/**
-	 * 
-	 * @param attributes list of attribute associated directory 
-	 * with category
-	 */
-	public void setAttributes(List<CategoryAttribute> attributes){
-		this.attributes = attributes;
-	}
+
 	/**
 	 * 
 	 * @return <code>true</code> if currently active; <code>false</code> otherwise
@@ -343,57 +271,59 @@ RETURNS NULL ON NULL INPUT;
 	}
 	
 	/**
-	 * Creates a clones of the category.
 	 * 
-	 * @param newCa the new conservation area to associated with the cloned category
-	 * @param parent the parent category
-	 * @param clonedAttributes a list of cloned attributes to be used when associating attributes with a category
-	 * @return cloned cateogry
+	 * @param attributes list of attribute associated directory 
+	 * with category
 	 */
-	public Category clone(ConservationArea newCa, Category parent, List<Attribute> clonedAttributes, Collection<Icon> iconSet, String defaultLang){
-		
-		Category clone = new Category();
-		clone.copyValues(this, newCa, defaultLang);
-		
-		clone.setCategoryOrder(this.getCategoryOrder());
-		clone.setChildren(children);
-		clone.setConservationArea(newCa);
-		clone.setIsActive(this.getIsActive());
-		clone.setIsMultiple(this.getIsMultiple());
-		clone.setParent(parent);
-		clone.updateHkey();
-		clone.updateIcon(this, iconSet);
-		
-		if (this.getAttributes() != null){
-			clone.setAttributes(new ArrayList<CategoryAttribute>());
-			for (CategoryAttribute attribute : this.getAttributes()){
-				//find attribute
-				Attribute newAttribute = null;
-				for (Attribute clonedAttribute: clonedAttributes){
-					if (clonedAttribute.getKeyId().equals(attribute.getAttribute().getKeyId())){
-						newAttribute = clonedAttribute;
-						break;
-					}
-				}
-				
-				if (newAttribute !=  null){
-					clone.getAttributes().add(attribute.clone(clone, newAttribute));
-				}
-				
-			}
-		}
-		if (this.getChildren() != null){
-			clone.setChildren(new ArrayList<Category>());
-			for (Category child : getChildren()){
-				clone.getChildren().add(child.clone(newCa,clone, clonedAttributes, iconSet, defaultLang));
-			}
-		}
-		
-		//clone language labels
-		
-		return clone;
+	public void setAllAttributes(List<CategoryAttribute> attributes){
+		this.attributes = attributes;
 	}
 	
+	@Transient
+	public List<CategoryAttribute> getAllActiveAttributes(){
+		return this.getAllAttributes().stream().filter(f->f.getIsActive()).collect(Collectors.toList());
+	}
+	
+	@Transient
+	public List<CategoryAttribute> getRootAttributes(){
+		return getAllAttributes().stream().filter(f->f.getIsRoot()).collect(Collectors.toList());
+	}
+	
+	/**
+	 * 
+	 * @return all children categories; <code>null</code> if leaf node
+	 */
+	@Transient
+	public List<Category> getActiveChildren(){
+		return getChildren().stream().filter(f->f.getIsActive()).collect(Collectors.toList());
+	}
+	
+	
+	/**
+	 * Updates the hkey of this object and
+	 * children objects.
+	 */
+	@Transient
+	public void updateHkey(){
+		setHkey(computeHkey());
+		if (getChildren() == null) return;
+		getChildren().forEach(k->k.updateHkey());
+	}
+	
+	
+	/**
+	 * Computes the hkey for the given category.
+	 * 
+	 * @return the hkey for this category.
+	 */
+	private String computeHkey(){
+		if (parent == null){
+			return this.getKeyId() + HkeyObject.HKEY_SEPERATOR;
+		}
+		return parent.computeHkey() + this.getKeyId() + HkeyObject.HKEY_SEPERATOR;
+	}
+	
+		
 	/**
 	 * 
 	 * @return the category name concatenated with
@@ -441,54 +371,6 @@ RETURNS NULL ON NULL INPUT;
 		}
 	}
 	
-	/**
-	 * Gets attributes that are active or inactive. Includes attributes
-	 * that are directly associated with this category or any parent
-	 * category.  
-	 * 
-	 * @param active <code>true</code> for active only attributes, 
-	 * <code>false</code> for in-active only attributes
-	 * <code>null</code> for all attributes
-	 * @return list of only active or inactive attributes
-	 */
-	@Transient
-	public void getAllAttribute(List<Attribute> attributes, Boolean onlyEnabled){
-		if (getParent() != null){
-			getParent().getAllAttribute(attributes, onlyEnabled);
-		}
-		List<CategoryAttribute> atts = getAttributes(onlyEnabled);
-		for (CategoryAttribute att : atts){
-			attributes.add(att.getAttribute());
-		}
-	}
-
-	/**
-	 * Finds all category attributes, first looking at parent attributes
-	 * and working way down to the children.  The results are new CategoryAttribute
-	 * objects with the category set to the current category. 
-	 * 
-	 * 
-	 * @param category attributes list to populate
-	 * @param onlyEnabled <code>true</code> to include only enabled, <code>false</code> to include 
-	 * only in-active and <code>null</code> to include all
-	 */
-	@Transient
-	public void getAllCategoryAttribute(List<CategoryAttribute> attributes, Boolean onlyEnabled){
-		getCategoryAttributes(attributes, onlyEnabled, this);
-	}
-	
-	private void getCategoryAttributes(List<CategoryAttribute> attributes, Boolean onlyEnabled, Category root){
-		if (getParent() != null){
-			getParent().getCategoryAttributes(attributes, onlyEnabled, root);
-		}
-		List<CategoryAttribute> atts = getAttributes(onlyEnabled);
-		for (CategoryAttribute att: atts){
-			CategoryAttribute clone = new CategoryAttribute(root, att.getAttribute());
-			clone.setIsActive(att.getIsActive());
-			clone.setOrder(att.getOrder());
-			attributes.add(clone);
-		}
-	}
 	
 	/**
 	 * 
@@ -496,13 +378,7 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@Transient
 	public boolean hasAttributes(){
-		if (getAttributes() != null && getAttributes().size() > 0){
-			return true;
-		}else if (parent == null){
-			return false;
-		}else{
-			return parent.hasAttributes();
-		}
+		return getAllAttributes() != null && getAllAttributes().size() > 0;
 	}
 	
 	@Transient
@@ -512,5 +388,152 @@ RETURNS NULL ON NULL INPUT;
 		for (Category kid : getChildren()){
 			kid.accept(visitor);
 		}
+	}
+	
+	/**
+	 * Adds the attribute to this category and all children category
+	 * 
+	 * @param attribute
+	 */
+	@Transient
+	public CategoryAttribute addAttribute(Attribute attribute) {
+		if (getAllAttributes() == null) setAllAttributes(new ArrayList<>());
+		
+		//do not add if this attribute already exists
+		for (CategoryAttribute ca : getAllAttributes()) {
+			if (ca.getAttribute().equals(attribute)) throw new IllegalStateException("Attribute already exists in category");
+		}
+		
+		CategoryAttribute root = new CategoryAttribute(this, attribute);
+		root.setOrder(getAllAttributes().size()+1);
+		root.setIsRoot(true);
+		root.setIsActive(true);
+		getAllAttributes().add(root);
+		
+		List<Category> toProcess = new ArrayList<>(getChildren());
+		while(!toProcess.isEmpty()) {
+			Category kid = toProcess.remove(0);
+			toProcess.addAll(kid.getChildren());
+			if (kid.getAllAttributes() == null) kid.setAllAttributes(new ArrayList<>());
+			
+			//if already exists don't re-add it
+			boolean found = false;
+			for (CategoryAttribute caa : kid.getAllAttributes()) {
+				if (caa.getAttribute().equals(attribute)) {
+					//no longer root
+					caa.setIsRoot(false);
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				CategoryAttribute ca = new CategoryAttribute(kid, attribute);
+				ca.setOrder(kid.getAllAttributes().size()+1);
+				ca.setIsRoot(false);
+				ca.setIsActive(true);
+				kid.getAllAttributes().add(ca);
+			}
+			
+		}
+		return root;
+	}
+	
+	/**
+	 * Sets the active state for this attribute in this category
+	 * and all children.
+	 * @param attribute
+	 */
+	@Transient
+	public void setAttributeActive(Attribute attribute, boolean isActive) {		
+		List<Category> toProcess = new ArrayList<>();
+		toProcess.add(this);
+		while(!toProcess.isEmpty()) {
+			Category kid = toProcess.remove(0);
+			toProcess.addAll(kid.getChildren());
+			
+			CategoryAttribute ca = kid.findAttribute(attribute);
+			if (ca == null) continue;
+			if (!isActive || ca.getCategory().getIsActive()) {
+				//if the category is disabled we don't wan to active attribute
+				ca.setIsActive(isActive);
+			}
+		}
+	}
+	
+	/**
+	 * @returns true if this category contains the provided attribute.
+	 */
+	@Transient
+	public boolean hasAttribute(Attribute attribute){
+		return findAttribute(attribute) != null;
+	}
+
+	/**
+	 * Searches the allAttributes array for the given attribute.
+	 * 
+	 * @param attribute
+	 * @return the attribute or null if not found
+	 */
+	@Transient
+	public CategoryAttribute findAttribute(Attribute attribute) {
+		for (CategoryAttribute att : getAllAttributes()) {
+			if (att.getAttribute().equals(attribute)) {
+				return att;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Creates a clones of the category.
+	 * 
+	 * @param newCa the new conservation area to associated with the cloned category
+	 * @param parent the parent category
+	 * @param clonedAttributes a list of cloned attributes to be used when associating attributes with a category
+	 * @return cloned cateogry
+	 */
+	public Category clone(ConservationArea newCa, Category parent, List<Attribute> clonedAttributes, Collection<Icon> iconSet, String defaultLang){
+		
+		Category clone = new Category();
+		clone.copyValues(this, newCa, defaultLang);
+		
+		clone.setCategoryOrder(this.getCategoryOrder());
+		clone.setChildren(children);
+		clone.setConservationArea(newCa);
+		clone.setIsActive(this.getIsActive());
+		clone.setIsMultiple(this.getIsMultiple());
+		clone.setParent(parent);
+		clone.updateHkey();
+		clone.updateIcon(this, iconSet);
+		clone.setAllAttributes(new ArrayList<>());
+		
+		if (this.getAllAttributes() != null){			
+			for (CategoryAttribute attribute : this.getAllAttributes()){
+				//find attribute
+				Attribute newAttribute = null;
+				for (Attribute clonedAttribute: clonedAttributes){
+					if (clonedAttribute.getKeyId().equals(attribute.getAttribute().getKeyId())){
+						newAttribute = clonedAttribute;
+						break;
+					}
+				}
+				
+				if (newAttribute !=  null){
+					clone.getAllAttributes().add(attribute.clone(clone, newAttribute));
+				}
+				
+			}
+		}
+		
+		if (this.getChildren() != null){
+			clone.setChildren(new ArrayList<Category>());
+			for (Category child : getChildren()){
+				clone.getChildren().add(child.clone(newCa,clone, clonedAttributes, iconSet, defaultLang));
+			}
+		}
+		
+		//clone language labels
+		
+		return clone;
 	}
 }

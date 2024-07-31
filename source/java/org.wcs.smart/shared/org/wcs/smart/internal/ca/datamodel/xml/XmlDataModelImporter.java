@@ -192,6 +192,8 @@ public class XmlDataModelImporter {
 				return new org.wcs.smart.internal.ca.datamodel.xml.generate.v10.DataModelXmlToSimpleDataModelConverter();
 			}else if (version.equals(org.wcs.smart.internal.ca.datamodel.xml.generate.v11.ObjectFactory._DataModel_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModelXmlToSimpleDataModelConverter();
+			}else if (version.equals(org.wcs.smart.internal.ca.datamodel.xml.generate.v12.ObjectFactory._DataModel_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModelXmlToSimpleDataModelConverter();
 			}
 		}catch (Exception ex){
 			//invalid xml file

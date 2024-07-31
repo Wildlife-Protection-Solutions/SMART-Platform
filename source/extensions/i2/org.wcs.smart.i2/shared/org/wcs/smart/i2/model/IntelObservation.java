@@ -22,11 +22,13 @@
 package org.wcs.smart.i2.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -120,10 +122,14 @@ public class IntelObservation extends UuidItem{
 	 */
 	@Transient
 	public List<IntelObservationAttribute> getObservationAttributesSorted(){
-		List<Attribute> order = new ArrayList<>();
-		getCategory().getAllAttribute(order, null);
+		HashMap<Attribute, Integer> attributeOrder = new HashMap<>();
+		int i = 0;
+		for(CategoryAttribute ca : getCategory().getAllAttributes()) {
+			attributeOrder.put(ca.getAttribute(), i++);
+		}
+		
 		List<IntelObservationAttribute> sorted = new ArrayList<>(getObservationAttributes());
-		sorted.sort((a, b)-> Integer.compare(order.indexOf(a.getAttribute()), order.indexOf(b.getAttribute())) );
+		sorted.sort((a, b)-> Integer.compare(attributeOrder.get(a.getAttribute()), attributeOrder.get(b.getAttribute())) );
 		return sorted;
 	}
 	/**

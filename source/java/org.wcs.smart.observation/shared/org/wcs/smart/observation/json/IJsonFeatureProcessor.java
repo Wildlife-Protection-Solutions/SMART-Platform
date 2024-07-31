@@ -59,6 +59,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.GeometryAttributeValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -616,12 +617,8 @@ public abstract class IJsonFeatureProcessor {
 	 * if attribute not found.
 	 */
 	private Attribute findAttribute(String key, Category c, Session session) {
-		List<Attribute> temp = new ArrayList<>();
-		c.getAllAttribute(temp, null);
-		for (Attribute ca : temp) {
-			if (ca.getKeyId().equals(key)) {
-				return ca;
-			}
+		for (CategoryAttribute a : c.getAllAttributes()) {
+			if (a.getAttribute().getKeyId().equals(key)) return a.getAttribute();
 		}
 		return null;
 	}

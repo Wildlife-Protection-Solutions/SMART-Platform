@@ -319,10 +319,8 @@ public class MappingPage  extends EditorPart {
 			Category cat = (Category) cmbWoCat.getStructuredSelection().getFirstElement();
 			Attribute none = new Attribute();
 			none.setName(Messages.MappingPage_NoneOp);
-			List<Attribute> atts = new ArrayList<>();
-			atts.add(none);
-			cat.getAllAttribute(atts, null);
-			
+			List<Attribute> atts = getAttributes(cat);
+			atts.add(0, none);			
 			for (ComboViewer cv: attviewer) {
 				cv.setInput(atts);
 				cv.setSelection(new StructuredSelection(none));
@@ -331,6 +329,10 @@ public class MappingPage  extends EditorPart {
 			if (!isInit) editor.getMapping().setField(Field.WO_CATEGORY, cat.getHkey());
 		});
 
+	}
+	
+	private List<Attribute> getAttributes(Category c){
+		return c.getAllAttributes().stream().map(m->m.getAttribute()).toList();
 	}
 	
 	private void createElephantMortality(Composite c) {
@@ -384,10 +386,8 @@ public class MappingPage  extends EditorPart {
 			Category cat = (Category) cmbEmCat.getStructuredSelection().getFirstElement();
 			Attribute none = new Attribute();
 			none.setName(Messages.MappingPage_NoneOp);
-			List<Attribute> atts = new ArrayList<>();
-			atts.add(none);
-			cat.getAllAttribute(atts, null);
-			
+			List<Attribute> atts = getAttributes(cat);
+			atts.add(0, none);
 			for (ComboViewer cv: attviewer) {
 				cv.setInput(atts);
 				cv.setSelection(new StructuredSelection(none));
@@ -446,10 +446,8 @@ public class MappingPage  extends EditorPart {
 			Category cat = (Category) cmbOcCat.getStructuredSelection().getFirstElement();
 			Attribute none = new Attribute();
 			none.setName(Messages.MappingPage_NoneOp);
-			List<Attribute> atts = new ArrayList<>();
-			atts.add(none);
-			cat.getAllAttribute(atts, null);
-			
+			List<Attribute> atts = getAttributes(cat);
+			atts.add(0, none);
 			for (ComboViewer cv: attviewer) {
 				cv.setInput(atts);
 				cv.setSelection(new StructuredSelection(none));
@@ -495,10 +493,8 @@ public class MappingPage  extends EditorPart {
 			Category cat = (Category) cmbHwcCat.getStructuredSelection().getFirstElement();
 			Attribute none = new Attribute();
 			none.setName(Messages.MappingPage_NoneOp);
-			List<Attribute> atts = new ArrayList<>();
-			atts.add(none);
-			cat.getAllAttribute(atts, null);
-			
+			List<Attribute> atts = getAttributes(cat);
+			atts.add(0, none);
 			for (ComboViewer cv: attviewer) {
 				cv.setInput(atts);
 				cv.setSelection(new StructuredSelection(none));
@@ -579,8 +575,7 @@ public class MappingPage  extends EditorPart {
 		
 		cmbCategory.addSelectionChangedListener(evt->{
 			Category c = (Category) cmbCategory.getStructuredSelection().getFirstElement();
-			List<Attribute> all = new ArrayList<>();
-			c.getAllAttribute(all, null);
+			List<Attribute> all = getAttributes(c);
 			List<Object> lists = new ArrayList<>();
 			lists.add(""); //$NON-NLS-1$
 			for (Attribute a : all) if (a.getType() == Attribute.AttributeType.LIST) lists.add(a);
@@ -926,7 +921,7 @@ public class MappingPage  extends EditorPart {
 					Category c = items.pop();
 					c.getFullCategoryName();
 					c.getName();
-					c.getAttributes().forEach(ca->{amapping.put(ca.getAttribute().getKeyId(), ca.getAttribute()); ca.getAttribute().getName();});
+					c.getRootAttributes().forEach(ca->{amapping.put(ca.getAttribute().getKeyId(), ca.getAttribute()); ca.getAttribute().getName();});
 					cmapping.put(c.getHkey(), c);
 					
 					categories.add(c);

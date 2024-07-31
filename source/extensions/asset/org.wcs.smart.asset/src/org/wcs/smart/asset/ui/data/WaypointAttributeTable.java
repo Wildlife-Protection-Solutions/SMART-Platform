@@ -59,6 +59,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Manages a collection of waypoint observations, displaying them
@@ -200,21 +201,7 @@ public class WaypointAttributeTable {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					
-					//TODO: test and fix this 
-					for (WaypointObservationGroup g : wo.getWaypoint().getObservationGroups()) {
-						session.merge(g);
-						//session.saveOrUpdate(g);
-						//for (WaypointObservation wwo : g.getObservations()) {
-						//	session.saveOrUpdate(wwo);
-						//}
-					}
-					session.flush();
-					
-					//evict
-					for (WaypointObservationGroup g : wo.getWaypoint().getObservationGroups()) {
-						session.evict(g);
-					}
+					session.merge(wo.getWaypoint());
 					
 					//delete empty groups and removed observations
 					Waypoint wp  = session.get(Waypoint.class, wo.getWaypoint().getUuid());
@@ -226,19 +213,6 @@ public class WaypointAttributeTable {
 						}
 					}
 					wp.getObservationGroups().removeAll(tod);
-					
-					List<WaypointObservation> otd = new ArrayList<>();
-					for (WaypointObservation wwo : wp.getAllObservations()) {
-						if (!wo.getWaypoint().getAllObservations().contains(wwo)) otd.add(wwo);
-					}
-					for (WaypointObservation wwo : otd) {
-						wwo.getObservationGroup().getObservations().remove(wwo);
-						session.remove(wwo);
-					}
-					
-//					for (WaypointObservationGroup g : wp.getObservationGroups()) {
-//						if (g.getObservations().isEmpty()) session.delete(g);
-//					}
 					
 					session.getTransaction().commit();
 					
@@ -396,17 +370,17 @@ public class WaypointAttributeTable {
 			((GridLayout)c.getLayout()).verticalSpacing = 0;
 			
 			Label ll = toolkit.createLabel(c, observation.getCategory().getName());
-			ll.setToolTipText(observation.getCategory().getFullCategoryName());
+			ll.setToolTipText(SmartUtils.formatStringForLabel(observation.getCategory().getFullCategoryName()));
 			ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			if (observation.getAttributes() != null) {
 				for (WaypointObservationAttribute a : observation.getAttributesSorted()) {
 					
-					ll = toolkit.createLabel(c, a.getAttribute().getName() + ":"); //$NON-NLS-1$
+					ll = toolkit.createLabel(c, SmartUtils.formatStringForLabel(a.getAttribute().getName()) + ":"); //$NON-NLS-1$
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 					((GridData)ll.getLayoutData()).horizontalIndent = 20;
 					
-					ll = toolkit.createLabel(c, a.getAttributeValueAsString(Locale.getDefault()), SWT.WRAP);
+					ll = toolkit.createLabel(c, SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())), SWT.WRAP);
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					((GridData)ll.getLayoutData()).widthHint = 50;
 					

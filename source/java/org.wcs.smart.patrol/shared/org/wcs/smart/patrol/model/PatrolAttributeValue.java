@@ -331,7 +331,6 @@ public class PatrolAttributeValue {
 			break;
 		case TREE:
 			if (getAttributeTreeNode() != null) {
-				//TODO: ??full name??
 				text = getAttributeTreeNode().getName();
 			}
 			break;

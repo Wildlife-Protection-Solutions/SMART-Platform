@@ -88,10 +88,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	
-	//TODO: patrols without transport type cannot be saved
-	//at this point those are warning in the JsonPatrol but nothing
-	//is done yet
-	//if CA of patrol link doesn't match the CA being processed
 	public static final Object CA_ERROR = new Object();
 	
 	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)

@@ -23,8 +23,6 @@ package org.wcs.smart.query.ui.itempanel;
 
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -50,6 +48,9 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.QuerySourceProvider;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * A view that display the query filter options.

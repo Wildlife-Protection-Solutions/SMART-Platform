@@ -348,7 +348,7 @@ public class NewFilterDialog extends SmartStyledTitleDialog {
 			while(!toVisit.isEmpty()){
 				Category c = toVisit.remove(0);
 				toVisit.addAll(c.getChildren());
-				c.getAttributes().forEach(ca->ca.getAttribute().getName());
+				c.getAllAttributes().forEach(ca->ca.getAttribute().getName());
 			}
 			dmTree.setInput(dm);
 		}

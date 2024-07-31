@@ -80,7 +80,7 @@ public class IncidentToPatrolProcessorJob extends Job{
 				//I can reproduce this when I load two smart mobile patrols at the same time
 				//for the first one, select create a new patrol, for the second one just wait
 				//eventually this error will come up
-				IncidentPlugIn.log("Timeout linking incidents to patrol. Trying again in 30 seconds", null);
+				IncidentPlugIn.log("Timeout linking incidents to patrol. Trying again in 30 seconds", null); //$NON-NLS-1$
 				schedule(30*1000);
 			}
 				

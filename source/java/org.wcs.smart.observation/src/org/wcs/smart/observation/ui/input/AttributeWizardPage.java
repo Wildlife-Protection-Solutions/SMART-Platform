@@ -335,10 +335,11 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	 * Finds all the attributes associated with the given category
 	 */
 	private List<Attribute> findAttributes(Category category, Session session){
-		List<Attribute> catAttributes = new ArrayList<Attribute>();
-		category.getAllAttribute(catAttributes, true);
 		
-		catAttributes.forEach(ca->{
+		List<Attribute> attributes = new ArrayList<>();
+		category.getAllActiveAttributes().forEach(e->attributes.add(e.getAttribute()));
+		
+		attributes.forEach(ca->{
 			if (ca.getAttributeList() != null) {
 				ca.getAttributeList().forEach(l->l.getName());
 			}
@@ -352,7 +353,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 			}
 		});
-		return catAttributes;
+		return attributes;
 	}
 	
 	/*

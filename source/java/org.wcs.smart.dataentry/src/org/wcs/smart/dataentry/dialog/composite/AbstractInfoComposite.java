@@ -49,6 +49,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -295,9 +296,8 @@ public abstract class AbstractInfoComposite extends Composite {
 		node.setCategory(category);
 		session.persist(node);
 		
-		List<Attribute> attrList = new ArrayList<Attribute>();
-		category.getAllAttribute(attrList, true);
-		for (Attribute a : attrList) {
+		for (CategoryAttribute ca : category.getAllActiveAttributes()) {
+			Attribute a = ca.getAttribute();
 			CmAttribute cma = new CmAttribute();
 			cma.setNode(node);
 			cma.setAttribute(a);

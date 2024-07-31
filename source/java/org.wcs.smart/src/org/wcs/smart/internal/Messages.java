@@ -365,7 +365,12 @@ public class Messages extends NLS {
 	public static String CategoryDMAdvisor_Error_CategoryReferencedByAttributes;
 	public static String CategoryDMAdvisor_Error_CategoryReferencedByChildren;
 	public static String CategoryDMAdvisor_Error_NotCategory;
+	public static String CategoryInfoPanel_AttributeDisplayOrder;
+	public static String CategoryInfoPanel_DisplayOrderTooltip;
 	public static String CategoryInfoPanel_IconLabel;
+	public static String CategoryInfoPanel_InvalidDmState;
+	public static String CategoryInfoPanel_MoveDown;
+	public static String CategoryInfoPanel_MoveUp;
 	public static String CategoryInfoPanel_OpMultiple;
 	public static String CaWizard_CaDef_CaDef_PageName;
 	public static String CaWizard_CaDef_DefaultLangInfo1;
@@ -498,6 +503,9 @@ public class Messages extends NLS {
 	public static String DataModel_AttributeAlreadyExists;
 	public static String DataModel_AttributeAlreadyExistsChild;
 	public static String DataModel_AttributeAlreadyExistsParent;
+	public static String DataModel_categoriestask;
+	public static String DataModel_CategoryConfigError;
+	public static String DataModel_CategoryConfigError2;
 	public static String DataModel_CloneAttributes1;
 	public static String DataModel_CloneAttributes2;
 	public static String DataModel_CloneCategories;
@@ -514,6 +522,7 @@ public class Messages extends NLS {
 	public static String DataModel_Progress_SaveCategory;
 	public static String DataModel_Progress_SaveDm;
 	public static String DataModel_ProgressLabel;
+	public static String DataModel_validationtask;
 	public static String DataModelExporter_Progress_DataModelTables;
 	public static String DataModelLabelProvider_RootNode_Label;
 	public static String DataModelManager_Error_DeleteAttribute;

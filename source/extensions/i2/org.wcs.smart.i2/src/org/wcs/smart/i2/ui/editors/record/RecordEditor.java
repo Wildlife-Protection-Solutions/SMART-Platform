@@ -226,7 +226,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							loc.getId();
 							if (loc.getObservations() != null){
 								for (IntelObservation oo : loc.getObservations()){
-									oo.getCategory().getAllAttribute(new ArrayList<>(), null);
+									oo.getCategory().getAllAttributes().size();
 									oo.getCategory().getFullCategoryName();
 									if (oo.getObservationAttributes() != null){
 										for (IntelObservationAttribute a : oo.getObservationAttributes()){

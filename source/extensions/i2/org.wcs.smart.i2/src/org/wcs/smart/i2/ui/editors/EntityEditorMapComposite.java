@@ -835,7 +835,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 						if (l.getLocation().getObservations() != null){
 							for (IntelObservation o : l.getLocation().getObservations()){
 								o.getCategory().getFullCategoryName();
-								o.getCategory().getAllAttribute(new ArrayList<>(), null);
+								o.getCategory().getAllAttributes().size();
 								if (o.getObservationAttributes() != null){
 									for (IntelObservationAttribute a : o.getObservationAttributes()){
 										a.getAttribute().getName();

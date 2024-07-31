@@ -123,8 +123,8 @@ public class IntelEntityDataSource extends ContentDataStore{
 					toProcess.add(root);
 					while(!toProcess.isEmpty()) {
 						Category c = toProcess.remove(0);
-						if (c.getAttributes() != null) {
-							for (CategoryAttribute item : c.getAttributes()) {
+						if (c.getRootAttributes() != null) {
+							for (CategoryAttribute item : c.getRootAttributes()) {
 								if (item.getAttribute().getType().isGeometry()) {
 									dmAttributes.add(item.getAttribute());
 								}

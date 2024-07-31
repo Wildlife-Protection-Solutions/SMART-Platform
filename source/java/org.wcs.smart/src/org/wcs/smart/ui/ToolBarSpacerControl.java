@@ -1,11 +1,11 @@
 package org.wcs.smart.ui;
 
-import jakarta.annotation.PostConstruct;
-
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+
+import jakarta.annotation.PostConstruct;
 
 public class ToolBarSpacerControl {
 	

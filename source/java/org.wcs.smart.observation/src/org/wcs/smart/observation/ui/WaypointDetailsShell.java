@@ -52,6 +52,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.Thumbnail;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Shell for displaying the observation details of a set of 
@@ -131,12 +132,12 @@ public class WaypointDetailsShell extends SmartShellDialog{
 					
 					for (WaypointObservation o : group.getObservations()) {
 						Label l = new Label(obsinfo, SWT.NONE);
-						l.setText(o.getCategory().getName());
+						l.setText(SmartUtils.formatStringForLabel(o.getCategory().getName()));
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 						l.setFont(boldFont);
 						
 						for (WaypointObservationAttribute a : o.getAttributesSorted()) {
-							createInfo(obsinfo, a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()));
+							createInfo(obsinfo, SmartUtils.formatStringForLabel(a.getAttribute().getName()), SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
 						}
 						createAttachments(owner, session, o.getAttachments());
 

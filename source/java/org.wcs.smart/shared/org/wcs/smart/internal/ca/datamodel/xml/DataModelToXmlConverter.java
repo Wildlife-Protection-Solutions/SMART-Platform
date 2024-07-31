@@ -40,19 +40,19 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.AggregationType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.AttributeListType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.AttributeType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.CategoryAttributeLink;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.CategoryType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.CategoryTypeList;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.LanguageListType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.LanguageType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.ListNode;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.MinMaxType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.NameType;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.v11.TreeNodeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.AggregationType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.AttributeListType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.AttributeType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.CategoryAttributeLink;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.CategoryType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.CategoryTypeList;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.LanguageListType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.LanguageType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.ListNode;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.MinMaxType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.NameType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.v12.TreeNodeType;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -82,7 +82,7 @@ public class DataModelToXmlConverter {
 	protected Set<Path> iconFiles; 
 	protected IconOption includeIconFiles;
 	
-	protected org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel xml;
+	protected org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel xml;
 	protected SimpleDataModel dm;
 	protected HashMap<String, Language> llookup;
 	
@@ -112,9 +112,9 @@ public class DataModelToXmlConverter {
 	 * @param monitor progress monitor
 	 * @return xml data model
 	 */
-	public org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel convert(SimpleDataModel dm) {
+	public org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel convert(SimpleDataModel dm) {
 		this.dm = dm;
-		this.xml = new org.wcs.smart.internal.ca.datamodel.xml.generate.v11.DataModel();
+		this.xml = new org.wcs.smart.internal.ca.datamodel.xml.generate.v12.DataModel();
 		llookup = processLanguages();
 		processAttributes();
 		processCategories();
@@ -141,11 +141,13 @@ public class DataModelToXmlConverter {
 		ct.setKey(child.getKeyId());
 		if (child.getIcon() != null) ct.setIconkey(child.getIcon().getKeyId());
 		
-		if (child.getAttributes() != null){
-			for (CategoryAttribute map : child.getAttributes()){
+		
+		if (child.getAllAttributes() != null){
+			for (CategoryAttribute map : child.getAllAttributes()){
 				CategoryAttributeLink link = new CategoryAttributeLink();
 				link.setAttributekey(map.getAttribute().getKeyId());
 				link.setIsactive(map.getIsActive());
+				link.setIsroot(map.getIsRoot());
 				ct.getAttributes().add(link);
 			}
 		}
@@ -284,7 +286,7 @@ public class DataModelToXmlConverter {
 		if (addedIcons.contains(object.getIcon().getKeyId())) return;
 		
 		//add icons to data model
-		org.wcs.smart.internal.ca.datamodel.xml.generate.v11.Icon xmlIcon = new org.wcs.smart.internal.ca.datamodel.xml.generate.v11.Icon();
+		org.wcs.smart.internal.ca.datamodel.xml.generate.v12.Icon xmlIcon = new org.wcs.smart.internal.ca.datamodel.xml.generate.v12.Icon();
 		xml.getIcons().add(xmlIcon);
 		xmlIcon.setIssystem(issystem);
 		xmlIcon.setKey(object.getIcon().getKeyId());
@@ -293,7 +295,7 @@ public class DataModelToXmlConverter {
 		setNames(xmlIcon.getNames(), object.getIcon().getNames());
 		
 		for (IconFile iconFile : object.getIcon().getFiles()) {
-			org.wcs.smart.internal.ca.datamodel.xml.generate.v11.IconFile xmlIconFile = new org.wcs.smart.internal.ca.datamodel.xml.generate.v11.IconFile();
+			org.wcs.smart.internal.ca.datamodel.xml.generate.v12.IconFile xmlIconFile = new org.wcs.smart.internal.ca.datamodel.xml.generate.v12.IconFile();
 		
 			xmlIconFile.setIconset( iconFile.getIconSet().getKeyId() );
 			xmlIconFile.setFile(  iconFile.getAttachmentFile().getFileName().toString() );
@@ -319,7 +321,7 @@ public class DataModelToXmlConverter {
 	 * @throws IOException
 	 */
 	public static void writeDataModel(DataModel model, OutputStream file) throws JAXBException, IOException{
-		JAXBContext context = JAXBContext.newInstance(org.wcs.smart.internal.ca.datamodel.xml.generate.v11.ObjectFactory.class);
+		JAXBContext context = JAXBContext.newInstance(org.wcs.smart.internal.ca.datamodel.xml.generate.v12.ObjectFactory.class);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		marshaller.marshal(model, file);
