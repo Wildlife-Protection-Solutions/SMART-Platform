@@ -1402,7 +1402,8 @@ public class UpgradeServlet extends HttpServlet {
 						"alter table connect.alerts add column field_id varchar", //$NON-NLS-1$
 						
 						//hibernate 6 employee uuid cannot conflict with ccaa uuid
-						"update smart.employee set uuid = '00000000000000000000000000000001' where uuid = '00000000000000000000000000000000'", //$NON-NLS-1$
+						//WRONG fiX - see comments in 8.0 to 8.0.1 upgrade section
+						//"update smart.employee set uuid = '00000000000000000000000000000001' where uuid = '00000000000000000000000000000000'", //$NON-NLS-1$
 						
 						"alter table connect.data_queue drop constraint status_chk", //$NON-NLS-1$
 						"alter table connect.data_queue add constraint status_chk CHECK (status = ANY (ARRAY['UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR', 'DUPLICATE']))", //$NON-NLS-1$
@@ -1712,6 +1713,51 @@ public class UpgradeServlet extends HttpServlet {
 						c.createStatement().executeUpdate(s);
 					}
 					
+					//complicated fix to resolve the problem with the zero employee uuid I introduced in SMART8.0.0 upgrade script
+					//only run this code if there is a employee with one uuid
+					boolean hasOne = false;
+					try(PreparedStatement ps = c.prepareStatement("SELECT count(*) FROM smart.employee where uuid = ?")){
+						ps.setObject(1, UuidUtils.stringToUuid(UuidUtils.ONE_UUID_STR));
+						try(ResultSet rs = ps.executeQuery()){
+							rs.next();
+							hasOne = rs.getInt(1) > 0;
+						}
+					}
+						
+					if (hasOne) {
+
+						String s = """
+								INSERT INTO smart.employee (uuid, ca_uuid, id, givenname, familyname, startemploymentdate, endemploymentdate, datecreated, birthdate, gender, smartuserid, smartpassword, agency_uuid, rank_uuid, smartuserlevel) 
+								SELECT ?, ca_uuid, id, givenname, familyname, startemploymentdate, endemploymentdate, datecreated, birthdate, gender, smartuserid, smartpassword, agency_uuid, rank_uuid, smartuserlevel
+								FROM smart.employee where uuid = ?				
+								""";
+						try(PreparedStatement ps = c.prepareStatement(s)){
+							ps.setObject(1, UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR));
+							ps.setObject(2, UuidUtils.stringToUuid(UuidUtils.ONE_UUID_STR));
+							ps.execute();
+						}
+						
+				
+						try(ResultSet rs = c.getMetaData().getExportedKeys(null, "SMART", "EMPLOYEE")){
+							while(rs.next()) {
+								String schema = rs.getString(6);
+								String table = rs.getString(7);
+								String field = rs.getString(8);
+								
+								String query = "UPDATE " + schema + "." + table + " SET " + field + " = ? where " + field + " = ?";
+								try(PreparedStatement ps = c.prepareStatement(query)){
+									ps.setObject(1, UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR));
+									ps.setObject(2, UuidUtils.stringToUuid(UuidUtils.ONE_UUID_STR));
+									ps.execute();
+								}			
+							}
+						}
+						
+						try(PreparedStatement ps = c.prepareStatement("DELETE FROM smart.employee WHERE uuid = ?")){
+							ps.setObject(1, UuidUtils.stringToUuid(UuidUtils.ONE_UUID_STR));
+							ps.execute();
+						}
+					}
 					
 				}catch (Exception ex) {
 					throw new SQLException (ex);

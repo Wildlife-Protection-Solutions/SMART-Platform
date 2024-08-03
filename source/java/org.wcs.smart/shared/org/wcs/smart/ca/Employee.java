@@ -26,15 +26,18 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.UuidGenerator;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -56,8 +59,11 @@ import jakarta.persistence.Transient;
  * to load cross conservation area (conservation area) reports:
  * org.hibernate.PropertyAccessException: IllegalArgumentException occurred while calling setter of org.wcs.smart.ca.Employee.conservationArea
  * So this class is not extending UuidItem for now.
+ * 
+ * If two classes have the same id they can't have the same abstract class.
+ * https://app.assembla.com/spaces/smart-cs/tickets/3621
  */
-public class Employee extends UuidItem implements Serializable {
+public class Employee implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -65,9 +71,7 @@ public class Employee extends UuidItem implements Serializable {
 	 * UUID for the 'shared' employee.  This employee uuid
 	 * is associated with the CrossCA Conservation Area.
 	 */
-	//I tried to use zero_uuid_str here but it conflicted with the ccaa 
-	//when I upgraded to hibernate 6
-	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ONE_UUID_STR);
+	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
 	
 	
 	public static final String USER_LEVEL_SEP = ","; //$NON-NLS-1$
@@ -129,10 +133,26 @@ public class Employee extends UuidItem implements Serializable {
 	private ConservationArea ca;
 	private Agency agency;
 	private Rank rank;
+	private UUID uuid;
 	
 	public Employee(){
 		this.dateCreated = LocalDate.now();
 	}
+	
+	/**
+	 * 
+	 * @return the uuid for the list element
+	 */
+	@Id
+	@UuidGenerator(style = UuidGenerator.Style.RANDOM)
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
+	}
+
 	
 	@Column(name="id")
 	public String getId() {
@@ -316,22 +336,23 @@ public class Employee extends UuidItem implements Serializable {
 		return this.endEmploymentDate == null;
 	}
 	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Employee){
-			Employee s = (Employee)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return this == s;
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return s.getUuid().equals(this.getUuid());
-			}
-		}
-		return false;
-	}
+
 	
 	@Override
+	public boolean equals(Object other){
+		if (this == other) return true;
+		if (other == null) return false;
+		if (getUuid() == null) return false;
+		//this is required for proxy classes
+		//https://stackoverflow.com/questions/11013138/hibernate-equals-and-proxy
+		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
+		UuidItem s = (UuidItem)other;
+		//must use getUuid for hibernate proxies 
+		return (Objects.equals(getUuid(), s.getUuid()));
+	}
+
 	public int hashCode(){
-		return getUuid().hashCode();
+		return Objects.hashCode(uuid);
 	}
 
 }
