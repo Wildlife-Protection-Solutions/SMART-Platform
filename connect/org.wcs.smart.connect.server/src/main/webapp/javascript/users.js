@@ -592,10 +592,10 @@ function createRoleTable(){
 }
 /* clears and displays new user dialog */
 function clearAndShowNewUserDialog(){
- 	document.querySelector("input[name=password1]").value = "";
- 	document.querySelector("input[name=password2]").value = "";
- 	document.querySelector("input[name=username]").value = "";
- 	document.querySelector("input[name=email]").value = "";
+ 	document.querySelector("input[name=newuser_password1]").value = "";
+ 	document.querySelector("input[name=newuser_password2]").value = "";
+ 	document.querySelector("input[name=newuser_username]").value = "";
+ 	document.querySelector("input[name=newuser_email]").value = "";
  	document.querySelector("#newUserDialog > #dialogerror").style.display = "none";
  	displayDialog('newUserDialog', 'main');
 }
@@ -1106,11 +1106,11 @@ function createNewRole() {
 
 //creates a new user
 function createNewUser() {
-	var pass1 = document.querySelector("input[name=password1]").value;
-	var pass2 = document.querySelector("input[name=password2]").value;
-	var user = document.querySelector("input[name=username]").value;
-	var email = document.querySelector("input[name=email]").value;
-	
+	var pass1 = document.querySelector("input[name=newuser_password1]").value;
+	var pass2 = document.querySelector("input[name=newuser_password2]").value;
+	var user = document.querySelector("input[name=newuser_username]").value;
+	var email = document.querySelector("input[name=newuser_email]").value;
+
 	var error = "";
 	if (user.length == 0 ) {
 		error = i18n("settings.usernamerequired");

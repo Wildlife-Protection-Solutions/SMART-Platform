@@ -410,7 +410,7 @@ public class ConnectUser extends HttpServlet {
 			toUpdate = QueryFactory.buildQuery(s, SmartUser.class, "username", olduser).uniqueResult(); //$NON-NLS-1$
 			if (newUser.getPassword() != null){
 				
-				if (!request.getUserPrincipal().getName().equals(olduser)) {
+				if (request.getUserPrincipal().getName().equals(olduser)) {
 					//admin user check password of this user
 					SmartUser adminUser = QueryFactory.buildQuery(s, SmartUser.class, "username", request.getUserPrincipal().getName()).uniqueResult(); //$NON-NLS-1$
 					if (!BCrypt.checkpw(newUser.getOldpassword(), adminUser.getPassword())){
