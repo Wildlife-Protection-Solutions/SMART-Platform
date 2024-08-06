@@ -196,7 +196,12 @@ public class Upgrader757To800 extends AbstractInteralDatabaseUpgrader {
 			"ALTER TABLE smart.wp_observation_attributes add column number_value_2 double", //$NON-NLS-1$
 				
 			//hibernate 6 employee uuid cannot conflict with ccaa uuid
-			"update smart.employee set uuid = x'00000000000000000000000000000001' where uuid = x'00000000000000000000000000000000'", //$NON-NLS-1$
+			//Update: 20240802; the real problem was employee & conservationarea extend UuidItem.
+			//the fix was to make employee not extend UuidItem now the id's won't matter.
+			//BUT now we have some 8.0.0 instances with the 1 uuid; if upgrading directly from 7 to 8 this won't be a problem
+			//as I've removed this line be we need to deal with upgrade from 8 to 8.0.1 and revert this change
+			//https://app.assembla.com/spaces/smart-cs/tickets/3776
+			//"update smart.employee set uuid = x'00000000000000000000000000000001' where uuid = x'00000000000000000000000000000000'", //$NON-NLS-1$
 
 			//waypoint last modified for timestamp change to utc
 			"CREATE FUNCTION smart.localTsToUtcTs(ts timestamp, zoneid varchar(256)) returns timestamp LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.DerbyUtils.localToUtc' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$

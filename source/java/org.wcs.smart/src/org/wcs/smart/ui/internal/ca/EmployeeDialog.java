@@ -306,7 +306,11 @@ public class EmployeeDialog extends SmartStyledDialog {
 						}
 					}
 					//save results to database
-					HibernateManager.saveOrMerge(session, toUpdate);
+					if (toUpdate.getUuid() == null) {
+						session.persist(toUpdate);
+					}else {
+						session.merge(toUpdate);
+					}
 					session.getTransaction().commit();
 					return true;
 				}catch (RuntimeException ex){
