@@ -217,13 +217,13 @@
   <div><fmt:message key="users.newmessage"/></div>
   <form id="newuserform" >
     <label class="block top-spacer"><fmt:message key="users.newusernamelabel"/></label>
-    <input type="text" name="username" class="formtext block" />
+    <input type="text" name="newuser_username" class="formtext block" />
     <label class="block top-spacer"><fmt:message key="users.newuseremaillabel"/></label>
-    <input type="text" name="email" class="formtext block" />
+    <input type="text" name="newuser_email" class="formtext block" />
     <label class="block top-spacer"><fmt:message key="users.newpass1"/></label>
-    <input type="password" name="password1" class="formtext table-row"/>
+    <input type="password" name="newuser_password1" class="formtext table-row"/>
     <label class="block top-spacer"><fmt:message key="users.newpass2"/></label>
-    <input type="password" name="password2" class="formtext table-row"/>
+    <input type="password" name="newuser_password2" class="formtext table-row"/>
     <div class="block top-spacer" style="text-align:right">
      <input class="button" type="submit" value="<fmt:message key="users.newuserbutton"/>" />
      <input class="button" type="button" id="cancelnewuser" value="<fmt:message key="users.cancel"/>" />
