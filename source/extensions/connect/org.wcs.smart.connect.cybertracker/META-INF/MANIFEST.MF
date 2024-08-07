@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Connect for SMART Mobile
 Bundle-SymbolicName: org.wcs.smart.connect.cybertracker;singleton:=true
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.0.1.qualifier
 Bundle-Activator: org.wcs.smart.connect.cybertracker.ConnectCtPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: org.wcs.smart
-Export-Package: org.wcs.smart.connect.cybertracker.ctpackage,
+Export-Package: org.wcs.smart.connect.cybertracker,
+ org.wcs.smart.connect.cybertracker.ctpackage,
  org.wcs.smart.connect.cybertracker.model,
  org.wcs.smart.connect.cybertracker.updatesite
 Automatic-Module-Name: org.wcs.smart.connect.cybertracker
