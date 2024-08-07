@@ -346,7 +346,7 @@ public class Employee implements Serializable {
 		//this is required for proxy classes
 		//https://stackoverflow.com/questions/11013138/hibernate-equals-and-proxy
 		if (!getClass().isInstance(other) && !other.getClass().isInstance(this) ) return false;		
-		UuidItem s = (UuidItem)other;
+		Employee s = (Employee)other;
 		//must use getUuid for hibernate proxies 
 		return (Objects.equals(getUuid(), s.getUuid()));
 	}

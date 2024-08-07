@@ -65,7 +65,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
-import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
@@ -542,7 +541,6 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 			}
 			
 			for (ICtPackagePropertyProvider pp : properties) {
-				pp.getProperties();
 			
 				l= new Label(inner, SWT.NONE);
 				l.setText(pp.getName());
@@ -556,16 +554,8 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				((GridLayout)(temp.getLayout())).marginHeight = 0;
 				temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
-				for (ICtPackageProperty pprop : pp.getProperties()) {
-					l = new Label(temp, SWT.NONE);
-					l.setText(pprop.getShortName()  + ":"); //$NON-NLS-1$
-					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				createPropertiesComposite(temp, ctpackage, pp, session);
 
-					l= new Label(temp, SWT.NONE);
-					l.setText( pprop.getValue(ctpackage) );
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				}
 			}
 			
 			

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
+import org.eclipse.swt.graphics.Image;
+import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -39,6 +41,10 @@ public interface ICtPackageProperty {
 	 */
 	public String getValue(ICtPackage ctpackage);
 	
+	public default Image getImage(ICtPackage ctpackage, Session session) {
+		return null;
+	}
+	
 	/**
 	 * The property long name
 	 * @return
@@ -50,6 +56,15 @@ public interface ICtPackageProperty {
 	 * @return
 	 */
 	public String getShortName();
+	
+
+	/**
+	 * The property tooltip
+	 * @return
+	 */
+	public default String getTooltip() {
+		return null;
+	}
 	
 	/**
 	 * If this should be display in summary table or not.

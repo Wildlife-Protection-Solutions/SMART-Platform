@@ -5,7 +5,7 @@
 	
 	<parent>
 		<groupId>org.wcs.smart</groupId>
-    		<artifactId>smart-tycho</artifactId>
+    	<artifactId>smart-tycho</artifactId>
 		<version>8.1.0-SNAPHOT</version>
 	</parent>
 	

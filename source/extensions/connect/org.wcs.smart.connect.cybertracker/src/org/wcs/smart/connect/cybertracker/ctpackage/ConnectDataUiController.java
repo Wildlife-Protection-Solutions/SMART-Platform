@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
-import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -39,6 +38,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -51,21 +51,20 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
+import org.wcs.smart.QrCodeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
-import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.api.model.AlertType;
+import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
-import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Ui Controller for adding connect alerts/upload details to package
@@ -96,6 +95,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private boolean canDisableUpload = true;
 	
 	private Text txtUrl;
+	private Label lblQr;
 	private Button btnPublic;
 	
 	public ConnectDataUiController() {
@@ -329,10 +329,16 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			((GridData)l.getLayoutData()).widthHint = 600;
 			
 			Composite temp = new Composite(core, SWT.NONE);
-			temp.setLayout(new GridLayout(2, false));
+			temp.setLayout(new GridLayout(3, false));
 			((GridLayout)temp.getLayout()).marginWidth = 0;
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			lblQr = new Label(temp, SWT.NONE);
+			lblQr.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			lblQr.addListener(SWT.Dispose,e->{
+				if (lblQr.getImage() != null && !lblQr.getImage().isDisposed()) lblQr.getImage().dispose();
+			});
 			
 			txtUrl = new Text(temp, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
 			txtUrl.setEditable(false);
@@ -628,29 +634,33 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		if (ctpackage.getUuid() == null) {
 			txtUrl.setText(Messages.ConnectDataUiController_PackageMustBeSaved);	
 		}else {
-			ConnectServer cs;
+			Image x = lblQr.getImage();
+			if (x != null && !x.isDisposed()) x.dispose();
+			lblQr.setImage(null);
+			
+			URL url = null;
+			
 			try(Session s = HibernateManager.openSession()){
-				cs = ConnectHibernateManager.getConnectServer(s);
+				url = ConnectCtPlugIn.generagePackageConnectUrl(s, ctpackage);
 			}
-			if (cs == null) {
+			
+			if (url == null) {
 				txtUrl.setText(Messages.ConnectDataUiController_NoConnectServer);
 			}else {
-				String surl = cs.getServerUrl();
-				surl += "/noa/cybertracker/packages/" + UuidUtils.uuidToString(ctpackage.getUuid()); //$NON-NLS-1$
-
 				try {
 					MetadataFieldValue privatemd = findCreateMetadataField(ICtPackage.PRIVATE_PROP_KEY, (AbstractCtPackage)ctpackage, null);
 					boolean isprivate = true;
 					if (privatemd.getBooleanValue() != null) isprivate = privatemd.getBooleanValue();
-					
-					URL url = URI.create(surl).toURL();
 					String link = ICtPackage.generateSmartMobileAppLink(url, isprivate);
-					txtUrl.setText(link);
+					txtUrl.setText(link);					
+					lblQr.setImage(QrCodeManager.INSTANCE.generateQRCode(link));
 				}catch (Exception ex) {
 					ConnectPlugIn.log(ex.getMessage(), ex);
 					txtUrl.setText(Messages.ConnectDataUiController_PackageConfigError +ex.getMessage());
 				}
 			}
+			
+			lblQr.getParent().layout(true);
 		}
 	}
 }
