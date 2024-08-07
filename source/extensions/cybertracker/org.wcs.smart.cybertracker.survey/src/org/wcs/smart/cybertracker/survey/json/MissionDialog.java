@@ -265,6 +265,8 @@ public class MissionDialog extends SmartStyledTitleDialog {
 	}
 	
 	private Mission createNewMission(UUID ctUuid, CtMissionLink mission, Survey survey) throws Exception{
+		survey = HibernateManager.saveOrMerge(session, survey);
+		
 		Mission newMission = mission.getMission();
 		newMission.setSurvey(survey);
 		survey.getMissions().add(newMission);
@@ -282,9 +284,9 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		newMission.setStartDate(startDate);
 		newMission.setEndDate(endDate);
 		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
-		
-		HibernateManager.saveOrMerge(session, newMission.getSurvey());
-		SurveyHibernateManager.saveMission(newMission, session, true);
+
+		newMission = SurveyHibernateManager.saveMission(newMission, session, true);
+		session.flush();
 		
 		CtMissionLink link = new CtMissionLink();
 		link.setCtUuid(ctUuid);

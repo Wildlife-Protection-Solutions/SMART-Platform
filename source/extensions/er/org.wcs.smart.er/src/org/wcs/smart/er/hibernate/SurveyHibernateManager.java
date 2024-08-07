@@ -96,7 +96,7 @@ public class SurveyHibernateManager {
 
 	
 	
-	public static void saveMission(Mission mission, Session session, boolean saveWaypoints) throws Exception{
+	public static Mission saveMission(Mission mission, Session session, boolean saveWaypoints) throws Exception{
 		if (mission.getId() == null ){
 			String id = MissionIdGenerator.INSTANCE.generateMissionId(mission, session);
 			mission.setId(id);
@@ -146,6 +146,7 @@ public class SurveyHibernateManager {
 				
 			}
 		}
+		return mission;
 	}
 	
 
