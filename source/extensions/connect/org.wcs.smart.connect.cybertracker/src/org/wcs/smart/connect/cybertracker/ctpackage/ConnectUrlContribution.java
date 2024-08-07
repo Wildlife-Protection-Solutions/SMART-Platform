@@ -49,7 +49,7 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 
 	//urls for package status and package
 	private static final String STATUS_URL = "/noa/cybertracker/packages/info/"; //$NON-NLS-1$
-	private static final String PACKAGE_URL = "/noa/cybertracker/packages/"; //$NON-NLS-1$
+	public static final String PACKAGE_URL = "/noa/cybertracker/packages/"; //$NON-NLS-1$
 	private static final String NAVIGATION_URL = "/noa/cybertracker/navigation/"; //$NON-NLS-1$
 	
 	public ConnectUrlContribution() {

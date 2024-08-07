@@ -765,16 +765,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 				((GridLayout)(temp.getLayout())).marginHeight = 0;
 				temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
-				for (ICtPackageProperty pprop : pp.getProperties()) {
-					l = new Label(temp, SWT.NONE);
-					l.setText(pprop.getShortName() + ":"); //$NON-NLS-1$
-					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-
-					l= new Label(temp, SWT.NONE);
-					l.setText( pprop.getValue(ctpackage) );
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				}
+				createPropertiesComposite(temp, ctpackage, pp, session);
 			}
 			
 			

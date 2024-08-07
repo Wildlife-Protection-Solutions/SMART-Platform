@@ -34,6 +34,8 @@ public class Messages extends NLS {
 	public static String ConnectCtPackageProperties_LoadingConnectProperties;
 	public static String ConnectCtPackageProperties_Message;
 	public static String ConnectCtPackageProperties_NoConnect;
+	public static String ConnectCtPackageProperties_PackageUrlQrCodeProperty;
+	public static String ConnectCtPackageProperties_PackageUrlQrCodeTooltip;
 	public static String ConnectCtPackageProperties_Title;
 	public static String ConnectCtPackageProperties_VersionColumn;
 	public static String ConnectCtPackageProperties_VersionPropertyShortName;

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -38,15 +39,18 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.wcs.smart.QrCodeManager;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -55,6 +59,7 @@ import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -76,7 +81,8 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 	
 	private ConnectDateProperty p1 = new ConnectDateProperty();
 	private ConnectVersionProperty p2 = new ConnectVersionProperty();
-	private List<ICtPackageProperty> pps = (List<ICtPackageProperty>) List.of(p1,p2);
+	private ConnectQrCodeProperty p3 = new ConnectQrCodeProperty();
+	private List<ICtPackageProperty> pps = (List<ICtPackageProperty>) List.of(p1,p2,p3);
 	
 	private SmartConnect connect = null;
 	
@@ -279,5 +285,56 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 		}
 	}
 
+	private class ConnectQrCodeProperty implements ICtPackageProperty{
+
+		@Override
+		public String getValue(ICtPackage ctpackage) {
+			return null;
+		}
+		
+		@Override
+		public Image getImage(ICtPackage ctpackage, Session session) {
+			URL url = ConnectCtPlugIn.generagePackageConnectUrl(session, ctpackage);
+			if (url == null) return null;
+			
+			boolean isprivate = true;
+			if (ctpackage.getMetadataValues() != null) {
+				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+					if (v.getMetadataKey().equals(ICtPackage.PRIVATE_PROP_KEY)) {
+						isprivate = v.getBooleanValue();
+					}
+				}
+			}
+					
+			try {
+				String link = ICtPackage.generateSmartMobileAppLink(url, isprivate);
+				return QrCodeManager.INSTANCE.generateQRCode(link);
+			} catch (Exception e) {
+				ConnectPlugIn.log(e.getMessage(), e);
+			}
+			return null;
+			
+		}
+
+		@Override
+		public String getLongName() {
+			return Messages.ConnectCtPackageProperties_PackageUrlQrCodeProperty;
+		}
+		
+		@Override
+		public String getShortName() {
+			return Messages.ConnectCtPackageProperties_PackageUrlQrCodeProperty;
+		}
+		
+		@Override
+		public String getTooltip() {
+			return Messages.ConnectCtPackageProperties_PackageUrlQrCodeTooltip;
+		}
+		
+		@Override
+		public boolean showInSummaryTable() {
+			return false;
+		}
+	}
 	
 }

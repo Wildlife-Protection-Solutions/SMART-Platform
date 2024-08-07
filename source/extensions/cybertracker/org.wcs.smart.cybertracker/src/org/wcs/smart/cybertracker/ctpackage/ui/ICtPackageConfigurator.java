@@ -24,7 +24,12 @@ package org.wcs.smart.cybertracker.ctpackage.ui;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -54,4 +59,31 @@ public interface ICtPackageConfigurator {
 	 * Saves the changes on the GUI to the database
 	 */
 	public void save() throws Exception;
+	
+	public default void createPropertiesComposite(Composite temp, ICtPackage ctpackage, ICtPackagePropertyProvider pp, Session session) {
+		Label l;
+		for (ICtPackageProperty pprop : pp.getProperties()) {
+			l = new Label(temp, SWT.NONE);
+			l.setText(pprop.getShortName() + ":"); //$NON-NLS-1$
+			l.setBackground(temp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			if (pprop.getTooltip() != null) {
+				l.setToolTipText(pprop.getTooltip());
+			}
+			
+			Image img = pprop.getImage(ctpackage, session);		
+			String text = pprop.getValue(ctpackage);
+			l = new Label(temp, SWT.NONE);
+			if (img != null) {
+				l = new Label(temp, SWT.NONE);
+				l.addListener(SWT.Dispose, e->img.dispose());
+				l.setImage(img);
+				new Label(temp, SWT.NONE);
+				
+			}else if (text != null) {
+				l.setText( text );
+			}
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setBackground(temp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		}
+	}
 }

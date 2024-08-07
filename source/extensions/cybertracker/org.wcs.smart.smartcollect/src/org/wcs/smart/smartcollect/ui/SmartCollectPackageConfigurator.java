@@ -22,7 +22,6 @@
 package org.wcs.smart.smartcollect.ui;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -55,6 +54,7 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -66,14 +66,13 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.wcs.smart.QrCodeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
-import org.wcs.smart.connect.ConnectHibernateManager;
+import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataContribution;
-import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
-import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.DataModelWrapper;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
@@ -93,7 +92,6 @@ import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Package configurator for SMARTCollect package
@@ -110,6 +108,8 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	private Text txtName;
 	private Button btnPrivate;
 	private Text txtUrl;
+	private Label lblQr;
+
 	private Label lblWarn;
 	private ToolBar privateTb;
 	
@@ -284,10 +284,16 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		((GridData)lblWarn.getLayoutData()).widthHint = 600;
 		
 		Composite urlpart = new Composite(g, SWT.NONE);
-		urlpart.setLayout(new GridLayout(2, false));
+		urlpart.setLayout(new GridLayout(3, false));
 		urlpart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)urlpart.getLayout()).marginWidth = 0;
 		((GridLayout)urlpart.getLayout()).marginHeight = 0;
+		
+		lblQr = new Label(urlpart, SWT.NONE);
+		lblQr.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		lblQr.addListener(SWT.Dispose,e->{
+			if (lblQr.getImage() != null && !lblQr.getImage().isDisposed()) lblQr.getImage().dispose();
+		});
 		
 		txtUrl = new Text(urlpart, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER);
 		txtUrl.setEditable(false);
@@ -360,37 +366,43 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	}
 	
 	private void updateUrl() {
-//		lblWarn.setEnabled(btnPrivate.getSelection());
-//		txtUrl.setEnabled(btnPrivate.getSelection());
-//		privateTb.setEnabled(btnPrivate.getSelection());
-//		if (!txtUrl.getEnabled()) {
-//			txtUrl.setText(""); //$NON-NLS-1$
-//		}else {
-			if (ctpackage.getUuid() == null) {
-				txtUrl.setText(Messages.SmartCollectPackageConfigurator_saverequired);	
-			}else {
-				ConnectServer cs;
-				try(Session s = HibernateManager.openSession()){
-					cs = ConnectHibernateManager.getConnectServer(s);
-				}
-				if (cs == null) {
-					txtUrl.setText(Messages.SmartCollectPackageConfigurator_connectnotconfigured);
-				}else {
-					String surl = cs.getServerUrl();
-					surl += "/noa/smartcollect/packages/" + UuidUtils.uuidToString(ctpackage.getUuid()); //$NON-NLS-1$
-					
-					try {
-						URL url = URI.create(surl).toURL();
-						
-						String link = ICtPackage.generateSmartMobileAppLink(url, false);
-						txtUrl.setText(link);
-					}catch (Exception ex) {
-						SmartCollectPlugIn.log(ex.getMessage(), ex);
-						txtUrl.setText(Messages.SmartCollectPackageConfigurator_urlerror);
-					}
-				}
+		if (ctpackage.getUuid() == null) {
+			txtUrl.setText(Messages.SmartCollectPackageConfigurator_saverequired);	
+		}else {
+			Image x = lblQr.getImage();
+			if (x != null && !x.isDisposed()) x.dispose();
+			lblQr.setImage(null);
+			
+			URL url = null;
+			try(Session s = HibernateManager.openSession()){
+				url = ConnectCtPlugIn.generagePackageConnectUrl(s, ctpackage);
 			}
-//		}
+			if (url == null) {
+				txtUrl.setText(Messages.SmartCollectPackageConfigurator_connectnotconfigured);
+			}else {
+				
+					
+				String link = ICtPackage.generateSmartMobileAppLink(url, false);
+				txtUrl.setText(link);					
+				try {
+					lblQr.setImage(QrCodeManager.INSTANCE.generateQRCode(link));
+				} catch (Exception e) {
+					SmartCollectPlugIn.log(e.getMessage(), e);
+				}
+				
+			}
+			
+			lblQr.getParent().layout(true);
+			
+			if (url == null) {
+				txtUrl.setText(Messages.SmartCollectPackageConfigurator_connectnotconfigured);
+			}else {
+				String link = ICtPackage.generateSmartMobileAppLink(url, false);
+				txtUrl.setText(link);
+			}
+			lblQr.getParent().layout(true);
+
+		}
 	}
 	
 	private CyberTrackerPropertiesProfile getDefaultProfile() {
@@ -575,7 +587,6 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			}
 			
 			for (ICtPackagePropertyProvider pp : properties) {
-				pp.getProperties();
 			
 				l= new Label(inner, SWT.NONE);
 				l.setText(pp.getName());
@@ -589,19 +600,8 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				((GridLayout)(temp.getLayout())).marginHeight = 0;
 				temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
-				for (ICtPackageProperty pprop : pp.getProperties()) {
-					String value = pprop.getValue(ctpackage);
-					if (value == null || value.isBlank()) continue;
-							
-					l = new Label(temp, SWT.NONE);
-					l.setText(pprop.getShortName()  + ":"); //$NON-NLS-1$
-					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				createPropertiesComposite(temp, ctpackage, pp, session);
 
-					l= new Label(temp, SWT.NONE);
-					l.setText( value);
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				}
 			}
 			
 			
