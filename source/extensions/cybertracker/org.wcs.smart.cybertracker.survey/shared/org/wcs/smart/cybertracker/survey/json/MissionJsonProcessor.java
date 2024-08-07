@@ -642,6 +642,8 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 			//assign missions to surveys
 			assignMissions(session);			
 		}
+
+		session.flush();
 		
 		//try processing track features
 		MissionJsonTrackProcessor trackProcessor = new MissionJsonTrackProcessor(this.ca);
