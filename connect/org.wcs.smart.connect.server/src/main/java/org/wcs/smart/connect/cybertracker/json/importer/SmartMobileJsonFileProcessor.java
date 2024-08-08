@@ -132,13 +132,19 @@ public class SmartMobileJsonFileProcessor {
 	}
 
 	private void postProcess() {
+
+		if (SmartMobileJsonProcessorManager.INSTANCE.getPostProcessors().length == 0) return;
+		
 		try (Session session = factory.openSession()){
-			for (IJsonPostProcessor p : SmartMobileJsonProcessorManager.INSTANCE.getPostProcessors()) {
-				try {
+			session.beginTransaction();
+			try {
+				for (IJsonPostProcessor p : SmartMobileJsonProcessorManager.INSTANCE.getPostProcessors()) {
 					p.postProcess(session);
-				}catch (Exception ex) {
-					logger.log(Level.SEVERE, ex.getMessage(), ex);
 				}
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
 			}
 		}
 	}

@@ -69,7 +69,7 @@ public class CtPatrolLink {
 		this.ctUuid = ctUuid;
 	}
 	
-	@OneToMany(cascade= {CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(cascade= {CascadeType.ALL}, orphanRemoval = true, fetch=FetchType.LAZY)
 	@JoinColumn(name="ct_patrol_link_uuid", referencedColumnName="ct_uuid")
 	public List<CtPatrolWpLink> getWaypointLinks(){
 		return this.wplinks;

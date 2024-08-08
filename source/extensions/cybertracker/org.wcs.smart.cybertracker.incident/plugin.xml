@@ -12,9 +12,6 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.incident.DesktopIncidentJsonProcessor">
       </JsonProcessor>
-      <JsonPostProcessor
-            class="org.wcs.smart.cybertracker.incident.IncidentJsonPostProcessor">
-      </JsonPostProcessor>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.ctpackage">
