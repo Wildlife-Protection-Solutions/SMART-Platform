@@ -33,8 +33,12 @@ import org.hibernate.Session;
 public interface IJsonPostProcessor {
 
 	/**
-	 * Post process.  Exceptions are logged to the
+	 * Post process.
+	 * 
+	 * Exceptions are logged to the
 	 * log file but not displayed to the user.
+	 * 
+	 * Session is not in a transaction you should managed transactions in implementations.
 	 * 
 	 * @param session
 	 * @throws Exception 

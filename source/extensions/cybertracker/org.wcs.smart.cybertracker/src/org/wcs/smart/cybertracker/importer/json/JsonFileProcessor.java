@@ -292,6 +292,13 @@ public class JsonFileProcessor {
 	}
 	
 	private void postProcess() {
+		try {
+			if (getPostProcessors().isEmpty()) return;
+		}catch (Exception ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			return;
+		}
+		
 		try (Session session = HibernateManager.openSession()){
 			for (IJsonPostProcessor p : getPostProcessors()) {
 				try {
