@@ -47,7 +47,6 @@ import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 import org.wcs.smart.cybertracker.json.JsonTrackUtils;
 import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
-import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.survey.model.ISurveyCyberTrackerLabelProvider;
 import org.wcs.smart.er.model.Mission;
