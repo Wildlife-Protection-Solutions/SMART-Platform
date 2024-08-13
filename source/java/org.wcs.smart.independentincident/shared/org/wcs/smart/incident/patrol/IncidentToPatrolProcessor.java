@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IncidentPropertyManager;
 import org.wcs.smart.incident.IntegrateIncidentSource;
@@ -46,7 +47,7 @@ import org.wcs.smart.incident.IntegratePatrolIncidentSource;
 import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
 import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -57,7 +58,6 @@ import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.TrackUtil;
 
 /**
@@ -208,7 +208,7 @@ public class IncidentToPatrolProcessor {
 					session.persist(pw);	
 					
 					//TODO: deal with attachments as they have to move to a new location
-					PatrolWaypointSource src = (PatrolWaypointSource) WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+					PatrolWaypointSource src = (PatrolWaypointSource) SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 							
 					
 					Path toLoc = Paths.get(wp.getConservationArea().getFileDataStoreLocation())
@@ -220,7 +220,6 @@ public class IncidentToPatrolProcessor {
 						Path fromFile = wa.getAttachmentFile();
 						Path toFile = toLoc.resolve(wa.getFilename());
 						toMove.put(fromFile, toFile);
-//						wa.computeFileLocation(null);
 					}
 					for (WaypointObservation wo : wp.getAllObservations()) {
 						for (ObservationAttachment oa : wo.getAttachments()) {
@@ -269,7 +268,7 @@ public class IncidentToPatrolProcessor {
 				//if the first file copies but the second doesn't 
 				for (Entry<Path,Path> files : toMove.entrySet()) {
 					Path toPath = files.getValue();
-					if (!Files.exists(toPath.getParent())) SmartUtils.createDirectory(toPath.getParent());
+					if (!Files.exists(toPath.getParent())) Files.createDirectories(toPath.getParent());
 					Files.move(files.getKey(), files.getValue());
 				}
 			
