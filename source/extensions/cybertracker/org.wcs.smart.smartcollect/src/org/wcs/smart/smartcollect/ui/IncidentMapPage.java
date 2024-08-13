@@ -148,21 +148,31 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		
 		super.dispose();
 		
-		if (pointResource != null) {
-			pointResource.dispose(new NullProgressMonitor());
-			
+		List<IGeoResource> todispose = new ArrayList<>();
+		todispose.addAll(attributeResources);
+		todispose.add(prjResource);
+		todispose.add(pointResource);
+		
+		for (IGeoResource resource : todispose) {
+			if (resource == null) continue;		
+			resource.dispose(new NullProgressMonitor());			
 			try {
-				IService service = pointResource.service(new NullProgressMonitor());
+				IService service = resource.service(new NullProgressMonitor());
 				if (service != null) CatalogPlugin.getDefault().getLocalCatalog().remove(service);
 			} catch (IOException e) {
 				IncidentPlugIn.log(e.getMessage(), e);
 			}
-			
 		}
-		featureCollection = null;
-		store = null;
+		
+		this.featureCollection = null;
+		this.prjFeatureCollection = null;
+		this.prjFeatureType = null;
+		this.store = null;
+		this.prjStore = null;
 		this.pointResource = null;
+		this.prjResource = null;
 		this.parent = null;
+		this.attributeResources.clear();
 	}
 	
 	/** Creates the map
@@ -176,6 +186,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			protected IStatus run(IProgressMonitor monitor) {
 				IStatus s = super.run(monitor);
 				Display.getDefault().asyncExec(()->{
+					if (parent == null || parent.isDisposed() || getMap() == null || IncidentMapPage.this.parent == null) return;
 					addPointsLayer();
 					updatePointsLayer();	
 					updateObservationLayers();
@@ -203,7 +214,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 
 			//normal point layer
-			featureType = SmartCollectIncidentFeatureFactory.createSimpleIncidentSchema(SmartCollectIncidentFeatureFactory.SMART_POINT_TYPE_NAME);
+			featureType = SmartCollectIncidentFeatureFactory.createSimpleIncidentSchema(SmartCollectIncidentFeatureFactory.SMART_POINT_TYPE_NAME, this.parent.getIncident().getWaypoint().getUuid());
 			featureCollection = new ListFeatureCollection(featureType);
 			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
 			store = pointResource.resolve(FeatureStore.class, null);
@@ -211,7 +222,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			
 			if (parent.getOptions().getTrackDistanceDirection()) {
 				//projected point layer
-				prjFeatureType = SmartCollectIncidentFeatureFactory.createSimpleIncidentSchema(SmartCollectIncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME);
+				prjFeatureType = SmartCollectIncidentFeatureFactory.createSimpleIncidentSchema(SmartCollectIncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME, this.parent.getIncident().getWaypoint().getUuid());
 				prjFeatureCollection = new ListFeatureCollection(prjFeatureType);
 				prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(prjFeatureType);
 				prjStore = prjResource.resolve(FeatureStore.class, null);
@@ -255,7 +266,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					
 				}
 			});
-	      ;
+	      
 			
 			AddLayersCommand command = new AddLayersCommand(layers, getMap().getLayersInternal().size()) {
 				@Override

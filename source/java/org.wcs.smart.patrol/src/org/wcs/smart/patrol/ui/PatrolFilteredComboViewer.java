@@ -152,7 +152,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 		btnFilter.setToolTipText(Messages.PatrolFilteredComboViewerComposite_Filter_Tooltip);
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), PatrolFilteredComboViewer.this);
+				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), PatrolFilteredComboViewer.this, session);
 				pfd.open();
 			}
 
