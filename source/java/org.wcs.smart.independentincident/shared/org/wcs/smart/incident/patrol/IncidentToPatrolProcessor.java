@@ -21,11 +21,17 @@
  */
 package org.wcs.smart.incident.patrol;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,13 +46,18 @@ import org.wcs.smart.incident.IntegratePatrolIncidentSource;
 import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
 import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.TrackUtil;
 
 /**
@@ -186,6 +197,7 @@ public class IncidentToPatrolProcessor {
 			
 			session.beginTransaction();
 			try {
+				Map<Path,Path> toMove = new HashMap<>();
 				
 				if (wp.getSourceId().equals(IntegratePatrolIncidentSource.KEY)) {
 					//add to patrol
@@ -193,10 +205,36 @@ public class IncidentToPatrolProcessor {
 					PatrolWaypoint pw = new PatrolWaypoint();
 					pw.setPatrolLegDay(matchedTrack.getPatrolLegDay());
 					pw.setWaypoint(wp);
-					session.persist(pw);
+					session.persist(pw);	
+					
+					//TODO: deal with attachments as they have to move to a new location
+					PatrolWaypointSource src = (PatrolWaypointSource) WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+							
+					
+					Path toLoc = Paths.get(wp.getConservationArea().getFileDataStoreLocation())
+							.resolve(src.getDatastoreFileLocation(matchedTrack.getPatrolLegDay().getPatrolLeg().getPatrol()));
+									
+					
+					for (WaypointAttachment wa : wp.getAttachments()) {
+						wa.computeFileLocation(session);
+						Path fromFile = wa.getAttachmentFile();
+						Path toFile = toLoc.resolve(wa.getFilename());
+						toMove.put(fromFile, toFile);
+//						wa.computeFileLocation(null);
+					}
+					for (WaypointObservation wo : wp.getAllObservations()) {
+						for (ObservationAttachment oa : wo.getAttachments()) {
+							oa.computeFileLocation(session);
+							Path fromFile = oa.getAttachmentFile();
+							Path toFile = toLoc.resolve(oa.getFilename());
+							toMove.put(fromFile, toFile);
+						}
+					}
+					
 					
 					//update source
 					wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+					
 					
 					//add to track
 					List<LineString> tracks = matchedTrack.getLineStrings();
@@ -223,6 +261,18 @@ public class IncidentToPatrolProcessor {
 					iw.setWaypoint(wp);
 					session.persist(iw);
 				}
+				//flush session to ensure all changes can be saved
+				session.flush();
+
+				//copy files
+				//there is a small chance a file gets lost if something goes wrong here
+				//if the first file copies but the second doesn't 
+				for (Entry<Path,Path> files : toMove.entrySet()) {
+					Path toPath = files.getValue();
+					if (!Files.exists(toPath.getParent())) SmartUtils.createDirectory(toPath.getParent());
+					Files.move(files.getKey(), files.getValue());
+				}
+			
 				
 				session.getTransaction().commit();
 				
