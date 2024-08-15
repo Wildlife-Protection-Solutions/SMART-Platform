@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.smartcollect;
 
+import java.util.UUID;
+
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -51,11 +53,11 @@ public class SmartCollectIncidentFeatureFactory {
 	 * @return
 	 * @throws SchemaException
 	 */
-	public static SimpleFeatureType createSimpleIncidentSchema(String typeName) throws SchemaException{
+	public static SimpleFeatureType createSimpleIncidentSchema(String typeName, UUID uuid) throws SchemaException{
 		if (typeName.equals(SMART_POINT_TYPE_NAME)) {
-			return DataUtilities.createType(SMART_POINT_TYPE_NAME, SMART_POINT_SPEC);
+			return DataUtilities.createType(SMART_POINT_TYPE_NAME + UuidUtils.uuidToString(uuid), SMART_POINT_SPEC);
 		}else if (typeName.equals(SMART_POINT_PRJ_TYPE_NAME)) {
-			return DataUtilities.createType(SMART_POINT_PRJ_TYPE_NAME, SMART_POINT_PRJ_SPEC);
+			return DataUtilities.createType(SMART_POINT_PRJ_TYPE_NAME + UuidUtils.uuidToString(uuid), SMART_POINT_PRJ_SPEC);
 		}
 		return null;
 	}
@@ -68,7 +70,8 @@ public class SmartCollectIncidentFeatureFactory {
 	 * @return
 	 */
 	public static SimpleFeature createSimpleIncidentFeature(SimpleFeatureType ftype, Waypoint incident) {
-		if (ftype.getName().getLocalPart().equals("smartcollectincident")) { //$NON-NLS-1$
+		if (ftype.getName().getLocalPart().equals("smartcollectincident" + UuidUtils.uuidToString(incident.getUuid()))) {
+
 			Object data[] = new Object[3];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 			int i = 0;
@@ -77,7 +80,8 @@ public class SmartCollectIncidentFeatureFactory {
 			data[i++] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(incident.getX(), incident.getY()));
 			SimpleFeature f = SimpleFeatureBuilder.build(ftype, data, name);
 			return f;
-		}else if (ftype.getName().getLocalPart().equals("smartcollectincidentprojected")) { //$NON-NLS-1$
+		}else if (ftype.getName().getLocalPart().equals("smartcollectincidentprojected" + UuidUtils.uuidToString(incident.getUuid()))) {
+
 			Object data[] = new Object[7];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 			int i = 0;

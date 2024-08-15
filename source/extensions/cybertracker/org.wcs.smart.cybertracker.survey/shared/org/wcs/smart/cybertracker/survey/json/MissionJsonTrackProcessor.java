@@ -120,7 +120,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			
 			List<CtMissionLink> links = linkmap.get(deviceId);
 			if (links == null) {
-				links = QueryFactory.buildQuery(session, CtMissionLink.class, "deviceId", deviceId).list(); //$NON-NLS-1$
+				//links in the same conservation area
+				String query = "SELECT ml FROM CtMissionLink ml join ml.mission m WHERE m.survey.surveyDesign.conservationArea = :ca and ml.deviceId = :deviceid";
+				links = session.createQuery(query, CtMissionLink.class)
+					.setParameter("ca", this.ca)
+					.setParameter("deviceid", deviceId)
+					.list();				
 				linkmap.put(deviceId, links);
 			}
 			

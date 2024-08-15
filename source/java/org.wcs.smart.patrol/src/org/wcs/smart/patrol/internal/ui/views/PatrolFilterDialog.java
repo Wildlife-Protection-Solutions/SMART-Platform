@@ -71,14 +71,20 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	private ComboViewer sortBy;
 	private ComboViewer sortByDir;
 	
+	private Session session;
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
 	 * @param filter the filter to update
 	 */
 	public PatrolFilterDialog(Shell parent, IPatrolFilteringView view) {
+		this(parent, view, null);
+	}
+	
+	public PatrolFilterDialog(Shell parent, IPatrolFilteringView view, Session session) {
 		super(parent, view);
 		currentFilter = view.getFilter();
+		this.session = session;
 	}
 
 	
@@ -155,49 +161,52 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		setMessage(Messages.PatrolFilterDialog_DialogMessage);
 		setTitle(Messages.PatrolFilterDialog_DialogTitle);
 		getShell().setText(Messages.PatrolFilterDialog_DialogTitle);
-		
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try {
-				Composite composite = new Composite((Composite) filter, SWT.NONE);
-				composite.setLayout(new GridLayout(1, false));
-				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-	
-				Composite dateFilterExpComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolDatesGroupLabel, composite);
-				dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
-	
-				Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel1, composite);
-				createPatrolType(session, patrolType);
-	
-				Composite patrolIdComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolIdGroupLabel, composite);
-				patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.PatrolFilterDialog_PatrolIdLabel, "id")}); //$NON-NLS-1$
-				patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
-				patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
-				
-				
-				Composite sortDirection = createGroupComposite(Messages.PatrolFilterDialog_SortByOption, composite);
-				createSortBy(sortDirection);
-				
-				Link linkSave = new Link(composite, SWT.NONE);
-				linkSave.setText("<a>" + Messages.PatrolFilterDialog_SaveDefault + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-				linkSave.setToolTipText(Messages.PatrolFilterDialog_SaveDefaultTooltip);
-				linkSave.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-				linkSave.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						PatrolViewFilter temp = currentFilter.clone();
-						updateFilterModel(temp);
-						temp.saveAsPreference();
-					}
-				});
-				
-				updateControlsValues();
-			} finally {
-				session.getTransaction().rollback();
+
+		if (this.session == null) {
+			try(Session fsession = HibernateManager.openSession()){
+				createContent(filter, fsession);
 			}
+		}else {
+			createContent(filter, session);
 		}
 		return filter;
 
+	}
+
+	private void createContent(final Composite filter, Session fsession) {
+		Composite composite = new Composite((Composite) filter, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		Composite dateFilterExpComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolDatesGroupLabel, composite);
+		dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
+
+		Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel1, composite);
+		createPatrolType(fsession, patrolType);
+
+		Composite patrolIdComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolIdGroupLabel, composite);
+		patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.PatrolFilterDialog_PatrolIdLabel, "id")}); //$NON-NLS-1$
+		patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
+		patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
+		
+		
+		Composite sortDirection = createGroupComposite(Messages.PatrolFilterDialog_SortByOption, composite);
+		createSortBy(sortDirection);
+		
+		Link linkSave = new Link(composite, SWT.NONE);
+		linkSave.setText("<a>" + Messages.PatrolFilterDialog_SaveDefault + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		linkSave.setToolTipText(Messages.PatrolFilterDialog_SaveDefaultTooltip);
+		linkSave.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		linkSave.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PatrolViewFilter temp = currentFilter.clone();
+				updateFilterModel(temp);
+				temp.saveAsPreference();
+			}
+		});
+		
+		updateControlsValues();
 	}
 
 	/*

@@ -86,7 +86,8 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 			@Override
 			public void run() {
 				try{
-					PatrolDialog pd = new PatrolDialog(Display.getDefault().getActiveShell(), newPatrolLinks, session);
+					PatrolDialog pd = new PatrolDialog(Display.getDefault().getActiveShell(), 
+							newPatrolLinks, session);
 					if (pd.open() == Window.CANCEL){
 						cancel[0] = true;
 					}else{

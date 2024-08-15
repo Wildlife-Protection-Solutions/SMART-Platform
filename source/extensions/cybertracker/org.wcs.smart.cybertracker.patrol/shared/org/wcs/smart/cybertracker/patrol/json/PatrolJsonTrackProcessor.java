@@ -51,7 +51,6 @@ import org.wcs.smart.cybertracker.json.JsonTrackUtils;
 import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
@@ -118,7 +117,13 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			 
 			List<CtPatrolLink> links = linkmap.get(deviceId);
 			if (links == null) {
-				links = QueryFactory.buildQuery(session, CtPatrolLink.class,"deviceId", deviceId).list(); //$NON-NLS-1$
+				//links in the same conservation area
+				//TODO: make this same change in the mission module
+				String query = "SELECT pl FROM CtPatrolLink pl join pl.patrolLeg l join l.patrol p WHERE p.conservationArea = :ca and pl.deviceId = :deviceid";
+				links = session.createQuery(query, CtPatrolLink.class)
+					.setParameter("ca", this.ca)
+					.setParameter("deviceid", deviceId)
+					.list();				
 				linkmap.put(deviceId, links);
 			}
 			
