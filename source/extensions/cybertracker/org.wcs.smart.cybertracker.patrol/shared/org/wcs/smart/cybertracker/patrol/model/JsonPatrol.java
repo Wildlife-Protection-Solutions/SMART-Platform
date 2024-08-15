@@ -74,7 +74,7 @@ public class JsonPatrol {
 		return mandate;
 	}
 
-	public PatrolType.Type getPatrolType() {
+	public PatrolType getPatrolType() {
 		return patrolTransportType != null ? patrolTransportType.getPatrolType() : null;
 	}
 

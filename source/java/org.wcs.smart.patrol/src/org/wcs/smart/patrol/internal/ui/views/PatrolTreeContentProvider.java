@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,7 +69,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 		FOLDER (Messages.PatrolTreeContentProvider_FolderOption), 
 		STATION (Messages.PatrolTreeContentProvider_StationOption),
 		TEAM (Messages.PatrolTreeContentProvider_TeamOption),
-		PATROLTYPE (Messages.PatrolTreeContentProvider_TypeOption),
+		PATROLTYPE (Messages.PatrolTreeContentProvider_TypeOption1),
 		MANDATE (Messages.PatrolTreeContentProvider_MandateOption),
 		TRANSPORTTYPE (Messages.PatrolTreeContentProvider_TransportOption),
 		YEAR(Messages.PatrolTreeContentProvider_YearOption),
@@ -219,10 +218,10 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 			if (input instanceof PatrolEditorInput[]){
 				PatrolEditorInput[] patrols = (PatrolEditorInput[]) input;
 				List<ITreeElement> result = new ArrayList<>();
-				Map<PatrolType.Type, TreeElement> obj2Element = new HashMap<>();
+				Map<PatrolType, TreeElement> obj2Element = new HashMap<>();
 				
 				for (PatrolEditorInput p : patrols) {
-					PatrolType.Type type = p.getType();
+					PatrolType type = p.getType();
 					TreeElement typeEl = obj2Element.get(type);
 					if(typeEl == null) {
 						typeEl = new TreeElement(type, null);
@@ -232,8 +231,8 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 					typeEl.getChildren().add(new TreeElement(p, type));
 				}
 				result.sort((a,b)->{
-					String s1 = ((PatrolType.Type)a.getObject()).getGuiName(Locale.getDefault());
-					String s2 = ((PatrolType.Type)a.getObject()).getGuiName(Locale.getDefault());
+					String s1 = ((PatrolType)a.getObject()).getName();
+					String s2 = ((PatrolType)a.getObject()).getName();
 					return Collator.getInstance().compare(s1, s2);
 				});
 				return result;

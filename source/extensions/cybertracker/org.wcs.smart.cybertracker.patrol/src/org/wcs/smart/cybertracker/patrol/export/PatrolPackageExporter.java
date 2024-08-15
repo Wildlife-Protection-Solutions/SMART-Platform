@@ -82,7 +82,6 @@ import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -348,16 +347,8 @@ public class PatrolPackageExporter {
 				PatrolMetadataField.TRANSPORT.getIcon(set),
 				false, session, ctpackage.getConservationArea(),
 				set, workingDir,
-				(item, json)->{
-					PatrolType ptype = session.createQuery("FROM PatrolType WHERE id.type = :type and id.conservationArea = :ca", PatrolType.class) //$NON-NLS-1$
-							.setParameter("type",  ((PatrolTransportType)item).getPatrolType()) //$NON-NLS-1$
-							.setParameter("ca", ((PatrolTransportType)item).getConservationArea()) //$NON-NLS-1$
-							.uniqueResult();
-					
-					int max = ((PatrolTransportType)item).getPatrolType().getDefaultMaxSpeed();
-					if (ptype != null) {
-						max = ptype.getMaxSpeed();
-					}
+				(item, json)->{					
+					int max = ((PatrolTransportType)item).getPatrolType().getMaxSpeed();
 					json.put("max_speed", max); //$NON-NLS-1$
 				}
 			);
@@ -437,7 +428,7 @@ public class PatrolPackageExporter {
 		for (PatrolTransportType tt : QueryFactory.buildQuery(session, PatrolTransportType.class, 
 				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
 				new Object[] {"isActive", true}).list()) { //$NON-NLS-1$
-			if (tt.getPatrolType().requiresPilot()) requiredBy.add(tt);
+			if (tt.getPatrolType().getRequiresPilot()) requiredBy.add(tt);
 		}
 		
 		JSONArray items = new JSONArray();

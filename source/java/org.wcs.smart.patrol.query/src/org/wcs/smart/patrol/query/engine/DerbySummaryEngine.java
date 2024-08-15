@@ -62,6 +62,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
@@ -1576,10 +1577,10 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				}else if (option.getType() == PatrolQueryOptionType.KEY){
 					PatrolQueryOption op = option;
 					fromSql.append(" join "); //$NON-NLS-1$
-					fromSql.append(tableNames.get(op.getSourceClass()));
+					fromSql.append(tableNamePrefix(op.getSourceClass()));
 					fromSql.append(" on temp."); //$NON-NLS-1$
 					fromSql.append(getUuidFieldName(op));
-					fromSql.append(" = "  ); //$NON-NLS-1$
+					fromSql.append(" = "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(op.getSourceClass()));
 					fromSql.append(".uuid"); //$NON-NLS-1$
 				}
@@ -1986,6 +1987,8 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 			return "pl_mandate_uuid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE_KEY:
 			return "pl_transport_uuid"; //$NON-NLS-1$
+		case PATROL_TYPE:
+			return "p_type_uuid"; //$NON-NLS-1$
 		default:
 			return null;
 		}
@@ -2010,7 +2013,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 		case MANDATE:
 			return "pl_mandate_uuid"; //$NON-NLS-1$
 		case PATROL_TYPE:
-			return "p_type"; //$NON-NLS-1$
+			return tablePrefix.get(PatrolType.class) + ".keyid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE:
 			return "pl_transport_uuid"; //$NON-NLS-1$
 		case ARMED:
@@ -2131,7 +2134,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Patrol.class) + ".patrol_type_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".end_date, "); //$NON-NLS-1$
@@ -2168,7 +2171,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
 		sql.append("pl_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_type varchar(6),"); //$NON-NLS-1$
+		sql.append("p_type_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$
 		sql.append("p_end_date date,"); //$NON-NLS-1$

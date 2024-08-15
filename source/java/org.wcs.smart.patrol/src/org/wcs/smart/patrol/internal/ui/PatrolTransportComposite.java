@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -151,6 +152,13 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		return pm;
 	}
 	
+	@Override
+	public boolean updatePatrol(Patrol p, Session session) {
+		boolean ok = super.updatePatrol(p, session);
+		p.recalculateType(session);
+		return ok;
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
@@ -158,11 +166,11 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		PatrolTransportType pm = getSelectedTransportType();
 		if (pm != null){
 			patrolLeg.setType(pm);
-			patrolLeg.getPatrol().recalculateType();
+			
 			
 			//for edits only
 			if (patrolLeg.getUuid() != null ){
-				if (pm.getPatrolType().requiresPilot()){
+				if (pm.getPatrolType().getRequiresPilot()){
 					//prompt for pilot
 					boolean hasPilot = false;
 					for (PatrolLegMember member : patrolLeg.getMembers()){
@@ -179,7 +187,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 					}
 				}
 			}
-			if (!pm.getPatrolType().requiresPilot() && patrolLeg.getMembers() != null){
+			if (!pm.getPatrolType().getRequiresPilot() && patrolLeg.getMembers() != null){
 				//remove all pilots
 				for (PatrolLegMember member : patrolLeg.getMembers()){
 					member.setIsPilot(false);

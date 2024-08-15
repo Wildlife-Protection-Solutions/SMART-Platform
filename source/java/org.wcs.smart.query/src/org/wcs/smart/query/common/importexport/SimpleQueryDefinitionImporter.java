@@ -82,11 +82,11 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 			qType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(qt.getQueryType());
 		}
 		if (qType == null){
-			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
+			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType1, new Object[]{qt.getQueryType()}));
 		}
 		wq = (SimpleQuery) createQuery(qType);
 		if (wq == null){
-			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
+			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType1, new Object[]{qt.getQueryType()}));
 		}
 		
 		QueryImportEngine.importNames(wq, qt, importCa, session);

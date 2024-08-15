@@ -56,7 +56,7 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 		deletePatrolTeams(ca, session);
 		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingMandates);
 		deleteMandates(ca, session);		
-		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTypes);
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTypes1);
 		deletePatrolTypes(ca, session);		
 	}
 

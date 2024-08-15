@@ -24,6 +24,11 @@ package org.wcs.smart.ca.icon;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 
 /**
  * Icon utils that are shared between connect and desktop
@@ -47,6 +52,67 @@ public enum IconUtils {
 		return null;
 	}
 	
+	/**
+	 * Finds the system icon in the conservation area OR creates a new icon
+	 * from the system icon with the given key.
+	 * 
+	 * If the iconKey does not match a system icon or existing ca icon it will return null
+	 * 
+	 * @param session
+	 * @param ca
+	 * @param iconKey
+	 * @return
+	 */
+	public Icon findOrCreateSystemIcon(Session session, ConservationArea ca, String iconKey) {
+		
+		Icon found = session.createQuery("FROM Icon WHERE conservationArea = :ca and keyId = :key", Icon.class) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("key", iconKey) //$NON-NLS-1$
+				.uniqueResult();
+		
+		if (found != null) return found;
+		
+		//create it from the system icon
+		for (String[] icons : SMART_ICON_MAPPING) {
+			if (!icons[0].equalsIgnoreCase(iconKey)) continue;
+			
+			Icon icon = new Icon();
+			icon.setConservationArea(ca);
+			icon.setKeyId(iconKey);
+			icon.setName(icons[1]);
+			icon.updateName(ca.getDefaultLanguage(), icons[1]);
+			icon.setFiles(new ArrayList<>());
+			
+			session.persist(icon);
+			
+			List<IconSet> sets = session.createQuery("FROM IconSet WHERE conservationArea = :ca", IconSet.class) //$NON-NLS-1$
+					.setParameter("ca", ca).list(); //$NON-NLS-1$
+			for (IconSet set : sets) {
+				
+				String file = null;
+				if (set.getKeyId().equalsIgnoreCase(FixedIconSet.BLACK.key)) {
+					file = icons[2];
+				}else if (set.getKeyId().equalsIgnoreCase(FixedIconSet.LINE.key)) {
+					file = icons[3];
+				}else if (set.getKeyId().equalsIgnoreCase(FixedIconSet.COLOR.key)) {
+					file = icons[4];
+				}
+				if (file == null) continue;
+				
+				IconFile iconfile = new IconFile();
+				iconfile.setFilename(file);
+				iconfile.setIcon(icon);
+				iconfile.setIconSet(set);
+				icon.getFiles().add(iconfile);
+				
+				session.persist(iconfile);
+			}
+			return icon;
+		}
+		return null;
+		
+		
+	}
 	/**
 	 * 
 	 * Used for upgrading existing data models and mapping icons to data model
@@ -1140,7 +1206,7 @@ public enum IconUtils {
 		{"patrol_members","Patrol members","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_members_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_members_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_members_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"patrol_objective","Patrol objective","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_objective_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_objective_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_objective_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"patrol_pilot_airplane","Patrol pilot airplane","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_pilot_airplane_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_pilot_airplane_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_pilot_airplane_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		{"patrol_pilot_boat ","Patrol pilot boat ","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_pilot_boat_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_pilot_boat_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_pilot_boat_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		{"patrol_pilot_boat","Patrol pilot boat ","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_pilot_boat_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_pilot_boat_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_pilot_boat_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"patrol_pilot","Patrol pilot","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_pilot_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_pilot_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_pilot_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"patrol_pilot_helicopter","Patrol pilot helicopter","platform:/plugin/org.wcs.smart/images/datamodel/black/Patrol_pilot_helicopter_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Patrol_pilot_helicopter_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Patrol_pilot_helicopter_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		{"paw","Paw","platform:/plugin/org.wcs.smart/images/datamodel/black/Paw_glyph_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/line/Paw_line_icon.svg","platform:/plugin/org.wcs.smart/images/datamodel/color/Paw_color_icon.svg",""}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$

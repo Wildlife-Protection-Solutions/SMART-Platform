@@ -89,7 +89,7 @@ public class PatrolToXmlConverter {
 		xml.setObjective(obj);
 		
 		/* patrol type */
-		xml.setPatrolType(p.getPatrolType().name());
+		xml.setPatrolType(p.getPatrolType().getKeyId());
 		
 		/* station */
 		xml.setStation(createLabel(p, p.getStation()));

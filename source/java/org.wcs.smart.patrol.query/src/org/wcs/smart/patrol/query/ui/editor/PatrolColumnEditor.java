@@ -22,7 +22,9 @@
  */package org.wcs.smart.patrol.query.ui.editor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,6 +49,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
@@ -69,9 +72,33 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 	
 	private ComboBoxViewerCellEditor employeeCellEditor = null;
 	
+	private HashMap<UUID, Boolean> pTypePilot = null;
+	
+	//cache link between patrol types and pilot
+	//users will have to re-run query in order for these to be
+	//reset if they change
+	private Job initpatrolTypes = new Job("initialize patrol types") { //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try(Session session = HibernateManager.openSession()){
+				List<PatrolType> types = session.createQuery("FROM PatrolType WHERE conservationArea = :ca", PatrolType.class) //$NON-NLS-1$
+						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+						.list();
+				types.forEach(e->pTypePilot.put(e.getUuid(),e.getRequiresPilot()));
+			}
+			return Status.OK_STATUS;
+		}
+		
+	};
 	
 	public PatrolColumnEditor (ColumnViewer viewer, FixedQueryColumn queryColumn, IQueryEditor editor ){
 		super(viewer, queryColumn, editor);
+		
+		if ( queryColumn.getColumn() == FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT) {
+			pTypePilot = new HashMap<>();
+			initpatrolTypes.schedule();
+		}
 	}
 
 	@Override
@@ -106,7 +133,8 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 		case PATROL_LEG_PILOT:
 			if (!(element instanceof IPatrolQueryResultItem)) return null;
 			IPatrolQueryResultItem pitem = (IPatrolQueryResultItem)element;
-			if (!pitem.getPatrolType().requiresPilot()) return null; // pilot not valid for type
+			if (!pTypePilot.containsKey(pitem.getPatrolTypeUuid())) return null;
+			if (!pTypePilot.get(pitem.getPatrolTypeUuid())) return null; // pilot not valid for type
 		case PATROL_LEG_LEADER:
 			if (!(element instanceof IPatrolQueryResultItem)) return null;
 			if (employeeCellEditor == null){

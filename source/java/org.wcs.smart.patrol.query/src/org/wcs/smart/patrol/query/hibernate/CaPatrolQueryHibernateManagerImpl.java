@@ -33,6 +33,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 /**
@@ -83,6 +84,31 @@ public class CaPatrolQueryHibernateManagerImpl extends AbstractPatrolQueryHibern
 		return items;
 	}
 
+	@Override
+	public List<ListItem> getActivePatrolTypes(Session session) {
+		List<PatrolType> teams = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (PatrolType t : teams){
+			items.add(new ListItem(null, t.getName(), t.getKeyId()));
+		}
+		return items;
+	}
+	
+	/**
+	 * Gets the patrol type types listitem object 
+	 * @param session
+	 * @param value the key representing the patrol type
+	 * @return the transport type or null if not found
+	 * @throws Exception
+	 */
+	public ListItem getPatrolType(Session session, String value) throws Exception{
+		PatrolType type = session.createQuery("FROM PatrolType WHERE conservationArea = :ca and keyId = :key", PatrolType.class) //$NON-NLS-1$
+		.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+		.setParameter("key", value).uniqueResult(); //$NON-NLS-1$
+		if (type == null) return null;
+		return new ListItem(null, type.getName(), type.getKeyId());		
+	}
+	
 	@Override
 	public List<PatrolAttribute> getCustomPatrolAttributes(Session session) {
 		List<PatrolAttribute> pas = QueryFactory.buildQuery(session, PatrolAttribute.class, 

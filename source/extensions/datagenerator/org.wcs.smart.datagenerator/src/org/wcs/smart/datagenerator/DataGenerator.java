@@ -246,7 +246,7 @@ public class DataGenerator implements IDataEngine{
 		pl.getMembers().get(0).setIsLeader(true);
 		pl.setLeader(pl.getMembers().get(0));
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-		if (pl.getPatrol().getPatrolType().requiresPilot()) {
+		if (pl.getPatrol().getPatrolType().getRequiresPilot()) {
 			pl.setPilot(pl.getMembers().get(0));	
 		}
 

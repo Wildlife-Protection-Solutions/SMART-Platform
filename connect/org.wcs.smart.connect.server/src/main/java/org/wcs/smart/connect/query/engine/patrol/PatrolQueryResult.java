@@ -38,7 +38,6 @@ import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -158,7 +157,8 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 		it.setTeam(rs.getString("p_team"));				 //$NON-NLS-1$
 		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
 		it.setMandate(rs.getString("pl_mandate")); //$NON-NLS-1$
-		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("p_type"))); //$NON-NLS-1$
+		it.setPatrolTypeUuid((UUID) rs.getObject("p_type_uuid")); //$NON-NLS-1$
+		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_is_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("pl_id")); //$NON-NLS-1$

@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.query.model.observation;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
@@ -176,7 +175,7 @@ public class FixedQueryColumn extends QueryColumn {
 			case PATROL_TEAM:
 				return item.getTeam();
 			case PATROL_TYPE:
-				return  SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(item.getPatrolType(), l);
+				return  item.getPatrolType();
 			case TRANSPORT_TYPE:
 				return item.getTransportType();
 			case CA_ID:

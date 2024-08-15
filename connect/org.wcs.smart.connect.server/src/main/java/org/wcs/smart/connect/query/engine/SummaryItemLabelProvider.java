@@ -945,6 +945,8 @@ public class SummaryItemLabelProvider {
 				queryClazz = PatrolTransportType.class;
 			}else if (item.getOption() == PatrolQueryOption.MANDATE_KEY){
 				queryClazz = PatrolMandate.class;
+			}else if (item.getOption() == PatrolQueryOption.PATROL_TYPE) {
+				queryClazz = PatrolType.class;
 			}
 			if (queryClazz == null){
 				throw new UnsupportedOperationException(Messages.getString("SummaryItemLabelProvider.PatrolQueryOptionNotSupported", l) + item.getOption());	 //$NON-NLS-1$
@@ -1004,17 +1006,7 @@ public class SummaryItemLabelProvider {
 						results.add(new ListItem( null, ((Patrol) object).getId(),((Patrol) object).getId() ));
 					}
 				}
-			}else if (item.getOption() == PatrolQueryOption.PATROL_TYPE){
-				if (keys == null){
-					for (PatrolType.Type t : PatrolType.Type.values()){
-						results.add(new ListItem(null, t.getGuiName(l), t.name()));
-					}
-				}else{
-					for (int i = 0; i < keys.length; i ++){
-						results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(l), keys[i]));
-					}
-				}
-			}	
+			}
 		}else if (type == PatrolQueryOptionType.BOOLEAN){
 			if (keys == null) {
 				results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l), Boolean.TRUE.toString()));

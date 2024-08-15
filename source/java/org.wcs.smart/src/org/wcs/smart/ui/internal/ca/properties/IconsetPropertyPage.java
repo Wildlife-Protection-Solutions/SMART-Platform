@@ -442,13 +442,14 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				@Override
 				public Image getImage(Object element) {
 					if (element instanceof Icon) {
-						IconFile ff = ((Icon)element).getIconFile(s);						
-						Image i = imgr.get(ff.getUuid().toString());
+						IconFile ff = ((Icon)element).getIconFile(s);
+						String key = ff.getIcon().getKeyId() + "_" + ff.getIconSet().getKeyId(); //$NON-NLS-1$
+						Image i = imgr.get(key);
 						if (i != null) return i;
 						byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
 						try(InputStream ins = new ByteArrayInputStream(data)){
 							Image img2 = new Image(Display.getDefault(), ins);
-							imgr.put(ff.getUuid().toString(), img2);
+							imgr.put(key, img2);
 							return img2;
 						}catch (Exception ex) {
 							SmartPlugIn.log(ex.getMessage(), ex);
@@ -686,15 +687,12 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			Icon copy = (Icon)x;
 			boolean exists = false;
 			for(Icon c : caicons) {
-				if (c.getKeyId().equals(c)) {
+				if (c.getKeyId().equals(copy.getKeyId())) {
 					exists = true;
 					break;
 				}
 			}
 			if (exists) continue;
-			
-			
-			
 			
 			Icon newIcon = new Icon();
 			newIcon.setConservationArea(SmartDB.getCurrentConservationArea());

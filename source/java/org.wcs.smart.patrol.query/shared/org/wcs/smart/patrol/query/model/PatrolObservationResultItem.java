@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 
 /**
@@ -49,7 +48,8 @@ public class PatrolObservationResultItem extends ObservationQueryResultItem impl
 	private String team;
 	private String objective;
 	private String mandate;
-	private PatrolType.Type patrolType;
+	private String patrolType;
+	private UUID patrolTypeUuid;
 	private UUID patrolUuid;
 	private boolean armed;
 	private String patrolLegId;
@@ -211,14 +211,27 @@ public class PatrolObservationResultItem extends ObservationQueryResultItem impl
 	/**
 	 * @return the patrol type 
 	 */
-	public PatrolType.Type getPatrolType() {
+	public String getPatrolType() {
 		return patrolType;
 	}
 	/**
 	 * @param patrolType the patrol type
 	 */
-	public void setPatrolType(PatrolType.Type patrolType) {
+	public void setPatrolType(String patrolType) {
 		this.patrolType = patrolType;
+	}
+	
+	/**
+	 * @return the patrol type uuid
+	 */
+	public UUID getPatrolTypeUuid() {
+		return patrolTypeUuid;
+	}
+	/**
+	 * @param patrolType the patrol type uui
+	 */
+	public void setPatrolTypeUuid(UUID patrolTypeUuid) {
+		this.patrolTypeUuid = patrolTypeUuid;
 	}
 	
 	/**

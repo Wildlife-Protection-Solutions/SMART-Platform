@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 public interface IPatrolQueryResultItem extends IResultItem {
@@ -36,17 +35,18 @@ public interface IPatrolQueryResultItem extends IResultItem {
 	public String getMembers();
 	public String getPilot();
 	public LocalDate getPatrolStartDate() ;
-	public LocalDate getPatrolEndDate() ;
-	public String getStation() ;
-	public String getTeam() ;
-	public String getObjective() ;
-	public String getMandate() ;
-	public PatrolType.Type getPatrolType() ;
-	public UUID getPatrolUuid() ;
-	public boolean isArmed() ;
-	public String getPatrolLegId() ;
-	public UUID getPatrolLegUuid() ;
-	public String getTransportType() ;
+	public LocalDate getPatrolEndDate();
+	public String getStation();
+	public String getTeam();
+	public String getObjective();
+	public String getMandate();
+	public String getPatrolType();
+	public UUID getPatrolTypeUuid();
+	public UUID getPatrolUuid();
+	public boolean isArmed();
+	public String getPatrolLegId();
+	public UUID getPatrolLegUuid();
+	public String getTransportType();
 	public LocalDate getPatrolLegStartDate();
 	public LocalDate getPatrolLegEndDate();
 	public String getConservationAreaId();

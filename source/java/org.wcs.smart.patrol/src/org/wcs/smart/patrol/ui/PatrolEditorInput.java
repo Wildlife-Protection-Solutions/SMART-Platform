@@ -28,7 +28,6 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -49,7 +48,7 @@ public class PatrolEditorInput implements IEditorInput {
 
 	private UUID patrolUuid;
 	private String id;
-	private PatrolType.Type type;
+	private PatrolType type;
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
@@ -69,7 +68,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 * @param type
 	 * @param startDate
 	 */
-	public PatrolEditorInput(UUID uuid, String id, PatrolType.Type type, LocalDate startDate, LocalDate endDate){
+	public PatrolEditorInput(UUID uuid, String id, PatrolType type, LocalDate startDate, LocalDate endDate){
 		this.patrolUuid = uuid;
 		this.id = id;
 		this.type = type;
@@ -115,7 +114,7 @@ public class PatrolEditorInput implements IEditorInput {
 	/**
 	 * @return patrol type
 	 */
-	public PatrolType.Type getType(){
+	public PatrolType getType(){
 		return this.type;
 	}
 	
@@ -140,7 +139,9 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {		
-		return UiPatrolUtils.getImageDescriptor(this.type);
+//		return UiPatrolUtils.getImageDescriptor(this.type);
+		//TODO:
+		return null;
 	}
 
 	/**

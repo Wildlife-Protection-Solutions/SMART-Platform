@@ -75,7 +75,6 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolLegStartDateComparator;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolDateLegsDialog;
 import org.wcs.smart.patrol.model.Patrol;
@@ -88,6 +87,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Patrol item composite that modifies the patrol legs.  Allows users
@@ -179,7 +179,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			lblDateInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			lnkEditDate = new Link(tmp, SWT.NONE);
-			lnkEditDate.setText("<a>" + UiPatrolUtils.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnkEditDate.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkEditDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			lnkEditDate.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -448,7 +448,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 
 	private boolean isPilotColumnRequired() {
 		for (PatrolLeg leg : legs) {
-			if (leg.getType().getPatrolType().requiresPilot()) {
+			if (leg.getType().getPatrolType().getRequiresPilot()) {
 				return true;
 			}
 		}
@@ -523,7 +523,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.PatrolLegsComposite_Error_LoadingPatrolTypes, ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolLegsComposite_Error_LoadingPatrolTypes1, ex);
 			session.getTransaction().rollback();
 		}
 		patrolLegViewer.setInput(legs);
@@ -897,13 +897,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		doflush(session);
 
 		if (p.getUuid() == null) {
-			p.recalculateType();
+			p.recalculateType(session);
 		}else {
 			//evict patrol object and reload to ensure legs 
 			//are recent before recalculating type
 			//#3630
 			session.evict(p);
-			session.get(Patrol.class, p.getUuid()).recalculateType();
+			session.get(Patrol.class, p.getUuid()).recalculateType(session);
 		}
 		
 		return true;			

@@ -346,7 +346,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				Hibernate.initialize(this.patrol.getStation());
 				Hibernate.initialize(this.patrol.getTeam());
 				
-				this.patrol.getPatrolType().getDefaultMaxSpeed();
+				this.patrol.getPatrolType().getName();
 				
 				this.patrol.getPatrolDatastorePath();
 				List<Projection> tmp = HibernateManager.getCaProjectionList(session);

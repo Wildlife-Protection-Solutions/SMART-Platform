@@ -70,7 +70,7 @@ public class PatrolResultInfoProvider extends ShowItemInfoProvider{
 	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof IPatrolQueryResultItem) {
 			IPatrolQueryResultItem it = (IPatrolQueryResultItem)resultItem;
-			PatrolEditorInput in = new PatrolEditorInput(it.getPatrolUuid(), it.getPatrolId(), it.getPatrolType(), it.getPatrolStartDate(), it.getPatrolEndDate());
+			PatrolEditorInput in = new PatrolEditorInput(it.getPatrolUuid(), it.getPatrolId(), null, it.getPatrolStartDate(), it.getPatrolEndDate());
 			UUID wpUuid = null;
 			if (resultItem instanceof WaypointQueryResultItem) {
 				wpUuid =((WaypointQueryResultItem) resultItem).getWaypointUuid();

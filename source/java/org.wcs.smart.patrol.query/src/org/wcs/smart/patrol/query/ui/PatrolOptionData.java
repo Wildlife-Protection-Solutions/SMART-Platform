@@ -50,7 +50,6 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.hibernate.MultiCaPatrolQueryHibernateManagerImpl;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
@@ -164,6 +163,12 @@ public class PatrolOptionData implements IPatrolOptionData{
 						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getMandates(session);
 					}else if (option ==  PatrolQueryOption.AGENCY_KEY) {
 						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getAgencies(session);
+					}else if (option == PatrolQueryOption.PATROL_TYPE) {
+						data = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+					}
+				}else {
+					if (option == PatrolQueryOption.PATROL_TYPE) {
+						data = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
 					}
 				}
 				if (data != null){
@@ -196,8 +201,13 @@ public class PatrolOptionData implements IPatrolOptionData{
 						}
 					}
 				}else if (option == PatrolQueryOption.PATROL_TYPE){
-					for (int i = 0; i < keys.length; i ++){
-						results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(Locale.getDefault()), keys[i]));
+					List<ListItem> types = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);					
+					if (types != null){
+						for (ListItem item : types) {
+							if (skeys.contains(item.getKey())) {
+								results.add(item);
+							}
+						}
 					}
 				}
 			}else if (type == PatrolQueryOptionType.BOOLEAN) {
@@ -253,16 +263,11 @@ public class PatrolOptionData implements IPatrolOptionData{
 			items.addAll(PatrolQueryHibernateManager.getInstance().getActiveMandates(session));
 			
 		}else if (option == PatrolQueryOption.PATROL_TYPE){
-			if (SmartDB.isMultipleAnalysis()){
-				for (PatrolType.Type t : PatrolType.Type.values()){
-					items.add(new ListItem(null, t.getGuiName(Locale.getDefault()), t.name()));
-				}
-			}else{
-				List<PatrolType> types= PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
-				for (PatrolType t : types){
-					items.add(new ListItem(null, t.getType().getGuiName(Locale.getDefault()), t.getType().name() ));
-				}
+			List<ListItem> types = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);				
+			for (ListItem t : types){
+				items.add(new ListItem(null, t.getName(), t.getKey()));
 			}
+			
 		}else if (option == PatrolQueryOption.CM) {
 			if (!SmartDB.isMultipleAnalysis()) {
 				List<ConfigurableModel> models = QueryFactory.buildQuery(session, ConfigurableModel.class, 

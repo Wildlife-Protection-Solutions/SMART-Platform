@@ -28,10 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,6 +48,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.OptionSelectionDialog;
+import org.wcs.smart.util.UuidUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -63,7 +62,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class PatrolTransportCsvImporter implements ICsvDataImporter {
 
-	private Collection<PatrolTransportType> importedData;
+	private Object[] importedData;
 	private ConservationArea ca;
 	
 	public PatrolTransportCsvImporter(ConservationArea ca) {
@@ -82,7 +81,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 	 * </p>
 	 * @return the set of patrol transport types imported
 	 */
-	public Collection<PatrolTransportType> getImportedData(){
+	public Object[] getImportedData(){
 		return importedData;
 	}
 	
@@ -92,7 +91,8 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 			throw new IOException(MessageFormat.format(Messages.PatrolTransportCsvImporter_ErrorfileNotFound, new Object[]{file.toString()}));
 		}
 		
-		ArrayList<PatrolTransportType> types = new ArrayList<PatrolTransportType>();
+		ArrayList<PatrolType> types = new ArrayList<>();
+		ArrayList<PatrolTransportType> ttypes = new ArrayList<>();
 		
 		List<Icon> icons = IconManager.INSTANCE.getIcons(session,  ca);
 		icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
@@ -109,54 +109,78 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 			
 			String[] row;
 			int line = 2;
+			HashMap<String, String> ttypeToptype = new HashMap<>();
 			while( (row = reader.readNext()) != null ) {
 				if (monitor.isCanceled()) return false;
 				if (row.length != headerRow.length) {
 					throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidLine, new Object[]{line, row.length, headerRow.length}));
 				}
-				PatrolTransportType type = handleTransportType(row, langCodes, code2Language, line, icons);
-				types.add(type);
+				
+				if (row[0].equalsIgnoreCase(PatrolTransportCsvExportConfig.TRANSPORTTYPE)) {
+					PatrolTransportType type = handleTransportType(row, langCodes, code2Language, line, icons);
+					ttypes.add(type);
+					ttypeToptype.put(type.getKeyId(), row[6].trim());
+				}else if (row[0].equalsIgnoreCase(PatrolTransportCsvExportConfig.TRACKTYPE)) {
+					PatrolType ptype = handlePatrolType(row, langCodes, code2Language, line, icons);
+					types.add(ptype);
+				}
+				
 				line++;
 			}
+			
+			for (PatrolTransportType ttype : ttypes) {
+				String typeKey = ttypeToptype.get(ttype.getKeyId());
+				for (PatrolType ptype : types) {
+					if (ptype.getKeyId().equalsIgnoreCase(typeKey)) {
+						ttype.setPatrolType(ptype);
+					}
+				}
+			}
+			
+			for (PatrolTransportType ttype : ttypes) {
+				if (ttype.getPatrolType() == null) {
+					PatrolType ptype = new PatrolType();
+					ptype.setKeyId(ttypeToptype.get(ttype.getKeyId()));
+					ptype.setUuid( UuidUtils.stringToUuid( UuidUtils.ZERO_UUID_STR));
+				}
+			}
 		}
-		if (monitor.isCanceled()) return false;
 		
-		importedData = types;
+		
+		
+		if (monitor.isCanceled()) return false;
+		this.importedData = new Object[] {types, ttypes};
+		
 		return true;
 	}
 
-	
 	/**
-	 *  Returns already existing agency for given row record or creates new one if required
+	 * 
 	 * @param row
 	 * @param langCodes
 	 * @return
 	 * @throws Exception 
 	 */
-	private PatrolTransportType handleTransportType(String[] row, List<String> columnLanguages, Map<String, Language> langCodes, int linenumber, List<Icon> icons) throws Exception {
-		PatrolTransportType type = new PatrolTransportType();
-		type.setIsActive(true);
+	private PatrolType handlePatrolType(String[] row, List<String> columnLanguages, 
+			Map<String, Language> langCodes, int linenumber, List<Icon> icons) throws Exception {
+		
+		PatrolType type = new PatrolType();
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
 		
-		try{
-			PatrolType.Type ttype = PatrolType.Type.valueOf(row[0].toUpperCase(Locale.ROOT));
-			type.setPatrolType(ttype);
-		}catch (Exception ex){
-			throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidPatrolType, new Object[]{row[0], linenumber}));
-		}
+		type.setKeyId(row[1]);
 		
-		String icon = row[1];
+		String icon = row[2];
 		for (Icon i : icons) {
 			if (i.getKeyId().equalsIgnoreCase(icon)) {
 				type.setIcon(i);
 				break;
 			}
 		}
+		type.setIsActive(parseBoolean(row[3]));
+		type.setRequiresPilot(parseBoolean(row[4]));
+		type.setMaxSpeed(Integer.parseInt(row[5]));
 		
-		String key = row[2];
-		type.setKeyId(key);
-		
-		for (int i = 3; i < row.length; i ++){
+		for (int i = 7; i < row.length; i ++){
 			String name = row[i];
 			String code = columnLanguages.get(i-3);
 			Language l = langCodes.get(code);
@@ -167,9 +191,58 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 			}
 		}
 		type.setName(type.findName(SmartDB.getCurrentLanguage()));
+		type.setTransportTypes(new ArrayList<>());
+		return type;
+	}
+	
+	/**
+	 *  Returns already existing agency for given row record or creates new one if required
+	 * @param row
+	 * @param langCodes
+	 * @return
+	 * @throws Exception 
+	 */
+	private PatrolTransportType handleTransportType(String[] row, List<String> columnLanguages, 
+			Map<String, Language> langCodes, int linenumber, List<Icon> icons) throws Exception {
+		
+		PatrolTransportType type = new PatrolTransportType();
+		type.setConservationArea(SmartDB.getCurrentConservationArea());
+		
+		type.setKeyId(row[1]);
+		
+		String icon = row[2];
+		for (Icon i : icons) {
+			if (i.getKeyId().equalsIgnoreCase(icon)) {
+				type.setIcon(i);
+				break;
+			}
+		}
+		type.setIsActive(parseBoolean(row[3]));
+		
+		String typeKey = row[6].trim();
+		PatrolType temp = new PatrolType();
+		temp.setKeyId(typeKey);
+		type.setPatrolType(temp);
+		
+		for (int i = 7; i < row.length; i ++){
+			String name = row[i];
+			String code = columnLanguages.get(i-3);
+			Language l = langCodes.get(code);
+			if (l != null){
+				if (name.length() > 0){
+					type.updateName(l, name);
+				}
+			}
+		}
+		type.setName(type.findName(SmartDB.getCurrentLanguage()));
+	
 		return type;
 	}
 
+	private boolean parseBoolean(String data) {
+		if (data.equalsIgnoreCase("true")) return true; //$NON-NLS-1$
+		return false;
+	}
 	private List<String> getLanguageCodes(String[] columns) {
 		List<String> result = new ArrayList<String>();
 		for (int i = 3; i < columns.length; i ++){

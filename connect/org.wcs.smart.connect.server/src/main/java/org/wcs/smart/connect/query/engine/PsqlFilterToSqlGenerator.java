@@ -758,20 +758,16 @@ public enum PsqlFilterToSqlGenerator {
 		}
 		
 		if (option.getType() == PatrolQueryOptionType.STRING){
-			if (option == PatrolQueryOption.PATROL_TYPE){
-				String p1 = engine.addParameterValue(SharedUtils.stripQuotes((String)filter.getValue()) );
-				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
-				return x;				
-			}else{
-				String value1 = SharedUtils.stripQuotes((String)filter.getValue());
-				if (filter.getOperator() == Operator.STR_CONTAINS || 
-						filter.getOperator() == Operator.STR_NOTCONTAINS){
-					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				String p1 = engine.addParameterValue(value1);
-				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-				return x;
+			
+			String value1 = SharedUtils.stripQuotes((String)filter.getValue());
+			if (filter.getOperator() == Operator.STR_CONTAINS || 
+					filter.getOperator() == Operator.STR_NOTCONTAINS){
+				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
+			String p1 = engine.addParameterValue(value1);
+			String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			return x;
+			
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
 			//boolean
 			String x = prefix + "." + option.getColumnName() ; //+ " = 'true'" ; //$NON-NLS-1$

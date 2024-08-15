@@ -26,8 +26,6 @@ import org.wcs.smart.ca.NamedKeyIconItem;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -50,7 +48,7 @@ public class PatrolTransportType extends NamedKeyIconItem{
 
 	private boolean isActive = true;
 	private ConservationArea ca;
-	private PatrolType.Type patrol_type;
+	private PatrolType patrolType;
 	
 	/**
 	 * 
@@ -88,21 +86,19 @@ public class PatrolTransportType extends NamedKeyIconItem{
 	
 	/**
 	 * 
-	 * @return the patrol type the transport type belongs to
+	 * @return conservation area associated with patrol type
 	 */
-	@Column(name = "patrol_type")
-	@Enumerated(EnumType.STRING)
-	public PatrolType.Type getPatrolType(){
-		return this.patrol_type;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="patrol_type_uuid", referencedColumnName="uuid")
+	public PatrolType getPatrolType(){
+		return this.patrolType;
 	}
-	
 	/**
 	 * 
-	 * @param pt the patrol type the transport type belongs to
+	 * @param ca conservation area associated with patrol type
 	 */
-	public void setPatrolType(PatrolType.Type pt){
-		this.patrol_type = pt;
+	public void setPatrolType(PatrolType patrolType){
+		this.patrolType = patrolType;
 	}
-	
 	
 }

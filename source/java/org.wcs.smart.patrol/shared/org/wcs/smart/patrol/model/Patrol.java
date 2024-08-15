@@ -33,13 +33,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolderItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -90,7 +89,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	private Team team;
 	private String id;
 	private String objective;
-	private PatrolType.Type patrolType;
+	private PatrolType  patrolType;
 	private boolean isArmed;
 	private LocalDate startDate;
 	private LocalDate endDate;
@@ -161,13 +160,13 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 		this.objective = objective;
 	}
 
-	@Column(name="patrol_type")
-	@Enumerated(EnumType.STRING)
-	public PatrolType.Type getPatrolType() {
+	@ManyToOne
+	@JoinColumn(name="patrol_type_uuid", referencedColumnName="uuid")
+	public PatrolType getPatrolType() {
 		return patrolType;
 	}
 
-	public void setPatrolType(PatrolType.Type patrolType) {
+	public void setPatrolType(PatrolType patrolType) {
 		this.patrolType = patrolType;
 	}
 
@@ -269,7 +268,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	 */
 	@Transient
 	public boolean hasPilot(){
-		return patrolType != null && patrolType.requiresPilot();
+		return patrolType != null && patrolType.getRequiresPilot();
 	}
 	
 	/**
@@ -287,17 +286,38 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	 * Calculates and updates the type of the patrol based on transport types in assigned legs.
 	 */
 	@Transient
-	public void recalculateType() {
+	public void recalculateType(Session session) {
 		if (getLegs() == null || getLegs().isEmpty())
 			return;
-		PatrolType.Type type = getLegs().get(0).getType().getPatrolType();
+		
+		boolean isMixed = false;
+		PatrolType type = getLegs().get(0).getType().getPatrolType();
 		for (PatrolLeg leg : getLegs()){
 			if (!type.equals(leg.getType().getPatrolType())) {
-				setPatrolType(PatrolType.Type.MIXED);
-				return;
+				isMixed = true;
+				break;
 			}
 		}
-		setPatrolType(type);
+		if (isMixed && !type.getKeyId().equals(PatrolType.DefaultType.MIXED.getKeyId())) {
+			//set to mixed
+			PatrolType mixed = QueryFactory.buildQuery(session, PatrolType.class,
+					new Object[] {"conservationArea", getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", PatrolType.DefaultType.MIXED.getKeyId()}).uniqueResult(); //$NON-NLS-1$
+			if (mixed == null) {
+				mixed = new PatrolType();
+				mixed.setConservationArea(getConservationArea());
+				mixed.setIsActive(true);
+				mixed.setKeyId(PatrolType.DefaultType.MIXED.getKeyId());
+				mixed.updateName(getConservationArea().getDefaultLanguage(), PatrolType.DefaultType.MIXED.name());
+				mixed.setName(PatrolType.DefaultType.MIXED.name());
+				mixed.setRequiresPilot(true);
+				mixed.setMaxSpeed(PatrolType.MAX_SPEED_MAX_VALUE);
+				session.persist(mixed);
+			}
+			setPatrolType(mixed);
+		}else {
+			setPatrolType(type);
+		}
 	}
 	
 	/**

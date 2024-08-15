@@ -42,16 +42,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item instanceof PatrolType){
-			return getLabel(((PatrolType)item).getType(), l);
-		}else if (item instanceof PatrolType.Type){
-			switch((PatrolType.Type)item){
-				case AIR: return Messages.getString("PatrolLabelProvider.AirPatrol", l); //$NON-NLS-1$
-				case GROUND: return Messages.getString("PatrolLabelProvider.GroundPatrol", l); //$NON-NLS-1$
-				case MARINE: return Messages.getString("PatrolLabelProvider.WaterPatrol", l); //$NON-NLS-1$
-				case MIXED: return Messages.getString("PatrolLabelProvider.MixedPatrol", l); //$NON-NLS-1$
-			}
-		}else if (item instanceof PatrolWaypointSource){
+		if (item instanceof PatrolWaypointSource){
 			return Messages.getString("PatrolLabelProvider.WpSource", l); //$NON-NLS-1$
 		}
 		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TeamTableName", l); //$NON-NLS-1$
@@ -63,12 +54,22 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(TEAMACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.TeamActiveColumn", l); //$NON-NLS-1$
 		if (item.equals(TRANSPORTNAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeColumn", l); //$NON-NLS-1$
 		if (item.equals(TRANSPORTACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.TransportActiveColumn", l); //$NON-NLS-1$
-		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.getString("PatrolLabelProvider.TransportPatrolColumn", l); //$NON-NLS-1$
+		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.getString("PatrolLabelProvider.TransportPatrolColumn1", l); //$NON-NLS-1$
 		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn", l); //$NON-NLS-1$
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.MandateActiveColumn", l); //$NON-NLS-1$
 		
 		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
 			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
+		}
+
+		if (item == PatrolType.DefaultType.AIR) {
+			return Messages.getString("PatrolLabelProvider.AirPatrol", l); //$NON-NLS-1$
+		}else if (item == PatrolType.DefaultType.GROUND) {
+			return Messages.getString("PatrolLabelProvider.GroundPatrol", l); //$NON-NLS-1$
+		}else if (item == PatrolType.DefaultType.MARINE) {
+			return Messages.getString("PatrolLabelProvider.WaterPatrol", l); //$NON-NLS-1$
+		}else if (item == PatrolType.DefaultType.MIXED) {
+			return Messages.getString("PatrolLabelProvider.MixedPatrol", l); //$NON-NLS-1$
 		}
 		return null;
 	}

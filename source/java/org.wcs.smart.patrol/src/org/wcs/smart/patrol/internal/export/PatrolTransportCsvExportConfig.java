@@ -26,23 +26,25 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SharedUtils;
 
 /**
  * Configuration for current {@link CsvExportDialog} to export
- * stations into csv file
+ * track types and transport types into a single csv file
  * 
  * @author Emily
  * @since 2.0.0
  */
 public class PatrolTransportCsvExportConfig extends AbstractCsvExportConfig {
 
+	public static final String TRACKTYPE = "tracktype"; //$NON-NLS-1$
+	public static final String TRANSPORTTYPE = "transporttype"; //$NON-NLS-1$
+	
 	private PatrolTransportCsvExporter exporter = new PatrolTransportCsvExporter();
 
 	@Override
 	public String getDefaultFileName(){
-		return SmartDB.getCurrentConservationArea().getId() + "_transports"; //$NON-NLS-1$
+		return SmartDB.getCurrentConservationArea().getId() + "_tracks_and_transports.csv"; //$NON-NLS-1$
 	}
 	
 	@Override
@@ -64,21 +66,19 @@ public class PatrolTransportCsvExportConfig extends AbstractCsvExportConfig {
 	public String getInfo() {
 		return Messages.PatrolTransportCsvExportConfig_Message1
 				+ SharedUtils.LINE_SEPARATOR
-				+ Messages.PatrolTransportCsvExportConfig_Message1a
-				+ SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR
-				+ Messages.PatrolTransportCsvExportConfig_Message2 + 
-				PatrolType.Type.AIR.name() + ","+ PatrolType.Type.MARINE.name() + "," +	PatrolType.Type.GROUND.name() + ". " + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ Messages.PatrolTransportCsvExportConfig_Message1a1
+				+ SharedUtils.LINE_SEPARATOR + 
 				Messages.PatrolTransportCsvExportConfig_Message3;
 	}
 
 	@Override
 	public String getTitle() {
-		return Messages.PatrolTransportCsvExportConfig_Title;
+		return Messages.PatrolTransportCsvExportConfig_Title1;
 	}
 
 	@Override
 	public String getMessage() {
-		return Messages.PatrolTransportCsvExportConfig_DialogMessage;
+		return Messages.PatrolTransportCsvExportConfig_DialogMessage1;
 	}
 
 	@Override

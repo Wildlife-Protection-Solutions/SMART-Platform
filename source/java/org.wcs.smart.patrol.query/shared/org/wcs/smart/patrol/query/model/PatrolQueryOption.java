@@ -22,6 +22,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 
@@ -48,7 +49,7 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	MANDATE("mandate", "mandate_uuid", PatrolLeg.class, PatrolMandate.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 	MANDATE_KEY("mandatekey", "mandate_uuid", PatrolLeg.class, PatrolMandate.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 	
-	PATROL_TYPE("patroltype", "patrol_type", Patrol.class, null, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
+	PATROL_TYPE("patroltype", "patrol_type_uuid", Patrol.class, PatrolType.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 	
 	PATROL_TRANSPORT_TYPE("transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 	PATROL_TRANSPORT_TYPE_KEY("transportkey", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$

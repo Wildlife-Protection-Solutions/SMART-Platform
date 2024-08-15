@@ -54,7 +54,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case CA_ID: return Messages.FixedQueryColumn_CaIdColumnName;
 			case CA_NAME: return Messages.FixedQueryColumn_CaNameColumnName;
 			case PATROL_ID: return Messages.FixedQueryColumn_PatrolIdColumnName;
-			case PATROL_TYPE: return Messages.FixedQueryColumn_TypeColumnName;
+			case PATROL_TYPE: return Messages.PatrolQueryLabelProvider_TrackTypeColumnName;
 			case PATROL_START_DATE: return Messages.FixedQueryColumn_PatrolStartDateColumnName;
 			case PATROL_END_DATE: return Messages.FixedQueryColumn_PatrolEndDateColumnName;
 			case PATROL_STATION: return Messages.FixedQueryColumn_StationColumnName;
@@ -127,7 +127,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case PILOT: return Messages.PatrolQueryOptions_QueryOpPilot;
 				case MANDATE: return Messages.PatrolQueryOptions_QueryOpMandate;
 				case MANDATE_KEY: return Messages.PatrolQueryOptions_QueryOpMandate;
-				case PATROL_TYPE: return Messages.PatrolQueryOptions_QueryOpType;
+				case PATROL_TYPE: return Messages.PatrolQueryLabelProvider_QueryOpTrackType;
 				case CM: return Messages.PatrolQueryLabelProvider_ConfigurableModel;
 				case PATROL_TRANSPORT_TYPE: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.PatrolQueryOptions_QueryOpTransportType;

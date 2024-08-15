@@ -21,25 +21,18 @@
  */
 package org.wcs.smart.patrol.model;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.NamedKeyIconItem;
 
-import jakarta.persistence.AssociationOverride;
-import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -47,35 +40,48 @@ import jakarta.persistence.Transient;
 
 /**
  * Call to represent the patrol type.
+ *
+ * In SMART 8.1.0 this was re-purposed to represent Track Type
+ * not a patrol type. Example Track Types may be "patrol", "animal",
+ * "plane" etc. See ticket: https://app.assembla.com/spaces/smart-cs/tickets/3607/details
+ * 
+ * In the application GUI this update included changing all the location of "Patrol Type"
+ * to "Track Type", however the code base still refers to as patrolType (getPatrolType() etc.);
+ * 
  * 
  * @author Emily
  * @since 1.0.0
  */
+
 @Entity
 @Table(name = "patrol_type", schema="smart")
-@AssociationOverrides({
-	@AssociationOverride(name = "id.conservationArea", 
-		joinColumns = @JoinColumn(name = "ca_uuid")),
-	@AssociationOverride(name = "id.patrolType", 
-		joinColumns = @JoinColumn(name = "patrol_type")) })
-public class PatrolType {
+public class PatrolType extends NamedKeyIconItem {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;
 	
 	//Min and max values for max_speed are the same as in CyberTracker
 	public static final int MAX_SPEED_MIN_VALUE = 0;
 	public static final int MAX_SPEED_MAX_VALUE = 10000;
 
-	public static final int MAX_SPEED_GROUND_DEFAULT = 120;
-	public static final int MAX_SPEED_MARINE_DEFAULT = 70;
-	public static final int MAX_SPEED_AIR_DEFAULT = 500;
 
 	public static final String LIBRARY_ICON_KEY = "transportation"; //$NON-NLS-1$
+	
+	/*
+	 * Every CA must have a type of MIXED which is create/managed by the system
+	 * and cannot be edited by the user
+	 */
 	/**
-	 * The supported patrol types.
+	 * The default types for new conservation areas.
 	 * 
 	 * @author Emily
 	 * @since 1.0.0
 	 */
-	public enum Type {
+	public enum DefaultType {
 		GROUND, 
 		MARINE, 
 		AIR,
@@ -87,60 +93,60 @@ public class PatrolType {
 
 		public int getDefaultMaxSpeed() {
 			switch (this) {
-			case GROUND: return MAX_SPEED_GROUND_DEFAULT;
-			case MARINE: return MAX_SPEED_MARINE_DEFAULT;
-			case AIR: return MAX_SPEED_AIR_DEFAULT;
+			case GROUND: return 120;
+			case MARINE: return 70;
+			case AIR: return 500;
 			case MIXED: return MAX_SPEED_MAX_VALUE;
 			}
 			return MAX_SPEED_MAX_VALUE;
 		}
 		
+		public String getKeyId() {
+			return this.name().toLowerCase();
+		}
+		
 		public boolean requiresPilot(){
 			return (this == MARINE || this == AIR || this == MIXED);
 		}
+		
+		public String getIconKey() {
+			switch(this) {
+			case AIR: return "patrol_pilot_airplane"; //$NON-NLS-1$
+			case GROUND: return "foot"; //$NON-NLS-1$
+			case MARINE: return "patrol_pilot_boat"; //$NON-NLS-1$
+			default: return null;
+			}
+		}
 	}
 
-	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;
-	
-	private PatrolTypePk pk;
 	private boolean isActive;
+	private boolean requiresPilot;
 	private Integer maxSpeed;
 	private List<PatrolTransportType> transportTypes;
+	private ConservationArea ca;
 	
 	public PatrolType(){
-		pk = new PatrolTypePk();
 	}
 	
-	/**
-	 * 
-	 * @return patrol type unique identifier
-	 */
-	@EmbeddedId
-	public PatrolTypePk getId(){
-		return pk;
+	@Transient
+	public boolean isMixed() {
+		return this.getKeyId().equals(DefaultType.MIXED.getKeyId());
 	}
-	/**
-	 * 
-	 * @param id patrol type unique identifier
-	 */
-	public void setId(PatrolTypePk id){
-		this.pk = id;
-	}
-	
 	/**
 	 * 
 	 * @return conservation area associated with patrol type
 	 */
-	@Transient 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea(){
-		return this.pk.getConservationArea();
+		return this.ca;
 	}
 	/**
 	 * 
 	 * @param ca conservation area associated with patrol type
 	 */
 	public void setConservationArea(ConservationArea ca){
-		this.pk.setConservationArea(ca);
+		this.ca = ca;
 	}
 	
 	/**
@@ -160,6 +166,22 @@ public class PatrolType {
 	}
 	
 	/**
+	 * 
+	 * @return <code>true</code> if patrol type requires a pilot, <code>false</code> otherwise
+	 */
+	@Column(name = "requires_pilot")
+	public boolean getRequiresPilot(){
+		return this.requiresPilot;
+	}
+	/**
+	 * 
+	 * @param isActive  <code>true</code> if patrol type requires a pilot, <code>false</code> otherwise
+	 */
+	public void setRequiresPilot(boolean requiresPilot){
+		this.requiresPilot = requiresPilot;
+	}
+	
+	/**
 	 * The maximum speed in km/h that should be used
 	 * to validate gps observations for this patrol type
 	 * 
@@ -176,29 +198,9 @@ public class PatrolType {
 	
 	/**
 	 * 
-	 * @return the patrol type
-	 */
-	@Transient
-	public Type getType(){
-		return this.pk.getType();
-	}
-	/**
-	 * 
-	 * @param type the patrol type
-	 */
-	public void setType(Type type){
-		this.pk.setType(type);
-	}
-	
-	/**
-	 * 
 	 * @return list of transport types associated with patrol types
 	 */
-	@OneToMany(fetch = FetchType.LAZY) //, cascade={CascadeType.}, orphanRemoval=true)
-	@JoinColumns({
-		@JoinColumn(name="patrol_type", referencedColumnName="patrol_type", insertable = false, updatable = false),
-		@JoinColumn(name="ca_uuid", referencedColumnName="ca_uuid", insertable = false, updatable = false)
-	})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolType", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<PatrolTransportType> getTransportTypes(){
 		return this.transportTypes;
 	}
@@ -211,55 +213,4 @@ public class PatrolType {
 		this.transportTypes = ttypes;
 	}
 	
-
-	/**
-	 * Primary key class for hibernate mapping of patrol type.
-	 * 
-	 */
-	@Embeddable
-	private static class PatrolTypePk implements Serializable {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private ConservationArea ca;
-		private PatrolType.Type pt;
-
-		public PatrolTypePk(){
-		}
-		
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-		public ConservationArea getConservationArea() {
-			return this.ca;
-		}
-
-		public void setConservationArea(ConservationArea ca) {
-			this.ca = ca;
-		}
-		
-		@Column(name="patrol_type")
-		@Enumerated(EnumType.STRING)
-		public PatrolType.Type getType() {
-			return pt;
-		}
-
-		public void setType(PatrolType.Type type) {
-			this.pt = type;
-		}
-		
-		@Override
-		public boolean equals(Object other){
-			if (other == this) return true;
-			if (other == null) return false;
-			if (getClass() != other.getClass()) return false;
-			PatrolTypePk o = (PatrolTypePk) other;
-			return Objects.equals(ca, o.ca) && Objects.equals(pt, o.pt);
-		}
-		
-		@Override
-		public int hashCode(){
-			return Objects.hash(ca, pt);
-		}
-	}
 }

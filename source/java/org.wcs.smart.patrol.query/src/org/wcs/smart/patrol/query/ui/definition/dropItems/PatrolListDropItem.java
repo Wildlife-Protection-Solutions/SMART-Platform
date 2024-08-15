@@ -46,7 +46,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
-import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
 import org.wcs.smart.query.QueryFilterConfigManager;
@@ -181,9 +180,7 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 		}
 		if (it != null){
 			sb.append("\""); //$NON-NLS-1$
-			if (option == PatrolQueryOption.PATROL_TYPE){
-				sb.append(it.getKey().toUpperCase(Locale.ROOT));
-			}else if (option.getType() == PatrolQueryOptionType.KEY){
+			if (option.getType() == PatrolQueryOptionType.KEY){
 				sb.append(it.getKey());
 			}else{
 				if (it.getUuid() != null){

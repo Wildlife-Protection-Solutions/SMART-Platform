@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.patrol.internal.export;
 
+import java.text.MessageFormat;
+
 import org.wcs.smart.export.config.AbstractCsvImportConfig;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -44,7 +45,7 @@ public class PatrolTransportCsvImportConfig extends AbstractCsvImportConfig {
 	
 	@Override
 	public String getDefaultFileName(){
-		return SmartDB.getCurrentConservationArea().getId() + "_transports.csv"; //$NON-NLS-1$
+		return SmartDB.getCurrentConservationArea().getId() + "_tracks_and_transports.csv"; //$NON-NLS-1$
 	}
 	
 	@Override
@@ -71,21 +72,19 @@ public class PatrolTransportCsvImportConfig extends AbstractCsvImportConfig {
 	public String getInfo() {
 		return Messages.PatrolTransportCsvImportConfig_Message1
 				+ SharedUtils.LINE_SEPARATOR
-				+ Messages.PatrolTransportCsvImportConfig_Message1a
+				+ Messages.PatrolTransportCsvImportConfig_Message1a1
 				+ SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR
-				+ Messages.PatrolTransportCsvImportConfig_Message2 + 
-				PatrolType.Type.AIR.name() + ","+ PatrolType.Type.MARINE.name() + "," +	PatrolType.Type.GROUND.name() + ". " + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				Messages.PatrolTransportCsvImportConfig_Message3;
+				+ MessageFormat.format(Messages.PatrolTransportCsvImportConfig_Message3, PatrolTransportCsvExportConfig.TRACKTYPE,PatrolTransportCsvExportConfig.TRANSPORTTYPE );
 	}
 
 	@Override
 	public String getTitle() {
-		return Messages.PatrolTransportCsvImportConfig_Title;
+		return Messages.PatrolTransportCsvImportConfig_Title1;
 	}
 
 	@Override
 	public String getMessage() {
-		return Messages.PatrolTransportCsvImportConfig_DialogMessage;
+		return Messages.PatrolTransportCsvImportConfig_DialogMessage1;
 	}
 
 	@Override

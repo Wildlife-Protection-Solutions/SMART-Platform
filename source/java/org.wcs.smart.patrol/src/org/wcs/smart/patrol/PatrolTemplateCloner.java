@@ -68,7 +68,7 @@ public class PatrolTemplateCloner implements
 		cloneTeams(engine);
 		progress.worked(1);
 		
-		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyTypes);
+		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyTypes1);
 		clonePatrolTypes(engine);
 		progress.worked(1);
 		
@@ -200,7 +200,12 @@ public class PatrolTemplateCloner implements
 			newt.setConservationArea(engine.getNewCa());
 			newt.setIsActive(t.getIsActive());
 			newt.setMaxSpeed(t.getMaxSpeed());
-			newt.setType(t.getType());
+			newt.setRequiresPilot(t.getRequiresPilot());
+			newt.setKeyId(t.getKeyId());
+			if (t.getIcon() != null) {
+				newt.setIcon(engine.getNewConservationItem(t.getIcon()));
+			}
+			engine.copyLabels(t, newt);
 			newt.setTransportTypes(new ArrayList<PatrolTransportType>());
 			
 			engine.getSession().persist(newt);
@@ -211,7 +216,7 @@ public class PatrolTemplateCloner implements
 				clone.setConservationArea(engine.getNewCa());
 				clone.setIsActive(pt.getIsActive());
 				clone.setKeyId(pt.getKeyId());
-				clone.setPatrolType(newt.getType());
+				clone.setPatrolType(newt);
 				engine.copyLabels(pt, clone);				
 				newt.getTransportTypes().add(clone);
 				

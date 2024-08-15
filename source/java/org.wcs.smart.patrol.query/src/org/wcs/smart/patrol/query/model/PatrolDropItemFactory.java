@@ -46,7 +46,6 @@ import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
@@ -728,9 +727,13 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			
 			
 		} else if (option == PatrolQueryOption.PATROL_TYPE) {
-			PatrolType.Type t = PatrolType.Type.valueOf(value1);
-			ListItem m = new ListItem(null, t.getGuiName(Locale.getDefault()), t.name());
-			it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			ListItem m = PatrolQueryHibernateManager.getInstance().getPatrolType(session, value1);
+			if (m == null) {
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolDropItemFactory_TrackTypeNotFound, new Object[] { value1 }));
+			} else {
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			}
+			
 		} else if (option == PatrolQueryOption.EMPLOYEE
 				|| option == PatrolQueryOption.LEADER
 				|| option == PatrolQueryOption.PILOT) {

@@ -36,12 +36,13 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * CSV Query exporter for stations
+ * CSV Query exporter for track and transport types (to single files)
  * 
  * @author Emily
  * @since 2.0.0
@@ -66,23 +67,45 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 					new OutputStreamWriter(Files.newOutputStream(file), cs),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 
-			List<PatrolTransportType> types = getTransportTypes(ca, session);
-
 			// WriteHeaders
 			String[] columns = createColumns(languages);
 			writer.writeNext(columns);
 
+			String csvout[] = new String[columns.length];
+			List<PatrolType> types = getPatrolTypes(ca, session);
+			for (PatrolType type : types) {
+				if (monitor.isCanceled()) return false;
+				if (type.isMixed()) continue;
+				
+				int i = 0;
+				csvout[i++] = PatrolTransportCsvExportConfig.TRACKTYPE;
+				csvout[i++] = type.getKeyId();
+				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
+				csvout[i++] = type.getIsActive() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
+				csvout[i++] = type.getRequiresPilot() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
+				csvout[i++] = String.valueOf(type.getMaxSpeed());
+				csvout[i++] = ""; //$NON-NLS-1$
+				for(Language l : languages){
+					csvout[i++] = type.findName(l);
+				}
+				writer.writeNext(csvout);
+			}
+			List<PatrolTransportType> ttypes = getTransportTypes(ca, session);
+
+
 			//for each station write one record
-			for (PatrolTransportType type : types) {
+			for (PatrolTransportType type : ttypes) {
 				if (monitor.isCanceled()) return false;
 				
 				// entry in string array (csv_out) of names
 				int i = 0;
-				String csvout[] = new String[columns.length];
-				csvout[i++] = type.getPatrolType().name();
-				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
+				csvout[i++] = PatrolTransportCsvExportConfig.TRANSPORTTYPE;
 				csvout[i++] = type.getKeyId();
-				
+				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
+				csvout[i++] = type.getIsActive() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
+				csvout[i++] = ""; //$NON-NLS-1$
+				csvout[i++] = ""; //$NON-NLS-1$
+				csvout[i++] = type.getPatrolType().getKeyId();
 				for(Language l : languages){
 					csvout[i++] = type.findName(l);
 				}
@@ -96,11 +119,15 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] cols = new String[langs.size() + 3];
+		String[] cols = new String[langs.size() + 7];
 		int i = 0;
 		cols[i++] = "Type"; //$NON-NLS-1$
-		cols[i++] = "Icon"; //$NON-NLS-1$
 		cols[i++] = "Key"; //$NON-NLS-1$
+		cols[i++] = "Icon_Key"; //$NON-NLS-1$
+		cols[i++] = "Is_Active"; //$NON-NLS-1$
+		cols[i++] = "Requires_Pilot"; //$NON-NLS-1$
+		cols[i++] = "Max_Speed"; //$NON-NLS-1$
+		cols[i++] = "Track_Type"; //$NON-NLS-1$
 		for (Language lng : langs) {
 			cols[i++] = "Name>" + lng.getCode(); //$NON-NLS-1$
 		}
@@ -112,8 +139,13 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 		List<PatrolTransportType> tt = QueryFactory.buildQuery(session, 
 				PatrolTransportType.class, 
 				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
-		tt.forEach(t->t.getNames().size());
 		return tt;
 	}
 
+	private List<PatrolType> getPatrolTypes(ConservationArea ca, Session session) {
+		List<PatrolType> tt = QueryFactory.buildQuery(session, 
+				PatrolType.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		return tt;
+	}
 }

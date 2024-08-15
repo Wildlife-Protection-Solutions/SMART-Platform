@@ -158,7 +158,7 @@ public class PatrolListView implements IPatrolFilteringView {
 					for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
 						Tuple data = iterator.next();					
 						input[i++] = new PatrolEditorInput((UUID)data.get(0), (String)data.get(1), 
-								(PatrolType.Type)data.get(2), (LocalDate)data.get(3), (LocalDate)data.get(4));
+								(PatrolType)data.get(2), (LocalDate)data.get(3), (LocalDate)data.get(4));
 					}
 					
 					monitor.internalWorked(0.5);
@@ -286,7 +286,7 @@ public class PatrolListView implements IPatrolFilteringView {
 		patrolListViewer = new TreeViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		Control list = patrolListViewer.getControl();
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		list.setBounds(0, 0, 88, 68);
+//		list.setBounds(0, 0, 88, 68);
 		
 		String defaultValue = null;
 		Object value = context.get(ECommandService.class).getCommand("org.wcs.smart.patrol.view.groupby").getState(RadioState.STATE_ID).getValue(); //$NON-NLS-1$

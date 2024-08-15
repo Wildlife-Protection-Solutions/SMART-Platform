@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.internal.ui.views;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.SWT;
@@ -34,11 +33,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.IFolder;
+import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.common.folder.NoneFolder;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.DateGroupBy.Type;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -56,32 +56,34 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
 public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 	
 	private Font boldFont;
-	
+	private IconCache iconCache;
 	public PatrolTreeLabelProvider(){
 		FontData fd = Display.getDefault().getActiveShell().getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		boldFont = new Font(Display.getCurrent(), fd);
+		iconCache = new IconCache(null, IconManager.Size.ICON);
 	}
 	
 	@Override
 	public void dispose(){
 		boldFont.dispose();
+		iconCache.dispose();
 	}
 	@Override
 	public Image getImage(Object element){
-		if (element instanceof PatrolEditorInput){
-			PatrolEditorInput p = (PatrolEditorInput)element;
-			return UiPatrolUtils.getImage(p.getType());			
+		if (element instanceof PatrolEditorInput pi){
+			return iconCache.getImage(pi.getType());			
+		}else if (element instanceof PatrolType pt){
+			return iconCache.getImage(pt);
+		}else if (element instanceof PatrolTransportType ptt){
+			return iconCache.getImage(ptt);
 		}else if (element instanceof PatrolMandate){
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
 		}else if (element instanceof Team){
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
 		}else if (element instanceof Station){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
-		}else if (element instanceof PatrolType.Type){
-			return UiPatrolUtils.getImage((PatrolType.Type)element);	
-		}else if (element instanceof PatrolTransportType){
-			return UiPatrolUtils.getImage(((PatrolTransportType)element).getPatrolType());
+		
 		}else if (element instanceof DateGroupBy){
 			if (((DateGroupBy)element).getType() == Type.MONTH){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MONTH_ICON);
@@ -102,9 +104,7 @@ public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 					+ " - " + DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format( ((PatrolEditorInput)element).getEndDate())  //$NON-NLS-1$
 					+ " ]"; //$NON-NLS-1$ 
 		}else if (element instanceof NamedItem){
-			return ((NamedItem) element).getName();
-		}else if (element instanceof PatrolType.Type){
-			return ((PatrolType.Type) element).getGuiName(Locale.getDefault());
+			return ((NamedItem) element).getName();		
 		}else if (element instanceof DateGroupBy){
 			return ((DateGroupBy)element).getLabel();
 		}else if (element == NoneFolder.INSTANCE) {

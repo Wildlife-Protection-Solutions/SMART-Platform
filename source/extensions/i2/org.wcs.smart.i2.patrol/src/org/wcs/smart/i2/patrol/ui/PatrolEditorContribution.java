@@ -237,7 +237,7 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 
 	
 	private void refresh() {
-		if (tblViewer == null) return;
+		if (tblViewer == null || tblViewer.getControl().isDisposed()) return;
 		tblViewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		updateValues.schedule();	
 	}

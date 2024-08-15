@@ -170,7 +170,6 @@ public class PatrolUtils {
 				new Object[] {"hkey", hkey}).uniqueResult(); //$NON-NLS-1$		
 			
 	}
-
 	
 	/**
 	 * For ccaa analysis; merges patrol attributes from various ca's 

@@ -125,7 +125,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case PILOT: return Messages.getString("PatrolQueryLabelProvider.PilotOp", l); //$NON-NLS-1$
 				case MANDATE: return Messages.getString("PatrolQueryLabelProvider.MandateOp", l); //$NON-NLS-1$
 				case MANDATE_KEY: return Messages.getString("PatrolQueryLabelProvider.MandateOp", l); //$NON-NLS-1$
-				case PATROL_TYPE: return Messages.getString("PatrolQueryLabelProvider.PatrolTypeOp", l); //$NON-NLS-1$
+				case PATROL_TYPE: return Messages.getString("PatrolQueryLabelProvider.PatrolTypeOp1", l); //$NON-NLS-1$
 				case PATROL_TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
 				case CONSERVATION_AREA: return Messages.getString("PatrolQueryLabelProvider.CaOp", l); //$NON-NLS-1$

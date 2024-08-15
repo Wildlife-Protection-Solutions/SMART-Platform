@@ -31,7 +31,6 @@ import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
-import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Implementation for patrol label provider.
@@ -43,11 +42,8 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item instanceof PatrolType){
-			return getLabel(((PatrolType)item).getType(), l);
-		}else if (item instanceof PatrolType.Type){
-			return LabelConstants.getLabel( (PatrolType.Type)item);
-		}else if (item instanceof PatrolWaypointSource){
+		
+		if (item instanceof PatrolWaypointSource){
 			return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
 		}
 		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolTeamColumnNameKey;
@@ -59,12 +55,22 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(TEAMACTIVE_KEY)) return Messages.PatrolLabelProvider_TeamActiveColumnName;
 		if (item.equals(TRANSPORTNAME_KEY)) return Messages.PatrolLabelProvider_TransportTypeColumnName;
 		if (item.equals(TRANSPORTACTIVE_KEY)) return Messages.PatrolLabelProvider_TransportActiveColumnName;
-		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.PatrolLabelProvider_PatrolTypeColumnName;
+		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.PatrolLabelProvider_PatrolTypeColumnName1;
 		if (item.equals(MANDATENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.PatrolLabelProvider_MandateActiveColumnName;
 		
 		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
 			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
+		}
+		
+		if (item == PatrolType.DefaultType.AIR) {
+			return Messages.PatrolType_AirName;
+		}else if (item == PatrolType.DefaultType.GROUND) {
+			return Messages.PatrolType_GroundName;
+		}else if (item == PatrolType.DefaultType.MARINE) {
+			return Messages.PatrolType_WaterName;
+		}else if (item == PatrolType.DefaultType.MIXED) {
+			return Messages.PatrolType_MixedName;
 		}
 		return null;
 	}
@@ -87,7 +93,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case EMPLOYEE_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_12;
 		case NO_EMPLOYEES: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_13;
 		case NO_LEADER: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_14;
-		case NO_PILOT: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_15;
+		case NO_PILOT: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_151;
 		case INVALID_PATROL_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_16;
 		case INVALID_PATROLLEG_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_17;
 		case PATROL_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_18;

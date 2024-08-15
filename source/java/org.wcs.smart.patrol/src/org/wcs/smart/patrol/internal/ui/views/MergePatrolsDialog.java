@@ -68,7 +68,6 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -241,7 +240,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		newPatrol.setComment(allComments);
 		newPatrol.setEndDate(endDate);
 		newPatrol.setStartDate(startDate);
-		newPatrol.setPatrolType(PatrolType.Type.MIXED);
+		newPatrol.setPatrolType(PatrolHibernateManager.getMixedPatrolType(newPatrol.getConservationArea(), session));
 		newPatrol.setTeam(stationId.getTeam());
 
 		if (ChronoUnit.DAYS.between(newPatrol.getStartDate(), newPatrol.getEndDate()) > Patrol.MAX_PATROL_LENGTH_DAYS){

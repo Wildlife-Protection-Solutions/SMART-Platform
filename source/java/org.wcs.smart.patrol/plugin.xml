@@ -11,7 +11,7 @@
             locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.fielddata">
          <menu
                id="org.wcs.smart.menu.patrol"
-               label="%patrol.menu.label"
+               label="%patroltrack.menu.label"
                mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
@@ -27,17 +27,17 @@
             </separator>
             <menu
                   icon="images/icons/obj16/patrol.png"
-                  label="%patroldata.menu.label">
+                  label="%menu.label.0">
                <command
                      commandId="org.wcs.smart.patrol.exportPatrol"
-                     label="%patrol.export.command.label"
+                     label="%patrolexport.command.label"
                      mnemonic="%patrol.export.command.mnemonic"
                      style="push"
                      tooltip="%patrol.export.command.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.patrol.importPatrol"
-                     label="%patrol.importpatrols.command.label"
+                     label="%patrolimport.command.label.0"
                      mnemonic="%patrol.importpatrols.command.mnemonic"
                      style="push"
                      tooltip="%patrol.importpatrols.command.tooltip">
@@ -46,7 +46,7 @@
             <menu
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.configuration"
-                  label="%patrolconfig.menu.label">
+                  label="%patroltrackconfig.menu.label.">
                <command
                      commandId="org.wcs.smart.patrol.patrolMandate"
                      icon="images/icons/obj16/patrol_mandate.png"
@@ -66,10 +66,10 @@
                <command
                      commandId="org.wcs.smart.patrol.patrolTypes"
                      icon="images/icons/obj16/patrol_transport_type.png"
-                     label="%patro.types.command.label"
-                     mnemonic="%patro.types.command.mnemonic"
+                     label="%types.command.label"
+                     mnemonic="t"
                      style="push"
-                     tooltip="%patro.types.command.tooltip">
+                     tooltip="%patro.types.command.tooltip1">
                   <visibleWhen
                         checkEnabled="true">
                      <test
@@ -117,7 +117,7 @@
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view"
-                  label="%showpatrolperspective.command.label2"
+                  label="%viewpatrol.command.label"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
                   style="push"
                   tooltip="%showpatrolperspectivecommand.tooltip">
@@ -261,7 +261,7 @@
                   commandId="org.wcs.smart.patrol.view.groupby"
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view.groupby.type"
-                  label="%command.groupby.type"
+                  label="%command.groupby.type1"
                   style="radio">
                <parameter
                      name="org.eclipse.ui.commands.radioStateParameter"
@@ -516,7 +516,7 @@
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.type"
-               label="%command.groupby.type"
+               label="%tracktypegroupby.command.label"
                style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
@@ -840,7 +840,7 @@
       </command>
       <command
             id="org.wcs.smart.patrol.patrolTypes"
-            name="%types.command.name">
+            name="%types.command.name1">
       </command>
       <command
             id="org.wcs.smart.patrol.teamList"
@@ -1203,6 +1203,10 @@
       <DeleteAdvisor
             advisor="org.wcs.smart.patrol.internal.advisors.EmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.PatrolTypeDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.PatrolType">
       </DeleteAdvisor>
    </extension>
    <extension

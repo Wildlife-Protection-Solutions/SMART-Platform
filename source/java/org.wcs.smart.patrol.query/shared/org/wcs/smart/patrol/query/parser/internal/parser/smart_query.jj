@@ -213,6 +213,7 @@ TOKEN :
 			< PATROL_ARMED_KEY > |
 			< PATROL_MANDATE_KEY > |
 			< PATROL_MANDATE_KEY_KEY > |
+			< PATROL_TYPE_KEY > |
 			< PATROLLEG_TRANSPORT_KEY > |
 			< PATROLLEG_TRANSPORT_KEY_KEY > |
 			< PATROLLEG_TRANSPORT_KEY_KEY > |
@@ -226,7 +227,7 @@ TOKEN :
 			< PATROLLEG_MEMBER_KEY >  ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |    < PATROL_CONTRIBUTION_GROUPBY_OPTION: (< PATROL_CONTRIBUTION > ":" < DM_KEY > ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )* ) >
 |    < PATROL_STRING_GROUPBY_OPTION :
-  			( < PATROL_ID_KEY > | < PATROL_TYPE_KEY > ) ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
+  			( < PATROL_ID_KEY > ) ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :

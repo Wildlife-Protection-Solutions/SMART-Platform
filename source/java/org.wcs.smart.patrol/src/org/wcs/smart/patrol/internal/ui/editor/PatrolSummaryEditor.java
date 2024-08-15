@@ -95,7 +95,6 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
@@ -123,6 +122,7 @@ import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
 import org.wcs.smart.patrol.ui.TeamComposite;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Editor part for displaying and editing patrol information.
@@ -134,7 +134,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	/**
 	 * 
 	 */
-	private static final String EDIT_LABEL = UiPatrolUtils.EDIT_LINK_TEXT;
+	private static final String EDIT_LABEL = DialogConstants.EDIT_LINK_TEXT;
 	private static final int WIDTH_HINT = 50;	//width hint for fields
 	private static final int EMPLOYEE_LIST_HEIGHT_HINT = 50;
 	
@@ -292,7 +292,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		
 		/* left side */		
-		Label lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_PatrolType_Label);
+		Label lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TrackType);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtPatrolType = new TextImageField(left, SWT.NONE);
@@ -796,7 +796,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				frmPatrolSummary.setText(patrol.getId());
 				
 				txtPatrolId.setText(patrol.getId(), false, false);
-				txtPatrolType.setValue(patrol.getPatrolType().getGuiName(Locale.getDefault()), UiPatrolUtils.getImage(patrol.getPatrolType()));
+				txtPatrolType.setValue(patrol.getPatrolType());
 				txtStation.setValue(patrol.getStation());
 				
 				

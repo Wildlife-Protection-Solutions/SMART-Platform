@@ -47,22 +47,6 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 
 	// The shared instance
 	private static SmartPatrolPlugIn plugin;
-	
-
-	/**
-	 * Image descriptor key for air patrol icon
-	 */
-	public static final String AIR_PATROL_ICON = "org.wsc.smart.patrol.AIR_PATROL"; //$NON-NLS-1$
-
-	/**
-	 * Image descriptor key for marine patrol icon
-	 */
-	public static final String MARINE_PATROL_ICON = "org.wsc.smart.patrol.MARINE_PATROL"; //$NON-NLS-1$
-
-	/**
-	 * Image descriptor key for ground patrol icon
-	 */
-	public static final String GROUND_PATROL_ICON = "org.wsc.smart.patrol.GROUND_PATROL"; //$NON-NLS-1$
 
 	/**
 	 * Image descriptor key for ground patrol icon
@@ -151,11 +135,8 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
 		reg.put(PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol.png")); //$NON-NLS-1$
-		reg.put(AIR_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/airplane.png")); //$NON-NLS-1$
 		reg.put(PATROL_ARMED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_armed.png")); //$NON-NLS-1$
 		reg.put(PATROL_TEAM_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_team.png")); //$NON-NLS-1$
-		reg.put(MARINE_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/boat.png")); //$NON-NLS-1$
-		reg.put(GROUND_PATROL_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_ground.png")); //$NON-NLS-1$
 		reg.put(MIXED_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mixed.png")); //$NON-NLS-1$
 		reg.put(PATROL_LEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_leader.png")); //$NON-NLS-1$
 		reg.put(PATROL_MEMBER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_member.png")); //$NON-NLS-1$

@@ -336,14 +336,15 @@ public class PatrolQueryMemoryResult extends MemoryQueryResult<PatrolQueryResult
 	
 	private void updateTransport(PatrolLeg pl, PatrolTransportType newValue, Session session){
 		pl.setType(newValue);
-		pl.getPatrol().recalculateType();
+		pl.getPatrol().recalculateType(session);
 		
 		for (PatrolQueryResultItem i : getData()){
 			if (i.getPatrolLegUuid().equals(pl.getUuid())){
 				i.setTransportType(newValue.getName());
 			}
 			if (i.getPatrolUuid().equals(pl.getPatrol().getUuid())){
-				i.setPatrolType(pl.getPatrol().getPatrolType());
+				i.setPatrolTypeUuid(pl.getPatrol().getPatrolType().getUuid());
+				i.setPatrolType(pl.getPatrol().getPatrolType().getName());
 			}
 		}
 	}

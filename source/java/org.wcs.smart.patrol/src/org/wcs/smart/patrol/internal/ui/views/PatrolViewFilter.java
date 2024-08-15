@@ -96,7 +96,7 @@ public class PatrolViewFilter {
 	private PatrolViewFilter(){
 	}
 	
-	private PatrolType.Type[] types = null;
+	private String[] typeKeys = null;
 	private DateFilter dateFilter = DateFilter.LAST_30_DAYS;
 	private String patrolIdFilter = null;
 	private StringComparison stringComparator = null;
@@ -164,8 +164,8 @@ public class PatrolViewFilter {
 	 * 
 	 * @return patrol type filters
 	 */
-	public PatrolType.Type[] getPatrolTypeFilters(){
-		return this.types;
+	public String[] getPatrolTypeFilters(){
+		return this.typeKeys;
 	}
 	
 	/**
@@ -175,7 +175,7 @@ public class PatrolViewFilter {
 		this.dateFilter = DateFilter.LAST_30_DAYS;
 		this.patrolIdFilter = null;
 		this.stringComparator = null;
-		this.types = null;
+		this.typeKeys = null;
 		this.sortBy = SortBy.ID;
 		this.sortByDir = SortByDir.DESC;
 	}
@@ -200,8 +200,15 @@ public class PatrolViewFilter {
 	 * 
 	 * @param types list of patrol types
 	 */
-	public void setPatrolTypes(PatrolType.Type[] types){
-		this.types = types;
+	public void setPatrolTypes(PatrolType[] types){
+		if (types == null) {
+			this.typeKeys = new String[0];
+			return;
+		}
+		this.typeKeys = new String[types.length];
+		for (int i = 0; i < types.length; i ++) {
+			this.typeKeys[i] = types[i].getKeyId();
+		}
 	}
 	
 	/**
@@ -234,21 +241,22 @@ public class PatrolViewFilter {
 	 * @return
 	 */
 	public Query<Tuple> buildQuery(Session s){ 
+
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate "); //$NON-NLS-1$
-		str.append("FROM Patrol p "); //$NON-NLS-1$
+		str.append("FROM Patrol p  "); //$NON-NLS-1$
 		str.append("WHERE p.conservationArea = :ca " ); //$NON-NLS-1$
 	
 		boolean and = true;
 		boolean or = false;
-		if (types != null && types.length > 0){
+		if (typeKeys != null && typeKeys.length > 0){
 			if (and ){
 				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
 			}
 			or = true;
-			str.append(" p.patrolType IN (:pt) "); //$NON-NLS-1$
+			str.append(" p.patrolType.keyId IN (:pt) "); //$NON-NLS-1$
 		}
 		if (stringComparator != null && patrolIdFilter != null){
 			if (and){
@@ -281,8 +289,8 @@ public class PatrolViewFilter {
 		str.append("ORDER BY " + sortBy.field + " " + sortByDir.sql ); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Query<Tuple> query = s.createQuery(str.toString(), Tuple.class).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		if (types != null && types.length > 0){
-			query.setParameterList("pt", this.types); //$NON-NLS-1$
+		if (typeKeys != null && typeKeys.length > 0){
+			query.setParameterList("pt", this.typeKeys); //$NON-NLS-1$
 		}
 		if (stringComparator != null && patrolIdFilter != null){
 			if (stringComparator == StringComparison.CONTAINS){
@@ -336,9 +344,9 @@ public class PatrolViewFilter {
 		}
 		sb.append(FIELD_SEP);
 		
-		if (types != null){
-			for (PatrolType.Type type : types){
-				sb.append(type.name() + FIELD_SEP2);
+		if (typeKeys != null){
+			for (String type : typeKeys){
+				sb.append(type + FIELD_SEP2);
 			}
 		}
 		sb.append(FIELD_SEP);
@@ -387,12 +395,12 @@ public class PatrolViewFilter {
 		}
 		if (!parts[5].isEmpty()){
 			String types[] = parts[5].split(FIELD_SEP2);
-			filter.types = new PatrolType.Type[types.length];
+			filter.typeKeys = new String[types.length];
 			for (int i = 0; i < types.length; i ++){
-				filter.types[i] = PatrolType.Type.valueOf(types[i]);
+				filter.typeKeys[i] = types[i].strip();
 			}
 		}else{
-			filter.types = null;
+			filter.typeKeys = null;
 		}
 		filter.sortBy = SortBy.valueOf(parts[6]);
 		filter.sortByDir = SortByDir.valueOf(parts[7]);
@@ -425,7 +433,7 @@ public class PatrolViewFilter {
 		clone.sortByDir = sortByDir;
 		clone.startDate= startDate;
 		clone.stringComparator = stringComparator;
-		clone.types = types;
+		clone.typeKeys = typeKeys;
 		return clone;
 	}
 }

@@ -822,7 +822,7 @@ public class DerbyGridEngine extends AbstractPatrolQueryEngine{
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Patrol.class) + ".patrol_type_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".end_date, "); //$NON-NLS-1$
@@ -857,7 +857,7 @@ public class DerbyGridEngine extends AbstractPatrolQueryEngine{
 		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
 		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_type varchar(6),"); //$NON-NLS-1$
+		sql.append("p_type_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$
 		sql.append("p_end_date date,"); //$NON-NLS-1$

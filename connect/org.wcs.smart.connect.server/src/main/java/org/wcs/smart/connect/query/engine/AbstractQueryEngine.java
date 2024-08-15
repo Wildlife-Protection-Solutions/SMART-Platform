@@ -98,6 +98,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
@@ -155,6 +156,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(Agency.class, "aa"); //$NON-NLS-1$
 		tablePrefix.put(Rank.class, "ear"); //$NON-NLS-1$
 		
+		tablePrefix.put(PatrolType.class, "pt"); //$NON-NLS-1$
 		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
 		tablePrefix.put(PatrolLeg.class, "pl"); //$NON-NLS-1$
 		tablePrefix.put(PatrolLegDay.class, "pld"); //$NON-NLS-1$
@@ -220,6 +222,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(Agency.class, "smart.agency"); //$NON-NLS-1$
 		tableNames.put(Rank.class, "smart.rank"); //$NON-NLS-1$
 		
+		tableNames.put(PatrolType.class, "smart.patrol_type"); //$NON-NLS-1$
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
 		tableNames.put(PatrolLeg.class, "smart.patrol_leg"); //$NON-NLS-1$
 		tableNames.put(PatrolLegDay.class, "smart.patrol_leg_day"); //$NON-NLS-1$

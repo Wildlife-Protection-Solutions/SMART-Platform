@@ -44,7 +44,6 @@ import org.locationtech.jts.io.WKBReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -78,7 +77,8 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	private String team;
 	private String objective;
 	private String mandate;
-	private PatrolType.Type patrolType;
+	private String patrolType;
+	private UUID patrolTypeUuid;
 	private UUID patrolUuid;
 	private boolean armed;
 	private String patrolLegId;
@@ -243,14 +243,27 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	/**
 	 * @return the patrol type 
 	 */
-	public PatrolType.Type getPatrolType() {
+	public String getPatrolType() {
 		return patrolType;
 	}
 	/**
 	 * @param patrolType the patrol type
 	 */
-	public void setPatrolType(PatrolType.Type patrolType) {
+	public void setPatrolType(String patrolType) {
 		this.patrolType = patrolType;
+	}
+	
+	/**
+	 * @return the patrol type uuid
+	 */
+	public UUID getPatrolTypeUuid() {
+		return patrolTypeUuid;
+	}
+	/**
+	 * @param patrolType the patrol type uui
+	 */
+	public void setPatrolTypeUuid(UUID patrolTypeUuid) {
+		this.patrolTypeUuid = patrolTypeUuid;
 	}
 	
 	/**

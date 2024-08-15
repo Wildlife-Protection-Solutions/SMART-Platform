@@ -36,6 +36,7 @@ import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
@@ -54,8 +55,6 @@ import jakarta.persistence.criteria.Root;
 public class MultiCaPatrolQueryHibernateManagerImpl extends
 		AbstractPatrolQueryHibernateManager {
 
-	
-	
 	private Collection<ListItem> getNamedKeyItem(Session session, Class<? extends NamedKeyItem> clazz, boolean onlyActive) {
 		
 		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
@@ -124,6 +123,20 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		items.addAll(getNamedKeyItem(session, PatrolTransportType.class, true));
 		return items;
+	}
+	
+	@Override
+	public List<ListItem> getActivePatrolTypes(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.addAll(getNamedKeyItem(session, PatrolType.class, true));
+		return items;
+	}
+	
+	public ListItem getPatrolType(Session session, String value) throws Exception{
+		for (ListItem li : getNamedKeyItem(session, PatrolType.class, false)) {
+			if (li.getKey().equals(value)) return li;
+		}
+		return null;		
 	}
 	
 	

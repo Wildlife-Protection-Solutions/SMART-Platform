@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.query.engine.ObservationQueryResult;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolObservationAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
@@ -85,7 +84,8 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 		it.setTeam(rs.getString("p_team"));	 //$NON-NLS-1$
 		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
 		it.setMandate(rs.getString("pl_mandate")); //$NON-NLS-1$
-		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("p_type"))); //$NON-NLS-1$
+		it.setPatrolTypeUuid((UUID) rs.getObject("p_type_uuid")); //$NON-NLS-1$
+		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$

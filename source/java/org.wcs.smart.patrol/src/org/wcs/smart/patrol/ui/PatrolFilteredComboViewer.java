@@ -292,7 +292,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         		Patrol p = new Patrol();
         		p.setUuid((UUID)data.get(0));
         		p.setId((String)data.get(1));
-        		p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data.get(2));
+        		p.setPatrolType((org.wcs.smart.patrol.model.PatrolType)data.get(2));
         		defaultPresent = defaultPresent || p.equals(preselectedPatrol);
         		patrols.add(p);
         	}

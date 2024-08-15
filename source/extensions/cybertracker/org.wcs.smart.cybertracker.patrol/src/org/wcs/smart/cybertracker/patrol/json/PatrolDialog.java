@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -144,7 +143,8 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 	private void mergePatrol(UUID ctUuid, CtPatrolLink newPatrolLink, Patrol addToPatrol) throws Exception{
 		Patrol newPatrol = newPatrolLink.getPatrolLeg().getPatrol();
 		if (!newPatrol.getPatrolType().equals(addToPatrol.getPatrolType())){
-			throw new Exception(MessageFormat.format(Messages.PatrolDialog_DifferentType, newPatrol.getPatrolType().getGuiName(Locale.getDefault()), addToPatrol.getPatrolType().getGuiName(Locale.getDefault())));
+			throw new Exception(MessageFormat.format(Messages.PatrolDialog_DifferentType, 
+					newPatrol.getPatrolType().getName(), addToPatrol.getPatrolType().getName()));
 		}
 		
 		//add all legs
@@ -317,7 +317,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_TypeLabel);
 			lbl.append(p.getFirstLeg().getType() == null ? "" : p.getFirstLeg().getType().getName()); //$NON-NLS-1$
-			lbl.append(" (" + (p.getPatrolType() == null ? "" : p.getPatrolType().getGuiName(Locale.getDefault())) + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			lbl.append(" (" + (p.getPatrolType() == null ? "" : p.getPatrolType().getName()) + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_LeaderLabel);
 			lbl.append(p.getFirstLeg().getLeader() == null ? "" : SmartLabelProvider.getShortLabel(p.getFirstLeg().getLeader().getMember())); //$NON-NLS-1$
@@ -410,7 +410,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 					Patrol p = entry.getValue().cmbPatrol.getSelection();
 					Patrol ctP = patrols.get(ctPatrol).getPatrolLeg().getPatrol();
 					if (!p.getPatrolType().equals(ctP.getPatrolType())){
-						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.PatrolDialog_DifferentTypeError, p.getPatrolType().getGuiName(Locale.getDefault()), ctP.getPatrolType().getGuiName(Locale.getDefault())));
+						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.PatrolDialog_DifferentTypeError, p.getPatrolType().getName(), ctP.getPatrolType().getName()));
 						entry.getValue().errItem.show();
 						error = true;
 					}

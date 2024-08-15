@@ -93,6 +93,7 @@ public class Messages extends NLS {
 	public static String PatrolDropItemFactory_ParseError;
 	public static String PatrolDropItemFactory_ProcessError;
 	public static String PatrolDropItemFactory_RankNotFound;
+	public static String PatrolDropItemFactory_TrackTypeNotFound;
 	public static String PatrolFilter_EmployeeNotFound;
 	public static String PatrolFilter_InvalidPrefix;
 	public static String PatrolFilter_MandateNotFound;
@@ -150,12 +151,14 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_PatrolEndTimeColumnName;
 	public static String PatrolQueryLabelProvider_PatrolStartTimeColumnName;
 	public static String PatrolQueryLabelProvider_PatrolUUIDColumnName;
+	public static String PatrolQueryLabelProvider_QueryOpTrackType;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_RawXColumnName;
 	public static String PatrolQueryLabelProvider_RawYColumnName;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
 	public static String PatrolQueryLabelProvider_TrackAreaValueItem;
 	public static String PatrolQueryLabelProvider_TrackColumnName;
+	public static String PatrolQueryLabelProvider_TrackTypeColumnName;
 	public static String PatrolQueryLabelProvider_WaypointUUIDColumnName;
 	public static String PatrolQueryMemoryResult_DeleteError;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
@@ -169,7 +172,6 @@ public class Messages extends NLS {
 	public static String PatrolQueryOptions_QueryOpStation;
 	public static String PatrolQueryOptions_QueryOpTeam;
 	public static String PatrolQueryOptions_QueryOpTransportType;
-	public static String PatrolQueryOptions_QueryOpType;
 	public static String PatrolQueryOptions_TotalDistance;
 	public static String PatrolQueryOptions_TotalNumDays;
 	public static String PatrolQueryOptions_TotalNumHours1;
@@ -242,6 +244,7 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
 	public static String WaypointFilterProcessor_progress1;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String DerbyWaypointEngine_TrackData;
 	public static String EditObservationResultInfoProvider_DeleteError;
 	public static String EditObservationResultInfoProvider_EditLabel;
 	public static String MapWaypointEditManager_MoveError;

@@ -586,7 +586,7 @@ public class Messages extends NLS {
 	public static String SimpleQueryExporter_Progress_ExportingFile;
 	public static String SimpleQueryExporter_Progress_InitializingWriter;
 	public static String SimpleQueryExporter_Progress_WritingData;
-	public static String SimpleQueryDefinitionImporter_InvalidPatrolType;
+	public static String SimpleQueryDefinitionImporter_InvalidPatrolType1;
 	public static String SmartGridCellStyleConfigurator_CellBorderLabel;
 	public static String SmartGridCellStyleConfigurator_ColorLabel;
 	public static String SmartGridCellStyleConfigurator_DrawBorderLbl;

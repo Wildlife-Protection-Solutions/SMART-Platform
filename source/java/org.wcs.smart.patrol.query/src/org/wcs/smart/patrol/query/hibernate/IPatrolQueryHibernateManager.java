@@ -73,6 +73,14 @@ public interface IPatrolQueryHibernateManager {
 	 */
 	public ListItem getTransportType(Session session, String value)throws Exception;
 	
+	/**
+	 * Gets the patrol type listitem object 
+	 * @param session
+	 * @param value patrol type uuid as hex encoded string 
+	 * @return
+	 * @throws Exception
+	 */
+	public ListItem getPatrolType(Session session, String value)throws Exception;
 		
 	/**
 	 * Creates a list item for the given employee uuid
@@ -104,6 +112,12 @@ public interface IPatrolQueryHibernateManager {
 	 * @return  list of all active transport types
 	 */
 	public List<ListItem> getActiveTransportTypes(Session session);
+	
+	/**
+	 * 
+	 * @return  list of all active patrol types
+	 */
+	public List<ListItem> getActivePatrolTypes(Session session);
 	
 	/**
 	 * Gets all the custom patrol attributes for the Conservation Area

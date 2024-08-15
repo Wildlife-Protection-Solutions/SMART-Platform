@@ -169,7 +169,7 @@ public class IncidentPatrolIdComposite extends AbstractIncidentComposite impleme
 			List<Tuple> items = currentFilter.buildQuery(session).list();
 			for (Tuple data : items) {
 				all.add(new PatrolEditorInput((UUID)data.get(0), (String)data.get(1), 
-						(PatrolType.Type)data.get(2), (LocalDate)data.get(3), (LocalDate)data.get(4)));
+						(PatrolType)data.get(2), (LocalDate)data.get(3), (LocalDate)data.get(4)));
 
 			}
 			if (all.contains(currentValue)) all.add(currentValue);

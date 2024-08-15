@@ -45,7 +45,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolWaypointAttachmentResultItem;
@@ -220,6 +219,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_transporttype","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_type","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_leader","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -247,6 +247,11 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		
+		progress.subTask(Messages.DerbyWaypointEngine_TrackData);
+		progress.split(3);
+		populateTemporaryTableNameObjExtra("p_type_uuid", "p_type", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		
 		
 		progress.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
 		progress.split(4);
@@ -343,7 +348,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Patrol.class) + ".patrol_type_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".end_date, "); //$NON-NLS-1$
@@ -381,7 +386,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
 		sql.append("pl_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_type varchar(6),"); //$NON-NLS-1$
+		sql.append("p_type_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_startdate date,"); //$NON-NLS-1$
 		sql.append("p_enddate date,"); //$NON-NLS-1$
@@ -451,7 +456,8 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		it.setTeam(rs.getString("p_team"));	 //$NON-NLS-1$
 		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
 		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
-		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("p_type"))); //$NON-NLS-1$
+		it.setPatrolTypeUuid(UuidUtils.byteToUUID(rs.getBytes("p_type_uuid"))); //$NON-NLS-1$
+		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$

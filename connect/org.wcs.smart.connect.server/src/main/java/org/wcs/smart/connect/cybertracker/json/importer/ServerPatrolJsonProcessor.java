@@ -35,6 +35,7 @@ import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -44,7 +45,7 @@ import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolType.Type;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 
@@ -92,9 +93,10 @@ public class ServerPatrolJsonProcessor extends PatrolJsonProcessor {
 			if (newPatrol.getFirstLeg().getType() != null){
 				newPatrol.setPatrolType(newPatrol.getFirstLeg().getType().getPatrolType());
 			}else{
-				//lets just pick something
-				newPatrol.setPatrolType(Type.MIXED);
-				
+				PatrolType mixed = QueryFactory.buildQuery(session, PatrolType.class, 
+						new Object[] {"conservationArea", newPatrol.getConservationArea()}, //$NON-NLS-1$
+						new Object[] {"keyid", PatrolType.DefaultType.MIXED.getKeyId()}).uniqueResult(); //$NON-NLS-1$
+				newPatrol.setPatrolType(mixed);
 			}
 		}
 		
