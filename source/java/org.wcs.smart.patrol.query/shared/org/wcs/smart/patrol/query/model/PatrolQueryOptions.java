@@ -162,7 +162,9 @@ public class PatrolQueryOptions {
 		EndHourGroupBy.INSTANCE,
 		DayDateGroupBy.INSTANCE,
 		MonthDateGroupBy.INSTANCE,
-		YearDateGroupBy.INSTANCE
+		YearDateGroupBy.INSTANCE,
+		PatrolStartMonthDateGroupBy.INSTANCE,
+		PatrolEndMonthDateGroupBy.INSTANCE,
 	};
 
 	

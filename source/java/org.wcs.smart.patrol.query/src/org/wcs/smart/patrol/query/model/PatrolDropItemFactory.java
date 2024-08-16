@@ -62,6 +62,7 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
+import org.wcs.smart.patrol.query.ui.PatrolDateGroupByViewer;
 import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGridNoDataFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
@@ -834,6 +835,11 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 		}
 		if (groupBy instanceof PatrolAttributeGroupBy) {
 			return new PatrolAttributeGroupByViewer( (PatrolAttributeGroupBy)groupBy );
+		}
+		if(groupBy instanceof PatrolDateGroupBy && (
+			((PatrolDateGroupBy) groupBy).getOption() == PatrolStartMonthDateGroupBy.INSTANCE || 
+			((PatrolDateGroupBy) groupBy).getOption() == PatrolEndMonthDateGroupBy.INSTANCE )) {
+			return new PatrolDateGroupByViewer( (PatrolDateGroupBy)groupBy);
 		}
 		return super.findViewer(groupBy);
 	}

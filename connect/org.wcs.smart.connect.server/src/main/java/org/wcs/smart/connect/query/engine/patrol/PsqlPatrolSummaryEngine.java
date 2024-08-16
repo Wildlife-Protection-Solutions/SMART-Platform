@@ -77,9 +77,11 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
+import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
@@ -1502,6 +1504,21 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					
 					groupByInnerSql.append("trim(cast(date_part('month', pld_patrol_day) as char(2))) "); //$NON-NLS-1$
 					groupByInnerSql.append(" || '/' || cast(date_part('year',pld_patrol_day) as char(4)) "); //$NON-NLS-1$
+					groupByInnerSql.append("as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append( itemcnt); 
+					
+				}else if (op.getClass().equals(PatrolStartMonthDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("trim(cast(date_part('month', p_start_date) as char(2))) "); //$NON-NLS-1$
+					groupByInnerSql.append(" || '/' || cast(date_part('year',p_start_date) as char(4)) "); //$NON-NLS-1$
+					groupByInnerSql.append("as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append( itemcnt); 
+				}else if (op.getClass().equals(PatrolEndMonthDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("trim(cast(date_part('month', p_end_date) as char(2))) "); //$NON-NLS-1$
+					groupByInnerSql.append(" || '/' || cast(date_part('year',p_end_date) as char(4)) "); //$NON-NLS-1$
 					groupByInnerSql.append("as datePart_"); //$NON-NLS-1$
 					groupByInnerSql.append( itemcnt); 
 					

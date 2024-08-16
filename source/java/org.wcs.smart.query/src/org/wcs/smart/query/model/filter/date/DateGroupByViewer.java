@@ -32,6 +32,7 @@ import java.util.Locale;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -62,6 +63,12 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		return null;
 	}
 
+	public String getText() {
+		return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).getLabel(
+				getGroupBy().getOption(),
+				Locale.getDefault());
+	}
+	
 	public Image getImage() {
 		if (groupBy.getOption() instanceof DayDateGroupBy) {
 			return QueryPlugIn.getDefault().getImageRegistry()

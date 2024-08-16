@@ -25,8 +25,10 @@ import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
+import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
@@ -147,6 +149,12 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 		}
 		if (item == TrackGeometryQueryColumn.KEY) { 
 			return Messages.getString("PatrolQueryLabelProvider.TrackColumName", l);  //$NON-NLS-1$
+		}
+		if (item instanceof PatrolStartMonthDateGroupBy){
+			return Messages.getString("PatrolQueryLabelProvider.PatrolStartMonthGroupByOp", l); //$NON-NLS-1$
+		}
+		if (item instanceof PatrolEndMonthDateGroupBy){
+			return Messages.getString("PatrolQueryLabelProvider.PatrolEndMonthGroupByOp", l); //$NON-NLS-1$
 		}
 		return null;
 	}

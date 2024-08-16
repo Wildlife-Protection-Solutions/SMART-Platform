@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,47 +21,37 @@
  */
 package org.wcs.smart.patrol.query.model;
 
-import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
+import java.util.Locale;
+
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
-import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
-import org.wcs.smart.query.model.summary.DateGroupBy;
+import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
 
 /**
- * Patrol group by date options.  This adds patrol start time
- * and end time to default date group by options.
+ * Group by patrol start month option
  * 
- * @author egouge
- * @since 1.0.0
- * 
+ * @since 8.1.0
+ *
  */
-public class PatrolDateGroupBy extends DateGroupBy {
+public enum PatrolEndMonthDateGroupBy implements IDateGroupBy {
+	
+	INSTANCE;
 
-	private static IDateGroupBy[] GROUPBYS = {
-		StartHourGroupBy.INSTANCE,
-		EndHourGroupBy.INSTANCE,
-		PatrolStartMonthDateGroupBy.INSTANCE,
-		PatrolEndMonthDateGroupBy.INSTANCE
-	};
-	
-	public static DateGroupBy createGroupBy(String key){
-		return new PatrolDateGroupBy(key);
-	}
-	
-	public PatrolDateGroupBy(String key) {
-		super(key);
+	@Override
+	public String getGuiName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IQueryPatrolLabelProvider.class).getLabel(this, l);
+
 	}
 	
 	@Override
-	protected IDateGroupBy[] getSupportedGroupBys(){
-		IDateGroupBy[] all = new IDateGroupBy[GROUPBYS.length + DateGroupBy.GROUPBYS.length];
-		int i = 0;
-		for (IDateGroupBy b : DateGroupBy.GROUPBYS){
-			all[i++] = b;
-		}
-		for (IDateGroupBy b : GROUPBYS){
-			all[i++] = b;
-		}
-		return all;
+	public String getKey() {
+		return "patrolendmonth"; //$NON-NLS-1$
+	}
+
+	@Override
+	public GroupByType getType() {
+		return GroupByType.STRING;
 	}
 
 }

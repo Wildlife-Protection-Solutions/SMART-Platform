@@ -70,9 +70,11 @@ import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.internal.PatrolValueItemLabelProvider;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
+import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
+import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
@@ -1592,6 +1594,14 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("trim(cast(month(pld_patrol_day) as char(2))) || '/' || cast(year(pld_patrol_day) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+
+				}else if (op.getClass().equals(PatrolStartMonthDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("trim(cast(month(p_start_date) as char(2))) || '/' || cast(year(p_start_date) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(PatrolEndMonthDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("trim(cast(month(p_end_date) as char(2))) || '/' || cast(year(p_end_date) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+				
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("YEAR(pld_patrol_day) as datePart_" + itemcnt); //$NON-NLS-1$

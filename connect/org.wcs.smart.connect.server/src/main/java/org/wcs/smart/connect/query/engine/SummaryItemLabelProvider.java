@@ -97,8 +97,10 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
@@ -599,6 +601,10 @@ public class SummaryItemLabelProvider {
 		if (item.getOption() instanceof DayDateGroupBy) {
 			return getDayItems(item.getDateFilter());
 		} else if (item.getOption() instanceof MonthDateGroupBy) {
+			return getMonthItems(item.getDateFilter());
+		} else if (item.getOption() instanceof PatrolStartMonthDateGroupBy) {
+			return getMonthItems(item.getDateFilter());
+		} else if (item.getOption() instanceof PatrolEndMonthDateGroupBy) {
 			return getMonthItems(item.getDateFilter());
 		} else if (item.getOption() instanceof YearDateGroupBy) {
 			return getYearItems(item.getDateFilter());

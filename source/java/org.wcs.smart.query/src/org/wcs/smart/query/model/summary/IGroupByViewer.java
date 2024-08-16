@@ -8,8 +8,18 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 public interface IGroupByViewer<T extends IGroupBy> {
 
+	/**
+	 * Get group byy
+	 * @return
+	 */
 	public T getGroupBy();
 	
+	/**
+	 * convert the viewer to a drop item
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
 	public DropItem asDropItem(Session session) throws Exception;
 	
 	/**

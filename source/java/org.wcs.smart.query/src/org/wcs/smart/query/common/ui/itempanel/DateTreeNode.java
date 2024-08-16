@@ -22,18 +22,15 @@
 package org.wcs.smart.query.common.ui.itempanel;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
-import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 
 /**
  * Tree node for displaying date options.  
@@ -47,10 +44,8 @@ public class DateTreeNode implements IItemTreeNode {
 	
 	private final static LabelProvider lblProvider = new LabelProvider(){
 		public String getText(Object element){
-			if (element instanceof DateGroupByViewer){
-				return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).getLabel(
-						((DateGroupByViewer) element).getGroupBy().getOption(),
-						Locale.getDefault());
+			if (element instanceof DateGroupByViewer gbv){
+				return gbv.getText();
 			}
 			return super.getText(element);
 		}
