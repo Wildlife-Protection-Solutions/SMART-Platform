@@ -70,6 +70,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -1005,6 +1006,17 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					groupByInnerSql.append(".datetime) as char(4)) as datePart_"); //$NON-NLS-1$
 					groupByInnerSql.append( itemcnt); 
 
+				}else if (op.getClass().equals(QuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("cast(year("); //$NON-NLS-1$
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) as char(4)) "); //$NON-NLS-1$
+					groupByInnerSql.append(" || '_' || cast(((month("); //$NON-NLS-1$
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) - 1) / 3) + 1 as char(1)) as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append(itemcnt);
+					
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("YEAR("); //$NON-NLS-1$

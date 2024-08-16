@@ -55,6 +55,7 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
@@ -168,7 +169,8 @@ public class SummaryItemPanel extends AbstractQueryItemPanel{
 			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
 			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
 			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
-			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));			
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(QuarterDateGroupBy.INSTANCE.getKey())));
 			input.put(DateTreeNode.KEY, dates);
 			
 			if (!SmartDB.isMultipleAnalysis()){

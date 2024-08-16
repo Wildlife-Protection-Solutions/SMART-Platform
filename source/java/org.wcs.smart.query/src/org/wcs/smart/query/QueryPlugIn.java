@@ -90,6 +90,12 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	/**
 	 * The calendar day icon
 	 */
+	public static final String CALENDAR_QUARTER_ICON = "org.wcs.smart.query.calendarquarter"; //$NON-NLS-1$
+	
+	
+	/**
+	 * The calendar day icon
+	 */
 	public static final String CALENDAR_DAY_ICON = "org.wcs.smart.query.calendarday"; //$NON-NLS-1$
 	
 	/**
@@ -276,6 +282,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(GRID_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/grid.png"));//$NON-NLS-1$
 		reg.put(CALENDAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar.png")); //$NON-NLS-1$
 		reg.put(CALENDAR_DAY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_day.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_QUARTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_quarter.png"));//$NON-NLS-1$
 		reg.put(CALENDAR_WEEK_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_week.png"));//$NON-NLS-1$
 		reg.put(CALENDAR_MONTH_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_month.png"));//$NON-NLS-1$
 		reg.put(CALENDAR_YEAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_year.png"));//$NON-NLS-1$

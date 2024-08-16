@@ -58,8 +58,10 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolAttributeQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.ui.PatrolDateGroupByViewer;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -72,6 +74,7 @@ import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
@@ -190,7 +193,10 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
 			dates.add(new PatrolDateGroupByViewer(new PatrolDateGroupBy(PatrolStartMonthDateGroupBy.INSTANCE.getKey())));
 			dates.add(new PatrolDateGroupByViewer(new PatrolDateGroupBy(PatrolEndMonthDateGroupBy.INSTANCE.getKey())));
-			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));			
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(QuarterDateGroupBy.INSTANCE.getKey())));
+			dates.add(new PatrolDateGroupByViewer(new PatrolDateGroupBy(PatrolStartQuarterDateGroupBy.INSTANCE.getKey())));
+			dates.add(new PatrolDateGroupByViewer(new PatrolDateGroupBy(PatrolEndQuarterDateGroupBy.INSTANCE.getKey())));
 			input.put(DateTreeNode.KEY, dates);
 			
 			

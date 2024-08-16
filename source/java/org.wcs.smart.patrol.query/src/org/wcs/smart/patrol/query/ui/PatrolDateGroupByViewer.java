@@ -29,10 +29,13 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
@@ -52,19 +55,21 @@ public class PatrolDateGroupByViewer extends DateGroupByViewer {
 		if (groupBy.getOption() instanceof PatrolStartMonthDateGroupBy || 
 				groupBy.getOption() instanceof PatrolEndMonthDateGroupBy ) {
 			return getMonthItems(session, groupBy.getDateFilter());
-		} 
+		} else if (groupBy.getOption() instanceof PatrolStartQuarterDateGroupBy || 
+				groupBy.getOption() instanceof PatrolEndQuarterDateGroupBy ) {
+			return getQuarterItems(session, groupBy.getDateFilter());
+		}
 		return super.getItems(session);
 	}
 
 	public String getText() {
-		if (groupBy.getOption() instanceof PatrolStartMonthDateGroupBy) {
+		if (groupBy.getOption() instanceof PatrolStartMonthDateGroupBy || 
+				groupBy.getOption() instanceof PatrolEndMonthDateGroupBy ||
+				groupBy.getOption() instanceof PatrolStartQuarterDateGroupBy || 
+				groupBy.getOption() instanceof PatrolEndQuarterDateGroupBy) {
 			return SmartContext.INSTANCE.getClass(IQueryPatrolLabelProvider.class).getLabel(
 					getGroupBy().getOption(),
-					Locale.getDefault());		
-		}else if (groupBy.getOption() instanceof PatrolEndMonthDateGroupBy) {
-			return SmartContext.INSTANCE.getClass(IQueryPatrolLabelProvider.class).getLabel(
-					getGroupBy().getOption(),
-					Locale.getDefault());
+					Locale.getDefault());			
 		}
 		return super.getText();
 	}
@@ -76,6 +81,11 @@ public class PatrolDateGroupByViewer extends DateGroupByViewer {
 				) {
 			return QueryPlugIn.getDefault().getImageRegistry()
 					.get(QueryPlugIn.CALENDAR_MONTH_ICON);		
+		}else if (groupBy.getOption() instanceof PatrolStartQuarterDateGroupBy ||
+				groupBy.getOption() instanceof PatrolEndQuarterDateGroupBy) {
+		
+			return QueryPlugIn.getDefault().getImageRegistry()
+					.get(QueryPlugIn.CALENDAR_QUARTER_ICON);
 		}
 		return super.getImage();
 	}

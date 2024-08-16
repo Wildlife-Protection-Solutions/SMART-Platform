@@ -100,6 +100,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -1393,7 +1394,17 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 					groupByInnerSql.append(groupByString);
 					groupByInnerSql.append(") as datePart_" + itemcnt); //$NON-NLS-1$
 				
+				}else if (op.getClass().equals(QuarterDateGroupBy.class)){
+					
+					groupByInnerSql.append("cast(date_part('year', "); //$NON-NLS-1$
+					groupByInnerSql.append(groupByString);
+					groupByInnerSql.append(") as char(4)) "); //$NON-NLS-1$
+					groupByInnerSql.append(" || '_' || cast(((date_part('month', "); //$NON-NLS-1$
+					groupByInnerSql.append(groupByString);
+					groupByInnerSql.append(") - 1) / 3) + 1 as char(1)) as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append(itemcnt);
 				}
+				
 				groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 				
 			}else if (gb instanceof CategoryGroupBy){

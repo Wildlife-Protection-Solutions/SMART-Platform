@@ -31,10 +31,12 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
@@ -144,6 +146,12 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 		}
 		if (item instanceof PatrolStartDateField){
 			return Messages.PatrolStartDateField_PatrolStartDate;
+		}
+		if (item instanceof PatrolStartQuarterDateGroupBy) {
+			return Messages.PatrolQueryLabelProvider_PatrolStartQuarter;
+		}
+		if (item instanceof PatrolEndQuarterDateGroupBy) {
+			return Messages.PatrolQueryLabelProvider_PatrolEndQuarter;
 		}
 		if (item instanceof PatrolStartMonthDateGroupBy){
 			return Messages.PatrolQueryLabelProvider_PatrolStartMonthOp;

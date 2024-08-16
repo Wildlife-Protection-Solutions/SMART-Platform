@@ -28,6 +28,7 @@ import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 
 /**
@@ -42,7 +43,8 @@ public class DateGroupBy implements IGroupBy {
 	protected static IDateGroupBy[] GROUPBYS = {
 		DayDateGroupBy.INSTANCE,
 		MonthDateGroupBy.INSTANCE,
-		YearDateGroupBy.INSTANCE
+		YearDateGroupBy.INSTANCE,
+		QuarterDateGroupBy.INSTANCE
 	};
 	
 	public static DateGroupBy createGroupBy(String key){

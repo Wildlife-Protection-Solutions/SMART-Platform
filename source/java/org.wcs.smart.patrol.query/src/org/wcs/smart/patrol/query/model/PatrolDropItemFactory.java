@@ -837,6 +837,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			return new PatrolAttributeGroupByViewer( (PatrolAttributeGroupBy)groupBy );
 		}
 		if(groupBy instanceof PatrolDateGroupBy && (
+			((PatrolDateGroupBy) groupBy).getOption() == PatrolStartQuarterDateGroupBy.INSTANCE ||
+			((PatrolDateGroupBy) groupBy).getOption() == PatrolEndQuarterDateGroupBy.INSTANCE ||
 			((PatrolDateGroupBy) groupBy).getOption() == PatrolStartMonthDateGroupBy.INSTANCE || 
 			((PatrolDateGroupBy) groupBy).getOption() == PatrolEndMonthDateGroupBy.INSTANCE )) {
 			return new PatrolDateGroupByViewer( (PatrolDateGroupBy)groupBy);

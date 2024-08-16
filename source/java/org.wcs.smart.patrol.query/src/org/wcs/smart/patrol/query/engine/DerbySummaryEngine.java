@@ -71,10 +71,12 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.internal.PatrolValueItemLabelProvider;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
@@ -104,6 +106,7 @@ import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
@@ -1598,6 +1601,16 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				}else if (op.getClass().equals(PatrolStartMonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("trim(cast(month(p_start_date) as char(2))) || '/' || cast(year(p_start_date) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+				}else if (op.getClass().equals(PatrolStartQuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("cast(year(p_start_date) as char(4)) || '_' || cast(((month(p_start_date) - 1)/3) + 1 as char(1)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+				}else if (op.getClass().equals(PatrolEndQuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("cast(year(p_end_date) as char(4)) || '_' || cast(((month(p_end_date) - 1)/3) + 1 as char(1)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+					
 				}else if (op.getClass().equals(PatrolEndMonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("trim(cast(month(p_end_date) as char(2))) || '/' || cast(year(p_end_date) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
@@ -1605,6 +1618,11 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("YEAR(pld_patrol_day) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+				}else if (op.getClass().equals(QuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("cast(year(pld_patrol_day) as char(4)) || '_' || cast(((month(pld_patrol_day) - 1)/3) + 1 as char(1)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
 				}else if (op.getClass().equals(StartHourGroupBy.class)){
 					groupBySql.append("startminute_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("pld_uuid,((hour(pld_start_time) * 60 + minute(pld_start_time)) / 30)* 30 as startminute_" + itemcnt); //$NON-NLS-1$

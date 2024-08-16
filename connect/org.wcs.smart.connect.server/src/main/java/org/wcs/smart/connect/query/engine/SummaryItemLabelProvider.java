@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -98,9 +99,11 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
@@ -110,6 +113,7 @@ import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
@@ -612,6 +616,11 @@ public class SummaryItemLabelProvider {
 			return getHourItems();
 		} else if (item.getOption() instanceof EndHourGroupBy){
 			return getHourItems();
+			
+		} else if (item.getOption() instanceof QuarterDateGroupBy || 
+				item.getOption() instanceof PatrolStartQuarterDateGroupBy ||
+				item.getOption() instanceof PatrolEndQuarterDateGroupBy){
+			return getQuarterItems(item.getDateFilter());
 		}
 		return null;
 	}
@@ -711,6 +720,51 @@ public class SummaryItemLabelProvider {
 			String name = nameFormat.format(s);
 			items.add(new ListItem(null, name, key));
 			s = s.plusMonths(1);
+		}
+		return items;
+	}
+	
+	private List<ListItem> getQuarterItems(IDateFilter dateFilter) {
+
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		LocalDate startdate = LocalDate.now();
+		LocalDate enddate = LocalDate.now();
+		if (dateFilter == null) {
+			throw new IllegalStateException(Messages.getString("SummaryItemLabelProvider.InvalidDateFilter", l)); //$NON-NLS-1$
+		} else {
+			if (dateFilter.getDates() == null) {
+				// all daytes
+				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
+				Query<LocalDateTime> q = s.createQuery(hql, LocalDateTime.class);
+				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+
+				List<LocalDateTime> data = q.list();
+				if (data != null && data.size() >= 1 && data.get(0) != null) {
+					startdate = data.get(0).toLocalDate();
+				}
+			} else {
+				LocalDate[] d = dateFilter.getDates();
+				if (d.length >= 1) {
+					startdate = d[0];
+				}
+				if (d.length >= 2) {
+					enddate = d[1];
+				}
+			}
+		}
+		// each month between start and end of
+		// form "m/yyyy"
+		DateTimeFormatter nameFormat = DateTimeFormatter.ofPattern("yyyy"); //$NON-NLS-1$
+		DateTimeFormatter keyFormat = DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH); //$NON-NLS-1$
+
+		LocalDate working = LocalDate.of(startdate.getYear(), startdate.getMonth(), 1);
+
+		while (working.isBefore(enddate) || (dateFilter.isEndDateInclusive() && working.isEqual(enddate))) {
+			int quarter =  ((working.getMonthValue()-1) / 3) + 1;
+			String key = keyFormat.format(working) + "_" + quarter ; //$NON-NLS-1$
+			String name = MessageFormat.format(Messages.getString("SummaryItemLabelProvider.QuarterYearFormatting", l), quarter, nameFormat.format(working)); //$NON-NLS-1$
+			items.add(new ListItem(null, name, key));
+			working = ChronoUnit.MONTHS.addTo(working, 3);
 		}
 		return items;
 	}

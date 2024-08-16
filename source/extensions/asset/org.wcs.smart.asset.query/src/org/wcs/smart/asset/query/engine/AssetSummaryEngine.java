@@ -80,6 +80,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -1102,6 +1103,15 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("YEAR(wp_date) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+				}else if (op.getClass().equals(QuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("cast(year(wp_date) as char(4)) "); //$NON-NLS-1$
+					groupByInnerSql.append(" || '_' || cast(((month(wp_date)"); //$NON-NLS-1$
+					groupByInnerSql.append(" - 1) / 3) + 1 as char(1)) as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append(itemcnt);
+					
 				}
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);

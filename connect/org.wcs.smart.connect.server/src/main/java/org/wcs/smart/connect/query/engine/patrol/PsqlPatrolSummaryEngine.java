@@ -78,10 +78,12 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeGroupBy;
@@ -111,6 +113,7 @@ import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
@@ -1533,6 +1536,17 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 				}else if (op.getClass().equals(EndHourGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("pld_uuid,floor((date_part('hour', pld_end_time) * 60 + date_part('minute', pld_end_time)) / 30.0)* 30 as datePart_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(QuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("cast(date_part('year', pld_patrol_day) as char(4)) || '_' || cast(((date_part('month',pld_patrol_day) - 1)/3) + 1 as char(1)) as datePart_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(PatrolStartQuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("cast(date_part('year', p_start_date) as char(4)) || '_' || cast(((date_part('month', p_start_date) - 1)/3) + 1 as char(1)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+				}else if (op.getClass().equals(PatrolEndQuarterDateGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("cast(date_part('year', p_end_date) as char(4)) || '_' || cast(((date_part('month', p_end_date) - 1)/3) + 1 as char(1)) as datePart_" + itemcnt); //$NON-NLS-1$
+				
 				}
 			}else if (gb instanceof PatrolAttributeGroupBy){
 				

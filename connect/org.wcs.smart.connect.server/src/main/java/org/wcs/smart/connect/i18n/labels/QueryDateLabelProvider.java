@@ -38,6 +38,7 @@ import org.wcs.smart.query.model.filter.date.LastQuarterDateFilter;
 import org.wcs.smart.query.model.filter.date.LastYearDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthToDateDateFilter;
+import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
@@ -72,6 +73,8 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 		labels.put(WaypointLastModifiedDateField.class,"QueryDateLabelProvider.WpLastModifiedFilterOp");  //$NON-NLS-1$
 		labels.put(StartHourGroupBy.class, "QueryDateLabelProvider.StartHourDateFilter"); //$NON-NLS-1$
 		labels.put(EndHourGroupBy.class, "QueryDateLabelProvider.EndHourDateFilter"); //$NON-NLS-1$
+		labels.put(QuarterDateGroupBy.class, "QueryDateLabelProvider.QuarterGroupByName"); //$NON-NLS-1$
+
 	}
 	
 	private String getStartEndDateErrorStr(Locale l){

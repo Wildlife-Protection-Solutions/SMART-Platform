@@ -149,8 +149,10 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_ObservationUUIDColumnName;
 	public static String PatrolQueryLabelProvider_ObsGroupColumnName;
 	public static String PatrolQueryLabelProvider_PatrolEndMonthOp;
+	public static String PatrolQueryLabelProvider_PatrolEndQuarter;
 	public static String PatrolQueryLabelProvider_PatrolEndTimeColumnName;
 	public static String PatrolQueryLabelProvider_PatrolStartMonthOp;
+	public static String PatrolQueryLabelProvider_PatrolStartQuarter;
 	public static String PatrolQueryLabelProvider_PatrolStartTimeColumnName;
 	public static String PatrolQueryLabelProvider_PatrolUUIDColumnName;
 	public static String PatrolQueryLabelProvider_QueryOpTrackType;

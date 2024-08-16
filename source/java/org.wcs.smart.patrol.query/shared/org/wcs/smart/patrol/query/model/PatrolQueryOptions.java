@@ -165,6 +165,8 @@ public class PatrolQueryOptions {
 		YearDateGroupBy.INSTANCE,
 		PatrolStartMonthDateGroupBy.INSTANCE,
 		PatrolEndMonthDateGroupBy.INSTANCE,
+		PatrolStartQuarterDateGroupBy.INSTANCE,
+		PatrolEndQuarterDateGroupBy.INSTANCE,
 	};
 
 	

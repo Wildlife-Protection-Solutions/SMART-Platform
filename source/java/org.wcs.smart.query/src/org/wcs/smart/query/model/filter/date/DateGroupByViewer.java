@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,7 +32,6 @@ import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
@@ -59,6 +59,8 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		} else if (groupBy.getOption() instanceof StartHourGroupBy ||
 				groupBy.getOption() instanceof EndHourGroupBy){
 			return getHourItems(session, null);
+		}else if (groupBy.getOption() instanceof QuarterDateGroupBy) {
+			return getQuarterItems(session, groupBy.getDateFilter());
 		}
 		return null;
 	}
@@ -85,6 +87,9 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		} else if (groupBy.getOption() instanceof EndHourGroupBy){
 			return QueryPlugIn.getDefault().getImageRegistry()
 					.get(QueryPlugIn.END_HOUR_ICON);
+		} else if (groupBy.getOption() instanceof QuarterDateGroupBy){
+			return QueryPlugIn.getDefault().getImageRegistry()
+					.get(QueryPlugIn.CALENDAR_QUARTER_ICON);
 		}
 		return null;
 	}
@@ -114,16 +119,8 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		} else {
 			if (dateFilter.getDates() == null) {
-				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
-				Query<LocalDateTime> q = session.createQuery(hql, LocalDateTime.class);
-				q.setParameterList(
-						"ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-
-				LocalDateTime ld = q.uniqueResult();
-				if (ld != null) {
-					startdate = ld.toLocalDate();
-				}
+				LocalDateTime ld = getMinDate(session);
+				if (ld != null) startdate = ld.toLocalDate();
 			} else {
 				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {
@@ -156,14 +153,8 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		} else {
 			if (dateFilter.getDates() == null) {
-				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea IN (:ca)"; //$NON-NLS-1$
-				LocalDateTime ld = session.createQuery(hql, LocalDateTime.class)
-					.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
-					.uniqueResult();
-				
+				LocalDateTime ld = getMinDate(session);
 				if (ld != null) startdate = ld.toLocalDate();
-				
 			} else {
 				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {
@@ -192,6 +183,47 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		return items;
 	}
 
+	public List<ListItem> getQuarterItems(Session session, IDateFilter dateFilter) {
+
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		LocalDate startdate = LocalDate.now();
+		LocalDate enddate = LocalDate.now();
+		if (dateFilter == null) {
+			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
+		} else {
+			if (dateFilter.getDates() == null) {
+				LocalDateTime ld = getMinDate(session);
+				if (ld != null) startdate = ld.toLocalDate();
+				
+			} else {
+				LocalDate[] d = dateFilter.getDates();
+				if (d.length >= 1) {
+					startdate = d[0];
+				}
+				if (d.length >= 2) {
+					enddate = d[1];
+				}
+			}
+		}
+
+		// each month between start and end of
+		// form "m/yyyy"
+		DateTimeFormatter nameFormat = DateTimeFormatter.ofPattern("yyyy"); //$NON-NLS-1$
+		DateTimeFormatter keyFormat = DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH); //$NON-NLS-1$
+
+		LocalDate working = LocalDate.of(startdate.getYear(), startdate.getMonth(), 1);
+
+		while (working.isBefore(enddate) || (dateFilter.isEndDateInclusive() && working.isEqual(enddate))) {
+			int quarter =  ((working.getMonthValue()-1) / 3) + 1;
+			String key = keyFormat.format(working) + "_" + quarter ; //$NON-NLS-1$
+			String name = MessageFormat.format(Messages.DateGroupByViewer_QuarterYearFormatting, quarter, nameFormat.format(working));
+			items.add(new ListItem(null, name, key));
+			working = ChronoUnit.MONTHS.addTo(working, 3);
+		}
+		
+		return items;
+	}
+	
 	public List<ListItem> getYearItems(Session session, IDateFilter dateFilter) {
 
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
@@ -201,11 +233,7 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		} else {
 			if (dateFilter.getDates() == null) {
-				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
-				LocalDateTime ld = session.createQuery(hql, LocalDateTime.class)
-					.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
-					.uniqueResult();
+				LocalDateTime ld = getMinDate(session);
 				if (ld != null) startdate = ld.toLocalDate();
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -229,6 +257,13 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		return items;
 	}
 
+	private LocalDateTime getMinDate(Session session) {
+		String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
+		LocalDateTime ld = session.createQuery(hql, LocalDateTime.class)
+			.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()) //$NON-NLS-1$
+			.uniqueResult();
+		return ld;
+	}
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
 		return BasicDropItemFactory.INSTANCE.createDateGroupByDropItem(this);

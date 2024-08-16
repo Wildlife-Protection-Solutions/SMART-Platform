@@ -110,6 +110,7 @@ public class Messages extends NLS {
 	public static String DataModelTreeNode_DmGroupByLabel;
 	public static String DataModelTreeNode_DmValuesLabel;
 	public static String DateGroupBy_InvalidFilter;
+	public static String DateGroupByViewer_QuarterYearFormatting;
 	public static String DateTreeNode_TreeNodeLabel1;
 	public static String DayDateGroupBy_GroupByDayName;
 	public static String DefinitionPanelManager_QueryEditingPanelError;
@@ -320,6 +321,7 @@ public class Messages extends NLS {
 	public static String QueryDateFilterComposite_DateLabel;
 	public static String QueryDateFilterComposite_InvalidDate;
 	public static String QueryDateLabelProvider_EndHourLabel;
+	public static String QueryDateLabelProvider_QuarterGroupByName;
 	public static String QueryDateLabelProvider_StartEndDateError;
 	public static String QueryDateLabelProvider_StartHourLabel;
 	public static String QueryDateLabelProvider_SummaryDateGroupByError;
