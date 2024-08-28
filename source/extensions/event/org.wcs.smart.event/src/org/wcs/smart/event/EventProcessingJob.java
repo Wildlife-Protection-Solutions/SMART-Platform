@@ -80,6 +80,7 @@ public class EventProcessingJob extends Job {
 			WaypointObservation o = observations.remove(0);
 			try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 				WaypointObservation temp = session.get(WaypointObservation.class, o.getUuid());
+				if (temp == null) continue;
 				
 				Employee e = session.get(Employee.class, SmartDB.getCurrentEmployee().getUuid());
 				if (e != null && !e.getConservationArea().equals(temp.getWaypoint().getConservationArea())) e = null;

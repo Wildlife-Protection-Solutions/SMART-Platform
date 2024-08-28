@@ -201,25 +201,56 @@ public class WaypointAttributeTable {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					session.merge(wo.getWaypoint());
-					
-					//delete empty groups and removed observations
 					Waypoint wp  = session.get(Waypoint.class, wo.getWaypoint().getUuid());
-					List<WaypointObservationGroup> tod = new ArrayList<>();
-					for (WaypointObservationGroup g : wp.getObservationGroups()) {
-						if (!wo.getWaypoint().getObservationGroups().contains(g)) {
-							session.remove(g);
-							tod.add(g);
+					List<WaypointObservationGroup> currentGroups = new ArrayList<>(wp.getObservationGroups());
+
+					for (WaypointObservationGroup g : wo.getWaypoint().getObservationGroups()) {
+						if (g.getUuid() == null) {
+							List<WaypointObservation> obs = g.getObservations();
+							g.setObservations(null);
+							session.persist(g);
+							g.setObservations(obs);
+						}
+						
+						for (WaypointObservation wwo : g.getObservations()) {
+							if (wwo.getUuid() == null) session.persist(wwo);
+						}
+						session.flush();
+						
+						WaypointObservationGroup currentGroup = session.get(WaypointObservationGroup.class, g.getUuid());
+						List<WaypointObservation> current = new ArrayList<>(currentGroup.getObservations());
+						
+						g = session.merge(g);
+						session.flush();
+						
+						for (WaypointObservation o : current ) {
+							if (!g.getObservations().contains(o)) {
+								session.remove(o);
+							}
+						}
+						session.flush();
+						
+						if (currentGroup.getObservations().isEmpty()) {
+							session.get(Waypoint.class, g.getWaypoint().getUuid()).getObservationGroups().remove(g);
 						}
 					}
-					wp.getObservationGroups().removeAll(tod);
 					
+					session.flush();
+					
+					for (WaypointObservationGroup currentGroup : currentGroups) {
+						if (!wo.getWaypoint().getObservationGroups().contains(currentGroup)) {
+							wp.getObservationGroups().remove(currentGroup);
+						}
+					}
+
 					session.getTransaction().commit();
 					
+					session.beginTransaction();
 					Waypoint saved = session.get(Waypoint.class, wo.getWaypoint().getUuid());
 					wo.getWaypoint().setLastModified(saved.getLastModified());
 					wo.getWaypoint().setLastModifiedBy(saved.getLastModifiedBy());
 					Hibernate.initialize(saved.getLastModifiedBy());
+					session.getTransaction().commit();
 					
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
