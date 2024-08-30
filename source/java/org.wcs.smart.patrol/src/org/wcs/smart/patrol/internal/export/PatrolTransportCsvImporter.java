@@ -43,8 +43,11 @@ import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.export.config.ICsvDataImporter;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.OptionSelectionDialog;
@@ -97,6 +100,9 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		List<Icon> icons = IconManager.INSTANCE.getIcons(session,  ca);
 		icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
 		
+		List<PatrolAttribute> customAttributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		
 		try(CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(file), cs), delimiter)){
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
@@ -121,7 +127,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 					ttypes.add(type);
 					ttypeToptype.put(type.getKeyId(), row[6].trim());
 				}else if (row[0].equalsIgnoreCase(PatrolTransportCsvExportConfig.TRACKTYPE)) {
-					PatrolType ptype = handlePatrolType(row, langCodes, code2Language, line, icons);
+					PatrolType ptype = handlePatrolType(row, langCodes, code2Language, line, icons, customAttributes);
 					types.add(ptype);
 				}
 				
@@ -133,6 +139,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 				for (PatrolType ptype : types) {
 					if (ptype.getKeyId().equalsIgnoreCase(typeKey)) {
 						ttype.setPatrolType(ptype);
+						ptype.getTransportTypes().add(ttype);
 					}
 				}
 			}
@@ -162,7 +169,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 	 * @throws Exception 
 	 */
 	private PatrolType handlePatrolType(String[] row, List<String> columnLanguages, 
-			Map<String, Language> langCodes, int linenumber, List<Icon> icons) throws Exception {
+			Map<String, Language> langCodes, int linenumber, List<Icon> icons, List<PatrolAttribute> attributes) throws Exception {
 		
 		PatrolType type = new PatrolType();
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -178,9 +185,8 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		}
 		type.setIsActive(parseBoolean(row[3]));
 		type.setRequiresPilot(parseBoolean(row[4]));
-		type.setMaxSpeed(Integer.parseInt(row[5]));
 		
-		for (int i = 7; i < row.length; i ++){
+		for (int i = 8; i < row.length; i ++){
 			String name = row[i];
 			String code = columnLanguages.get(i-3);
 			Language l = langCodes.get(code);
@@ -192,6 +198,22 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		}
 		type.setName(type.findName(SmartDB.getCurrentLanguage()));
 		type.setTransportTypes(new ArrayList<>());
+		type.setCustomAttributes(new ArrayList<>());
+		
+		String[] attributekeys = row[7].split(":"); //$NON-NLS-1$
+		for (String key : attributekeys) {
+			for (PatrolAttribute pa : attributes) {
+				if (pa.getKeyId().equalsIgnoreCase(key)) {
+					PatrolAttributePatrolType link = new PatrolAttributePatrolType();
+					link.setPatrolAttribute(pa);
+					link.setPatrolType(type);
+					type.getCustomAttributes().add(link);
+				}
+			}
+		}
+		
+		
+		
 		return type;
 	}
 	
@@ -223,8 +245,8 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		PatrolType temp = new PatrolType();
 		temp.setKeyId(typeKey);
 		type.setPatrolType(temp);
-		
-		for (int i = 7; i < row.length; i ++){
+		type.setMaxSpeed(Integer.parseInt(row[5]));
+		for (int i = 8; i < row.length; i ++){
 			String name = row[i];
 			String code = columnLanguages.get(i-3);
 			Language l = langCodes.get(code);

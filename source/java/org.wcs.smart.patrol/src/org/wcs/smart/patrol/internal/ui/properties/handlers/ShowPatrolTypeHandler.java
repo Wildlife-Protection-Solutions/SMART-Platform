@@ -25,7 +25,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.patrol.internal.ui.properties.PatrolTypePropertyPage;
+import org.wcs.smart.patrol.internal.ui.properties.TrackTypeDialog;
 /**
  * Handler for display patrol type dialg
  * @author Emily
@@ -36,9 +36,8 @@ public class ShowPatrolTypeHandler {
 	
 	@Execute
 	public Object execute(Shell activeShell) throws ExecutionException {
-		PatrolTypePropertyPage dialog = new PatrolTypePropertyPage(activeShell);
+		TrackTypeDialog dialog = new TrackTypeDialog(activeShell);
 		dialog.open();
-		
 		return null;
 	}
 	

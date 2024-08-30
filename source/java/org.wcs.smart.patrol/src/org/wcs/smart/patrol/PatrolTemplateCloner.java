@@ -33,6 +33,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -111,6 +112,13 @@ public class PatrolTemplateCloner implements
 			}
 			engine.copyLabels(a, clone);
 			engine.getSession().persist(clone);
+			
+			for(PatrolAttributePatrolType oldlink :  a.getPatrolTypes()) {
+				PatrolAttributePatrolType newlink = new PatrolAttributePatrolType ();
+				newlink.setPatrolAttribute(clone);
+				newlink.setPatrolType(engine.getNewConservationItem(oldlink.getPatrolType()));
+				engine.getSession().persist(newlink);
+			}
 		}
 		engine.getSession().flush();
 	}
@@ -187,19 +195,14 @@ public class PatrolTemplateCloner implements
 	 */
 	private void clonePatrolTypes(ConservationAreaClonerEngine engine){
 		
-		CriteriaBuilder cb = engine.getSession().getCriteriaBuilder();
-		CriteriaQuery<PatrolType> c = cb.createQuery(PatrolType.class);
-		Root<PatrolType> root = c.from(PatrolType.class);
-		c.where(cb.equal(root.get("id").get("conservationArea"),  engine.getTemplateCa())); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		List<PatrolType> types = engine.getSession().createQuery(c).getResultList();
-		engine.getSession().flush();
-		
+		List<PatrolType> types = QueryFactory.buildQuery(engine.getSession(), PatrolType.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}) //$NON-NLS-1$
+				.list();
+				
 		for (PatrolType t : types){
 			PatrolType newt = new PatrolType();
 			newt.setConservationArea(engine.getNewCa());
 			newt.setIsActive(t.getIsActive());
-			newt.setMaxSpeed(t.getMaxSpeed());
 			newt.setRequiresPilot(t.getRequiresPilot());
 			newt.setKeyId(t.getKeyId());
 			if (t.getIcon() != null) {
@@ -217,14 +220,16 @@ public class PatrolTemplateCloner implements
 				clone.setIsActive(pt.getIsActive());
 				clone.setKeyId(pt.getKeyId());
 				clone.setPatrolType(newt);
+				clone.setMaxSpeed(pt.getMaxSpeed());
 				engine.copyLabels(pt, clone);				
 				newt.getTransportTypes().add(clone);
 				
 				engine.getSession().persist(clone);					
 				engine.addConservationItemMapping(pt, clone);
 			}
-			
+			engine.addConservationItemMapping(t, newt);			
 		}
+		
 		engine.getSession().flush();
 	}
 	

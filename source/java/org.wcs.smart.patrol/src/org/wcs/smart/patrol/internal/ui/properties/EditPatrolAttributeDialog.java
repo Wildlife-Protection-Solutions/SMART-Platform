@@ -347,6 +347,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		if (pAttribute.getUuid() == null || pAttribute.getType() == AttributeType.TREE) {
 			treePanel = new PatrolAttributeTreeComposite(stackPanel);
 			treePanel.refresh(nameKeyControls.getSelectedLanguage());
+			treePanel.setListener(()->setDirty(true));
 		}
 		selectPanel();
 		
@@ -472,9 +473,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 				} 
 				
 				session.merge(pAttribute);
-				
 				session.getTransaction().commit();
-				session.evict(pAttribute);
 				isDirty = false;
 			}catch (Exception ex) {
 				try {
@@ -673,10 +672,9 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 					if (pAttribute.getAttributeList() == null) pAttribute.setAttributeList(new ArrayList<>());
 					lstViewer.setInput(pAttribute.getAttributeList());	
 				}
-				if (pAttribute.getType() == AttributeType.TREE) {
+				if (pAttribute.getType() == AttributeType.TREE || pAttribute.getUuid() == null) {
 					if (pAttribute.getAttributeTree() == null) pAttribute.setAttributeTree(new ArrayList<>());
 					treePanel.setInput(pAttribute);
-					treePanel.setListener(()->setDirty(true));
 				}
 				if (pAttribute.getUuid() != null) {
 					setTitle(pAttribute.getName());

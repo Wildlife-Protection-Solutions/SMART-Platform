@@ -73,6 +73,7 @@ public class PatrolAttribute extends NamedKeyIconItem{
 	private boolean isActive;
 	private List<PatrolAttributeListItem> attributeList = null;
 	private List<PatrolAttributeTreeNode> attributeTree = null;
+	private List<PatrolAttributePatrolType> patrolTypes = null;
 	
 	/**
 	 * 
@@ -89,6 +90,18 @@ public class PatrolAttribute extends NamedKeyIconItem{
 	 */
 	public void setConservationArea(ConservationArea ca) {
 		this.conservationArea = ca;
+	}
+	
+	/**
+	 * the patrol types this attribute is valid for
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrolAttribute", orphanRemoval=true, cascade={CascadeType.ALL})
+	public List<PatrolAttributePatrolType> getPatrolTypes(){
+		return patrolTypes;
+	}
+	public void setPatrolTypes(List<PatrolAttributePatrolType> patrolTypes) {
+		this.patrolTypes = patrolTypes;
 	}
 	
 	/**

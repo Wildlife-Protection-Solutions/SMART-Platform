@@ -311,7 +311,6 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 				mixed.updateName(getConservationArea().getDefaultLanguage(), PatrolType.DefaultType.MIXED.name());
 				mixed.setName(PatrolType.DefaultType.MIXED.name());
 				mixed.setRequiresPilot(true);
-				mixed.setMaxSpeed(PatrolType.MAX_SPEED_MAX_VALUE);
 				session.persist(mixed);
 			}
 			setPatrolType(mixed);

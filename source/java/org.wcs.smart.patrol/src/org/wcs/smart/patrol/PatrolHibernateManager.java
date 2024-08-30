@@ -333,7 +333,6 @@ public class PatrolHibernateManager extends HibernateManager{
 				pt.setIsActive(true);
 				pt.setKeyId(defaultType.getKeyId());
 				pt.setRequiresPilot(defaultType.requiresPilot());
-				pt.setMaxSpeed(defaultType.getDefaultMaxSpeed());
 				pt.setIcon(IconUtils.INSTANCE.findOrCreateSystemIcon(s, ca, defaultType.getIconKey()));
 				pt.setTransportTypes(new ArrayList<>());
 				

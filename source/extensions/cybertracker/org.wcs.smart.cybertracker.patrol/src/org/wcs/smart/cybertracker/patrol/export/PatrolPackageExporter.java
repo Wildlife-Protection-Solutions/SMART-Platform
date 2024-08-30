@@ -348,7 +348,7 @@ public class PatrolPackageExporter {
 				false, session, ctpackage.getConservationArea(),
 				set, workingDir,
 				(item, json)->{					
-					int max = ((PatrolTransportType)item).getPatrolType().getMaxSpeed();
+					int max = ((PatrolTransportType)item).getMaxSpeed();
 					json.put("max_speed", max); //$NON-NLS-1$
 				}
 			);

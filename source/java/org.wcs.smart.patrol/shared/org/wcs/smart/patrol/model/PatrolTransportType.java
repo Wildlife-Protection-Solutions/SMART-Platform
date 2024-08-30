@@ -46,6 +46,12 @@ public class PatrolTransportType extends NamedKeyIconItem{
 	
 	public static final String LIBRARY_ICON_KEY = "transportation"; //$NON-NLS-1$
 
+	
+	//Min and max values for max_speed are the same as in CyberTracker
+	public static final int MAX_SPEED_MIN_VALUE = 0;
+	public static final int MAX_SPEED_MAX_VALUE = 10000;
+	private Integer maxSpeed;
+
 	private boolean isActive = true;
 	private ConservationArea ca;
 	private PatrolType patrolType;
@@ -101,4 +107,19 @@ public class PatrolTransportType extends NamedKeyIconItem{
 		this.patrolType = patrolType;
 	}
 	
+	
+	/**
+	 * The maximum speed in km/h that should be used
+	 * to validate gps observations for this patrol type
+	 * 
+	 * @return
+	 */
+	@Column(name = "max_speed")
+	public Integer getMaxSpeed() {
+		return maxSpeed;
+	}
+	
+	public void setMaxSpeed(Integer maxSpeed) {
+		this.maxSpeed = maxSpeed;
+	}
 }

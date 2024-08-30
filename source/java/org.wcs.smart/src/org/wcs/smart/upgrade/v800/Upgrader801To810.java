@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,13 +42,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.icon.FixedIconSet;
-import org.wcs.smart.ca.icon.Icon;
-import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.AbstractInteralDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -294,7 +288,9 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			"RENAME COLUMN smart.patrol_type.patrol_type to keyId", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type alter column keyId set data type varchar(128)", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type add column uuid char(16) for bit data", //$NON-NLS-1$
-			"UPDATE smart.patrol_type set uuid = smart.uuid()", //$NON-NLS-1$
+			"CREATE FUNCTION smart.uuidtemp() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+			"UPDATE smart.patrol_type set uuid = smart.uuidtemp()", //$NON-NLS-1$
+			"DROP FUNCTION smart.uuidtemp",  //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type alter column uuid set not null", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type drop primary key", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type add primary key (uuid) ", //$NON-NLS-1$
@@ -314,6 +310,17 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			"ALTER TABLE smart.patrol_type add constraint patrol_type_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type add constraint patrol_type_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
 
+			//link custom attribute to patrol type
+			"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid char(16) for bit data not null references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate, patrol_type_uuid char(16) for bit data not null references smart.patrol_type on delete cascade on update restrict deferrable initially immediate, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
+			//by default link all
+			"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
+							
+			//move max speed to transport type
+			"ALTER TABLE smart.patrol_transport ADD COLUMN max_speed integer", //$NON-NLS-1$
+			"UPDATE smart.patrol_transport set max_speed = (select max_speed from smart.patrol_type where smart.patrol_type.uuid = smart.patrol_transport.patrol_type_uuid)", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_type drop column max_speed", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_transport ALTER COLUMN max_speed set not null", //$NON-NLS-1$
+			
 			//TODO: MIXED???
 			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.keyid = 'foot' and a.ca_uuid = smart.patrol_type.ca_uuid) where smart.patrol_type.keyid = 'ground'", //$NON-NLS-1$
 			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.keyid = 'patrol_pilot_boat' and a.ca_uuid = smart.patrol_type.ca_uuid) where smart.patrol_type.keyid = 'marine'", //$NON-NLS-1$

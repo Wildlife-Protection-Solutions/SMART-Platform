@@ -87,14 +87,14 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	}
 	
 	private void deletePatrolTypes(ConservationArea ca, Session session) throws Exception{
-		session.createMutationQuery("delete from PatrolType where id.conservationArea = :ca") //$NON-NLS-1$
-			.setParameter("ca", ca) //$NON-NLS-1$
-			.executeUpdate();
-		
+
 		session.createMutationQuery("delete from PatrolTransportType where conservationArea = :ca") //$NON-NLS-1$
 			.setParameter("ca", ca) //$NON-NLS-1$
 			.executeUpdate();
 		
+		session.createMutationQuery("delete from PatrolType where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
 	}
 	
 	private void deletePatrolTeams(ConservationArea ca, Session session) throws Exception{

@@ -52,6 +52,7 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.HkeyObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 
@@ -299,7 +300,7 @@ public class NameKeyComposite {
 			Button btnChangeKey = new Button(parent, SWT.NONE);
 			btnChangeKey.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnChangeKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-			btnChangeKey.setText(Messages.NameKeyComposite_ChangeKey_Button_Label);
+			btnChangeKey.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			btnChangeKey.setToolTipText(Messages.NameKeyComposite_ChangeKey_Button_Tooltip);
 			btnChangeKey.addSelectionListener(new SelectionAdapter() {			
 				@Override

@@ -95,19 +95,6 @@
                      </test>
                   </visibleWhen>
                </command>
-               <command
-                     commandId="org.wcs.smart.patrol.attributes"
-                     label="%customattributes.command.label"
-                     style="push">
-                  <visibleWhen
-                        checkEnabled="true">
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                  </visibleWhen>
-               </command>
             </menu>
             <separator
                   name="org.wcs.smart.patrol.separator2"
@@ -414,7 +401,7 @@
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.type"
-               label="%command.groupby.type"
+               label="%command.groupby.type1"
                style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
@@ -895,10 +882,6 @@
                id="org.eclipse.ui.commands.radioState">
          </state>
       </command>
-      <command
-            id="org.wcs.smart.patrol.attributes"
-            name="%customattributes.command.name">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -913,10 +896,6 @@
       <image
             commandId="org.wcs.smart.patrol.importPatrol"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.patrol.attributes"
-            icon="platform:/plugin/org.wcs.smart/images/icons/obj16/attribute_number.png">
       </image>
    </extension>
    <extension
@@ -1085,10 +1064,6 @@
             class="org.wcs.smart.patrol.internal.ui.views.PatrolGroupByHandler$PatrolGroupByHandlerWrapper"
             commandId="org.wcs.smart.patrol.view.groupby">
       </handler>
-      <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolAttributesHandler$ShowPatrolAttributesHandlerWrapper"
-            commandId="org.wcs.smart.patrol.attributes">
-      </handler>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.libs.mapping">
@@ -1097,7 +1072,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.conservationArea"
+            ca_property=".conservationArea"
             class="org.wcs.smart.patrol.model.PatrolType"
             supportsCcaa="false">
       </class>
@@ -1159,6 +1134,11 @@
       <class
             ca_property=".attribute.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolAttributeTreeNode"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.patrolAttribute.conservationArea"
+            class="org.wcs.smart.patrol.model.PatrolAttributePatrolType"
             supportsCcaa="false">
       </class>
    </extension>

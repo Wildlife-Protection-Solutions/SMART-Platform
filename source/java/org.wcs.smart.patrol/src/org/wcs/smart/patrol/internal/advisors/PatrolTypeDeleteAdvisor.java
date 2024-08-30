@@ -52,13 +52,6 @@ public class PatrolTypeDeleteAdvisor implements IDeleteAdvisor {
 					new Object[]{cnt, type.getName()});
 		}
 		
-		PatrolType loaded = session.get(PatrolType.class, type.getUuid());
-		if (!loaded.getTransportTypes().isEmpty()) {
-			return MessageFormat.format(
-					Messages.PatrolTypeDeleteAdvisor_tranportswithtypeexist,
-					new Object[]{loaded.getTransportTypes().size(), type.getName()});
-		}
-		
 		return null;
 		
 	}

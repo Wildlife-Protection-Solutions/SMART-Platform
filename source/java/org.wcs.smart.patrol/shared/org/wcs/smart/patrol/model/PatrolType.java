@@ -63,11 +63,6 @@ public class PatrolType extends NamedKeyIconItem {
 	private static final long serialVersionUID = 1L;
 	
 	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;
-	
-	//Min and max values for max_speed are the same as in CyberTracker
-	public static final int MAX_SPEED_MIN_VALUE = 0;
-	public static final int MAX_SPEED_MAX_VALUE = 10000;
-
 
 	public static final String LIBRARY_ICON_KEY = "transportation"; //$NON-NLS-1$
 	
@@ -90,16 +85,6 @@ public class PatrolType extends NamedKeyIconItem {
 		public String getGuiName(Locale l){
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, Locale.getDefault());
 		}
-
-		public int getDefaultMaxSpeed() {
-			switch (this) {
-			case GROUND: return 120;
-			case MARINE: return 70;
-			case AIR: return 500;
-			case MIXED: return MAX_SPEED_MAX_VALUE;
-			}
-			return MAX_SPEED_MAX_VALUE;
-		}
 		
 		public String getKeyId() {
 			return this.name().toLowerCase();
@@ -121,10 +106,10 @@ public class PatrolType extends NamedKeyIconItem {
 
 	private boolean isActive;
 	private boolean requiresPilot;
-	private Integer maxSpeed;
 	private List<PatrolTransportType> transportTypes;
 	private ConservationArea ca;
-	
+	private List<PatrolAttributePatrolType> customAttributes = null;
+
 	public PatrolType(){
 	}
 	
@@ -180,21 +165,7 @@ public class PatrolType extends NamedKeyIconItem {
 	public void setRequiresPilot(boolean requiresPilot){
 		this.requiresPilot = requiresPilot;
 	}
-	
-	/**
-	 * The maximum speed in km/h that should be used
-	 * to validate gps observations for this patrol type
-	 * 
-	 * @return
-	 */
-	@Column(name = "max_speed")
-	public Integer getMaxSpeed() {
-		return maxSpeed;
-	}
-	
-	public void setMaxSpeed(Integer maxSpeed) {
-		this.maxSpeed = maxSpeed;
-	}
+
 	
 	/**
 	 * 
@@ -211,6 +182,18 @@ public class PatrolType extends NamedKeyIconItem {
 	 */
 	public void setTransportTypes(List<PatrolTransportType> ttypes){
 		this.transportTypes = ttypes;
+	}
+	
+	/**
+	 * get the custom patrol attributes associated with this patrol type
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrolType", orphanRemoval=true, cascade={CascadeType.ALL})
+	public List<PatrolAttributePatrolType> getCustomAttributes(){
+		return customAttributes;
+	}
+	public void setCustomAttributes(List<PatrolAttributePatrolType> patrolAttributes) {
+		this.customAttributes = patrolAttributes;
 	}
 	
 }

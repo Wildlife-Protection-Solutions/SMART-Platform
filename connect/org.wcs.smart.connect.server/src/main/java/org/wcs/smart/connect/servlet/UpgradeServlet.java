@@ -2000,6 +2000,18 @@ public class UpgradeServlet extends HttpServlet {
 							"ALTER TABLE smart.patrol_type add constraint patrol_type_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
 							"ALTER TABLE smart.patrol_type add constraint patrol_type_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
 
+							//link custom attribute to patrol type
+							"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid uuid not null references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate, patrol_type_uuid uuid not null references smart.patrol_type on delete cascade on update restrict deferrable initially immediate, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
+							//by default link all
+							"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
+											
+							//move max speed to transport type
+							"ALTER TABLE smart.patrol_transport ADD COLUMN max_speed integer",  //$NON-NLS-1$
+							"UPDATE smart.patrol_transport set max_speed = a.max_speed FROM smart.patrol_type a WHERE a.uuid = smart.patrol_transport.patrol_type_uuid", //$NON-NLS-1$
+							"ALTER TABLE smart.patrol_transport alter column max_speed set not null", //$NON-NLS-1$
+							"ALTER TABLE smart.patrol_type drop column max_speed", //$NON-NLS-1$
+							
+							
 							//TODO: MIXED???
 							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.keyid = 'foot' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_type.keyid = 'ground'", //$NON-NLS-1$
 							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.keyid = 'patrol_pilot_boat' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_type.keyid = 'marine'", //$NON-NLS-1$

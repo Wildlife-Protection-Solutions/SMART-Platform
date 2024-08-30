@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -83,8 +84,14 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
 				csvout[i++] = type.getIsActive() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
 				csvout[i++] = type.getRequiresPilot() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
-				csvout[i++] = String.valueOf(type.getMaxSpeed());
 				csvout[i++] = ""; //$NON-NLS-1$
+				csvout[i++] = ""; //$NON-NLS-1$
+				
+				String attributeKeys = type.getCustomAttributes().stream()
+						.map(e->e.getPatrolAttribute().getKeyId())
+						.collect(Collectors.joining(":")); //$NON-NLS-1$
+				csvout[i++] = attributeKeys; 
+				
 				for(Language l : languages){
 					csvout[i++] = type.findName(l);
 				}
@@ -103,9 +110,10 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 				csvout[i++] = type.getKeyId();
 				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
 				csvout[i++] = type.getIsActive() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
-				csvout[i++] = ""; //$NON-NLS-1$
-				csvout[i++] = ""; //$NON-NLS-1$
+				csvout[i++] = ""; //$NON-NLS-1$ //pilot
+				csvout[i++] = String.valueOf(type.getMaxSpeed());  //max speed
 				csvout[i++] = type.getPatrolType().getKeyId();
+				csvout[i++] = ""; //$NON-NLS-1$
 				for(Language l : languages){
 					csvout[i++] = type.findName(l);
 				}
@@ -119,7 +127,7 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] cols = new String[langs.size() + 7];
+		String[] cols = new String[langs.size() + 8];
 		int i = 0;
 		cols[i++] = "Type"; //$NON-NLS-1$
 		cols[i++] = "Key"; //$NON-NLS-1$
@@ -128,6 +136,7 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 		cols[i++] = "Requires_Pilot"; //$NON-NLS-1$
 		cols[i++] = "Max_Speed"; //$NON-NLS-1$
 		cols[i++] = "Track_Type"; //$NON-NLS-1$
+		cols[i++] = "Custom_Attributes"; //$NON-NLS-1$
 		for (Language lng : langs) {
 			cols[i++] = "Name>" + lng.getCode(); //$NON-NLS-1$
 		}
