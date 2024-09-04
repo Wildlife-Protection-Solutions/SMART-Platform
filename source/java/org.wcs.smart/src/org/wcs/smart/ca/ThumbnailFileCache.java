@@ -58,6 +58,7 @@ public class ThumbnailFileCache {
 		
 		//re-creates the cache each time
 		//optionally could keep it and read data
+		//if we keep it we need to make sure to manage it when we sync etc.
 		if (Files.exists(fileName)) {
 			try {
 				Files.delete(fileName);

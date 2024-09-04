@@ -79,7 +79,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	 * @param changeLogFilestoreDir filestore files
 	 * @param ca conservation area
 	 * @param persistChangeLogRecords if change log records should be added back into change log table. This is
-	 * true of the cases were we want to "re-apply" new items after fixing sync conflict
+	 * true of the cases where we want to "re-apply" new items after fixing sync conflict
 	 * @param monitor
 	 */
 	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir, 

@@ -53,6 +53,7 @@ import org.hibernate.Session;
 import org.wcs.smart.LogoutHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
@@ -349,6 +350,9 @@ public class ApplyChangeLogJob extends Job {
 		
 		//gets the current user; for resetting after applying changes
 		try(Session session = HibernateManager.lockDatabase()){
+			
+			IconFKManager.INSTANCE.dropIconFkConstraints(session);
+			
 			session.beginTransaction();
 			try {
 				
@@ -393,6 +397,10 @@ public class ApplyChangeLogJob extends Job {
 			}
 		}finally{
 			HibernateManager.unlockDatabase();
+			
+			try(Session session = HibernateManager.openSession()){
+				IconFKManager.INSTANCE.createIconFkConstraints(session);
+			}
 			
 			if (replicationEnabled){
 				//re-enable replication if it was previously enabled

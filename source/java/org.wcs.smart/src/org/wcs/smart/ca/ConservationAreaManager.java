@@ -98,9 +98,18 @@ public class ConservationAreaManager {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaManager_Progress_DeleteCa, 5); 
 		
 		try(Session session = HibernateManager.openSession()){
+			
 			Path fStore = null;
-			session.beginTransaction();
+			
 			try {
+				IconFKManager.INSTANCE.dropIconFkConstraints(session);
+			}catch (Exception ex) {
+				throw ex;
+			}
+						
+			
+			try {
+				session.beginTransaction();
 				ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
 				fStore = Paths.get(ca.getFileDataStoreLocation());
 				
@@ -112,8 +121,11 @@ public class ConservationAreaManager {
 			}catch (Exception ex){
 				session.getTransaction().rollback();
 				throw ex;
+			}finally {
+				IconFKManager.INSTANCE.createIconFkConstraints(session);	
 			}
 			
+						
 			progress.subTask(Messages.ConservationAreaManager_CompressingTables);
 			try {
 				HibernateManager.compressTables(session, progress.split(2));

@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.DerbyChangeLogDeserializer;
@@ -65,14 +66,19 @@ public class ConflictDataRecoveryEngine {
 		
 		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changeLogFile, workingDir, ca, true, monitor);
 		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
+			
+			IconFKManager.INSTANCE.dropIconFkConstraints(session);
+			
 			try {
+				session.beginTransaction();
 				processor.processFile(session);	
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
 				throw ex;
-			}	
+			}finally {
+				IconFKManager.INSTANCE.createIconFkConstraints(session);
+			}
 		}
 		
 	}

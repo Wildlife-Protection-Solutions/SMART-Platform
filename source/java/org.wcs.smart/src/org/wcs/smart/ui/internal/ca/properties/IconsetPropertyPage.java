@@ -84,6 +84,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -238,8 +239,9 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		IconManager.INSTANCE.clearThumbnails();
 		
 		session = HibernateManager.openSession(new AttachmentInterceptor());
-		session.beginTransaction();
 		
+		session.beginTransaction();
+				
 		main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -866,6 +868,9 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						monitor.beginTask(Messages.IconsetPropertyPage_deleteicontask, toDelete.size()+1);
+						
+						IconFKManager.INSTANCE.setIconFksToNull(session, toDelete);
+						
 						toDelete.forEach(e->{
 							
 							//there seems to be a bug in apache derby
@@ -873,14 +878,15 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 							//as a result we get ca_uuid cannot be null error
 							//this only appears to be a problem for 
 							//re: #3401
-							session.createMutationQuery("UPDATE Attribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
-								.setParameter("icon", e) //$NON-NLS-1$
-								.executeUpdate();
-							session.createMutationQuery("UPDATE PatrolAttribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
-							.setParameter("icon", e) //$NON-NLS-1$
-							.executeUpdate();
-							
+//							session.createMutationQuery("UPDATE Attribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
+//								.setParameter("icon", e) //$NON-NLS-1$
+//								.executeUpdate();
+//							session.createMutationQuery("UPDATE PatrolAttribute SET icon = null WHERE icon = :icon") //$NON-NLS-1$
+//							.setParameter("icon", e) //$NON-NLS-1$
+//							.executeUpdate();
+//							
 							session.remove(e);
+							
 							session.flush();
 							monitor.worked(1);
 						});

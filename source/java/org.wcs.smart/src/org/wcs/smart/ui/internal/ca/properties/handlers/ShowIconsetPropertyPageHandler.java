@@ -21,7 +21,16 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
+import javax.inject.Named;
+
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.ca.IconFKManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.internal.ca.properties.IconsetPropertyPage;
 
 /**
@@ -39,6 +48,26 @@ public class ShowIconsetPropertyPageHandler extends ShowPropertyPageHandler {
 		super(IconsetPropertyPage.class);
 	}
 
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
+		
+		try(Session session = HibernateManager.openSession()){
+			IconFKManager.INSTANCE.dropIconFkConstraints(session);
+		}catch (Exception ex) {
+			//this shouldn't happen but for whatever reason the fk constraints can't be removed so
+			//don't show the dialog.
+			throw new ExecutionException(ex.getMessage());
+		}
+		
+		try {
+			super.execute(activeShell);
+		}finally {
+			try(Session session = HibernateManager.openSession()){
+				IconFKManager.INSTANCE.createIconFkConstraints(session);
+			}
+		}	
+	}
+	
 	// E3
 	public static class ShowIconsetPropertyPageHandlerWrapper extends DIHandler<ShowIconsetPropertyPageHandler> {
 		public ShowIconsetPropertyPageHandlerWrapper() {

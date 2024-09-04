@@ -274,23 +274,19 @@ public class SmartHibernateManager {
 		return sessionFactory != null;
 	}
 	
-	@SuppressWarnings("resource")
 	private static Session openSessionOnly(Interceptor interceptor){
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
+		
 		Session session = null;
 		if (interceptor == null){
-			session = sessionFactory
-//					.withOptions().interceptor(new AuditItemInterceptor())
-					.openSession();
-		}else{
-			
+			session = sessionFactory.openSession();
+		}else{			
 			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
 		}
 
 		//add to session collection with listener to remove when closed
-		
 		openSessions.add(session);
 		session.addEventListeners(new SessionEndListener(session));
 		

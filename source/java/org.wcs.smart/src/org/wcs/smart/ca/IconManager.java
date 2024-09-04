@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +50,7 @@ import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * For managing icons in the desktop and creating/caching thumbnails.
  * 
@@ -89,6 +89,7 @@ public enum IconManager {
 	
 	private synchronized ThumbnailFileCache getSystemCache() {
 		if (systemCache != null) return systemCache;
+	
 		Path filename = SmartContext.INSTANCE.getTempFilestoreLocation()
 				.resolve("system_thumbnails.cache"); //$NON-NLS-1$
 		systemCache = new ThumbnailFileCache(filename);
@@ -98,11 +99,16 @@ public enum IconManager {
 	private synchronized ThumbnailFileCache getCaCache(ConservationArea ca) {
 		if (caCache.containsKey(ca)) return caCache.get(ca);
 		
-		Path filename = Paths.get(ca.getFileDataStoreLocation()).resolve("icon_thumbs.cache"); //$NON-NLS-1$
+		//this can't be in the CA directory otherwise it gets syn'c to connect
+		//and causes conflicts
+		String name = UuidUtils.uuidToString(ca.getUuid()) + "_icon_thumbs.cache"; //$NON-NLS-1$
+		Path filename = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(name);
 		ThumbnailFileCache temp = new ThumbnailFileCache(filename);
 		caCache.put(ca, temp);
 		return temp;
 	}
+	
+	
 	/**
 	 * Gets the conservation area specific icons - these are used in the CA
 	 * or have been manually configured.
@@ -444,4 +450,5 @@ public enum IconManager {
 		}
 		return img;
 	}
+	
 }
