@@ -9,5 +9,5 @@
 	</parent>
 	<artifactId>org.wcs.smart.i2.migrate.nl</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>7.5.8</version>
+	<version>7.5.9</version>
 </project>
