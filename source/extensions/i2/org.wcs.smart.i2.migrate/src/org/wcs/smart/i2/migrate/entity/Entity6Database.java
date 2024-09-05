@@ -42,7 +42,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class Entity6Database extends Smart6Database{
+public class Entity6Database extends Smart6Database implements IEntityDatabase{
 	
 	public Entity6Database(Path dir) throws SQLException {
 		super(dir);

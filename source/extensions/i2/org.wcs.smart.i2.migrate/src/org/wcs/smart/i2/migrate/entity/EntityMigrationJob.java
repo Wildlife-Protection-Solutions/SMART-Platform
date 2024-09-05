@@ -91,12 +91,16 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 	private Map<ConservationArea, Employee> userMapping;
 	
 	private List<EntityTypeMappingRecord> mappings;
-	private Entity6Database db;
+	private IEntityDatabase db;
 	
 	private List<IntelEntityType> newTypes;
 	private int totalEntities = 0;
 	
-	public EntityMigrationJob(Entity6Database db, List<EntityTypeMappingRecord> mappings, Map<ConservationArea, Employee> userMapping) {
+	private String taskName = Messages.EntityMigrationJob_TaskName;
+	private String entityComment = Messages.EntityMigrationJob_EntityMigrationComment;
+	private String warningListItemAdded = Messages.EntityMigrationJob_WarningListItemAdded;
+	
+	public EntityMigrationJob(IEntityDatabase db, List<EntityTypeMappingRecord> mappings, Map<ConservationArea, Employee> userMapping) {
 		this.mappings = mappings;
 		this.db = db;
 		this.userMapping = userMapping;
@@ -110,10 +114,17 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		return newTypes;
 	}
 	
+	public void setLabels(String taskName, String entityComment, String warningListItem) {
+		this.taskName = taskName;
+		this.entityComment = entityComment;
+		this.warningListItemAdded = warningListItem;
+	}
+	
+	
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 	
-		monitor.beginTask(Messages.EntityMigrationJob_TaskName, mappings.size()*2 + 2);
+		monitor.beginTask(taskName, mappings.size()*2 + 2);
 		idAttribute = new HashMap<>();
 		positionAttribute = new HashMap<>();
 		statusAttribute = new HashMap<>();
@@ -205,7 +216,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 			IntelEntity entity = new IntelEntity();
 			entity.setConservationArea(etype.getConservationArea());
 			entity.setEntityType(etype);
-			entity.setComment(Messages.EntityMigrationJob_EntityMigrationComment);
+			entity.setComment(entityComment);
 			entity.setCreatedBy(userMapping.get(etype.getConservationArea()));
 			entity.setLastModifiedBy(userMapping.get(etype.getConservationArea()));
 			entity.setDateCreated(LocalDateTime.now());
@@ -567,9 +578,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 			ia.setOrder(order++);
 		}
 		session.save(entityType);
-		return entityType;
-		
-		
+		return entityType;	
 	}
 	
 	private IntelAttribute searchForAttribute(Session session, EntityTypeAttributeItem attribute, Attribute dmAttribute, ConservationArea ca) {
@@ -595,7 +604,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 				for (AttributeListItem ali : dmAttribute.getAttributeList()) {
 					IntelAttributeListItem ili = lmapping.get(ali.getKeyId());
 					if (ili == null) {
-						warnings.add(MessageFormat.format(Messages.EntityMigrationJob_WarningListItemAdded, ia.getName(), ali.getKeyId()));
+						warnings.add(MessageFormat.format(warningListItemAdded, ia.getName(), ali.getKeyId()));
 						//create a new list item for this key
 						
 						IntelAttributeListItem iali = new IntelAttributeListItem();

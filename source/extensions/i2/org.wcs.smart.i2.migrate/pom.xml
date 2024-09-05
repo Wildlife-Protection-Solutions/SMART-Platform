@@ -13,6 +13,6 @@
 	<name>SMART Profile Data Migration Tools</name>
 	<artifactId>org.wcs.smart.i2.migrate</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.5.7-SNAPSHOT</version>
+	<version>7.5.11-SNAPSHOT</version>
 	
 </project>

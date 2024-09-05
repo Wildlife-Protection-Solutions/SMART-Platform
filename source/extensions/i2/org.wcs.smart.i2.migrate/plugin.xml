@@ -46,6 +46,24 @@
                </and>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.i2.migrate.entity.smart7"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="intel_admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -58,6 +76,10 @@
             class="org.wcs.smart.i2.migrate.entity.MigrateSmart6EntityHandler$MigrateSmart6EntityHandlerWrapper"
             commandId="org.wcs.smart.i2.migrate.entity">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.migrate.entity.MigrateSmart7EntityHandler$MigrateSmart7EntityHandlerWrapper"
+            commandId="org.wcs.smart.i2.migrate.entity.smart7">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -68,6 +90,10 @@
       <command
             id="org.wcs.smart.i2.migrate.entity"
             name="%command.entity.name">
+      </command>
+      <command
+            id="org.wcs.smart.i2.migrate.entity.smart7"
+            name="Convert SMART7 Entity Data ...">
       </command>
    </extension>
 
