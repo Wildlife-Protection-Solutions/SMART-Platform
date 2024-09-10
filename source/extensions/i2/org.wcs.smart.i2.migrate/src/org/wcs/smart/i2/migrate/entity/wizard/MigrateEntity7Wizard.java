@@ -106,8 +106,8 @@ public class MigrateEntity7Wizard extends Wizard {
 		
 		EntityMigrationJob job = new EntityMigrationJob(db, page3.getMappings(), userMapping);
 		
-		job.setLabels("Migrating SMART Entities", "Migrated from SMART 7 Entity Module", 
-				"Entity Type Conversion: The existing profile list attribute {0} doesn''t have a value for key {1} which exists in the entity attribute. A new list item with this key will be added to this attribute.");
+		job.setLabels(Messages.MigrateEntity7Wizard_Title, Messages.MigrateEntity7Wizard_Message, 
+				Messages.MigrateEntity7Wizard_AttributeError);
 
 		try {
 			getContainer().run(true, true, job);
@@ -138,7 +138,7 @@ public class MigrateEntity7Wizard extends Wizard {
      */
 	public void addPages() {
     	
-    	setWindowTitle("Migrate SMART7 Entity Data");
+    	setWindowTitle(Messages.MigrateEntity7Wizard_WindowTitle);
     	
     	page3 = new EntityTypeMappingPage();
     	super.addPage(page3);

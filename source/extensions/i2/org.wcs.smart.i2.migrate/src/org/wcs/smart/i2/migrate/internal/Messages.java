@@ -64,9 +64,14 @@ public class Messages extends NLS {
 	public static String ExtractDbJob_subtask2;
 	public static String ExtractDbJob_subtask3;
 	public static String ExtractDbJob_TaskName;
+	public static String MigrateEntity7Wizard_AttributeError;
+	public static String MigrateEntity7Wizard_Message;
+	public static String MigrateEntity7Wizard_Title;
+	public static String MigrateEntity7Wizard_WindowTitle;
 	public static String MigrateEntityWizard_CompleteMessage;
 	public static String MigrateEntityWizard_CompleteTitle;
 	public static String MigrateEntityWizard_ConversionError;
+	public static String MigrateEntityWizard_Smart6WindowsTitle;
 	public static String MigrateIntelligenceWizard_NoCas;
 	public static String MigrateIntelligenceWizard_NoMatchingCas;
 	public static String MigrateIntelligenceWizard_Title;

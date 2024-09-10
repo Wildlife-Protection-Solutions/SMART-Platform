@@ -15,9 +15,15 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * 
+ * Support conversion from smart7 entities to smart7 profiles.
+ * 
+ * @author Emily
+ * @since 7.5.11
+ */
 public class Entity7Database implements IEntityDatabase{
 
 	public Entity7Database() {
