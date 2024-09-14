@@ -89,16 +89,8 @@ public class ServerPatrolJsonProcessor extends PatrolJsonProcessor {
 		newPatrol.setEndDate(end);
 			
 		newPatrol.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(newPatrol, session));
-		if (newPatrol.getPatrolType() == null){
-			if (newPatrol.getFirstLeg().getType() != null){
-				newPatrol.setPatrolType(newPatrol.getFirstLeg().getType().getPatrolType());
-			}else{
-				PatrolType mixed = QueryFactory.buildQuery(session, PatrolType.class, 
-						new Object[] {"conservationArea", newPatrol.getConservationArea()}, //$NON-NLS-1$
-						new Object[] {"keyid", PatrolType.DefaultType.MIXED.getKeyId()}).uniqueResult(); //$NON-NLS-1$
-				newPatrol.setPatrolType(mixed);
-			}
-		}
+		
+		newPatrol.recalculateType();
 		
 		session.persist(newPatrol);
 		

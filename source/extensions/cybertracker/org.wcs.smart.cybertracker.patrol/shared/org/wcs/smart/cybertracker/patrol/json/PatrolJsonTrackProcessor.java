@@ -118,11 +118,10 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			List<CtPatrolLink> links = linkmap.get(deviceId);
 			if (links == null) {
 				//links in the same conservation area
-				//TODO: make this same change in the mission module
-				String query = "SELECT pl FROM CtPatrolLink pl join pl.patrolLeg l join l.patrol p WHERE p.conservationArea = :ca and pl.deviceId = :deviceid";
+				String query = "SELECT pl FROM CtPatrolLink pl join pl.patrolLeg l join l.patrol p WHERE p.conservationArea = :ca and pl.deviceId = :deviceid"; //$NON-NLS-1$
 				links = session.createQuery(query, CtPatrolLink.class)
-					.setParameter("ca", this.ca)
-					.setParameter("deviceid", deviceId)
+					.setParameter("ca", this.ca) //$NON-NLS-1$
+					.setParameter("deviceid", deviceId) //$NON-NLS-1$
 					.list();				
 				linkmap.put(deviceId, links);
 			}

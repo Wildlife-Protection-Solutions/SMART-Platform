@@ -268,13 +268,13 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		compTransportType.updatePatrol(newLeg);
 		compMandate.updatePatrol(newLeg);
 		
-		if (!newLeg.getType().getPatrolType().getRequiresPilot()) {
+		if (!newLeg.getType().getRequiresPilot()) {
 			//this is needed to clear pilot if changed from transport type with pilot to transport type without pilot
 			for (PatrolLegMember member : newLeg.getMembers()) {
 				member.setIsPilot(false);
 			}
 		}
-		if (newLeg.getType().getPatrolType().getRequiresPilot() && newLeg.getPilot() == null) {
+		if (newLeg.getType().getRequiresPilot() && newLeg.getPilot() == null) {
 			//transport type was changed from a type without pilot to a type that requires pilot, need to for pilot selection
 			EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
 					Display.getDefault().getActiveShell(),

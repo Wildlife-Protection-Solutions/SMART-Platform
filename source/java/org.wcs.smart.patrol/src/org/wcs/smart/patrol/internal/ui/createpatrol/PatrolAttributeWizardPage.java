@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
@@ -30,7 +28,6 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 import org.wcs.smart.patrol.ui.PatrolAttributeComposite;
 
@@ -44,7 +41,6 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 	public static final String ID = "newpatrol.customattributes"; //$NON-NLS-1$
 	
 	private PatrolAttributeComposite attributeComposite = null;
-	private List<PatrolAttribute> attributes;
 	private ScrolledComposite scroll;
 	
 	/**
@@ -53,10 +49,6 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 		super(ID); 
 	}
 
-	public void setAttributes(List<PatrolAttribute> attributes) {
-		this.attributes = attributes;
-	}
-	
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -66,7 +58,7 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
 
-		attributeComposite = new PatrolAttributeComposite(attributes);
+		attributeComposite = new PatrolAttributeComposite(false);
 		attributeComposite.addChangeListener(this);
 		Composite acomp = attributeComposite.createComponent(scroll, SWT.NONE);
 		scroll.addListener(SWT.Resize, e->{

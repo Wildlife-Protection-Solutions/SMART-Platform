@@ -41,6 +41,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *       &lt;attribute name="startDate" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="endDate" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="transportTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -73,7 +74,9 @@ public class PatrolLegType {
     protected XMLGregorianCalendar endDate;
     @XmlAttribute(name = "id")
     protected String id;
-
+    @XmlAttribute(name = "transportTypeKey")
+    protected String transportTypeKey;
+    
     /**
      * Gets the value of the transportType property.
      * 
@@ -250,6 +253,30 @@ public class PatrolLegType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+    
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTransportTypeKey() {
+        return transportTypeKey;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTransportTypeKey(String value) {
+        this.transportTypeKey = value;
     }
 
 }

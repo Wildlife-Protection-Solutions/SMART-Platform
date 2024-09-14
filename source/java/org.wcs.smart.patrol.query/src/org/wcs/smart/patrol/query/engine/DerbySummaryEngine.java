@@ -61,6 +61,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -155,6 +156,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 	private PatrolSummaryQuery query;
 	
 	private Set<String> tablesWithNoData = new HashSet<>();
+	String patrolTransportGroupTable = null;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -303,6 +305,9 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 							allGroupByParts, ldef.getValuePart(),
 							cafilter, progress.split(1));
 					
+					if (patrolTransportGroupTable != null) {
+						session.createNativeMutationQuery("DROP TABLE " + patrolTransportGroupTable).executeUpdate(); //$NON-NLS-1$
+					}
 					
 					progress.checkCanceled();
 					if (data == null) return;
@@ -1431,6 +1436,65 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 		Set<Class<?>> usedTables = new HashSet<>();
 
 		for (IGroupBy gb : groupBy.getGroupBys()){
+			if (gb instanceof PatrolGroupBy pgb && 
+					pgb.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY && 
+					patrolTransportGroupTable == null) {
+				//create a temporary table that computes the transport group
+				//at the patrol level with "mixed"
+				patrolTransportGroupTable = createTempTableName();
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("create table "); //$NON-NLS-1$
+				sb.append(patrolTransportGroupTable);
+				sb.append("(uuid char(16) for bit data, groupkey varchar(1048))"); //$NON-NLS-1$
+				
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("INSERT INTO "); //$NON-NLS-1$
+				sb.append(patrolTransportGroupTable);
+				sb.append("(uuid, groupkey)"); //$NON-NLS-1$
+				sb.append("SELECT foo.uuid, foo.ptkeyid || '.mixed' FROM (");  //$NON-NLS-1$
+				sb.append("SELECT distinct a.uuid as uuid, d.keyid as ptkeyid, "); //$NON-NLS-1$
+				sb.append("c.patrol_transport_group_uuid "); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( tableName(Patrol.class) + " a JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolLeg.class) + " b on a.uuid = b.patrol_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportType.class) + " c on c.uuid = b.transport_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolType.class) + " d on d.uuid = a.patrol_type_uuid "); //$NON-NLS-1$
+				sb.append( " WHERE a.ca_uuid IN (:cas) "); //$NON-NLS-1$
+				sb.append(" ) foo "); //$NON-NLS-1$
+				sb.append(" GROUP BY foo.uuid, foo.ptkeyid "); //$NON-NLS-1$
+				sb.append(" HAVING count(*) > 1 "); //$NON-NLS-1$
+				sb.append(" UNION "); //$NON-NLS-1$
+
+				sb.append(" SELECT bar.uuid, case when d.keyid is not null then d.keyid else e.keyid || '.none' end "); //$NON-NLS-1$
+				sb.append(" FROM ( select foo.uuid FROM (");  //$NON-NLS-1$
+				sb.append(" SELECT DISTINCT a.uuid as uuid, c.patrol_transport_group_uuid "); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( tableName(Patrol.class) + " a JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolLeg.class) + " b on a.uuid = b.patrol_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportType.class) + " c on c.uuid = b.transport_uuid ");  //$NON-NLS-1$
+				sb.append( " WHERE a.ca_uuid IN (:cas1) "); //$NON-NLS-1$
+				sb.append(" ) foo GROUP BY foo.uuid "); //$NON-NLS-1$
+				sb.append(" HAVING count(*) = 1) bar JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolLeg.class) + " b on bar.uuid = b.patrol_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportType.class) + " c on c.uuid = b.transport_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolType.class) + " e on e.uuid = c.patrol_type_uuid LEFT JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportGroup.class) + " d on d.uuid = c.patrol_transport_group_uuid  "); //$NON-NLS-1$
+				
+				session.createNativeMutationQuery(sb.toString())
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.setParameterList("cas1", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.executeUpdate();
+				session.createNativeMutationQuery("CREATE INDEX " + patrolTransportGroupTable + "uuididx on " + patrolTransportGroupTable + "(uuid)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				//only need to compute this once
+				break;
+			}
+		}
+		
+		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
 						|| value instanceof AttributeValueItem) {
@@ -1579,6 +1643,48 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 							usedTables.add(Rank.class);
 						}
 					}
+				}else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+					if (!usedTables.contains(PatrolTransportType.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(PatrolTransportType.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolTransportType.class) + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = temp.pl_transport_uuid "); //$NON-NLS-1$
+						
+						
+						usedTables.add(PatrolTransportType.class);
+					}
+					if (!usedTables.contains(PatrolType.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(PatrolType.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolType.class) + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = temp.p_type_uuid "); //$NON-NLS-1$
+						
+						
+						usedTables.add(PatrolTransportType.class);
+					}
+					if (!usedTables.contains(PatrolTransportGroup.class)) {
+						fromSql.append(" left join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(PatrolTransportGroup.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolTransportType.class) + ".patrol_transport_group_uuid "); //$NON-NLS-1$
+						fromSql.append(" =  "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolTransportGroup.class) + ".uuid "); //$NON-NLS-1$
+
+						usedTables.add(PatrolTransportGroup.class);
+					}
+					
+				}else if (option == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+					if (!usedTables.contains(PatrolTransportGroupPlaceHolder.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(patrolTransportGroupTable );
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(patrolTransportGroupTable + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = temp.p_uuid "); //$NON-NLS-1$
+						usedTables.add(PatrolTransportGroupPlaceHolder.class);
+					}
+										
 				}else if (option.getType() == PatrolQueryOptionType.KEY){
 					PatrolQueryOption op = option;
 					fromSql.append(" join "); //$NON-NLS-1$
@@ -2024,7 +2130,7 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 	
 	/**
 	 * Returns the patrol group by field from 
-	 * the temproary results table that contains
+	 * the temporary results table that contains
 	 * the given patrol group by item.
 	 * 
 	 * @param gb
@@ -2044,6 +2150,10 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 			return tablePrefix.get(PatrolType.class) + ".keyid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE:
 			return "pl_transport_uuid"; //$NON-NLS-1$
+		case PATROL_TRANSPORT_GROUP_KEY:
+			return "case when " + tablePrefix.get(PatrolTransportGroup.class) + ".keyid is not null then " + tablePrefix.get(PatrolTransportGroup.class) + ".keyid  else " +  tablePrefix.get(PatrolType.class) + ".keyid || '.none' end"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		case PATROL_TRANSPORT_PATROL_GROUP_KEY:
+			return patrolTransportGroupTable + ".groupkey"; //$NON-NLS-1$
 		case ARMED:
 			return "p_is_armed"; //$NON-NLS-1$
 		case PILOT:
@@ -2271,4 +2381,5 @@ public class DerbySummaryEngine extends AbstractPatrolQueryEngine{
 		super.createWpIndex(c, tableName);
 	}
 
+	class PatrolTransportGroupPlaceHolder{}
 }

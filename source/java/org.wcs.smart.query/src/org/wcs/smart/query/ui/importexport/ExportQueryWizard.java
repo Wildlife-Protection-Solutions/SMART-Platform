@@ -117,7 +117,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 			defaultProjection = HibernateManager.getCurrentViewProjection(s);
 			
-			//TODO: this might be slow
+			//TODO: this might be slow (do in progress monitor)?
 			if (query instanceof SimpleQuery) {
 				queryColumns = ((SimpleQuery) query).computeQueryColumns(Locale.getDefault(), s, ()->defaultProjection);
 				

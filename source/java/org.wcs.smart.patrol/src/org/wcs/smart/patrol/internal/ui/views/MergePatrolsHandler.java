@@ -32,9 +32,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
@@ -84,13 +86,19 @@ public class MergePatrolsHandler {
 			return;
 		}
 		ArrayList<Patrol> patrols = new ArrayList<Patrol>();
-		
-		
 		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor(false))) {
 			session.beginTransaction();
 			try{
+				PatrolType pt = null;
 				for(PatrolEditorInput pei : toMerge){
-					patrols.add((Patrol)session.get(Patrol.class, pei.getUuid()));
+					Patrol p = session.get(Patrol.class, pei.getUuid());
+					if (pt == null) {
+						pt = p.getPatrolType();
+					}else if (!pt.equals(p.getPatrolType())) {
+						SmartPlugIn.displayLog("Cannot merge patrols with different track types.", null);
+						return;
+					}
+					patrols.add(p);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex){

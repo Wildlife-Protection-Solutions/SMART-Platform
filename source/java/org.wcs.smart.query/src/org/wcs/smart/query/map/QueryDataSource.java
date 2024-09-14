@@ -99,7 +99,7 @@ public class QueryDataSource extends ContentDataStore{
 		List<Name> types = new ArrayList<>();
 		List<QueryColumn> columns = ((IStyledQuery) getQuery()).computeQueryColumns(Locale.getDefault(), null, this.prjProvider);
 		for (QueryColumn qc : columns) {
-			if (qc instanceof IGeometryColumn qcc) {
+			if (qc instanceof IGeometryColumn) {
 				Name name = new NameImpl("smartquery", qc.getKey()); //$NON-NLS-1$
 				types.add(name);
 				nameToQcMap.put(name.getLocalPart(), qc);

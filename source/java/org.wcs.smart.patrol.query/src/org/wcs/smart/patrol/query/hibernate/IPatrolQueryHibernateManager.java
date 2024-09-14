@@ -120,6 +120,13 @@ public interface IPatrolQueryHibernateManager {
 	public List<ListItem> getActivePatrolTypes(Session session);
 	
 	/**
+	 * 
+	 * @param session
+	 * @return list of all active transport groups
+	 */
+	public List<ListItem> getActiveTransportGroups(Session session);
+	
+	/**
 	 * Gets all the custom patrol attributes for the Conservation Area
 	 * @param session
 	 * @return

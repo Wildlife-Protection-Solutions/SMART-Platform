@@ -67,6 +67,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case PATROL_LEG_START_DATE: return Messages.getString("PatrolQueryLabelProvider.LegStartdate", l); //$NON-NLS-1$
 			case PATROL_LEG_END_DATE: return Messages.getString("PatrolQueryLabelProvider.LegEnddate", l); //$NON-NLS-1$
 			case TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.Transporttype", l); //$NON-NLS-1$
+			case TRANSPORT_GROUP: return "Transport Group";
 			case WAYPOINT_ID: return Messages.getString("PatrolQueryLabelProvider.Wid", l); //$NON-NLS-1$
 			case WAYPOINT_DATE: return Messages.getString("PatrolQueryLabelProvider.WPDate", l); //$NON-NLS-1$
 			case WAYPOINT_TIME: return Messages.getString("PatrolQueryLabelProvider.WPTime", l); //$NON-NLS-1$
@@ -132,6 +133,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case PATROL_TYPE: return Messages.getString("PatrolQueryLabelProvider.PatrolTypeOp1", l); //$NON-NLS-1$
 				case PATROL_TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
+				case PATROL_TRANSPORT_GROUP_KEY: return "Transport Group";
+				case PATROL_TRANSPORT_PATROL_GROUP_KEY: return "Transport Group - Patrol";
 				case CONSERVATION_AREA: return Messages.getString("PatrolQueryLabelProvider.CaOp", l); //$NON-NLS-1$
 				case AGENCY: return Messages.getString("PatrolQueryLabelProvider.AgencyOp", l); //$NON-NLS-1$
 				case AGENCY_KEY: return Messages.getString("PatrolQueryLabelProvider.AgencyOp", l); //$NON-NLS-1$

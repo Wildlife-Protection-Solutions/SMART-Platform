@@ -59,7 +59,6 @@ import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.patrol.model.JsonPatrol;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -74,7 +73,6 @@ import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
@@ -881,7 +879,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 		pl.setEndDate(pl.getStartDate());
 		for (Employee member: ct.getMembers()){
 			PatrolLegMember item = pl.addPatrolLegMember(member);
-			if (ct.getPatrolType() != null && ct.getPatrolType().getRequiresPilot()){
+			if (ct.getPatrolTransportType() != null && ct.getPatrolTransportType().getRequiresPilot()){
 				if (member.equals(ct.getPilot())) item.setIsPilot(true);
 			}
 			if (member.equals(ct.getLeader())) item.setIsLeader(true);
@@ -889,21 +887,12 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 	
 		pl.setType(ct.getPatrolTransportType());
 		
-		
-		
-		//update patrol type if required
-		if (!patrol.getPatrolType().getKeyId().equals( PatrolType.DefaultType.MIXED.getKeyId() ) && 
-				patrol.getPatrolType() != pl.getType().getPatrolType()) {
-			
-			PatrolType mixed = QueryFactory.buildQuery(session, PatrolType.class, 
-					new Object[] {"conservationArea", patrol.getConservationArea()}, //$NON-NLS-1$
-					new Object[] {"keyid", PatrolType.DefaultType.MIXED.getKeyId()}).uniqueResult(); //$NON-NLS-1$
-			
-			if (mixed == null) {
-				//create mixed type - might lead to conflict?
-				throw new Exception("No MIXED patrol type exists.  A patrol type with the key of 'mixed' must exist for the Conservation Area."); //$NON-NLS-1$
+		if (patrol.getPatrolType() == null) {
+			patrol.setPatrolType(pl.getType().getPatrolType());
+		}else {
+			if (!pl.getType().getPatrolType().equals(patrol.getPatrolType())) {
+				throw new Exception("Cannot merge patrols of different track types."); //$NON-NLS-1$
 			}
-			patrol.setPatrolType(mixed);
 		}
 		
 		//make a single patrol leg day for the start date and time

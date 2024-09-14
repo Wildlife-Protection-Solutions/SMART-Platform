@@ -78,12 +78,14 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	private String objective;
 	private String mandate;
 	private String patrolType;
+	private UUID patrolTransportTypeUuid;
 	private UUID patrolTypeUuid;
 	private UUID patrolUuid;
 	private boolean armed;
 	private String patrolLegId;
 	private UUID patrolLegUuid;
 	private String transportType;
+	private String transportGroup;
 	private LocalDate plStartDate;
 	private LocalDate plEndDate;
 	
@@ -254,6 +256,19 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 	}
 	
 	/**
+	 * @return the patrol transport type uuid
+	 */
+	public UUID getPatrolTransportTypeUuid() {
+		return patrolTransportTypeUuid;
+	}
+	/**
+	 * @param patrolType the patrol transport type uuid
+	 */
+	public void setPatrolTransportTypeUuid(UUID patrolTransportTypeUuid) {
+		this.patrolTransportTypeUuid = patrolTransportTypeUuid;
+	}
+	
+	/**
 	 * @return the patrol type uuid
 	 */
 	public UUID getPatrolTypeUuid() {
@@ -330,6 +345,18 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryR
 		this.transportType = transportType;
 	}
 	
+	/**
+	 * @return patrol transport group
+	 */
+	public String getTransportGroup() {
+		return transportGroup;
+	}
+	/**
+	 * @param transportType patrol transport group
+	 */
+	public void setTransportGroup(String transportGroup) {
+		this.transportGroup = transportGroup;
+	}
 	
 	public void setPatrolLegStartDate(LocalDate date){
 		this.plStartDate = date;

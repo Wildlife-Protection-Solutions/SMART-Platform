@@ -246,7 +246,7 @@ public class DataGenerator implements IDataEngine{
 		pl.getMembers().get(0).setIsLeader(true);
 		pl.setLeader(pl.getMembers().get(0));
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-		if (pl.getPatrol().getPatrolType().getRequiresPilot()) {
+		if (pl.getType().getRequiresPilot()) {
 			pl.setPilot(pl.getMembers().get(0));	
 		}
 
@@ -324,10 +324,12 @@ public class DataGenerator implements IDataEngine{
 			}
 			
 			LineString track = ObservationGPSDataImport.convertToLineString(trackpoints);
-			Track t = new Track();
-			t.setLineStrings(Arrays.asList(track));
-			pld.setTrack(t);
-			t.setPatrolLegDay(pld);
+			if (track != null) {
+				Track t = new Track();
+				t.setLineStrings(Arrays.asList(track));
+				pld.setTrack(t);
+				t.setPatrolLegDay(pld);
+			}
 			
 			//randomly pick numwaypoints to use as waypoints
 			List<Waypoint> waypoints = new ArrayList<>();

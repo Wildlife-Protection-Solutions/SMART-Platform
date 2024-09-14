@@ -34,9 +34,9 @@ import org.wcs.smart.patrol.query.model.PatrolEndMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolEndQuarterDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
-import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.PatrolStartMonthDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
@@ -75,6 +75,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case PATROL_LEG_START_DATE: return Messages.FixedQueryColumn_LegStartDateColumnName;
 			case PATROL_LEG_END_DATE: return Messages.FixedQueryColumn_LegEndDateColumnName;
 			case TRANSPORT_TYPE: return Messages.FixedQueryColumn_TransportColumnName;
+			case TRANSPORT_GROUP: return "Transport Group";
 			case WAYPOINT_ID: return Messages.FixedQueryColumn_WaypointIdColumnName;
 			case OBS_GROUP_ID: return Messages.PatrolQueryLabelProvider_ObsGroupColumnName;
 			case WAYPOINT_DATE: return Messages.FixedQueryColumn_WaypointDateColumnName;
@@ -135,6 +136,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case CM: return Messages.PatrolQueryLabelProvider_ConfigurableModel;
 				case PATROL_TRANSPORT_TYPE: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.PatrolQueryOptions_QueryOpTransportType;
+				case PATROL_TRANSPORT_GROUP_KEY: return "Transport Group";
+				case PATROL_TRANSPORT_PATROL_GROUP_KEY: return "Transport Group - Patrol";
 				case CONSERVATION_AREA: return Messages.PatrolQueryOptions_CaGroupByOptionName;
 				case AGENCY: return Messages.PatrolQueryLabelProvider_AgencyLabel;
 				case AGENCY_KEY: return Messages.PatrolQueryLabelProvider_AgencyLabel;

@@ -88,6 +88,7 @@ public class GeometryAttributeField implements IAttributeField<GeometryAttribute
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Composite editorpart = new Composite(parent, SWT.NONE);
 		editorpart.setLayout(new GridLayout(4, false));

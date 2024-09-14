@@ -36,13 +36,10 @@ import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 
 /**
  * Template cloner than copies patrol information from the
@@ -203,16 +200,27 @@ public class PatrolTemplateCloner implements
 			PatrolType newt = new PatrolType();
 			newt.setConservationArea(engine.getNewCa());
 			newt.setIsActive(t.getIsActive());
-			newt.setRequiresPilot(t.getRequiresPilot());
 			newt.setKeyId(t.getKeyId());
 			if (t.getIcon() != null) {
 				newt.setIcon(engine.getNewConservationItem(t.getIcon()));
 			}
 			engine.copyLabels(t, newt);
 			newt.setTransportTypes(new ArrayList<PatrolTransportType>());
+			newt.setTransportGroups(new ArrayList<>());
 			
 			engine.getSession().persist(newt);
 			engine.getSession().flush();
+			
+			for (PatrolTransportGroup g : t.getTransportGroups()) {
+				PatrolTransportGroup clone = new PatrolTransportGroup();
+				clone.setKeyId(g.getKeyId());
+				clone.setPatrolType(newt);
+				clone.setTransportTypes(new ArrayList<>());
+				engine.copyLabels(g, clone);
+				
+				engine.getSession().persist(clone);
+				engine.addConservationItemMapping(g, clone);
+			}
 			
 			for (PatrolTransportType pt : t.getTransportTypes()){
 				PatrolTransportType clone = new PatrolTransportType();
@@ -221,13 +229,22 @@ public class PatrolTemplateCloner implements
 				clone.setKeyId(pt.getKeyId());
 				clone.setPatrolType(newt);
 				clone.setMaxSpeed(pt.getMaxSpeed());
+				clone.setRequiresPilot(pt.getRequiresPilot());
+				if (pt.getTransportGroup() != null) {
+					clone.setTransportGroup(engine.getNewConservationItem(pt.getTransportGroup()));
+				}
 				engine.copyLabels(pt, clone);				
 				newt.getTransportTypes().add(clone);
 				
 				engine.getSession().persist(clone);					
 				engine.addConservationItemMapping(pt, clone);
 			}
-			engine.addConservationItemMapping(t, newt);			
+			
+			
+			
+			engine.addConservationItemMapping(t, newt);		
+			
+			
 		}
 		
 		engine.getSession().flush();

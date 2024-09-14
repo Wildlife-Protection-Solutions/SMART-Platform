@@ -55,7 +55,10 @@ public class PatrolTransportType extends NamedKeyIconItem{
 	private boolean isActive = true;
 	private ConservationArea ca;
 	private PatrolType patrolType;
+	private PatrolTransportGroup transportGroup;
 	
+	private boolean requiresPilot;
+
 	/**
 	 * 
 	 * @return <code>true</code> if patrol transport type active; <code>false</code> otherwise
@@ -92,6 +95,24 @@ public class PatrolTransportType extends NamedKeyIconItem{
 	
 	/**
 	 * 
+	 * @return conservation area associated with transport type
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="patrol_transport_group_uuid", referencedColumnName="uuid")
+	public PatrolTransportGroup getTransportGroup(){
+		return this.transportGroup;
+	}
+
+	/**
+	 * 
+	 * @param ca conservation area associated with transport type
+	 */
+	public void setTransportGroup(PatrolTransportGroup transportGroup){
+		this.transportGroup = transportGroup;
+	}
+	
+	/**
+	 * 
 	 * @return conservation area associated with patrol type
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -121,5 +142,22 @@ public class PatrolTransportType extends NamedKeyIconItem{
 	
 	public void setMaxSpeed(Integer maxSpeed) {
 		this.maxSpeed = maxSpeed;
+	}
+	
+
+	/**
+	 * 
+	 * @return <code>true</code> if patrol type requires a pilot, <code>false</code> otherwise
+	 */
+	@Column(name = "requires_pilot")
+	public boolean getRequiresPilot(){
+		return this.requiresPilot;
+	}
+	/**
+	 * 
+	 * @param isActive  <code>true</code> if patrol type requires a pilot, <code>false</code> otherwise
+	 */
+	public void setRequiresPilot(boolean requiresPilot){
+		this.requiresPilot = requiresPilot;
 	}
 }

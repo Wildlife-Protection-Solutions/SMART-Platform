@@ -140,7 +140,7 @@ public class PatrolToXmlConverter {
 		xml.setId(leg.getId());
 		xml.setTransportType(createLabel(leg.getPatrol(), leg.getType()));
 		xml.setMandate(createLabel(leg.getPatrol(), leg.getMandate()));
-		
+		xml.setTransportTypeKey(leg.getType().getKeyId());
 		for (PatrolLegMember member : leg.getMembers()){
 			xml.getMembers().add(convertPatrolMemeber(member));
 		}

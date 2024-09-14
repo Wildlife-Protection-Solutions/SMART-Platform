@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -34,40 +35,34 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  *  Patrol item composite for selecting patrol transport type. 
  *  
  * @author Emily
- * @since 1.0.0
+ * @since 8.1.0
  */
-public class PatrolTransportComposite extends PatrolLegItemComposite{
+public class TrackTypeComposite extends PatrolLegItemComposite{
 
-	private TableViewer patrolTypeViewer = null;
+	private TableViewer tblTrackType = null;
 
 	/**
 	 * 
 	 */
-	public PatrolTransportComposite() {
+	public TrackTypeComposite() {
 
 	}
 
@@ -76,37 +71,37 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 */
 	public Composite createComponent(Composite parent, int style) {
 
-		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout());
-		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)center.getLayout()).marginWidth = 0;
-		((GridLayout)center.getLayout()).marginHeight = 0;
-		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.PatrolTransportComposite_TransportType_Lable);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-		
-		Composite table = new Composite(center, SWT.NONE);
+//		Composite center = new Composite(parent, SWT.NONE);
+//		center.setLayout(new GridLayout());
+//		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		((GridLayout)center.getLayout()).marginWidth = 0;
+//		((GridLayout)center.getLayout()).marginHeight = 0;
+//		
+//		Label lbl = new Label(center, SWT.NONE);
+//		lbl.setText(Messages.PatrolTransportComposite_TransportType_Lable);
+//		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+//		
+		Composite table = new Composite(parent, SWT.NONE);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setLayout(new TableColumnLayout());
 		((GridData)table.getLayoutData()).heightHint = 100;
 		
-		patrolTypeViewer = new TableViewer(table, SWT.BORDER | SWT.SINGLE);
-		patrolTypeViewer.setContentProvider(ArrayContentProvider.getInstance());
-		patrolTypeViewer.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
+		tblTrackType = new TableViewer(table,SWT.SINGLE);
+		tblTrackType.setContentProvider(ArrayContentProvider.getInstance());
+		tblTrackType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
 		
-		patrolTypeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		tblTrackType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fireChangeListeners();	
 			}
 		});
 		((TableColumnLayout)table.getLayout()).setColumnData(
-				new TableColumn(patrolTypeViewer.getTable(), SWT.NONE),
+				new TableColumn(tblTrackType.getTable(), SWT.NONE),
 	            new ColumnWeightData(100));
 		
 		
-		return center;
+		return table;
 	}
 
 	/**
@@ -114,7 +109,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 */
 	public void setValues(PatrolLeg patrolLeg, Session session) {
 		
-		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(patrolLeg.getPatrol().getPatrolType(), session);
+		List<PatrolType> types = PatrolHibernateManager.getActivePatrolTypes(patrolLeg.getPatrol().getConservationArea(), session);
 		
 		
 		types.forEach(m->{
@@ -127,21 +122,21 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		});
 		
 		Collections.sort(types, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		patrolTypeViewer.setInput(types);
+		tblTrackType.setInput(types);
 		
-		PatrolTransportType selection = null;
+		PatrolType selection = null;
 		if (types.size() > 0){
 			selection = types.get(0);
 		}
 
-		if (patrolLeg.getType() != null){
-			selection = patrolLeg.getType();
+		if (patrolLeg.getPatrol().getPatrolType() != null){
+			selection = patrolLeg.getPatrol().getPatrolType();
 		}
 		if (selection != null) {
-			patrolTypeViewer.setSelection(new StructuredSelection(selection));
-			patrolTypeViewer.reveal(selection);
+			tblTrackType.setSelection(new StructuredSelection(selection));
+			tblTrackType.reveal(selection);
 		}
-		patrolTypeViewer.getControl().getParent().layout(true, true);
+		tblTrackType.getControl().getParent().layout(true, true);
 
 	}
 
@@ -149,67 +144,42 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 * 
 	 * @return selected transport type
 	 */
-	public PatrolTransportType getSelectedTransportType(){
-		PatrolTransportType pm = (PatrolTransportType) ((IStructuredSelection)patrolTypeViewer.getSelection()).getFirstElement();
-		return pm;
+	public PatrolType getSelectedPatrolType(){
+		return (PatrolType) ((IStructuredSelection)tblTrackType.getSelection()).getFirstElement();		
 	}
 	
 	@Override
-	public boolean updatePatrol(Patrol p, Session session) {
-		boolean ok = super.updatePatrol(p, session);
-		p.recalculateType();
-		return ok;
+	public boolean updatePatrol(Patrol p, Session session) {		
+		return super.updatePatrol(p, session);
 	}
 	
-	/**
-	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
-	 */
-	public boolean updatePatrol(PatrolLeg patrolLeg) {
-		PatrolTransportType pm = getSelectedTransportType();
-		if (pm != null){
-			patrolLeg.setType(pm);
+	@Override
+	public boolean updatePatrol(PatrolLeg p) {
+		p.getPatrol().setPatrolType(getSelectedPatrolType());
+		for (PatrolLeg l : p.getPatrol().getLegs()) {
 			
 			
-			//for edits only
-			if (patrolLeg.getUuid() != null ){
-				if (pm.getRequiresPilot()){
-					//prompt for pilot
-					boolean hasPilot = false;
-					for (PatrolLegMember member : patrolLeg.getMembers()){
-						if (member.getIsPilot()){
-							hasPilot = true;
-							break;
-						}
-					}
-					if (!hasPilot){
-						//as for pilot
-						EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(patrolTypeViewer.getControl().getShell(), Messages.PatrolTransportComposite_PilotLabel, 
-								MessageFormat.format(Messages.PatrolTransportComposite_PilotRequired, pm.getName()), EmployeeSelectorDialog.Type.PILOT,patrolLeg);
-						if (dialog.open() != Window.OK) return false;  //not pilot selected
-					}
+			if (l.getType() != null && !(l.getType().getPatrolType().equals(p.getPatrol().getPatrolType()))) {
+			
+				if (p.getPatrol().getUuid() != null) {
+					MessageDialog.openError(tblTrackType.getControl().getShell(), 
+							DialogConstants.ERROR_STRING,
+							MessageFormat.format("{0} is not a valid transport type for track type {1}", l.getType().getName(), p.getPatrol().getPatrolType().getName()));
+					return false;
+				}else {
+					l.setType(null);
 				}
 			}
-			if (!pm.getRequiresPilot() && patrolLeg.getMembers() != null){
-				//remove all pilots
-				for (PatrolLegMember member : patrolLeg.getMembers()){
-					member.setIsPilot(false);
-				}
-			}
-			return true;
-		}else{
-			SmartPatrolPlugIn.displayLog(Messages.PatrolTransportComposite_Error_NoTransportType, null);
-			return false;
 		}
-		
-	}
-
+		return true;
+	}	
 
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.PatrolTransportComposite_Title;
+		return "Track Type";
 	}
 	
 	
@@ -219,5 +189,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	@Override
 	public int getAttribute() {
 		return PatrolEventManager.PATROL_DATES_LEG;
-	}	
+	}
+
+
 }

@@ -36,7 +36,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 /**
  * Call to represent the patrol type.
@@ -77,10 +76,7 @@ public class PatrolType extends NamedKeyIconItem {
 	 * @since 1.0.0
 	 */
 	public enum DefaultType {
-		GROUND, 
-		MARINE, 
-		AIR,
-		MIXED;
+		PATROL; 
 		
 		public String getGuiName(Locale l){
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, Locale.getDefault());
@@ -90,33 +86,24 @@ public class PatrolType extends NamedKeyIconItem {
 			return this.name().toLowerCase();
 		}
 		
-		public boolean requiresPilot(){
-			return (this == MARINE || this == AIR || this == MIXED);
-		}
-		
 		public String getIconKey() {
 			switch(this) {
-			case AIR: return "patrol_pilot_airplane"; //$NON-NLS-1$
-			case GROUND: return "foot"; //$NON-NLS-1$
-			case MARINE: return "patrol_pilot_boat"; //$NON-NLS-1$
+			case PATROL: return "foot"; //$NON-NLS-1$
 			default: return null;
 			}
 		}
 	}
 
 	private boolean isActive;
-	private boolean requiresPilot;
 	private List<PatrolTransportType> transportTypes;
+	private List<PatrolTransportGroup> transportGroups;
 	private ConservationArea ca;
 	private List<PatrolAttributePatrolType> customAttributes = null;
 
 	public PatrolType(){
+	
 	}
 	
-	@Transient
-	public boolean isMixed() {
-		return this.getKeyId().equals(DefaultType.MIXED.getKeyId());
-	}
 	/**
 	 * 
 	 * @return conservation area associated with patrol type
@@ -150,21 +137,6 @@ public class PatrolType extends NamedKeyIconItem {
 		this.isActive = isActive;
 	}
 	
-	/**
-	 * 
-	 * @return <code>true</code> if patrol type requires a pilot, <code>false</code> otherwise
-	 */
-	@Column(name = "requires_pilot")
-	public boolean getRequiresPilot(){
-		return this.requiresPilot;
-	}
-	/**
-	 * 
-	 * @param isActive  <code>true</code> if patrol type requires a pilot, <code>false</code> otherwise
-	 */
-	public void setRequiresPilot(boolean requiresPilot){
-		this.requiresPilot = requiresPilot;
-	}
 
 	
 	/**
@@ -182,6 +154,23 @@ public class PatrolType extends NamedKeyIconItem {
 	 */
 	public void setTransportTypes(List<PatrolTransportType> ttypes){
 		this.transportTypes = ttypes;
+	}
+	
+	/**
+	 * 
+	 * @return list of transport groups associated with patrol types
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolType", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<PatrolTransportGroup> getTransportGroups(){
+		return this.transportGroups;
+	}
+	
+	/**
+	 * 
+	 * @param groups list of transport groups associated with patrol types
+	 */
+	public void setTransportGroups(List<PatrolTransportGroup> groups){
+		this.transportGroups = groups;
 	}
 	
 	/**

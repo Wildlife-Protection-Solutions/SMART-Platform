@@ -30,10 +30,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,6 +56,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -87,9 +87,11 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
@@ -108,6 +110,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolMetadataPackageContribution implements IPackageUiContribution {
 	
+	private static final String ATTRIBUTE_KEY = "ATT"; //$NON-NLS-1$
+
 	private Button btnTT, btnArmed, btnTeam, btnStation, btnMandate, btnObj, btnCmt, btnMembers, btnLeader, btnPilot, btnArmedYes, btnArmedNo;
 	
 	private Button btnTTrq, btnArmedrq, btnTeamrq, btnStationrq, btnMandaterq, btnObjrq, btnCmtrq, btnMembersrq, btnLeaderrq, btnPilotrq;
@@ -115,6 +119,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	private TableComboViewer cmbTt, cmbTeam, cmbStation, cmbMandate; 
 	private ComboViewer cmbLeader, cmbPilot;
 	private Text txtObj, txtComment;
+	private Composite core;
 	
 	private HashMap<PatrolAttribute, Object[]> customAttributes;
 	
@@ -158,7 +163,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, 
+			Runnable onInitilized) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
 		this.onInitilized = onInitilized;
@@ -202,7 +208,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		table.setExpandVertical(true);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite core = new Composite(table, SWT.NONE);
+		core = new Composite(table, SWT.NONE);
 		core.setLayout(new GridLayout(5, false));
 		table.setContent(core);
 		
@@ -421,143 +427,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				fireChanged();
 			});
 			
-			//add custom patrol attributes
-			customAttributes = new HashMap<>();
-		
-			
-			List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-					new Object[] {"isActive", true}).list(); //$NON-NLS-1$
-			attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			
-			for (PatrolAttribute attribute : attributes) {
-				
-				Label icon = new Label(core, SWT.NONE);
-				if (attribute.getIcon() != null) {
-					attribute.getIcon().getFiles().forEach(e->e.computeFileLocation(session));
-					
-					Image img = IconManager.INSTANCE.getThumbnail(attribute.getIcon(), IconManager.Size.SMALL);
-					if (img != null) {
-						icon.setImage(img);
-						icon.addListener(SWT.Dispose, e->img.dispose());
-					}
-				}
-				
-				Label name = new Label(core, SWT.NONE);
-				name.setText(attribute.getName());
-				
-				Object[] data = new Object[4];
-				
-				Button btnSelected = new Button(core, SWT.CHECK);
-				btnSelected.setSelection(true);
-				btnSelected.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-				
-				Button btnRequired = new Button(core, SWT.CHECK);
-				btnRequired.setSelection(false);
-				btnRequired.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-				
-				
-				data[0] = btnSelected;
-				data[1] = btnRequired;
-				
-				if (attribute.getType() == AttributeType.TEXT) {
-					Text txt =  new Text(core, SWT.BORDER);
-					txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-					txt.setEnabled(false);
-					txt.addListener(SWT.Modify, e->fireChanged());
-					data[2] = txt;
-					btnSelected.addListener(SWT.Selection,e->{
-						txt.setEnabled(!btnSelected.getSelection());
-					});
-				}else if (attribute.getType() == AttributeType.NUMERIC) {
-					Text txt =  new Text(core, SWT.BORDER);
-					txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-					txt.setEnabled(false);
-					txt.addListener(SWT.Modify, e->fireChanged());
-					data[2] = txt;
-					btnSelected.addListener(SWT.Selection,e->{
-						txt.setEnabled(!btnSelected.getSelection());
-					});
-				}else if (attribute.getType() == AttributeType.DATE) {
-					DateTime dateTime = new DateTime(core, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-					dateTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-					dateTime.setEnabled(false);
-					btnSelected.addListener(SWT.Selection,e->{
-						dateTime.setEnabled(!btnSelected.getSelection());
-					});
-					dateTime.addListener(SWT.Selection, e->fireChanged());
-					data[2] = dateTime;
-				}else if (attribute.getType() == AttributeType.LIST) {
-					TableComboViewer cmb = new TableComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
-					data[2] = cmb;
-					cmb.setContentProvider(ArrayContentProvider.getInstance());
-					cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
-					List<Object> items = new ArrayList<>();
-					items.add(""); //$NON-NLS-1$
-					items.addAll(attribute.getAttributeList());
-					cmb.setInput(items);
-					cmb.getControl().setEnabled(false);
-					cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-					
-					cmb.addSelectionChangedListener(e->fireChanged());
-					
-					btnSelected.addListener(SWT.Selection,e->{
-						cmb.getControl().setEnabled(!btnSelected.getSelection());
-					});				
-				}else if (attribute.getType() == AttributeType.TREE) {
-					Composite temp = new Composite(core, SWT.NONE);
-					temp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-					temp.setLayout(new GridLayout());
-					((GridLayout)temp.getLayout()).marginWidth = 0;
-					((GridLayout)temp.getLayout()).marginHeight = 0;
-					
-					
-					TreeEditorField<PatrolAttributeTreeNode> field = new TreeEditorField<>();
-					field.createComposite(temp, new AttributeTreeContentProvider(true, false), new TreeNodeLabelProvider(IconManager.Size.SMALL));
-					field.setEnabled(false);
-					field.setInput(attribute.getAttributeTree());
-					field.addSelectionChangedListener(e->fireChanged());
-					btnSelected.addListener(SWT.Selection,e->{
-						field.setEnabled(!btnSelected.getSelection());
-					});	
-					data[2] = field;
-				}else if (attribute.getType() == AttributeType.BOOLEAN) {
-					
-					Composite part = new Composite(core, SWT.NONE);
-					part.setLayout(new GridLayout(2, false));
-					part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-					Button btnYes = new Button(part, SWT.RADIO);
-					btnYes.setText(Messages.PatrolMetadataPackageContribution_YesOption);
-					btnYes.setEnabled(false);
-					Button btnNo = new Button(part, SWT.RADIO);
-					btnNo.setText(Messages.PatrolMetadataPackageContribution_NoOption);
-					btnNo.setSelection(true);
-					btnNo.setEnabled(false);
-					
-					btnYes.addListener(SWT.Selection,e->fireChanged());
-					btnNo.addListener(SWT.Selection,e->fireChanged());
-					
-					btnSelected.addListener(SWT.Selection,e->{
-						btnYes.setEnabled(!btnSelected.getSelection());
-						btnNo.setEnabled(!btnSelected.getSelection());
-					});
-					data[2] = btnYes;
-					data[3] = btnNo;
-				} else {
-					new Label(core, SWT.NONE);
-					data[2] = null;
-				}
-				
-				
-				btnSelected.addListener(SWT.Selection, e-> {
-					btnRequired.setEnabled(btnSelected.getSelection());
-					fireChanged();
-				});
-				
-				btnRequired.addListener(SWT.Selection,e->fireChanged());
-
-				customAttributes.put(attribute, data);
-			}
+			createCustomAttributes(null);
 		}
 		((GridData)table.getLayoutData()).heightHint = 200;
 		table.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -572,6 +442,245 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		loadValues.schedule();
 		
 		return outer;
+	}
+	
+	private void createCustomAttributes(PatrolType type) {
+		//add custom patrol attributes
+		customAttributes = new HashMap<>();
+		if (type == null) return;
+		
+		List<PatrolAttribute> attributes = new ArrayList<>();
+		for (PatrolAttributePatrolType at : type.getCustomAttributes()) {
+			if (at.getIsActive())  attributes.add(at.getPatrolAttribute());
+		}
+		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		
+		for (Control c : core.getChildren()) {
+			if (c.getData(ATTRIBUTE_KEY) != null) c.dispose();
+		}
+		
+		for (PatrolAttribute attribute : attributes) {
+			
+			Label icon = new Label(core, SWT.NONE);
+			icon.setData(ATTRIBUTE_KEY, 1);
+			if (attribute.getIcon() != null) {			
+				Image img = IconManager.INSTANCE.getThumbnail(attribute.getIcon(), IconManager.Size.SMALL);
+				if (img != null) {
+					icon.setImage(img);
+					icon.addListener(SWT.Dispose, e->img.dispose());
+				}
+			}
+			icon.setBackground(core.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
+			Label name = new Label(core, SWT.NONE);
+			name.setText(attribute.getName());
+			name.setData(ATTRIBUTE_KEY, 1);
+			name.setBackground(core.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
+			Object[] data = new Object[4];
+			
+			Button btnSelected = new Button(core, SWT.CHECK);
+			btnSelected.setSelection(true);
+			btnSelected.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+			btnSelected.setData(ATTRIBUTE_KEY, 1);
+			
+			Button btnRequired = new Button(core, SWT.CHECK);
+			btnRequired.setSelection(false);
+			btnRequired.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+			btnRequired.setData(ATTRIBUTE_KEY, 1);
+			
+			data[0] = btnSelected;
+			data[1] = btnRequired;
+			
+			if (attribute.getType() == AttributeType.TEXT) {
+				Text txt =  new Text(core, SWT.BORDER);
+				txt.setData(ATTRIBUTE_KEY, 1);
+				txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				txt.setEnabled(false);
+				txt.addListener(SWT.Modify, e->fireChanged());
+				data[2] = txt;
+				btnSelected.addListener(SWT.Selection,e->{
+					txt.setEnabled(!btnSelected.getSelection());
+				});
+			}else if (attribute.getType() == AttributeType.NUMERIC) {
+				Text txt =  new Text(core, SWT.BORDER);
+				txt.setData(ATTRIBUTE_KEY, 1);
+				txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				txt.setEnabled(false);
+				txt.addListener(SWT.Modify, e->fireChanged());
+				data[2] = txt;
+				btnSelected.addListener(SWT.Selection,e->{
+					txt.setEnabled(!btnSelected.getSelection());
+				});
+			}else if (attribute.getType() == AttributeType.DATE) {
+				DateTime dateTime = new DateTime(core, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
+				dateTime.setData(ATTRIBUTE_KEY, 1);
+				dateTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+				dateTime.setEnabled(false);
+				btnSelected.addListener(SWT.Selection,e->{
+					dateTime.setEnabled(!btnSelected.getSelection());
+				});
+				dateTime.addListener(SWT.Selection, e->fireChanged());
+				data[2] = dateTime;
+			}else if (attribute.getType() == AttributeType.LIST) {
+				TableComboViewer cmb = new TableComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+				cmb.getControl().setData(ATTRIBUTE_KEY, 1);
+				data[2] = cmb;
+				cmb.setContentProvider(ArrayContentProvider.getInstance());
+				cmb.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
+				List<Object> items = new ArrayList<>();
+				items.add(""); //$NON-NLS-1$
+				items.addAll(attribute.getAttributeList());
+				cmb.setInput(items);
+				cmb.getControl().setEnabled(false);
+				cmb.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				
+				cmb.addSelectionChangedListener(e->fireChanged());
+				
+				btnSelected.addListener(SWT.Selection,e->{
+					cmb.getControl().setEnabled(!btnSelected.getSelection());
+				});				
+			}else if (attribute.getType() == AttributeType.TREE) {
+				Composite temp = new Composite(core, SWT.NONE);
+				temp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				temp.setLayout(new GridLayout());
+				temp.setData(ATTRIBUTE_KEY, 1);
+				((GridLayout)temp.getLayout()).marginWidth = 0;
+				((GridLayout)temp.getLayout()).marginHeight = 0;
+				temp.setBackground(temp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				TreeEditorField<PatrolAttributeTreeNode> field = new TreeEditorField<>();
+				field.createComposite(temp, new AttributeTreeContentProvider(true, false), new TreeNodeLabelProvider(IconManager.Size.SMALL));
+				field.setEnabled(false);
+				field.setInput(attribute.getAttributeTree());
+				field.addSelectionChangedListener(e->fireChanged());
+				btnSelected.addListener(SWT.Selection,e->{
+					field.setEnabled(!btnSelected.getSelection());
+				});	
+				data[2] = field;
+			}else if (attribute.getType() == AttributeType.BOOLEAN) {
+				
+				Composite part = new Composite(core, SWT.NONE);
+				part.setData(ATTRIBUTE_KEY, 1);
+				part.setLayout(new GridLayout(2, false));
+				part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				part.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				Button btnYes = new Button(part, SWT.RADIO);
+				btnYes.setText(Messages.PatrolMetadataPackageContribution_YesOption);
+				btnYes.setEnabled(false);
+				btnYes.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+				Button btnNo = new Button(part, SWT.RADIO);
+				btnNo.setText(Messages.PatrolMetadataPackageContribution_NoOption);
+				btnNo.setSelection(true);
+				btnNo.setEnabled(false);
+				btnNo.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+				
+				btnYes.addListener(SWT.Selection,e->fireChanged());
+				btnNo.addListener(SWT.Selection,e->fireChanged());
+				
+				btnSelected.addListener(SWT.Selection,e->{
+					btnYes.setEnabled(!btnSelected.getSelection());
+					btnNo.setEnabled(!btnSelected.getSelection());
+				});
+				data[2] = btnYes;
+				data[3] = btnNo;
+			} else {
+				Label l = new Label(core, SWT.NONE);
+				l.setData(ATTRIBUTE_KEY, 1);
+				data[2] = null;
+			}
+			
+			
+			btnSelected.addListener(SWT.Selection, e-> {
+				btnRequired.setEnabled(btnSelected.getSelection());
+				fireChanged();
+			});
+			
+			btnRequired.addListener(SWT.Selection,e->fireChanged());
+
+			customAttributes.put(attribute, data);
+		}
+		
+		((GridData)core.getParent().getLayoutData()).heightHint = 200;
+		((ScrolledComposite)core.getParent()).setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		core.layout(true);
+		
+		
+		//initialize values
+		List<MetadataFieldValue> metadataValues = new ArrayList<>();
+		if ( ((PatrolCtPackage)ctpackage).getMetadataValues() != null) {
+			metadataValues.addAll(((PatrolCtPackage)ctpackage).getMetadataValues());
+		}
+		
+		for (Entry<PatrolAttribute, Object[]> custom : customAttributes.entrySet()) {
+			
+			Object[] fields = custom.getValue();
+			PatrolAttribute pa = custom.getKey();
+			
+			String key = PatrolMetadataField.generateKey(pa);
+			
+			MetadataFieldValue v = null;
+			for (MetadataFieldValue field : metadataValues) {	
+				if (field.getMetadataKey().equalsIgnoreCase(key)) {
+					v = field;
+					break;
+				}
+			}
+			if (v == null) continue;
+			
+			((Button)fields[0]).setSelection(v.isVisible());
+			((Button)fields[1]).setSelection(v.isRequired());
+			
+			if (pa.getType() == AttributeType.BOOLEAN) {
+				if (v.getBooleanValue() != null) {
+					((Button)fields[2]).setSelection(v.getBooleanValue());
+					((Button)fields[3]).setSelection(!v.getBooleanValue());
+				}
+			}else if (pa.getType() == AttributeType.DATE) {
+				DateTime dt = (DateTime) fields[2];
+				if (v.getStringValue() != null) {
+					SmartUtils.initDateTimeWidget(dt, LocalDate.parse(v.getStringValue()));
+				}
+			}else if (pa.getType() == AttributeType.LIST) {
+				TableComboViewer cmb = (TableComboViewer) fields[2];
+				if (v.getUuidValue() != null) {
+					PatrolAttributeListItem temp = new PatrolAttributeListItem();
+					temp.setUuid(v.getUuidValue());
+					cmb.setSelection(new StructuredSelection(temp));
+				}else {
+					cmb.setSelection(new StructuredSelection("")); //$NON-NLS-1$
+					cmb.getTableCombo().setText(""); //$NON-NLS-1$
+				}
+			}else if (pa.getType() == AttributeType.TREE) {
+				TreeEditorField<PatrolAttributeTreeNode> field =(TreeEditorField<PatrolAttributeTreeNode>)fields[2];
+				field.setInput( pa.getAttributeTree() );
+				
+				if (v.getUuidValue() != null) {
+					List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
+					toProcess.addAll(pa.getAttributeTree());
+					
+					while(!toProcess.isEmpty()) {
+						PatrolAttributeTreeNode temp = toProcess.remove(0);
+						if (v.getUuidValue().equals(temp.getUuid())) {
+							field.setSelectedValue(temp);
+							break;
+						}
+						toProcess.addAll(temp.getChildren());
+					}										
+				}else {
+					field.setSelectedValue(null);
+				}
+				
+			}else if (pa.getType() == AttributeType.TEXT) {
+				((Text)fields[2]).setText(v.getStringValue());
+			}else if (pa.getType() == AttributeType.NUMERIC) {
+				((Text)fields[2]).setText(v.getStringValue());
+			}
+			
+			((Button)fields[0]).notifyListeners(SWT.Selection, new Event());
+		}
 	}
 	
 	private void updateLeaderPilotLists() {
@@ -684,6 +793,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	@Override
 	public String isValid() {
+		
+		
 		boolean ok = false;
 		for (Object type : lstEmployees.getCheckedElements()) {
 			if (type instanceof Employee) {
@@ -729,7 +840,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void updatePackage(ICtPackage ctpackage, Session session) {		
+	public void updatePackage(ICtPackage ctpackage, Session session) {	
+
 		PatrolCtPackage ppackage = (PatrolCtPackage)ctpackage;
 		if (ppackage.getMetadataValues() == null) ppackage.setMetadataValues(new ArrayList<>());
 		
@@ -816,6 +928,24 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			v.setUuidValue( ((PatrolTransportType)cmbTt.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
+		//remove invalid attributes for tracktype
+		Set<String> currentAttributes = customAttributes.keySet().stream().map(e->e.getKeyId()).collect(Collectors.toSet());
+		
+		List<PatrolAttribute> all = QueryFactory.buildQuery(session, 
+				PatrolAttribute.class,
+				new Object[] {"conservationArea", ctpackage.getConservationArea()}).list(); //$NON-NLS-1$
+		List<MetadataFieldValue> deleteme = new ArrayList<>();
+		for (PatrolAttribute pa : all) {
+			String key = PatrolMetadataField.generateKey(pa);
+			for (MetadataFieldValue metadata : ctpackage.getMetadataValues()) {
+				if (metadata.getMetadataKey().equals(key) && !currentAttributes.contains(pa.getKeyId())) {
+					deleteme.add(metadata);
+				}				
+			}
+		}
+		ctpackage.getMetadataValues().removeAll(deleteme);
+		
+		//set remaining attributes
 		for (Entry<PatrolAttribute, Object[]> custom : customAttributes.entrySet()) {
 			Object[] fields = custom.getValue();
 			PatrolAttribute pa = custom.getKey();
@@ -891,9 +1021,43 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		return v;
 	}
 		
+	/**
+	 * Sets the track type of the package which affects the transport types
+	 * and custom attributes
+	 * @param trackType
+	 */
+	public void setTrackType(PatrolType trackType) {
+		fireEvents = false;
+		try {
+			List<PatrolTransportType> ttypes = trackType.getTransportTypes().stream().filter(e->e.getIsActive()).sorted().toList();
+			cmbTt.setInput(ttypes); 
+			cmbTt.refresh();
+			if (!trackType.getTransportTypes().isEmpty()) {
+				cmbTt.setSelection(new StructuredSelection(trackType.getTransportTypes().get(0)));
+			}
+			
+			List<MetadataFieldValue> metadataValues = new ArrayList<>();
+			if ( ((PatrolCtPackage)ctpackage).getMetadataValues() != null) {
+				metadataValues.addAll(((PatrolCtPackage)ctpackage).getMetadataValues());
+			}
+			
+			for (MetadataFieldValue v : metadataValues) {
+				if(v.getMetadataKey().equals(PatrolMetadataField.TRANSPORT.name())) {
+					btnTT.setSelection(v.isVisible());
+					btnTTrq.setSelection(true);
+					PatrolTransportType temp = new PatrolTransportType();
+					temp.setUuid(v.getUuidValue());
+					cmbTt.setSelection(new StructuredSelection(temp));
+				}
+			}
+			createCustomAttributes(trackType);
+		}finally {
+			fireEvents=true;
+		}
+	}
+	
 	private Job loadValues = new Job("loading metadata values") { //$NON-NLS-1$
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -909,8 +1073,6 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			if ( ((PatrolCtPackage)ctpackage).getMetadataValues() != null) {
 				metadataValues.addAll(((PatrolCtPackage)ctpackage).getMetadataValues());
 			}
-			
-			Map<UUID, PatrolAttribute> pAttributes = new HashMap<>();
 			
 			try(Session s = HibernateManager.openSession()){
 				eteams.addAll(QueryFactory.buildQuery(s, EmployeeTeam.class,
@@ -937,14 +1099,6 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				employees.addAll(QueryFactory.buildQuery(s, Employee.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"endEmploymentDate", null}).list()); //$NON-NLS-1$
-				
-				List<PatrolAttribute> attributes = QueryFactory.buildQuery(s, PatrolAttribute.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-						new Object[] {"isActive", true}).list(); //$NON-NLS-1$
-				attributes.forEach(e->{
-					e.loadTree(s);
-					pAttributes.put(e.getUuid(), e);
-				});
 			}
 			
 			eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
@@ -1050,68 +1204,6 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 							PatrolTransportType temp = new PatrolTransportType();
 							temp.setUuid(v.getUuidValue());
 							cmbTt.setSelection(new StructuredSelection(temp));
-						}else {
-							
-							for (Entry<PatrolAttribute, Object[]> custom : customAttributes.entrySet()) {
-								
-								Object[] fields = custom.getValue();
-								PatrolAttribute pa = custom.getKey();
-								
-								String key = PatrolMetadataField.generateKey(pa);
-								if (!v.getMetadataKey().equalsIgnoreCase(key)) continue;
-								
-								((Button)fields[0]).setSelection(v.isVisible());
-								((Button)fields[1]).setSelection(v.isRequired());
-								
-								if (pa.getType() == AttributeType.BOOLEAN) {
-									if (v.getBooleanValue() != null) {
-										((Button)fields[2]).setSelection(v.getBooleanValue());
-										((Button)fields[3]).setSelection(!v.getBooleanValue());
-									}
-								}else if (pa.getType() == AttributeType.DATE) {
-									DateTime dt = (DateTime) fields[2];
-									if (v.getStringValue() != null) {
-										SmartUtils.initDateTimeWidget(dt, LocalDate.parse(v.getStringValue()));
-									}
-								}else if (pa.getType() == AttributeType.LIST) {
-									TableComboViewer cmb = (TableComboViewer) fields[2];
-									if (v.getUuidValue() != null) {
-										PatrolAttributeListItem temp = new PatrolAttributeListItem();
-										temp.setUuid(v.getUuidValue());
-										cmb.setSelection(new StructuredSelection(temp));
-									}else {
-										cmb.setSelection(new StructuredSelection("")); //$NON-NLS-1$
-										cmb.getTableCombo().setText(""); //$NON-NLS-1$
-									}
-								}else if (pa.getType() == AttributeType.TREE) {
-									TreeEditorField<PatrolAttributeTreeNode> field =(TreeEditorField<PatrolAttributeTreeNode>)fields[2];
-									field.setInput( pAttributes.get(pa.getUuid()).getAttributeTree() );
-									
-									if (v.getUuidValue() != null) {
-										List<PatrolAttributeTreeNode> toProcess = new ArrayList<>();
-										toProcess.addAll(pAttributes.get(pa.getUuid()).getAttributeTree());
-										
-										while(!toProcess.isEmpty()) {
-											PatrolAttributeTreeNode temp = toProcess.remove(0);
-											if (v.getUuidValue().equals(temp.getUuid())) {
-												field.setSelectedValue(temp);
-												break;
-											}
-											toProcess.addAll(temp.getChildren());
-										}										
-									}else {
-										field.setSelectedValue(null);
-									}
-									
-								}else if (pa.getType() == AttributeType.TEXT) {
-									((Text)fields[2]).setText(v.getStringValue());
-								}else if (pa.getType() == AttributeType.NUMERIC) {
-									((Text)fields[2]).setText(v.getStringValue());
-								}
-								
-								((Button)fields[0]).notifyListeners(SWT.Selection, new Event());
-							}
-							
 						}
 					}
 					btnArmed.notifyListeners(SWT.Selection, new Event());

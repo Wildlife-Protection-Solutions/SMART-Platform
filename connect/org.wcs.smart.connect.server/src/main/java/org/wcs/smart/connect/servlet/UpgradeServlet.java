@@ -1798,7 +1798,7 @@ public class UpgradeServlet extends HttpServlet {
 						
 						while(rs.next()) {
 							UUID cauuid = (UUID) rs.getObject(1);
-							for(String iconKey : new String[] {"patrol_pilot_airplane", "patrol_pilot_boat", "foot"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							for(String iconKey : new String[] {"patrol_pilot_airplane", "patrol_pilot_boat", "foot", "footprint_1"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 									
 								boolean hasicon = false;
 								try(PreparedStatement s2 = 
@@ -2000,8 +2000,18 @@ public class UpgradeServlet extends HttpServlet {
 							"ALTER TABLE smart.patrol_type add constraint patrol_type_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
 							"ALTER TABLE smart.patrol_type add constraint patrol_type_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
 
+							"ALTER TABLE smart.patrol_transport add column requires_pilot boolean not null default false", //$NON-NLS-1$
+							"UPDATE smart.patrol_transport set requires_pilot = (select requires_pilot from smart.patrol_type where smart.patrol_type.uuid = smart.patrol_transport.patrol_type_uuid)", //$NON-NLS-1$
+							"alter table smart.patrol_type drop column requires_pilot", //$NON-NLS-1$
+							
+							"CREATE TABLE smart.patrol_transport_group(uuid uuid not null, patrol_type_uuid uuid not null, icon_uuid uuid, keyid varchar(128) not null, primary key (uuid))", //$NON-NLS-1$
+							"ALTER TABLE smart.patrol_transport_group add constraint ptg_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+							"ALTER TABLE smart.patrol_transport add column patrol_transport_group_uuid uuid", //$NON-NLS-1$
+							"ALTER TABLE smart.patrol_transport add constraint pt_patrol_transport_group_uuid_fk foreign key (patrol_transport_group_uuid) references smart.patrol_transport_group(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+							"ALTER TABLE smart.patrol_transport_group add constraint ptg_patrol_type_uuid_fk foreign key (patrol_type_uuid) references smart.patrol_type(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
+
 							//link custom attribute to patrol type
-							"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid uuid not null references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate, patrol_type_uuid uuid not null references smart.patrol_type on delete cascade on update restrict deferrable initially immediate, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
+							"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid uuid not null references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate, patrol_type_uuid uuid not null references smart.patrol_type on delete cascade on update restrict deferrable initially immediate, is_active boolean not null default true, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
 							//by default link all
 							"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
 											
@@ -2011,21 +2021,91 @@ public class UpgradeServlet extends HttpServlet {
 							"ALTER TABLE smart.patrol_transport alter column max_speed set not null", //$NON-NLS-1$
 							"ALTER TABLE smart.patrol_type drop column max_speed", //$NON-NLS-1$
 							
+							//update to a single patrol type and existing patrol types become patrols groups
+							"insert into smart.patrol_type(uuid, ca_uuid, keyid, is_active) select uuid_generate_v4(), a.uuid, 'patrol', true FROM smart.conservation_area a where a.uuid != '00000000-0000-0000-0000-000000000000' ", //$NON-NLS-1$
+							"update smart.patrol_transport set patrol_type_uuid = a.uuid from smart.patrol_type a where a.keyid = 'patrol' and a.ca_uuid = smart.patrol_transport.ca_uuid", //$NON-NLS-1$
 							
-							//TODO: MIXED???
-							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.keyid = 'foot' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_type.keyid = 'ground'", //$NON-NLS-1$
-							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.keyid = 'patrol_pilot_boat' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_type.keyid = 'marine'", //$NON-NLS-1$
-							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.keyid = 'patrol_pilot_airplane' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_type.keyid = 'air'", //$NON-NLS-1$
+							"update smart.patrol set patrol_type_uuid = a.uuid from smart.patrol_type a where a.keyid = 'patrol' and a.ca_uuid = smart.patrol.ca_uuid", //$NON-NLS-1$
+							
+							"insert into smart.patrol_transport_group(uuid, patrol_type_uuid, icon_uuid, keyid) select a.uuid, b.uuid, a.icon_uuid, a.keyid from smart.patrol_type a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid = 'patrol' and a.keyid not in ('patrol', 'mixed')", //$NON-NLS-1$
+							"delete from smart.patrol_type where keyid != 'patrol'", //$NON-NLS-1$
+							
+							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'foot' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_transport_group.keyid = 'ground'", //$NON-NLS-1$
+							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and and b.uuid = smart.patrol_transport_group.patrol_type_uuid a.keyid = 'patrol_pilot_boat' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_transport_group.keyid = 'marine'", //$NON-NLS-1$
+							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and and b.uuid = smart.patrol_transport_group.patrol_type_uuid a.keyid = 'patrol_pilot_airplane' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_transport_group.keyid = 'air'", //$NON-NLS-1$
+							
+							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.ca_uuid = smart.patrol_type.ca_uuid and a.keyid = 'footprint_1'", //$NON-NLS-1$
+							"insert into smart.i18n_label (language_uuid, element_uuid, value) SELECT a.uuid, b.uuid, 'Patrol' FROM smart.language a, smart.patrol_type b where a.ca_uuid = b.ca_uuid", //$NON-NLS-1$
+
 							
 							"DROP TRIGGER trg_patrol_type ON smart.patrol_type ", //$NON-NLS-1$
-							"DROP FUNCTION connect.trg_patrol_type()", //$NON-NLS-1$
+							//"DROP FUNCTION connect.trg_patrol_type()", //$NON-NLS-1$
 							"CREATE TRIGGER trg_patrol_type AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_type FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
-						
+
+							//trigger for patrol_attribute_patrol_type
+							"""								
+							CREATE OR REPLACE FUNCTION connect.trg_patrol_attribute_patrol_type() RETURNS trigger AS $$ 
+									DECLARE
+										ROW RECORD;
+									BEGIN
+										IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN 
+											ROW = NEW; 
+										ELSIF (TG_OP = 'DELETE') THEN 
+											ROW = OLD; 
+										END IF; 
+										INSERT INTO connect.change_log 
+											(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+											SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_attribute_uuid', ROW.patrol_attribute_uuid, 'patrol_type_uuid', ROW.patrol_type_uuid, null, t.CA_UUID
+											FROM smart.patrol_type t WHERE t.uuid = ROW.patrol_type_uuid;
+										RETURN ROW;
+									END$$ LANGUAGE 'plpgsql'
+							""", //$NON-NLS-1$
+							
+							"CREATE TRIGGER trg_patrol_attribute_patrol_type AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_attribute_patrol_type FOR EACH ROW execute procedure connect.trg_patrol_attribute_patrol_type()", //$NON-NLS-1$
+
+							
+							//trigger for patrol_transport_group
+							"""								
+							CREATE OR REPLACE FUNCTION connect.trg_patrol_transport_group() RETURNS trigger AS $$ 
+									DECLARE
+										ROW RECORD;
+									BEGIN
+										IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN 
+											ROW = NEW; 
+										ELSIF (TG_OP = 'DELETE') THEN 
+											ROW = OLD; 
+										END IF; 
+										INSERT INTO connect.change_log 
+											(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+											SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, t.CA_UUID
+											FROM smart.patrol_type t WHERE t.uuid = ROW.patrol_type_uuid;
+										RETURN ROW;
+									END$$ LANGUAGE 'plpgsql'
+							""", //$NON-NLS-1$
+							
+							"CREATE TRIGGER trg_patrol_transport_group AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_transport_group FOR EACH ROW execute procedure connect.trg_patrol_transport_group()", //$NON-NLS-1$
+
+							
 							//datamodel attribute ordering
 							"ALTER TABLE smart.dm_cat_att_map ADD COLUMN is_root boolean", //$NON-NLS-1$
 							"UPDATE smart.dm_cat_att_map set is_root = true", //$NON-NLS-1$
 							
+							//ct patrol
+							"ALTER TABLE smart.ct_patrol_package add column patrol_type_uuid uuid ", //$NON-NLS-1$
+							"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_patrol_type_uuid_fk FOREIGN KEY (patrol_type_uuid) REFERENCES smart.patrol_type(UUID) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+							"UPDATE smart.ct_patrol_package set patrol_type_uuid = t.uuid from smart.patrol_type t where t.keyid = 'patrol' and t.ca_uuid =  smart.ct_patrol_package.ca_uuid", //$NON-NLS-1$
+							
+							"create table smart.pptemp (ca_uuid uuid, uuid uuid)", //$NON-NLS-1$
+							"insert into smart.pptemp (ca_uuid, uuid)  select a.ca_uuid, a.uuid  from (select  ca_uuid, min(keyid) as keyid  from smart.patrol_type  group by ca_uuid) b join smart.patrol_type a on a.ca_uuid = b.ca_uuid and a.keyid = b.keyid", //$NON-NLS-1$
+							"UPDATE smart.ct_patrol_package set patrol_type_uuid = t.uuid from smart.pptemp t where smart.ct_patrol_package.ca_uuid = t.ca_uuid and smart.ct_patrol_package.patrol_type_uuid is null", //$NON-NLS-1$
+							"drop table smart.pptemp", //$NON-NLS-1$
+							
+							"alter table smart.ct_patrol_package alter column patrol_type_uuid set not null", //$NON-NLS-1$
+							
 							//versions
+							"update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol'", //$NON-NLS-1$
+							
 							"update connect.connect_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 							"update connect.connect_plugin_version set version = '8.1' where plugin_id = 'org.wcs.smart.cybertracker'", //$NON-NLS-1$

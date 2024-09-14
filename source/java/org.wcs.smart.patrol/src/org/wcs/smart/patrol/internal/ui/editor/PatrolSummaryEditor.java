@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -90,7 +91,6 @@ import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -116,6 +116,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolAttributeComposite;
 import org.wcs.smart.patrol.ui.PatrolEditor;
@@ -151,6 +152,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Text txtStartDate;
 	private Text txtEndDate;
 	private TextImageField txtTransport;
+	private TextImageField txtGroup;
 	
 	private Button btnArmed;
 	
@@ -298,6 +300,13 @@ public class PatrolSummaryEditor extends EditorPart {
 		txtPatrolType = new TextImageField(left, SWT.NONE);
 		txtPatrolType.adapt(toolkit);
 		txtPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
+		lbl = toolkit.createLabel(left, "Transport Group:");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtGroup = new TextImageField(left, SWT.NONE);
+		txtGroup.adapt(toolkit);
+		txtGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		transportTypelbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
 		transportTypelbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -704,8 +713,12 @@ public class PatrolSummaryEditor extends EditorPart {
 
 		for (Control kid : customAttributes.getChildren()) kid.dispose();
 		
-		List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
-				new Object[] {"conservationArea", patrol.getConservationArea()}).getResultList(); //$NON-NLS-1$
+		PatrolType pt = session.get(PatrolType.class, patrol.getPatrolType().getUuid());
+		
+		List<PatrolAttribute> attributes = 
+				pt.getCustomAttributes().stream()
+				.map(m->m.getPatrolAttribute())
+				.collect(Collectors.toList());
 		
 		if (!attributes.isEmpty()) {
 			Collections.sort(attributes);
@@ -721,9 +734,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			((GridLayout)core.getLayout()).marginWidth = 0;
 			((GridLayout)core.getLayout()).marginHeight = 0;
 		
-			List<PatrolAttribute> editAttributes = new ArrayList<>();
-			
-			PatrolAttributeComposite editcompoiste = new PatrolAttributeComposite(editAttributes);
+			PatrolAttributeComposite editcompoiste = new PatrolAttributeComposite(true);
 			for (PatrolAttribute pa : attributes) {
 				if (pa.getAttributeList() != null) {
 					pa.getAttributeList().forEach(li->li.getName());
@@ -739,7 +750,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 				
 				if (!pa.getIsActive() && value == null) continue;
-				editAttributes.add(pa);
+				
 				Label l = toolkit.createLabel(core, pa.getName() + ":"); //$NON-NLS-1$
 				if (pa.getName().length() > 25) {
 					l.setText(pa.getName().substring(0, 25) + "...:") ; //$NON-NLS-1$
@@ -799,7 +810,6 @@ public class PatrolSummaryEditor extends EditorPart {
 				txtPatrolType.setValue(patrol.getPatrolType());
 				txtStation.setValue(patrol.getStation());
 				
-				
 				if (patrol.getComment() != null){
 					txtComment.setText(patrol.getComment());
 				}else{
@@ -854,6 +864,7 @@ public class PatrolSummaryEditor extends EditorPart {
 					txtTransport.setValue(patrol.getFirstLeg().getType());
 					txtMandate.setValue(patrol.getFirstLeg().getMandate());
 				}
+				txtGroup.setValue(patrol.getGroup());
 				
 				configureAttributes(session);
 			}finally{
@@ -1148,8 +1159,12 @@ public class PatrolSummaryEditor extends EditorPart {
 					}
 					return ""; //$NON-NLS-1$
 				} else if (column == PatrolLegDayColumn.TRANSPORT) {
-					return legDay.getPatrolLeg().getType().getName();
-
+					if (legDay.getPatrolLeg().getType().getTransportGroup() == null) {
+						return legDay.getPatrolLeg().getType().getName();
+					}else {
+						return MessageFormat.format("{0} ({1})", legDay.getPatrolLeg().getType().getTransportGroup().getName(), legDay.getPatrolLeg().getType().getName()); //$NON-NLS-1$
+					}
+				
 				} else if (column == PatrolLegDayColumn.HAS_DATA) {
 					return legDay.hasData() ? Messages.PatrolSummaryEditor_YesDataLabel
 							: Messages.PatrolSummaryEditor_NoDataLabel;

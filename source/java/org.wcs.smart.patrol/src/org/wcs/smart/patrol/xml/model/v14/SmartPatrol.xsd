@@ -58,11 +58,14 @@ elementFormDefault="qualified">
     		<element name="days" type="tns:PatrolLegDayType"
     			maxOccurs="unbounded" minOccurs="1">
     		</element>
-    		<element name="mandate" type="tns:LabelType" maxOccurs="1" minOccurs="1"></element>
+    		<element name="mandate" type="tns:LabelType" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
     	</sequence>
     	<attribute name="startDate" type="date"></attribute>
     	<attribute name="endDate" type="date"></attribute>
     	<attribute name="id" type="string"></attribute>
+    	<attribute name="transportTypeKey" type="string"></attribute>
     </complexType>
 
     <complexType name="PatrolMemberType">

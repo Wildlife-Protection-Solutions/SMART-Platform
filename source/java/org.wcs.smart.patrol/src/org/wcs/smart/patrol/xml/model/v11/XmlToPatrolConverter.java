@@ -190,11 +190,6 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		patrol.setComment(xml.getComment());
 		patrol.setId(xml.getId());
 		
-		org.wcs.smart.patrol.model.PatrolType type = findPatrolType(xml.getPatrolType());
-		if (type == null) {
-			throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_TrackTypeNotFound, xml.getPatrolType()));
-		}
-		patrol.setPatrolType(type);
 		
 		if (xml.getObjective() != null){
 			patrol.setObjective(xml.getObjective().getDescription());
@@ -234,7 +229,9 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		patrol.setLegs(new ArrayList<PatrolLeg>());
 		for (PatrolLegType legxml : xml.getLegs()){
 			patrol.getLegs().add(convertPatrolLeg(legxml, patrol, mandate));
-		}		
+		}
+		
+		patrol.recalculateType();
 	}
 	
 	private PatrolLeg convertPatrolLeg(PatrolLegType xml, Patrol parent, PatrolMandate mandate) throws Exception{
@@ -672,15 +669,6 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	
 	private  Employee findEmployeeByName(PatrolMemberType type){
 		return HibernateManager.findEmployeeByName(type.getGivenName(), type.getFamilyName(), ca, session);
-	}
-	
-	private org.wcs.smart.patrol.model.PatrolType findPatrolType(String keyId) {
-		org.wcs.smart.patrol.model.PatrolType type = session.createQuery("FROM PatrolType WHERE conservationArea = :ca and keyId = :key", org.wcs.smart.patrol.model.PatrolType.class) //$NON-NLS-1$
-		.setParameter("ca", ca) //$NON-NLS-1$
-		.setParameter("key", keyId.toLowerCase()) //$NON-NLS-1$
-		.uniqueResult();
-		
-		return type;
 	}
 	
 	private NamedItem findValue(String langCode, String value, Class<?> hibnerateClass){

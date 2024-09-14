@@ -79,6 +79,7 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -340,8 +341,19 @@ public class PatrolPackageExporter {
 		
 		JSONArray metadataScreens = new JSONArray();
 		
+		List<PatrolTransportType> activett = new ArrayList<>();
+		List<PatrolTransportType> pilotRequired = new ArrayList<>();
+		
+		for (PatrolTransportType t : ctpackage.getTrackType().getTransportTypes()) {
+			if (t.getIsActive()) {
+				activett.add(t);
+				if (t.getRequiresPilot()) {
+					pilotRequired.add(t);
+				}
+			}
+		}
 		JSONObject transportScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
-				PatrolTransportType.class, PatrolMetadataField.TRANSPORT.getJsonKey(), 
+				activett, PatrolMetadataField.TRANSPORT.getJsonKey(), 
 				Messages.PatrolPackageExporter_TransportTypePageLabel,
 				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel"), //$NON-NLS-1$
 				PatrolMetadataField.TRANSPORT.getIcon(set),
@@ -424,15 +436,8 @@ public class PatrolPackageExporter {
 				session, ctpackage.getConservationArea()));
 		
 		//transport types that require pilot
-		List<PatrolTransportType> requiredBy = new ArrayList<>();
-		for (PatrolTransportType tt : QueryFactory.buildQuery(session, PatrolTransportType.class, 
-				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"isActive", true}).list()) { //$NON-NLS-1$
-			if (tt.getPatrolType().getRequiresPilot()) requiredBy.add(tt);
-		}
-		
 		JSONArray items = new JSONArray();
-		requiredBy.forEach(e->items.add(UuidUtils.uuidToString(e.getUuid())));
+		pilotRequired.forEach(e->items.add(UuidUtils.uuidToString(e.getUuid())));
 		JSONObject jr = new JSONObject();
 		jr.put(PatrolMetadataField.TRANSPORT.getJsonKey(), items);
 		
@@ -482,12 +487,10 @@ public class PatrolPackageExporter {
 		if (md != null) metadataScreens.add(md);
 		
 		//custom attributes
-		List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
-				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"isActive", true}).getResultList(); //$NON-NLS-1$
-		
-		for (PatrolAttribute a : attributes) {
-			metadataScreens.add(covertPatrolAttribute(a, map.get(PatrolMetadataField.generateKey(a)), set));
+		for (PatrolAttributePatrolType pa : ctpackage.getTrackType().getCustomAttributes()) {
+			if (pa.getIsActive()) {
+				metadataScreens.add(covertPatrolAttribute(pa.getPatrolAttribute(), map.get(PatrolMetadataField.generateKey(pa.getPatrolAttribute())), set));
+			}
 		}
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(metadataFile)){

@@ -190,7 +190,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 	 */
 	@Override
 	protected void okPressed() {
-
+		
 		//Make a new Patrol to put everything into:
 		Patrol newPatrol = new Patrol();
 		newPatrol.setLegs(new ArrayList<PatrolLeg>());
@@ -240,7 +240,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		newPatrol.setComment(allComments);
 		newPatrol.setEndDate(endDate);
 		newPatrol.setStartDate(startDate);
-		newPatrol.setPatrolType(PatrolHibernateManager.getMixedPatrolType(newPatrol.getConservationArea(), session));
+		newPatrol.recalculateType();
 		newPatrol.setTeam(stationId.getTeam());
 
 		if (ChronoUnit.DAYS.between(newPatrol.getStartDate(), newPatrol.getEndDate()) > Patrol.MAX_PATROL_LENGTH_DAYS){

@@ -172,13 +172,13 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 
-		//ensure patrol_pilot_airplane, patrol_pilot_boat, and foot exist as icons for each ca
+		//ensure patrol_pilot_airplane, patrol_pilot_boat, foot, footprint_1 exist as icons for each ca
 		try(Statement s = c.createStatement();
 				ResultSet rs = s.executeQuery("select uuid from smart.conservation_area where uuid != x'00000000000000000000000000000000'")){ //$NON-NLS-1$
 			
 			while(rs.next()) {
 				byte[] cauuid = rs.getBytes(1);
-				for(String iconKey : new String[] {"patrol_pilot_airplane", "patrol_pilot_boat", "foot"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				for(String iconKey : new String[] {"patrol_pilot_airplane", "patrol_pilot_boat", "foot", "footprint_1"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						
 					boolean hasicon = false;
 					try(PreparedStatement s2 = 
@@ -290,7 +290,7 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			"ALTER TABLE smart.patrol_type add column uuid char(16) for bit data", //$NON-NLS-1$
 			"CREATE FUNCTION smart.uuidtemp() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 			"UPDATE smart.patrol_type set uuid = smart.uuidtemp()", //$NON-NLS-1$
-			"DROP FUNCTION smart.uuidtemp",  //$NON-NLS-1$
+			
 			"ALTER TABLE smart.patrol_type alter column uuid set not null", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type drop primary key", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type add primary key (uuid) ", //$NON-NLS-1$
@@ -310,8 +310,35 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			"ALTER TABLE smart.patrol_type add constraint patrol_type_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_type add constraint patrol_type_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
 
+			"ALTER TABLE smart.patrol_transport add column requires_pilot boolean not null default false", //$NON-NLS-1$
+			"UPDATE smart.patrol_transport set requires_pilot = (select requires_pilot from smart.patrol_type where smart.patrol_type.uuid = smart.patrol_transport.patrol_type_uuid)", //$NON-NLS-1$
+			"alter table smart.patrol_type drop column requires_pilot", //$NON-NLS-1$
+			
+			"""
+				CREATE TABLE smart.patrol_transport_group(
+				  uuid char(16) for bit data not null, 
+				  patrol_type_uuid char(16) for bit data not null, 
+				  icon_uuid char(16) for bit data, 
+				  keyid varchar(128) not null, primary key (uuid))	
+			""", //$NON-NLS-1$
+			//added below"ALTER TABLE smart.patrol_transport_group add constraint ptg_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_transport add column patrol_transport_group_uuid char(16) for bit data ", //$NON-NLS-1$
+			"UPDATE smart.patrol_transport set patrol_transport_group_uuid = patrol_type_uuid", //$NON-NLS-1$
+			
+			//added below"ALTER TABLE smart.patrol_transport add constraint pt_patrol_transport_group_uuid_fk foreign key (patrol_transport_group_uuid) references smart.patrol_transport_group(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+			//added below"ALTER TABLE smart.patrol_transport_group add constraint ptg_patrol_type_uuid_fk foreign key (patrol_type_uuid) references smart.patrol_type(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
+
 			//link custom attribute to patrol type
-			"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid char(16) for bit data not null references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate, patrol_type_uuid char(16) for bit data not null references smart.patrol_type on delete cascade on update restrict deferrable initially immediate, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
+			"""
+				create table smart.patrol_attribute_patrol_type(
+				  patrol_attribute_uuid char(16) for bit data not null,
+				  patrol_type_uuid char(16) for bit data not null ,
+				  is_active boolean not null default true, 
+				  primary key (patrol_attribute_uuid, patrol_type_uuid))	
+			""",//$NON-NLS-1$
+			"alter table smart.patrol_attribute_patrol_type add constraint papt_pauuid_pa_fk foreign key (patrol_attribute_uuid) references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"alter table smart.patrol_attribute_patrol_type add constraint papt_ptuuid_pt_fk foreign key (patrol_type_uuid) references smart.patrol_type on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			
 			//by default link all
 			"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
 							
@@ -321,14 +348,39 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			"ALTER TABLE smart.patrol_type drop column max_speed", //$NON-NLS-1$
 			"ALTER TABLE smart.patrol_transport ALTER COLUMN max_speed set not null", //$NON-NLS-1$
 			
-			//TODO: MIXED???
-			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.keyid = 'foot' and a.ca_uuid = smart.patrol_type.ca_uuid) where smart.patrol_type.keyid = 'ground'", //$NON-NLS-1$
-			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.keyid = 'patrol_pilot_boat' and a.ca_uuid = smart.patrol_type.ca_uuid) where smart.patrol_type.keyid = 'marine'", //$NON-NLS-1$
-			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.keyid = 'patrol_pilot_airplane' and a.ca_uuid = smart.patrol_type.ca_uuid) where smart.patrol_type.keyid = 'air'", //$NON-NLS-1$
+			//update to single patrol type and existing patrol types become patrol groups
+			//create new groups and configure correctly
+			"insert into smart.patrol_type(uuid, ca_uuid, keyid, is_active) select smart.uuidtemp(), a.uuid, 'patrol', true FROM smart.conservation_area a where a.uuid != x'00000000000000000000000000000000'", //$NON-NLS-1$
+			"update smart.patrol_transport set patrol_type_uuid = (select uuid from smart.patrol_type where smart.patrol_type.keyid = 'patrol' and smart.patrol_type.ca_uuid = smart.patrol_transport.ca_uuid)", //$NON-NLS-1$
+
+			//it might be slow if lots of patrols
+			"update smart.patrol set patrol_type_uuid = (select uuid from smart.patrol_type where smart.patrol_type.keyid = 'patrol' and smart.patrol_type.ca_uuid = smart.patrol.ca_uuid)", //$NON-NLS-1$
+			"insert into smart.patrol_transport_group(uuid, patrol_type_uuid, icon_uuid, keyid) select a.uuid, b.uuid, a.icon_uuid, a.keyid from smart.patrol_type a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid = 'patrol' and a.keyid not in ('patrol', 'mixed')", //$NON-NLS-1$
+			"delete from smart.patrol_type where keyid != 'patrol'", //$NON-NLS-1$
+			"update smart.patrol_transport_group set icon_uuid = (select a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'foot' ) where smart.patrol_transport_group.keyid = 'ground'", //$NON-NLS-1$
+			"update smart.patrol_transport_group set icon_uuid = (select a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'patrol_pilot_boat') where smart.patrol_transport_group.keyid = 'marine'", //$NON-NLS-1$
+			"update smart.patrol_transport_group set icon_uuid = (select a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'patrol_pilot_airplane' ) where smart.patrol_transport_group.keyid = 'air'", //$NON-NLS-1$
+			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.ca_uuid = smart.patrol_type.ca_uuid and a.keyid = 'footprint_1' ) ", //$NON-NLS-1$
+			"insert into smart.i18n_label (language_uuid, element_uuid, value) SELECT a.uuid, b.uuid, 'Patrol' FROM smart.language a, smart.patrol_type b where a.ca_uuid = b.ca_uuid", //$NON-NLS-1$
+
 			
-			
+			//sort out all the constraints
+			"alter table smart.patrol_type drop constraint PATROL_TYPE_ICON_UUID_FK", //$NON-NLS-1$
+			"alter table smart.patrol_transport drop constraint PTRANSPORT_ICON_UUID_FK", //$NON-NLS-1$
+			"alter table smart.icon drop constraint ICON_CAUUID_FK", //$NON-NLS-1$
+			"alter table smart.patrol_leg drop constraint PATROL_LEG_TRANSPORT_UUID_FK", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_transport add constraint pt_patrol_transport_group_uuid_fk foreign key (patrol_transport_group_uuid) references smart.patrol_transport_group(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_transport_group add constraint ptg_patrol_type_uuid_fk foreign key (patrol_type_uuid) references smart.patrol_type(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
+			"ALTER TABLE smart.patrol_transport_group add constraint ptg_icon_uuid_fk foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+			"alter table smart.patrol_type add constraint PATROL_TYPE_ICON_UUID_FK foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+			"alter table smart.patrol_transport add constraint PTRANSPORT_ICON_UUID_FK foreign key (icon_uuid) references smart.icon(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
+			"alter table smart.patrol_leg add constraint PATROL_LEG_TRANSPORT_UUID_FK foreign key (transport_uuid) references smart.patrol_transport(uuid) on update restrict on delete restrict deferrable initially immediate", //$NON-NLS-1$
+			"alter table smart.icon add constraint ICON_CAUUID_FK foreign key (ca_uuid) references smart.conservation_area(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
+
 			"ALTER TABLE smart.dm_cat_att_map ADD COLUMN is_root boolean", //$NON-NLS-1$
 			"UPDATE smart.dm_cat_att_map set is_root = true", //$NON-NLS-1$
+			
+			"DROP FUNCTION smart.uuidtemp",  //$NON-NLS-1$
 			
 		};
 		
@@ -404,7 +456,7 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 		ptTranslations.put("mixed_zh", "\u6df7\u5408"); //$NON-NLS-1$ //$NON-NLS-2$
 		ptTranslations.put("marine_zh", "\u6c34\u4e0a"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String query = "select pt.uuid, pt.keyid, l.code, l.uuid, l.isdefault from smart.patrol_type pt join smart.language l on pt.ca_uuid = l.ca_uuid"; //$NON-NLS-1$
+		String query = "select g.uuid, g.keyid, l.code, l.uuid, l.isdefault from smart.patrol_transport_group g join smart.patrol_type t on g.patrol_type_uuid = t.uuid join smart.language l on t.ca_uuid = l.ca_uuid"; //$NON-NLS-1$
 		String insertQuery2 = "insert into smart.i18n_label (language_uuid, element_uuid, value) values (?, ?, ?)"; //$NON-NLS-1$
 		try(Statement s = c.createStatement(); PreparedStatement psinsert = c.prepareStatement(insertQuery2);
 				ResultSet rs = s.executeQuery(query)){ 

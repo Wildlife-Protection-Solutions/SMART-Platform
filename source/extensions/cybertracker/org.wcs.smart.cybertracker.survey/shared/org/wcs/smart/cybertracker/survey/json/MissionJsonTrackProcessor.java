@@ -53,7 +53,6 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -121,10 +120,10 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			List<CtMissionLink> links = linkmap.get(deviceId);
 			if (links == null) {
 				//links in the same conservation area
-				String query = "SELECT ml FROM CtMissionLink ml join ml.mission m WHERE m.survey.surveyDesign.conservationArea = :ca and ml.deviceId = :deviceid";
+				String query = "SELECT ml FROM CtMissionLink ml join ml.mission m WHERE m.survey.surveyDesign.conservationArea = :ca and ml.deviceId = :deviceid"; //$NON-NLS-1$
 				links = session.createQuery(query, CtMissionLink.class)
-					.setParameter("ca", this.ca)
-					.setParameter("deviceid", deviceId)
+					.setParameter("ca", this.ca) //$NON-NLS-1$
+					.setParameter("deviceid", deviceId) //$NON-NLS-1$
 					.list();				
 				linkmap.put(deviceId, links);
 			}

@@ -120,7 +120,8 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)comp.getLayoutData()).horizontalIndent = 5;

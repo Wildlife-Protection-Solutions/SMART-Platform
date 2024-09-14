@@ -44,6 +44,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -75,7 +76,8 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tablePrefix.put(PatrolLegMember.class, "plm"); //$NON-NLS-1$
 		tablePrefix.put(Track.class, "t"); //$NON-NLS-1$
 		tablePrefix.put(Team.class, "smart.team"); //$NON-NLS-1$
-		tablePrefix.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
+		tablePrefix.put(PatrolTransportType.class, "smptt"); //$NON-NLS-1$
+		tablePrefix.put(PatrolTransportGroup.class, "ptg"); //$NON-NLS-1$
 		tablePrefix.put(PatrolType.class, "pt"); //$NON-NLS-1$
 		tablePrefix.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
 		tablePrefix.put(PatrolAttribute.class, "spa"); //$NON-NLS-1$
@@ -99,6 +101,7 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tableNames.put(Track.class, "smart.track"); //$NON-NLS-1$
 		tableNames.put(Team.class, "smart.team"); //$NON-NLS-1$
 		tableNames.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
+		tableNames.put(PatrolTransportGroup.class, "smart.patrol_transport_group"); //$NON-NLS-1$
 		tableNames.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
 		tableNames.put(PatrolAttribute.class, "smart.patrol_attribute"); //$NON-NLS-1$
 		tableNames.put(PatrolAttributeValue.class, "smart.patrol_attribute_value"); //$NON-NLS-1$
@@ -106,7 +109,8 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		tableNames.put(PatrolAttributeTreeNode.class, "smart.patrol_attribute_tree"); //$NON-NLS-1$
 	}
 
-
+	private HashMap<UUID,String> membersCache = new HashMap<>();
+	
 	/**
 	 * Creates the filter processor based on the query filter type
 	 * 
@@ -125,9 +129,7 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 			return new WaypointFilterProcessor(queryDataTable, this, query);
 		}
 	}
-	
-	//TODO: don't cache everything?
-	private HashMap<UUID,String> membersCache = new HashMap<>();
+		
 	protected String getPatrolMembersAsString(Session session, UUID patrolLegUuid) {
 		if (membersCache.containsKey(patrolLegUuid)) return membersCache.get(patrolLegUuid);
 			
@@ -400,8 +402,43 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 		try(Statement s = c.createStatement()){
 			s.execute(sb.toString());
 		}
+	}
+	
+	
+	protected void populateTransportGroup(String transportTypeUuidColumn, String nameColumn, Connection c, Session session, String queryDataTable) throws SQLException {
+		String sql = "SELECT DISTINCT ca_uuid, " + transportTypeUuidColumn + " FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
+		QueryPlugIn.logSql(sql);
 		
+		HashMap<UUID, String> groupNames = new HashMap<>();
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
+			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+transportTypeUuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			int count = 0;
+			while (rs.next()) {
+				byte[] ca_uuid = rs.getBytes(1);
+				byte[] uuid = rs.getBytes(2);
+				if (uuid == null || ca_uuid == null)
+					continue;
 				
+				PatrolTransportType pt = session.get(PatrolTransportType.class, UuidUtils.byteToUUID(uuid));
+				if (pt.getTransportGroup() == null) continue;
+				
+				String name = groupNames.get(pt.getTransportGroup().getUuid());
+				if (name == null) {
+					name = getName(pt.getTransportGroup().getUuid(), UuidUtils.byteToUUID(ca_uuid), session);
+					groupNames.put(pt.getTransportGroup().getUuid(), name);
+				}
+				statement.setString(1, name);
+				statement.setBytes(2, uuid);
+				statement.addBatch();
+				count ++;
+				if (count > 100){
+					statement.executeBatch();
+					count = 0;
+				}				
+			}
+			statement.executeBatch();
+			
+		}
 	}
 
 }

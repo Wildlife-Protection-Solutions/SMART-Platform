@@ -168,6 +168,8 @@ TOKEN :
  | < PATROL_CA_KEY : "patrol:ca" >
  | < PATROLLEG_TRANSPORT_KEY : "patrol:transport" >
  | < PATROLLEG_TRANSPORT_KEY_KEY : "patrol:transportkey" >
+ | < PATROLLEG_TRANSPORT_GROUP_KEY_KEY : "patrol:transgroupkey" >
+ | < PATROL_TRANSPORT_GROUP_KEY_KEY : "patrol:patroltransgroupkey" >
  | < PATROLLEG_LEADER_KEY : "patrol:leader" >
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
@@ -217,6 +219,8 @@ TOKEN :
 			< PATROLLEG_TRANSPORT_KEY > |
 			< PATROLLEG_TRANSPORT_KEY_KEY > |
 			< PATROLLEG_TRANSPORT_KEY_KEY > |
+			< PATROLLEG_TRANSPORT_GROUP_KEY_KEY > |
+			< PATROL_TRANSPORT_GROUP_KEY_KEY > |
 			< PATROLLEG_LEADER_KEY > |
 			< PATROLLEG_PILOT_KEY > |
 			< PATROLLEG_AGENCY_KEY > |
@@ -946,6 +950,7 @@ IFilter StringExpression():
   				< PATROL_TYPE_KEY > |
  				< PATROLLEG_TRANSPORT_KEY > |
  				< PATROLLEG_TRANSPORT_KEY_KEY > |
+ 				< PATROLLEG_TRANSPORT_GROUP_KEY_KEY > |
  				< PATROLLEG_LEADER_KEY > |
  				< PATROLLEG_PILOT_KEY > |
  				< PATROLLEG_MEMBER_KEY > |

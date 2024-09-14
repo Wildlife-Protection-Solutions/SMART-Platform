@@ -107,6 +107,7 @@ public class MultiListAttributeField implements IAttributeField<Collection<Attri
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbViewer = new CheckBoxDropDown(parent);
 		cmbViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

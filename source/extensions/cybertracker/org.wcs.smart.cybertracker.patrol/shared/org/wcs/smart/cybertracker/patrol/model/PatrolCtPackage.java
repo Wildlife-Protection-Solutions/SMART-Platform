@@ -30,6 +30,7 @@ import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.patrol.model.PatrolType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,6 +57,7 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, I
 	private ConfigurableModel cm;
 	protected boolean hasIncident;
 	protected ConfigurableModel incidentmodel;
+	protected PatrolType trackType;
 	
 	@Column(name = "has_incident")
 	public boolean getHasIncident() {
@@ -80,6 +82,16 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, I
 	}
 	public void setConfigurableModel(ConfigurableModel cm) {
 		this.cm = cm;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="patrol_type_uuid", referencedColumnName="uuid")
+	public PatrolType getTrackType() {
+		return trackType;		
+	}
+	
+	public void setTrackType(PatrolType type) {
+		this.trackType = type;
 	}
 	
 	@Transient

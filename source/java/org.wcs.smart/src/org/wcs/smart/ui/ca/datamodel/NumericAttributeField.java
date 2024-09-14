@@ -99,6 +99,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		txt = new Text(parent, SWT.BORDER);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

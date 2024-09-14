@@ -139,8 +139,6 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {		
-//		return UiPatrolUtils.getImageDescriptor(this.type);
-		//TODO:
 		return null;
 	}
 

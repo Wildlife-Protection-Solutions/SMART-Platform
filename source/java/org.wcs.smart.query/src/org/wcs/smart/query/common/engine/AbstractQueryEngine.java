@@ -249,6 +249,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	}
 	
 	protected String getName(UUID uuid, UUID cauuid, Session session){
+		if (uuid == null) return ""; //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			//need find label for the given conservation area
 			return SmartLabelProvider.getDescription(uuid, cauuid, session);	

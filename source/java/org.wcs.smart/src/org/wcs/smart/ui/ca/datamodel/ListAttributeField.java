@@ -112,6 +112,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName())); 
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbViewer = new TableComboViewer(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

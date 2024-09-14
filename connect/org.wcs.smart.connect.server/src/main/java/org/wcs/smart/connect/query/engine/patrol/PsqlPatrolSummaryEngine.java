@@ -71,6 +71,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -160,7 +161,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	private boolean hasAreaFilter = false;
 	
 	private Set<String> tablesWithNoData = new HashSet<>();
-
+	private String patrolTransportGroupTable = null;
+	
 	private boolean includeUuids = false;
 	
 	@Override
@@ -301,6 +303,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupByParts, ldef.getValuePart(),
 							caFilter);
+					
+					if (patrolTransportGroupTable != null) {
+						session.createNativeMutationQuery("DROP TABLE " + patrolTransportGroupTable).executeUpdate(); //$NON-NLS-1$
+					}
 					
 					sumResults.setData(data);
 					
@@ -1340,6 +1346,62 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		Set<Class<?>> usedTables = new HashSet<>();
 		
 		for (IGroupBy gb : groupBy.getGroupBys()){
+			if (gb instanceof PatrolGroupBy pgb && 
+					pgb.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY &&
+					patrolTransportGroupTable == null) {
+				//create a temporary table that computes the transport group
+				//at the patrol level with "mixed"
+				patrolTransportGroupTable = createTempTableName();
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("create table "); //$NON-NLS-1$
+				sb.append(patrolTransportGroupTable);
+				sb.append("(uuid uuid, groupkey varchar(1048))"); //$NON-NLS-1$
+				
+				session.createNativeMutationQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("INSERT INTO "); //$NON-NLS-1$
+				sb.append(patrolTransportGroupTable);
+				sb.append("(uuid, groupkey)"); //$NON-NLS-1$
+				sb.append("WITH pgroups as ("); //$NON-NLS-1$
+				sb.append("SELECT distinct a.uuid as patrol_uuid, d.uuid as group_uuid"); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( tableName(Patrol.class) + " a JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolLeg.class) + " b on a.uuid = b.patrol_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportType.class) + " c on c.uuid = b.transport_uuid LEFT JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportGroup.class) + " d on d.uuid = c.patrol_transport_group_uuid "); //$NON-NLS-1$
+				sb.append(" WHERE a.ca_uuid in (:cas) "); //$NON-NLS-1$
+				sb.append(" ), pcounts as ( "); //$NON-NLS-1$
+				sb.append(" SELECT patrol_uuid, count(*) cnt FROM pgroups group by patrol_uuid"); //$NON-NLS-1$
+				sb.append(" ) "); //$NON-NLS-1$
+				
+				sb.append(" SELECT a.patrol_uuid, c.keyid || '.mixed' "); //$NON-NLS-1$
+				sb.append(" FROM pcounts a JOIN "); //$NON-NLS-1$
+				sb.append( tableName(Patrol.class) + " b on a.patrol_uuid = b.uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolType.class) + " c on b.patrol_type_uuid = c.uuid "); //$NON-NLS-1$
+				sb.append(" WHERE cnt > 1 "); //$NON-NLS-1$
+				sb.append(" UNION "); //$NON-NLS-1$
+			
+				sb.append("SELECT a.patrol_uuid, case when d.keyid is not null then d.keyid else f.keyid || '.none' end "); //$NON-NLS-1$
+				sb.append(" FROM pcounts a JOIN pgroups b on a.patrol_uuid = b.patrol_uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(Patrol.class) + " e on a.patrol_uuid = e.uuid JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolType.class) + " f on f.uuid = e.patrol_type_uuid LEFT JOIN "); //$NON-NLS-1$
+				sb.append( tableName(PatrolTransportGroup.class) + " d on b.group_uuid = d.uuid "); //$NON-NLS-1$
+				sb.append(" WHERE a.cnt = 1"); //$NON-NLS-1$
+				
+				session.createNativeMutationQuery(sb.toString())
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.executeUpdate();
+				
+				session.createNativeMutationQuery("CREATE INDEX " + getIndexName(patrolTransportGroupTable) + "uuididx on " + patrolTransportGroupTable + "(uuid)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				//only need to compute this once
+				break;
+			}
+		}
+		
+		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
 						|| value instanceof AttributeValueItem) {
@@ -1487,6 +1549,45 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 							usedTables.add(Rank.class);
 						}
 					}
+				}else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+					if (!usedTables.contains(PatrolTransportType.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(PatrolTransportType.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolTransportType.class) + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = temp.pl_transport_uuid "); //$NON-NLS-1$
+						usedTables.add(PatrolTransportType.class);
+					}
+					
+					if (!usedTables.contains(PatrolType.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(PatrolType.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolType.class) + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = temp.p_type_uuid "); //$NON-NLS-1$
+						usedTables.add(PatrolType.class);
+					}
+					
+					if (!usedTables.contains(PatrolTransportGroup.class)) {
+						fromSql.append(" left join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(PatrolTransportGroup.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolTransportType.class) + ".patrol_transport_group_uuid "); //$NON-NLS-1$
+						fromSql.append(" =  "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolTransportGroup.class) + ".uuid "); //$NON-NLS-1$
+						usedTables.add(PatrolTransportGroup.class);
+					}
+					
+				}else if (option == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+					if (!usedTables.contains(PatrolTransportGroupPlaceHolder.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(patrolTransportGroupTable );
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(patrolTransportGroupTable + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = temp.p_uuid "); //$NON-NLS-1$
+						usedTables.add(PatrolTransportGroupPlaceHolder.class);
+					}
+					
 				}else if (option.getType() == PatrolQueryOptionType.KEY){
 					PatrolQueryOption op = option;
 					fromSql.append(" join "); //$NON-NLS-1$
@@ -1976,6 +2077,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			return tablePrefix.get(PatrolType.class) + ".keyid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE:
 			return "pl_transport_uuid"; //$NON-NLS-1$
+		case PATROL_TRANSPORT_GROUP_KEY:
+			return "case when " + tablePrefix.get(PatrolTransportGroup.class) + ".keyid is not null then " + tablePrefix.get(PatrolTransportGroup.class) + ".keyid  else " +  tablePrefix.get(PatrolType.class) + ".keyid || '.none' end"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		case PATROL_TRANSPORT_PATROL_GROUP_KEY:
+			return patrolTransportGroupTable + ".groupkey"; //$NON-NLS-1$
 		case ARMED:
 			return "p_is_armed"; //$NON-NLS-1$
 		case PILOT:
@@ -2420,4 +2525,6 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			ps.executeUpdate();
 		}
 	}
+	
+	class PatrolTransportGroupPlaceHolder{};
 }

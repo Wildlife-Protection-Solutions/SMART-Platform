@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.OptionSelectionDialog;
@@ -81,6 +83,11 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 	 * <p>This does not do any validation of keys.  Therefore
 	 * whoever uses this information should validate and update
 	 * keys as necessary.
+	 * 
+	 * Any objects with zero uuid are objects that could not be matched
+	 * in import file - should attempt to match
+	 * these to existing objects, but if can't then they either need to be
+	 * created or dropped
 	 * </p>
 	 * @return the set of patrol transport types imported
 	 */
@@ -96,6 +103,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		
 		ArrayList<PatrolType> types = new ArrayList<>();
 		ArrayList<PatrolTransportType> ttypes = new ArrayList<>();
+		ArrayList<PatrolTransportGroup> groups= new ArrayList<>();
 		
 		List<Icon> icons = IconManager.INSTANCE.getIcons(session,  ca);
 		icons.addAll(IconManager.INSTANCE.getSystemIcons(session, ca));
@@ -129,6 +137,9 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 				}else if (row[0].equalsIgnoreCase(PatrolTransportCsvExportConfig.TRACKTYPE)) {
 					PatrolType ptype = handlePatrolType(row, langCodes, code2Language, line, icons, customAttributes);
 					types.add(ptype);
+				}else if (row[0].equalsIgnoreCase(PatrolTransportCsvExportConfig.GROUP)) {
+					PatrolTransportGroup group = handleTransportGroup(row, langCodes, code2Language, line, icons);
+					groups.add(group);
 				}
 				
 				line++;
@@ -151,6 +162,33 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 					ptype.setUuid( UuidUtils.stringToUuid( UuidUtils.ZERO_UUID_STR));
 				}
 			}
+			
+			Set<PatrolTransportType> groupsSet = new HashSet<>();
+			for (PatrolTransportGroup group : groups) {
+				boolean found = false;
+				for (PatrolType ptype : types) {
+					if (ptype.getKeyId().equalsIgnoreCase(group.getPatrolType().getKeyId())) {
+						group.setPatrolType(ptype);
+						ptype.getTransportGroups().add(group);
+						found = true;
+						break;
+					}
+				}
+				if (found) {
+					for (PatrolTransportType type : ttypes) {
+						if (type.getTransportGroup() != null && type.getTransportGroup().getKeyId().equals(group.getKeyId())) {
+							type.setTransportGroup(group);
+							group.getTransportTypes().add(type);
+							groupsSet.add(type);
+						}
+					}
+				}
+				
+			}
+			for (PatrolTransportType type : ttypes) {
+				if (!groupsSet.contains(type)) type.setTransportGroup(null);
+			}
+			
 		}
 		
 		
@@ -184,7 +222,6 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 			}
 		}
 		type.setIsActive(parseBoolean(row[3]));
-		type.setRequiresPilot(parseBoolean(row[4]));
 		
 		for (int i = 8; i < row.length; i ++){
 			String name = row[i];
@@ -199,8 +236,9 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		type.setName(type.findName(SmartDB.getCurrentLanguage()));
 		type.setTransportTypes(new ArrayList<>());
 		type.setCustomAttributes(new ArrayList<>());
+		type.setTransportGroups(new ArrayList<>());
 		
-		String[] attributekeys = row[7].split(":"); //$NON-NLS-1$
+		String[] attributekeys = row[8].split(":"); //$NON-NLS-1$
 		for (String key : attributekeys) {
 			for (PatrolAttribute pa : attributes) {
 				if (pa.getKeyId().equalsIgnoreCase(key)) {
@@ -211,10 +249,50 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 				}
 			}
 		}
-		
-		
-		
 		return type;
+	}
+	
+	/**
+	 * 
+	 * @param row
+	 * @param langCodes
+	 * @return
+	 * @throws Exception 
+	 */
+	private PatrolTransportGroup handleTransportGroup(String[] row, List<String> columnLanguages, 
+			Map<String, Language> langCodes, int linenumber, List<Icon> icons) throws Exception {
+		
+		PatrolTransportGroup group = new PatrolTransportGroup();
+		group.setKeyId(row[1]);
+		
+		String icon = row[2];
+		for (Icon i : icons) {
+			if (i.getKeyId().equalsIgnoreCase(icon)) {
+				group.setIcon(i);
+				break;
+			}
+		}
+		
+		for (int i = 8; i < row.length; i ++){
+			String name = row[i];
+			String code = columnLanguages.get(i-3);
+			Language l = langCodes.get(code);
+			if (l != null){
+				if (name.length() > 0){
+					group.updateName(l, name);
+				}
+			}
+		}
+		group.setName(group.findName(SmartDB.getCurrentLanguage()));
+		group.setTransportTypes(new ArrayList<>());
+		
+		
+		String typeKey = row[6].trim();
+		PatrolType temp = new PatrolType();
+		temp.setKeyId(typeKey);
+		group.setPatrolType(temp);
+		
+		return group;
 	}
 	
 	/**
@@ -240,6 +318,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 			}
 		}
 		type.setIsActive(parseBoolean(row[3]));
+		type.setRequiresPilot(parseBoolean(row[4]));
 		
 		String typeKey = row[6].trim();
 		PatrolType temp = new PatrolType();
@@ -258,6 +337,11 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		}
 		type.setName(type.findName(SmartDB.getCurrentLanguage()));
 	
+		String groupKey = row[7].trim();
+		PatrolTransportGroup group = new PatrolTransportGroup();
+		group.setKeyId(groupKey);
+		type.setTransportGroup(group);
+		
 		return type;
 	}
 

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -61,11 +60,13 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.export.dialog.CsvCaImportDialog;
 import org.wcs.smart.export.dialog.CsvExportDialog;
@@ -80,12 +81,14 @@ import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImportConfig;
 import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImporter;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.IconSelectionDialog;
 import org.wcs.smart.ui.IconSelectionDialog.Type;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -105,11 +108,12 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	private List<PatrolType> types;
 	private List<PatrolAttribute> allAttributes;
 	private List<PatrolType> toDelete;
+	private List<PatrolAttributePatrolType> deleteAttributes;
 	
 	private CTabFolder tabs;
 	private Text txtTypeName;
 	private Label txtTypeKey;
-	private ComboViewer cmbPilot;
+//	private ComboViewer cmbPilot;
 	private ComboViewer cmbActive;
 	private PatrolType currentType;
 	private Label lblIcon;
@@ -117,8 +121,10 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	private Button btnDisableTransport;
 	private TableViewer tblAttributes;
 	private TableViewer tblTransportTypes;
+	private TableViewer tblTransportGroupTypes;
 	private int transportTableEditIndex;
 	private LanguageViewer languageViewer;
+	private int transportGroupTableEditIndex = -1;
 
 	boolean fireEvents = true;
 	
@@ -129,6 +135,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	public TrackTypeDialog(Shell parent) {
 		super(parent);
 		toDelete = new ArrayList<>();
+		deleteAttributes = new ArrayList<>();
 	}
 
 	
@@ -189,6 +196,11 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		Composite types = createTransportTypePanel(tabs);
 		transportTypeItem.setControl(types);
 		
+		CTabItem transportTypeGroupItem = new CTabItem(tabs, SWT.NONE);
+		transportTypeGroupItem.setText("Transport Type Groups");
+		Composite groups = createTransportTypeGroupPanel(tabs);
+		transportTypeGroupItem.setControl(groups);
+		
 		CTabItem attributeTypeItem = new CTabItem(tabs, SWT.NONE);
 		attributeTypeItem.setText("Custom Attributes");
 		Composite attributes = createAttributePanel(tabs);
@@ -210,9 +222,9 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		PatrolType type = new PatrolType();
 		type.setConservationArea(currentCa);
 		type.setIsActive(true);
-		type.setRequiresPilot(false);
 		type.setTransportTypes(new ArrayList<>());
 		type.setCustomAttributes(new ArrayList<>());
+		type.setTransportGroups(new ArrayList<>());
 		type.setName("New Track Type");
 		type.updateName(currentCa.getDefaultLanguage(), type.getName());
 		type.updateName(SmartDB.getCurrentLanguage(), type.getName());
@@ -273,6 +285,11 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
         List<PatrolTransportType> importedTransports = (List<PatrolTransportType>) data[1];
         
         //add types
+        List<PatrolTransportGroup> allGroups = new ArrayList<>();
+        for (PatrolType t : this.types) {
+        	allGroups.addAll(t.getTransportGroups());
+        }
+        
 		for (PatrolType type : importedTypes) {
 			if (DataModelManager.INSTANCE.validateKey(type.getKeyId(), this.types) != null) {
 				type.setKeyId(DataModelManager.INSTANCE.generateKey(type.getKeyId(), this.types));
@@ -289,6 +306,13 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				newLinks.add(nlink);
 			}
 			type.setCustomAttributes(newLinks);
+			
+			for (PatrolTransportGroup group : type.getTransportGroups()) {
+				if (DataModelManager.INSTANCE.validateKey(group.getKeyId(), allGroups) != null) {
+					group.setKeyId(DataModelManager.INSTANCE.generateKey(group.getKeyId(), allGroups));
+				}
+				allGroups.add(group);
+			}
 		}
 		
 		//link transports to types
@@ -434,6 +458,14 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		return all;
 	}
 	
+	private List<PatrolTransportGroup> getAllTransportGroups(){
+		List<PatrolTransportGroup> all = new ArrayList<>();
+		for(PatrolType t:types) {
+			all.addAll(t.getTransportGroups());
+		}
+		return all;
+	}
+	
 	private void editTransportTypeKey(){
 		PatrolTransportType x = (PatrolTransportType)((IStructuredSelection)tblTransportTypes.getSelection()).getFirstElement();
 		String currentKey = x.getKeyId();
@@ -446,7 +478,18 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 			tblTransportTypes.refresh(x);
 		}
 	}
-	
+	private void editTransportGroupKey(){
+		PatrolTransportGroup x = (PatrolTransportGroup)((IStructuredSelection)tblTransportGroupTypes.getSelection()).getFirstElement();
+		String currentKey = x.getKeyId();
+		
+		InputDialog id = new KeyInputDialog(getShell(), currentKey,  getAllTransportGroups());
+		int ret = id.open();
+		if (ret != Window.CANCEL) {
+			x.setKeyId(id.getValue());
+			modified();
+			tblTransportGroupTypes.refresh(x);
+		}
+	}
 	
 	private void editTransportTypeIcon() {
 		IconSelectionDialog dialog = new IconSelectionDialog(tblTransportTypes.getControl().getShell(), Type.SELECT);
@@ -456,6 +499,20 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	
 	private void setTransportTypeIcon(Icon icon) {
 		PatrolTransportType type = (PatrolTransportType)((IStructuredSelection)tblTransportTypes.getSelection()).getFirstElement();
+		if (type == null) return;
+		type.setIcon(icon);
+		clearImageCache();
+		modified();
+	}
+	
+	private void editTransportGroupIcon() {
+		IconSelectionDialog dialog = new IconSelectionDialog(tblTransportGroupTypes.getControl().getShell(), Type.SELECT);
+		if (dialog.open()  != Window.OK) return ;
+		setTransportGroupIcon(dialog.getSelectedIcon());
+	}
+	
+	private void setTransportGroupIcon(Icon icon) {
+		PatrolTransportGroup type = (PatrolTransportGroup)((IStructuredSelection)tblTransportGroupTypes.getSelection()).getFirstElement();
 		if (type == null) return;
 		type.setIcon(icon);
 		clearImageCache();
@@ -492,6 +549,41 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.PatrolTypePropertyPage_Error_DeletingTransport + " " + ex.getLocalizedMessage(), new Object[]{ getName(ttype)}), ex); //$NON-NLS-1$
 		}
 		
+		modified();
+		tblTransportTypes.refresh();
+		
+	}
+	
+	private void deleteTransportGroup(){
+		
+		PatrolTransportGroup group = (PatrolTransportGroup) ((IStructuredSelection)tblTransportGroupTypes.getSelection()).getFirstElement();
+		if (group == null) return;
+			
+		boolean ok = MessageDialog.openConfirm(getShell(), 
+				Messages.PatrolTypePropertyPage_DeleteDialogTitle, 
+				MessageFormat.format("Area you sure you want to delete the transport group {0}?", getName(group)));
+		if (!ok) return;
+		
+		try(Session s = HibernateManager.openSession()){
+			ok = true;
+			if (group.getUuid() != null){
+				if (!DeleteManager.canDelete(group, s)){
+					ok = false;
+				}
+			}
+			if (ok){
+				group.getTransportTypes().forEach(tt->tt.setTransportGroup(null));
+				group.getTransportTypes().clear();
+				group.getPatrolType().getTransportGroups().remove(group);			
+				group.setPatrolType(null);
+				modified();
+			}
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(MessageFormat.format("Could not delete patrol transport group {0}." + ex.getLocalizedMessage(), getName(group)), ex); //$NON-NLS-1$
+		}
+		
+		modified();
+		tblTransportGroupTypes.refresh();
 		tblTransportTypes.refresh();
 		
 	}
@@ -515,6 +607,14 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		}
 	}
 	
+	private void togglePilot(){
+		PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)tblTransportTypes.getSelection()).getFirstElement();
+		pt.setRequiresPilot(!pt.getRequiresPilot());
+
+		tblTransportTypes.refresh();
+		modified();
+	}
+	
 	private void addTransportType(){
 		if (currentType == null) return;
 		
@@ -522,6 +622,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		newPtt.setConservationArea(currentType.getConservationArea());
 		newPtt.setIsActive(true);
 		newPtt.setPatrolType(currentType);
+		newPtt.setRequiresPilot(false);
 		newPtt.setMaxSpeed(PatrolTransportType.MAX_SPEED_MAX_VALUE);
 		
 		if (currentType.getTransportTypes() == null) currentType.setTransportTypes(new ArrayList<>());
@@ -534,6 +635,277 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		tblTransportTypes.refresh();
 		modified();
+	}
+	
+	private void addTransportGroup(){
+		if (currentType == null) return;
+		
+		PatrolTransportGroup newgroup = new PatrolTransportGroup();
+		newgroup.setPatrolType(currentType);
+		newgroup.setTransportTypes(new ArrayList<>());
+		
+		if (currentType.getTransportGroups() == null) currentType.setTransportGroups(new ArrayList<>());
+		currentType.getTransportGroups().add(newgroup);
+		
+		newgroup.updateName(currentType.getConservationArea().getDefaultLanguage(), "New Transport Group");
+		newgroup.setName(newgroup.findName(currentType.getConservationArea().getDefaultLanguage()));
+		
+		newgroup.setKeyId(DataModelManager.INSTANCE.generateKey(newgroup.getName(), getAllTransportGroups()));
+		
+		tblTransportGroupTypes.refresh();
+		modified();
+	}
+	
+	private Composite createTransportTypeGroupPanel(Composite parent) {
+		Composite panel = new Composite(parent, SWT.NONE);
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		panel.setLayout(new GridLayout(2, false));
+		
+		Composite tableTransportComp = new Composite(panel, SWT.NONE);
+		tableTransportComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		tableTransportComp.setLayout(tableLayout);
+		
+		tblTransportGroupTypes = new TableViewer( tableTransportComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		
+		// Icon Column
+		TableViewerColumn viewerColumn = new TableViewerColumn(tblTransportGroupTypes,SWT.NONE);
+		TableColumn column = viewerColumn.getColumn();
+		column.setResizable(true);
+		column.setText(DialogConstants.ICON_TEXT);
+
+		TableColumnLayout layout = (TableColumnLayout) tblTransportGroupTypes.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+		column.setWidth( 32 + 20);
+				
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return ""; //$NON-NLS-1$
+			}
+					
+			@Override
+			public Image getImage(Object element) {
+				return lblProvider.getImage(element);
+			}
+		});
+		
+		//Name
+		viewerColumn = new TableViewerColumn(tblTransportGroupTypes,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText("Group");
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) tblTransportGroupTypes.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+					
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return lblProvider.getText(element);
+			}
+		});
+				
+		viewerColumn.setEditingSupport(new EditingSupport(tblTransportGroupTypes){
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				return new TextCellEditor(tblTransportGroupTypes.getTable());
+			}
+			@Override
+			protected boolean canEdit(Object element) {
+				return true;
+			}
+			@Override
+			protected Object getValue(Object element) {
+				return lblProvider.getText(element);
+			}
+
+			@Override
+			protected void setValue(Object element, Object value) {
+				if (element instanceof PatrolTransportGroup group){
+					if (!group.findName(languageViewer.getCurrentSelection()).equals((String)value)){
+						if(SmartUtils.isSimpleString(((String)value).trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolType.MAX_TRANSPORT_NAME_LENGTH)){
+							group.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
+							if (group.getKeyId() == null || group.getUuid() == null){
+								group.setKeyId(DataModelManager.INSTANCE.generateKey(group.findName(group.getPatrolType().getConservationArea().getDefaultLanguage()), getAllTransportGroups()));
+							}
+							modified();
+						}else{
+							//invalid name
+							MessageDialog.openError(getShell(), INVALID_TYPE_DIALOG_TITLE, 
+									MessageFormat.format("Transportation group names must not be blank, can only contain {0}, and must be fewer than {1, number, integer} characters.", SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolType.MAX_TRANSPORT_NAME_LENGTH));
+							modified();
+						}				
+						tblTransportGroupTypes.refresh();
+											
+			}}}});
+			
+		final TableViewerColumn vc2 = viewerColumn;
+		viewerColumn.getColumn().addListener(SWT.Selection, l->{
+			tblTransportGroupTypes.getTable().setSortColumn(vc2.getColumn());
+			int dir = tblTransportGroupTypes.getTable().getSortDirection();
+			if (dir == SWT.UP){
+				dir = SWT.DOWN;
+			}else{
+				dir = SWT.UP;
+			}
+			tblTransportGroupTypes.getTable().setSortDirection(dir);
+					
+			int change = dir == SWT.DOWN ? -1 : 1;
+			currentType.getTransportTypes().sort((a,b)-> change * Collator.getInstance().compare(getName(a), getName(b)));
+			tblTransportGroupTypes.refresh();
+		});
+				
+		// Key Column 
+		viewerColumn = new TableViewerColumn(tblTransportGroupTypes,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText(LabelConstants.TRANSTYPE_KEY);
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) tblTransportGroupTypes.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+					
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof NamedKeyItem ni) return ni.getKeyId();
+				return super.getText(element);
+			}
+		});
+		
+		final TableViewerColumn vc5 = viewerColumn;
+		viewerColumn.getColumn().addListener(SWT.Selection, l->{
+			tblTransportGroupTypes.getTable().setSortColumn(vc5.getColumn());
+			int dir = tblTransportGroupTypes.getTable().getSortDirection();
+			if (dir == SWT.UP){
+				dir = SWT.DOWN;
+			}else{
+				dir = SWT.UP;
+			}
+			tblTransportGroupTypes.getTable().setSortDirection(dir);
+			int change = dir == SWT.DOWN ? -1 : 1;
+			currentType.getTransportTypes().sort((a,b)-> change * Collator.getInstance().compare(a.getKeyId(), b.getKeyId()));
+			tblTransportGroupTypes.refresh();
+		});
+		
+		
+		tblTransportGroupTypes.setContentProvider(ArrayContentProvider.getInstance());
+		tblTransportGroupTypes.getTable().setHeaderVisible(true);
+		tblTransportGroupTypes.getTable().setLinesVisible(true);
+		
+		
+		tblTransportGroupTypes.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				ViewerCell cell = tblTransportGroupTypes.getCell(new Point(event.x, event.y));
+				if (cell == null) return;
+				if (cell.getColumnIndex() == tblTransportGroupTypes.getTable().getColumnCount()-1){
+					editTransportGroupKey();				
+				}else if (cell.getColumnIndex() == 0) {
+					editTransportGroupIcon();
+				}
+			}
+		});
+
+		Composite composite = new Composite(panel, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,1, 1));
+		((GridLayout)composite.getLayout()).marginWidth = 0;
+		((GridLayout)composite.getLayout()).marginHeight = 0;
+
+		Button btnAddGroup = new Button(composite, SWT.NONE);
+		btnAddGroup.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAddGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,1, 1));
+		btnAddGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAddGroup.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAddGroup.addListener(SWT.Selection, e->addTransportGroup());
+		
+		Button btnEditGroup = new Button(composite, SWT.NONE);
+		btnEditGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEditGroup.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEditGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
+		btnEditGroup.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		btnEditGroup.setEnabled(false);
+		btnEditGroup.addListener(SWT.Selection, e->editTransportGroupKey());
+		
+		Button btnDeleteGroup = new Button(composite, SWT.NONE);
+		btnDeleteGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
+		btnDeleteGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDeleteGroup.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDeleteGroup.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDeleteGroup.setEnabled(false);
+		btnDeleteGroup.addListener(SWT.Selection, e->deleteTransportGroup());	
+		
+		//table menu
+		Menu tableMenu = new Menu(tblTransportTypes.getControl());
+		tblTransportGroupTypes.getControl().setMenu(tableMenu);
+		
+		MenuItem miAdd = new MenuItem(tableMenu, SWT.CASCADE);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->addTransportGroup());
+
+		new MenuItem(tableMenu, SWT.SEPARATOR);
+		
+		MenuItem editKey = new MenuItem(tableMenu, SWT.PUSH);
+		editKey.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		editKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editKey.addListener(SWT.Selection, evt->{
+			if (transportGroupTableEditIndex == -1) return;
+			if (transportGroupTableEditIndex == 0) {
+				editTransportTypeIcon();
+			}else if (transportGroupTableEditIndex == tblTransportGroupTypes.getTable().getColumnCount()-1) {
+				editTransportTypeKey();
+			}else {
+				tblTransportGroupTypes.editElement((PatrolTransportType) tblTransportGroupTypes.getStructuredSelection().getFirstElement(), transportTableEditIndex);
+			}
+		});
+		
+		MenuItem clearIcon = new MenuItem(tableMenu, SWT.PUSH);
+		clearIcon.setText(LabelConstants.CLEAR_IMAGE);
+		clearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		clearIcon.addListener(SWT.Selection, l->setTransportGroupIcon(null));
+		
+		new MenuItem(tableMenu, SWT.SEPARATOR);
+
+		MenuItem delete = new MenuItem(tableMenu, SWT.PUSH);
+		delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		delete.addListener(SWT.Selection, l->deleteTransportGroup());
+		
+		tableMenu.addMenuListener(new MenuListener() {			
+			@Override
+			public void menuShown(MenuEvent e) {
+				boolean isSelected = !tblTransportGroupTypes.getSelection().isEmpty();
+				delete.setEnabled(isSelected);
+				editKey.setEnabled(isSelected);
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});
+		
+		tblTransportGroupTypes.getTable().addListener(SWT.MenuDetect, evt->{
+			ViewerCell cell = tblTransportTypes.getCell(tblTransportGroupTypes.getControl().toControl(evt.x,  evt.y));
+			transportGroupTableEditIndex = -1;
+			if (cell != null) transportGroupTableEditIndex = cell.getColumnIndex();	
+		});
+		
+		
+
+		tblTransportGroupTypes.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				boolean isSelected = !tblTransportGroupTypes.getSelection().isEmpty();
+				btnDeleteGroup.setEnabled(isSelected);
+				btnEditGroup.setEnabled(isSelected);
+			}
+		});
+		
+		
+		return panel;
 	}
 	
 	private Composite createTransportTypePanel(Composite parent) {
@@ -560,7 +932,9 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				if (cell == null) return;
 				if (cell.getColumnIndex() == tblTransportTypes.getTable().getColumnCount()-1){
 					editTransportTypeKey();
-				}else if (cell.getColumnIndex() == 3){
+				}else if (cell.getColumnIndex() == 4){
+					togglePilot();
+				}else if (cell.getColumnIndex() == 5){
 					disableTransportType();
 				}else if (cell.getColumnIndex() == 0) {
 					editTransportTypeIcon();
@@ -612,7 +986,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		MenuItem miAdd = new MenuItem(tableMenu, SWT.CASCADE);
 		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		
+		miAdd.addListener(SWT.Selection, e->addTransportType());
 		new MenuItem(tableMenu, SWT.SEPARATOR);
 		
 		MenuItem editKey = new MenuItem(tableMenu, SWT.PUSH);
@@ -722,14 +1096,105 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		Composite wrapper = new Composite(panel, SWT.NONE);
 		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		tblAttributes = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL);
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		wrapper.setLayout(tableLayout);
+		
+		tblAttributes = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
 		tblAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		tblAttributes.setLabelProvider(lblProvider);	
 		tblAttributes.setInput(new String[] {DialogConstants.LOADING_TEXT});
-		TableColumn tc = new TableColumn(tblAttributes.getTable(), SWT.NONE);
-		TableColumnLayout layout = new TableColumnLayout();
-		layout.setColumnData(tc, new ColumnWeightData(100));
-		wrapper.setLayout(layout);
+		tblAttributes.getTable().setHeaderVisible(true);
+		
+		
+		tblAttributes.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				ViewerCell cell = tblAttributes.getCell(new Point(event.x, event.y));
+				if (cell == null) return;
+				if (cell.getColumnIndex() == tblAttributes.getTable().getColumnCount()-1){
+					toggleAttributeEnabledState();				
+				}else {
+					editAttribute();
+				}
+			}
+		});
+
+		// Icon Column
+		TableViewerColumn viewerColumn = new TableViewerColumn(tblAttributes,SWT.NONE);
+		TableColumn column = viewerColumn.getColumn();
+		column.setResizable(false);
+		column.setText(DialogConstants.ICON_TEXT);
+
+		TableColumnLayout layout = (TableColumnLayout) tblAttributes.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+		column.setWidth( 32 + 20);
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof PatrolAttributePatrolType pt) {
+					return lblProvider.getImage(pt.getPatrolAttribute());
+				}
+				return null;
+			}
+			@Override
+			public String getText(Object element) {
+				return null;
+			}
+		});
+		
+		//Name
+		viewerColumn = new TableViewerColumn(tblAttributes,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText("Attribute");
+		column.setResizable(true);
+
+		layout = (TableColumnLayout) tblAttributes.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+							
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+					@Override
+					public String getText(Object element) {
+						if (element instanceof PatrolAttributePatrolType pt) {
+							return lblProvider.getText(pt.getPatrolAttribute());
+						}
+						return super.getText(element);
+					}
+					@Override
+					public Color getForeground(Object element) {
+						if (element instanceof PatrolAttributePatrolType pt){
+							if (!pt.getIsActive()) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+						}
+						return null;
+					}
+		});
+		
+		// Enabled/Disabled 
+		viewerColumn = new TableViewerColumn(tblAttributes,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText(ACTIVE_LABEL);
+		column.setResizable(true);
+
+		layout = (TableColumnLayout) tblTransportGroupTypes.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+							
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolAttributePatrolType pt) {
+					if (pt.getIsActive()) return ACTIVE_LABEL;
+					return DISABLED_LABEL;
+				}
+				return ""; //$NON-NLS-1$
+			}
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof PatrolAttributePatrolType pt){
+					if (!pt.getIsActive()) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
+			}
+		});
+				
+				
 		
 		Composite buttonPanel = new Composite(panel, SWT.NONE);
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -750,6 +1215,13 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		btnEdit.setEnabled(false);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
+		Button btnEnable = new Button(buttonPanel, SWT.PUSH);
+		btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		btnEnable.addListener(SWT.Selection, e->toggleAttributeEnabledState());
+		btnEnable.setEnabled(false);
+		btnEnable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -766,11 +1238,20 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miAdd.addListener(SWT.Selection, e->addAttributeToType());
 
+		new MenuItem(mnu, SWT.SEPARATOR);
+
 		MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
 		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		miEdit.addListener(SWT.Selection, e->editAttribute());
 		miEdit.setEnabled(false);
+		
+		MenuItem disableItem = new MenuItem(mnu, SWT.PUSH);
+		disableItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		disableItem.addListener(SWT.Selection, e->toggleAttributeEnabledState());
+		disableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+
+		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -779,11 +1260,28 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		miDelete.setEnabled(false);
 		
 		tblAttributes.addSelectionChangedListener(e->{
-			boolean enabled = !tblAttributes.getStructuredSelection().isEmpty() && (tblAttributes.getStructuredSelection().getFirstElement() instanceof PatrolAttribute);
+			boolean enabled = !tblAttributes.getStructuredSelection().isEmpty() && (tblAttributes.getStructuredSelection().getFirstElement() instanceof PatrolAttributePatrolType);
 			miEdit.setEnabled(enabled);
 			miDelete.setEnabled(enabled);
 			btnEdit.setEnabled(enabled);
-			btnDelete.setEnabled(enabled);			
+			btnDelete.setEnabled(enabled);	
+			
+			btnEnable.setEnabled(enabled);
+			
+			if (enabled) {
+				if ( ((PatrolAttributePatrolType)tblAttributes.getStructuredSelection().getFirstElement()).getIsActive()) {
+					btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+					disableItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					disableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+				}else {
+					btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+					disableItem.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					disableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+				}
+			}
+			
 		});
 		return panel;
 	}
@@ -890,26 +1388,26 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		btnEditIcon.addListener(SWT.Selection, e->editTypeIcon());
 		
 		
-		l = new Label(detailsPanel, SWT.NONE);
-		l.setText("Requires Pilot:");
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		cmbPilot = new ComboViewer(detailsPanel, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbPilot.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2, 1));
-		cmbPilot.setContentProvider(ArrayContentProvider.getInstance());
-		cmbPilot.setInput(new Boolean[] {Boolean.TRUE, Boolean.FALSE});
-		cmbPilot.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				if ((Boolean)element) return "Yes";
-				return "No";
-			}
-		});
-		cmbPilot.addSelectionChangedListener(e->{
-			if (currentType == null) return;
-			currentType.setRequiresPilot((boolean)cmbPilot.getStructuredSelection().getFirstElement());
-			modified();
-		});
-	
+//		l = new Label(detailsPanel, SWT.NONE);
+//		l.setText("Requires Pilot:");
+//		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+//		
+//		cmbPilot = new ComboViewer(detailsPanel, SWT.DROP_DOWN | SWT.READ_ONLY);
+//		cmbPilot.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2, 1));
+//		cmbPilot.setContentProvider(ArrayContentProvider.getInstance());
+//		cmbPilot.setInput(new Boolean[] {Boolean.TRUE, Boolean.FALSE});
+//		cmbPilot.setLabelProvider(new LabelProvider() {
+//			public String getText(Object element) {
+//				if ((Boolean)element) return "Yes";
+//				return "No";
+//			}
+//		});
+//		cmbPilot.addSelectionChangedListener(e->{
+//			if (currentType == null) return;
+//			currentType.setRequiresPilot((boolean)cmbPilot.getStructuredSelection().getFirstElement());
+//			modified();
+//		});
+//	
 		return detailsPanel;
 	}
 	
@@ -935,12 +1433,21 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 			}
 			if (add) {
 				PatrolAttributePatrolType t = new PatrolAttributePatrolType();
+				t.setIsActive(true);
 				t.setPatrolAttribute(a);
 				t.setPatrolType(currentType);
 				currentType.getCustomAttributes().add(t);
 				if (a.getPatrolTypes() == null) a.setPatrolTypes(new ArrayList<>());
 				a.getPatrolTypes().add(t);
 				added = true;
+				
+				List<PatrolAttributePatrolType> tmp = new ArrayList<>();
+				for (PatrolAttributePatrolType d : deleteAttributes) {
+					if (d.getPatrolType().equals(currentType) && d.getPatrolAttribute().equals(a)) {
+						tmp.add(d);
+					}
+				}
+				deleteAttributes.removeAll(tmp);
 			}
 		}
 		
@@ -948,15 +1455,28 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		if (added) modified();
 	}
 	
+	
+	private void toggleAttributeEnabledState() {
+		if (tblAttributes.getStructuredSelection().isEmpty()) return;
+		if (currentType == null) return;
+		Object x = tblAttributes.getStructuredSelection().getFirstElement();
+		if (x == null || !(x instanceof PatrolAttributePatrolType)) return;
+		PatrolAttributePatrolType link = (PatrolAttributePatrolType)x;
+		link.setIsActive(!link.getIsActive());		
+		tblAttributes.refresh();
+		modified();
+	}
+	
 	private void editAttribute() {
 		if (tblAttributes.getStructuredSelection().isEmpty()) return;
 		if (currentType == null) return;
 		Object x = tblAttributes.getStructuredSelection().getFirstElement();
 		
-		if (x == null || !(x instanceof PatrolAttribute)) return;
+		if (x == null || !(x instanceof PatrolAttributePatrolType)) return;
 		
-		PatrolAttribute pa = (PatrolAttribute) x;
-		pa = allAttributes.get(allAttributes.indexOf(pa));
+		PatrolAttributePatrolType link = (PatrolAttributePatrolType)x;
+		
+		PatrolAttribute pa = allAttributes.get(allAttributes.indexOf(link.getPatrolAttribute()));
 		
 		
 		for (PatrolAttributePatrolType type : currentType.getCustomAttributes()) {
@@ -970,7 +1490,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		EditPatrolAttributeDialog dialog = new EditPatrolAttributeDialog(getShell(), pa, allAttributes);
 		dialog.open();
-		//TODO: reload attribute from database and update local cache
+
+		//reload attribute from database and update local cache
 		try(Session session = HibernateManager.openSession()){
 			PatrolAttribute updated = session.get(PatrolAttribute.class, pa.getUuid());
 			if (updated.getIcon() != null) updated.getIcon().getFiles().forEach(f->{
@@ -990,29 +1511,25 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 			}
 		}
 		updateAttributeTable();
-		clearImageCache();
-		
+		clearImageCache();	
 	}
-	
-	
-	
 	
 	private void deleteAttribute() {
 		if (tblAttributes.getStructuredSelection().isEmpty()) return;
 		if (currentType == null) return;
 		Object x = tblAttributes.getStructuredSelection().getFirstElement();
-		if (x == null || !(x instanceof PatrolAttribute)) return;
+		if (x == null || !(x instanceof PatrolAttributePatrolType)) return;
 		
-		PatrolAttribute pa = (PatrolAttribute) x;
+		PatrolAttributePatrolType pa = (PatrolAttributePatrolType) x;
 		if (!MessageDialog.openQuestion(getShell(), DialogConstants.DELETE_BUTTON_TEXT,
-				MessageFormat.format("Are you sure you want to remove the custom attribute {0} from the type {1}?", 
-						getName(pa), getName(currentType)))) {
+				MessageFormat.format("Are you sure you want to remove the custom attribute ''{0}'' from the type ''{1}''? \n\n This will remove all values associated with this attribute for patrols of type ''{2}''.", 
+						getName(pa.getPatrolAttribute()), getName(currentType), getName(currentType)))) {
 			return;
 		}
 		
 		PatrolAttributePatrolType patoDelete = null;
 		for(PatrolAttributePatrolType i : currentType.getCustomAttributes()) {
-			if (i.getPatrolAttribute().equals(pa) && i.getPatrolType().equals(currentType)) {
+			if (i.getPatrolAttribute().equals(pa.getPatrolAttribute()) && i.getPatrolType().equals(currentType)) {
 				patoDelete = i;
 				break;
 			}
@@ -1021,6 +1538,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		patoDelete.getPatrolAttribute().getPatrolTypes().remove(patoDelete);
 		currentType.getCustomAttributes().remove(patoDelete);
+		deleteAttributes.add(patoDelete);
 		updateAttributeTable();
 		modified();
 	}
@@ -1047,6 +1565,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		tblAttributes.refresh(true);
 		tblTrackTypes.refresh(true);
 		tblTransportTypes.refresh(true);
+		tblTransportGroupTypes.refresh(true);
+		
 		if (currentType != null) lblIcon.setImage(lblProvider.getImage(currentType));
 	}
 	
@@ -1070,13 +1590,14 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				txtTypeKey.setText(currentType.getKeyId());
 				txtTypeName.setText(getName(currentType));
 				
-				cmbPilot.setSelection(new StructuredSelection(currentType.getRequiresPilot()));
 				cmbActive.setSelection(new StructuredSelection(currentType.getIsActive()));
 				
 				lblIcon.setImage(lblProvider.getImage(currentType));
 				
 				updateAttributeTable();
 				tblTransportTypes.setInput(currentType.getTransportTypes());
+				
+				tblTransportGroupTypes.setInput(currentType.getTransportGroups());
 			}
 			
 			detailsPanel.layout(true);
@@ -1087,8 +1608,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	}
 	
 	private void updateAttributeTable() {
-		List<PatrolAttribute> tattributes = currentType.getCustomAttributes().stream().map(e->e.getPatrolAttribute()).collect(Collectors.toList());
-		Collections.sort(tattributes);
+		List<PatrolAttributePatrolType> tattributes = new ArrayList<>(currentType.getCustomAttributes());
+		tattributes.sort((a,b)->Collator.getInstance().compare(a.getPatrolAttribute().getName(), b.getPatrolAttribute().getName()));
 		tblAttributes.setInput(tattributes);
 		tblAttributes.refresh(true);
 	}
@@ -1103,7 +1624,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	
 	@Override
 	protected Point getInitialSize(){
-		return new Point(750, 500);
+		return new Point(900, 500);
 	}
 	
 	
@@ -1145,17 +1666,43 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 					for (PatrolTransportType tt : pt.getTransportTypes()) {
 						HibernateManager.saveOrMerge(session, tt.getIcon());
 					}
+					for (PatrolTransportGroup g: pt.getTransportGroups()) {
+						HibernateManager.saveOrMerge(session, g.getIcon());
+					}
 				}
 				session.flush();
 				for (PatrolType pt : types) {
 					HibernateManager.saveOrMerge(session, pt.getIcon());
 					
-					if (pt.getUuid() == null) {
-						session.persist(pt);
-					}else {
-						pt = session.merge(pt);
+					if (pt.getUuid() == null) session.persist(pt);
+					
+					for (PatrolTransportGroup tt : pt.getTransportGroups()) {
+						if (tt.getUuid() != null) {
+							session.merge(tt);
+						}else {
+							session.persist(tt);
+						}
 					}
+					
+					for (PatrolTransportType tt : pt.getTransportTypes()) {
+						if (tt.getUuid() != null) {
+							session.merge(tt);
+						}else {
+							session.persist(tt);
+						}
+					}
+					session.flush();
+					
+					pt = session.merge(pt);
 					session.flush();	
+				}
+				
+				//delete any patrol data
+				for (PatrolAttributePatrolType delete : deleteAttributes) {
+					String hql = "DELETE FROM PatrolAttributeValue WHERE id.patrolAttribute = :attribute and id.patrol.patrolType = :type"; //$NON-NLS-1$
+					session.createMutationQuery(hql)
+					.setParameter("attribute",  delete.getPatrolAttribute()) //$NON-NLS-1$
+					.setParameter("type", delete.getPatrolType()).executeUpdate(); //$NON-NLS-1$			
 				}
 				
 				List<PatrolAttribute> pas = QueryFactory.buildQuery(session, PatrolAttribute.class, 
@@ -1182,6 +1729,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				
 				session.getTransaction().commit();
 				
+				deleteAttributes.clear();
 				toDelete.clear();
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 				
@@ -1227,6 +1775,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
 		column.setText(Messages.PatrolTypePropertyPage_TransportType_ColumnHeader);
+		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -1311,10 +1860,82 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 			viewer.refresh();
 		});
 		
+		/* Group Speed */
+		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText("Group");
+		column.setToolTipText(column.getText());
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType pt) {
+					return lblProvider.getText(pt.getTransportGroup());
+				}
+				return ""; //$NON-NLS-1$
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				return null;
+			}
+			
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof PatrolTransportType pt){
+					if (!pt.getIsActive()) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
+				
+			}
+		});
+		
+		
+		viewerColumn.setEditingSupport(new EditingSupport(viewer){
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				ComboBoxViewerCellEditor ceditor = new ComboBoxViewerCellEditor(viewer.getTable(), SWT.READ_ONLY);
+				ceditor.setLabelProvider(lblProvider);
+				ceditor.setContentProvider(ArrayContentProvider.getInstance());
+				List<Object> all = new ArrayList<>(currentType.getTransportGroups());
+				all.add(0, ""); //$NON-NLS-1$
+				ceditor.setInput(all);
+				return ceditor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element) {
+				return (currentType != null) && element instanceof PatrolTransportType;
+			}
+			
+			@Override
+			protected Object getValue(Object element) {
+				return ((PatrolTransportType)element).getTransportGroup();
+			}
+
+			@Override
+			protected void setValue(Object element, Object value) {
+				if (element instanceof PatrolTransportType ttype){
+					if (value instanceof PatrolTransportGroup g) {
+						ttype.setTransportGroup(g);
+					}else {
+						ttype.setTransportGroup(null);
+					}
+					modified();
+					viewer.refresh();
+				}					
+			}});
+		
 		/* Max Speed */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
 		column.setText("Max Speed (km/h)");
+		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -1387,10 +2008,56 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				}					
 			}});
 		
+		/* Requires Pilot */
+		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText("Requires Pilot");
+		column.setToolTipText(column.getText());
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType tt){
+					if (tt.getRequiresPilot()) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+					return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof PatrolTransportType tt){
+					if (!tt.getIsActive()) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
+				
+			}
+		});
+		final TableViewerColumn vc6 = viewerColumn;
+		viewerColumn.getColumn().addListener(SWT.Selection, l->{
+			viewer.getTable().setSortColumn(vc6.getColumn());
+			int dir = viewer.getTable().getSortDirection();
+			if (dir == SWT.UP){
+				dir = SWT.DOWN;
+			}else{
+				dir = SWT.UP;
+			}
+			viewer.getTable().setSortDirection(dir);
+			
+			int change = dir == SWT.DOWN ? -1 : 1;
+			currentType.getTransportTypes().sort((a,b)-> change * Boolean.compare(a.getRequiresPilot(), b.getRequiresPilot()));
+			viewer.refresh();
+		});
+		
 		/* Active Column */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
 		column.setText(ACTIVE_LABEL);
+		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -1440,6 +2107,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
 		column.setText(LabelConstants.TRANSTYPE_KEY);
+		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -1510,6 +2178,16 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 						});
 						
 					});
+					
+					t.getTransportGroups().forEach(g->{
+						Hibernate.initialize(g);
+						g.getTransportTypes().size();
+						if (g.getIcon() != null) {
+							g.getIcon().getFiles().forEach(f->{
+								f.computeFileLocation(session);
+							});
+						}
+					});
 				});
 				
 				allAttributes = session.createQuery("FROM PatrolAttribute WHERE conservationArea = :ca", PatrolAttribute.class)
@@ -1534,14 +2212,11 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				Object x = tblTrackTypes.getStructuredSelection().getFirstElement();
 				tblTrackTypes.setInput(types);
 				if (x != null) tblTrackTypes.setSelection(new StructuredSelection(x));
+				
 				updateDetails();
 			});
 			return Status.OK_STATUS;
-		}
-		
+		}	
 	};
-	
-	
-	
 	
 }

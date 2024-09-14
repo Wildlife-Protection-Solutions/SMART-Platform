@@ -32,6 +32,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -94,6 +95,18 @@ public class CaPatrolQueryHibernateManagerImpl extends AbstractPatrolQueryHibern
 		return items;
 	}
 	
+	@Override
+	public List<ListItem> getActiveTransportGroups(Session session) {
+		List<PatrolType> types = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+		List<ListItem> items = new ArrayList<ListItem>();
+		for (PatrolType type : types) {
+			if (type.getTransportGroups() == null) continue;
+			for (PatrolTransportGroup group : type.getTransportGroups()) {				
+				items.add(new ListItem(null, group.getGroupTypeLabel(), group.getKeyId()));
+			}
+		}
+		return items;
+	}
 	/**
 	 * Gets the patrol type types listitem object 
 	 * @param session

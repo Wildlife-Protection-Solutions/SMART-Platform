@@ -49,7 +49,6 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
@@ -82,7 +81,7 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try(Session session = HibernateManager.openSession()){
-				List<PatrolType> types = session.createQuery("FROM PatrolType WHERE conservationArea = :ca", PatrolType.class) //$NON-NLS-1$
+				List<PatrolTransportType> types = session.createQuery("FROM PatrolTransportType WHERE conservationArea = :ca", PatrolTransportType.class) //$NON-NLS-1$
 						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.list();
 				types.forEach(e->pTypePilot.put(e.getUuid(),e.getRequiresPilot()));
@@ -133,8 +132,11 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 		case PATROL_LEG_PILOT:
 			if (!(element instanceof IPatrolQueryResultItem)) return null;
 			IPatrolQueryResultItem pitem = (IPatrolQueryResultItem)element;
-			if (!pTypePilot.containsKey(pitem.getPatrolTypeUuid())) return null;
-			if (!pTypePilot.get(pitem.getPatrolTypeUuid())) return null; // pilot not valid for type
+			
+			if (!pTypePilot.containsKey(pitem.getPatrolTransportTypeUuid())) return null;
+			if (!pTypePilot.get(pitem.getPatrolTransportTypeUuid())) return null; // pilot not valid for type
+			
+			
 		case PATROL_LEG_LEADER:
 			if (!(element instanceof IPatrolQueryResultItem)) return null;
 			if (employeeCellEditor == null){
@@ -167,7 +169,10 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 			j.schedule();
 			return employeeCellEditor;
 		case TRANSPORT_TYPE:
-			return getTransportCellEditor();
+			
+			if (!(element instanceof IPatrolQueryResultItem)) return null;
+			IPatrolQueryResultItem ppitem = (IPatrolQueryResultItem)element;
+			return getTransportCellEditor(ppitem.getPatrolTypeUuid());
 		default:
 			return null;
 		}
@@ -252,29 +257,38 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 		return mandateCellEditor;
 	}
 	
-	private ComboBoxViewerCellEditor getTransportCellEditor(){
-		if (transportCellEditor != null){
-			return transportCellEditor;
+	private ComboBoxViewerCellEditor getTransportCellEditor(UUID patrolTypeUuid){
+		if (transportCellEditor == null){
+			transportCellEditor = getDropDownEditor();
 		}
-		transportCellEditor = getDropDownEditor();
 				
-		Job j = new Job("load list items"){ //$NON-NLS-1$
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				final List<PatrolTransportType> items = new ArrayList<>();
-				try(Session s = HibernateManager.openSession()){
-					items.addAll(PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), s));
-				}
-				Display.getDefault().syncExec(()->{
-					if (!transportCellEditor.getControl().isDisposed()){
-						transportCellEditor.setInput(items);
-						transportCellEditor.recomputeSize();
+		UUID temp = (UUID) transportCellEditor.getControl().getData("LASTUUID"); //$NON-NLS-1$
+		transportCellEditor.getControl().setData("LASTUUID", patrolTypeUuid); //$NON-NLS-1$
+		
+		if (!patrolTypeUuid.equals(temp)) {
+			transportCellEditor.setInput(new String[] {DialogConstants.LOADING_TEXT});
+			Job j = new Job("load list items"){ //$NON-NLS-1$
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					final List<PatrolTransportType> items = new ArrayList<>();
+					try(Session s = HibernateManager.openSession()){
+						items.addAll(s.createQuery("FROM PatrolTransportType WHERE patrolType.uuid = :uuid and conservationArea = :ca and isActive", PatrolTransportType.class) //$NON-NLS-1$
+								.setParameter("uuid", patrolTypeUuid) //$NON-NLS-1$
+								.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+						.list());
 					}
-				});
-				return Status.OK_STATUS;
-			}
-		};
-		j.schedule();
+					Display.getDefault().syncExec(()->{
+						if (!transportCellEditor.getControl().isDisposed()){
+							transportCellEditor.setInput(items);
+							transportCellEditor.recomputeSize();
+							
+						}
+					});
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+		}
 		return transportCellEditor;
 	}
 	

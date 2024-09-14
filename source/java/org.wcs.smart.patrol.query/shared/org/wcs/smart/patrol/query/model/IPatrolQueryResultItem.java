@@ -41,12 +41,14 @@ public interface IPatrolQueryResultItem extends IResultItem {
 	public String getObjective();
 	public String getMandate();
 	public String getPatrolType();
+	public UUID getPatrolTransportTypeUuid();
 	public UUID getPatrolTypeUuid();
 	public UUID getPatrolUuid();
 	public boolean isArmed();
 	public String getPatrolLegId();
 	public UUID getPatrolLegUuid();
 	public String getTransportType();
+	public String getTransportGroup();
 	public LocalDate getPatrolLegStartDate();
 	public LocalDate getPatrolLegEndDate();
 	public String getConservationAreaId();

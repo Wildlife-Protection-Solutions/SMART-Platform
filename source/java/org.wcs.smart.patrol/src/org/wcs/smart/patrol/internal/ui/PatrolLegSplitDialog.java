@@ -273,14 +273,14 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 	
 	protected void updateGroupAPilotState() {
 		PatrolTransportType ptt = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
-		boolean showPilot = ptt != null && ptt.getPatrolType() != null && ptt.getPatrolType().getRequiresPilot();
+		boolean showPilot = ptt != null && ptt.getRequiresPilot();
 		lblGroupAPilot.setVisible(showPilot);
 		groupAPilot.getCombo().setVisible(showPilot);
 	}
 
 	protected void updateGroupBPilotState() {
 		PatrolTransportType ptt = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).getFirstElement();
-		boolean showPilot = ptt != null && ptt.getPatrolType() != null && ptt.getPatrolType().getRequiresPilot();
+		boolean showPilot = ptt != null && ptt.getRequiresPilot();
 		lblGroupBPilot.setVisible(showPilot);
 		groupBPilot.getCombo().setVisible(showPilot);
 	}
@@ -552,11 +552,11 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 			return Messages.PatrolLegSplitDialog_Error_GroupBNoLeader;
 		}
 		PatrolTransportType pttA = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
-		if (this.groupAPilot != null && pttA.getPatrolType().getRequiresPilot() && ((IStructuredSelection)this.groupAPilot.getSelection()).isEmpty() ){
+		if (this.groupAPilot != null && pttA.getRequiresPilot() && ((IStructuredSelection)this.groupAPilot.getSelection()).isEmpty() ){
 			return Messages.PatrolLegSplitDialog_Error_GroupANoPilot;
 		}
 		PatrolTransportType pttB = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).getFirstElement();
-		if (this.groupBPilot != null && pttB.getPatrolType().getRequiresPilot() && ((IStructuredSelection)this.groupBPilot.getSelection()).isEmpty() ){
+		if (this.groupBPilot != null && pttB.getRequiresPilot() && ((IStructuredSelection)this.groupBPilot.getSelection()).isEmpty() ){
 			return Messages.PatrolLegSplitDialog_Error_GroupBNoPilot;
 		}
 		
@@ -685,12 +685,12 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		
 		Employee pilotA = null;
 		Employee pilotB = null;
-		if (this.groupAPilot != null && legA.getType().getPatrolType().getRequiresPilot()){
-			pilotA =   (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
+		if (this.groupAPilot != null && legA.getType().getRequiresPilot()){
+			pilotA = (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
 		}	
 
-		if (this.groupBPilot != null && legB.getType().getPatrolType().getRequiresPilot()){
-			pilotB =   (Employee) ((IStructuredSelection)this.groupBPilot.getSelection()).getFirstElement();
+		if (this.groupBPilot != null && legB.getType().getRequiresPilot()){
+			pilotB = (Employee) ((IStructuredSelection)this.groupBPilot.getSelection()).getFirstElement();
 		}	
 		
 		legA.setMembers(new ArrayList<PatrolLegMember>());

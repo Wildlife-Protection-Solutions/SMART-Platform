@@ -876,7 +876,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			toUpdate.setType(updatedPatrolLeg.getType());
 		}
 		
-		toUpdate.getPatrol().recalculateType(session);
+		toUpdate.getPatrol().recalculateType();
 		
 		//
 		//if employees is provided by not leader/pilot then use existing leader/pilot
@@ -930,7 +930,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}else {
 				m.setIsLeader(false);
 			}
-			if (toUpdate.getType().getPatrolType().getRequiresPilot() && m.getMember().getUuid().equals(pilotUuid)) {
+			if (toUpdate.getType().getRequiresPilot() && m.getMember().getUuid().equals(pilotUuid)) {
 				m.setIsPilot(true);
 				haspilot = true;
 			}else {
@@ -941,7 +941,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (!hasleader) {
 			throw new Exception(Messages.NO_LEADER.getMessage(l));
 		}
-		if (toUpdate.getType().getPatrolType().getRequiresPilot() && !haspilot) {
+		if (toUpdate.getType().getRequiresPilot() && !haspilot) {
 			throw new Exception(MessageFormat.format(Messages.NO_PILOT.getMessage(l), toUpdate.getType().getName()));
 		}
 	
@@ -991,7 +991,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		UUID srcPatrolUuid = newPatrol.getUuid();
 		newPatrol.setUuid(null);
 
-		newPatrol.recalculateType(session);
+		newPatrol.recalculateType();
 		
 		Patrol temp = findPatrolLink(srcPatrolUuid, ca, session, l);
 		if (temp != null) {
@@ -1020,7 +1020,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (!hasleader) {
 			throw new Exception(Messages.NO_LEADER.getMessage(l));
 		}
-		if (newPatrolLeg.getType().getPatrolType().getRequiresPilot() && !haspilot) {
+		if (newPatrolLeg.getType().getRequiresPilot() && !haspilot) {
 			throw new Exception(MessageFormat.format(Messages.NO_PILOT.getMessage(l), newPatrolLeg.getType().getName()));
 		}
 
@@ -1299,14 +1299,14 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (!hasleader) {
 			throw new Exception(Messages.NO_LEADER.getMessage(l));
 		}
-		if (newLeg.getType().getPatrolType().getRequiresPilot() && !haspilot) {
+		if (newLeg.getType().getRequiresPilot() && !haspilot) {
 			throw new Exception(MessageFormat.format(Messages.NO_LEADER.getMessage(l), newLeg.getType().getName()));
 		}
 		
 		newLeg.setPatrol(patrolToUpdate);
 		if (patrolToUpdate.getLegs() == null) patrolToUpdate.setLegs(new ArrayList<>());
 		patrolToUpdate.getLegs().add(newLeg);
-		newLeg.getPatrol().recalculateType(session);
+		newLeg.getPatrol().recalculateType();
 
 		//expand to ensure at least one leg per day
 		PatrolUtils.createLegDaysForMissingDays(patrolToUpdate);

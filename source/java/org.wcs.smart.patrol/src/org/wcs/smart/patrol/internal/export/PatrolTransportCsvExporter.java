@@ -36,6 +36,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SharedUtils;
@@ -74,29 +75,59 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 
 			String csvout[] = new String[columns.length];
 			List<PatrolType> types = getPatrolTypes(ca, session);
+			List<PatrolTransportGroup> groups = new ArrayList<>();
 			for (PatrolType type : types) {
 				if (monitor.isCanceled()) return false;
-				if (type.isMixed()) continue;
+				groups.addAll(type.getTransportGroups());
 				
 				int i = 0;
 				csvout[i++] = PatrolTransportCsvExportConfig.TRACKTYPE;
 				csvout[i++] = type.getKeyId();
 				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
 				csvout[i++] = type.getIsActive() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
-				csvout[i++] = type.getRequiresPilot() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
-				csvout[i++] = ""; //$NON-NLS-1$
-				csvout[i++] = ""; //$NON-NLS-1$
+				csvout[i++] = ""; //$NON-NLS-1$ //pilot
+				csvout[i++] = ""; //$NON-NLS-1$ //max speed
+				csvout[i++] = ""; //$NON-NLS-1$ //patrol type
+				//groups
+				String groupKeys = type.getTransportGroups().stream()
+						.map(e->e.getKeyId())
+						.collect(Collectors.joining(":")); //$NON-NLS-1$
+				csvout[i++] = groupKeys; 
 				
+				//attributes
 				String attributeKeys = type.getCustomAttributes().stream()
 						.map(e->e.getPatrolAttribute().getKeyId())
 						.collect(Collectors.joining(":")); //$NON-NLS-1$
 				csvout[i++] = attributeKeys; 
 				
+				//names
 				for(Language l : languages){
 					csvout[i++] = type.findName(l);
 				}
 				writer.writeNext(csvout);
 			}
+
+			for (PatrolTransportGroup group : groups) {
+				if (monitor.isCanceled()) return false;
+				
+				int i = 0;
+				csvout[i++] = PatrolTransportCsvExportConfig.GROUP;
+				csvout[i++] = group.getKeyId();
+				csvout[i++] = group.getIcon() == null ? "" : group.getIcon().getKeyId(); //$NON-NLS-1$
+				csvout[i++] = ""; //$NON-NLS-1$ //active
+				csvout[i++] = ""; //$NON-NLS-1$ //pilot
+				csvout[i++] = ""; //$NON-NLS-1$ //max speed
+				csvout[i++] = group.getPatrolType().getKeyId(); //patrol type
+				csvout[i++] = ""; //$NON-NLS-1$ //groups
+				csvout[i++] = ""; //$NON-NLS-1$ //attributes
+				
+				//names
+				for(Language l : languages){
+					csvout[i++] = group.findName(l);
+				}
+				writer.writeNext(csvout);
+			}
+			
 			List<PatrolTransportType> ttypes = getTransportTypes(ca, session);
 
 
@@ -110,10 +141,11 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 				csvout[i++] = type.getKeyId();
 				csvout[i++] = type.getIcon() == null ? "" : type.getIcon().getKeyId(); //$NON-NLS-1$
 				csvout[i++] = type.getIsActive() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
-				csvout[i++] = ""; //$NON-NLS-1$ //pilot
+				csvout[i++] = type.getRequiresPilot() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$				
 				csvout[i++] = String.valueOf(type.getMaxSpeed());  //max speed
-				csvout[i++] = type.getPatrolType().getKeyId();
-				csvout[i++] = ""; //$NON-NLS-1$
+				csvout[i++] = type.getPatrolType().getKeyId(); //patrol type
+				csvout[i++] = type.getTransportGroup() == null ? "" : type.getTransportGroup().getKeyId(); //$NON-NLS-1$
+				csvout[i++] = ""; //$NON-NLS-1$ //attributes
 				for(Language l : languages){
 					csvout[i++] = type.findName(l);
 				}
@@ -127,7 +159,7 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] cols = new String[langs.size() + 8];
+		String[] cols = new String[langs.size() + 9];
 		int i = 0;
 		cols[i++] = "Type"; //$NON-NLS-1$
 		cols[i++] = "Key"; //$NON-NLS-1$
@@ -136,6 +168,7 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 		cols[i++] = "Requires_Pilot"; //$NON-NLS-1$
 		cols[i++] = "Max_Speed"; //$NON-NLS-1$
 		cols[i++] = "Track_Type"; //$NON-NLS-1$
+		cols[i++] = "Groups"; //$NON-NLS-1$
 		cols[i++] = "Custom_Attributes"; //$NON-NLS-1$
 		for (Language lng : langs) {
 			cols[i++] = "Name>" + lng.getCode(); //$NON-NLS-1$

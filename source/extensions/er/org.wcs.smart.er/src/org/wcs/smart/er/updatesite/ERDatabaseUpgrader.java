@@ -395,6 +395,8 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		
 	private void upgradeV5ToV6(Session session){
 		String[] sql = new String[]{
+				"alter table smart.icon drop constraint ICON_CAUUID_FK ", //$NON-NLS-1$
+
 				"ALTER TABLE smart.mission_attribute ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER table smart.mission_attribute ADD CONSTRAINT mission_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.mission_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
@@ -402,7 +404,10 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE smart.sampling_unit_attribute ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER table smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.sampling_unit_attribute_list ADD COLUMN icon_uuid char(16) for bit data", //$NON-NLS-1$
-				"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$				
+				"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"alter table smart.icon add constraint ICON_CAUUID_FK foreign key (ca_uuid) references smart.conservation_area(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
+
 		};
 		
 		for (String s : sql){

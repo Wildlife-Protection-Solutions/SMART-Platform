@@ -21,17 +21,22 @@
  */
 package org.wcs.smart.patrol.ui;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -42,8 +47,10 @@ import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 
@@ -56,26 +63,71 @@ import org.wcs.smart.ui.ca.datamodel.IAttributeField;
  */
 public class PatrolAttributeComposite extends PatrolItemComposite {
 
-	private List<PatrolAttribute> attributes;
 	private List<IAttributeField<?>> fields;
 	private HashMap<IAttributeField<?>, PatrolAttribute> field2attribute;
 	
-	public PatrolAttributeComposite(List<PatrolAttribute> attributes) {
+	private Composite ctemp;
+	
+	private ScrolledComposite scrolled;
+	private boolean includeDisabled = true;
+	
+	public PatrolAttributeComposite(boolean includeDisabled ) {
 		super();
-		this.attributes = attributes;
+		this.includeDisabled = includeDisabled;
 	}
 	
 	@Override
 	public Composite createComponent(Composite parent, int style) {
 		
-		Composite ctemp = new Composite(parent, SWT.NONE);
+		scrolled = new ScrolledComposite(parent, SWT.V_SCROLL);
+		scrolled.setLayout(new GridLayout());
+		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		ctemp = new Composite(scrolled, SWT.NONE);
 		ctemp.setLayout(new GridLayout(2, false));
-		ctemp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		ctemp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		scrolled.setContent(ctemp);
+		
+		return scrolled;
+	}
+	private void modified() {
+		setErrorMessage(null);
+		for (IAttributeField<?> field : fields) {
+			String error = field.validate();
+			if (error != null) setErrorMessage(error);
+		}
+		super.fireChangeListeners();
+	}
+	
+	@Override
+	public void setValues(Patrol p, Session session) {
+		for (Control c : ctemp.getChildren()) c.dispose();
 		
 		fields = new ArrayList<>();
 		field2attribute = new HashMap<>();
 		
-		for(PatrolAttribute pa : attributes) {
+		PatrolType pt = session.get(PatrolType.class, p.getPatrolType().getUuid());
+		if (pt.getCustomAttributes().isEmpty()) {
+			Label l = new Label(ctemp, SWT.NONE);
+			l.setText(MessageFormat.format("No custom attributes defined for track type {0}", pt.getName()));
+			l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		}
+		
+		List<PatrolAttributePatrolType> sorted = new ArrayList<>(pt.getCustomAttributes());
+		if (!includeDisabled) {
+			for (Iterator<PatrolAttributePatrolType> iterator = sorted.iterator(); iterator.hasNext();) {
+				PatrolAttributePatrolType a =  iterator.next();
+				if (!a.getIsActive()) iterator.remove();
+				
+			}
+		}
+		sorted.sort((a,b)->Collator.getInstance().compare(a.getPatrolAttribute().getName(), b.getPatrolAttribute().getName()));
+		//create ui fields
+		for (PatrolAttributePatrolType pat : sorted) {
+			PatrolAttribute pa = pat.getPatrolAttribute();
+			
 			//convert patrol attribute to data model attribute so we can use the
 			//attribute fields setup for editing
 			Attribute temp = new Attribute();
@@ -140,24 +192,17 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 			field2attribute.put(field, pa);
 			field.createComposite(ctemp);
 			field.addModifyListener(e->modified());
-			field.addResizeListener(e->parent.notifyListeners(SWT.Resize, e));
+			field.addResizeListener(e->ctemp.getParent().notifyListeners(SWT.Resize, e));
 			ctemp.addListener(SWT.Dispose, e->field.dispose());
 			fields.add(field);
-			
 		}
-		return ctemp;
-	}
-	private void modified() {
-		setErrorMessage(null);
-		for (IAttributeField<?> field : fields) {
-			String error = field.validate();
-			if (error != null) setErrorMessage(error);
-		}
-		super.fireChangeListeners();
-	}
-	
-	@Override
-	public void setValues(Patrol p, Session session) {
+		
+		ctemp.layout(true);
+		scrolled.setExpandHorizontal(true);
+		ctemp.setSize(ctemp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scrolled.getParent().layout(true, true);
+		
+		//initial ui values
 		if (p.getCustomAttributes() == null) p.setCustomAttributes(new ArrayList<>());
 		for (IAttributeField<?> field : fields) {
 			for (PatrolAttributeValue v : p.getCustomAttributes()) {

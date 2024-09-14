@@ -204,6 +204,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -334,6 +335,7 @@ public enum SmartTable {
 	PATROLSUMMARYQUERY(PatrolSummaryQuery.class,null),
 	PATROLTYPE(PatrolType.class, ".conservationArea"),
 	PATROLTRANSPORTTYPE(PatrolTransportType.class,null),
+	PATROLTRANSPORTGROUP(PatrolTransportGroup.class, ".patrolType.conservationArea"),
 	PATROLATTRIBUTE_PATROLTYPE(PatrolAttributePatrolType.class, ".id.patrolAttribute.conservationArea"),
 	PATROLWAYPOINT(PatrolWaypoint.class,".id.waypoint.conservationArea"),
 	PATROLWAYPOINTQUERY(PatrolWaypointQuery.class,null),

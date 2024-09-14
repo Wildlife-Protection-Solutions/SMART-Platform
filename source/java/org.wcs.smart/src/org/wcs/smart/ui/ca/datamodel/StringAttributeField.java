@@ -93,6 +93,7 @@ public class StringAttributeField implements IAttributeField<String>{
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		((GridData)lbl.getLayoutData()).verticalIndent = 2;
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		txt = new MultiLineText(parent);
 		txt.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);

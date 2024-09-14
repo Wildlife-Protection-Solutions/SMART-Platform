@@ -229,7 +229,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 	
 	protected void updateGroupAPilotState() {
 		PatrolTransportType ptt = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
-		boolean showPilot = ptt != null && ptt.getPatrolType() != null && ptt.getPatrolType().getRequiresPilot();
+		boolean showPilot = ptt != null && ptt.getRequiresPilot();
 		lblGroupAPilot.setVisible(showPilot);
 		groupAPilot.getCombo().setVisible(showPilot);
 	}
@@ -567,7 +567,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			return Messages.EditPatrolLegDialog_MandateRequired;
 		}
 		PatrolTransportType pttA = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
-		if (this.groupAPilot != null && pttA.getPatrolType().getRequiresPilot() && this.groupAPilot.getSelection().isEmpty()){
+		if (this.groupAPilot != null && pttA.getRequiresPilot() && this.groupAPilot.getSelection().isEmpty()){
 			return Messages.EditPatrolLegDialog_Error_NoPilot;
 		}		
 		return null;
@@ -615,7 +615,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		
 		//update pilot
 		Employee pilotA = null;
-		if (this.groupAPilot != null && editLeg.getType().getPatrolType().getRequiresPilot()){
+		if (this.groupAPilot != null && editLeg.getType().getRequiresPilot()){
 			pilotA =   (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
 		}	
 		

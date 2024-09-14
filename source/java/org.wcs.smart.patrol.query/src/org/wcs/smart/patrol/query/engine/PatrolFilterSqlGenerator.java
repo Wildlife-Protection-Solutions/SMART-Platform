@@ -42,6 +42,8 @@ import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
@@ -166,6 +168,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	protected String asSql(PatrolFilter filter, IQueryEngine engine) throws SQLException{
 		PatrolQueryOption option = filter.getPatrolOption();
+		
 		if (option.isEmployeeItem()){
 			if (option == PatrolQueryOption.AGENCY ||
 					option == PatrolQueryOption.RANK){
@@ -275,7 +278,13 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
 			String key = SharedUtils.stripQuotes((String)filter.getValue());
 			String p1 = engine.addParameterValue(key);
-			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			
+			if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+				return prefix + "." + option.getColumnName() + " IN ( select a.uuid from " + engine.tableName(PatrolTransportType.class) + " a join " + engine.tableName(PatrolTransportGroup.class) + " b on a.patrol_transport_group_uuid = b.uuid where b.keyid = " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$				
+			}else {
+				return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
+			}
+			
 			
 		}
 		return ""; //$NON-NLS-1$	

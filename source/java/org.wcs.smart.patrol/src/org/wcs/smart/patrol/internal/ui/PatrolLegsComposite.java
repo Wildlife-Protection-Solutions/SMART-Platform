@@ -448,7 +448,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 
 	private boolean isPilotColumnRequired() {
 		for (PatrolLeg leg : legs) {
-			if (leg.getType().getPatrolType().getRequiresPilot()) {
+			if (leg.getType().getRequiresPilot()) {
 				return true;
 			}
 		}
@@ -518,7 +518,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		session.beginTransaction();
 		try{
-			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session);
+			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getPatrolType(), session);
 			mandateOps = PatrolHibernateManager.getActiveMandates(patrol.getConservationArea(), session);
 			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
 			session.getTransaction().rollback();
@@ -897,13 +897,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		doflush(session);
 
 		if (p.getUuid() == null) {
-			p.recalculateType(session);
+			p.recalculateType();
 		}else {
 			//evict patrol object and reload to ensure legs 
 			//are recent before recalculating type
 			//#3630
 			session.evict(p);
-			session.get(Patrol.class, p.getUuid()).recalculateType(session);
+			session.get(Patrol.class, p.getUuid()).recalculateType();
 		}
 		
 		return true;			

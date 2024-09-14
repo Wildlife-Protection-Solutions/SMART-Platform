@@ -119,8 +119,17 @@ public class HibernateManager extends SmartHibernateManager{
 		return openSession(null);
 	}
 	
-	public static Icon loadIcon(IconItem item) {
+	public static void loadIcon(IconItem item, Session session) {
+		if (item == null || item.getIcon() == null) return;
+		if (item.getIcon().getUuid() == null) return;
 		
+		for (IconFile file : item.getIcon().getFiles()) {
+			file.computeFileLocation(session);
+			file.getIconSet().getIsDefault();
+		}		
+	}
+	
+	public static Icon loadIcon(IconItem item) {
 		if (item == null || item.getIcon() == null) return null;
 		if (item.getIcon().getUuid() == null) return item.getIcon();
 		try (Session session = HibernateManager.openSession()) {

@@ -35,7 +35,6 @@ import org.wcs.smart.patrol.query.model.PatrolStartQuarterDateGroupBy;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
-import org.wcs.smart.query.model.filter.date.QuarterDateGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;

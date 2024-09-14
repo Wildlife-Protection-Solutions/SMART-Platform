@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,41 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.advisors;
-
-import java.text.MessageFormat;
+package org.wcs.smart.cybertracker.patrol;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 
+import com.ibm.icu.text.MessageFormat;
+
 /**
- * @sinze 8.0.1
+ * Delete advisor for patrol types (track types) that are now linked
+ * to patrol packages
+ * @since 8.1
  */
 public class PatrolTypeDeleteAdvisor implements IDeleteAdvisor {
 
+	public PatrolTypeDeleteAdvisor() {
+	}
+
 	@Override
 	public String canDelete(Object object, Session session) {
-		if (!(object instanceof PatrolType)){
-			return "Object not of type PatrolType. Can not delete."; //$NON-NLS-1$
-		}
-		PatrolType type = (PatrolType)object;
+		if (!(object instanceof PatrolType)) return "Invalid object type"; //$NON-NLS-1$
 		
-//		if (type.getKeyId().equalsIgnoreCase(PatrolType.DefaultType.MIXED.getKeyId())) {
-//			return MessageFormat.format(Messages.PatrolTypeDeleteAdvisor_systemtracktypenotdelete, PatrolType.DefaultType.MIXED.getKeyId());
-//		}
-		Long cnt = QueryFactory.buildCountQuery(session, Patrol.class,new Object[] {"patrolType", object}); //$NON-NLS-1$
-		if (cnt != 0){
-			return MessageFormat.format(
-					Messages.PatrolTypeDeleteAdvisor_patrolswithtypeexist,
-					new Object[]{cnt, type.getName()});
+		PatrolType pt = (PatrolType)object;
+		
+		long numpackages = session.createQuery("SELECT count(*) FROM PatrolCtPackage WHERE trackType = :type", Long.class) //$NON-NLS-1$
+		.setParameter("type", pt) //$NON-NLS-1$
+		.uniqueResult();
+		
+		if (numpackages > 0) {
+			return MessageFormat.format("There are {0} SMART Mobile patrol packages associated with the ''{1}'' track type. These must be deleted before you can delete the track type.", numpackages, pt.getName());
 		}
 		
 		return null;
-		
 	}
 
 }

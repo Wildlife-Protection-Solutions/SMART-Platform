@@ -35,6 +35,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -58,16 +59,8 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 	private Collection<ListItem> getNamedKeyItem(Session session, Class<? extends NamedKeyItem> clazz, boolean onlyActive) {
 		
 		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
-		CriteriaBuilder cb = session.getCriteriaBuilder();
 		
-		CriteriaQuery<? extends NamedKeyItem> c = cb.createQuery(clazz);
-		Root<? extends NamedKeyItem> from = c.from(clazz);
-		Predicate[] where = new Predicate[onlyActive? 2 : 1];
-		where[0] = from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-		if (onlyActive) where[1] = cb.equal(from.get("isActive"), true); //$NON-NLS-1$
-		c.where(cb.and(where));
-		
-		List<?> teams = session.createQuery(c).getResultList();
+		List<?> teams = getItems(session,clazz, onlyActive);
 		for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
 			NamedKeyItem namedItem = (NamedKeyItem) iterator.next();
 			ListItem item = keyToItem.get(namedItem.getKeyId());
@@ -84,6 +77,18 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 
 	}
 
+	private <T> List<T> getItems(Session session, Class<T> clazz, boolean onlyActive){
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		
+		CriteriaQuery<T> c = cb.createQuery(clazz);
+		Root<T> from = c.from(clazz);
+		Predicate[] where = new Predicate[onlyActive? 2 : 1];
+		where[0] = from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
+		if (onlyActive) where[1] = cb.equal(from.get("isActive"), true); //$NON-NLS-1$
+		c.where(cb.and(where));
+		
+		return session.createQuery(c).getResultList();
+	}
 
 	@Override
 	public List<ListItem> getAgencies(Session session) {
@@ -130,6 +135,33 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		items.addAll(getNamedKeyItem(session, PatrolType.class, true));
 		return items;
+	}
+	
+	@Override
+	public List<ListItem> getActiveTransportGroups(Session session) {
+		List<PatrolType> types = getItems(session, PatrolType.class, true);
+		
+		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
+		
+		for (PatrolType type : types) {
+			if (type.getTransportGroups() == null) continue;
+			
+			
+			for (PatrolTransportGroup group : type.getTransportGroups()) {
+				
+				ListItem item = keyToItem.get(group.getKeyId());
+				if (item == null) {
+					item = new ListItem(null, group.getGroupTypeLabel(), group.getKeyId());
+					keyToItem.put(group.getKeyId(), item);
+				} else if (group.getNames().iterator().next().getLanguage().getCa().equals(
+						SmartDB.getConservationAreaConfiguration()
+								.getMainConservationArea())) {
+					item.updateName(group.getGroupTypeLabel());
+				}
+			}
+		}
+		
+		return new ArrayList<>(keyToItem.values());
 	}
 	
 	public ListItem getPatrolType(Session session, String value) throws Exception{

@@ -33,7 +33,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolderItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.CascadeType;
@@ -267,8 +266,11 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	 * @return <code>true</code> if the patrol has a pilot, <code>false</code> otherwise
 	 */
 	@Transient
-	public boolean hasPilot(){
-		return patrolType != null && patrolType.getRequiresPilot();
+	public boolean hasPilot(){		
+		for(PatrolLeg pl : getLegs()) {
+			if (pl.getType().getRequiresPilot()) return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -282,40 +284,33 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 		}
 	}
 	
+	@Transient
+	public PatrolTransportGroup getGroup() {
+		if (getLegs() == null || getLegs().isEmpty()) return null;
+		
+		PatrolTransportType type = getLegs().get(0).getType();
+		for (PatrolLeg l : getLegs()) {
+			if (l.getType().getTransportGroup() == null && type.getTransportGroup() == null) continue;
+			if (l.getType().getTransportGroup() != null && l.getType().getTransportGroup().equals(type.getTransportGroup())) continue;
+			return PatrolTransportGroup.MIXED;
+		}
+		return type.getTransportGroup();		
+	}
+	
+	
 	/**
 	 * Calculates and updates the type of the patrol based on transport types in assigned legs.
 	 */
 	@Transient
-	public void recalculateType(Session session) {
-		if (getLegs() == null || getLegs().isEmpty())
-			return;
-		
-		boolean isMixed = false;
+	public void recalculateType() {
+		if (getLegs() == null || getLegs().isEmpty()) return;
+		if (getLegs().get(0).getType() == null) return;
 		PatrolType type = getLegs().get(0).getType().getPatrolType();
+		setPatrolType(type);
 		for (PatrolLeg leg : getLegs()){
 			if (!type.equals(leg.getType().getPatrolType())) {
-				isMixed = true;
-				break;
+				throw new RuntimeException("Cannot mix transport types from different track types in a single patrol"); //$NON-NLS-1$
 			}
-		}
-		if (isMixed && !type.getKeyId().equals(PatrolType.DefaultType.MIXED.getKeyId())) {
-			//set to mixed
-			PatrolType mixed = QueryFactory.buildQuery(session, PatrolType.class,
-					new Object[] {"conservationArea", getConservationArea()}, //$NON-NLS-1$
-					new Object[] {"keyId", PatrolType.DefaultType.MIXED.getKeyId()}).uniqueResult(); //$NON-NLS-1$
-			if (mixed == null) {
-				mixed = new PatrolType();
-				mixed.setConservationArea(getConservationArea());
-				mixed.setIsActive(true);
-				mixed.setKeyId(PatrolType.DefaultType.MIXED.getKeyId());
-				mixed.updateName(getConservationArea().getDefaultLanguage(), PatrolType.DefaultType.MIXED.name());
-				mixed.setName(PatrolType.DefaultType.MIXED.name());
-				mixed.setRequiresPilot(true);
-				session.persist(mixed);
-			}
-			setPatrolType(mixed);
-		}else {
-			setPatrolType(type);
 		}
 	}
 	

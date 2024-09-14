@@ -219,6 +219,7 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_transporttype","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_transportgroup","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_type","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_leader","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -247,7 +248,8 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		
+		populateTransportGroup("pl_transport_uuid", "p_transportgroup", c, session, queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
+
 		progress.subTask(Messages.DerbyWaypointEngine_TrackData);
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_type_uuid", "p_type", c, session);  //$NON-NLS-1$//$NON-NLS-2$
@@ -455,11 +457,13 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
 		it.setTeam(rs.getString("p_team"));	 //$NON-NLS-1$
 		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
-		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
-		it.setPatrolTypeUuid(UuidUtils.byteToUUID(rs.getBytes("p_type_uuid"))); //$NON-NLS-1$
+		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$		
 		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
+		it.setTransportGroup(rs.getString("p_transportgroup")); //$NON-NLS-1$
+		it.setPatrolTypeUuid(UuidUtils.byteToUUID(rs.getBytes("p_type_uuid"))); //$NON-NLS-1$
+		it.setPatrolTransportTypeUuid(UuidUtils.byteToUUID(rs.getBytes("pl_transport_uuid"))); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$

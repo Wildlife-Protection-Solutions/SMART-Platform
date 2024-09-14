@@ -44,6 +44,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -389,8 +390,17 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 		UUID ptypeuuid = UuidUtils.byteToUUID(rs.getBytes("r_p_type_uuid")); //$NON-NLS-1$
 		it.setPatrolType(getName(ptypeuuid, cauuid, session)); 
 		it.setPatrolTypeUuid(ptypeuuid);
+		it.setPatrolTransportTypeUuid(UuidUtils.byteToUUID(rs.getBytes("r_pl_transport_uuid"))); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
-		it.setTransportType(getName(UuidUtils.byteToUUID(rs.getBytes("r_pl_transport_uuid")), cauuid, session)); //$NON-NLS-1$
+		
+		UUID transportUuid = UuidUtils.byteToUUID(rs.getBytes("r_pl_transport_uuid")); //$NON-NLS-1$
+		it.setTransportType(getName(transportUuid, cauuid, session)); 
+		
+		PatrolTransportType tt = session.get(PatrolTransportType.class, transportUuid);
+		if (tt.getTransportGroup() != null) {
+			it.setTransportGroup(getName(tt.getTransportGroup().getUuid(), cauuid, session));
+		}
+		
 		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
 		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date").toLocalDate()); //$NON-NLS-1$
 		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date").toLocalDate()); //$NON-NLS-1$

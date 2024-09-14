@@ -749,7 +749,24 @@ public enum PsqlFilterToSqlGenerator {
 			}
 		}	
 		
-		
+		if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+			String key = SharedUtils.stripQuotes((String)filter.getValue());
+			String p1 = engine.addParameterValue(key);
+			
+			PatrolQueryOption ttoption = PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY;
+			String prefix = engine.tablePrefix(ttoption.getPatrolAttributeClass());
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(prefix + "." + ttoption.getColumnName()); //$NON-NLS-1$
+			sb.append(" IN ( SELECT a.uuid FROM "); //$NON-NLS-1$
+			sb.append(engine.tableName(ttoption.getSourceClass()));
+			sb.append(" a join "); //$NON-NLS-1$
+			sb.append(engine.tableName(option.getSourceClass()));
+			sb.append(" b on b.uuid = a.patrol_transport_group_uuid " ); //$NON-NLS-1$
+			sb.append(" WHERE b.keyid = " + p1 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			return sb.toString();
+		}
 		
 		String prefix = engine.tablePrefix(option.getPatrolAttributeClass());
 		if (prefix == null){

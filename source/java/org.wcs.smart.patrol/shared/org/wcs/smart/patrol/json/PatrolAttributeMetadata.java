@@ -167,7 +167,7 @@ public class PatrolAttributeMetadata {
 				List<PatrolTransportType> types = QueryFactory.buildQuery(session, PatrolTransportType.class, new Object[] {"conservationArea",ca}).list(); //$NON-NLS-1$
 				StringBuilder sb = new StringBuilder();
 				for (PatrolTransportType type : types) {
-					if (type.getPatrolType().getRequiresPilot()) {
+					if (type.getRequiresPilot()) {
 						if (sb.length() > 0) sb.append(" OR "); //$NON-NLS-1$
 						sb.append(FixedPatrolMetadata.TRANSPORT_TYPE.key);
 						sb.append(" = '"); //$NON-NLS-1$

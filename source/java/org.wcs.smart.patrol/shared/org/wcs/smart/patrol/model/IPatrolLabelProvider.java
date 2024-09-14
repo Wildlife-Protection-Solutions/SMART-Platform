@@ -51,6 +51,9 @@ public interface IPatrolLabelProvider extends ISharedLabelProvider {
 	public static final String MANDATENAME_KEY = "mandatenamekey"; //$NON-NLS-1$
 	public static final String MANDATEACTIVE_KEY = "mandateactivekey"; //$NON-NLS-1$
 	
+	public static final String MIXED_KEY = "mixedkey"; //$NON-NLS-1$
+	public static final String NOGROUP_KEY = "notransportgroupkey"; //$NON-NLS-1$
+	
 	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedPatrolMetadata metadataOption);
 	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.PatrolWaypointMetadata metadataOption);
 

@@ -74,7 +74,8 @@ public class FixedQueryColumn extends QueryColumn {
 		PATROL_LEG_MEMBERS(ColumnType.STRING, "patrolleg:members"), //$NON-NLS-1$
 		PATROL_LEG_START_DATE(ColumnType.DATE, "patrolleg:startdate"), //$NON-NLS-1$
 		PATROL_LEG_END_DATE(ColumnType.DATE, "patrolleg:enddate"), //$NON-NLS-1$
-		TRANSPORT_TYPE( ColumnType.STRING,"patrol:transporttype"), //$NON-NLS-1$
+		TRANSPORT_GROUP( ColumnType.STRING,"patrol:transportgroup"), //$NON-NLS-1$
+		TRANSPORT_TYPE( ColumnType.STRING,"patrol:transporttype"), //$NON-NLS-1$		
 		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME(ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
@@ -178,6 +179,8 @@ public class FixedQueryColumn extends QueryColumn {
 				return  item.getPatrolType();
 			case TRANSPORT_TYPE:
 				return item.getTransportType();
+			case TRANSPORT_GROUP:
+				return item.getTransportGroup();
 			case CA_ID:
 				return item.getConservationAreaId();
 			case CA_NAME:

@@ -260,4 +260,11 @@
             viewer="org.wcs.smart.cybertracker.patrol.query.MobileDeviceIdGroupByPatrolContribution">
       </GroupByItem>
    </extension>
+   <extension
+         point="org.wcs.smart.caDeleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.cybertracker.patrol.PatrolTypeDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.PatrolType">
+      </DeleteAdvisor>
+   </extension>
 </plugin>

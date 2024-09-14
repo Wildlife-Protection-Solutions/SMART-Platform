@@ -866,6 +866,65 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
+	public static JSONObject convertKeyOptions(MetadataFieldValue metadataValue, 
+			List<? extends NamedKeyItem> items, String screenKey, 
+			String defaultLabel, HashMap<String,String> translations, 
+			URI metadataIcon,
+			boolean isFixed, Session session, ConservationArea ca,
+			IconSet set, Path workingDir,
+			BiConsumer<NamedKeyItem, JSONObject> customValuesAdded) throws IOException {
+		
+		boolean isRequired = false;
+		if (metadataValue != null) isRequired = metadataValue.isRequired();
+		
+		JSONObject optionType = new JSONObject();
+		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+//		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
+		
+		optionType.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			optionType.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
+		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
+		if (metadataValue != null) {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, metadataValue.isVisible());
+			if (!metadataValue.isVisible()) {
+				if (metadataValue.getUuidValue() != null) {
+					optionType.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(metadataValue.getUuidValue()));
+				}else {
+					optionType.put(JSON_DEFAULT_PROP_KEY, null);
+				}
+			}
+		}else {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
+		}
+		
+		addMetadataIconToJson(metadataIcon, workingDir, optionType);
+				
+		JSONArray optionOptions = new JSONArray();
+		
+		for (NamedKeyItem t : items) {
+			JSONObject ttype = new JSONObject();
+			ttype.put(JSON_PROP_UUID, UuidUtils.uuidToString(t.getUuid()));
+			ttype.put(JSON_PROP_KEY, t.getKeyId()); 
+			ttype.put(JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ca.getDefaultLanguage()));
+			for (Label l : t.getNames()) {
+				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());	
+			}
+			customValuesAdded.accept(t, ttype);
+			optionOptions.add(ttype);
+			if (t instanceof IconItem) {
+				addIconToJson((IconItem)t, set, ttype, workingDir, session);
+			}
+		}
+		optionType.put(JSON_OPTION_PROP_KEY, optionOptions);
+		
+		JSONObject teamTypeOp = new JSONObject();
+		teamTypeOp.put(screenKey, optionType);
+		return teamTypeOp;
+	}
+	
 	public static JSONObject createConfigurableModelUuid(String key, ConfigurableModel cm) {
 		if (cm == null || cm.getUuid() == null) return null;
 		JSONObject dataType = new JSONObject();

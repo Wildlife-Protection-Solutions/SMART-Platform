@@ -95,6 +95,7 @@ import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolAttributeTreeNode;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -998,6 +999,7 @@ public class SummaryItemLabelProvider {
 				results.add(addnull, new ListItem(null, name, IFilter.NULL_OP));
 			}
 		}else if (type == PatrolQueryOptionType.KEY){
+			
 			Class<?> queryClazz = null;
 			if (item.getOption() == PatrolQueryOption.TEAM_KEY){
 				queryClazz = Team.class;
@@ -1007,26 +1009,62 @@ public class SummaryItemLabelProvider {
 				queryClazz = PatrolMandate.class;
 			}else if (item.getOption() == PatrolQueryOption.PATROL_TYPE) {
 				queryClazz = PatrolType.class;
+			}else if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY || 
+					item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+				queryClazz = PatrolTransportGroup.class;
 			}
 			if (queryClazz == null){
 				throw new UnsupportedOperationException(Messages.getString("SummaryItemLabelProvider.PatrolQueryOptionNotSupported", l) + item.getOption());	 //$NON-NLS-1$
 			}
 			
-			CriteriaQuery<?> c = cb.createQuery(queryClazz);
-			Root<?> from = c.from(queryClazz);
-			c.where(cb.and(
-					from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()), //$NON-NLS-1$ //$NON-NLS-2$
-					cb.equal(from.get("isActive"), true) //$NON-NLS-1$
-					));
+			Query<?> q = null;
+			if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY || 
+					item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY ) {
+				q = s.createQuery("SELECT a FROM PatrolTransportGroup a join a.patrolType b where b.conservationArea.uuid in (:cas) ", PatrolTransportGroup.class) //$NON-NLS-1$
+				.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+				
+			}else {
+				CriteriaQuery<?> c = cb.createQuery(queryClazz);
+				Root<?> from = c.from(queryClazz);
+				c.where(cb.and(
+						from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()), //$NON-NLS-1$ //$NON-NLS-2$
+						cb.equal(from.get("isActive"), true) //$NON-NLS-1$
+						));
+				q = s.createQuery(c);
+			}
 			
 			//unique values based on keys
 			List<ListItem> data = new ArrayList<>();
 			HashSet<String> existingKeys = new HashSet<String>();
-			for (Iterator<?> it =s.createQuery(c).list().iterator(); it.hasNext();){
+			for (Iterator<?> it = q.list().iterator(); it.hasNext();){
 				NamedKeyItem nkitem = (NamedKeyItem)it.next();
 				if (!existingKeys.contains(nkitem.getKeyId())){
-					data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));
+					String name = nkitem.getName();
+					if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY ||
+							item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+						name = MessageFormat.format("{0} ({1})", name, ((PatrolTransportGroup)nkitem).getPatrolType().getName());
+					}
+					data.add(new ListItem(null, name, nkitem.getKeyId()));
 					existingKeys.add(nkitem.getKeyId());
+				}
+			}
+			
+			if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY || 
+					item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+				//we need to add the None/"MIXED" options here; one for each patrol type
+				existingKeys.clear();
+				List<PatrolType> types = s.createQuery("FROM PatrolType WHERE conservationArea.uuid in (:ca) and isActive", PatrolType.class) //$NON-NLS-1$
+						.setParameterList("ca", caFilter.getConservationAreaFilterIds()).list(); //$NON-NLS-1$
+				for (PatrolType ptype : types) {
+					if (existingKeys.contains(ptype.getKeyId())) continue;
+					existingKeys.add(ptype.getKeyId());
+					
+					if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+						String[] itemdata = PatrolQueryOption.getMixedListItem(ptype, l);
+						data.add(new ListItem(null, itemdata[0], itemdata[1]));
+					}
+					String[] itemdata = PatrolQueryOption.getNoneListItem(ptype, l);
+					data.add(new ListItem(null, itemdata[0], itemdata[1]));
 				}
 			}
 			

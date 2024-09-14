@@ -266,11 +266,15 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	private void update80o81(Session session) {
 		String[] sql = new String[] {
+			"alter table smart.icon drop constraint ICON_CAUUID_FK ", //$NON-NLS-1$
+
 			"CREATE TABLE smart.ct_device(uuid char(16) for bit data not null, device_id varchar(128), ca_uuid char(16) for bit data not null, icon_uuid char(16) for bit data, name varchar(1024), primary key (uuid, ca_uuid)) ", //$NON-NLS-1$
 			"ALTER TABLE smart.ct_device ADD CONSTRAINT ct_device_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 			"ALTER TABLE smart.ct_device ADD CONSTRAINT ct_device_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 			
-			"ALTER TABLE smart.ct_incident_link add column ct_device_id varchar(36)" //$NON-NLS-1$
+			"ALTER TABLE smart.ct_incident_link add column ct_device_id varchar(36)", //$NON-NLS-1$
+			"alter table smart.icon add constraint ICON_CAUUID_FK foreign key (ca_uuid) references smart.conservation_area(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
+
 		};
 		
 		for (String s : sql) {

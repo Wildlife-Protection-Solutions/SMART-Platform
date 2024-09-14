@@ -29,6 +29,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 
@@ -58,19 +59,22 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.PatrolLabelProvider_PatrolTypeColumnName1;
 		if (item.equals(MANDATENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.PatrolLabelProvider_MandateActiveColumnName;
+		if (item.equals(MIXED_KEY)) return "[Mixed]";
+		if (item.equals(NOGROUP_KEY)) return "[None]";
 		
 		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
 			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
 		}
 		
-		if (item == PatrolType.DefaultType.AIR) {
-			return Messages.PatrolType_AirName;
-		}else if (item == PatrolType.DefaultType.GROUND) {
+		if (item == PatrolType.DefaultType.PATROL) {
+			return "Patrol";
+		}
+		if (item == PatrolTransportGroup.DefaultType.GROUND) {
 			return Messages.PatrolType_GroundName;
-		}else if (item == PatrolType.DefaultType.MARINE) {
+		}else if (item == PatrolTransportGroup.DefaultType.MARINE) {
 			return Messages.PatrolType_WaterName;
-		}else if (item == PatrolType.DefaultType.MIXED) {
-			return Messages.PatrolType_MixedName;
+		}else if (item == PatrolTransportGroup.DefaultType.AIR) {
+			return Messages.PatrolType_AirName;
 		}
 		return null;
 	}

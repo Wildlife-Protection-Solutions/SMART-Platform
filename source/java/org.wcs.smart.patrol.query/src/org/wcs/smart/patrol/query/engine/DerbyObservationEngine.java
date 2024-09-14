@@ -276,7 +276,6 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 			
 		}
 	}
-
 	
 	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
 		
@@ -339,6 +338,7 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_transporttype","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_transportgroup","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_type","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_leader","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -374,6 +374,7 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		populateTransportGroup("pl_transport_uuid", "p_transportgroup", c, session, queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
 		
 		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
 		progress.split(3);
@@ -639,8 +640,8 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 				"ca_uuid", "ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","p_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"pl_uuid", "p_legid","p_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_type", "p_type_uuid", "p_armed","p_transporttype", "pl_transport_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				"p_transportgroup", "pl_uuid", "p_legid","p_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"p_pilot","wp_uuid","wp_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_lastmodified","wp_lastmodifiedbyname", //$NON-NLS-1$ //$NON-NLS-2$
@@ -701,9 +702,11 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
 		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
-		it.setPatrolTypeUuid(UuidUtils.byteToUUID(rs.getBytes("p_type_uuid")));; //$NON-NLS-1$
+		it.setPatrolTypeUuid(UuidUtils.byteToUUID(rs.getBytes("p_type_uuid"))); //$NON-NLS-1$
 		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
+		it.setTransportGroup(rs.getString("p_transportgroup")); //$NON-NLS-1$
+		it.setPatrolTransportTypeUuid(UuidUtils.byteToUUID(rs.getBytes("pl_transport_uuid"))); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$

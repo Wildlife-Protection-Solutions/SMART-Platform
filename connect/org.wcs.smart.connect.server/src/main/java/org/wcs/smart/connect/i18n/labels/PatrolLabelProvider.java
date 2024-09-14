@@ -29,6 +29,7 @@ import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata.PatrolWaypointMetadata;
 import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 
@@ -57,19 +58,21 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.getString("PatrolLabelProvider.TransportPatrolColumn1", l); //$NON-NLS-1$
 		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn", l); //$NON-NLS-1$
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.MandateActiveColumn", l); //$NON-NLS-1$
+		if (item.equals(MIXED_KEY)) return "[Mixed]";
+		if (item.equals(NOGROUP_KEY)) return "[None]";
 		
 		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
 			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
 		}
 
-		if (item == PatrolType.DefaultType.AIR) {
+		if (item == PatrolTransportGroup.DefaultType.AIR) {
 			return Messages.getString("PatrolLabelProvider.AirPatrol", l); //$NON-NLS-1$
-		}else if (item == PatrolType.DefaultType.GROUND) {
+		}else if (item == PatrolTransportGroup.DefaultType.GROUND) {
 			return Messages.getString("PatrolLabelProvider.GroundPatrol", l); //$NON-NLS-1$
-		}else if (item == PatrolType.DefaultType.MARINE) {
+		}else if (item == PatrolTransportGroup.DefaultType.MARINE) {
 			return Messages.getString("PatrolLabelProvider.WaterPatrol", l); //$NON-NLS-1$
-		}else if (item == PatrolType.DefaultType.MIXED) {
-			return Messages.getString("PatrolLabelProvider.MixedPatrol", l); //$NON-NLS-1$
+		}else if (item == PatrolType.DefaultType.PATROL) {
+			return "Patrol";
 		}
 		return null;
 	}

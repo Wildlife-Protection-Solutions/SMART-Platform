@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -48,6 +49,8 @@ public class PatrolAttributePatrolType implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private PatrolAttributePatrolTypePk id = new PatrolAttributePatrolTypePk();	
+	private boolean isActive;
+
 	
 	public PatrolAttributePatrolType(){
 	}
@@ -67,6 +70,24 @@ public class PatrolAttributePatrolType implements Serializable {
 	public void setId(PatrolAttributePatrolTypePk id){
 		this.id = id;
 	}
+	
+	/**
+	 * 
+	 * @return <code>true</code> if patrol type active, <code>false</code> otherwise
+	 */
+	@Column(name = "is_active")
+	public boolean getIsActive(){
+		return this.isActive;
+	}
+	/**
+	 * 
+	 * @param isActive  <code>true</code> if patrol type active, <code>false</code> otherwise
+	 */
+	public void setIsActive(boolean isActive){
+		this.isActive = isActive;
+	}
+	
+
 	
 	/**
 	 * 

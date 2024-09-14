@@ -39,6 +39,7 @@ public class PatrolTransportCsvExportConfig extends AbstractCsvExportConfig {
 
 	public static final String TRACKTYPE = "tracktype"; //$NON-NLS-1$
 	public static final String TRANSPORTTYPE = "transporttype"; //$NON-NLS-1$
+	public static final String GROUP = "group"; //$NON-NLS-1$
 	
 	private PatrolTransportCsvExporter exporter = new PatrolTransportCsvExporter();
 

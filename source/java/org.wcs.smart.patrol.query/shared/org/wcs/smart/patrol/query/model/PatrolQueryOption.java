@@ -1,5 +1,6 @@
 package org.wcs.smart.patrol.query.model;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -17,10 +18,12 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
@@ -53,6 +56,10 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	
 	PATROL_TRANSPORT_TYPE("transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 	PATROL_TRANSPORT_TYPE_KEY("transportkey", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
+	
+	PATROL_TRANSPORT_GROUP_KEY("transgroupkey", "transport_uuid", PatrolLeg.class, PatrolTransportGroup.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
+	PATROL_TRANSPORT_PATROL_GROUP_KEY("patroltransgroupkey", "transport_uuid", PatrolLeg.class, PatrolTransportGroup.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
+	
 	AGENCY("agency", "agency_uuid", PatrolLegMember.class, Agency.class, PatrolQueryOptionType.UUID), //$NON-NLS-1$ //$NON-NLS-2$
 	AGENCY_KEY("agencykey", "agency_uuid", PatrolLegMember.class, Agency.class, PatrolQueryOptionType.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 	RANK("rank", "rank_uuid", PatrolLegMember.class, Rank.class, PatrolQueryOptionType.UUID), //$NON-NLS-1$ //$NON-NLS-2$
@@ -147,6 +154,11 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 		Object x = getObject(session, uuid);
 		if (x != null){
 			if (x instanceof NamedItem){
+				if (this == PATROL_TRANSPORT_GROUP_KEY) {
+					PatrolTransportGroup group = (PatrolTransportGroup)x;
+					return group.getGroupTypeLabel();
+					
+				}
 				return ((NamedItem) x).getName();
 			}else if (x instanceof Employee){
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(x, l);
@@ -197,5 +209,36 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 		return data.get(0);
 	}
 	
+	/**
+	 * Mixed Patrol Transport Group name and key for use in summary queries
+	 * 
+	 * @param type
+	 * @return {name, key}
+	 */
+	public static String[] getMixedListItem(PatrolType type, Locale l) {
+		return getMixedListItem(type.getName(), type.getKeyId(), l);
+	}
+	
+	/**
+	 * Mixed Patrol Transport Group name and key for use in summary queries
+	 * 
+	 * @param type
+	 * @return {name, key}
+	 */
+	public static String[] getMixedListItem(String patrolTypeName, String patrolTypeKey, Locale l) {
+		String name = MessageFormat.format("{0} ({1})", SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(IPatrolLabelProvider.MIXED_KEY, l), patrolTypeName); //$NON-NLS-1$
+		String key = patrolTypeKey + ".mixed"; //$NON-NLS-1$
+		return new String[]{name, key};
+	}
+	
+	public static String[] getNoneListItem(PatrolType type, Locale l) {
+		return getNoneListItem(type.getName(), type.getKeyId(), l);
+	}
+	
+	public static String[] getNoneListItem(String patrolTypeName, String patrolTypeKey, Locale l) {
+		String name = MessageFormat.format("{0} ({1})", SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(IPatrolLabelProvider.NOGROUP_KEY, l), patrolTypeName); //$NON-NLS-1$ 
+		String key = patrolTypeKey + ".none"; //$NON-NLS-1$
+		return new String[]{name, key};
+	}
 	
 }

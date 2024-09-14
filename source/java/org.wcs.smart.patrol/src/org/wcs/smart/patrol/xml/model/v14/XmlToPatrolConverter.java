@@ -64,7 +64,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -202,12 +201,6 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		patrol.setComment(xml.getComment());
 		patrol.setId(xml.getId());
 		
-		org.wcs.smart.patrol.model.PatrolType type = findPatrolType(xml.getPatrolType());
-		if (type == null) {
-			throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_TrackTypeNotFound, xml.getPatrolType()));
-		}
-		patrol.setPatrolType(type);
-		
 		if (xml.getObjective() != null){
 			patrol.setObjective(xml.getObjective().getDescription());
 		}
@@ -280,6 +273,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		for (PatrolLegType legxml : xml.getLegs()){
 			patrol.getLegs().add(convertPatrolLeg(legxml, patrol));
 		}		
+		patrol.recalculateType();
 	}
 	
 	private PatrolAttributeListItem findListItem(PatrolAttribute pa, String key) {
@@ -331,39 +325,19 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 		
 		
-		PatrolTransportType ttype = 
-				(PatrolTransportType)findTransportationValue(xml.getTransportType().getLanguageCode(), 
-						xml.getTransportType().getValue(), patrol.getPatrolType());
+		PatrolTransportType ttype = null;
+		if (xml.getTransportTypeKey() != null) {
+			ttype = findTransportationTypeFromKey(xml.getTransportTypeKey());
+		}
+		if (ttype == null) {
+			ttype = findTransportationValue(xml.getTransportType().getLanguageCode(), xml.getTransportType().getValue());
+		}
 				
 		if (ttype == null){
 			throw new Exception(MessageFormat.format(
 				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound1, new Object[]{xml.getTransportType().getValue(), 
 						xml.getTransportType().getLanguageCode(), 
 						patrol.getPatrolType().getName()}));
-		}
-		boolean found = false;
-		
-		if (!patrol.getPatrolType().getKeyId().equalsIgnoreCase(org.wcs.smart.patrol.model.PatrolType.DefaultType.MIXED.getKeyId())) {
-			//validate that the transportation type is valid for the patrol type
-			session.beginTransaction();
-			List<PatrolTransportType> types =  null;
-			try{
-				types =  PatrolHibernateManager.getPatrolTransporationTypes(ca, session, patrol.getPatrolType());
-			}finally{
-				session.getTransaction().rollback();
-			}
-			
-			for (PatrolTransportType t: types){
-				if (t.equals(ttype)){
-					found = true;
-					break;
-				}
-			}
-			if (!found){
-				throw new Exception(MessageFormat.format(
-						Messages.XmlToPatrolConverter_Error_InvalidTransportType1, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
-								patrol.getPatrolType().getName()}));
-			}
 		}
 		leg.setType(ttype);
 		
@@ -855,15 +829,6 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		return HibernateManager.findEmployeeByName(type.getGivenName(), type.getFamilyName(), ca, session);
 	}
 	
-	private org.wcs.smart.patrol.model.PatrolType findPatrolType(String keyId) {
-		org.wcs.smart.patrol.model.PatrolType type = session.createQuery("FROM PatrolType WHERE conservationArea = :ca and keyId = :key", org.wcs.smart.patrol.model.PatrolType.class) //$NON-NLS-1$
-		.setParameter("ca", ca) //$NON-NLS-1$
-		.setParameter("key", keyId.toLowerCase()) //$NON-NLS-1$
-		.uniqueResult();
-		
-		return type;
-	}
-	
 	private NamedItem findValue(String langCode, String value, Class<?> hibernateObject){
 		
 		String sql = "SELECT c FROM Language a, Label b, " + hibernateObject.getSimpleName() + " c WHERE b.id.language.uuid = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -884,14 +849,24 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 	}
 	
-	private NamedItem findTransportationValue(String langCode, String value, 
-			org.wcs.smart.patrol.model.PatrolType type){
+	private PatrolTransportType findTransportationTypeFromKey(String keyId){
+		return QueryFactory.buildQuery(session,  PatrolTransportType.class, 
+				new Object[] {"keyId", keyId}, //$NON-NLS-1$
+				new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
 		
-		for (PatrolTransportType ttype : type.getTransportTypes()) {
-			for (Label l : ttype.getNames()) {
-				if (l.getLanguage().getCode().equalsIgnoreCase(langCode) && 
-						l.getValue().equalsIgnoreCase(value)) {
-					return ttype;
+	}
+		
+	private PatrolTransportType findTransportationValue(String langCode, String value){
+		List<org.wcs.smart.patrol.model.PatrolType> types = QueryFactory.buildQuery(session,  org.wcs.smart.patrol.model.PatrolType.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		
+		for (org.wcs.smart.patrol.model.PatrolType type : types) {
+			for (PatrolTransportType ttype : type.getTransportTypes()) {
+				for (Label l : ttype.getNames()) {
+					if (l.getLanguage().getCode().equalsIgnoreCase(langCode) && 
+							l.getValue().equalsIgnoreCase(value)) {
+						return ttype;
+					}
 				}
 			}
 		}

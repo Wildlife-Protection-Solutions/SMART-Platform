@@ -87,8 +87,12 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion == null) {
 			createTables(session);
 			update10to20(session);
+			update20to30(session);
 		}else if (currentVersion.equals(PatrolCyberTrackerPlugIn.DB_VERSION_1)) {
 			update10to20(session);
+			update20to30(session);
+		}else if (currentVersion.equals(PatrolCyberTrackerPlugIn.DB_VERSION_2)) {
+			update20to30(session);
 		}
 	}
 	
@@ -117,6 +121,28 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, PatrolCyberTrackerPlugIn.DB_VERSION_2, session);
+	}
+
+	
+	private void update20to30(Session session) {
+		String[] sql = new String[] {
+				"ALTER TABLE smart.ct_patrol_package add column patrol_type_uuid char(16) for bit data ", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_patrol_type_uuid_fk FOREIGN KEY (patrol_type_uuid) REFERENCES smart.patrol_type(UUID) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"UPDATE smart.ct_patrol_package set patrol_type_uuid = (select uuid from smart.patrol_type where keyid = 'patrol' and smart.patrol_type.ca_uuid =  smart.ct_patrol_package.ca_uuid)", //$NON-NLS-1$
+				
+				"create table smart.pptemp (ca_uuid char(16) for bit data, uuid char(16) for bit data)", //$NON-NLS-1$
+				"insert into smart.pptemp (ca_uuid, uuid)  select a.ca_uuid, a.uuid  from (select  ca_uuid, min(keyid) as keyid  from smart.patrol_type  group by ca_uuid) b join smart.patrol_type a on a.ca_uuid = b.ca_uuid and a.keyid = b.keyid", //$NON-NLS-1$
+				"UPDATE smart.ct_patrol_package set patrol_type_uuid = (select uuid from smart.pptemp where smart.ct_patrol_package.ca_uuid = smart.pptemp.ca_uuid) where patrol_type_uuid is null", //$NON-NLS-1$
+				"drop table smart.pptemp", //$NON-NLS-1$
+				
+				"alter table smart.ct_patrol_package alter column patrol_type_uuid set not null", //$NON-NLS-1$
+		};
+		
+		for (String s : sql) {
+			session.createNativeMutationQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, PatrolCyberTrackerPlugIn.DB_VERSION_3, session);
 	}
 
 

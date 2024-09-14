@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,6 +47,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
@@ -170,6 +172,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		}
 		
 		List<PatrolAttribute> attributes = null;
+		List<PatrolType> types = null;
 		try(Session session = HibernateManager.openSession()){
 			attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
@@ -179,15 +182,24 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 				HibernateManager.load(a.getAttributeList());
 				a.loadTree(session);
 			});
+			
+			types = PatrolHibernateManager.getActivePatrolTypes(patrol.getConservationArea(), session);
 		}
-		for (NewPatrolWizardPage p : thisitems) {
-			if (!p.getName().equals(PatrolAttributeWizardPage.ID)) continue;
-			if (attributes == null || attributes.isEmpty()) {
-				thisitems.remove(p);
-			}else {
-				((PatrolAttributeWizardPage)p).setAttributes(attributes);
+		
+		
+		for (Iterator<NewPatrolWizardPage> iterator = thisitems.iterator(); iterator.hasNext();) {
+			NewPatrolWizardPage p = (NewPatrolWizardPage) iterator.next();
+			
+			if (p.getName().equals(PatrolAttributeWizardPage.ID)) {
+				if (attributes == null || attributes.isEmpty()) {
+					iterator.remove();
+				}
+			}else if (p.getName().equals(TrackTypeWizardPage.ID)) {
+				if (types.size() == 1) {
+					iterator.remove();
+					patrol.setPatrolType(types.get(0));
+				}
 			}
-			break;
 		}
 		
 		//apply sort rules

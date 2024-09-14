@@ -165,10 +165,52 @@ public class PatrolOptionData implements IPatrolOptionData{
 						data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getAgencies(session);
 					}else if (option == PatrolQueryOption.PATROL_TYPE) {
 						data = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+					}else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+						List<ListItem> groups =PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session);
+						List<ListItem> ptypes = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+						for (ListItem li : ptypes ) {
+							String[] itemdata = PatrolQueryOption.getNoneListItem(li.getName(), li.getKey(), Locale.getDefault());
+							groups.add(new ListItem(null, itemdata[0], itemdata[1]));
+						}
+						data = groups;
+					}else if (option == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+						List<ListItem> groups = PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session);
+						//one mixed per patrol type
+						List<ListItem> ptypes = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+						for (ListItem li : ptypes ) {
+							String[] itemdata = PatrolQueryOption.getMixedListItem(li.getName(), li.getKey(), Locale.getDefault());
+							groups.add(new ListItem(null, itemdata[0], itemdata[1]));
+							
+							itemdata = PatrolQueryOption.getNoneListItem(li.getName(), li.getKey(), Locale.getDefault());
+							groups.add(new ListItem(null, itemdata[0], itemdata[1]));
+						}
+						data = groups;
+						
 					}
 				}else {
 					if (option == PatrolQueryOption.PATROL_TYPE) {
 						data = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+					}else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+						List<ListItem> groups = PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session);
+						List<ListItem> ptypes = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+						for (ListItem li : ptypes ) {
+							String[] itemdata = PatrolQueryOption.getNoneListItem(li.getName(), li.getKey(), Locale.getDefault());
+							groups.add(new ListItem(null, itemdata[0], itemdata[1]));
+						}
+						data = groups;
+					}else if (option == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+						List<ListItem> groups = PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session);
+						//one mixed per patrol type
+						List<ListItem> ptypes = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+						for (ListItem li : ptypes ) {
+							String[] itemdata = PatrolQueryOption.getMixedListItem(li.getName(), li.getKey(), Locale.getDefault());
+							groups.add(new ListItem(null, itemdata[0], itemdata[1]));
+							
+							itemdata = PatrolQueryOption.getNoneListItem(li.getName(), li.getKey(), Locale.getDefault());
+							groups.add(new ListItem(null, itemdata[0], itemdata[1]));
+						}
+						data = groups;
+						
 					}
 				}
 				if (data != null){
@@ -266,6 +308,25 @@ public class PatrolOptionData implements IPatrolOptionData{
 			List<ListItem> types = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);				
 			for (ListItem t : types){
 				items.add(new ListItem(null, t.getName(), t.getKey()));
+			}
+			
+		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+			items.addAll(PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session));
+			List<ListItem> ptypes = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+			for (ListItem li : ptypes ) {
+				String[] itemdata = PatrolQueryOption.getNoneListItem(li.getName(), li.getKey(), Locale.getDefault());
+				items.add(new ListItem(null, itemdata[0], itemdata[1]));
+			}
+		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
+			items.addAll(PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session));
+			//one mixed per patrol type
+			List<ListItem> ptypes = PatrolQueryHibernateManager.getInstance().getActivePatrolTypes(session);
+			for (ListItem li : ptypes ) {
+				String[] itemdata = PatrolQueryOption.getMixedListItem(li.getName(), li.getKey(), Locale.getDefault());
+				items.add(new ListItem(null, itemdata[0], itemdata[1]));
+				
+				itemdata = PatrolQueryOption.getNoneListItem(li.getName(), li.getKey(), Locale.getDefault());
+				items.add(new ListItem(null, itemdata[0], itemdata[1]));
 			}
 			
 		}else if (option == PatrolQueryOption.CM) {

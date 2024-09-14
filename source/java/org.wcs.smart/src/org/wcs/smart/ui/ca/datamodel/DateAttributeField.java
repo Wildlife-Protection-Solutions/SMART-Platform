@@ -71,6 +71,7 @@ public class DateAttributeField implements IAttributeField<LocalDate>{
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setBackground(lbl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Composite dtComp = new Composite(parent, SWT.NONE);
 		dtComp.setLayout(new GridLayout(2, false));

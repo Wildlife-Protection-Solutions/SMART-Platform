@@ -806,7 +806,6 @@ public class CustomPatrolQueryEngine extends CustomQueryEngine {
 				JSONObject member = new JSONObject();
 				member.put(UUID_FIELD, UuidUtils.uuidToString(m.getMember().getUuid()));
 				member.put(ID_FIELD, m.getMember().getId());
-				//TODO: locale
 				member.put(NAME_FIELD, SmartLabelProvider.getFullName(m.getMember(), l));
 				member.put("is_leader", m.getIsLeader()); //$NON-NLS-1$
 				member.put("is_pilot", m.getIsPilot()); //$NON-NLS-1$

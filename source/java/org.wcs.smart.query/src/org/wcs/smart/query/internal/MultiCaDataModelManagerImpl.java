@@ -312,7 +312,6 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public Collection<Attribute> getAttributes(Session session, String categoryHkey){
-		List<Attribute> attributes = new ArrayList<Attribute>();
 		Category c = getCategory(session, categoryHkey);
 		return c.getAllAttributes().stream().map(e->e.getAttribute()).collect(Collectors.toList());
 		

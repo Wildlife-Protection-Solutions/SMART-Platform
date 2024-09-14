@@ -1072,7 +1072,6 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".conservationArea"
             class="org.wcs.smart.patrol.model.PatrolType"
             supportsCcaa="false">
       </class>
@@ -1139,6 +1138,11 @@
       <class
             ca_property=".id.patrolAttribute.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolAttributePatrolType"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".patrolType.conservationArea"
+            class="org.wcs.smart.patrol.model.PatrolTransportGroup"
             supportsCcaa="false">
       </class>
    </extension>
@@ -1208,6 +1212,10 @@
    </extension>
    <extension
          point="org.wcs.smart.patrol.wizardpage">
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.TrackTypeWizardPage"
+            id="newpatrol.tracktype">
+      </wizardpage>
       <wizardpage
             class="org.wcs.smart.patrol.internal.ui.createpatrol.TransportTypeWizardPage"
             id="newpatrol.transporttype">

@@ -271,6 +271,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 				option == PatrolQueryOption.PATROL_TYPE ||
 				option == PatrolQueryOption.PATROL_TRANSPORT_TYPE ||
 				option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY ||
+				option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY ||
 				option == PatrolQueryOption.STATION ||
 				option == PatrolQueryOption.EMPLOYEE ||
 				option == PatrolQueryOption.LEADER ||
@@ -667,10 +668,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			}
 		} else if (option == PatrolQueryOption.TEAM_KEY
 				|| option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY
+				|| option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY
 				|| option == PatrolQueryOption.MANDATE_KEY
 				|| option == PatrolQueryOption.AGENCY_KEY) {
 			List<ListItem> items = null;
-			// TODO: should get all not just active
 			if (option == PatrolQueryOption.TEAM_KEY) {
 				items = PatrolQueryHibernateManager.getInstance()
 						.getActiveTeams(session);
@@ -682,7 +683,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 						.getActiveMandates(session);
 			} else if (option == PatrolQueryOption.AGENCY_KEY) {
 				items = PatrolQueryHibernateManager.getInstance().getAgencies(session);				
+			} else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
+				items = PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session);
 			}
+			
 			boolean found = false;
 			if (items != null) {
 				for (ListItem item : items) {

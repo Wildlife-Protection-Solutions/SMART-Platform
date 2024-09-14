@@ -53,6 +53,7 @@ import org.wcs.smart.patrol.model.PatrolFolder;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -186,7 +187,21 @@ public class PatrolHibernateManager extends HibernateManager{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.setParameter("ca2", ca); //$NON-NLS-1$
 		types = q.list();
-		types.forEach(t->t.getPatrolType().getRequiresPilot());
+		return types;
+	}
+	
+	/**
+	 * Get active transportation types associated with the given track type
+	 * @param type
+	 * @param s
+	 * @return
+	 */
+	public static List<PatrolTransportType> getActivePatrolTransporationTypes(PatrolType type, Session s){
+		List<PatrolTransportType> types = null;
+		String query = "SELECT p FROM PatrolTransportType p WHERE p.patrolType = :type AND p.isActive "; //'true' = derby fix //$NON-NLS-1$
+		Query<PatrolTransportType> q = s.createQuery(query, PatrolTransportType.class);
+		q.setParameter("type", type); //$NON-NLS-1$
+		types = q.list();
 		return types;
 	}
 	
@@ -219,7 +234,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of active and in-active patrol types
 	 */
 	public static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s){
-		return getPatrolTypes(ca, s, false, true);
+		return getPatrolTypes(ca, s, false);
 	}
 	
 	/**
@@ -231,39 +246,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of active patrol types
 	 */
 	public static List<PatrolType> getActivePatrolTypes(ConservationArea ca, Session s){
-		return getPatrolTypes(ca, s, true, false);		
-	}
-
-	/**
-	 * Gets the MIXED patrol type for the Conservation Area. Creates a new mixed patrol type if one doesn't exist.
-	 * @param ca
-	 * @param s
-	 * @return
-	 */
-	public static PatrolType getMixedPatrolType(ConservationArea ca, Session s){
-		PatrolType pt = QueryFactory.buildQuery(s, PatrolType.class, 
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"keyId", PatrolType.DefaultType.MIXED.getKeyId()}).uniqueResult(); //$NON-NLS-1$
-		if (pt == null) {
-			pt = new PatrolType();
-			pt.setKeyId(PatrolType.DefaultType.MIXED.getKeyId());
-			pt.setIsActive(true);
-
-			pt.setName(PatrolType.DefaultType.MIXED.getGuiName(Locale.getDefault()));
-			for (Language l : ca.getLanguages()) {
-				String value = PatrolType.DefaultType.MIXED.getGuiName(I18nUtil.stringToLocale(l.getCode()));
-				if (value == null && l.isDefault()) value = PatrolType.DefaultType.MIXED.name();
-				if (value != null) pt.updateName(l, value);
-			}
-			
-			//TODO: icon
-			pt.setIcon(null);
-			pt.setRequiresPilot(true);
-			pt.setTransportTypes(new ArrayList<>());
-			s.persist(pt);	
-		}
-		return pt;
-		
+		return getPatrolTypes(ca, s, true);		
 	}
 	
 	/**
@@ -289,7 +272,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active patrol types are to be returned, <code>false</code> otherwise
 	 * @return list of patrol types
 	 */
-	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive, boolean excludeHidden){
+	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive){
 		List<PatrolType> types = null;
 		
 		try{
@@ -310,9 +293,6 @@ public class PatrolHibernateManager extends HibernateManager{
 		if (types.size() == 0){
 			types = createPatrolTypes(ca, s);
 		}
-		if (excludeHidden) {
-			types = types.stream().filter(pt -> !pt.isMixed()).collect(Collectors.toList());
-		}
 		return types;
 	}
 	
@@ -332,9 +312,9 @@ public class PatrolHibernateManager extends HibernateManager{
 				pt.setConservationArea(ca);
 				pt.setIsActive(true);
 				pt.setKeyId(defaultType.getKeyId());
-				pt.setRequiresPilot(defaultType.requiresPilot());
 				pt.setIcon(IconUtils.INSTANCE.findOrCreateSystemIcon(s, ca, defaultType.getIconKey()));
 				pt.setTransportTypes(new ArrayList<>());
+				pt.setTransportGroups(new ArrayList<>());
 				
 				pt.setName(defaultType.getGuiName(Locale.getDefault()));
 				for (Language l : ca.getLanguages()) {
@@ -345,6 +325,24 @@ public class PatrolHibernateManager extends HibernateManager{
 				
 				s.persist(pt);
 				types.add(pt);
+				
+				for (PatrolTransportGroup.DefaultType group : PatrolTransportGroup.DefaultType.values()) {
+					PatrolTransportGroup g = new PatrolTransportGroup();
+					g.setIcon(IconUtils.INSTANCE.findOrCreateSystemIcon(s, ca, group.getIconKey()));
+					g.setKeyId(group.getKeyId());
+					g.setPatrolType(pt);
+					pt.getTransportGroups().add(g);
+					g.setTransportTypes(new ArrayList<>());
+					
+					g.setName(group.getGuiName(Locale.getDefault()));
+					for (Language l : ca.getLanguages()) {
+						String value = group.getGuiName(I18nUtil.stringToLocale(l.getCode()));
+						if (value == null && l.isDefault()) value = group.name();
+						if (value != null) g.updateName(l, value);
+					}
+					
+					s.persist(g);
+				}
 			}
 			s.getTransaction().commit();
 			return types;
@@ -415,7 +413,7 @@ public class PatrolHibernateManager extends HibernateManager{
 			patrol.setId(id);
 		}
 		
-		patrol.recalculateType(session);
+		patrol.recalculateType();
 		if (patrol.getUuid() == null) {
 			session.persist(patrol);
 		}else {

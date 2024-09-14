@@ -84,6 +84,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.icon.Icon;
@@ -136,6 +137,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	private boolean isDirty = false;
 	
 	private String txtFilterText = null;
+	
+	private ImageRegistry imgr ;
 	
 	private ViewerFilter iconFilter = new ViewerFilter() {
 		
@@ -235,9 +238,11 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 	
+		imgr = new ImageRegistry();
+		parent.addListener(SWT.Dispose, e->imgr.dispose());
 		//clear all CA thumbnails
 		IconManager.INSTANCE.clearThumbnails();
-		
+				
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		
 		session.beginTransaction();
@@ -429,12 +434,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			
 			colIcon.getColumn().setText(s.getName());
 			colIcon.setLabelProvider(new ColumnLabelProvider() {
-				ImageRegistry imgr = new ImageRegistry();
-				
-				@Override
-				public void dispose() {
-					imgr.dispose();
-				}
 				
 				@Override
 				public String getText(Object element) {
@@ -445,7 +444,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				public Image getImage(Object element) {
 					if (element instanceof Icon) {
 						IconFile ff = ((Icon)element).getIconFile(s);
-						String key = ff.getIcon().getKeyId() + "_" + ff.getIconSet().getKeyId(); //$NON-NLS-1$
+//						String key = ff.getIcon().getKeyId() + "_" + ff.getIconSet().getKeyId(); //$NON-NLS-1$
+						String key = ff.getUuid().toString();
 						Image i = imgr.get(key);
 						if (i != null) return i;
 						byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
@@ -585,13 +585,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			colIcon.getColumn().setText(s.getName());
 			colIcon.setLabelProvider(new ColumnLabelProvider() {
 				
-				ImageRegistry imgr = new ImageRegistry();
-				
-				@Override
-				public void dispose() {
-					imgr.dispose();
-				}
-				
 				@Override
 				public String getText(Object element) {
 					return null;
@@ -613,12 +606,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 						}catch (Exception ex) {
 							SmartPlugIn.log(ex.getMessage(), ex);
 						}
-						
-//						Path p = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
-//						Image img2 = new Image(Display.getDefault(), p.toString());
-//						imgr.put(ff.getUuid().toString(), img2);
-//						return img2;
-						
 					}
 					return null;
 				}
@@ -657,7 +644,10 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		});
 		session.merge(toEdit);
 		
-		toEdit.getFiles().forEach(f->IconManager.INSTANCE.clearThumbnailFile(f));
+		toEdit.getFiles().forEach(f->{
+			IconManager.INSTANCE.clearThumbnailFile(f);
+			imgr.remove(f.getUuid().toString());
+		});
 		
 		setDirty(true);
 		tblIcons.refresh();
@@ -892,7 +882,10 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 						});
 						
 						caicons.removeAll(toDelete);
-						toDelete.forEach(i->IconManager.INSTANCE.clearThumbnailFiles(i));
+						toDelete.forEach(i->{
+							IconManager.INSTANCE.clearThumbnailFiles(i);
+							i.getFiles().forEach(rr->imgr.remove(rr.getUuid().toString()));
+						});
 						monitor.done();
 						
 					}

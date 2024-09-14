@@ -335,17 +335,23 @@ public class PatrolQueryMemoryResult extends MemoryQueryResult<PatrolQueryResult
 	}
 	
 	private void updateTransport(PatrolLeg pl, PatrolTransportType newValue, Session session){
+		
+		newValue = session.get(PatrolTransportType.class, newValue.getUuid());
+		
 		pl.setType(newValue);
-		pl.getPatrol().recalculateType(session);
+		pl.getPatrol().recalculateType();
+		
+		if (!newValue.getRequiresPilot()) {
+			pl.getMembers().forEach(f->f.setIsPilot(false));
+		}
 		
 		for (PatrolQueryResultItem i : getData()){
 			if (i.getPatrolLegUuid().equals(pl.getUuid())){
 				i.setTransportType(newValue.getName());
-			}
-			if (i.getPatrolUuid().equals(pl.getPatrol().getUuid())){
-				i.setPatrolTypeUuid(pl.getPatrol().getPatrolType().getUuid());
-				i.setPatrolType(pl.getPatrol().getPatrolType().getName());
-			}
+				i.setPatrolTransportTypeUuid(pl.getType().getUuid());
+				
+				if (!newValue.getRequiresPilot()) i.setPilot(null);
+			}			
 		}
 	}
 	
