@@ -351,10 +351,11 @@ public class ApplyChangeLogJob extends Job {
 		//gets the current user; for resetting after applying changes
 		try(Session session = HibernateManager.lockDatabase()){
 			
-			IconFKManager.INSTANCE.dropIconFkConstraints(session);
+			
 			
 			session.beginTransaction();
 			try {
+				IconFKManager.INSTANCE.dropIconFkConstraints(session);
 				
 				//if not logged into a ca the replication won't be enabled
 				//and we do not want to re-enable it when complete
@@ -387,6 +388,8 @@ public class ApplyChangeLogJob extends Job {
 				serverInfo.setServerRevision(metadata.getServerRevision());
 				session.merge(serverInfo);
 				session.getTransaction().commit();
+				
+				IconFKManager.INSTANCE.createIconFkConstraints(session);
 			}catch(Exception ex){
 				try {
 					if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -397,10 +400,6 @@ public class ApplyChangeLogJob extends Job {
 			}
 		}finally{
 			HibernateManager.unlockDatabase();
-			
-			try(Session session = HibernateManager.openSession()){
-				IconFKManager.INSTANCE.createIconFkConstraints(session);
-			}
 			
 			if (replicationEnabled){
 				//re-enable replication if it was previously enabled

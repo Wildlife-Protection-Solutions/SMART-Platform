@@ -26,14 +26,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.jdbc.Work;
+import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.UuidUtils;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 
 /**
@@ -82,26 +94,24 @@ public enum IconFKManager {
 
 				try (ResultSet rs = c.getMetaData().getExportedKeys(null, "SMART", "ICON")) { //$NON-NLS-1$ //$NON-NLS-2$
 					while (rs.next()) {
-						while (rs.next()) {
-							String schema = rs.getString(6);
-							String table = rs.getString(7);
-							String field = rs.getString(8);
-							String fkname = rs.getString(12);
+						String schema = rs.getString(6);
+						String table = rs.getString(7);
+						String field = rs.getString(8);
+						String fkname = rs.getString(12);
 
-							if (table.equalsIgnoreCase("iconfile")) //$NON-NLS-1$
-								continue;
+						if (table.equalsIgnoreCase("iconfile")) //$NON-NLS-1$
+							continue;
 
-							String query = "UPDATE " + schema + "." + table + " SET " + field + " = null where " + field //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-									+ " in (:icons)"; //$NON-NLS-1$
-							updateConstraints.add(query);
+						String query = "UPDATE " + schema + "." + table + " SET " + field + " = null where " + field //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+								+ " in (:icons)"; //$NON-NLS-1$
+						updateConstraints.add(query);
 
-							String create = "ALTER TABLE " + schema + "." + table + " ADD CONSTRAINT " + fkname //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-									+ " FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID)  ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE"; //$NON-NLS-1$
-							createConstraints.add(create);
+						String create = "ALTER TABLE " + schema + "." + table + " ADD CONSTRAINT " + fkname //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								+ " FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID)  ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE"; //$NON-NLS-1$
+						createConstraints.add(create);
 
-							String drop = "ALTER TABLE " + schema + "." + table + " DROP CONSTRAINT " + fkname; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							dropConstraints.add(drop);
-						}
+						String drop = "ALTER TABLE " + schema + "." + table + " DROP CONSTRAINT " + fkname; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						dropConstraints.add(drop);
 					}
 				}
 			}
@@ -109,7 +119,10 @@ public enum IconFKManager {
 	}
 	
 	/**
-	 * Drops all icon table FK constraints.
+	 * Drops all icon table FK constraints. This should be done in the
+	 * same transaction as the deleting of icons. However you have to re-create
+	 * them in a NEW transaction.
+	 * 
 	 * Throws an exception if they can't be dropped.
 	 * 
 	 * @param session
@@ -117,11 +130,10 @@ public enum IconFKManager {
 	public void dropIconFkConstraints(Session session) {
 		init(session);
 		
-		session.beginTransaction();
 		for (String s : dropConstraints) {
 			session.createNativeMutationQuery(s).executeUpdate();
 		}	
-		session.getTransaction().commit();
+		
 	}
 	
 	/**
@@ -132,26 +144,22 @@ public enum IconFKManager {
 	public void createIconFkConstraints(Session session) {
 		try {
 			session.beginTransaction();
+			session.createNativeMutationQuery("alter table smart.icon drop constraint ICON_CAUUID_FK").executeUpdate(); //$NON-NLS-1$
 			for (String s : createConstraints) {
 				session.createNativeMutationQuery(s).executeUpdate();
 			}
+			session.createNativeMutationQuery("alter table smart.icon add constraint ICON_CAUUID_FK foreign key (ca_uuid) references smart.conservation_area(uuid) on update restrict on delete cascade deferrable initially immediate").executeUpdate(); //$NON-NLS-1$
 			session.getTransaction().commit();
 		}catch (Exception ex) {
-			//TODO: figure out what to do in this case
-			
-			StringJoiner sj = new StringJoiner(";\n");
+			StringJoiner sj = new StringJoiner(";\n"); //$NON-NLS-1$
 			for (String s : createConstraints) {
 				sj.add(s);
 			}
 			
-			SmartPlugIn.log("Constarints that could not to be added:\n" + sj.toString(), null);
+			SmartPlugIn.log("Constraints that could not to be added:\n" + sj.toString(), null); //$NON-NLS-1$
 			SmartPlugIn.log(ex.getMessage(), ex);
 			
-			String message = """
-			Icon constraints could not be re-created in the database. 
-			Restore a backup or contact your SMART Administrator.
-			If you continue to use this version of SMART your data may become corrupted.   
-			""";
+			String message = Messages.IconFKManager_IconConstraintErrorApp;
 			SmartPlugIn.displayLog(message, ex);
 			
 		}
@@ -159,7 +167,7 @@ public enum IconFKManager {
 	}
 	
 	/**
-	 * Set all forign key constraints to null - required when deleting an icon 
+	 * Set all foreign key constraints to null - required when deleting an icon 
 	 * @param session
 	 * @param icons
 	 */
@@ -176,6 +184,88 @@ public enum IconFKManager {
 				.setParameterList("icons", iconuuids) //$NON-NLS-1$
 				.executeUpdate();					
 		}
+	}
+	
+	/**
+	 * Validate the icon foreign key constraints exist as expected and 
+	 * try to re-create them if they don't
+	 * 
+	 */
+	public void validateIconFk() {
 		
+		try(Session session = HibernateManager.openSession()){
+			
+			Set<String> tables = new HashSet<>();
+			Set<String> missingIconFk = new HashSet<>();
+			
+			session.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+
+					try (ResultSet rs = c.getMetaData().getExportedKeys(null, "SMART", "ICON")) { //$NON-NLS-1$ //$NON-NLS-2$
+						while (rs.next()) {
+							String schema = rs.getString(6);
+							String table = rs.getString(7);
+							tables.add((schema + "." + table).toLowerCase()); //$NON-NLS-1$
+						}
+					}
+				}
+			});	
+								
+			try (EntityManager em = session.getSessionFactory().createEntityManager()){			
+				for (EntityType<?> entityType : em.getMetamodel().getEntities()) {
+					if (entityType.getBindableJavaType().equals(IconFile.class)) continue;
+					for (SingularAttribute<?, ?> sa : entityType.getSingularAttributes()) {
+						if(sa.getBindableJavaType().equals(Icon.class)) {
+							Object entityExample = null;
+							try {
+								entityExample = entityType.getBindableJavaType().getConstructor().newInstance();
+							} catch (ReflectiveOperationException e) {
+								throw new RuntimeException(e);
+							}
+							EntityPersister p = em.unwrap(SessionImpl.class).getEntityPersister(null, entityExample);
+							
+							if (p instanceof AbstractEntityPersister) {
+								AbstractEntityPersister info = (AbstractEntityPersister) p;
+								String tablename = info.getRootTableName().toLowerCase();
+								
+								if (!tables.contains(tablename)) {
+									missingIconFk.add(tablename);
+								}
+							}
+							
+						}
+						
+					}
+				}
+			}
+			
+			if (!missingIconFk.isEmpty()) {
+				StringJoiner sj = new StringJoiner(";\n"); //$NON-NLS-1$
+				for (String s : missingIconFk) sj.add(s);
+				
+				SmartPlugIn.log("The following tables are missing icon fk constraints, attempting to re-create these constraints now:\n" + sj.toString(), null); //$NON-NLS-1$
+				
+				try {
+					session.beginTransaction();
+					
+					session.createNativeMutationQuery("alter table smart.icon drop constraint ICON_CAUUID_FK").executeUpdate(); //$NON-NLS-1$
+					for (String s : missingIconFk) {
+						String tableonly = s.substring(s.indexOf('.')+1);
+						String constraint = "alter table " + s + " add constraint " + tableonly + "_iconuuidfk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(UUID)  ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						SmartPlugIn.log(constraint, null);
+						session.createNativeMutationQuery(constraint).executeUpdate();
+					}
+					session.createNativeMutationQuery("alter table smart.icon add constraint ICON_CAUUID_FK foreign key (ca_uuid) references smart.conservation_area(uuid) on update restrict on delete cascade deferrable initially immediate").executeUpdate(); //$NON-NLS-1$
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					SmartPlugIn.log("Icon constarints that could not to be added.", null); //$NON-NLS-1$
+					SmartPlugIn.log(ex.getMessage(), ex);
+					
+					String message = Messages.IconFKManager_IconConstraintErrorRestart;
+					SmartPlugIn.displayLog(message, ex);
+				}
+			}
+		}
 	}
 }

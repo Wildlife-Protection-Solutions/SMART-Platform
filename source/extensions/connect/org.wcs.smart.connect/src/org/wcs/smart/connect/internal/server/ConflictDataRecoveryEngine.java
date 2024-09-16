@@ -66,18 +66,16 @@ public class ConflictDataRecoveryEngine {
 		
 		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changeLogFile, workingDir, ca, true, monitor);
 		try(Session session = HibernateManager.openSession()){
-			
-			IconFKManager.INSTANCE.dropIconFkConstraints(session);
-			
 			try {
 				session.beginTransaction();
+				IconFKManager.INSTANCE.dropIconFkConstraints(session);
 				processor.processFile(session);	
 				session.getTransaction().commit();
+				
+				IconFKManager.INSTANCE.createIconFkConstraints(session);		
 			}catch (Exception ex) {
-				session.getTransaction().rollback();
+				if (session.getTransaction().isActive())  session.getTransaction().rollback();
 				throw ex;
-			}finally {
-				IconFKManager.INSTANCE.createIconFkConstraints(session);
 			}
 		}
 		

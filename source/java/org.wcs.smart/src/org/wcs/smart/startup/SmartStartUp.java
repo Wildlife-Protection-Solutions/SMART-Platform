@@ -54,6 +54,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -99,6 +100,7 @@ public class SmartStartUp {
 		//check version
 		try{
 			versionCheck(sub.split(2, SubMonitor.SUPPRESS_NONE));
+			IconFKManager.INSTANCE.validateIconFk();
 		}catch (Exception ex){
 			if (checkAlreadyRunning(ex)){
 				throw new IllegalStateException(Messages.SmartStartUp_MultiConnectError);

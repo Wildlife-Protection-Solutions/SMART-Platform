@@ -1020,6 +1020,8 @@ public class Messages extends NLS {
 	public static String IconExporter_SubTaskA;
 	public static String IconExporter_SubTaskB;
 	public static String IconExporter_TaskName;
+	public static String IconFKManager_IconConstraintErrorApp;
+	public static String IconFKManager_IconConstraintErrorRestart;
 	public static String IconImporter_DefaultName;
 	public static String IconImporter_IconFileNotFound;
 	public static String IconImporter_IconFileNotSpecified;

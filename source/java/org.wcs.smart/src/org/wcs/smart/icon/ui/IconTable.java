@@ -94,7 +94,7 @@ public class IconTable extends Composite implements Listener {
 				Display.getDefault().syncExec(()->{
 					thumb.addFiles(items);
 					thumb.createThumbs();
-					if (getParent().isDisposed()) return;
+					if (isDisposed() || getParent().isDisposed()) return;
 					getParent().layout(true, true);
 					needmore[0] = needsToLoad();
 					

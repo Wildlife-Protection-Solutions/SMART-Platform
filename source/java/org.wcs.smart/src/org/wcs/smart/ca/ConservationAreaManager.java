@@ -102,14 +102,10 @@ public class ConservationAreaManager {
 			Path fStore = null;
 			
 			try {
-				IconFKManager.INSTANCE.dropIconFkConstraints(session);
-			}catch (Exception ex) {
-				throw ex;
-			}
-						
-			
-			try {
 				session.beginTransaction();
+				
+				IconFKManager.INSTANCE.dropIconFkConstraints(session);
+				
 				ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
 				fStore = Paths.get(ca.getFileDataStoreLocation());
 				
@@ -118,11 +114,11 @@ public class ConservationAreaManager {
 				progress.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
 				session.remove(ca);
 				session.getTransaction().commit();
-			}catch (Exception ex){
-				session.getTransaction().rollback();
-				throw ex;
-			}finally {
+				
 				IconFKManager.INSTANCE.createIconFkConstraints(session);	
+			}catch (Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				throw ex;
 			}
 			
 						

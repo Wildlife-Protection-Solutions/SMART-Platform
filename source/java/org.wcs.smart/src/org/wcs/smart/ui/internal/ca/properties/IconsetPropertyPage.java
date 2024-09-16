@@ -198,6 +198,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		}else {
 			session.getTransaction().rollback();
 		}
+
 		session.close();
 		return super.close();
 	}
@@ -210,8 +211,10 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	private boolean doSave() {
 		try {
 			session.getTransaction().commit();
+			IconFKManager.INSTANCE.createIconFkConstraints(session);
 			setDirty(false);
 			session.getTransaction().begin();
+			IconFKManager.INSTANCE.dropIconFkConstraints(session);
 			return true;
 		}catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.IconsetPropertyPage_SaveError + ex.getMessage(), ex);
@@ -246,6 +249,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		session.beginTransaction();
 				
+		IconFKManager.INSTANCE.dropIconFkConstraints(session);
+
 		main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
