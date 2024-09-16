@@ -30,6 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
+import org.wcs.smart.patrol.PatrolCaDeleteHandler;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -72,7 +73,7 @@ public class PatrolCyberTrackerPlugIn extends AbstractUIPlugin {
 				.executeUpdate();
 			}
 		};
-		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, 1);
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, PatrolCaDeleteHandler.EXECUTE_ORDER+1);
 		SmartContext.INSTANCE.setClass(IPatrolCyberTrackerLabelProvider.class, new PatrolCyberTrackerLabelProvider());
 	}
 
