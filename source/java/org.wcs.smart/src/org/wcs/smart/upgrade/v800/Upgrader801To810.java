@@ -328,20 +328,7 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			//added below"ALTER TABLE smart.patrol_transport add constraint pt_patrol_transport_group_uuid_fk foreign key (patrol_transport_group_uuid) references smart.patrol_transport_group(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
 			//added below"ALTER TABLE smart.patrol_transport_group add constraint ptg_patrol_type_uuid_fk foreign key (patrol_type_uuid) references smart.patrol_type(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
 
-			//link custom attribute to patrol type
-			"""
-				create table smart.patrol_attribute_patrol_type(
-				  patrol_attribute_uuid char(16) for bit data not null,
-				  patrol_type_uuid char(16) for bit data not null ,
-				  is_active boolean not null default true, 
-				  primary key (patrol_attribute_uuid, patrol_type_uuid))	
-			""",//$NON-NLS-1$
-			"alter table smart.patrol_attribute_patrol_type add constraint papt_pauuid_pa_fk foreign key (patrol_attribute_uuid) references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
-			"alter table smart.patrol_attribute_patrol_type add constraint papt_ptuuid_pt_fk foreign key (patrol_type_uuid) references smart.patrol_type on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
 			
-			//by default link all
-			"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
-							
 			//move max speed to transport type
 			"ALTER TABLE smart.patrol_transport ADD COLUMN max_speed integer", //$NON-NLS-1$
 			"UPDATE smart.patrol_transport set max_speed = (select max_speed from smart.patrol_type where smart.patrol_type.uuid = smart.patrol_transport.patrol_type_uuid)", //$NON-NLS-1$
@@ -363,6 +350,20 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			"update smart.patrol_type set icon_uuid = (select a.uuid from smart.icon a where a.ca_uuid = smart.patrol_type.ca_uuid and a.keyid = 'footprint_1' ) ", //$NON-NLS-1$
 			"insert into smart.i18n_label (language_uuid, element_uuid, value) SELECT a.uuid, b.uuid, 'Patrol' FROM smart.language a, smart.patrol_type b where a.ca_uuid = b.ca_uuid", //$NON-NLS-1$
 
+			//link custom attribute to patrol type
+			"""
+				create table smart.patrol_attribute_patrol_type(
+				  patrol_attribute_uuid char(16) for bit data not null,
+				  patrol_type_uuid char(16) for bit data not null ,
+				  is_active boolean not null default true, 
+				  primary key (patrol_attribute_uuid, patrol_type_uuid))	
+			""",//$NON-NLS-1$
+			"alter table smart.patrol_attribute_patrol_type add constraint papt_pauuid_pa_fk foreign key (patrol_attribute_uuid) references smart.patrol_attribute (uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			"alter table smart.patrol_attribute_patrol_type add constraint papt_ptuuid_pt_fk foreign key (patrol_type_uuid) references smart.patrol_type (uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+			
+			//by default link all
+			"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
+							
 			
 			//sort out all the constraints
 			"alter table smart.patrol_type drop constraint PATROL_TYPE_ICON_UUID_FK", //$NON-NLS-1$
@@ -456,7 +457,7 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 		ptTranslations.put("mixed_zh", "\u6df7\u5408"); //$NON-NLS-1$ //$NON-NLS-2$
 		ptTranslations.put("marine_zh", "\u6c34\u4e0a"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String query = "select g.uuid, g.keyid, l.code, l.uuid, l.isdefault from smart.patrol_transport_group g join smart.patrol_type t on g.patrol_type_uuid = t.uuid join smart.language l on t.ca_uuid = l.ca_uuid"; //$NON-NLS-1$
+		String query = "select ptg.uuid, ptg.keyid, l.code, l.uuid, l.isdefault from smart.patrol_transport_group ptg join smart.patrol_type pt on ptg.patrol_type_uuid = pt.uuid  join smart.language l on pt.ca_uuid = l.ca_uuid"; //$NON-NLS-1$
 		String insertQuery2 = "insert into smart.i18n_label (language_uuid, element_uuid, value) values (?, ?, ?)"; //$NON-NLS-1$
 		try(Statement s = c.createStatement(); PreparedStatement psinsert = c.prepareStatement(insertQuery2);
 				ResultSet rs = s.executeQuery(query)){ 

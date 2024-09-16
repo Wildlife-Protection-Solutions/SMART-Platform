@@ -73,6 +73,8 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.MANDATE_KEY,
 			PatrolQueryOption.PATROL_TYPE,
 			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY,
+			PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY,
+			PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY,
 			PatrolQueryOption.ARMED,
 			PatrolQueryOption.CONSERVATION_AREA
 	};
@@ -107,7 +109,8 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.AGENCY_KEY,
 			PatrolQueryOption.MANDATE_KEY,
 			PatrolQueryOption.PATROL_TYPE,
-			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY
+			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY,
+			PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY,
 	};
 	
 	/**

@@ -1254,7 +1254,7 @@ public class UpgradeServlet extends HttpServlet {
 					sb.append("where b.ca_uuid != c.ca_uuid) "); //$NON-NLS-1$
 					sb.append("update smart.dm_attribute_list set icon_uuid = e.correct_icon_uuid "); //$NON-NLS-1$
 					sb.append("from errors e where e.list_item_uuid = smart.dm_attribute_list.uuid "); //$NON-NLS-1$
-					//System.out.println(sb.toString());
+
 					c.createStatement().executeUpdate(sb.toString());
 					
 					String[] sql = new String[] {
@@ -2009,11 +2009,7 @@ public class UpgradeServlet extends HttpServlet {
 							"ALTER TABLE smart.patrol_transport add column patrol_transport_group_uuid uuid", //$NON-NLS-1$
 							"ALTER TABLE smart.patrol_transport add constraint pt_patrol_transport_group_uuid_fk foreign key (patrol_transport_group_uuid) references smart.patrol_transport_group(uuid) on update restrict on delete set null deferrable initially immediate", //$NON-NLS-1$
 							"ALTER TABLE smart.patrol_transport_group add constraint ptg_patrol_type_uuid_fk foreign key (patrol_type_uuid) references smart.patrol_type(uuid) on update restrict on delete cascade deferrable initially immediate", //$NON-NLS-1$
-
-							//link custom attribute to patrol type
-							"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid uuid not null references smart.patrol_attribute on delete cascade on update restrict deferrable initially immediate, patrol_type_uuid uuid not null references smart.patrol_type on delete cascade on update restrict deferrable initially immediate, is_active boolean not null default true, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
-							//by default link all
-							"insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'", //$NON-NLS-1$
+							"UPDATE smart.patrol_transport set patrol_transport_group_uuid = patrol_type_uuid", //$NON-NLS-1$
 											
 							//move max speed to transport type
 							"ALTER TABLE smart.patrol_transport ADD COLUMN max_speed integer",  //$NON-NLS-1$
@@ -2030,13 +2026,24 @@ public class UpgradeServlet extends HttpServlet {
 							"insert into smart.patrol_transport_group(uuid, patrol_type_uuid, icon_uuid, keyid) select a.uuid, b.uuid, a.icon_uuid, a.keyid from smart.patrol_type a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.keyid = 'patrol' and a.keyid not in ('patrol', 'mixed')", //$NON-NLS-1$
 							"delete from smart.patrol_type where keyid != 'patrol'", //$NON-NLS-1$
 							
-							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'foot' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_transport_group.keyid = 'ground'", //$NON-NLS-1$
-							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and and b.uuid = smart.patrol_transport_group.patrol_type_uuid a.keyid = 'patrol_pilot_boat' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_transport_group.keyid = 'marine'", //$NON-NLS-1$
-							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and and b.uuid = smart.patrol_transport_group.patrol_type_uuid a.keyid = 'patrol_pilot_airplane' and a.ca_uuid = smart.patrol_type.ca_uuid and smart.patrol_transport_group.keyid = 'air'", //$NON-NLS-1$
+							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'foot' and smart.patrol_transport_group.keyid = 'ground'", //$NON-NLS-1$
+							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'patrol_pilot_boat' and smart.patrol_transport_group.keyid = 'marine'", //$NON-NLS-1$
+							"update smart.patrol_transport_group set icon_uuid = a.uuid from smart.icon a, smart.patrol_type b where a.ca_uuid = b.ca_uuid and b.uuid = smart.patrol_transport_group.patrol_type_uuid and a.keyid = 'patrol_pilot_airplane' and smart.patrol_transport_group.keyid = 'air'", //$NON-NLS-1$
 							
 							"update smart.patrol_type set icon_uuid = a.uuid from smart.icon a where a.ca_uuid = smart.patrol_type.ca_uuid and a.keyid = 'footprint_1'", //$NON-NLS-1$
 							"insert into smart.i18n_label (language_uuid, element_uuid, value) SELECT a.uuid, b.uuid, 'Patrol' FROM smart.language a, smart.patrol_type b where a.ca_uuid = b.ca_uuid", //$NON-NLS-1$
 
+							//link custom attribute to patrol type
+							"create table smart.patrol_attribute_patrol_type(patrol_attribute_uuid uuid not null, patrol_type_uuid uuid not null, is_active boolean not null default true, primary key (patrol_attribute_uuid, patrol_type_uuid))", //$NON-NLS-1$
+							
+							"alter table smart.patrol_attribute_patrol_type add constraint papt_patrol_attribute_uuid_fk foreign key (patrol_attribute_uuid) references smart.patrol_attribute (uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+							"alter table smart.patrol_attribute_patrol_type add constraint papt_patrol_type_uuid_fk foreign key (patrol_type_uuid ) references smart.patrol_type (uuid) on delete cascade on update restrict deferrable initially immediate", //$NON-NLS-1$
+							//by default link all
+							"""
+							insert into smart.patrol_attribute_patrol_type(patrol_attribute_uuid, patrol_type_uuid) 
+							select a.uuid, b.uuid from smart.patrol_attribute a, smart.patrol_type b 
+							where a.ca_uuid = b.ca_uuid and b.keyid != 'mixed'
+							""",  //$NON-NLS-1$
 							
 							"DROP TRIGGER trg_patrol_type ON smart.patrol_type ", //$NON-NLS-1$
 							//"DROP FUNCTION connect.trg_patrol_type()", //$NON-NLS-1$
@@ -2116,6 +2123,7 @@ public class UpgradeServlet extends HttpServlet {
 					};
 					
 					for (String s : sql) {
+						//System.out.println(s);
 						c.createStatement().executeUpdate(s);
 					}
 					
@@ -2187,7 +2195,7 @@ public class UpgradeServlet extends HttpServlet {
 					ptTranslations.put("mixed_zh", "\u6df7\u5408"); //$NON-NLS-1$ //$NON-NLS-2$
 					ptTranslations.put("marine_zh", "\u6c34\u4e0a"); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					String query = "select pt.uuid, pt.keyid, l.code, l.uuid, l.isdefault from smart.patrol_type pt join smart.language l on pt.ca_uuid = l.ca_uuid"; //$NON-NLS-1$
+					String query = "select ptg.uuid, ptg.keyid, l.code, l.uuid, l.isdefault from smart.patrol_transport_group ptg join smart.patrol_type pt on ptg.patrol_type_uuid = pt.uuid  join smart.language l on pt.ca_uuid = l.ca_uuid"; //$NON-NLS-1$
 					String insertQuery2 = "insert into smart.i18n_label (language_uuid, element_uuid, value) values (?, ?, ?)"; //$NON-NLS-1$
 					try(Statement s = c.createStatement(); PreparedStatement psinsert = c.prepareStatement(insertQuery2);
 							ResultSet rs = s.executeQuery(query)){ 
