@@ -84,7 +84,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.icon.Icon;
@@ -443,19 +442,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				@Override
 				public Image getImage(Object element) {
 					if (element instanceof Icon) {
-						IconFile ff = ((Icon)element).getIconFile(s);
-//						String key = ff.getIcon().getKeyId() + "_" + ff.getIconSet().getKeyId(); //$NON-NLS-1$
-						String key = ff.getUuid().toString();
-						Image i = imgr.get(key);
-						if (i != null) return i;
-						byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
-						try(InputStream ins = new ByteArrayInputStream(data)){
-							Image img2 = new Image(Display.getDefault(), ins);
-							imgr.put(key, img2);
-							return img2;
-						}catch (Exception ex) {
-							SmartPlugIn.log(ex.getMessage(), ex);
-						}
+						return getImageIcon((Icon)element, s);
 					}
 					return null;
 				}
@@ -593,19 +580,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				@Override
 				public Image getImage(Object element) {
 					if (element instanceof Icon) {
-						IconFile ff = ((Icon)element).getIconFile(s);
-						
-						Image i = imgr.get(ff.getUuid().toString());
-						if (i != null) return i;
-						
-						byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
-						try(InputStream ins = new ByteArrayInputStream(data)){
-							Image img2 = new Image(Display.getDefault(), ins);
-							imgr.put(ff.getUuid().toString(), img2);
-							return img2;
-						}catch (Exception ex) {
-							SmartPlugIn.log(ex.getMessage(), ex);
-						}
+						return getImageIcon((Icon)element, s);						
 					}
 					return null;
 				}
@@ -631,6 +606,21 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		tblLibraryIcons.getControl().setMenu(tmp);
 	}
 	
+	private Image getImageIcon(Icon element, IconSet s) {
+		IconFile ff = ((Icon)element).getIconFile(s);
+		String key = ff.getUuid().toString();
+		Image i = imgr.get(key);
+		if (i != null) return i;
+		byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
+		try(InputStream ins = new ByteArrayInputStream(data)){
+			Image img2 = new Image(Display.getDefault(), ins);
+			imgr.put(key, img2);
+			return img2;
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return null;
+	}
 	
 	private void editIcon() {
 		Object x = tblIcons.getStructuredSelection().getFirstElement();
@@ -693,7 +683,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			newIcon.updateName(SmartDB.getCurrentLanguage(), copy.getName());
 			newIcon.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), copy.getName());
 			newIcon.setFiles(new ArrayList<>());
-			session.persist(newIcon);
 			
 			for (IconSet set : sets) {
 				IconFile copyfile = copy.getIconFile(set);
@@ -704,6 +693,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				newFile.setIconSet(set);
 				newFile.setFilename(copyfile.getFilename());
 			}
+			session.persist(newIcon);
 			setDirty(true);
 			caicons.add(newIcon);
 		}
