@@ -37,7 +37,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.cybertracker.devices.show"
-                  label="SMART Mobile Devices..."
+                  label="%devices.menu.command.label"
                   style="push">
             </command>
             <command
@@ -109,7 +109,7 @@
       </command>
       <command
             id="org.wcs.smart.cybertracker.devices.show"
-            name="Manage Devices...">
+            name="%devices.command.name">
       </command>
    </extension>
    <extension
@@ -313,6 +313,14 @@
       <handler
             class="org.wcs.smart.cybertracker.CaCreateHandler">
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.cybertracker.MbTileGeneratorOpPreferencePage"
+            id="org.wcs.smart.cybertracker.packages"
+            name="%packages.preferencepage.name">
+      </page>
    </extension>
 
 </plugin>

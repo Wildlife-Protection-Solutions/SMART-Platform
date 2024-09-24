@@ -81,6 +81,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	 */
 	private static final String JSON_ENCODING_TYPE_KEY = "org.wcs.smart.connect.cybertracker.json.protocol"; //$NON-NLS-1$
 	
+	public static final String MB_TILE_SIZE_PROP = "org.wcs.smart.cybertracker.mbtilesize.caprop"; //$NON-NLS-1$
+	public static final int MB_TILE_SIZE_DEFAULT = 25;
 	
 	// The shared instance
 	private static CyberTrackerPlugIn plugin;

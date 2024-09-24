@@ -376,6 +376,11 @@ public class Messages extends NLS {
 	public static String MbTileGenerator_SubTask3;
 	public static String MbTileGenerator_SubTask4;
 	public static String MbTileGenerator_TaskName;
+	public static String MbTileGeneratorOpPreferencePage_InsufficientPermissions;
+	public static String MbTileGeneratorOpPreferencePage_invalidSize;
+	public static String MbTileGeneratorOpPreferencePage_LoadingPref;
+	public static String MbTileGeneratorOpPreferencePage_Message;
+	public static String MbTileGeneratorOpPreferencePage_RenderSizeRequirements;
 	public static String MobileDeviceUtils_BadCommandErr;
 	public static String MobileDeviceUtils_CommunicationError;
 	public static String MobileDeviceUtils_DeviceNotConnectedErr;

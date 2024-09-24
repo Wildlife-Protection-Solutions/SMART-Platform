@@ -267,7 +267,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			this.layers = new ArrayList<>();
 		}
 				
-		generator = new MbTileGenerator();
+		generator = new MbTileGenerator(CyberTrackerPlugIn.MB_TILE_SIZE_DEFAULT);
 		
 		Composite g = new Composite(parent, SWT.NONE);
 		g.setLayout(new GridLayout());

@@ -76,12 +76,13 @@ import org.wcs.smart.map.internal.settings.MapSettings;
 public class MbTileGenerator {
 	
 	private static final int TILESIZE = 256;
-	private static final int TILE_TO_RENDER_BUFFER = 10;
+	
+	private int tileRenderBuffer = 25;
 	
 	private PreparedStatement psInsertTile;
 	
-	public MbTileGenerator() {
-		
+	public MbTileGenerator(int tileRenderBuffer) {
+		this.tileRenderBuffer = tileRenderBuffer;
 	}
 	
 	
@@ -207,11 +208,11 @@ public class MbTileGenerator {
 					int yMaxTile = zz.getMaxTileY();
 	
 					//process images TILE_TO_RENDER_BUFFER x TILE_TO_RENDER_BUFFER at a time
-					for (int x = xMinTile; x <= xMaxTile; x += TILE_TO_RENDER_BUFFER) {
-						for (int y = yMinTile; y <= yMaxTile; y += TILE_TO_RENDER_BUFFER) {
+					for (int x = xMinTile; x <= xMaxTile; x += tileRenderBuffer) {
+						for (int y = yMinTile; y <= yMaxTile; y += tileRenderBuffer) {
 							
 							Tile minTile = zz.getTile(x, y);
-							Tile maxTile = zz.getTile(Math.min(xMaxTile, x + TILE_TO_RENDER_BUFFER - 1), Math.min(yMaxTile, y + TILE_TO_RENDER_BUFFER - 1));
+							Tile maxTile = zz.getTile(Math.min(xMaxTile, x + tileRenderBuffer - 1), Math.min(yMaxTile, y + tileRenderBuffer - 1));
 							
 							Envelope r1 = minTile.getBoundsMercator();
 							r1.expandToInclude(maxTile.getBoundsMercator());
@@ -236,8 +237,8 @@ public class MbTileGenerator {
 							
 	//						ImageIO.write(img, "png", new File("C:\\temp\\mbtiles\\overview_" + zz.getZoom() + "_" + x + "_" + y + ".png"));
 	
-							for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
-								for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
+							for (int i = 0; i < tileRenderBuffer; i ++) {
+								for (int j = 0; j < tileRenderBuffer; j ++) {
 									Tile t = zz.getTile(x+i, y+j);
 									if (t == null) continue;
 								
@@ -275,7 +276,6 @@ public class MbTileGenerator {
 	 * write tile to mbtiles set
 	 */
 	private void writeTile(Connection c, Tile t, BufferedImage image) throws SQLException, IOException, RenderException {
-		
 		psInsertTile.setInt(1, t.getZoom().getZoom());
 		psInsertTile.setInt(2, t.getTileX());
 		int y = (int)(Math.pow(2,  t.getZoom().getZoom()) - t.getTileY()) - 1;

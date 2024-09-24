@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
@@ -152,9 +153,24 @@ public class MapPackageContribution implements IPackageContribution{
 		if (obj.containsKey(BaseMapKeys.BM.jsonkey)) {
 
 			BasemapDefinition def = null;
+			int tileRenderBuffer = CyberTrackerPlugIn.MB_TILE_SIZE_DEFAULT;
 			try(Session session = HibernateManager.openSession()){
 				UUID bm = UuidUtils.stringToUuid((String)obj.get(BaseMapKeys.BM.jsonkey));
 				def = session.get(BasemapDefinition.class, bm);
+				
+				
+				ConservationAreaProperty prop = session.createQuery("FROM ConservationAreaProperty WHERE conservationArea = :ca and key = :key", ConservationAreaProperty.class) //$NON-NLS-1$
+						.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+						.setParameter("key", CyberTrackerPlugIn.MB_TILE_SIZE_PROP) //$NON-NLS-1$
+						.uniqueResult();
+				if (prop != null) {
+					try {
+						tileRenderBuffer = Integer.valueOf(prop.getValue());
+					}catch (Exception ex) {
+						CyberTrackerPlugIn.log(ex.getMessage(), ex);
+					}
+				}
+				
 				
 			}
 			if (def == null) {
@@ -162,7 +178,7 @@ public class MapPackageContribution implements IPackageContribution{
 				return new PackageContribution();
 			}
 
-			MbTileGenerator generator = new MbTileGenerator();
+			MbTileGenerator generator = new MbTileGenerator(tileRenderBuffer);
 			mapDefObject.put(CtJsonExportUtils.BASEMAP_KEY, MAPFILE);
 			int minZoom = ((Long)obj.get(BaseMapKeys.MINZOOM.jsonkey)).intValue();
 			int maxZoom = ((Long)obj.get(BaseMapKeys.MAXZOOM.jsonkey)).intValue();
