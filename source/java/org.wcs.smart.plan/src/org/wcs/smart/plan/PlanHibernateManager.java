@@ -353,14 +353,10 @@ public class PlanHibernateManager{
 	 * @throws  
 	 */
 	public static ListItem getPlan(Session session, String id) throws Exception {
-		Query<Tuple> q = session.createQuery("SELECT uuid, id, name FROM Plan WHERE uuid =:uuid", Tuple.class); //$NON-NLS-1$
-		q.setParameter("uuid", UuidUtils.stringToUuid(id)); //$NON-NLS-1$
-		List<Tuple> results = q.list();
-		if (results.size() == 1) {
-			Tuple data = results.get(0);
-			
-			String displayName = Plan.generateLabel((String)data.get(1), (String)data.get(2));
-			return new ListItem( (UUID)data.get(0), displayName);
+		Plan p = session.get(Plan.class,UuidUtils.stringToUuid(id)); 
+		if (p != null) {
+			String displayName = Plan.generateLabel(p.getId(), p.getName());
+			return new ListItem( p.getUuid(), displayName);
 		} else {
 			SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.PlanHibernateManager_Plan_NotFound_Error, id), null);
 			return null;

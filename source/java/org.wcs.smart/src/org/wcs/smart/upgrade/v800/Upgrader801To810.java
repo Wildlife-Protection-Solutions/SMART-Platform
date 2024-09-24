@@ -31,6 +31,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -518,10 +520,118 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			}
 		}
 		
+		upgradePatrolQueries(c);
+		
 		/* VERSION UDATE */
 		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V810.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(ssql);
 		
+	}
+	
+	private void upgradePatrolQueries(Connection c) throws SQLException{
+		
+		Map<String,String> oldnew = new HashMap<>();
+		oldnew.put("patrol:patroltype equals \"GROUND\"", "patrol:transgroupkey equals \"ground\"");  //$NON-NLS-1$//$NON-NLS-2$
+		oldnew.put("patrol:patroltype equals \"AIR\"", "patrol:transgroupkey equals \"air\"");  //$NON-NLS-1$//$NON-NLS-2$
+		oldnew.put("patrol:patroltype equals \"MARINE\"", "patrol:transgroupkey equals \"marine\"");  //$NON-NLS-1$//$NON-NLS-2$
+		
+		for (String table : new String[] {"smart.observation_query", //$NON-NLS-1$
+				"smart.waypoint_query",  //$NON-NLS-1$
+				"smart.patrol_query"}) { //$NON-NLS-1$
+			
+			try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid, query_filter FROM " + table + " WHERE query_filter is not null "); //$NON-NLS-1$ //$NON-NLS-2$
+					PreparedStatement ps = c.prepareStatement("UPDATE " + table + " SET query_filter = ? WHERE uuid = ?")){  //$NON-NLS-1$//$NON-NLS-2$
+				
+				
+				while(rs.next()) {
+					
+					byte[] uuid = rs.getBytes(1);
+					String query = rs.getString(2);
+					if (query == null) continue;
+					
+					boolean updated = false;
+					for (Entry<String,String> replace : oldnew.entrySet()) {
+						if (query.contains(replace.getKey())) {
+							updated = true;
+							query = query.replaceAll(replace.getKey(), replace.getValue());
+						}
+					}
+					if (updated) {
+						ps.setString(1, query);
+						ps.setBytes(2, uuid);
+						ps.execute();
+					}
+				}
+			}
+			
+			//add column filter if columns are filtered and transporttype is included in the filter
+			try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid, column_filter FROM " + table + " WHERE column_filter is not null "); //$NON-NLS-1$ //$NON-NLS-2$
+					PreparedStatement ps = c.prepareStatement("UPDATE " + table + " SET column_filter = ? WHERE uuid = ?")){  //$NON-NLS-1$//$NON-NLS-2$
+			
+				while(rs.next()) {
+					
+					byte[] uuid = rs.getBytes(1);
+					String filter = rs.getString(2);
+
+					if (filter.contains("patrol:transporttype")) { //$NON-NLS-1$
+					
+						filter += ",patrol:transportgroup"; //$NON-NLS-1$
+					
+						ps.setString(1, filter);
+						ps.setBytes(2, uuid);
+						ps.execute();
+					}
+				}
+			}
+		}
+		
+		for (String table : new String[] {"smart.summary_query", //$NON-NLS-1$
+				"smart.gridded_query"}) { //$NON-NLS-1$
+			
+			//summary & grid query
+			try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid, query_def FROM " + table); //$NON-NLS-1$
+					PreparedStatement ps = c.prepareStatement("UPDATE " + table + " SET query_def = ? WHERE uuid = ?")){ //$NON-NLS-1$ //$NON-NLS-2$
+				
+				while(rs.next()) {
+					
+					byte[] uuid = rs.getBytes(1);
+					String query = rs.getString(2);
+					
+					boolean updated = false;
+					for (Entry<String,String> replace : oldnew.entrySet()) {
+						if (query.contains(replace.getKey())) {
+							updated = true;
+							query = query.replaceAll(replace.getKey(), replace.getValue());
+						}
+					}
+					
+					if (table.equals("smart.summary_query")) { //$NON-NLS-1$
+						String old = "patrol:patroltype:"; //$NON-NLS-1$
+						if (query.contains(old)) {
+							updated = true;
+							query = query.replaceAll(old, "patrol:patroltransgroupkey:"); //$NON-NLS-1$
+						
+							for (String key : new String[] {"\"GROUND\"", "\"AIR\"", "\"MARINE\"", "\"MIXED\""}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+								if (query.contains(key)) {
+									updated=true;
+									String newvalue = key.substring(1, key.length()-1).toLowerCase();
+									if (newvalue.equals("mixed")) { //$NON-NLS-1$
+										newvalue = "patrol.mixed"; //$NON-NLS-1$
+									}
+									query = query.replaceAll(key, newvalue);
+								}
+							}
+						}
+					}
+					
+					if (updated) {
+						ps.setString(1, query);
+						ps.setBytes(2, uuid);
+						ps.execute();
+					}
+				}
+			}
+		}
 	}
 
 }

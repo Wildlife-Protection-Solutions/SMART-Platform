@@ -715,8 +715,9 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			
 		} else if (option == PatrolQueryOption.CM) {
 			try {
-				if (value1.isBlank()) {
-					ListItem m = new ListItem(null, PatrolQueryOption.CM.getName(session, null, Locale.getDefault()));
+				if (value1.isBlank() || value1.equals(IFilter.NULL_OP)) {
+					
+					ListItem m = new ListItem(null, PatrolQueryOption.CM.getName(session, null, Locale.getDefault()), IFilter.NULL_OP);
 					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
 				}else {
 					ConfigurableModel cm = session.get(ConfigurableModel.class, UuidUtils.stringToUuid(value1));

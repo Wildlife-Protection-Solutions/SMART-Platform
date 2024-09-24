@@ -228,7 +228,7 @@ TOKEN :
 			< PATROLLEG_RANK_KEY > |
 			< WAYPOINT_CM_KEY > |
 			< PATROL_CA_KEY > |
-			< PATROLLEG_MEMBER_KEY >  ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
+			< PATROLLEG_MEMBER_KEY >  ) ":" (< LETTER > | < DIGIT > | ".")* (":" (< LETTER > | < DIGIT > | ".")+ )*  >
 |    < PATROL_CONTRIBUTION_GROUPBY_OPTION: (< PATROL_CONTRIBUTION > ":" < DM_KEY > ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )* ) >
 |    < PATROL_STRING_GROUPBY_OPTION :
   			( < PATROL_ID_KEY > ) ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
