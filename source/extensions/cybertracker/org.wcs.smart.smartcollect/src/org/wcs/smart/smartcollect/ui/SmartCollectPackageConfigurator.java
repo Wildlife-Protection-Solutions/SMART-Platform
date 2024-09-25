@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -68,6 +69,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.QrCodeManager;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataContribution;
@@ -87,6 +90,7 @@ import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.smartcollect.SmartCollectPlugIn;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.internal.Messages;
@@ -101,11 +105,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	
+	private static final String LANG_KEY = "LANGUAGE"; //$NON-NLS-1$
+
 	private SmartCollectPackage ctpackage;
 	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
-	private Text txtName;
+	private List<Text> txtNames;
 	private Button btnPrivate;
 	private Text txtUrl;
 	private Label lblQr;
@@ -191,12 +197,26 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		warnLabel.setText(Messages.SmartCollectPackageConfigurator_WarningLabel);
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText(Messages.SmartCollectPackageConfigurator_PackageNameLabel);
+		nameLabel.setText("Package Name(s):");
+		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
 		
-		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.SmartCollectPackageConfigurator_DeafultName) : ctitem.getName());
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
+		Composite nameComp = new Composite(g, SWT.NONE);
+		nameComp.setLayout(new GridLayout(2, false));		
+		nameComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtNames = new ArrayList<>();
+		
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+			Label lbl = new Label(nameComp, SWT.NONE);
+			lbl.setText(l.getDisplayName() + ":"); //$NON-NLS-1$
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			Text txtName = new Text(nameComp, SWT.BORDER);
+			txtName.setText( ((NamedItem)ctitem).findName(l));
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtName.addListener(SWT.Modify, e->validate());
+			txtName.setData(LANG_KEY, l);
+			txtNames.add(txtName);			
+		}
 		
 		Label modelLabel = new Label(g, SWT.NONE);
 		modelLabel.setText(Messages.SmartCollectPackageConfigurator_CMLabel);
@@ -420,12 +440,18 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		validate(true);
 	}
 	
+	private Language getLanguage(Text txt) {
+		return (Language) txt.getData(LANG_KEY);
+	}
+	
 	private void validate(boolean modified) {
 		if (modified) onModified.accept(true);
 		
 		try {
-			if (txtName.getText().isBlank()) {
-				throw new Exception(Messages.SmartCollectPackageConfigurator_NameRequired);
+			for (Text txt : txtNames) {
+				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
+					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+				}
 			}
 		
 			if (modelViewer.getSelection().isEmpty()) {
@@ -630,7 +656,9 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					ctpackage.setConfigurableModel(null);
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
-				ctpackage.setName(txtName.getText());
+				for (Text txt : txtNames) {
+					ctpackage.updateName(getLanguage(txt), txt.getText().strip());
+				}
 				
 				MetadataFieldValue privatemd = null;
 				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {

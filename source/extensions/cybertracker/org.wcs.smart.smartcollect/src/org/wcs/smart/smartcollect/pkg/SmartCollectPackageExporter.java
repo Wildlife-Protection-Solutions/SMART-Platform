@@ -41,6 +41,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
@@ -190,7 +191,7 @@ public class SmartCollectPackageExporter {
 				
 				//project file
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(ctPackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
+				writeProjectFile(ctPackage, modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				
 				
 				//add all files in working directory to package
@@ -233,8 +234,8 @@ public class SmartCollectPackageExporter {
 	}
 	
 	
-	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctPackage.getConservationArea().getUuid());
+	private void writeProjectFile(AbstractCtPackage ctpackage, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
+		CtJsonExportUtils.writeProjectJson(ctpackage, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctPackage.getConservationArea().getUuid());
 	}
 
 	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, 

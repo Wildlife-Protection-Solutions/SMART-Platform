@@ -28,11 +28,13 @@ import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.Entity;
@@ -77,7 +79,7 @@ public interface ICtPackage {
 	
 	/**
 	 * 
-	 * @return the name of the package
+	 * @return the name of the package in the current language
 	 */
 	public String getName();
 	

@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.incident.pkg.ui;
 
 import java.nio.file.Path;
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -74,10 +75,11 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
-import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.DataModelWrapper;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
@@ -113,11 +115,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	
+	private static final String LANG_KEY = "LANGUAGE"; //$NON-NLS-1$
+
 	private IncidentCtPackage ctpackage;
 	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
-	private Text txtName;
+	private List<Text> txtNames;
 	
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
@@ -183,12 +187,26 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText(Messages.CtIncidentPackageConfigurator_NameLabel);
+		nameLabel.setText("Package Name(s):");
+		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
 		
-		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtIncidentPackageConfigurator_DefaultName) : ctitem.getName());
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
+		Composite nameComp = new Composite(g, SWT.NONE);
+		nameComp.setLayout(new GridLayout(2, false));		
+		nameComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtNames = new ArrayList<>();
+		
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+			Label lbl = new Label(nameComp, SWT.NONE);
+			lbl.setText(l.getDisplayName() + ":"); //$NON-NLS-1$
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			Text txtName = new Text(nameComp, SWT.BORDER);
+			txtName.setText( ((NamedItem)ctitem).findName(l));
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtName.addListener(SWT.Modify, e->validate());
+			txtName.setData(LANG_KEY, l);
+			txtNames.add(txtName);			
+		}
 		
 		Label modelLabel = new Label(g, SWT.NONE);
 		modelLabel.setText(Messages.CtIncidentPackageConfigurator_ConfigLabel);
@@ -365,6 +383,10 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		
 	}
 
+	private Language getLanguage(Text txt) {
+		return (Language) txt.getData(LANG_KEY);
+	}
+	
 	@Override
 	public void save() throws Exception {
 		try(Session session = HibernateManager.openSession()){
@@ -383,7 +405,9 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 					ctpackage.setConfigurableModel(null);
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
-				ctpackage.setName(txtName.getText());
+				for (Text txt : txtNames) {
+					ctpackage.updateName(getLanguage(txt), txt.getText().strip());
+				}
 				
 				MetadataFieldValue mdObserver = findMetadataValue(IncidentMetadataField.MEMBERS, ctpackage);
 				if (lstEmployees != null) {
@@ -462,8 +486,10 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		if (modified) onModified.accept(true);
 		
 		try {
-			if (txtName.getText().isBlank()) {
-				throw new Exception(Messages.CtIncidentPackageConfigurator_PackageRequired);
+			for (Text txt : txtNames) {
+				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
+					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+				}
 			}
 		
 			if (modelViewer.getSelection().isEmpty()) {

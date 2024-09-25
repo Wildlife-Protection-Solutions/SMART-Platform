@@ -245,7 +245,7 @@ public class PatrolPackageExporter {
 				projectAdditions.put(CtJsonExportUtils.JSON_INTEGRATE_KEY, CtJsonExportUtils.getEarthRangerUrl(session, ctpackage.getConservationArea()));
 				
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				CtJsonExportUtils.writeProjectJson(ctpackage.getName(), version, CtJsonExportUtils.CM_MODEL_FILE, logo, 
+				CtJsonExportUtils.writeProjectJson(ctpackage, version, CtJsonExportUtils.CM_MODEL_FILE, logo, 
 						projectFile, metadataFile, projectAdditions, ctpackage.getConservationArea().getUuid());
 
 				

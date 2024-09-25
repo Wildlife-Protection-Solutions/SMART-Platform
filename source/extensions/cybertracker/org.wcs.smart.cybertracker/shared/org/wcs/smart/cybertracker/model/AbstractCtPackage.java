@@ -32,7 +32,7 @@ import org.json.simple.parser.ParseException;
 import org.locationtech.jts.geom.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.CascadeType;
@@ -48,7 +48,7 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
+public abstract class AbstractCtPackage extends NamedItem implements ICtPackage {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -69,8 +69,6 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 		}
 	}
 	
-	//package name
-	protected String name;
 	//conservation area
 	protected ConservationArea ca;
 	//device properties
@@ -115,17 +113,7 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	public void setConservationArea(ConservationArea ca){
 		this.ca = ca;
 	}
-	
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
+		
 	@Column(name = "basemapdef")
 	public String getBasemapDef() {
 		return this.basemapdef;

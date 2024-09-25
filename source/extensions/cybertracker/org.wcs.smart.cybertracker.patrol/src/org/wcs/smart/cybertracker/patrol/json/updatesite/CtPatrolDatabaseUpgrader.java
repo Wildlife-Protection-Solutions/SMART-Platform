@@ -136,6 +136,9 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 				"drop table smart.pptemp", //$NON-NLS-1$
 				
 				"alter table smart.ct_patrol_package alter column patrol_type_uuid set not null", //$NON-NLS-1$
+				
+				"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_patrol_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_patrol_package drop column name", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

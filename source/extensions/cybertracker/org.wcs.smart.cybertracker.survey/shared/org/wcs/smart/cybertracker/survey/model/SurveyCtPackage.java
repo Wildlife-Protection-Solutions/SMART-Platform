@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.survey.model;
 import java.util.ArrayList;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -117,7 +118,9 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider, I
 		copy.setSurveyDesign(getSurveyDesign());
 		copy.setIncidentModel(getIncidentModel());
 		copy.setCtProfile(getCtProfile());
-		copy.setName(getName());
+		for (Label l : this.getNames()) {
+			copy.updateName(l.getLanguage(), l.getValue());
+		}
 		copy.setBasemapDef(getBasemapDef());
 		copy.setHasIncident(getHasIncident());
 		

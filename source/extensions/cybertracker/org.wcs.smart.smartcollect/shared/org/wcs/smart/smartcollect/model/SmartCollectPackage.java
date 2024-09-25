@@ -23,6 +23,7 @@ package org.wcs.smart.smartcollect.model;
 
 import java.util.ArrayList;
 
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -80,7 +81,9 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 		copy.ca = this.ca;
 		copy.cm = this.cm;
 		copy.ctprofile = this.ctprofile;
-		copy.name = name;
+		for (Label l : this.getNames()) {
+			copy.updateName(l.getLanguage(), l.getValue());
+		}
 		copy.basemapdef = this.basemapdef;
 		
 		if (getMetadataValues() != null) {

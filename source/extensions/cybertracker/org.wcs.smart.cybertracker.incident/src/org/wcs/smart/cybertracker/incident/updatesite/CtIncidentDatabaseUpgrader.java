@@ -84,6 +84,9 @@ public class CtIncidentDatabaseUpgrader implements IDatabaseUpgrader {
 	private void upgrade(String currentVersion, Session session){
 		if (currentVersion == null) {
 			createTables(session);
+			upgrade1to2(session);
+		}else if (currentVersion.equalsIgnoreCase(CtIncidentPlugIn.DB_VERSION_1)) {
+			upgrade1to2(session);
 		}
 	}
 	
@@ -113,6 +116,25 @@ public class CtIncidentDatabaseUpgrader implements IDatabaseUpgrader {
 		});
 		
 		HibernateManager.setPlugInVersion(CtIncidentPlugIn.PLUGIN_ID, CtIncidentPlugIn.DB_VERSION_1, session);
+	}
+	
+	private void upgrade1to2(Session session){
+		
+		final String[] sql = new String[]{
+				"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_incident_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_incident_package drop column name", //$NON-NLS-1$				
+		};
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				for (int i = 0; i < sql.length; i ++){
+					c.createStatement().execute(sql[i]);
+				}				
+			}
+		});
+		
+		HibernateManager.setPlugInVersion(CtIncidentPlugIn.PLUGIN_ID, CtIncidentPlugIn.DB_VERSION_2, session);
 	}
 
 }

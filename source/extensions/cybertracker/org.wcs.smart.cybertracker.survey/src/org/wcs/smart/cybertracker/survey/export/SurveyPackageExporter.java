@@ -55,6 +55,7 @@ import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
@@ -214,7 +215,7 @@ public class SurveyPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile( ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
+				writeProjectFile( ctpackage, modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				
 				//add all files in working directory to package
 				try(Stream<Path> files = Files.list(workingDir)){
@@ -383,9 +384,9 @@ public class SurveyPackageExporter {
 		}
 	}
 
-	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
+	private void writeProjectFile(AbstractCtPackage ctpackage, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
 		projectAdditions.put(CtJsonExportUtils.JSON_INTEGRATE_KEY, CtJsonExportUtils.getEarthRangerUrl(session, ctpackage.getConservationArea()));
-		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctpackage.getConservationArea().getUuid());
+		CtJsonExportUtils.writeProjectJson(ctpackage, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctpackage.getConservationArea().getUuid());
 	}
 	
 	@SuppressWarnings("unchecked")

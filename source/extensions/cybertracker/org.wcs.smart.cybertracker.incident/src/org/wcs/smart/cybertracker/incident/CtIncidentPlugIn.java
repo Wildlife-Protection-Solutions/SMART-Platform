@@ -13,8 +13,9 @@ public class CtIncidentPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.cybertracker.incident"; //$NON-NLS-1$
 
+	public static final String DB_VERSION_2 = "3.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_1 = "2.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1;
+	public static final String DB_VERSION = DB_VERSION_2;
 	
 	
 	// The shared instance

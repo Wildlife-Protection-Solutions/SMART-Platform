@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.patrol.model;
 
 import java.util.ArrayList;
 
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -126,7 +127,9 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, I
 		copy.cm = this.cm;
 		copy.incidentmodel = this.incidentmodel;
 		copy.ctprofile = this.ctprofile;
-		copy.name = name;
+		for (Label l : this.getNames()) {
+			copy.updateName(l.getLanguage(), l.getValue());
+		}
 		copy.basemapdef = this.basemapdef;
 		copy.hasIncident = this.hasIncident;
 		

@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.survey.ui;
 
 import java.nio.file.Path;
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -62,6 +63,8 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
@@ -91,11 +94,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	
+	private static final String LANG_KEY = "LANGUAGE"; //$NON-NLS-1$
+
 	private SurveyCtPackage ctpackage;
 	
 	private ComboViewer designViewer;
 	private ComboViewer profileViewer;
-	private Text txtName;
+	private List<Text> txtNames;
 	
 	private List<IPackageUiContribution> contributions = null;
 	
@@ -159,12 +164,26 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText(Messages.CtSurveyPackageConfigurator_PackageName);
+		nameLabel.setText("Package Name(s):");
+		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
 		
-		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtSurveyPackageConfigurator_DefaultName) : ctitem.getName());
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
+		Composite nameComp = new Composite(g, SWT.NONE);
+		nameComp.setLayout(new GridLayout(2, false));		
+		nameComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtNames = new ArrayList<>();
+		
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+			Label lbl = new Label(nameComp, SWT.NONE);
+			lbl.setText(l.getDisplayName() + ":"); //$NON-NLS-1$
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			Text txtName = new Text(nameComp, SWT.BORDER);
+			txtName.setText( ((NamedItem)ctitem).findName(l));
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtName.addListener(SWT.Modify, e->validate());
+			txtName.setData(LANG_KEY, l);
+			txtNames.add(txtName);			
+		}
 		
 		Label modelLabel = new Label(g, SWT.NONE);
 		modelLabel.setText(Messages.CtSurveyPackageConfigurator_ModelLabel);
@@ -287,8 +306,10 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				
 				ctpackage.setSurveyDesign((SurveyDesign)designViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
-				ctpackage.setName(txtName.getText());
 				
+				for (Text txt : txtNames) {
+					ctpackage.updateName(getLanguage(txt), txt.getText().strip());
+				}
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage, session);
 				}				
@@ -301,6 +322,10 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		}
 	}
 
+	private Language getLanguage(Text txt) {
+		return (Language) txt.getData(LANG_KEY);
+	}
+	
 	private void validate() {
 		validate(true);
 	}
@@ -309,8 +334,10 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		if (isModified) onModified.accept(true);
 		
 		try {
-			if (txtName.getText().isBlank()) {
-				throw new Exception(Messages.CtSurveyPackageConfigurator_NameRequired);
+			for (Text txt : txtNames) {
+				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
+					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+				}
 			}
 		
 			if (designViewer.getSelection().isEmpty() || !(designViewer.getStructuredSelection().getFirstElement() instanceof SurveyDesign)) {

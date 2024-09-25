@@ -211,7 +211,7 @@ public class IncidentPackageExporter {
 								
 				//project file
 				Path projectFile = workingDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
+				writeProjectFile(ctpackage, modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				
 				//add all files in working directory to package
 				try(Stream<Path> files = Files.list(workingDir)){
@@ -266,9 +266,9 @@ public class IncidentPackageExporter {
 	}
 	
 	
-	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
+	private void writeProjectFile(AbstractCtPackage ctpackage, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
 		projectAdditions.put(CtJsonExportUtils.JSON_INTEGRATE_KEY, CtJsonExportUtils.getEarthRangerUrl(session, ctpackage.getConservationArea()));
-		CtJsonExportUtils.writeProjectJson(name, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctpackage.getConservationArea().getUuid());
+		CtJsonExportUtils.writeProjectJson(ctpackage, version, CtJsonExportUtils.CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions, ctpackage.getConservationArea().getUuid());
 	}
 
 	private void profileToJson(CyberTrackerPropertiesProfile profile, 

@@ -86,7 +86,23 @@ public class SmartCollectDatabaseUpgrader implements IDatabaseUpgrader {
 	private void upgrade(String currentVersion, Session session){
 		if (currentVersion == null) {
 			createTables(session);
+			upgradeV1toV2(session);
+		}else if (currentVersion.equals(SmartCollectPlugIn.DB_VERSION_1)) {
+			upgradeV1toV2(session);
 		}
+	}
+	
+	private void upgradeV1toV2(Session session) {
+		String[] sql = new String[] {
+				"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.smartcollect_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+				"ALTER TABLE smart.smartcollect_package drop column name", //$NON-NLS-1$
+		};
+		
+		for (String s : sql) {
+			session.createNativeMutationQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(SmartCollectPlugIn.PLUGIN_ID, SmartCollectPlugIn.DB_VERSION_2, session);
 	}
 	
 	private void createTables(Session session){

@@ -2111,7 +2111,27 @@ public class UpgradeServlet extends HttpServlet {
 							
 							"alter table smart.ct_patrol_package alter column patrol_type_uuid set not null", //$NON-NLS-1$
 							
+							
+							//add names to packages
+							"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_incident_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+							"ALTER TABLE smart.ct_incident_package drop column name", //$NON-NLS-1$		
+							
+							"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_patrol_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+							"ALTER TABLE smart.ct_patrol_package drop column name", //$NON-NLS-1$
+							
+							"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_survey_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+							"ALTER TABLE smart.ct_survey_package drop column name", //$NON-NLS-1$
+							
+							"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.smartcollect_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+							"ALTER TABLE smart.smartcollect_package drop column name", //$NON-NLS-1$
+							
 							//versions
+							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
+							"update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.survey'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.survey'", //$NON-NLS-1$
+							"update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.incident'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.incident'", //$NON-NLS-1$
 							"update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol'", //$NON-NLS-1$
 							

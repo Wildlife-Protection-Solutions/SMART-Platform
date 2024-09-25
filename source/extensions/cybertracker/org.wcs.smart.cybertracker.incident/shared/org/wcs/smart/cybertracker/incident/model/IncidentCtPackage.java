@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.incident.model;
 
 import java.util.ArrayList;
 
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -81,8 +82,10 @@ public class IncidentCtPackage extends AbstractCtPackage implements ICmProvider{
 		copy.ca = this.ca;
 		copy.cm = this.cm;
 		copy.ctprofile = this.ctprofile;
-		copy.name = name;
 		copy.basemapdef = this.basemapdef;
+		for (Label l : this.getNames()) {
+			copy.updateName(l.getLanguage(), l.getValue());
+		}
 	
 		if (getMetadataValues() != null) {
 			copy.metadataValues = new ArrayList<>();

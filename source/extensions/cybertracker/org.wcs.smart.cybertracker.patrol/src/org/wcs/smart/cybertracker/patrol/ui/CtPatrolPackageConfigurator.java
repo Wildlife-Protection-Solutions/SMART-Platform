@@ -68,6 +68,8 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
@@ -110,12 +112,14 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	
+	private static final String LANG_KEY = "LANGUAGE"; //$NON-NLS-1$
+
 	private PatrolCtPackage ctpackage;
 	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
 	private ComboViewer cmbTrackType;
-	private Text txtName;
+	private List<Text> txtNames;
 	
 	private ScrolledComposite scrolltt;
 	
@@ -199,12 +203,27 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		});
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText(Messages.CtPatrolPackageConfigurator_NameLabel);
+		nameLabel.setText("Package Name(s):");
+		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
 		
-		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtPatrolPackageConfigurator_DefaultName) : ctitem.getName());
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtName.addListener(SWT.Modify, e->validate());
+		Composite nameComp = new Composite(g, SWT.NONE);
+		nameComp.setLayout(new GridLayout(2, false));		
+		nameComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtNames = new ArrayList<>();
+		
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+			Label lbl = new Label(nameComp, SWT.NONE);
+			lbl.setText(l.getDisplayName() + ":"); //$NON-NLS-1$
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			Text txtName = new Text(nameComp, SWT.BORDER);
+			txtName.setText( ((NamedItem)ctitem).findName(l));
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtName.addListener(SWT.Modify, e->validate());
+			txtName.setData(LANG_KEY, l);
+			txtNames.add(txtName);			
+		}
+		
 		
 		Label modelLabel = new Label(g, SWT.NONE);
 		modelLabel.setText(Messages.PatrolCTPackageDialog_CmLbl);
@@ -411,8 +430,11 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				((ComboViewer)controls[0]).setSelection(new StructuredSelection(s.getTrackTimerOption()));
 				((Text)controls[1]).setText(String.valueOf(s.getValue()));
 			}
-		}
-		
+		}	
+	}
+	
+	private Language getLanguage(Text txt) {
+		return (Language) txt.getData(LANG_KEY);
 	}
 	
 	@Override
@@ -436,7 +458,9 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					ctpackage.setConfigurableModel(null);
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
-				ctpackage.setName(txtName.getText());
+				for (Text txt : txtNames) {
+					ctpackage.updateName(getLanguage(txt), txt.getText().strip());
+				}
 				ctpackage.setTrackType((PatrolType) cmbTrackType.getStructuredSelection().getFirstElement());
 				List<MetadataFieldValue> md = ctpackage.getMetadataValues();
 				MetadataFieldValue ttts = null;
@@ -513,8 +537,10 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				throw new Exception("Track type required.");
 			}
 			
-			if (txtName.getText().isBlank()) {
-				throw new Exception(Messages.CtPatrolPackageConfigurator_NameRequired);
+			for (Text txt : txtNames) {
+				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
+					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+				}
 			}
 		
 			if (modelViewer.getSelection().isEmpty()) {

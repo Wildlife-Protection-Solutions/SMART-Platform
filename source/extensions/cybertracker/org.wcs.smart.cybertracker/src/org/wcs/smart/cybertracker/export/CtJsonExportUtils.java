@@ -63,6 +63,7 @@ import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.IconItem;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.icon.IconFile;
@@ -375,11 +376,16 @@ public class CtJsonExportUtils {
 	 * @param projectAdditions optional addition key/value pairs to add.  Value can be single value or json object
 	 * @throws IOException
 	 */
-	public static void writeProjectJson(String projectName, String version, String cmFile, 
+	public static void writeProjectJson(NamedItem projectPackage, String version, String cmFile, 
 			Path logoFile, Path outputFile, Path metadataFilename,
 			HashMap<String, Object> projectAdditions, UUID caUuid) throws IOException {
 		JSONObject projectJSON = new JSONObject();
-		projectJSON.put("projectName",projectName); //$NON-NLS-1$
+		projectJSON.put("projectName",projectPackage.getName()); //$NON-NLS-1$
+		for (Label l : projectPackage.getNames()) {
+			if (!l.getValue().isBlank()) {
+				projectJSON.put("projectName_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$			
+			}
+		}
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$

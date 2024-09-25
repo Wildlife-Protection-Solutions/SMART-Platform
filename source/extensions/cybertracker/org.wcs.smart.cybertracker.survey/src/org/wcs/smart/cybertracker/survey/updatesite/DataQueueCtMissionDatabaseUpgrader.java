@@ -94,9 +94,25 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion == null) {
 			createTables(session);
 			upgradeV1ToV2(session);
+			upgradeV2ToV3(session);
 		}else if (currentVersion.contentEquals(SurveyCyberTrackerPlugIn.DB_VERSION_1)) {
 			upgradeV1ToV2(session);
+			upgradeV2ToV3(session);
+		}else if (currentVersion.contentEquals(SurveyCyberTrackerPlugIn.DB_VERSION_2)) {
+			upgradeV2ToV3(session);
 		}
+	}
+	
+	private void upgradeV2ToV3(Session session) {
+		String[] sql = new String[] {
+				"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_survey_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_survey_package drop column name", //$NON-NLS-1$				
+		};
+		
+		for (String s : sql) {
+			session.createNativeMutationQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(SurveyCyberTrackerPlugIn.PLUGIN_ID, SurveyCyberTrackerPlugIn.DB_VERSION_3, session);
 	}
 	
 	private void upgradeV1ToV2(Session session) {
