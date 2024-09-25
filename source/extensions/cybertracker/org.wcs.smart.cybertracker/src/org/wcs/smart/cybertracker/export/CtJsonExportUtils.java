@@ -381,11 +381,15 @@ public class CtJsonExportUtils {
 			HashMap<String, Object> projectAdditions, UUID caUuid) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectPackage.getName()); //$NON-NLS-1$
+		
+		JSONObject jsonnames = new JSONObject();
 		for (Label l : projectPackage.getNames()) {
 			if (!l.getValue().isBlank()) {
-				projectJSON.put("projectName_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$			
+				jsonnames.put(l.getLanguage().getCode(), l.getValue());
 			}
 		}
+		projectJSON.put("projectNames",jsonnames); //$NON-NLS-1$
+
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
