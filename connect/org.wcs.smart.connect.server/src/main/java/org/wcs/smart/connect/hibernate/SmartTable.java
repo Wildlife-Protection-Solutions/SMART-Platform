@@ -178,6 +178,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.patrol.model.PatrolMotivatedRecord;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.DataLink;
@@ -384,6 +385,7 @@ public enum SmartTable {
 	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".attribute.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTELIST(WaypointObservationAttributeList.class,".id.observationAttribute.observation.observationGroup.waypoint.conservationArea"),
+	INCIDENT_TYPE(IncidentType.class, null),
 	
 	I2_ATTACHMENT(IntelAttachment.class, null),
 	I2_ATTRIBUTE(IntelAttribute.class, null),

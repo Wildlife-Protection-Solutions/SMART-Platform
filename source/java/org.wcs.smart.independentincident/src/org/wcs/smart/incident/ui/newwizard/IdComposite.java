@@ -38,11 +38,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentProvider;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Incident ID composite
@@ -56,6 +59,7 @@ public class IdComposite extends AbstractIncidentComposite {
 	
 	private Text txtId;
 	
+	private ComboViewer cmbSource;
 	private ComboViewer cmbType;
 	
 	@Override
@@ -80,12 +84,12 @@ public class IdComposite extends AbstractIncidentComposite {
 			Label l = new Label(item, SWT.NONE);
 			l.setText(Messages.IdComposite_WaypointSourceField);
 			
-			cmbType = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
-			cmbType.setContentProvider(ArrayContentProvider.getInstance());
-			cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			cmbSource = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbSource.setContentProvider(ArrayContentProvider.getInstance());
+			cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			cmbType.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProviders().iterator().next()));
-			cmbType.setLabelProvider(new LabelProvider() {
+			cmbSource.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProviders().iterator().next()));
+			cmbSource.setLabelProvider(new LabelProvider() {
 				@Override
 				public String getText(Object element) {
 					return ((IIncidentProvider)element).getName();
@@ -98,10 +102,31 @@ public class IdComposite extends AbstractIncidentComposite {
 				return Collator.getInstance().compare(a.getName(),  b.getName());
 			});
 			
-			cmbType.setInput(sources);
+			cmbSource.setInput(sources);
+			
+			cmbSource.addSelectionChangedListener(e->{
+				IIncidentProvider op = (IIncidentProvider) cmbSource.getStructuredSelection().getFirstElement();
+				cmbType.getControl().setEnabled( op.getWaypointSourceKey().equalsIgnoreCase(IndepedentIncidentSource.KEY));
+				
+				
+			});
 		}
 		
 		Label l = new Label(item, SWT.NONE);
+		l.setText("Incident Type:");
+		
+		cmbType = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbType.setLabelProvider(new NamedItemLabelProvider());
+		
+		try(Session session = HibernateManager.openSession()){
+			List<IncidentType> types = IncidentManager.getInstance().getIncidentTypes(session, true);
+			cmbType.setInput(types);
+			cmbType.setSelection(new StructuredSelection(types.get(0)));
+		}
+		
+		l = new Label(item, SWT.NONE);
 		l.setText(Messages.IdComposite_Label);
 		
 		txtId = new Text(item, SWT.BORDER);
@@ -121,20 +146,34 @@ public class IdComposite extends AbstractIncidentComposite {
 	@Override
 	public void updateIncident(Waypoint incident) {
 		incident.setId(txtId.getText().strip());
-		if (cmbType == null) {
+		if (cmbSource == null) {
 			incident.setSourceId(IndepedentIncidentSource.KEY);
 		}else {
-			IIncidentProvider p = (IIncidentProvider) cmbType.getStructuredSelection().getFirstElement();
+			IIncidentProvider p = (IIncidentProvider) cmbSource.getStructuredSelection().getFirstElement();
 			incident.setSourceId(p.getWaypointSourceKey());
 		}
+		
+		if (incident.getSourceId().equalsIgnoreCase(IndepedentIncidentSource.KEY)) {
+			IncidentType type = (IncidentType)cmbType.getStructuredSelection().getFirstElement();
+			incident.setIncidentTypeUuid(type.getUuid());
+		}else {
+			incident.setIncidentTypeUuid(null);
+		}
 	}
+	
 
 	@Override
 	public void initFields(Waypoint incident, Session session) {	
 		txtId.setText(incident.getId());
-		if (cmbType != null) {		
-			cmbType.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProvider(incident.getSourceId())));
-			cmbType.getControl().setEnabled(incident.getUuid() == null);
+		if (cmbSource != null) {		
+			cmbSource.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProvider(incident.getSourceId())));
+			cmbSource.getControl().setEnabled(incident.getUuid() == null);
+		}
+		
+		if (incident.getSourceId().equalsIgnoreCase(IndepedentIncidentSource.KEY)) {
+			IncidentType temp = new IncidentType();
+			temp.setUuid(incident.getIncidentTypeUuid());		
+			cmbType.setSelection(new StructuredSelection(temp));
 		}
 	}
 	

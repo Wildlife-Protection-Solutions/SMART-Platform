@@ -25,13 +25,11 @@ import org.hibernate.event.spi.PostCommitInsertEventListener;
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.incident.IntegrateIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.SingleItemDataProvider;
 import org.wcs.smart.qa.auto.AutoValidateJob;
 import org.wcs.smart.qa.incident.IncidentDataProvider;
-import org.wcs.smart.qa.incident.IntegrateIncidentDataProvider;
 import org.wcs.smart.qa.routine.WaypointLocationData;
 
 /**
@@ -53,10 +51,11 @@ public class NewIncidentObjectEventListener implements PostCommitInsertEventList
 				WaypointLocationData data = new WaypointLocationData((Waypoint) x);
 				SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(IncidentDataProvider.ID), data);
 				AutoValidateJob.INSTANCE.addTask(provider);
-			}else if (((Waypoint)x).getSourceId().equals(IntegrateIncidentSource.KEY)) {
-				WaypointLocationData data = new WaypointLocationData((Waypoint) x);
-				SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(IntegrateIncidentDataProvider.ID), data);
-				AutoValidateJob.INSTANCE.addTask(provider);			
+				//TODO:
+//			}else if (((Waypoint)x).getSourceId().equals(IntegrateIncidentSource.KEY)) {
+//				WaypointLocationData data = new WaypointLocationData((Waypoint) x);
+//				SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(IntegrateIncidentDataProvider.ID), data);
+//				AutoValidateJob.INSTANCE.addTask(provider);			
 			}
 		}
 	}

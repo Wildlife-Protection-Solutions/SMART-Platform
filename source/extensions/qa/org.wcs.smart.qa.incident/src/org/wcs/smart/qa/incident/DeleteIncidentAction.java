@@ -58,8 +58,7 @@ public class DeleteIncidentAction implements IQaAction {
 	public boolean doAction(List<QaError> items) {
 		List<QaError> toProcess = new ArrayList<>();
 		for (QaError e : items){
-			if (e.getDataProviderId().equals(IncidentDataProvider.ID) ||
-					e.getDataProviderId().equals(IntegrateIncidentDataProvider.ID) ){
+			if (e.getDataProviderId().equals(IncidentDataProvider.ID) ){
 				toProcess.add(e);
 			}
 		}

@@ -32,18 +32,18 @@ import org.eclipse.swt.widgets.Shell;
  * @since 1.0.0
  */
 @SuppressWarnings("restriction")
-public class ShowOptionsHandler {
+public class ShowIncidentTypesHandler {
 
 	@Execute
 	public void execute(Shell activeShell) {
-		IncidentOptionsPropertyPage dialog = new IncidentOptionsPropertyPage(activeShell);
+		IncidentTypePropertyPage dialog = new IncidentTypePropertyPage(activeShell);
 		dialog.open();
 		return;
 	}
 	
-	public static class ShowOptionsHandlerWrapper extends DIHandler<ShowOptionsHandler>{
-		public ShowOptionsHandlerWrapper(){
-			super(ShowOptionsHandler.class);
+	public static class ShowIncidentTypesHandlerWrapper extends DIHandler<ShowIncidentTypesHandler>{
+		public ShowIncidentTypesHandlerWrapper(){
+			super(ShowIncidentTypesHandler.class);
 		}
 	}
 }

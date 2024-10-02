@@ -58,8 +58,7 @@ public class OpenIncidentAction implements IQaAction {
 	public boolean doAction(List<QaError> items) {
 		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
-		if (item.getDataProviderId().equals(IncidentDataProvider.ID) ||
-				item.getDataProviderId().equals(IntegrateIncidentDataProvider.ID)){
+		if (item.getDataProviderId().equals(IncidentDataProvider.ID)){
 			Waypoint pw = null;
 			
 			try(Session s = HibernateManager.openSession()){

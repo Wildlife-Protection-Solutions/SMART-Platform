@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,24 +40,30 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
+import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -242,8 +249,87 @@ public class IncidentPackageExporter {
 		JSONArray metadataScreens = new JSONArray();
 		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentCtPackage.TYPE_NAME.toLowerCase()));
 		
-		//observer employee options
+		//incident type
 		MetadataFieldValue md = null;
+		for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+			if (v.getMetadataKey().equalsIgnoreCase(IncidentMetadataField.TYPES.name())) {
+				md = v;
+				break;
+			}
+		}
+
+		if (md == null) {
+			//make a fake one with all types
+			md = new MetadataFieldValue();
+			md.setConservationArea(ctpackage.getConservationArea());
+			md.setCtPackage(ctpackage);
+			md.setMetadataKey(IncidentMetadataField.TYPES.name());
+			md.setRequired(true);
+		}
+		if (md.getUuidList() == null || md.getUuidList().isEmpty()) {
+			//add all active types
+			md.setUuidList(new ArrayList<>());
+			List<IncidentType> types = IncidentManager.getInstance().getIncidentTypes(session, true);
+			for (IncidentType t : types) {
+				MetadataFieldUuidValue v = new MetadataFieldUuidValue();
+				v.setMetadata(md);
+				v.setUuidValue(t.getUuid());
+				md.getUuidList().add(v);
+			}
+		}
+		JSONObject optionType = new JSONObject();
+		
+		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, "Incident Type");
+		//TODO: translations for incident Type label
+//		for (Entry<String,String> t : getTranslations(Messages.CtJsonExportUtils_EmployeePageLabel, "CtJsonExportUtils_EmployeePageLabel", ca).entrySet()) { //$NON-NLS-1$
+//			optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+//		}
+		optionType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
+		
+		if (md.getUuidList().size() == 1) {
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.UUID.name());
+			optionType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY, true);
+			optionType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+			optionType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, false);
+			IncidentType type = session.get(IncidentType.class, md.getUuidList().get(0).getUuidValue());
+			optionType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(type.getUuid()));
+		}else {
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+			optionType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY, false);
+			optionType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+
+			//addMetadataIconToJson(metadataIcon, workingDir, optionType);
+			
+			List<IncidentType> types = new ArrayList<>();
+			for (MetadataFieldUuidValue v : md.getUuidList()) {
+				IncidentType type = session.get(IncidentType.class, v.getUuidValue());
+				if (type != null) types.add(type);
+			}
+			Collections.sort(types);
+			JSONArray optionOptions = new JSONArray();
+			for (IncidentType t : types) {
+				JSONObject ttype = new JSONObject();
+				ttype.put(CtJsonExportUtils.JSON_PROP_UUID, UuidUtils.uuidToString(t.getUuid()));
+				ttype.put(CtJsonExportUtils.JSON_PROP_KEY, t.getKeyId());
+				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ctpackage.getConservationArea().getDefaultLanguage())); 
+				for (Label l : t.getNames()) {
+					ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue()); 
+					
+				}
+				optionOptions.add(ttype);				
+			}
+			optionType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
+			
+		}
+		
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(IncidentMetadataField.TYPES.getJsonKey(), optionType);
+		
+		metadataScreens.add(typeOp);
+					
+		
+		//observer employee options
+		md = null;
 		for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
 			if (v.getMetadataKey().equalsIgnoreCase(IncidentMetadataField.MEMBERS.name())) {
 				md = v;
@@ -259,6 +345,9 @@ public class IncidentPackageExporter {
 					workingDir, session, ctpackage.getConservationArea());
 			metadataScreens.add(emp);
 		}
+				
+		
+	
 				
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
 			fw.write(metadataScreens.toJSONString());

@@ -37,7 +37,6 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.incident.IntegrateIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
@@ -46,7 +45,6 @@ import org.wcs.smart.qa.SingleItemDataProvider;
 import org.wcs.smart.qa.ValidationEngine;
 import org.wcs.smart.qa.er.ErWaypointDataProvider;
 import org.wcs.smart.qa.incident.IncidentDataProvider;
-import org.wcs.smart.qa.incident.IntegrateIncidentDataProvider;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider;
@@ -120,11 +118,8 @@ public class QaValidationProcessor implements Runnable{
 			if (wp.getSourceId().equals(IndepedentIncidentSource.KEY)){
 				provider = new SingleItemDataProvider(
 						RoutineExtensionManager.INSTANCE.findDataProvider(IncidentDataProvider.ID), data);
-			}else if (wp.getSourceId().equals(IntegrateIncidentSource.KEY)) {
-				provider = new SingleItemDataProvider(
-						RoutineExtensionManager.INSTANCE.findDataProvider(IntegrateIncidentDataProvider.ID), data);
 			}
-			//we do not validate collect, integratepatrol, integtratepatrollink incidents
+
 		}
 		
 		if (ca != null && provider != null) {

@@ -31,6 +31,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
 
 /**
  * Editor input for incident objects.  Tracks
@@ -45,16 +46,22 @@ public class IncidentEditorInput implements IEditorInput {
 	private UUID uuid;
 	private LocalDateTime dateTime;
 	private String sourceKey;
+	private IncidentType type;
 	
-	private IncidentEditorInput(UUID uuid, String sourceKey){
+	private IncidentEditorInput(UUID uuid, String sourceKey, IncidentType type){
 		this.uuid = uuid;
 		this.sourceKey = sourceKey;
+		this.type = type;
 	}
 	
-	public IncidentEditorInput(UUID uuid, String id, LocalDateTime dateTime, String sourceKey){
-		this(uuid, sourceKey);
+	public IncidentEditorInput(UUID uuid, String id, LocalDateTime dateTime, String sourceKey, IncidentType type){
+		this(uuid, sourceKey, type);
 		this.id = id;
 		this.dateTime = dateTime;
+	}
+	
+	public IncidentType getType() {
+		return this.type;
 	}
 	
 	/**

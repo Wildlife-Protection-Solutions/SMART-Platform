@@ -38,7 +38,8 @@ import org.wcs.smart.ca.icon.IconUtils;
  */
 public enum IncidentMetadataField {
 	
-	MEMBERS("SMART_Employee", true, false, "patrol_members"); //$NON-NLS-1$ //$NON-NLS-2$
+	MEMBERS("SMART_Employee", true, false, "patrol_members"), //$NON-NLS-1$ //$NON-NLS-2$
+	TYPES("SMART_IncidentType", true, false, null); //$NON-NLS-1$
 	
 	private String jsonKey;
 	private boolean isRequired;

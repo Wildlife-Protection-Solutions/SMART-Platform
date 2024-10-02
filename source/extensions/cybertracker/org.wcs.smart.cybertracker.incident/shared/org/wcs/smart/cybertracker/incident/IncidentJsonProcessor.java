@@ -40,14 +40,17 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.incident.model.IIncidentCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
+import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
 import org.wcs.smart.cybertracker.json.CtJsonObservationParser;
 import org.wcs.smart.cybertracker.json.CtJsonUtil;
 import org.wcs.smart.cybertracker.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.json.JsonImportWarning;
 import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -185,6 +188,33 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 			
 				//Parse the waypoint information 				
 				Waypoint parsedWp = parser.createWaypoint(feature,ca, session);
+				
+				String itype = feature.get(IncidentMetadataField.TYPES).toString();
+				try {
+					UUID itypeuuid = UuidUtils.stringToUuid(itype);
+					IncidentType iitype = session.get(IncidentType.class, itypeuuid);
+					if (iitype == null || !iitype.getConservationArea().equals(ca)) {
+						//add warning and set to incident system type
+					}else {
+						parsedWp.setIncidentTypeUuid(iitype.getUuid());
+					}
+				}catch(Exception ex) {
+					//add warning and set to incident system type
+					warnings.add(new JsonImportWarning(JsonImportWarning.Type.INC_TYPE_NOT_FOUND, itype));
+				}
+				if (parsedWp.getIncidentTypeUuid() == null) {
+					IncidentType i = QueryFactory.buildQuery(session, 
+							IncidentType.class,
+							new Object[] {"conservationArea", ca},
+							new Object[] {"keyId", IncidentType.DefaultType.INCIDENT.getKeyId()}).uniqueResult();
+					if (i == null) {
+						//should never happen
+						throw new Exception(MessageFormat.format("Could not find system incident type with key {0}.", IncidentType.DefaultType.INCIDENT.getKeyId()));
+					}
+					parsedWp.setIncidentTypeUuid(i.getUuid());
+				}
+				
+				
 				parser.processImages(parsedWp, session);
 				
 				if (currentLink.getWaypoint() == null) {

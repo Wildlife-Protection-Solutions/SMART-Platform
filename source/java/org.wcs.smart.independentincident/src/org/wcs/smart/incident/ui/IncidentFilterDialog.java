@@ -51,6 +51,8 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 	private StringFilterComposite incidentIdFilterCmp;
 		
 	private SourceFilterComposite sourceFilterCmp;
+	private IncidentTypeFilterComposite typeFilterComp;
+	
 	
 	/**
 	 * Create the dialog.
@@ -84,6 +86,11 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 			currentFilter.getSourceIds().clear();
 			currentFilter.getSourceIds().addAll(sourceFilterCmp.getIncidentFilter());
 		}
+		
+		if (typeFilterComp != null) {
+			currentFilter.getTypes().clear();
+			currentFilter.getTypes().addAll(typeFilterComp.getIncidentFilter());
+		}
 	}
 
 	/**
@@ -101,6 +108,9 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 		//source filter
 		if (sourceFilterCmp != null) {
 			sourceFilterCmp.applyState(currentFilter.getSourceIds());
+		}
+		if (typeFilterComp != null) {
+			typeFilterComp.applyState(currentFilter.getTypes());
 		}
 	}
 	/**
@@ -132,14 +142,16 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 				incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
 				incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
 				
-				
-				
 				if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
 					Composite incidentsourceComp = createGroupComposite(Messages.IncidentFilterDialog_SourceFilterSection, composite);
 					incidentsourceComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-					
 					sourceFilterCmp = new SourceFilterComposite(incidentsourceComp, SWT.NONE);
 				}
+				
+				Composite incidenttypecomp = createGroupComposite("Incident Type", composite);
+				incidenttypecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				typeFilterComp = new IncidentTypeFilterComposite(incidenttypecomp, SWT.NONE);
+				
 				updateControlsValues();
 			} finally {
 				session.getTransaction().rollback();

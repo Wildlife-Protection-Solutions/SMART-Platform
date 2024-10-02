@@ -385,6 +385,10 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			
 			"DROP FUNCTION smart.uuidtemp",  //$NON-NLS-1$
 			
+			//to support different incident types
+			//TODO: fk ?
+			"alter table smart.waypoint add column incident_type_uuid char(16) for bit data"
+			
 		};
 		
 		for (String s : sql) {

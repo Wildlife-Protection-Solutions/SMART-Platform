@@ -43,6 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
@@ -87,7 +88,11 @@ public class OpenIncidentHandler {
 			try(Session session = HibernateManager.openSession()){
 				Waypoint wp = session.get(Waypoint.class, incidentUuid);
 				if (wp != null) {
-					IncidentEditorInput ii = new IncidentEditorInput(wp.getUuid(), wp.getId(), wp.getDateTime(), wp.getSourceId());
+					IncidentType type = null;
+					if (wp.getIncidentTypeUuid() != null) {
+						type = session.get(IncidentType.class, wp.getIncidentTypeUuid());
+					}
+					IncidentEditorInput ii = new IncidentEditorInput(wp.getUuid(), wp.getId(), wp.getDateTime(), wp.getSourceId(), type);
 					incidents.add(ii);
 				}
 			}

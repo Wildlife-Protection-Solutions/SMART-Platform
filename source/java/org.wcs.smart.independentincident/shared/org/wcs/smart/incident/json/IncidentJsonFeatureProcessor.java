@@ -39,12 +39,11 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.incident.IntegrateIncidentSource;
-import org.wcs.smart.incident.IntegratePatrolIncidentSource;
-import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -62,24 +61,10 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
  *
  */
 public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
-
+	
 	//Incident related JSON data type
 	private static final String INCIDENT_DATATYPE = "incident"; //$NON-NLS-1$
-	private static final String INTEGRATE_DATATYPE = "integrateincident"; //$NON-NLS-1$
-	
-	public enum IncidentLinkDataType{
-		INCIDENT("incident"); //$NON-NLS-1$
 		
-		private String key;
-		IncidentLinkDataType(String key){
-			this.key = key;
-		}
-		
-		public String getKey() {
-			return this.key;
-		}
-	}
-	
 	public enum Messages{
 		INVALID_DATA_TYPE,
 		INVALID_FEATURE_TYPE,
@@ -94,6 +79,20 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 	}
 	
+	public enum IncidentLinkDataType{
+		INCIDENT("incident"); //$NON-NLS-1$
+		
+		private String key;
+		
+		IncidentLinkDataType(String key){
+			this.key = key;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
+	}
+	
 	private Map<String, Set<Waypoint>> createdFeatures = new HashMap<>();
 
 	/**
@@ -103,9 +102,11 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 	@Override
 	public boolean canProcess(String featureType) {
 		return featureType.equalsIgnoreCase(INCIDENT_DATATYPE) ||
-				featureType.equalsIgnoreCase(INTEGRATE_DATATYPE) ||
-				featureType.equalsIgnoreCase(IntegratePatrolIncidentSource.KEY) ||
-				featureType.equalsIgnoreCase(IntegratePatrolLinkIncidentSource.KEY);
+				//these are for backward compatibility
+				featureType.equalsIgnoreCase("incident") || //$NON-NLS-1$
+				featureType.equalsIgnoreCase("integrateincident") || //$NON-NLS-1$
+				featureType.equalsIgnoreCase("integratepatrol") || //$NON-NLS-1$
+				featureType.equalsIgnoreCase("integratepllink"); //$NON-NLS-1$
 	}
 
 	/**
@@ -121,16 +122,54 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 
-		String dtype = props.get(JSON_SMARTDATATYPE).toString(); 
-		if (!dtype.equalsIgnoreCase(INCIDENT_DATATYPE) && !dtype.equalsIgnoreCase(INTEGRATE_DATATYPE) 
-				&& !dtype.equalsIgnoreCase(IntegratePatrolIncidentSource.KEY) 
-				&& !dtype.equalsIgnoreCase(IntegratePatrolLinkIncidentSource.KEY))
+		List<IncidentType> types = QueryFactory.buildQuery(session, IncidentType.class,		
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"isActive", true}).list(); //$NON-NLS-1$
+		
+		IncidentType type = null;
+		
+		String dtype = props.get(JSON_SMARTDATATYPE).toString();
+		//find incident type
+		JSONObject atts = (JSONObject) props.get(JSON_SMARTATTRIBUTES);
+		if (atts != null) {
+			String incidentType = atts.get("incidentType").toString(); //$NON-NLS-1$
+			if (incidentType != null) {
+				for (IncidentType t : types) {
+					if (t.getKeyId().equalsIgnoreCase(incidentType)) {
+						type = t;
+						break;
+					}
+				}	
+			}
+		}
+		if (type == null) {
+			//for backward compatibility have a look at dtype
+			String key = null;
+			if (dtype.equalsIgnoreCase("integrateincident")) { //$NON-NLS-1$
+				key = IncidentType.DefaultType.INTEGRATE.getKeyId();
+			}else if (dtype.equalsIgnoreCase("integratepatrol")) { //$NON-NLS-1$
+				key = IncidentType.DefaultType.INTEGRATE_MOVE.getKeyId();
+			}else if (dtype.equalsIgnoreCase("integratepllink")) { //$NON-NLS-1$
+				key = IncidentType.DefaultType.INTEGRATE_LINK.getKeyId();
+			}else {
+				key = IncidentType.DefaultType.INCIDENT.getKeyId();
+			}
+			for (IncidentType t : types) {
+				if (t.getKeyId().equalsIgnoreCase(key)) {
+					type = t;
+					break;
+				}
+			}
+		}
+		
+		if (type == null) {
 			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, INCIDENT_DATATYPE));
-
+		}
+		
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
 		
 		if (ftype.equalsIgnoreCase(SmartFeatureType.WAYPOINT_NEW.getKey())) {
-			processNewWaypoint(feature,dtype, ca, session, l);
+			processNewWaypoint(feature, type, dtype, ca, session, l);
 		}else if (ftype.equalsIgnoreCase(SmartFeatureType.WAYPOINT.getKey())) {
 			processWaypointUpdate(feature, ca, session, l);
 		}else if (ftype.equalsIgnoreCase(SmartFeatureType.OBSERVATION.getKey())) {
@@ -141,17 +180,12 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 	}
 
-	private void processNewWaypoint(JSONObject feature, String wpDataType, ConservationArea ca, Session session, Locale l) throws Exception {
+	private void processNewWaypoint(JSONObject feature, IncidentType type, String wpDataType, 
+			ConservationArea ca, Session session, Locale l) throws Exception {
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 		
 		wp.setSourceId(IndepedentIncidentSource.KEY);
-		if (wpDataType.equalsIgnoreCase(INTEGRATE_DATATYPE)) {
-			wp.setSourceId(IntegrateIncidentSource.KEY);	
-		}else if (wpDataType.equalsIgnoreCase(IntegratePatrolIncidentSource.KEY)) {
-			wp.setSourceId(IntegratePatrolIncidentSource.KEY);	
-		}else if (wpDataType.equalsIgnoreCase(IntegratePatrolLinkIncidentSource.KEY)) {
-			wp.setSourceId(IntegratePatrolLinkIncidentSource.KEY);	
-		}
+		wp.setIncidentTypeUuid(type.getUuid());
 		
 		if (wp.getId() == null) {
 			Employee observer = null;
@@ -337,8 +371,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			throw new Exception("Link Conservation Area doesn't match waypoint Conservation Area"); //$NON-NLS-1$
 		}
 		
-		if (!(waypoint.getSourceId().equals(IndepedentIncidentSource.KEY) 
-				|| waypoint.getSourceId().equals(IntegrateIncidentSource.KEY))) {
+		if (!(waypoint.getSourceId().equals(IndepedentIncidentSource.KEY))) {
 			throw new Exception("Link is not independent incident"); //$NON-NLS-1$
 		}
 		//update last modified

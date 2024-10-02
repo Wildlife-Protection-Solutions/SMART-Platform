@@ -44,11 +44,9 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -101,9 +99,12 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -122,6 +123,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
 	private List<Text> txtNames;
+	private CheckboxTableViewer tblTypes;
 	
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
@@ -282,6 +284,20 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 		
+		SmartUiUtils.createHeaderLabel(outer, "Incident Types");
+
+//		Label lblTypes = new Label(g, SWT.NONE);
+//		lblTypes.setText("Incident Types:");
+		
+		tblTypes = CheckboxTableViewer.newCheckList(outer,  SWT.BORDER | SWT.MULTI);
+		tblTypes.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(lstEmployees));
+		tblTypes.setContentProvider(ArrayContentProvider.getInstance());
+		tblTypes.setLabelProvider(new NamedIconItemLabelProvider());
+		tblTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tblTypes.getControl().getLayoutData()).heightHint = 80;				
+		tblTypes.addCheckStateListener(e->validate());
+		
+		
 		ObservationOptions ops = null;
 		try(Session session = HibernateManager.openSession()){
 			ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
@@ -333,13 +349,8 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 					return true;
 				}
 			};
-			lstEmployees.addCheckStateListener(new ICheckStateListener() {
-				
-				@Override
-				public void checkStateChanged(CheckStateChangedEvent event) {
-					validate(true);
-				}
-			});
+			lstEmployees.addCheckStateListener(e->validate());
+			
 			Button btnChecked = new Button(obs, SWT.CHECK);
 			btnChecked.setText(Messages.CtIncidentPackageConfigurator_ShowOnlyChecked);
 			btnChecked.addListener(SWT.Selection, e->{
@@ -409,6 +420,32 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 					ctpackage.updateName(getLanguage(txt), txt.getText().strip());
 				}
 				
+				MetadataFieldValue types = findMetadataValue(IncidentMetadataField.TYPES, ctpackage);
+				
+				
+				if (tblTypes.getCheckedElements().length == ((List<?>)tblTypes.getInput()).size()) {
+					//all checked; 
+					types.getUuidList().clear();
+				}else {
+					if (types.getUuidList() == null) types.setUuidList(new ArrayList<>());
+					List<MetadataFieldUuidValue> items = new ArrayList<>();
+					for (Object x : tblTypes.getCheckedElements()) {
+						if (!(x instanceof IncidentType it))  continue;
+						MetadataFieldUuidValue found = null;
+						for (MetadataFieldUuidValue v : types.getUuidList()) {
+							if (v.getUuid().equals(it.getUuid())) found = v;
+						}
+						if (found == null) {
+							found = new MetadataFieldUuidValue();
+							found.setMetadata(types);
+							found.setUuidValue(it.getUuid());
+						}
+						items.add(found);					
+					}
+					types.getUuidList().clear();
+					types.getUuidList().addAll(items);
+				}
+
 				MetadataFieldValue mdObserver = findMetadataValue(IncidentMetadataField.MEMBERS, ctpackage);
 				if (lstEmployees != null) {
 					mdObserver.setVisible(true);
@@ -548,7 +585,9 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 				IncidentCtPackage init = null;
 				List<EmployeeTeam> eteams ;
 				List<Employee> es;
-				
+				List<IncidentType> types;
+				List<IncidentType> checkedTypes = new ArrayList<>();
+
 				try(Session session = HibernateManager.openSession()){
 					
 					eteams = QueryFactory.buildQuery(session, EmployeeTeam.class, 
@@ -558,6 +597,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 							new Object[] {"endEmploymentDate", null}).list(); //$NON-NLS-1$
 							
+					types = IncidentManager.getInstance().getIncidentTypes(session, true);
 					
 					List<ConfigurableModel> models = DataentryHibernateManager.getConfigurableModels(session);
 					models.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(),  b.getName().toLowerCase()));
@@ -593,6 +633,17 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 					}else {
 						context.set(ConfigurableModel.class, init.getConfigurableModel());
 					}
+					
+					MetadataFieldValue mv = findMetadataValue(IncidentMetadataField.TYPES, init);
+					if (mv != null && mv.getUuidList() != null && !mv.getUuidList().isEmpty()) {
+						for (MetadataFieldUuidValue v : mv.getUuidList()) {
+							IncidentType it = session.get(IncidentType.class, v.getUuidValue());
+							if (!types.contains(it)) types.add(it);
+							checkedTypes.add(it);
+						}
+					}else {
+						checkedTypes.addAll(types);
+					}
 				}
 				eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 				es.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
@@ -618,7 +669,6 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 						if (uuids.contains(e.getUuid())) checked.add(e);
 					}
 				}
-				
 
 				IncidentCtPackage finit = init;
 				
@@ -627,6 +677,8 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 						isInit = true;
 						profileViewer.setInput(profiles);
 						modelViewer.setInput(modelList);
+						tblTypes.setInput(types);
+						tblTypes.setCheckedElements(checkedTypes.toArray());
 						
 						if (finit.getConfigurableModel() != null) {
 							modelViewer.setSelection(new StructuredSelection(finit.getConfigurableModel()));

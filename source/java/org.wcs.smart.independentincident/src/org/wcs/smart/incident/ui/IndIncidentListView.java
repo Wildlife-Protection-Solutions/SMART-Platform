@@ -24,6 +24,7 @@ package org.wcs.smart.incident.ui;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -69,12 +70,15 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconCache;
+import org.wcs.smart.ca.IconManager.Size;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentProvider;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
@@ -129,14 +133,21 @@ public class IndIncidentListView implements IIncidentFilteringView {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
+					HashMap<UUID, IncidentType> types = new HashMap<>();
+					for (IncidentType t : IncidentManager.getInstance().getIncidentTypes(s, false)) {
+						types.put(t.getUuid(), t);
+						HibernateManager.loadIcon(t, s);
+					}
+					
 					Query<Tuple> query = filter.buildQuery(s);
 					List<Tuple> results  = query.list();
 					final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
 					int i = 0;
 					for (Iterator<Tuple> iterator = results.iterator(); iterator.hasNext();) {
 						Tuple data = iterator.next();					
+						UUID typeuuid = (UUID) data.get(4);
 						input[i++] = new IncidentEditorInput((UUID)data.get(0), (String)data.get(1), 
-								(LocalDateTime)data.get(2), (String)data.get(3));
+								(LocalDateTime)data.get(2), (String)data.get(3), types.get(typeuuid));
 					}
 					
 					monitor.internalWorked(0.5);
@@ -218,20 +229,32 @@ public class IndIncidentListView implements IIncidentFilteringView {
 		TableViewerColumn col1 = new TableViewerColumn(incidentListViewer, SWT.NONE);
 		col1.setLabelProvider(new ColumnLabelProvider(){
 			
+			IconCache cache = new IconCache(null, Size.ICON);
+			
+			@Override
+			public void dispose() {
+				cache.dispose();
+			}
+			
 			@Override
 			public Image getImage(Object element){
-				if (element instanceof IncidentEditorInput){
-					return ((IncidentEditorInput) element).getImage();
+				if (element instanceof IncidentEditorInput input){
+					if (input.getType() == null || input.getType().getIcon() == null) {
+						return input.getImage();
+					}else {
+						return cache.getImage(input.getType());
+					}
 				}
 				return null;
 			}
+			
 			@Override
 			public String getText(Object element) {
-				if (element instanceof IncidentEditorInput){
+				if (element instanceof IncidentEditorInput input){
 					StringBuilder sb = new StringBuilder();
-					sb.append(((IncidentEditorInput)element).getId());
+					sb.append(input.getId());
 					sb.append(" ["); //$NON-NLS-1$
-					sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((IncidentEditorInput)element).getDateTime()) );
+					sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(input.getDateTime()) );
 					sb.append("]"); //$NON-NLS-1$
 					return sb.toString();
 				}

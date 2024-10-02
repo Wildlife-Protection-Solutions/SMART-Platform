@@ -64,7 +64,9 @@ public class JsonImportWarning {
 		
 		DEFAULT_ATTRIBUTE_NOT_FOUND, //1 parameter - attribute uuid as string
 		
-		JSON_FEATURE_PARSE_ERROR; //1 parameter error message
+		JSON_FEATURE_PARSE_ERROR, //1 parameter error message
+		
+		INC_TYPE_NOT_FOUND;	//1 parameter incident type string
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(ICyberTrackerLabelProvider.class).getLabel(this, l);

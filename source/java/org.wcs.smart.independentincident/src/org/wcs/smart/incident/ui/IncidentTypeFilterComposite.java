@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,39 +21,45 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.text.Collator;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.incident.IIncidentProvider;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.model.IncidentType;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Composite with required controls for string filtering. Used inside filter dialogs
+ * Composite with required controls for incident type filtering. Used inside filter dialogs
  * 
- * @author elitvin
- * @author Emily
- * @since 1.0.0
+ * @since 8.1.0
  */
-public class SourceFilterComposite extends Composite {
+public class IncidentTypeFilterComposite extends Composite {
 
 	private CheckboxTableViewer viewer;
-
+	private Collection<IncidentType> selected = null;
 	
 	/**
 	 * @param parent
 	 * @param style
 	 */
-	public SourceFilterComposite(Composite parent, int style) {
+	public IncidentTypeFilterComposite(Composite parent, int style) {
 		super(parent, style);
 		createControls();
 	}
@@ -65,23 +71,33 @@ public class SourceFilterComposite extends Composite {
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)getLayout()).marginWidth = 0;
 		
-		viewer = CheckboxTableViewer.newCheckList(this, SWT.V_SCROLL | SWT.BORDER);
+		viewer = CheckboxTableViewer.newCheckList(this, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
+		viewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(viewer));
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)viewer.getControl().getLayoutData()).heightHint = 100;
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				return ((IIncidentProvider)element).getName();
-			}
-		});
-		List<IIncidentProvider> providers = new ArrayList<>(IncidentManager.getInstance().getIncidentProviders());
-		providers.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		viewer.setInput(providers);
-		
-	}
-
+		viewer.setLabelProvider(new NamedItemLabelProvider());
+		viewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 	
+		Job loadJob = new Job("loading") { //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<IncidentType> types = null;
+				try(Session session = HibernateManager.openSession()){
+					types = IncidentManager.getInstance().getIncidentTypes(session, false);
+				}
+				final List<IncidentType> ftypes = types;
+				Display.getDefault().asyncExec(()->{
+					if (viewer.getControl().isDisposed()) return;
+					viewer.setInput(ftypes);
+					applyState(selected);
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		loadJob.schedule();
+	}
 
 	/**
 	 * Updates the controls to the given values 
@@ -89,9 +105,11 @@ public class SourceFilterComposite extends Composite {
 	 * @param text search value
 	 * @param field field to search, can be <code>null</code> if only one field to search
 	 */
-	public void applyState(Set<IIncidentProvider> selected) {
+	public void applyState(Collection<IncidentType> selected) {
+		if (selected == null) return;
+		this.selected = selected;
 		viewer.setAllChecked(false);
-		for (IIncidentProvider p : selected) {
+		for (IncidentType p : selected) {
 			viewer.setChecked(p, true);
 		}
 	}
@@ -101,10 +119,10 @@ public class SourceFilterComposite extends Composite {
 	 * 
 	 * @return the string comparison operator
 	 */
-	public Set<IIncidentProvider> getIncidentFilter() {
-		Set<IIncidentProvider> selected = new HashSet<>();
+	public Set<IncidentType> getIncidentFilter() {
+		Set<IncidentType> selected = new HashSet<>();
 		for (Object o : viewer.getCheckedElements()) {
-			selected.add((IIncidentProvider)o);
+			if (o instanceof IncidentType oo) selected.add(oo);
 		}
 		return selected;
 	}

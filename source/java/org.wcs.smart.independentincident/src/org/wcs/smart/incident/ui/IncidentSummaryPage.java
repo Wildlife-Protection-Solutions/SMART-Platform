@@ -92,6 +92,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.incident.ui.newwizard.CommentComposite;
 import org.wcs.smart.incident.ui.newwizard.DateTimeComposite;
@@ -234,7 +235,16 @@ public class IncidentSummaryPage extends EditorPart {
 						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModifiedAtLocal())));
 			}
 			this.lblLastModified.setText(sb.toString());
+			
 			this.txtType.setText(WaypointSourceEngine.INSTANCE.getSource(incident.getSourceId()).getName(Locale.getDefault()));
+			if (incident.getIncidentTypeUuid() != null) {
+				IncidentType type = session.get(IncidentType.class, incident.getIncidentTypeUuid());
+				if (type != null) {
+					this.txtType.setText(type.getName());
+				}
+			}
+			
+			
 			this.txtIncidentId.setText(incident.getId());
 			this.txtDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(incident.getDateTime()));
 			this.txtTime.setText(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(incident.getDateTime()));
@@ -547,7 +557,6 @@ public class IncidentSummaryPage extends EditorPart {
 		toolkit.createLabel(left, Messages.IncidentSummaryPage_IncidentSourceField);
 		txtType = toolkit.createLabel(left, ""); //$NON-NLS-1$
 		txtType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
 		
 		toolkit.createLabel(right, Messages.IncidentSummaryPage_PatrolLabel);
 		txtPatrol= new Link(right, SWT.NONE);

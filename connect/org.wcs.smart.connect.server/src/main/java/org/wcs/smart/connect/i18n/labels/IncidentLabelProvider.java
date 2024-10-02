@@ -25,11 +25,8 @@ import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.incident.IIncidentLabelProvider;
-import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.incident.IntegrateIncidentSource;
-import org.wcs.smart.incident.IntegratePatrolIncidentSource;
-import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
 import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
+import org.wcs.smart.incident.model.IncidentType;
 
 /**
  * Label provider for incident plugin.
@@ -40,10 +37,10 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item instanceof IndepedentIncidentSource) return Messages.getString("IncidentLabelProvider.IncidentLabel", l); //$NON-NLS-1$
-		if (item instanceof IntegrateIncidentSource) return Messages.getString("IncidentLabelProvider.SmartIntegrateIncident", l); //$NON-NLS-1$
-		if (item instanceof IntegratePatrolIncidentSource) return Messages.getString("IncidentLabelProvider.IntegrateMoveToPatrolIncident", l); //$NON-NLS-1$
-		if (item instanceof IntegratePatrolLinkIncidentSource) return Messages.getString("IncidentLabelProvider.IntegrateLinkToPatrolIncident", l); //$NON-NLS-1$
+		if (item == IncidentType.DefaultType.INCIDENT) return Messages.getString("IncidentLabelProvider.IncidentLabel", l); //$NON-NLS-1$
+		if (item == IncidentType.DefaultType.INTEGRATE) return Messages.getString("IncidentLabelProvider.SmartIntegrateIncident", l); //$NON-NLS-1$
+		if (item == IncidentType.DefaultType.INTEGRATE_MOVE) return Messages.getString("IncidentLabelProvider.IntegrateMoveToPatrolIncident", l); //$NON-NLS-1$
+		if (item == IncidentType.DefaultType.INTEGRATE_LINK) return Messages.getString("IncidentLabelProvider.IntegrateLinkToPatrolIncident", l); //$NON-NLS-1$
 		
 		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.getString("IncidentLabelProvider.createIncidentMsg",l); //$NON-NLS-1$
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.getString("IncidentLabelProvider.invalidSmartDataTypeJson",l); //$NON-NLS-1$

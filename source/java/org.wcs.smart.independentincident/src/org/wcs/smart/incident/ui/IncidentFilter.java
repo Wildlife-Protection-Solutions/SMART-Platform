@@ -26,16 +26,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentProvider;
 import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.model.IncidentType;
 
 import jakarta.persistence.Tuple;
 
@@ -54,14 +58,19 @@ public class IncidentFilter {
 	private StringComparison stringComparator = null;
 	
 	private Set<IIncidentProvider> sourceids = null;
+	private List<IncidentType> types = null;
 	
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
 	public IncidentFilter() {
 		sourceids = new HashSet<>();
+		
 		for (IIncidentProvider p : IncidentManager.getInstance().getIncidentProviders()) {
 			sourceids.add(p);
+		}
+		try(Session session = HibernateManager.openSession()){
+			types = IncidentManager.getInstance().getIncidentTypes(session, false);
 		}
 	}
 	
@@ -73,6 +82,13 @@ public class IncidentFilter {
 		return this.sourceids;
 	}
 	
+	/**
+	 * 
+	 * @return the set of source ids to filter on
+	 */
+	public List<IncidentType> getTypes(){
+		return this.types;
+	}
 	
 	/**
 	 * 
@@ -150,7 +166,7 @@ public class IncidentFilter {
 	
 	/**
 	 * Builds a query that returns the following incident fields:
-	 * incident uuid, incident id, incident datetime, source
+	 * incident uuid, incident id, incident datetime, source, typeuuid
 	 * 
 	 * @param s
 	 * @return
@@ -158,10 +174,11 @@ public class IncidentFilter {
 	public Query<Tuple> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT i.uuid, i.id, i.dateTime, i.sourceId "); //$NON-NLS-1$
+		str.append("SELECT i.uuid, i.id, i.dateTime, i.sourceId, i.incidentTypeUuid "); //$NON-NLS-1$
 		str.append("FROM Waypoint i "); //$NON-NLS-1$
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
 		str.append("AND i.sourceId IN ( :source ) " ); //$NON-NLS-1$
+		str.append("AND (i.incidentTypeUuid is null or i.incidentTypeUuid IN ( :types )) " ); //$NON-NLS-1$
 	
 		boolean and = true;
 		boolean or = false;
@@ -200,9 +217,12 @@ public class IncidentFilter {
 		str.append("ORDER BY i.dateTime desc, i.id"); //$NON-NLS-1$
 		
 		Set<String> sourcestrings = sourceids.stream().map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
+		Set<UUID> typeuuids = types.stream().map(e->e.getUuid()).collect(Collectors.toSet());
 		
 		Query<Tuple> query = s.createQuery(str.toString(), Tuple.class).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		query.setParameterList("source", sourcestrings); //$NON-NLS-1$
+		query.setParameterList("types", typeuuids); //$NON-NLS-1$
+		
 		if (stringComparator != null && incidentIdFilter != null){
 			if (stringComparator == StringComparison.EQUALS){
 				query.setParameter("pid", this.incidentIdFilter); //$NON-NLS-1$				

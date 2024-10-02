@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,20 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.ui;
+package org.wcs.smart.incident;
 
-import org.wcs.smart.incident.IntegratePatrolIncidentSource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ICaDeleteHandler;
 
 /**
- * UI Provider for SMART Integrate Incident
- * 
- * @author Emily
- *
+ * delete incident configurations
+ * @since 8.1.0
  */
-public class IntegratePatrolIncidentSourceUiProvider extends AbstractIncidentSourceUiProvider {
+public class IncidentCaDeleteHandler implements ICaDeleteHandler{
 
+	/**
+	 * To be executed before the conservation area is deleted
+	 */
+	public static final int EXECUTE_ORDER = 32;
+	
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.ca.ICaDeleteListener#beforeDelete(org.wcs.smart.ca.ConservationArea, org.hibernate.Session)
+	 */
 	@Override
-	protected String getSourceKey() {
-		return IntegratePatrolIncidentSource.KEY;
+	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
+			throws Exception {
+		monitor.subTask("Delete Incident Types");
+		deleteIncidentTypes(ca, session);	
 	}
+
+	private void deleteIncidentTypes(ConservationArea ca, Session session) throws Exception{
+		session.createMutationQuery("delete from IncidentType where conservationArea = :ca") //$NON-NLS-1$
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
+	}
+	
 }

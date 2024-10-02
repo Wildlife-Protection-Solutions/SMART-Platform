@@ -37,18 +37,6 @@
             class="org.wcs.smart.incident.IndepedentIncidentSource"
             ui_provider="org.wcs.smart.incident.ui.IndIncidentSourceUiProvider">
       </ObservationSource>
-      <ObservationSource
-            class="org.wcs.smart.incident.IntegrateIncidentSource"
-            ui_provider="org.wcs.smart.incident.ui.IntegrateIncidentSourceUiProvider">
-      </ObservationSource>
-      <ObservationSource
-            class="org.wcs.smart.incident.IntegratePatrolIncidentSource"
-            ui_provider="org.wcs.smart.incident.ui.IntegratePatrolIncidentSourceUiProvider">
-      </ObservationSource>
-      <ObservationSource
-            class="org.wcs.smart.incident.IntegratePatrolLinkIncidentSource"
-            ui_provider="org.wcs.smart.incident.ui.IntegratePatrolLinkIncidentSourceUiProvider">
-      </ObservationSource>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -111,6 +99,14 @@
                   mnemonic="%import.command.mnemonic"
                   style="push"
                   tooltip="%import.command.tooltip">
+            </command>
+            <separator
+                  name="org.wcs.smart.independentincident.separator3"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.incident.types"
+                  style="push">
             </command>
             <menu
                   id="org.wcs.smart.incident.birt.template"
@@ -558,14 +554,6 @@
                visible="true">
          </separator>
       </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.wcs.smart.fielddata?after=org.wcs.smart.observation.options">
-         <command
-               commandId="org.wcs.smart.incident.options"
-               style="push">
-         </command>
-      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -628,8 +616,8 @@
          </commandParameter>
       </command>
       <command
-            id="org.wcs.smart.incident.options"
-            name="%command.name.options">
+            id="org.wcs.smart.incident.types"
+            name="Incident Type Configuration...">
       </command>
    </extension>
    <extension
@@ -819,8 +807,8 @@
             commandId="org.wcs.smart.incident.pdf">
       </handler>
       <handler
-            class="org.wcs.smart.incident.ui.ShowOptionsHandler$ShowOptionsHandlerWrapper"
-            commandId="org.wcs.smart.incident.options">
+            class="org.wcs.smart.incident.ui.ShowIncidentTypesHandler$ShowIncidentTypesHandlerWrapper"
+            commandId="org.wcs.smart.incident.types">
          <activeWhen>
             <and>
                <test
@@ -856,15 +844,6 @@
          point="org.wcs.smart.independentincident.provider">
       <incidentprovider
             class="org.wcs.smart.incident.IndependentIncidentProvider">
-      </incidentprovider>
-      <incidentprovider
-            class="org.wcs.smart.incident.IntegrateIncidentProvider">
-      </incidentprovider>
-      <incidentprovider
-            class="org.wcs.smart.incident.IntegratePatrolIncidentProvider">
-      </incidentprovider>
-      <incidentprovider
-            class="org.wcs.smart.incident.IntegratePatrolLinkIncidentProvider">
       </incidentprovider>
    </extension>
    <extension
@@ -1261,6 +1240,10 @@
             class="org.wcs.smart.incident.model.IncidentWaypoint"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.incident.model.IncidentType"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.datalink.type">
@@ -1283,7 +1266,7 @@
       <coreUpgrader
             fromVersion="7.5.7"
             toVersion="8.0.0"
-            upgrader="org.wcs.smart.independentincident.plugin.DesktopReport800Upgrader">
+            upgrader="org.wcs.smart.incident.plugin.DesktopReport800Upgrader">
       </coreUpgrader>
       <dbUpgrader
             upgrader="org.wcs.smart.incident.plugin.IncidentDatabaseUpgrader">
@@ -1294,6 +1277,26 @@
       <ChangeLogTracker
             clazz="org.wcs.smart.incident.plugin.ChangeTrackerInstaller">
       </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.wcs.smart.caTemplateCloner">
+      <templateCloner
+            class="org.wcs.smart.incident.ConservationAreaCloner"
+            id="org.wcs.smart.independentincident.cloner">
+      </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.caCreate">
+      <handler
+            class="org.wcs.smart.incident.IncidentCreateCaHandler">
+      </handler>
+   </extension>
+   <extension
+         point="org.wcs.smart.caDeleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.incident.IncidentTypeDeleteAdvisor"
+            class="org.wcs.smart.incident.model.IncidentType">
+      </DeleteAdvisor>
    </extension>
 
 </plugin>

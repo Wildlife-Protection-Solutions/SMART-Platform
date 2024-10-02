@@ -1,4 +1,4 @@
-package org.wcs.smart.independentincident.plugin;
+package org.wcs.smart.incident.plugin;
 
 import java.util.List;
 

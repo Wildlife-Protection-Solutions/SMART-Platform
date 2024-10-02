@@ -36,9 +36,11 @@ import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.patrol.IncidentToPatrolProcessor;
 import org.wcs.smart.incident.patrol.IncidentToPatrolProcessorJob;
+import org.wcs.smart.patrol.PatrolCaDeleteHandler;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -56,8 +58,9 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 	public static final String INTEGRATE_ICON = "org.wcs.smart.incident.integrate.ICON"; //$NON-NLS-1$
 	public static final String INCIDENT32_ICON = "org.wcs.smart.incident.ICON32"; //$NON-NLS-1$
 
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1;
+	public static final String DB_VERSION = DB_VERSION_2;
 	
 	// The shared instance
 	private static IncidentPlugIn plugin;
@@ -112,6 +115,9 @@ public class IncidentPlugIn extends AbstractUIPlugin {
 				}
 			}
 		});
+		
+		ConservationAreaManager.getInstance().addDeleteHandler(new IncidentCaDeleteHandler(), 32);
+
 	}
 
 	/*

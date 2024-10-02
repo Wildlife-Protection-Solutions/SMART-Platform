@@ -25,16 +25,24 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
+import org.wcs.smart.incident.model.IncidentType.DefaultType;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -63,6 +71,49 @@ public class IncidentManager {
 		return instance;
 	}
 	
+	
+	public void createDefaultIncidentTypes(Session session, ConservationArea ca) {
+		IncidentType integrate = null;
+		for (IncidentType.DefaultType t : IncidentType.DefaultType.values()) {
+			IncidentType it = new IncidentType();
+			it.setConservationArea(ca);
+//			it.setIcon(null);
+			it.setIsActive(true);
+			it.setName(INCIDENT_PROVIDER_EXT_ID);
+			String name = SmartContext.INSTANCE.getClass(IIncidentLabelProvider.class).getLabel(t, Locale.getDefault());
+			it.updateName(ca.getDefaultLanguage(), name);
+			it.setKeyId(t.getKeyId());
+			
+			if (t == DefaultType.INTEGRATE) {
+				integrate = it;
+			}
+			if (t == DefaultType.INTEGRATE_LINK) {
+				it.setLinkPatrol(true);
+				it.setFallbackType(integrate);
+			}else if (t == DefaultType.INTEGRATE_MOVE) {
+				it.setMovePatrol(true);
+				it.setFallbackType(integrate);
+			}
+			session.persist(it);
+		}
+	}
+	public List<IncidentType> getIncidentTypes(Session session, boolean onlyActive){
+		return getIncidentTypes(session, SmartDB.getCurrentConservationArea(), onlyActive);
+	}
+	
+	public List<IncidentType> getIncidentTypes(Session session, ConservationArea ca, boolean onlyActive){
+		List<IncidentType> types = null;
+		if (onlyActive) {
+			types = QueryFactory.buildQuery(session, IncidentType.class,		
+					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"isActive", true}).list(); //$NON-NLS-1$
+		}else {
+			types = QueryFactory.buildQuery(session, IncidentType.class,		
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		}
+		Collections.sort(types);
+		return types;
+	}
 		
 	/**
 	 * 

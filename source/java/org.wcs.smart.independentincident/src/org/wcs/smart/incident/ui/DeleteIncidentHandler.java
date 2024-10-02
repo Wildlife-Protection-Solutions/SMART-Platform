@@ -72,7 +72,7 @@ public class DeleteIncidentHandler{
 			Object waypoint = (Object) iterator.next();
 			if (waypoint instanceof Waypoint){
 				Waypoint wp = (Waypoint)waypoint;
-				toDelete.add(new IncidentEditorInput(wp.getUuid(), wp.getId(),wp.getDateTime(), wp.getSourceId()));
+				toDelete.add(new IncidentEditorInput(wp.getUuid(), wp.getId(),wp.getDateTime(), wp.getSourceId(), null));
 			}else if (waypoint instanceof IncidentEditorInput){
 				toDelete.add(((IncidentEditorInput)waypoint));
 			}

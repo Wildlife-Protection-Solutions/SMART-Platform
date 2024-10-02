@@ -35,6 +35,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor.LinkDataType;
 import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.DataLink;
@@ -100,6 +101,7 @@ public class CustomQueryEngine {
 	protected static final String NAME_FIELD = "name"; //$NON-NLS-1$
 	protected static final String ID_FIELD = "id"; //$NON-NLS-1$
 	protected static final String UUID_FIELD = "uuid"; //$NON-NLS-1$
+	protected static final String INCIDENT_TYPE_KEY = "incident_type_key"; //$NON-NLS-1$
 	
 	protected static final String VALUE_FIELD = "value"; //$NON-NLS-1$
 	protected static final String KEY_FIELD = "key"; //$NON-NLS-1$
@@ -131,6 +133,13 @@ public class CustomQueryEngine {
 		jwp.put("last_modified", pw.getLastModifiedAtLocal().toString()); //$NON-NLS-1$
 		jwp.put("source",pw.getSourceId()); //$NON-NLS-1$
 		jwp.put("conservation_area_uuid", UuidUtils.uuidToString(pw.getConservationArea().getUuid())); //$NON-NLS-1$
+		
+		if (pw.getIncidentTypeUuid() != null) {
+			IncidentType type = session.get(IncidentType.class, pw.getIncidentTypeUuid());
+			if (type != null) {
+				jwp.put(INCIDENT_TYPE_KEY, type.getKeyId());
+			}
+		}
 		
 		JSONArray attachments = new JSONArray();
 		jwp.put("attachments",attachments); //$NON-NLS-1$

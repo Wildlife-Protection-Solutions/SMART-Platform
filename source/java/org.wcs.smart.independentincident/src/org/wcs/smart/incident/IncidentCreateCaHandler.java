@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,22 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.ui;
+package org.wcs.smart.incident;
 
-import org.wcs.smart.incident.IntegrateIncidentSource;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ICaCreateHandler;
 
 /**
- * UI Provider for SMART Integrate Incident
- * 
- * @author Emily
- *
+ * Create default incident types
  */
-public class IntegrateIncidentSourceUiProvider extends AbstractIncidentSourceUiProvider {
+public class IncidentCreateCaHandler implements ICaCreateHandler {
+
+	public IncidentCreateCaHandler() {
+	}
 
 	@Override
-	protected String getSourceKey() {
-		return IntegrateIncidentSource.KEY;
+	public void afterCreate(ConservationArea ca, Session session) throws Exception {
+		IncidentManager.getInstance().createDefaultIncidentTypes(session, ca);
+
 	}
-	
 
 }

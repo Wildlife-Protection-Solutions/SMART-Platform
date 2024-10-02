@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,57 +21,36 @@
  */
 package org.wcs.smart.incident;
 
-import java.util.Locale;
+import java.text.MessageFormat;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
-import org.wcs.smart.incident.ui.IncidentEditor;
-import org.wcs.smart.incident.xml.IncidentExporter;
-import org.wcs.smart.incident.xml.IncidentImporter;
-import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.model.Waypoint;
 
+
 /**
- * Incident provider for SMART Integrate Incidents
- * @author Emily
- *
+ * Delete advisor for incident types
  */
-public class IntegrateIncidentProvider implements IIncidentProvider {
+public class IncidentTypeDeleteAdvisor implements IDeleteAdvisor {
 
-	@Override
-	public String getWaypointSourceKey() {
-		return IntegrateIncidentSource.KEY;
-	}
-	
-	@Override
-	public String getName() {
-		return WaypointSourceEngine.INSTANCE.getSource(IntegrateIncidentSource.KEY).getName(Locale.getDefault());
+	public IncidentTypeDeleteAdvisor() {
 	}
 
 	@Override
-	public Image getImage() {
-		return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INTEGRATE_ICON);
-	}
-
-
-	@Override
-	public String getEditorID() {
-		return IncidentEditor.ID;
-	}
-
-	@Override
-	public void waypointCreated(Waypoint wp, Session session) {
-
-	}
-
-	@Override
-	public IIncidentXmlExporter getXmlExporter() {
-		return IncidentExporter.INSTANCE;
-	}
-
-	@Override
-	public IIncidentXmlImporter getXmlImporter() {
-		return IncidentImporter.INSTANCE;
+	public String canDelete(Object object, Session session) {
+		if (!(object instanceof IncidentType type)) return "Invalid object type"; //$NON-NLS-1$
+		
+		if (type.isSystem()) return "Cannot delete system incident type.";
+		
+		Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
+				new Object[] {"incidentTypeUuid", type.getUuid()});
+		
+		if (cnt > 0) {
+			return MessageFormat.format("The incident type ''{0}'' is associated with {1} waypoints.", type.getName(), cnt);
+		}
+		return null;
 	}
 
 }

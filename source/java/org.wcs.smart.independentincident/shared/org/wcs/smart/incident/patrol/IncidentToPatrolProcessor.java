@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,9 +43,7 @@ import org.locationtech.jts.geom.Point;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IncidentPropertyManager;
-import org.wcs.smart.incident.IntegrateIncidentSource;
-import org.wcs.smart.incident.IntegratePatrolIncidentSource;
-import org.wcs.smart.incident.IntegratePatrolLinkIncidentSource;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -110,11 +109,21 @@ public class IncidentToPatrolProcessor {
 		this.updatedPatrols.clear();
 		this.updatedWaypoints.clear();
 		
+		List<IncidentType> types = session.createQuery("FROM IncidentType WHERE conservationArea = :ca and options in (:ops)", IncidentType.class) //$NON-NLS-1$
+				.setParameter("ca",  ca) //$NON-NLS-1$
+				.setParameterList("options", new String[] {IncidentType.LINK_PATROL_OP, IncidentType.MOVE_PATROL_OP}) //$NON-NLS-1$
+				.list();
+		Map<UUID, IncidentType> typeMap = new HashMap<>();
+		List<UUID> uuids = new ArrayList<>();
+		for (IncidentType t : types) {
+			uuids.add(t.getUuid());
+			typeMap.put(t.getUuid(), t);
+		}
 		
 		List<Waypoint> toProcess = 
-				session.createQuery("FROM Waypoint WHERE conservationArea = :ca and sourceId in (:sources)", Waypoint.class) //$NON-NLS-1$
+				session.createQuery("FROM Waypoint WHERE conservationArea = :ca and incidentTypeUuid in (:types)", Waypoint.class) //$NON-NLS-1$
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameterList("sources", new Object[] {IntegratePatrolIncidentSource.KEY, IntegratePatrolLinkIncidentSource.KEY}) //$NON-NLS-1$
+				.setParameterList("types", uuids) //$NON-NLS-1$
 				.list();
 		
 		for (Waypoint wp : toProcess) {
@@ -125,7 +134,11 @@ public class IncidentToPatrolProcessor {
 					//convert to normal integrate waypoint and move on
 					session.beginTransaction();
 					try {
-						wp.setSourceId(IntegrateIncidentSource.KEY);
+						IncidentType type = session.get(IncidentType.class, wp.getIncidentTypeUuid());
+						if (type != null && type.getFallbackType() != null) {
+							//set to fallback type
+							wp.setIncidentTypeUuid(type.getFallbackType().getUuid());
+						}						
 						session.getTransaction().commit();
 					}catch (Exception ex) {
 						session.getTransaction().rollback();
@@ -199,7 +212,8 @@ public class IncidentToPatrolProcessor {
 			try {
 				Map<Path,Path> toMove = new HashMap<>();
 				
-				if (wp.getSourceId().equals(IntegratePatrolIncidentSource.KEY)) {
+				if (typeMap.get(wp.getIncidentTypeUuid()).doMovePatrol()  ) {
+				
 					//add to patrol
 					//recompute track
 					PatrolWaypoint pw = new PatrolWaypoint();
@@ -207,7 +221,7 @@ public class IncidentToPatrolProcessor {
 					pw.setWaypoint(wp);
 					session.persist(pw);	
 					
-					//TODO: deal with attachments as they have to move to a new location
+					//deal with attachments as they have to move to a new location
 					PatrolWaypointSource src = (PatrolWaypointSource) SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 							
 					
@@ -251,9 +265,10 @@ public class IncidentToPatrolProcessor {
 					}
 					matchedTrack.setLineStrings(newtracks);
 					updatedPatrols.add(matchedTrack.getPatrolLegDay());
-				}else if (wp.getSourceId().equals(IntegratePatrolLinkIncidentSource.KEY)) {
-					//set to integrate 
-					wp.setSourceId(IntegrateIncidentSource.KEY);
+				}else if (typeMap.get(wp.getIncidentTypeUuid()).doLinkPatrol()  ) {
+
+					//set to fallback type after linked
+					wp.setIncidentTypeUuid(typeMap.get(wp.getIncidentTypeUuid()).getFallbackType().getUuid());
 					
 					IncidentWaypoint iw = new IncidentWaypoint();
 					iw.setPatrol(matchedTrack.getPatrolLegDay().getPatrolLeg().getPatrol());

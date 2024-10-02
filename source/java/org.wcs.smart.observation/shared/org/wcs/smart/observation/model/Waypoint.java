@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
@@ -93,6 +94,7 @@ public class Waypoint extends UuidItem {
 	
 	//source configurable model used to collect data (as of 757)
 	private ConfigurableModel sourceCm;
+	private UUID incidentType; 
 
 	public Waypoint(){
 		
@@ -284,6 +286,15 @@ public class Waypoint extends UuidItem {
 	}
 	public void setObservationGroups(List<WaypointObservationGroup> groups){
 		this.groups = groups;
+	}
+	
+	@Column(name="incident_type_uuid")
+	public UUID getIncidentTypeUuid() {
+		return this.incidentType;
+	}
+
+	public void setIncidentTypeUuid(UUID incidentTypeUuid) {
+		this.incidentType = incidentTypeUuid;
 	}
 	
 	/**

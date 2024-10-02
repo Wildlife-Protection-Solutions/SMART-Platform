@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
+import org.wcs.smart.incident.model.IncidentType;
 /**
  * Label provider for independent incidents
  * 
@@ -38,17 +39,11 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 		if (item instanceof IndepedentIncidentSource ){
 			 return Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
 		}
-		
-		if (item instanceof IntegrateIncidentSource ){
-			 return Messages.IncidentLabelProvider_SmartIntegrateIncident;
-		}
-		
-		if (item instanceof IntegratePatrolIncidentSource ){
-			 return Messages.IncidentLabelProvider_MoveToPatrolIncidentSource;
-		}
-		if (item instanceof IntegratePatrolLinkIncidentSource ){
-			 return Messages.IncidentLabelProvider_LinkToPatrolIncidentSource;
-		}
+				
+		if (item == IncidentType.DefaultType.INCIDENT)  return  Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
+		if (item == IncidentType.DefaultType.INTEGRATE) return Messages.IncidentLabelProvider_SmartIntegrateIncident;
+		if (item == IncidentType.DefaultType.INTEGRATE_LINK) return Messages.IncidentLabelProvider_LinkToPatrolIncidentSource;
+		if (item == IncidentType.DefaultType.INTEGRATE_MOVE) return Messages.IncidentLabelProvider_MoveToPatrolIncidentSource;
 		
 		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.IncidentLabelProvider_jsonloaded;
 		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.IncidentLabelProvider_invaliddatatype;
