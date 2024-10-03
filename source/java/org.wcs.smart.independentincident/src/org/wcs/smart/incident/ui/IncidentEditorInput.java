@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.model.IncidentType;
 
@@ -129,6 +130,12 @@ public class IncidentEditorInput implements IEditorInput {
 	}
 
 	public Image getImage() {
+		if (type != null && (
+				type.getKeyId().equalsIgnoreCase(IncidentType.DefaultType.INTEGRATE.getKeyId()) ||
+				type.getKeyId().equalsIgnoreCase(IncidentType.DefaultType.INTEGRATE_LINK.getKeyId()) ||
+				type.getKeyId().equalsIgnoreCase(IncidentType.DefaultType.INTEGRATE_MOVE.getKeyId()))){
+			return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INTEGRATE_ICON);
+		}
 		return IncidentManager.getInstance().getIncidentProvider(sourceKey).getImage();
 	}
 	/**

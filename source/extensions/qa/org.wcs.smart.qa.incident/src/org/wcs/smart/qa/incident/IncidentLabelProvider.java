@@ -42,8 +42,6 @@ public class IncidentLabelProvider extends ILabelProvider {
 			return Messages.IncidentLabelProvider_NotFoundError;
 		case IncidentDataProvder_WpIdLbl:
 			return Messages.IncidentLabelProvider_WaypointLbl;
-		case IntegrateDataProvider_Name:
-			return Messages.IncidentLabelProvider_IntegrateDataProviderName;
 		default:
 			break;
 		}

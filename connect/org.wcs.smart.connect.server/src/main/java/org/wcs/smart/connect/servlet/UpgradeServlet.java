@@ -2140,9 +2140,10 @@ public class UpgradeServlet extends HttpServlet {
 
 							"update smart.incident_type set fallback_type_uuid = a.uuid from smart.incident_type a where a.ca_uuid = smart.incident_type.ca_uuid and a.keyid='integrate' and smart.incident_type.keyid in ('integratelink', 'integratemove')", //$NON-NLS-1$
 							
-							"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integrate') where source = 'INTEGRATE'", //$NON-NLS-1$
-							"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integratelink') where source = 'INTEGRATEPLLINK'", //$NON-NLS-1$
-							"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integratemove') where source = 'INTEGRATEPATROL'", //$NON-NLS-1$
+							"update smart.waypoint set incident_type_uuid = a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'incident' and source = 'INDINC'", //$NON-NLS-1$
+							"update smart.waypoint set incident_type_uuid = a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integrate' and source = 'INTEGRATE'", //$NON-NLS-1$
+							"update smart.waypoint set incident_type_uuid = a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integratelink' and source = 'INTEGRATEPLLINK'", //$NON-NLS-1$
+							"update smart.waypoint set incident_type_uuid = a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integratemove' and source = 'INTEGRATEPATROL'", //$NON-NLS-1$
 							
 							"update smart.waypoint set source = 'INDINC' where source in ('INTEGRATE', 'INTEGRATEPLLINK', 'INTEGRATEPATROL')", //$NON-NLS-1$
 
@@ -2455,10 +2456,6 @@ public class UpgradeServlet extends HttpServlet {
 							//{"integratelink", "uk", "\u0406\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0456\u044f \u043b\u0456\u043d\u043a\u0443 SMART \u0434 \ u 0 ..."},
 							{"integratelink", "zh", "SMART\u96c6\u6210\u94fe\u63a5\u5230\u5de1\u62a4\u4e8b\u4ef6"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					};
-							
-					for (String s : sql){								
-						c.createStatement().executeUpdate(s);
-					}
 
 					String upsql ="insert into smart.i18n_label(language_uuid, element_uuid, value) select l.uuid, a.uuid, ? from smart.language l join smart.incident_type a on a.ca_uuid = l.ca_uuid WHERE a.keyid = ? and l.code = ?"; //$NON-NLS-1$
 					//name

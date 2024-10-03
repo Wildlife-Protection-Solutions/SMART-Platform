@@ -43,8 +43,6 @@ public class QaIncidentLabelProvider extends ILabelProvider {
 			return Messages.getString("QaIncidentLabelProvider.IncidentNotFound", l); //$NON-NLS-1$
 		case IncidentDataProvder_WpIdLbl:
 			return Messages.getString("QaIncidentLabelProvider.WpId", l); //$NON-NLS-1$
-		case IntegrateDataProvider_Name:
-			return Messages.getString("QaIncidentLabelProvider.SMARTIntegrateIncident", l); //$NON-NLS-1$
 		default:
 			break;
 		}

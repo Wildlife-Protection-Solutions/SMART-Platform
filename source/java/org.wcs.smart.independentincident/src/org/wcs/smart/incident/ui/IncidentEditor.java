@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWTError;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
@@ -41,6 +42,7 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentManager;
@@ -48,6 +50,7 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.IWaypointEventListener;
@@ -66,6 +69,8 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	public static final String ID = "org.wcs.smart.incident.ui.IncidentEditor"; //$NON-NLS-1$
 
 	private Waypoint incident = null;
+	private IncidentType incidentType = null;
+	private Image incidentImage = null;
 	private IncidentSummaryPage summaryEditor;
 	private IncidentMapPage mapPage;
 	private ObservationOptions ops;
@@ -126,6 +131,10 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 
 	@Override
 	public void dispose() {
+		if (incidentImage != null) {
+			incidentImage.dispose();
+			incidentImage = null;
+		}
 		IncidentEventManager.getInstance().removeListener(listener);
 		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, wlistener);
 		getSite().setSelectionProvider(null);
@@ -186,6 +195,12 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 					session.beginTransaction();
 					this.incident = (Waypoint) session.get(Waypoint.class, uuid);
 					this.incident.getId();
+					if (this.incident.getIncidentTypeUuid() != null) {
+						incidentType = session.get(IncidentType.class, this.incident.getIncidentTypeUuid());
+						if (incidentType != null) {
+							HibernateManager.loadIcon(incidentType, session);
+						}
+					}
 					
 					try{
 						ObservationHibernateManager.computeAttachmentLocations(incident, session);
@@ -220,7 +235,14 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	@Override
 	protected void createPages() {
 		super.setPartName(getIncident().getId());
-		setTitleImage(((IncidentEditorInput)getEditorInput()).getImage());
+	
+		if (incidentType != null && incidentType.getIcon() != null) {
+			if (incidentImage != null) incidentImage.dispose();
+			incidentImage = IconManager.INSTANCE.getThumbnail(incidentType.getIcon(), IconManager.Size.ICON);
+			setTitleImage(incidentImage);
+		}else {
+			setTitleImage(((IncidentEditorInput)getEditorInput()).getImage());
+		}
 
 		showBusy(true);
 		try {

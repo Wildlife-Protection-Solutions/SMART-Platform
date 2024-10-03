@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.incident.model;
 
-import java.util.Locale;
-
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyIconItem;
 
@@ -47,8 +45,15 @@ public class IncidentType extends NamedKeyIconItem {
 	
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * Option value if incident type is flagged as move to patrol 
+	 */
 	public static final String MOVE_PATROL_OP = "movepatrol"; //$NON-NLS-1$
+	/**
+	 * Option value if incident type is flagged as link to patrol
+	 */
 	public static final String LINK_PATROL_OP = "linkpatrol"; //$NON-NLS-1$
+	
 	/**
 	 * The default types for new conservation areas.
 	 * 
@@ -56,10 +61,10 @@ public class IncidentType extends NamedKeyIconItem {
 	 * @since 1.0.0
 	 */
 	public enum DefaultType {
-		INCIDENT("incident"),
-		INTEGRATE("integrate"),
-		INTEGRATE_LINK("integratelink"),
-		INTEGRATE_MOVE("integratemove");
+		INCIDENT("incident"), //$NON-NLS-1$
+		INTEGRATE("integrate"), //$NON-NLS-1$
+		INTEGRATE_LINK("integratelink"), //$NON-NLS-1$
+		INTEGRATE_MOVE("integratemove"); //$NON-NLS-1$
 		
 		private String key;
 		

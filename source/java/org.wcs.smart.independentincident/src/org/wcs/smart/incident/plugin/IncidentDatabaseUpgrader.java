@@ -118,6 +118,7 @@ public class IncidentDatabaseUpgrader implements IDatabaseUpgrader {
 
 				"update smart.incident_type set fallback_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.incident_type.ca_uuid and a.keyid='integrate') where keyid in ('integratelink', 'integratemove')", //$NON-NLS-1$
 				
+				"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'incident') where source = 'INDINC'", //$NON-NLS-1$
 				"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integrate') where source = 'INTEGRATE'", //$NON-NLS-1$
 				"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integratelink') where source = 'INTEGRATEPLLINK'", //$NON-NLS-1$
 				"update smart.waypoint set incident_type_uuid = (select a.uuid from smart.incident_type a where a.ca_uuid = smart.waypoint.ca_uuid and a.keyid = 'integratemove') where source = 'INTEGRATEPATROL'", //$NON-NLS-1$
