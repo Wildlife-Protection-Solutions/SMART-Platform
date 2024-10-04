@@ -111,7 +111,7 @@ public class IncidentToPatrolProcessor {
 		
 		List<IncidentType> types = session.createQuery("FROM IncidentType WHERE conservationArea = :ca and options in (:ops)", IncidentType.class) //$NON-NLS-1$
 				.setParameter("ca",  ca) //$NON-NLS-1$
-				.setParameterList("options", new String[] {IncidentType.LINK_PATROL_OP, IncidentType.MOVE_PATROL_OP}) //$NON-NLS-1$
+				.setParameterList("ops", new String[] {IncidentType.LINK_PATROL_OP, IncidentType.MOVE_PATROL_OP}) //$NON-NLS-1$
 				.list();
 		Map<UUID, IncidentType> typeMap = new HashMap<>();
 		List<UUID> uuids = new ArrayList<>();
