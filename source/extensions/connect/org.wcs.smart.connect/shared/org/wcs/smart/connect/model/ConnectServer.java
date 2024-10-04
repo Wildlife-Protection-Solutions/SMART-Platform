@@ -160,6 +160,7 @@ public class ConnectServer extends UuidItem{
 	 */
 	@Transient
 	public Path getLocalCertificateFile(){
+		if (getCertificateFileName() == null) return null;
 		return Paths.get(ca.getFileDataStoreLocation(),
 				getCertificateFileName());
 	}	

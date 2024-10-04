@@ -86,7 +86,8 @@ public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 			
 			@Override
 			public String getCertificateFileName(){
-				return String.valueOf(System.nanoTime());
+				if (cert == null) return null;
+				return cert.getFileName().toString();
 			}
 			@Override
 			public Path getLocalCertificateFile(){
@@ -97,7 +98,7 @@ public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 		
 		temp.setConservationArea(SmartDB.getCurrentConservationArea());
 		try {
-			if (serverpnl.getCertificateFile() != null){
+			if (serverpnl.getCertificateFile() != null && !serverpnl.getCertificateFile().isBlank()){
 				temp.setCertificateFile(Paths.get(serverpnl.getCertificateFile()));
 			}else{
 				temp.setCertificateFile(server.getLocalCertificateFile());
