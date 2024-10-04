@@ -160,18 +160,19 @@ public class IncidentDatabaseUpgrader implements IDatabaseUpgrader {
 				{"integratemove", "en", "SMART Integrate Move To Patrol Incident"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				{"integratemove", "es", "SMART Integrar Mover al Incidente de Patrullaje."}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				{"integratemove", "in", "SMART Integrasikan Pindah ke Insiden Patroli"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				//TODO sort out these incorrect translations
-				///{"integratemove", "km", "Smart \u1794\u17b6\u1793\u1792\u17d2\u179c\u17be\u179f\u1798\u17b6\u17a0\u179a\u178e\u1780\u1798\u17d2 \ u 1 7 9  ..."},
+
+				{"integratemove", "km", "Smart \u1794\u17b6\u1793\u1792\u17d2\u179c\u17be\u179f\u1798\u17b6\u17a0\u179a\u178e\u1780\u1798\u17d2\u1798\u1785\u179b\u1793\u17b6\u1791\u17c5\u17a7\u1794\u17d2\u1794\u178f\u17d2\u178f\u17b7\u17a0\u17c1\u178f\u17bb\u179b\u17d2\u1794\u17b6\u178f"},   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 				{"integratemove", "ru", "\u041f\u0435\u0440\u0435\u043d\u043e\u0441 SMART Integrate \u0432 \u0438\u043d\u0446\u0438\u0434\u0435\u043d\u0442 \u0440\u0435\u0439\u0434\u0430\t"},  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				//{"integratemove", "uk", "\u0406\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0456\u044f \u043f\u0435\u0440\u0435\u043c\u0456\u0449 \ u 0 4 ..."},
+				{"integratemove", "uk", "\u0406\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0456\u044f \u043f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f SMART \u0434\u043e \u043f\u0430\u0442\u0440\u0443\u043b\u044c\u043d\u043e\u0433\u043e \u0456\u043d\u0446\u0438\u0434\u0435\u043d\u0442\u0443"},   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 				{"integratemove", "zh", "SMART\u96c6\u6210\u79fb\u52a8\u5230\u5de1\u62a4\u4e8b\u4ef6"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				{"integratelink", "en", "SMART Integrate Link To Patrol Incident"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				{"integratelink", "es", "SMART Integrar Enlace con Incidente de Patrullaje."}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				{"integratelink", "in", "SMART Integrasikan Tautan ke Insiden Patroli"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				//{"integratelink", "km", "\u1780\u1798\u17d2\u1798\u179c\u17b7\u1792\u17b8 SMART \u179a\u17bd\u1798\u1794\u1789\u17d2\u1785\u17bc \ u 1 7 ..."},
+				
+				{"integratelink", "km", "\u1780\u1798\u17d2\u1798\u179c\u17b7\u1792\u17b8 SMART \u179a\u17bd\u1798\u1794\u1789\u17d2\u1785\u17bc\u179b\u178f\u17c6\u178e\u1791\u17c5\u1793\u17b9\u1784\u17a7\u1794\u17d2\u1794\u178f\u17d2\u178f\u17b7\u17a0\u17c1\u178f\u17bb\u179b\u17d2\u1794\u17b6\u178f"},  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				{"integratelink", "ru", "C\u0441\u044b\u043b\u043a\u0430 SMART Integrate \u0432 \u0438\u043d\u0446\u0438\u0434\u0435\u043d\u0442 \u0440\u0435\u0439\u0434\u0430\t"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				//{"integratelink", "uk", "\u0406\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0456\u044f \u043b\u0456\u043d\u043a\u0443 SMART \u0434 \ u 0 ..."},
+				{"integratelink", "uk", "\u0406\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0456\u044f \u043b\u0456\u043d\u043a\u0443 SMART \u0434\u043e \u043f\u0430\u0442\u0440\u0443\u043b\u044c\u043d\u043e\u0433\u043e \u0456\u043d\u0446\u0438\u0434\u0435\u043d\u0442\u0443"},  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				{"integratelink", "zh", "SMART\u96c6\u6210\u94fe\u63a5\u5230\u5de1\u62a4\u4e8b\u4ef6"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				};
 				

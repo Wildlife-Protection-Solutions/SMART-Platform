@@ -186,6 +186,11 @@
 			               Increasing timeout from 60000 to 120000 (see bug 544823).
 			              -->
 					<timeoutMillis>120000</timeoutMillis>
+					
+					<arguments>
+              					<argument>-tsa</argument>
+              					<argument>https://freetsa.org/tsr</argument>
+            				</arguments>
             			</configuration>
           		</plugin>
           		<plugin>
@@ -326,7 +331,6 @@
 			<id>emily</id>
 			<modules>
 				<module>org.wcs.smart.license.feature</module>
-				<module>../translations/org.wcs.smart.feature.nl</module>
 			</modules>
 		</profile>
 		<profile>
@@ -662,7 +666,7 @@
 				<module>../translations/org.wcs.smart.birt.map.nl</module>
 				<module>../translations/org.wcs.smart.dataentry.nl</module>
 				<module>../translations/org.wcs.smart.feature.nl</module>
-				<module>../translations/org.wcs.smart.help.nl</module>
+				<module>../translations/org.wcs.smart.help.nl</module>	
 				<module>../translations/org.wcs.smart.nl</module>
 				<module>../translations/org.wcs.smart.observation.nl</module>
 				<module>../translations/org.wcs.smart.observation.query.nl</module>
@@ -744,7 +748,7 @@
 				<module>../extensions/qa/translations/org.wcs.smart.qa.patrol.nl</module>
 
 				<module>../extensions/r/translations/org.wcs.smart.r.nl</module>
-				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>		
+				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>	
 			</modules>
 		</profile>
 	</profiles>
