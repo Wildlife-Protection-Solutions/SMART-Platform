@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,36 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.engine;
+package org.wcs.smart.observation.query.model.filter;
 
-import org.hibernate.Session;
-import org.wcs.smart.query.common.engine.AbstractQueryEngine;
-import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.FilterType;
-
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
+import org.wcs.smart.filter.Operator;
+import org.wcs.smart.util.SharedUtils;
 /**
- * Query engine for executing 
- * queries using derby.
- * 
- * @author Emily
- * @since 1.0.0
+ * Incident type filter
+ * @since 8.1.0
+ *
  */
-public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryEngine {
+public class IncidentTypeFilter implements IFilter {
 
-	protected Session session;
+	public static IncidentTypeFilter createFilter(String key, Operator op){
+		return new IncidentTypeFilter(key, op);
+	}
 	
+	private String key;
+	private Operator op;
 	
-	@Override
-	public IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, Query query) {
-		if (filterType == FilterType.OBSERVATION){
-			return new FilterProcessor(queryDataTable, this, query);
-		}else if (filterType == FilterType.GROUP){
-			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
-		}else{
-			return new WaypointFilterProcessor(queryDataTable, this, query);
-		}
-
+	public IncidentTypeFilter(String key, Operator op){
+		this.key = SharedUtils.stripQuotes(key);
+		this.op = op;
 	}
 
+	public String getIncidentTypeKey(){
+		return this.key;
+	}
+	
+	public Operator getOperator(){
+		return this.op;
+	}
+	
+	@Override
+	public String asString() {
+		return "wpn:incidenttype = \"" + key + "\"";  //$NON-NLS-1$//$NON-NLS-2$ 
+	}
+
+	@Override
+	public void accept(IFilterVisitor visitor) {
+		visitor.visit(this);
+	}
 }

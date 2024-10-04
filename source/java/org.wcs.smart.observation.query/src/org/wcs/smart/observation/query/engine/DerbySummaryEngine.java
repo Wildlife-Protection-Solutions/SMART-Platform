@@ -27,8 +27,12 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -49,7 +53,10 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.internal.ObservationValueItemLabelProvider;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.QueryIncidentType;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeGroupBy;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
@@ -145,7 +152,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			HashMap<String, Object> parameters) throws SQLException{
 
 		final ObservationSummaryQuery query = (ObservationSummaryQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 	
 		valueTable = createTempTableName();
@@ -1132,6 +1139,43 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 				groupByInnerSql.append(".source"); //$NON-NLS-1$
 				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				
+				groupBySql.append(categoryKey);
+				
+				if (!waypointAdd) {
+					fromSql.append(" join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
+			}else if (gb instanceof IncidentTypeGroupBy igb){
+				
+				String[] keys = igb.getKeys();
+				Set<String> allKeys = new HashSet<>();
+				if (keys != null) {
+					for (String s : keys) {
+						allKeys.add(s);
+					}
+				}
+				
+				Collection<QueryIncidentType> types = IncidentTypeProviderManager.INSTANCE.getTypes(session, SmartDB.getConservationAreaConfiguration().getConservationAreas());
+				groupByInnerSql.append("CASE "); //$NON-NLS-1$
+				for (QueryIncidentType type : types) {
+					if (keys == null || allKeys.contains(type.getKey())) {
+						for (UUID uuid : type.getUuids()) {
+							groupByInnerSql.append(" WHEN "); //$NON-NLS-1$
+							groupByInnerSql.append(tablePrefix(Waypoint.class));
+							groupByInnerSql.append(".incident_type_uuid = "); //$NON-NLS-1$
+							String p1 = addParameterValue(uuid);
+							groupByInnerSql.append(p1);
+							groupByInnerSql.append(" THEN "); //$NON-NLS-1$
+							groupByInnerSql.append("'" + type.getKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+						}							
+					}
+				}
+				groupByInnerSql.append("ELSE null END "); //$NON-NLS-1$
+				
+				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
+				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				groupBySql.append(categoryKey);
 				
 				if (!waypointAdd) {

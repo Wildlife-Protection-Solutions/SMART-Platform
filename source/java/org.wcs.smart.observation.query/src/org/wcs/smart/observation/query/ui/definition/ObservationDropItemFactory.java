@@ -40,15 +40,21 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.filter.BooleanFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.QueryIncidentType;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeFilter;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeGroupBy;
 import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
+import org.wcs.smart.observation.query.ui.IncidentTypeGroupByViewer;
 import org.wcs.smart.observation.query.ui.WaypointCmGroupByViewer;
 import org.wcs.smart.observation.query.ui.WaypointSourceGroupByViewer;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
@@ -132,12 +138,15 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 				if (source == GeneralItem.WAYPOINT_SOURCE){
 					items = new DropItem[]{createWaypointSourceGroupByDropItem()};
+				}else if (source == GeneralItem.INCIDENT_TYPE) {
+					items = new DropItem[] {createIncidentTypeGroupByDropItem()};
 				}else if (source == GeneralItem.CONSERVATION_AREA){
 					items = new DropItem[]{super.createConservationAreaGroupByDropItem()};
 				}else if (source == GeneralItem.WAYPOINT_CM) {
 					items = new DropItem[]{createWaypointCmGroupByDropItem()};
 				}
 			}else if (source == GeneralItem.WAYPOINT_SOURCE ||
+						source == GeneralItem.INCIDENT_TYPE ||
 						source == GeneralItem.OBSERVER || 
 						source == GeneralItem.WAYPOINT_ID || 
 						source == GeneralItem.WAYPOINT_CM){
@@ -150,6 +159,9 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem createWaypointSourceGroupByDropItem(){
 		return new WaypointSourceGroupByDropItem();
 	}
+	public DropItem createIncidentTypeGroupByDropItem(){
+		return new IncidentTypeGroupByDropItem();
+	}
 	
 	public DropItem createWaypointCmGroupByDropItem(){
 		return new WaypointCmGroupByDropItem();
@@ -157,6 +169,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItem source){
 		if (source == GeneralContentProvider.GeneralItem.WAYPOINT_SOURCE){
 			return new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.SOURCE);
+		}else if (source == GeneralContentProvider.GeneralItem.INCIDENT_TYPE){
+				return new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.INCIDENTTYPE);
 		}else if (source == GeneralContentProvider.GeneralItem.WAYPOINT_CM){
 				return new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.CM);
 		}else if (source == GeneralContentProvider.GeneralItem.WAYPOINT_ID){
@@ -301,6 +315,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
 		if (f instanceof WaypointSourceFilter){
 			return createDropItems((WaypointSourceFilter)f, session);
+		}else if (f instanceof IncidentTypeFilter){
+			return createDropItems((IncidentTypeFilter)f, session);
 		}else if (f instanceof WaypointCmFilter){
 			return createDropItems((WaypointCmFilter)f, session);			
 		}else if (f instanceof WaypointIdFilter) {
@@ -346,6 +362,19 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			di.initializeData(new Object[]{filter.getOperator(), src});
 		}
 		return new DropItem[]{di};
+	}
+	
+	private DropItem[] createDropItems(IncidentTypeFilter filter, Session session) throws Exception {
+		QueryIncidentType found = IncidentTypeProviderManager.INSTANCE.getType(filter.getIncidentTypeKey(), session, SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		DropItem di;
+		if (found == null) {
+			di = new ErrorDropItem(MessageFormat.format("The incident type with key {0} cannot be found.", new Object[]{filter.getIncidentTypeKey()}));
+		}else {
+			di = new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.INCIDENTTYPE);
+			di.initializeData(new Object[]{filter.getOperator(), found});
+		}
+		
+		return new DropItem[] {di};
 	}
 	
 	private DropItem[] createDropItems(WaypointCmFilter filter, Session session) throws Exception {
@@ -414,6 +443,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
 		if (groupBy instanceof WaypointSourceGroupBy){
 			return new WaypointSourceGroupByViewer((WaypointSourceGroupBy) groupBy);
+		}else if (groupBy instanceof IncidentTypeGroupBy igroupBy) {
+			return new IncidentTypeGroupByViewer(igroupBy);
 		}else if (groupBy instanceof WaypointCmGroupBy) {
 			return new WaypointCmGroupByViewer((WaypointCmGroupBy) groupBy);
 		}

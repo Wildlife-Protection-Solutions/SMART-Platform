@@ -131,47 +131,51 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int WAYPOINT_SOURCE_KEY = 64;
   /** RegularExpression Id. */
-  int WAYPOINT_ID_KEY = 65;
+  int WAYPOINT_INCIDENTTYPE_KEY = 65;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_KEY = 66;
+  int WAYPOINT_ID_KEY = 66;
   /** RegularExpression Id. */
-  int WAYPOINT_CM_KEY = 67;
+  int WAYPOINT_OBSERVER_KEY = 67;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 68;
+  int WAYPOINT_CM_KEY = 68;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 69;
+  int SUM_CAT_VALUE_KEY = 69;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 70;
+  int SUM_ATTRIBUTE_VALUE_KEY = 70;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_GEOMETRY_KEY = 71;
+  int SUM_CAT_ATT_VALUE_KEY = 71;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_GEOMETRY_KEY = 72;
+  int SUM_ATTRIBUTE_GEOMETRY_KEY = 72;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 73;
+  int SUM_CAT_ATT_GEOMETRY_KEY = 73;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 74;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 74;
   /** RegularExpression Id. */
-  int AGG = 75;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 75;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 76;
+  int AGG = 76;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 77;
+  int DATE_GROUPBY_ITEM = 77;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 78;
+  int QUERY_SPLITTER = 78;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 79;
+  int CATEGORY_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 80;
+  int AREA_GROUPBY_ITEM = 80;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 81;
+  int ATTRIBUTE_GROUPBY_ITEM = 81;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_GROUP_BY = 82;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 82;
   /** RegularExpression Id. */
-  int WAYPOINT_CM_GROUP_BY = 83;
+  int WAYPOINT_SOURCE_GROUP_BY = 83;
   /** RegularExpression Id. */
-  int CA_GROUP_BY = 84;
+  int WAYPOINT_INCIDENTTYPE_GROUP_BY = 84;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 85;
+  int WAYPOINT_CM_GROUP_BY = 85;
+  /** RegularExpression Id. */
+  int CA_GROUP_BY = 86;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 87;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -243,6 +247,7 @@ public interface ParserConstants {
     "\"observation\"",
     "\"waypoint\"",
     "\"wpn:src\"",
+    "\"wpn:incidenttype\"",
     "\"wpn:id\"",
     "\"wpnobs:observer\"",
     "\"waypoint:cm\"",
@@ -261,6 +266,7 @@ public interface ParserConstants {
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
     "<WAYPOINT_SOURCE_GROUP_BY>",
+    "<WAYPOINT_INCIDENTTYPE_GROUP_BY>",
     "<WAYPOINT_CM_GROUP_BY>",
     "<CA_GROUP_BY>",
     "<QUOTED_STRING>",

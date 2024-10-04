@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.observation.ObservationPlugIn;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 
 /**
@@ -58,6 +59,8 @@ public class GeneralContentProvider implements ITreeContentProvider{
 	public enum GeneralItem{
 		WAYPOINT_SOURCE(Messages.QueryFilterContentProvider_WaypointSourceName,
 				ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON)),
+		INCIDENT_TYPE("Incident Type",
+				ObservationQueryPlugIn.getDefault().getImageRegistry().get(ObservationQueryPlugIn.INCIDENT_TYPE_ICON)),
 		WAYPOINT_CM(Messages.GeneralContentProvider_CmSourceName,
 				DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.CONFIG_MODEL_ICON)),
 		WAYPOINT_ID(Messages.GeneralContentProvider_WaypointIdName, 

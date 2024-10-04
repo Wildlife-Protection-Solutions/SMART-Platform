@@ -67,6 +67,7 @@ TOKEN :
  | < OBSERVATION_FILTER_TYPE_KEY : "observation" >
  | < WAYPOINT_FILTER_TYPE_KEY : "waypoint" >
  | < WAYPOINT_SOURCE_KEY : "wpn:src" >
+ | < WAYPOINT_INCIDENTTYPE_KEY : "wpn:incidenttype" >
  | < WAYPOINT_ID_KEY : "wpn:id" >
  | < WAYPOINT_OBSERVER_KEY : "wpnobs:observer" >
  | < WAYPOINT_CM_KEY : "waypoint:cm" >}
@@ -93,6 +94,7 @@ TOKEN :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_MLIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > |   <  WAYPOINT_SOURCE_GROUP_BY : "wpt:src:" ( < DM_KEY > )? (":" < DM_KEY > )* >
+|   <  WAYPOINT_INCIDENTTYPE_GROUP_BY : "wpt:incidenttype:" ( < DM_KEY > )? (":" < DM_KEY > )* >
 |   <  WAYPOINT_CM_GROUP_BY : "waypoint:cm:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |   <  CA_GROUP_BY : "ca:" (< BYTE_STRING >)? (":" < BYTE_STRING > )*  >
 }
@@ -312,10 +314,15 @@ IGroupBy GroupByItem() :
 		{
 		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
 		}	
-    |  
+    	|  
 		< WAYPOINT_SOURCE_GROUP_BY >		{
 		  	item = WaypointSourceGroupBy.createGroupBy(token.image);		}
-		    |  
+		|  
+		< WAYPOINT_INCIDENTTYPE_GROUP_BY >
+		{
+		  	item = IncidentTypeGroupBy.createGroupBy(token.image);
+		}
+		|  
 		< WAYPOINT_CM_GROUP_BY >
 		{
 		  	item = WaypointCmGroupBy.createGroupBy(token.image);
@@ -663,6 +670,13 @@ IFilter StringExpression():
   		< QUOTED_STRING > {value = token.image;}
   		{
     		filter = WaypointSourceFilter.createFilter(value,op);
+  		}
+  		| 
+		 < WAYPOINT_INCIDENTTYPE_KEY >
+  		 < EQUAL >
+  		< QUOTED_STRING > {value = token.image;}
+  		{
+    		filter = IncidentTypeFilter.createFilter(value,op);
   		}
   	| 
 		 < WAYPOINT_ID_KEY >

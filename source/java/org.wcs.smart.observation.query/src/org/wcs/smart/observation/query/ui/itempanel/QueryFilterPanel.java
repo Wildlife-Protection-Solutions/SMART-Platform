@@ -52,6 +52,7 @@ import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -123,8 +124,18 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		
 		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters,
-				new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER, GeneralItem.WAYPOINT_CM}));
+		GeneralItem[] generalitems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE,
+							GeneralItem.INCIDENT_TYPE,
+							GeneralItem.WAYPOINT_ID, 
+							GeneralItem.OBSERVER, 
+							GeneralItem.WAYPOINT_CM};
+		if (!IncidentTypeProviderManager.INSTANCE.hasProviders()) {
+			generalitems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE,
+					GeneralItem.WAYPOINT_ID, 
+					GeneralItem.OBSERVER, 
+					GeneralItem.WAYPOINT_CM};
+		}
+		nodes.add(new GeneralTreeNode(Messages.QueryFilterPanel_GeneralFilters, generalitems));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 
 		areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters, true);
@@ -179,17 +190,34 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			input.put(OperatorsTreeNode.KEY, ops);
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 
+			
 			if (SmartDB.isMultipleAnalysis()){
-				input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER});	
+				List<GeneralItem> gitems = new ArrayList<>();
+				gitems.add(GeneralItem.WAYPOINT_SOURCE);
+				if (IncidentTypeProviderManager.INSTANCE.hasProviders()) {
+					gitems.add(GeneralItem.INCIDENT_TYPE);
+				}
+				gitems.add(GeneralItem.WAYPOINT_ID);
+				gitems.add(GeneralItem.OBSERVER);
+				input.put(GeneralTreeNode.KEY,gitems.toArray(new GeneralItem[gitems.size()])); 							
+					
 			}else{
 				//only add observer if part of options
 				try(Session session = HibernateManager.openSession()){
 					ObservationOptions options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-					if (options.getTrackObserver()){
-						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.OBSERVER, GeneralItem.WAYPOINT_CM});
-					}else{
-						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.WAYPOINT_ID, GeneralItem.WAYPOINT_CM});
+					
+					List<GeneralItem> gitems = new ArrayList<>();
+					gitems.add(GeneralItem.WAYPOINT_SOURCE);
+					if (IncidentTypeProviderManager.INSTANCE.hasProviders()) {
+						gitems.add(GeneralItem.INCIDENT_TYPE);
 					}
+					gitems.add(GeneralItem.WAYPOINT_ID);
+					if (options.getTrackObserver()) {
+						gitems.add(GeneralItem.OBSERVER);
+					}
+					gitems.add(GeneralItem.WAYPOINT_CM);
+		
+					input.put(GeneralTreeNode.KEY,gitems.toArray(new GeneralItem[gitems.size()])); 							
 				}
 			}
 			

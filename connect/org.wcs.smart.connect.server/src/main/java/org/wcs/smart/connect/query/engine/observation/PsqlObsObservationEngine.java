@@ -89,7 +89,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine implements IWO
 			HashMap<String, Object> parameters) throws SQLException{
 		this.query = (SimpleQuery) lquery;
 		this.locale = (Locale) parameters.get(Locale.class.getName());
-		final Session session = (Session) parameters.get(Session.class.getName());
+		this.session = (Session) parameters.get(Session.class.getName());
 		
 		if (query.getDateFilter() == null){
 			return null;

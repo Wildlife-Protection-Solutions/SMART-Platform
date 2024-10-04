@@ -40,7 +40,6 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.patrol.IncidentToPatrolProcessor;
 import org.wcs.smart.incident.patrol.IncidentToPatrolProcessorJob;
-import org.wcs.smart.patrol.PatrolCaDeleteHandler;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;

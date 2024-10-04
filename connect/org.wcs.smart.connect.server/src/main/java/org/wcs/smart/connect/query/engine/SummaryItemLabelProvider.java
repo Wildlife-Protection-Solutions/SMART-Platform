@@ -88,6 +88,9 @@ import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
+import org.wcs.smart.observation.query.model.QueryIncidentType;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeGroupBy;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.model.Patrol;
@@ -389,6 +392,8 @@ public class SummaryItemLabelProvider {
 			results = getName((SamplingUnitAttributeGroupBy)item);	
 		}else if (item instanceof WaypointSourceGroupBy){
 			results = getName((WaypointSourceGroupBy)item);
+		}else if (item instanceof IncidentTypeGroupBy){
+			results = getName((IncidentTypeGroupBy)item);
 		}else if (item instanceof PlanPatrolGroupBy) {
 			results = getName((PlanPatrolGroupBy)item);
 		}else if (item instanceof MobileDeviceIdParolGroupBy) {
@@ -1042,7 +1047,7 @@ public class SummaryItemLabelProvider {
 					String name = nkitem.getName();
 					if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY ||
 							item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_PATROL_GROUP_KEY) {
-						name = MessageFormat.format("{0} ({1})", name, ((PatrolTransportGroup)nkitem).getPatrolType().getName());
+						name = MessageFormat.format("{0} ({1})", name, ((PatrolTransportGroup)nkitem).getPatrolType().getName()); //$NON-NLS-1$
 					}
 					data.add(new ListItem(null, name, nkitem.getKeyId()));
 					existingKeys.add(nkitem.getKeyId());
@@ -1407,6 +1412,34 @@ public class SummaryItemLabelProvider {
 		sortItems(items);
 		return items;
 	}
+	
+	private List<ListItem> getName(IncidentTypeGroupBy item){
+		String[] keys = item.getKeys();
+		
+		List<ListItem> items = new ArrayList<ListItem>();
+		
+		List<ConservationArea> cas = new ArrayList<>();
+		for (UUID cauuid : caFilter.getConservationAreaFilterIds()) {
+			cas.add(s.get(ConservationArea.class, cauuid));
+		}
+		Collection<QueryIncidentType> types = IncidentTypeProviderManager.INSTANCE.getTypes(s, cas);
+		
+		if (keys == null){
+			for (QueryIncidentType type : types) {
+				items.add(new ListItem(null, type.getName(), type.getKey()));
+			}
+		}else{
+			Set<String> keyset = new HashSet<>();
+			for (String key : keys) keyset.add(key);
+			for (QueryIncidentType type : types) {
+				if (!keyset.contains(type.getKey())) continue;
+				items.add(new ListItem(null, type.getName(), type.getKey()));
+			}			
+		}
+		sortItems(items);
+		return items;
+	}
+	
 	
 	private List<ListItem> getName(WaypointCmGroupBy item){
 		String[] keys = item.getKeys();

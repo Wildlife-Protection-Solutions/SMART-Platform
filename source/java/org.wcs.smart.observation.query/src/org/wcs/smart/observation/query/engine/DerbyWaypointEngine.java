@@ -94,7 +94,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine imp
 			HashMap<String, Object> parameters) throws SQLException{
 
 		final SimpleQuery query = (SimpleQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 	
 		if (query.getDateFilter() == null){

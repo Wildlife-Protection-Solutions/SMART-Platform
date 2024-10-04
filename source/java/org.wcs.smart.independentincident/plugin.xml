@@ -1298,5 +1298,11 @@
             class="org.wcs.smart.incident.model.IncidentType">
       </DeleteAdvisor>
    </extension>
+   <extension
+         point="org.wcs.smart.observation.query.IncidentTypeProvider">
+      <provider
+            provider="org.wcs.smart.incident.model.QueryIncidentTypeProvider">
+      </provider>
+   </extension>
 
 </plugin>

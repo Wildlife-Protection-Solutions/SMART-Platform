@@ -62,7 +62,7 @@ public class ObservationQueryPlugIn extends AbstractUIPlugin {
 	 * The gridded query
 	 */
 	public static final String GRIDDED_SUMMARY_QUERY_ICON = "org.wcs.smart.query.griddedquery"; //$NON-NLS-1$
-
+	public static final String INCIDENT_TYPE_ICON = "org.wcs.smart.observation.incidenttype"; //$NON-NLS-1$
 
 	
 	// The shared instance
@@ -152,7 +152,9 @@ public class ObservationQueryPlugIn extends AbstractUIPlugin {
 		reg.put(GRIDDED_SUMMARY_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
 						"images/icons/obj16/gridded_query.png"));//$NON-NLS-1$
-
+		reg.put(INCIDENT_TYPE_ICON,
+				imageDescriptorFromPlugin(PLUGIN_ID,
+						"images/icons/obj16/incident_type.png"));//$NON-NLS-1$
 		super.initializeImageRegistry(reg);
 	}
 }

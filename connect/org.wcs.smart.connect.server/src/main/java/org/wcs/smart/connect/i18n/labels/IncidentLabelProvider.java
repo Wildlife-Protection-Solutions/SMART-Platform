@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.incident.IIncidentLabelProvider;
+import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
 import org.wcs.smart.incident.model.IncidentType;
 
@@ -50,6 +51,9 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 		if (item == IncidentJsonFeatureProcessor.Messages.WAYPOINT_NOT_FOUND) return Messages.getString("IncidentLabelProvider.WaypointNotFound", l); //$NON-NLS-1$
 		if (item == IncidentJsonFeatureProcessor.Messages.OBSERVATION_NOT_FOUND) return Messages.getString("IncidentLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
 		
+		if (item instanceof IndepedentIncidentSource ){
+			 return Messages.getString("IncidentLabelProvider.IncidentLabel", l);
+		}
 		return null;
 	}
 

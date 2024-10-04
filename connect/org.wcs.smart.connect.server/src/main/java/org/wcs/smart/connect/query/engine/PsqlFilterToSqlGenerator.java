@@ -25,13 +25,16 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
 import org.geotools.geometry.jts.WKBReader;
+import org.hibernate.Session;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -88,6 +91,9 @@ import org.wcs.smart.i2.patrol.query.IntelRecordPatrolQueryFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
+import org.wcs.smart.observation.query.model.QueryIncidentType;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.patrol.model.Patrol;
@@ -201,6 +207,8 @@ public enum PsqlFilterToSqlGenerator {
 //			return asSql((EntityAttributeFilter)filter, engine);
 		}else if (filter instanceof WaypointSourceFilter){
 			return asSql((WaypointSourceFilter)filter, engine);
+		}else if (filter instanceof IncidentTypeFilter){
+			return asSql((IncidentTypeFilter)filter, engine);
 		}else if (filter instanceof WaypointCmFilter){
 			return asSql((WaypointCmFilter)filter, engine);
 		}else if (filter instanceof WaypointIdFilter){
@@ -948,6 +956,39 @@ public enum PsqlFilterToSqlGenerator {
 		return sb.toString();
 	}
 
+
+	/*
+	 * Incident Type filter
+	 */
+	protected String asSql(IncidentTypeFilter filter, IQueryEngine engine) throws SQLException{
+		
+		
+		Session session = ((AbstractQueryEngine)engine).session;
+		
+		ConservationAreaFilter afilter = ((AbstractQueryEngine)engine).caFilter;
+		List<ConservationArea> cas = new ArrayList<>();
+		for(UUID cauuid : afilter.getConservationAreaFilterIds()) {
+			cas.add(session.get(ConservationArea.class, cauuid));
+		}
+		
+		QueryIncidentType found = 
+				IncidentTypeProviderManager.INSTANCE.getType(filter.getIncidentTypeKey(), session, cas);
+		if (found == null) {
+			throw new SQLException(MessageFormat.format("No incident type with key {0} found", filter.getIncidentTypeKey())); //$NON-NLS-1$
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(Waypoint.class));
+		sb.append(".incident_type_uuid in ("); //$NON-NLS-1$
+		for (UUID iuuid : found.getUuids()) {
+			String p1 = engine.addParameterValue(iuuid);
+			sb.append(p1 + ","); //$NON-NLS-1$			
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.append(")"); //$NON-NLS-1$		
+		return sb.toString();		
+	}
+	
 	/*
 	 * Waypoint id filter
 	 */

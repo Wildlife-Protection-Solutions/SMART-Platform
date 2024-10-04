@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2024 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,36 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.engine;
+package org.wcs.smart.observation.query.model;
+
+import java.util.Collection;
 
 import org.hibernate.Session;
-import org.wcs.smart.query.common.engine.AbstractQueryEngine;
-import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.FilterType;
+import org.wcs.smart.ca.ConservationArea;
 
 /**
- * Query engine for executing 
- * queries using derby.
- * 
- * @author Emily
- * @since 1.0.0
+ * Interface for providing incident types to the query module
  */
-public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryEngine {
+public interface IIncidentTypeProvider {
 
-	protected Session session;
-	
-	
-	@Override
-	public IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, Query query) {
-		if (filterType == FilterType.OBSERVATION){
-			return new FilterProcessor(queryDataTable, this, query);
-		}else if (filterType == FilterType.GROUP){
-			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
-		}else{
-			return new WaypointFilterProcessor(queryDataTable, this, query);
-		}
-
-	}
-
+	public Collection<QueryIncidentType> getTypes(Session session, Collection<ConservationArea> cas);
 }

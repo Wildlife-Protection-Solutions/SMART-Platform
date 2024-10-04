@@ -23,14 +23,20 @@ package org.wcs.smart.observation.query.engine;
 
 
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
+import org.wcs.smart.observation.query.model.QueryIncidentType;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -67,6 +73,8 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 			return asSql((WaypointSourceFilter)filter, engine);
 		}else if (filter instanceof WaypointIdFilter){
 			return asSql((WaypointIdFilter)filter, engine);
+		}else if (filter instanceof IncidentTypeFilter){
+			return asSql((IncidentTypeFilter)filter, engine);
 		}
 		return super.toSql(filter, engine);
 		
@@ -85,6 +93,30 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 		return sb.toString();
 	}
 	
+	/*
+	 * Incident type filter
+	 */
+	protected String asSql(IncidentTypeFilter filter, IQueryEngine engine) throws SQLException{
+		Collection<ConservationArea> areas = SmartDB.getConservationAreaConfiguration().getConservationAreas();
+		Session session = ((AbstractDerbyObservationQueryEngine)engine).session;
+		
+		QueryIncidentType found = 
+				IncidentTypeProviderManager.INSTANCE.getType(filter.getIncidentTypeKey(), session, areas);
+		if (found == null) {
+			throw new SQLException(MessageFormat.format("No incident type with key {0} found", filter.getIncidentTypeKey())); //$NON-NLS-1$
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(Waypoint.class));
+		sb.append(".incident_type_uuid in ("); //$NON-NLS-1$
+		for (UUID iuuid : found.getUuids()) {
+			String p1 = engine.addParameterValue(iuuid);
+			sb.append(p1 + ","); //$NON-NLS-1$			
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.append(")"); //$NON-NLS-1$		
+		return sb.toString();
+	}
 	
 	/*
 	 * Waypoint id filter

@@ -25,9 +25,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +38,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -50,7 +54,10 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
+import org.wcs.smart.observation.query.model.IncidentTypeProviderManager;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.QueryIncidentType;
+import org.wcs.smart.observation.query.model.filter.IncidentTypeGroupBy;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
@@ -1015,6 +1022,47 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 				groupByInnerSql.append(".source"); //$NON-NLS-1$
 				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				
+				groupBySql.append(categoryKey);
+				
+				if (!waypointAdd) {
+					fromSql.append(" join "); //$NON-NLS-1$
+					fromSql.append(tableNamePrefix(Waypoint.class));
+					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					waypointAdd = true;
+				}
+			}else if (gb instanceof IncidentTypeGroupBy igb){
+				
+				String[] keys = igb.getKeys();
+				Set<String> allKeys = new HashSet<>();
+				if (keys != null) {
+					for (String s : keys) {
+						allKeys.add(s);
+					}
+				}
+				
+				List<ConservationArea> cas = new ArrayList<>();
+				for(UUID cauuid : caFilter.getConservationAreaFilterIds()) {
+					cas.add(session.get(ConservationArea.class, cauuid));
+				}
+				Collection<QueryIncidentType> types = IncidentTypeProviderManager.INSTANCE.getTypes(session, cas);
+				groupByInnerSql.append("CASE "); //$NON-NLS-1$
+				for (QueryIncidentType type : types) {
+					if (keys == null || allKeys.contains(type.getKey())) {
+						for (UUID uuid : type.getUuids()) {
+							groupByInnerSql.append(" WHEN "); //$NON-NLS-1$
+							groupByInnerSql.append(tablePrefix(Waypoint.class));
+							groupByInnerSql.append(".incident_type_uuid = "); //$NON-NLS-1$
+							String p1 = addParameterValue(uuid);
+							groupByInnerSql.append(p1);
+							groupByInnerSql.append(" THEN "); //$NON-NLS-1$
+							groupByInnerSql.append("'" + type.getKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+						}							
+					}
+				}
+				groupByInnerSql.append("ELSE null END "); //$NON-NLS-1$
+				
+				String categoryKey = "wpsrc_" + itemcnt; //$NON-NLS-1$
+				groupByInnerSql.append(" as " + categoryKey); //$NON-NLS-1$
 				groupBySql.append(categoryKey);
 				
 				if (!waypointAdd) {

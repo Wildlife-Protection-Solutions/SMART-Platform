@@ -46,6 +46,7 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 	 * waypoint source icon
 	 */
 	public static final String WAYPOINT_SOURCE_ICON = "org.wcs.smart.observation.waypointsource"; //$NON-NLS-1$
+	
 	/**
 	 * waypoint id icon
 	 */
