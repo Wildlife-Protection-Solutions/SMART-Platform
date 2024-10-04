@@ -7,6 +7,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: org.wcs.smart
 Bundle-Activator: org.wcs.smart.datagenerator.er.ErDataGeneratorPlugIn
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.wcs.smart.er;bundle-version="[8.1.0,9.0.0)"
+Require-Bundle: org.wcs.smart.er;bundle-version="[8.0.0,9.0.0)"
 Automatic-Module-Name: org.wcs.smart.datagenerator
 Export-Package: org.wcs.smart.datagenerator.er.model.xml

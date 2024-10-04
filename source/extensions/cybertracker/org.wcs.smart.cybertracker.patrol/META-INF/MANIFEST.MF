@@ -6,8 +6,8 @@ Bundle-Version: 8.1.0.qualifier
 Bundle-Activator: org.wcs.smart.cybertracker.patrol.PatrolCyberTrackerPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,
- org.wcs.smart.cybertracker;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
- org.wcs.smart.patrol;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.cybertracker;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.patrol;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.eclipse.nebula.widgets.tablecombo,
  org.wcs.smart.patrol.query
 Bundle-RequiredExecutionEnvironment: JavaSE-21

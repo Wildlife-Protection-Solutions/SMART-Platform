@@ -34,7 +34,7 @@ Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.xml.model
 Require-Bundle: org.eclipse.ui.forms,
  org.locationtech.udig.catalog.rasterings;bundle-version="3.0.0";visibility:=reexport,
- org.wcs.smart.observation;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.locationtech.udig.style.sld;bundle-version="3.1.0",
  org.locationtech.udig.render.gridcoverage.basic;bundle-version="3.1.0",
  org.locationtech.udig.style;bundle-version="3.1.0",

@@ -6,8 +6,8 @@ Bundle-Version: 8.1.0.qualifier
 Bundle-Activator: org.wcs.smart.er.query.ERQueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.er;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
- org.wcs.smart.observation.query;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.er;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.observation.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-21

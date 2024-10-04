@@ -4,9 +4,9 @@ Bundle-Name: Asset Query Report PlugIn
 Bundle-SymbolicName: org.wcs.smart.asset.query.report;singleton:=true
 Bundle-Version: 8.1.0.qualifier
 Bundle-Activator: org.wcs.smart.asset.report.query.AssetQueryReportPlugIn
-Require-Bundle: org.wcs.smart.asset.query;bundle-version="[8.1.0,9.0.0)",
- org.wcs.smart.report;bundle-version="[8.1.0,9.0.0)",
- org.wcs.smart.report.birt.query;bundle-version="[8.1.0,9.0.0)"
+Require-Bundle: org.wcs.smart.asset.query;bundle-version="[8.0.0,9.0.0)",
+ org.wcs.smart.report;bundle-version="[8.0.0,9.0.0)",
+ org.wcs.smart.report.birt.query;bundle-version="[8.0.0,9.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .

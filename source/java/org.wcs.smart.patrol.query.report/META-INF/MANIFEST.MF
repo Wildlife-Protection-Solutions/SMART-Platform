@@ -4,9 +4,9 @@ Bundle-Name: Patrol Query Report PlugIn
 Bundle-SymbolicName: org.wcs.smart.patrol.query.report;singleton:=true
 Bundle-Version: 8.1.0.qualifier
 Bundle-Activator: org.wcs.smart.report.query.PatrolQueryReportPlugIn
-Require-Bundle: org.wcs.smart.patrol.query;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
- org.wcs.smart.report;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
- org.wcs.smart.report.birt.query;bundle-version="[8.1.0,9.0.0)";visibility:=reexport
+Require-Bundle: org.wcs.smart.patrol.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.report;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.report.birt.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .

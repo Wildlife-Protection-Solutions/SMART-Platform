@@ -6,7 +6,7 @@ Bundle-Version: 8.1.0.qualifier
 Bundle-Activator: org.wcs.smart.observation.ObservationPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,
- org.wcs.smart.dataentry;bundle-version="[8.1.0,9.0.0)";visibility:=reexport,
+ org.wcs.smart.dataentry;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
  org.eclipse.nebula.widgets.chips;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
