@@ -666,6 +666,11 @@
     		<version>3.131.100</version>
 		</dependency>
 
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>   
         <!-- required for reports with images; support Display class loading-->
         <dependency>
             <groupId>swt</groupId>
