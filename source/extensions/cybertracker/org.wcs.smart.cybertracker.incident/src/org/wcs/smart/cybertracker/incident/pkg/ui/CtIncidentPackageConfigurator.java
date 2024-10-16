@@ -190,14 +190,23 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		
 		Label nameLabel = new Label(g, SWT.NONE);
 		nameLabel.setText("Package Name(s):");
-		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
+		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)nameLabel.getLayoutData()).verticalIndent = 2;
 		
 		Composite nameComp = new Composite(g, SWT.NONE);
 		nameComp.setLayout(new GridLayout(2, false));		
 		nameComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)nameComp.getLayout()).marginWidth = 0;
+		((GridLayout)nameComp.getLayout()).marginHeight = 0;
 		txtNames = new ArrayList<>();
 		
-		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+		List<Language> items = new ArrayList<>(SmartDB.getCurrentConservationArea().getLanguages());
+		items.sort((a,b)->{
+			if (a.isDefault()) return 1;
+			return Collator.getInstance().compare(a.getDisplayName(), b.getDisplayName());
+		});
+		
+		for (Language l : items) {
 			Label lbl = new Label(nameComp, SWT.NONE);
 			lbl.setText(l.getDisplayName() + ":"); //$NON-NLS-1$
 			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -422,12 +431,11 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 				
 				MetadataFieldValue types = findMetadataValue(IncidentMetadataField.TYPES, ctpackage);
 				
-				
+				if (types.getUuidList() == null) types.setUuidList(new ArrayList<>());
 				if (tblTypes.getCheckedElements().length == ((List<?>)tblTypes.getInput()).size()) {
 					//all checked; 
 					types.getUuidList().clear();
 				}else {
-					if (types.getUuidList() == null) types.setUuidList(new ArrayList<>());
 					List<MetadataFieldUuidValue> items = new ArrayList<>();
 					for (Object x : tblTypes.getCheckedElements()) {
 						if (!(x instanceof IncidentType it))  continue;
