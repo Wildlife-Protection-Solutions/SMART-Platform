@@ -189,27 +189,32 @@ public abstract class IncidentJsonProcessor implements IJsonProcessor {
 				//Parse the waypoint information 				
 				Waypoint parsedWp = parser.createWaypoint(feature,ca, session);
 				
-				String itype = feature.get(IncidentMetadataField.TYPES).toString();
 				try {
-					UUID itypeuuid = UuidUtils.stringToUuid(itype);
-					IncidentType iitype = session.get(IncidentType.class, itypeuuid);
-					if (iitype == null || !iitype.getConservationArea().equals(ca)) {
+					String itype = sighting.get(IncidentMetadataField.TYPES.getJsonKey()).toString();
+					try {
+						
+						UUID itypeuuid = UuidUtils.stringToUuid(itype);
+						IncidentType iitype = session.get(IncidentType.class, itypeuuid);
+						if (iitype == null || !iitype.getConservationArea().equals(ca)) {
+							//add warning and set to incident system type
+						}else {
+							parsedWp.setIncidentTypeUuid(iitype.getUuid());
+						}
+					}catch(Exception ex) {
 						//add warning and set to incident system type
-					}else {
-						parsedWp.setIncidentTypeUuid(iitype.getUuid());
+						warnings.add(new JsonImportWarning(JsonImportWarning.Type.INC_TYPE_NOT_FOUND, itype));
 					}
-				}catch(Exception ex) {
-					//add warning and set to incident system type
-					warnings.add(new JsonImportWarning(JsonImportWarning.Type.INC_TYPE_NOT_FOUND, itype));
+				}catch (Exception ex) {
+					warnings.add(new JsonImportWarning(JsonImportWarning.Type.INC_TYPE_NOT_FOUND, "<null>")); //$NON-NLS-1$
 				}
 				if (parsedWp.getIncidentTypeUuid() == null) {
 					IncidentType i = QueryFactory.buildQuery(session, 
 							IncidentType.class,
-							new Object[] {"conservationArea", ca},
-							new Object[] {"keyId", IncidentType.DefaultType.INCIDENT.getKeyId()}).uniqueResult();
+							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+							new Object[] {"keyId", IncidentType.DefaultType.INCIDENT.getKeyId()}).uniqueResult(); //$NON-NLS-1$
 					if (i == null) {
 						//should never happen
-						throw new Exception(MessageFormat.format("Could not find system incident type with key {0}.", IncidentType.DefaultType.INCIDENT.getKeyId()));
+						throw new Exception(MessageFormat.format("Could not find system incident type with key {0}.", IncidentType.DefaultType.INCIDENT.getKeyId())); //$NON-NLS-1$
 					}
 					parsedWp.setIncidentTypeUuid(i.getUuid());
 				}

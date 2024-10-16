@@ -103,6 +103,9 @@ public class ChangeLogPackager {
 			packageMetadata();
 			
 			zipPackage();
+		}catch (Exception ex) {
+			logger.log(Level.SEVERE, "error creating package: " + ex.getMessage(), ex); //$NON-NLS-1$
+			throw ex;
 		}finally{
 			cleanUp();
 		}
