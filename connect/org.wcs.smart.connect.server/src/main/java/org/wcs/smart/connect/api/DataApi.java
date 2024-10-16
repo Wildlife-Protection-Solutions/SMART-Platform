@@ -50,6 +50,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.AttachmentInterceptor;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -59,6 +60,7 @@ import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.er.json.SurveyDesignMetadata;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.incident.patrol.IncidentToPatrolProcessor;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
@@ -66,6 +68,7 @@ import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata.FixedPatrolMetadata;
+import org.wcs.smart.patrol.json.PatrolAttributeMetadata.Name;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.util.UuidUtils;
 
@@ -161,6 +164,59 @@ public class DataApi extends HttpServlet{
 				metadata.waypointMetadata = wpMetadata;
 				metadata.signatureMetadata = PatrolAttributeMetadata.getSignatureMetadata(s, ca);
 				metadata.attachmentTagsMetadata = PatrolAttributeMetadata.getAttachmentTagsMetadata(s, ca);
+				return metadata;
+
+			}finally {
+				s.getTransaction().commit();
+			}
+		}
+		
+	}
+	
+	/**
+	 * Gets the incident metadata for a conservation area.
+	 * 
+	 * @param uuid
+	 * @return
+	 */
+	@GET
+	@Path("/metadata/incident/{cauuid}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public IncidentMetadata getIncidentMetadata(
+			@Parameter(description="uuid of the conservation area to get incident metadata for") @PathParam("cauuid") String uuid) {
+		
+		UUID caUuid = parseUuid(uuid);
+		
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				if (!SecurityManager.INSTANCE.canAccess(s, 
+						request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY,
+						caUuid)){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				
+				ConservationArea ca = s.get(ConservationArea.class, caUuid);
+				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
+					
+				List<PatrolAttributeMetadata> incidentType = new ArrayList<>();
+				List<IncidentType> types = QueryFactory.buildQuery(s, IncidentType.class, 
+						new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+				for (IncidentType type : types) {
+					PatrolAttributeMetadata m = new PatrolAttributeMetadata(type.getKeyId(), null);
+					m.setRequiredExpression(null);
+					for (Label l : type.getNames()) {
+						Name name = new Name(l.getValue(), l.getLanguage().getCode());
+						m.getNames().add(name);
+					}
+					incidentType.add(m);
+				}
+				
+				IncidentMetadata metadata = new IncidentMetadata();
+				metadata.incidentTypes = incidentType;
 				return metadata;
 
 			}finally {
@@ -344,4 +400,14 @@ public class DataApi extends HttpServlet{
 		}
 	}
 	
+	@JsonInclude(Include.NON_NULL)
+	class IncidentMetadata{
+		List<PatrolAttributeMetadata> incidentTypes;
+		
+		
+		public List<PatrolAttributeMetadata> getIncidentTypes(){
+			return incidentTypes;
+		}
+		
+	}
 }
