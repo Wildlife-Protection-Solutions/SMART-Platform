@@ -98,7 +98,8 @@ public enum SmartMobileDeviceIdParserManager {
 			
 			Path file = DataStoreManager.INSTANCE.getFile(item.getFile());
 			boolean deleteOnExit = false;
-			String pattern = "\"deviceId\": \"([0-9a-zA-Z]*)\""; //$NON-NLS-1$
+
+			String pattern = "\"deviceId\":\\s*\"([0-9a-zA-Z]*)\""; //$NON-NLS-1$
 			Matcher matcher = Pattern.compile(pattern).matcher(""); //$NON-NLS-1$
 			
 			Set<String> deviceIds = new HashSet<>();
