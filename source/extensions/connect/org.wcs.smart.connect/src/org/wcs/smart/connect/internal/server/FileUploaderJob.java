@@ -141,8 +141,12 @@ public abstract class FileUploaderJob extends Job {
 				throw new Exception(Messages.FileUploaderJob_UnknownErrorMessage);
 			}
 		}catch(Exception ex){
-			serverStatus.setMessage(ex.getMessage());
-			onError(serverStatus.getMessage());
+			if (serverStatus != null) {
+				serverStatus.setMessage(ex.getMessage());
+				onError(serverStatus.getMessage());
+			}else {
+				onError(ex.getMessage());
+			}
 			throw ex;
 		}
 	}

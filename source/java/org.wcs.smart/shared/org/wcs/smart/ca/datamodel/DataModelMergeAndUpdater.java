@@ -514,11 +514,13 @@ public class DataModelMergeAndUpdater {
 	
 	private void mergeListItems(Attribute source, Attribute target){
 		if (target.getAttributeList() == null) return;
+		
+		if (source.getAttributeList() == null){
+			source.setAttributeList(new ArrayList<AttributeListItem>());
+		}
+		
 		for(AttributeListItem targetItem : target.getAttributeList()){
 			boolean found = false;
-			if (source.getAttributeList() == null){
-				source.setAttributeList(new ArrayList<AttributeListItem>());
-			}
 			for (AttributeListItem sourceItem : source.getAttributeList()){
 				if (sourceItem.getKeyId().equals(targetItem.getKeyId())){
 					found = true;
