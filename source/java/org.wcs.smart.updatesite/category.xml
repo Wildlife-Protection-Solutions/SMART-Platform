@@ -9,6 +9,9 @@
    <feature id="org.wcs.smart.feature">
       <category name="smart"/>
    </feature>
+   <feature id="org.wcs.smart.connect.feature">
+      <category name="connect"/>
+   </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
          The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
