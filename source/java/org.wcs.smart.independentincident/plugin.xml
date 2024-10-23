@@ -666,6 +666,10 @@
             commandId="org.wcs.smart.incident.pdf"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
       </image>
+      <image
+            commandId="org.wcs.smart.incident.types"
+            icon="images/icons/obj16/incident.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">

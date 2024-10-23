@@ -43,6 +43,7 @@ import org.locationtech.jts.geom.Point;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IncidentPropertyManager;
+import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.incident.model.IncidentWaypoint;
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -121,13 +122,14 @@ public class IncidentToPatrolProcessor {
 		}
 		
 		List<Waypoint> toProcess = 
-				session.createQuery("FROM Waypoint WHERE conservationArea = :ca and incidentTypeUuid in (:types)", Waypoint.class) //$NON-NLS-1$
+				session.createQuery("FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca and incidentTypeUuid in (:types)", Waypoint.class) //$NON-NLS-1$
+				.setParameter("source", IndepedentIncidentSource.KEY) //$NON-NLS-1$
 				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameterList("types", uuids) //$NON-NLS-1$
 				.list();
 		
 		for (Waypoint wp : toProcess) {
-
+			System.out.println(wp.getSourceId());
 			//if waypoints are old convert them to normal waypoints	
 			if (doExpire) {
 				if (ChronoUnit.DAYS.between(wp.getDateTime().toLocalDate(), LocalDate.now()) > expireDays) {
@@ -247,7 +249,7 @@ public class IncidentToPatrolProcessor {
 					
 					//update source
 					wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-					
+					wp.setIncidentTypeUuid(null);
 					
 					//add to track
 					List<LineString> tracks = matchedTrack.getLineStrings();
