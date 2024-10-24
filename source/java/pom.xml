@@ -495,6 +495,18 @@
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module> 
 			</modules>
 		</profile>
+		
+		<profile>
+			<id>profilemigrate</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
+				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
+			</modules>
+		</profile>
+		
 		<profile>
 			<id>plugins</id>
 			
