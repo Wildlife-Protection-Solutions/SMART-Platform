@@ -229,10 +229,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			
 			PatrolAttribute pa = findAttribute(av.getKey());
 			if (pa == null) continue;
-			if (pa.getType() == AttributeType.TREE) {
-				warnings.add(Messages.XmlToPatrolConverter_TreeAttributesNotSupported);
-				continue;
-			}
+			
 			
 			PatrolAttributeValue custom = new PatrolAttributeValue();
 			custom.setPatrol(patrol);

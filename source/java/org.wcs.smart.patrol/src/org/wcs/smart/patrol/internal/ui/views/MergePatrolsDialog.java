@@ -66,6 +66,7 @@ import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -139,7 +140,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		
 		txtPatrolId.setEnabled(false);
 	
-		getStationFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_StationAndTeam, idOptions, patrolsToMerge.get(0));
+		getStationFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_StationAndTeam1, idOptions, patrolsToMerge.get(0));
 		getObjectiveFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_ObjectiveAndMandate, idOptions, patrolsToMerge.get(0));
 
 		
@@ -209,7 +210,20 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		//set the station of the new patrol
 		Patrol stationId =  (Patrol)((IStructuredSelection)getStationFromID.getSelection()).getFirstElement();
 		newPatrol.setStation(stationId.getStation());
-		
+		newPatrol.setTeam(stationId.getTeam());
+		newPatrol.setCustomAttributes(new ArrayList<>());
+		//custom attribute
+		for (PatrolAttributeValue pa : stationId.getCustomAttributes()) {
+			PatrolAttributeValue v = new PatrolAttributeValue();
+			v.setPatrolAttribute(pa.getPatrolAttribute());
+			v.setAttributeListItem(pa.getAttributeListItem());
+			v.setAttributeTreeNode(pa.getAttributeTreeNode());
+			v.setStringValue(pa.getStringValue());
+			v.setNumberValue(pa.getNumberValue());
+			v.setPatrol(newPatrol);
+			newPatrol.getCustomAttributes().add(v);
+		}
+					
 		//set the Objective
 		Patrol objectiveId =  (Patrol)((IStructuredSelection)getObjectiveFromID.getSelection()).getFirstElement();
 		newPatrol.setObjective(objectiveId.getObjective());
@@ -227,6 +241,8 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 			allComments = allComments.substring(0, Patrol.MAX_COMMENT_LENGTH);
 		}
 		
+		
+		
 		//gather start/end dates
 		LocalDate startDate = LocalDate.MAX;
 		LocalDate endDate = LocalDate.MIN;
@@ -241,7 +257,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		newPatrol.setEndDate(endDate);
 		newPatrol.setStartDate(startDate);
 		newPatrol.recalculateType();
-		newPatrol.setTeam(stationId.getTeam());
+		
 
 		if (ChronoUnit.DAYS.between(newPatrol.getStartDate(), newPatrol.getEndDate()) > Patrol.MAX_PATROL_LENGTH_DAYS){
 			MessageDialog.openError(getShell(), Messages.MergePatrolsDialog_ErrorDialogTitle, 
