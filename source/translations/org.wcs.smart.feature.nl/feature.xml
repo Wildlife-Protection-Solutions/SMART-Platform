@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.feature.nl"
       label="SMART Language Pack"
-      version="7.5.9"
+      version="7.5.12"
       provider-name="org.wcs.smart">
 
    <description>
