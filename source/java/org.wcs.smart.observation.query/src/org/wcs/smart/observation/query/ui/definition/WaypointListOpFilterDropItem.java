@@ -304,7 +304,7 @@ public class WaypointListOpFilterDropItem extends DropItem implements IFilterDro
 					}
 					List<QueryIncidentType> fallTypes=allTypes;
 					Display.getDefault().asyncExec(()->{
-						if (listViewer.getControl().isDisposed()) return;
+						if (listViewer == null || listViewer.getControl().isDisposed()) return;
 						listViewer.setInput(fallTypes);
 						
 						if (currentSelection != null) {

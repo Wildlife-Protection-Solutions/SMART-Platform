@@ -139,6 +139,17 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 				
 				"insert into smart.i18n_label(language_uuid, element_uuid, value) select  a.uuid,b.uuid, b.name from smart.language a, smart.ct_patrol_package b where a.ca_uuid = b.ca_uuid and a.isdefault", //$NON-NLS-1$
 				"ALTER TABLE smart.ct_patrol_package drop column name", //$NON-NLS-1$
+				
+				//end all smart mobile patrols whose end time is not 11:59:59 				
+				"""	
+					UPDATE smart.ct_patrol_link set last_observation_cnt = -1 WHERE patrol_leg_uuid IN (
+					SELECT b.uuid FROM (
+						SELECT c.patrol_uuid,max(cast(d.patrol_day || ' ' || d.end_time as timestamp)) as ts from smart.patrol_leg_day d join smart.patrol_leg c on d.patrol_leg_uuid = c.uuid
+						GROUP BY c.patrol_uuid 
+					) a JOIN smart.patrol_leg b on a.patrol_uuid = b.patrol_uuid
+					WHERE time(a.ts) != '23:59:59'
+				)
+				"""//$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

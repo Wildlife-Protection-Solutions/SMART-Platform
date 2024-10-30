@@ -161,12 +161,55 @@
             </command>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.cybertracker2.menu?before=org.wcs.smart.cybertracker2.separator.import">
+         <separator
+               name="org.wcs.smart.cybertracker.patrol.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.cybertracker.patrol.cleanandfix"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.cybertracker.patrol.cleanandfix"
+            name="Clean &amp;&amp; End Patrols">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.cybertracker.patrol.qa.CleanAndFixPatrolHandler$CleanAndFixPatrolHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.patrol.cleanandfix">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">

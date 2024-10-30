@@ -280,7 +280,10 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 						addPointToTrack(pd, parser.readXYFromProperties(feature),dt);
 						
 						//update last observation count
-						link.setLastObservationCnt(observationCounter);
+						//link.setLastObservationCnt(observationCounter);
+						//using -1 to flag end of patrol
+						//this will prevent the cleanup software from trying to end this patrol again
+						link.setLastObservationCnt(-1);
 						processedFeatures.add(feature);
 						if (link.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 						continue;
