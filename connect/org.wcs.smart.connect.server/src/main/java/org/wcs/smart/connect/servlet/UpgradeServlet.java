@@ -2149,6 +2149,17 @@ public class UpgradeServlet extends HttpServlet {
 
 							"CREATE TRIGGER trg_incident_type AFTER INSERT OR UPDATE OR DELETE ON smart.incident_type FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
 							
+							//end smart mobile patrols whose end time is not 23:59:59
+							"""
+							update smart.ct_patrol_link set last_observation_cnt = -1 where patrol_leg_uuid in (
+									select b.uuid from (
+											 select c.patrol_uuid,max(cast(d.patrol_day || ' ' || d.end_time as timestamp)) as ts from smart.patrol_leg_day d join smart.patrol_leg c on d.patrol_leg_uuid = c.uuid
+											group by c.patrol_uuid
+									) a join smart.patrol_leg b on a.patrol_uuid = b.patrol_uuid
+									where extract(hour from a.ts) || ':' || extract(minute from a.ts) || ':' || extract(second from a.ts) != '23:59:59.000000'
+							)""", //$NON-NLS-1$
+							
+							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
