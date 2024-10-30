@@ -135,14 +135,23 @@ public class UpgradeServlet extends HttpServlet {
 						//7.5.4 shouldn't exist as we didn't upgrade version number
 						upgradeDb754to757(s);
 						upgradeDb757to800(s, warnings);
+						upgradeDb800to801(s, warnings);
+						upgradeDb801to802(s, warnings);
 						updated = true;
 					}else if (version.equals("7.5.5") || version.equals("7.5.6") || version.equals("7.5.7")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb757to800(s, warnings);
+						upgradeDb800to801(s, warnings);
+						upgradeDb801to802(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb800to801(s, warnings);
+						upgradeDb801to802(s, warnings);
+						updated = true;
+					}else if (version.equals("8.0.1")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						//7.5.5/6 shouldn't exist as we didn't upgrade version number
+						upgradeDb801to802(s, warnings);
 						updated = true;
 					}else {
 						request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
@@ -1759,6 +1768,66 @@ public class UpgradeServlet extends HttpServlet {
 						}
 					}
 					
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});	
+		
+	}
+	
+	
+	private void upgradeDb801to802(Session s, List<String> warnings) {
+		
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					//disable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+
+					String[] sql = new String[] {
+
+						"""
+							CREATE or REPLACE FUNCTION smart.computehours(geometry bytea, linestring bytea) RETURNS double precision
+							    LANGUAGE plpgsql
+							    AS $$
+							DECLARE
+							  type varchar;
+							  value double precision;
+							  i integer;
+							  p geometry;
+							BEGIN
+							    p := st_geomfromwkb(geometry);
+							    type := st_geometrytype(p);
+							    IF (upper(type) = 'ST_POLYGON') THEN
+							        RETURN smart.computeHoursPoly(geometry, linestring);
+							    ELSIF (upper(type) = 'ST_MULTIPOLYGON') THEN
+							        value := 0;
+							        FOR i in 1..ST_NumGeometries(p) LOOP
+							            value := value + smart.computeHoursPoly( st_asewkb(ST_GeometryN(p, i), 'XDR'), linestring);
+							        END LOOP;
+							        RETURN value;
+							    ELSIF (upper(type) = 'ST_GEOMETRYCOLLECTION') THEN
+							        value := 0;
+							        FOR i in 1..ST_NumGeometries(p) LOOP
+							            value := value + smart.computeHours(ST_GeometryN(p, i), linestring);
+							        END LOOP;
+							        RETURN value;
+							    END IF;
+							    RETURN 0;
+							
+							END;
+							$$;					
+							""",
+							
+						"update connect.connect_version set version = '8.0.2', last_updated = now()", //$NON-NLS-1$
+					};
+					
+					for (String s : sql) {
+						c.createStatement().executeUpdate(s);
+					}					
 				}catch (Exception ex) {
 					throw new SQLException (ex);
 				}
