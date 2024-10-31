@@ -39,12 +39,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.ui.configure.RoutinesListDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Wizard page for collecting the routine type, name 
@@ -62,7 +64,7 @@ public class TypeNamePage extends WizardPage{
 	private ComboViewer cmbType;
 	
 	private Button btnAuto;
-	private Label lblAuto;
+	private Label lblAuto, lblInfo;
 	
 	private ControlDecoration cdType;
 	private ControlDecoration cdName;
@@ -88,7 +90,11 @@ public class TypeNamePage extends WizardPage{
 		lblType.setText(RoutinesListDialog.RoutineColumn.TYPE.guiName + ":"); //$NON-NLS-1$
 		lblType.setToolTipText(RoutinesListDialog.RoutineColumn.TYPE.tooltip);
 		
-		cmbType = new ComboViewer(all, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Composite type = new Composite(all, SWT.NONE);
+		type.setLayout(new GridLayout(2, false));
+		type.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		cmbType = new ComboViewer(type, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbType.setLabelProvider(new LabelProvider(){
@@ -97,9 +103,12 @@ public class TypeNamePage extends WizardPage{
 				return super.getText(element);
 			}
 		});
-		cmbType.getControl().addListener(SWT.Selection, e->{
-			validate();
-		});
+		cmbType.getControl().addListener(SWT.Selection, e->validate());
+		
+		lblInfo = new Label(type, SWT.NONE);
+		lblInfo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.INFO_ICON));
+		
+		
 		Collection<IQaRoutineType> input = RoutineExtensionManager.INSTANCE.getDefinedRoutineTypes();
 		cmbType.setInput(input);
 		if (!input.isEmpty()) cmbType.setSelection(new StructuredSelection(input.iterator().next()));
@@ -169,13 +178,21 @@ public class TypeNamePage extends WizardPage{
 			cdName.hide();
 		}
 		if (buttons) getWizard().getContainer().updateButtons();
+		
+		Object x= cmbType.getStructuredSelection().getFirstElement();
+		if (x instanceof IQaRoutineType qt) {
+			lblInfo.setEnabled(true);
+			lblInfo.setToolTipText(SmartUtils.formatStringForLabel( qt.getDescription(Locale.getDefault())));
+		}else {
+			lblInfo.setEnabled(false);
+		}
 	}
 	
 	private void validate(){
 		IQaRoutineType type = (IQaRoutineType) cmbType.getStructuredSelection().getFirstElement();
 		btnAuto.setEnabled( type != null && type.canRunAutomatically() );
 		lblAuto.setVisible( type == null || !type.canRunAutomatically() );
-		validate(true);
+		validate(true);	
 	}
 
 	/**
@@ -189,6 +206,8 @@ public class TypeNamePage extends WizardPage{
 		QaRoutine r = new QaRoutine();
 		if (getSelectedType().canRunAutomatically()) {
 			r.setAutoCheck(btnAuto.getSelection());
+		}else {
+			r.setAutoCheck(false);
 		}
 		String name = txtName.getText().trim();
 		r.setName(name);

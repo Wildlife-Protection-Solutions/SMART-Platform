@@ -105,8 +105,8 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		tblTransportTypes.setContentProvider(ArrayContentProvider.getInstance());
 		tblTransportTypes.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				if (element instanceof PatrolTransportType){
-					return ((PatrolTransportType) element).getName();
+				if (element instanceof PatrolTransportType tt){
+					return MessageFormat.format("{0} [{1}]", tt.getName(), tt.getPatrolType().getName()); //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -177,6 +177,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 					transportTypes.addAll( QueryFactory.buildQuery(s, PatrolTransportType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$
 					for (PatrolTransportType t : transportTypes){
 						t.getName().length();
+						t.getPatrolType().getName();
 					}
 				}catch (Exception ex){
 					QaPlugIn.displayLog(Messages.PatrolSpeedParameterCollector_DbError + ex.getMessage(), ex);
