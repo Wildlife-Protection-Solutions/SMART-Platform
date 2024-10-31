@@ -55,10 +55,13 @@ import org.wcs.smart.cybertracker.json.JsonTrackUtils;
 import org.wcs.smart.cybertracker.json.SmartMobileProcessingError;
 import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.cybertracker.patrol.CleanPatrolEngine;
+import org.wcs.smart.cybertracker.patrol.CleanPatrolSettings;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.cybertracker.patrol.model.IPatrolCyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.patrol.model.JsonPatrol;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -177,14 +180,52 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 						throw new SmartMobileProcessingError(MessageFormat.format(message, this.ca.getNameLabel(), link.getPatrolLeg().getPatrol().getConservationArea().getNameLabel()));
 					}
 					
+					
+					//if this is a startpatrol observation
+					//then we want to cleanup and end any patrols
+					//associated with the deviceID 
+				
+					String value2 = (String) sighting.get(CtJsonUtil.JsonKey.OBSERVATION.key);
+					boolean isPatrolStart = false;
+					if (value2.trim().equalsIgnoreCase(CtJsonObservationParser.OBSERVATION_TYPE_START_PATROL_KEY)) {
+						isPatrolStart = true;
+					}
+					
+					if (isPatrolStart) {
+						
+						if (link != null) {
+							//this just shouldn't happen - two start patrols with the same patroID
+						}else {
+							//find any open patrols associated with this deviceId and close them.				
+							
+							List<CtPatrolLink> toCleanUp = session.createQuery("SELECT lk FROM CtPatrolLink lk join lk.patrolLeg g join g.patrol p WHERE lk.deviceId = :deviceId and lk.lastObservationCnt != -1 and p.conservationArea = :ca", CtPatrolLink.class) //$NON-NLS-1$
+							.setParameter("deviceId", deviceId) //$NON-NLS-1$
+							.setParameter("ca", ca) //$NON-NLS-1$
+							.list();
+							
+							if (!toCleanUp.isEmpty()) {
+								CleanPatrolSettings settings = CleanPatrolEngine.getOrCreateSettings(session, ca);
+								CleanPatrolEngine engine = new CleanPatrolEngine(settings);
+								for (CtPatrolLink ptoclean : toCleanUp) {
+									boolean isModified = engine.cleanUpAndEndPatrol(ptoclean.getPatrolLeg().getPatrol(), session);
+									if (isModified) modifiedPatrols.add(ptoclean.getPatrolLeg().getPatrol());
+								}
+							}
+						}
+						//create a new link for this patrol
+						link = null;
+					}				
+					
 					//ensure valid observation id
 					if (link == null){
 						//no patrol created yet, observation counter must be 1
 						if (observationCounter != 1) continue;
 					}else{
+						
+								
 						//must be the next observation
 						if (link.getLastObservationCnt()  + 1 != observationCounter) {
-	
+		
 							//in an effort to improve error reporting lets make an assumption here 
 							if (link.getLastObservationCnt() + 1 > observationCounter) {
 								if (!duplicateWarningGenerated) {
@@ -200,6 +241,7 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 							
 							continue;					
 						}
+						
 					}
 					
 					//is the end of this leg and needs a new leg

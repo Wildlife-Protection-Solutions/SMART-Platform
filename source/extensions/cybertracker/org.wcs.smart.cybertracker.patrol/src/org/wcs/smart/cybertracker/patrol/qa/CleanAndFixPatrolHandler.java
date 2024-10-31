@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class CleanAndFixPatrolHandler{
 
 	@Execute
@@ -42,6 +43,7 @@ public class CleanAndFixPatrolHandler{
 		CleanAndFixDialog dialog = new CleanAndFixDialog(activeShell);
 		dialog.open();
 	}
+	
 	
 	public static class CleanAndFixPatrolHandlerWrapper extends DIHandler<CleanAndFixPatrolHandler>{
 		public CleanAndFixPatrolHandlerWrapper(){

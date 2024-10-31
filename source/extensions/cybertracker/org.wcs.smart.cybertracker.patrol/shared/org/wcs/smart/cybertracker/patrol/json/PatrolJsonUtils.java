@@ -60,7 +60,9 @@ public class PatrolJsonUtils {
 	public static DateTimeFormatter TIMEFORMAT = DateTimeFormatter.ofPattern("HH:mm:ss"); //$NON-NLS-1$
 	
 	public static final String ATTRIBUTE_PREFIX = "SMART_"; //$NON-NLS-1$
+	//for backward compatibility
 	public static final String END_PATROL_KEY = "SMART_EndPatrol"; //$NON-NLS-1$
+	
 
 	/**
 	 * 

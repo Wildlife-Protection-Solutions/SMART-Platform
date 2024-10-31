@@ -48,6 +48,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.patrol.CleanPatrolEngine;
+import org.wcs.smart.cybertracker.patrol.CleanPatrolSettings;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -64,20 +66,8 @@ import com.ibm.icu.text.MessageFormat;
  */
 public class CleanAndFixDialog extends SmartStyledTitleDialog{
 
-	public static final String DEFAULT_DAYS = "7"; //$NON-NLS-1$
-	public static final String DEFAULT_DISTANCE = "250"; //$NON-NLS-1$
-	public static final String DEFAULT_MINUTES = "30"; //$NON-NLS-1$
-	
-	public static final int MAX_DISTANCE = 5000;
-	
-	private static final String KEY = "org.wcs.smart.cybertracker.patrol.clean"; //$NON-NLS-1$
-	
-	private static final String START_KEY = KEY + ".start"; //$NON-NLS-1$
-	private static final String END_KEY = KEY + ".end"; //$NON-NLS-1$
-	private static final String DISTANCE_KEY = KEY + ".distance"; //$NON-NLS-1$
-	private static final String DAYS_KEY = KEY + ".days"; //$NON-NLS-1$
-	private static final String CLUSTER_MINUTES_KEY = KEY + ".clusterminutes"; //$NON-NLS-1$
-	private static final String CLUSTER_DISTANCE_KEY = KEY + ".clusterdistance"; //$NON-NLS-1$
+	private static final String START_KEY = CleanPatrolSettings.KEY + ".start"; //$NON-NLS-1$
+	private static final String END_KEY =  CleanPatrolSettings.KEY + ".end"; //$NON-NLS-1$
 	
 	private Text txtStatus, txtDays, txtDistance, txtClusterDistance, txtClusterMinutes;
 	private DateTime dtStart, dtEnd;
@@ -125,25 +115,30 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 			SmartUtils.initDateTimeWidget(dtEnd, end);
 		}
 		
-		String[] propKeys = new String[] {DISTANCE_KEY, CLUSTER_DISTANCE_KEY, CLUSTER_MINUTES_KEY, DAYS_KEY};
-		Text[] propText = new Text[] {txtDistance, txtClusterDistance, txtClusterMinutes, txtDays};
 		
+		CleanPatrolSettings settings = null;
 		try(Session session = HibernateManager.openSession()){
-			for (int i = 0; i < propKeys.length; i ++) {
-				ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},  //$NON-NLS-1$
-						new Object[] {"key", propKeys[i]}).uniqueResult();  //$NON-NLS-1$
-				if (prop != null) {
-					propText[i].setText(prop.getValue());
-				}
+			try {
+				session.beginTransaction();
+				settings = CleanPatrolEngine.getOrCreateSettings(session, SmartDB.getCurrentConservationArea());
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				SmartPlugIn.displayLog(ex.getMessage(), ex);
 			}
+		}
+		if (settings != null) {
+			txtDays.setText( String.valueOf(settings.getDays()) );
+			
+			txtDistance.setText( String.valueOf(settings.getValidTrackDistance()) );
+			txtClusterDistance.setText( String.valueOf(settings.getClusterTrackDistance()) );
+			txtClusterMinutes.setText( String.valueOf(settings.getClusterMinutes()) );			
 		}
 		btnSaveSetting.setEnabled(false);
 
 	}
 	
 	private boolean saveSettings() {
-		String[] propKeys = new String[] {DISTANCE_KEY, CLUSTER_DISTANCE_KEY, CLUSTER_MINUTES_KEY, DAYS_KEY};
+		String[] propKeys = new String[] {CleanPatrolSettings.DISTANCE_KEY, CleanPatrolSettings.CLUSTER_DISTANCE_KEY, CleanPatrolSettings.CLUSTER_MINUTES_KEY, CleanPatrolSettings.DAYS_KEY};
 		Text[] propText = new Text[] {txtDistance, txtClusterDistance, txtClusterMinutes, txtDays};
 		
 		try(Session session = HibernateManager.openSession()){
@@ -217,13 +212,13 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 			}
 			
 			x = Integer.parseInt(txtDistance.getText());
-			if (x < -1 || x > MAX_DISTANCE) {
-				throw new Exception(MessageFormat.format("Distance must be between -1 and {0}", MAX_DISTANCE));
+			if (x < -1 || x > CleanPatrolSettings.MAX_DISTANCE) {
+				throw new Exception(MessageFormat.format("Distance must be between -1 and {0}", CleanPatrolSettings.MAX_DISTANCE));
 			}
 			
 			x = Integer.parseInt(txtClusterDistance.getText());
-			if (x < -1 || x > MAX_DISTANCE) {
-				throw new Exception(MessageFormat.format("Distance must be between -1 and {0}", MAX_DISTANCE));
+			if (x < -1 || x > CleanPatrolSettings.MAX_DISTANCE) {
+				throw new Exception(MessageFormat.format("Distance must be between -1 and {0}", CleanPatrolSettings.MAX_DISTANCE));
 			}
 			
 			x = Integer.parseInt(txtClusterMinutes.getText());
@@ -267,7 +262,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		txtDays = new Text(settings, SWT.BORDER);
 		txtDays.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtDays.setText(DEFAULT_DAYS);
+		txtDays.setText(CleanPatrolSettings.DEFAULT_DAYS);
 		txtDays.addListener(SWT.Modify, lmodifed);
 				
 		l = new Label(settings, SWT.WRAP);
@@ -298,7 +293,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		txtDistance = new Text(settings, SWT.BORDER);
 		txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtDistance.setText(DEFAULT_DISTANCE);
+		txtDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
 		txtDistance.addListener(SWT.Modify, lmodifed);
 		
 		l = new Label(settings, SWT.WRAP);
@@ -328,7 +323,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		txtClusterDistance = new Text(settings, SWT.BORDER);
 		txtClusterDistance.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtClusterDistance.setText(DEFAULT_DISTANCE);
+		txtClusterDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
 		txtClusterDistance.addListener(SWT.Modify, lmodifed);
 		
 		
@@ -344,7 +339,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		txtClusterMinutes = new Text(settings, SWT.BORDER);
 		txtClusterMinutes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridData)txtClusterMinutes.getLayoutData()).widthHint = 50;
-		txtClusterMinutes.setText(DEFAULT_MINUTES);
+		txtClusterMinutes.setText(CleanPatrolSettings.DEFAULT_MINUTES);
 		txtClusterMinutes.addListener(SWT.Modify, lmodifed);
 		
 		l = new Label(settings, SWT.WRAP);
@@ -359,10 +354,10 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		Button btnDefaults = new Button(btnPanel, SWT.PUSH);
 		btnDefaults.setText("Restore Defaults");
 		btnDefaults.addListener(SWT.Selection, e->{
-			txtDays.setText(DEFAULT_DAYS);
-			txtDistance.setText(DEFAULT_DISTANCE);
-			txtClusterDistance.setText(DEFAULT_DISTANCE);
-			txtClusterMinutes.setText(DEFAULT_MINUTES);
+			txtDays.setText(CleanPatrolSettings.DEFAULT_DAYS);
+			txtDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
+			txtClusterDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
+			txtClusterMinutes.setText(CleanPatrolSettings.DEFAULT_MINUTES);
 		});
 
 		btnSaveSetting = new Button(btnPanel, SWT.PUSH);
@@ -424,6 +419,12 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		int minutes = Integer.valueOf(txtClusterMinutes.getText());
 		int cdistance = Integer.valueOf(txtClusterDistance.getText());
 		
+		CleanPatrolSettings settings = new CleanPatrolSettings();
+		settings.setDays(days);
+		settings.setValidTrackDistance(distance);
+		settings.setClusterMinutes(minutes);
+		settings.setClusterTrackDistance(cdistance);
+		
 		saveDates();
 		
 		enableControls(false);
@@ -433,7 +434,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					UnendedPatrolProcessor processor = new UnendedPatrolProcessor(SmartDB.getCurrentConservationArea(), days, distance, cdistance, minutes);
+					UnendedPatrolProcessor processor = new UnendedPatrolProcessor(SmartDB.getCurrentConservationArea(), settings);
 					processor.doWork(start, end, txtProgress);
 					updateMessage(processor.getStatusMessage());
 					
