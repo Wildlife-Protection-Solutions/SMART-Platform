@@ -5,7 +5,7 @@
 
 	<groupId>org.wcs.smart.connect</groupId>
 	<artifactId>org.wcs.smart.connect</artifactId>
-	<version>8.0.1-SNAPSHOT</version>
+	<version>8.0.2-SNAPSHOT</version>
 	<name>SMART Connect</name>
 	<packaging>pom</packaging>
 	
@@ -16,7 +16,7 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<smart.version>8.0.1-SNAPSHOT</smart.version>
+		<smart.version>8.0.2-SNAPSHOT</smart.version>
 		<!--<birt.version>4.9.0</birt.version>-->
 		<geotools.version>28.1</geotools.version>
 		<jts.version>1.19.0</jts.version>
