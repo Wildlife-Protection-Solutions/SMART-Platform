@@ -418,7 +418,15 @@ public class PatrolHibernateManager extends HibernateManager{
 			session.persist(patrol);
 		}else {
 			for (PatrolLeg pl :  patrol.getLegs()) {
-				if (pl.getUuid() == null) session.persist(pl);
+				if (pl.getUuid() == null) {
+					session.persist(pl);
+				}else {
+					for (PatrolLegDay pld : pl.getPatrolLegDays()) {
+						if (pld.getUuid() == null) {
+							session.persist(pld);
+						}
+					}
+				}
 			}
 		}
 		

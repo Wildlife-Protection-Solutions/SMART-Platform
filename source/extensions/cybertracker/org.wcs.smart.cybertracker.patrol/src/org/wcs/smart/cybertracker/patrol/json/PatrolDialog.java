@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.patrol.json;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog for linking cybertracker patrols to SMART patrols.
@@ -140,6 +142,12 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		super.okPressed();
 	}
 	
+	private boolean between (LocalDate date, LocalDate start, LocalDate end) {
+		if (start.isEqual(date)) return true;
+		if (end.isEqual(date)) return true;
+		return date.isAfter(start) && date.isBefore(end);
+	}
+	
 	private void mergePatrol(UUID ctUuid, CtPatrolLink newPatrolLink, Patrol addToPatrol) throws Exception{
 		Patrol newPatrol = newPatrolLink.getPatrolLeg().getPatrol();
 		if (!newPatrol.getPatrolType().equals(addToPatrol.getPatrolType())){
@@ -159,6 +167,67 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 				addToPatrol.setEndDate(toAdd.getEndDate());
 			}
 		}
+		
+		//ensure there is no days with missing data
+		LocalDate start = addToPatrol.getStartDate();
+		LocalDate end = addToPatrol.getEndDate();
+		List<LocalDate> missing = new ArrayList<>();
+		while(start.isBefore(end) || start.isEqual(end)) {
+			
+			boolean hasData = false;
+			for (PatrolLeg pl : addToPatrol.getLegs()) {
+				if (between(start, pl.getStartDate(), pl.getEndDate())){
+					hasData = true;
+					break;
+				}
+			}
+			
+			if (!hasData) missing.add(start);
+			start = start.plusDays(1);
+		}
+		if (!missing.isEmpty()) {
+			LocalDate first = missing.getFirst();
+			LocalDate last = missing.getLast();
+			
+			//find the first leg that includes the start leg
+			PatrolLeg toupdate = null;
+			for (PatrolLeg pl : addToPatrol.getLegs()) {
+				if (between(start, pl.getStartDate(), pl.getEndDate())) {
+					toupdate = pl;
+					break;
+				}
+			}
+			if (toupdate == null) {
+				toupdate = addToPatrol.getLegs().getFirst();
+			}
+			if (first.isBefore(toupdate.getStartDate())) {
+				toupdate.setStartDate(first);
+			}
+			if (last.isAfter(toupdate.getEndDate())) {
+				toupdate.setEndDate(last);
+			}
+			first = toupdate.getStartDate();
+			last = toupdate.getEndDate();
+			while(!first.isAfter(last)) {				
+				PatrolLegDay found = null;
+				for (PatrolLegDay d : toupdate.getPatrolLegDays()) {
+					if (d.getDate().isEqual(first)) {
+						found = d;
+						break;
+					}
+				}
+				if (found == null) {
+					PatrolLegDay d = new PatrolLegDay();
+					d.setDate(first);
+					toupdate.getPatrolLegDays().add(d);
+					d.setPatrolLeg(toupdate);
+					d.setStartTime(LocalTime.MIN);
+					d.setEndTime(SharedUtils.END_OF_DAY);
+				}
+				first = first.plusDays(1);
+			}		
+		}
+		
 		PatrolHibernateManager.savePatrol(addToPatrol, session, true);
 		
 		//create links
