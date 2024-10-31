@@ -1050,8 +1050,12 @@ public abstract class PatrolJsonProcessor implements IJsonProcessor {
 			sb.deleteCharAt(sb.length() - 1);
 			sb.append(")"); //$NON-NLS-1$
 		}
-		HashSet<Patrol> tmp = new HashSet<Patrol>(modifiedPatrols);
-		tmp.removeAll(newPatrols);
+		HashSet<Patrol> tmp = new HashSet<Patrol>();
+		for (Patrol p : modifiedPatrols){
+			if (p.getUuid() == null || newPatrols.contains(p)) continue;
+			tmp.add(p);
+		}
+		
 		if (tmp.size() > 0){
 			sb.append(MessageFormat.format(StatusMessage.MODIFIED.getMessage(l), tmp.size()));
 			sb.append(" ("); //$NON-NLS-1$

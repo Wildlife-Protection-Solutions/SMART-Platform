@@ -305,6 +305,7 @@ public class JsonImportEditor extends EditorPart {
 		filesTable.refresh();
 		filesTable.getTable().getColumn(0).pack();
 		filesTable.getTable().getColumn(1).pack();
+		filesTable.refresh();
 	}
 	
 	@Override
