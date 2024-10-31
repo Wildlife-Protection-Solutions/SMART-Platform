@@ -316,22 +316,6 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		l.setText("These setting are used to remove clusters of track points at the end of the patrol.");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		
-		l = new Label(settings, SWT.NONE);
-		l.setText("Cluster distance (m):");
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		
-		txtClusterDistance = new Text(settings, SWT.BORDER);
-		txtClusterDistance.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtClusterDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
-		txtClusterDistance.addListener(SWT.Modify, lmodifed);
-		
-		
-		l = new Label(settings, SWT.WRAP);
-		l.setText("Track points at the end of patrol that are clusted within this distance will be collapsed to a single point. If all track points are within this distance, the day will be removed from the patrol. Set to -1 to never collapse track points.");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)l.getLayoutData()).widthHint = 250;
-		
 		l = new Label(settings, SWT.NONE);
 		l.setText("Cluster timeframe (minutes):");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -343,9 +327,27 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		txtClusterMinutes.addListener(SWT.Modify, lmodifed);
 		
 		l = new Label(settings, SWT.WRAP);
-		l.setText("This timeframe is used to determine the center point for collapsing track points. All points within x minutes of the end of the patrol are collected, the center found, a buffer of distance Y generated, then all points at the end of the patrol within this area collapsed to that single point.");
+		l.setText("This value represents the number of minutes at the end of a track during which the data is used to determine if the data collection was actively ended or if the device continued recording by mistake. Set this value to reflect how long a stationary reading at the end of data collection would indicate that the team forgot to manually stop the track.");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 250;
+		
+		
+		l = new Label(settings, SWT.NONE);
+		l.setText("Buffer distance (m):");
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
+		txtClusterDistance = new Text(settings, SWT.BORDER);
+		txtClusterDistance.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		txtClusterDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
+		txtClusterDistance.addListener(SWT.Modify, lmodifed);
+		
+		
+		l = new Label(settings, SWT.WRAP);
+		l.setText("Based on the points from the timeframe, a center point is calculated that marks the estimated end location of the track (if the recording was left on accidentally). Track points within this specified radius of the center point are removed in reverse order, starting from the end, until a point outside the radius is found. Set this to -1 to disable point removal. The recommended value depends on your GPS device and typical signal accuracy. If tracks left recording are not cleaned up effectively, increase this radius to match the GPS error range observed in your data.");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 250;
+		
+		
 		
 		Composite btnPanel = new Composite(settings, SWT.NONE);
 		btnPanel.setLayout(new GridLayout(2, false));
@@ -401,10 +403,12 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 	}
 	
 	private void enableControls(boolean enable) {
+		if (dtStart.isDisposed()) return;
+		
 		dtStart.setEnabled(enable);
 		dtEnd.setEnabled(enable);
 		btnGo.setEnabled(enable);
-		
+		getButton(IDialogConstants.CANCEL_ID).setEnabled(enable);
 		txtDays.setEnabled(enable);
 		txtDistance.setEnabled(enable);
 	}
@@ -466,6 +470,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		statusMessage = newMessage;
 		
 		Display.getDefault().asyncExec(()->{
+			if (txtStatus.isDisposed()) return;
 			txtStatus.setText(statusMessage);
 		});
 	}

@@ -56,7 +56,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 	}
 		
 	public String getStatusMessage() {
-		if (modified.isEmpty() && error.isEmpty()) return "No patrols found that required processing";
+		if (modified.isEmpty() && error.isEmpty()) return "No data found that required processing";
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("The following patrols have been cleaned and ended:\n");
@@ -90,7 +90,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 		
 		List<Patrol> tocleanup = new ArrayList<>();
 		
-		monitor.beginTask("Loading Patrols", 1);
+		monitor.beginTask("Loading Data", 1);
 		
 		try(Session session = HibernateManager.openSession()){
 			
@@ -129,13 +129,15 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 			}	
 		}
 		
-		monitor.beginTask("Processing patrols", tocleanup.size()+1);
+		monitor.beginTask("Processing data", tocleanup.size()+1);
 		for(Patrol p : tocleanup) {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
 					p = session.get(Patrol.class, p.getUuid());
-					cleanUpAndEndPatrol(p, session);
+					if (cleanUpAndEndPatrol(p, session)) {
+						modified.add(p);
+					}
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					SmartPlugIn.displayLog(MessageFormat.format("Unable to clean up patrol {0}: {1}", p.getId(), ex.getMessage()), ex);
@@ -147,7 +149,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 		}		
 
 		//fire patrol modified event
-		monitor.beginTask("Refreshing patrols", modified.size());
+		monitor.beginTask("Refreshing data", modified.size());
 		for (Patrol p : modified) {
 			PatrolEventManager.getInstance().patrolSaved(p, true);
 			monitor.worked(1);	
