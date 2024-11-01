@@ -43,7 +43,6 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -379,12 +378,12 @@ public class CleanPatrolEngine {
 		
 		for (int i = 0; i < keys.length; i ++) {
 			ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},  //$NON-NLS-1$
+				new Object[] {"conservationArea", ca},  //$NON-NLS-1$
 				new Object[] {"key", keys[i]}).uniqueResult();  //$NON-NLS-1$
 		
 			if (prop == null) {
 				prop = new ConservationAreaProperty();
-				prop.setConservationArea(SmartDB.getCurrentConservationArea());
+				prop.setConservationArea(ca);
 				prop.setKey(keys[i]);
 				prop.setValue(defaults[i]);
 				session.persist(prop);
