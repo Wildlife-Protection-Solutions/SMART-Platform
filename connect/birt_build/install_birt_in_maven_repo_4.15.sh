@@ -8,6 +8,7 @@
 # 1. Download 'birt-runtime-4.15.0-202403270652.zip' BIRT runtime ZIP file, then unzip it.
 #    unzip ~/Downloads/birt-runtime-4.14.0-202312020807.zip -d /tmp/birt-runtime-4.14.0-202312020807
 # 2. Update the RUNTIME_PATH variable below to point to the unzipped folder
+# 3. Update the REPO_LOC variable below to point to the directory containing your .m2 folder (repo)
 
 # TO UPGRADE:
 # 1. need to upgrade the birt runtime version 
@@ -17,6 +18,7 @@ RUNTIME_PATH="C:/data/SMART/BIRT/birt-runtime-4.15.0-202403270652"
 LIB_PATH="${RUNTIME_PATH}/ReportEngine/lib"
 ADDONS_PATH="${RUNTIME_PATH}/ReportEngine/addons"
 GROUP_ID_BASE="com.friss.org.eclipse.birt"
+REPO_LOC="C:/Users/<USERNAME>"
 
 rm -rf /tmp/pom.xml
 cat <<EOT >>/tmp/pom.xml
@@ -65,7 +67,7 @@ function deploy {
   7z d -r ${FILE} "META-INF/maven/*"
 
   #mvn deploy:deploy-file -Durl=https://reposilite.serviceplanet.nl/third-party \
-  mvn deploy:deploy-file -Durl=file://${HOME}/.m2/repository \
+  mvn deploy:deploy-file -Durl=file://${REPO_LOC}/.m2/repository \
     -DgeneratePom=true \
     -DrepositoryId=third-party \
     -Dfile=${FILE} \
@@ -176,7 +178,7 @@ EOT
 #zip --delete ${LIB_PATH}/org.eclipse.birt.runtime_4.15.0-202403270652.jar "META-INF/maven/*"
 7z d -r ${LIB_PATH}/org.eclipse.birt.runtime_4.15.0-202403270652.jar "META-INF/maven/*"
 
-mvn deploy:deploy-file -Durl=file://${HOME}/.m2/repository \
+mvn deploy:deploy-file -Durl=file://${REPO_LOC}/.m2/repository \
     -DpomFile=/tmp/pom.xml \
     -DrepositoryId=third-party \
     -Dfile=${LIB_PATH}/org.eclipse.birt.runtime_4.15.0-202403270652.jar \
