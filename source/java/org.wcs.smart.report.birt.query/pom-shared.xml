@@ -40,11 +40,5 @@
     			<artifactId>org.wcs.smart.core.observation</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		<dependency>
-    			<groupId>org.eclipse.datatools.plugins</groupId>
-  				<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
-    			<version>${org.eclipse.datatools.connectivity.oda.version}</version>
-		</dependency>
-		
 	</dependencies> 	
 </project>
