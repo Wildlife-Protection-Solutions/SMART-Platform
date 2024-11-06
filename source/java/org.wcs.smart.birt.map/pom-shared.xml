@@ -47,13 +47,7 @@
 			<groupId>org.locationtech.udig</groupId>
 			<artifactId>org.locationtech.udig.catalog.rasterings</artifactId>
 			<version>${udig.version}</version>
-		</dependency>
-		<dependency>
-  			<groupId>org.eclipse.birt.runtime</groupId>
-			<artifactId>org.mozilla.javascript</artifactId>
-			<version>${mozilla.javascript.version}</version>
-		</dependency>
-		
+		</dependency>	
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.ui.workbench</artifactId>

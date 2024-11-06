@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.wcs.smart.connect</groupId>
         <artifactId>org.wcs.smart.connect</artifactId>
-        <version>8.0.1-SNAPSHOT</version>
+        <version>8.0.2-SNAPSHOT</version>
     </parent>
     <groupId>org.wcs.smart.connect.server</groupId>
     <artifactId>org.wcs.smart.connect.server</artifactId>
@@ -622,48 +622,130 @@
             <version>${udig.version}</version>
         </dependency>
         
-        <!--
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.ui.workbench</artifactId>
-            <version>${org.eclipse.ui.workbench.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
         <dependency>
     		<groupId>org.eclipse.platform</groupId>
     		<artifactId>org.eclipse.equinox.preferences</artifactId>
     		<version>3.10.400</version>
+    		
+			<exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.ecore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.common</artifactId>
+                </exclusion>
+            </exclusions>
+            
+            
 		</dependency>
-		<dependency>
-    		<groupId>org.eclipse.platform</groupId>
-    		<artifactId>org.eclipse.equinox.registry</artifactId>
-    		<version>3.11.400</version>
-		</dependency>
-		<dependency>
-    		<groupId>org.eclipse.platform</groupId>
-    		<artifactId>org.eclipse.equinox.security</artifactId>
-    		<version>1.4.100</version>
-		</dependency>
+
 		<dependency>
     		<groupId>org.eclipse.platform</groupId>
     		<artifactId>org.eclipse.core.jobs</artifactId>
     		<version>3.15.100</version>
+    		<exclusions>                
+                 <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>    
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.registry</artifactId>
+                </exclusion> 
+            </exclusions>
 		</dependency>
 		<dependency>
     		<groupId>org.eclipse.platform</groupId>
     		<artifactId>org.eclipse.core.commands</artifactId>
     		<version>3.10.400</version>
+    		<exclusions>                
+                 <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>    
+				<exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.registry</artifactId>
+                </exclusion>                 
+            </exclusions>
 		</dependency>
 		<dependency>
     		<groupId>org.eclipse.platform</groupId>
     		<artifactId>org.eclipse.jface</artifactId>
     		<version>3.32.0</version>
+    		<exclusions>                
+                 <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>    
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.registry</artifactId>
+                </exclusion> 
+            </exclusions>
 		</dependency>		
 		<dependency>
 		    <groupId>org.eclipse.platform</groupId>
 		    <artifactId>org.eclipse.ui.workbench</artifactId>
     		<version>3.131.100</version>
+    		
+    		<exclusions>                
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.core.runtime</artifactId>
+                </exclusion>
+                 <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.ecore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.emf</groupId>
+                    <artifactId>org.eclipse.emf.common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.registry</artifactId>
+                </exclusion> 
+            </exclusions>
+            
 		</dependency>
 
 		<dependency>
