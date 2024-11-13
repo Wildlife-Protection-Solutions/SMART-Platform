@@ -22,6 +22,7 @@
 		<div class="tabheader pageheader">
   			<a id="calist" class="tab "><fmt:message key="ca.pageheader"/></a>
   			<a id="dmmanager" class="tab "><fmt:message key="ca.dmpageheader"/></a>
+  			<a id="synchistory" class="tab ">Sync History</a>
   		</div>
  	
 		<div><div id="message" class="msgsection"></div></div>
@@ -82,6 +83,29 @@
 			<div><button id="btnMergeDm" class="block button top-spacer"><fmt:message key="ca.dmmergebtn"/></button></div>
 			
 		</div>
+	</div>
+	
+	
+	<div id="synchistory_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
+
+		<div class="top-spacer"  style="" >
+		
+			 <div id="synctable" class="table-cell smart-table">
+		  	  	<div class="table-row smart-table-header">
+				  <div class="table-cell smart-table-cell">Conservation Area</div>
+				  <div class="table-cell smart-table-cell">Username</div>
+				  <div class="table-cell smart-table-cell">IP</div>
+				  <div class="table-cell smart-table-cell">Last Sync Download</div>
+				  <div class="table-cell smart-table-cell">Last Sync Upload</div>
+				  <div class="table-cell smart-table-cell">Last CA Download</div>
+				  <div class="table-cell smart-table-cell">Last CA Upload</div>
+				</div>
+			</div>
+		    <a id="refreshhistory" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>
+		
+		
+		</div>
+		
 	</div>
 	
 	</div>

@@ -2227,6 +2227,60 @@ public class UpgradeServlet extends HttpServlet {
 							"alter table smart.query_column_config add constraint query_column_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 							"CREATE TRIGGER trg_query_column_config AFTER INSERT OR UPDATE OR DELETE ON smart.query_column_config FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
 
+							//connect - tracking last update/download
+							"alter table connect.work_item add column username varchar", //$NON-NLS-1$
+							"alter table connect.work_item add column ip varchar", //$NON-NLS-1$
+
+							"""
+							create table connect.work_item_summary(
+								uuid uuid not null default gen_random_uuid(),
+							 	ca_uuid uuid not null,
+								username varchar not null,
+								ip varchar not null,
+								last_sync_up timestamp,
+								last_sync_down timestamp,
+								last_ca_up timestamp,
+								last_ca_down timestamp,
+								primary key (ca_uuid, username, ip)
+							)
+							""", //$NON-NLS-1$
+							"alter table connect.work_item_summary add constraint work_item_summary_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area(uuid) on delete cascade", //$NON-NLS-1$
+							
+							"""
+							CREATE OR REPLACE FUNCTION connect.update_workitem_summary() RETURNS TRIGGER AS $$ 
+								DECLARE
+									nowutc timestamp;
+								BEGIN 
+									nowutc := now() at time zone 'utc';							
+									  IF NEW.status = 'COMPLETE' THEN
+									    IF (NEW.type = 'UP_CA') THEN
+											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
+											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, null, nowutc, null)
+											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = nowutc, last_ca_down = null;
+									    END IF; 
+									    IF (NEW.type = 'DOWN_CA' OR NEW.type = 'RECOVERY_CA') THEN
+											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
+											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, null, null, nowutc)
+											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = null, last_ca_down = nowutc;
+									    END IF; 
+									    IF (NEW.type = 'DOWN_SYNC') THEN
+											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
+											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, nowutc, null, null)
+											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_down = nowutc;
+									    END IF; 
+									    IF (NEW.type = 'UP_SYNC') THEN
+											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
+											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, nowutc, null, null, null)
+											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_up = nowutc;
+									    END IF;
+									  END IF; 
+									  RETURN NEW; 
+									END; 
+							$$ LANGUAGE plpgsql;
+							""",  //$NON-NLS-1$
+
+							"drop trigger trg_work_item on connect.work_item", //$NON-NLS-1$
+							"create trigger trg_work_item after update of status on connect.work_item for each row execute function connect.update_workitem_summary()", //$NON-NLS-1$
 							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$

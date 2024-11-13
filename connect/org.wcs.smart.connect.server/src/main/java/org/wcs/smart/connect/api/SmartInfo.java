@@ -24,7 +24,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -46,6 +48,7 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.WorkItemSummary;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -75,7 +78,7 @@ public class SmartInfo extends HttpServlet{
 	
 	
 	/**
-	 * Gets the cybertracker package
+	 * Gets the server info
 	 * 
 	 * 
 	 */
@@ -162,5 +165,45 @@ public class SmartInfo extends HttpServlet{
 		info.put("build-date", buildDate); //$NON-NLS-1$
 		
 		return Response.ok(info.toJSONString()).build();	
+	}
+
+	
+	@GET
+    @Path("/sync")
+	@Operation(description="Lists version user Conservation Area last sync dates")
+	public List<WorkItemSummary> getSyncInfo(){
+
+		//must be admin user
+		
+		Session session = HibernateManager.getSession(context);
+		session.beginTransaction();
+		try{
+			List<WorkItemSummary> allitems = QueryFactory.buildQuery(session, WorkItemSummary.class).list();
+			for (Iterator<WorkItemSummary> iterator = allitems.iterator(); iterator.hasNext();) {
+				WorkItemSummary workItemSummary = (WorkItemSummary) iterator.next();
+				if (!validateRead(workItemSummary.getConservationAreaInfo().getUuid(), session)) {
+					iterator.remove();
+				}
+				
+			}
+			return allitems;
+		}finally{
+			session.getTransaction().rollback();
+		}
+	
+	}
+	
+	
+	/*
+	 * Ensures the current user has read access.
+	 */
+	private boolean validateRead(UUID cauuid, Session s){
+		if (!SecurityManager.INSTANCE.canAccess(s, 
+				request.getUserPrincipal().getName(), 
+				CaAction.VIEWCA_KEY,
+				cauuid)){
+			return false;			
+		}
+		return true;
 	}
 }

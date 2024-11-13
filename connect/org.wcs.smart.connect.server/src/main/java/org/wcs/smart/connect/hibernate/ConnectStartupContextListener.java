@@ -126,6 +126,7 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItemSummary;
 import org.wcs.smart.connect.qa.QaErLabelProvider;
 import org.wcs.smart.connect.qa.QaIncidentLabelProvider;
 import org.wcs.smart.connect.qa.QaLabelProvider;
@@ -411,6 +412,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartUserAction.class);
 		config.addAnnotatedClass(ConservationAreaInfo.class);
 		config.addAnnotatedClass(WorkItem.class);
+		config.addAnnotatedClass(WorkItemSummary.class);
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
 		config.addAnnotatedClass(Alert.class);

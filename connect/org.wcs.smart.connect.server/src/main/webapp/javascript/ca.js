@@ -1,5 +1,6 @@
 var CAURL = "../api/conservationarea";
 var DATA_CAURL = "../api/conservationarea/withdataonly"
+var SYNC_HISTORY = "../api/info/sync"
 var DOWNLOADCA = false;
 
 /* configure events on html elements */
@@ -8,6 +9,8 @@ window.onload = function(){
 	
 	document.querySelector("#calist").onclick=function(){showTab("calist");}
 	document.querySelector("#dmmanager").onclick=function(){showTab("dmmanager");}
+	document.querySelector("#synchistory").onclick=function(){showTab("synchistory");}
+	
 	showTab("calist");
 	
 	//add new ca
@@ -38,7 +41,10 @@ window.onload = function(){
 	
 	document.querySelector("#btnMergeDm").onclick=function(){submitDmUpdate(); return false;};
 	
+	document.getElementById("refreshhistory").onclick = refreshSyncHistory;
+
 	refreshDmCaList();
+	refreshSyncHistory();
 }
 
 function selectDmCa(state){
@@ -490,4 +496,56 @@ function mergeDmComplete(){
 		}
 		displayInfo(msg);
 	}
+}
+
+
+function refreshSyncHistory(){
+	
+	var parent = document.getElementById("synctable");
+	var row = document.createElement("div");
+	row.className="syncrow";
+	row.innerHTML=i18n("ca.refreshingcas");
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createSyncHistoryTable;
+ 	oReq.open("Get", SYNC_HISTORY, true);
+ 	oReq.send();
+}
+
+
+function createSyncHistoryTable(){
+	if (this.status != 200) {
+		var msg = i18n("ca.error") + ": ";
+		if (this.status == 401){
+			msg += i18n("ca.unauthorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	
+	//clear current table
+	var parent = document.getElementById("synctable");
+	while(parent.children.length > 1){
+		var ele = parent.children[1];
+		parent.removeChild(ele);
+	}
+	
+ 	var cas = JSON.parse(this.responseText);
+ 	for (var i = 0; i < cas.length; i ++){
+		var name = cas[i].conservationAreaInfo.label;
+ 		tableCreateRow(parent, 
+ 			[name,
+			cas[i].username, 
+			cas[i].ip, 
+			formatUtcDate(cas[i].lastSyncDown), 
+			formatUtcDate(cas[i].lastSyncUp), 
+			formatUtcDate(cas[i].lastCaDown), 
+			formatUtcDate(cas[i].lastCaUp)],  
+ 			"syncrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff")); 		 		
+ 	}
 }

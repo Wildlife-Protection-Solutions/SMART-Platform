@@ -80,6 +80,9 @@ public class WorkItem extends ConnectUuidItem {
 	private int percentComplete;;
 	private String data;
 	
+	private String username;
+	private String ip;
+	
 	public WorkItem(){
 		
 	}
@@ -184,6 +187,24 @@ public class WorkItem extends ConnectUuidItem {
 		this.data = data;
 	}
 
+	
+	@Column(name="username")
+	public String getUsername(){
+		return this.username;
+	}
+	public void setUsername(String username){
+		this.username= username;
+	}
+	
+	@Column(name="ip")
+	public String getIp(){
+		return this.ip;
+	}
+	public void setIp(String ip){
+		this.ip= ip;
+	}
+	
+	
 	@Transient
 	public String getStatusURL(HttpServletRequest request) throws UnsupportedEncodingException{
 		return request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$

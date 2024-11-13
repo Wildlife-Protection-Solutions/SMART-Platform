@@ -49,3 +49,21 @@ function formatDate(strdate){
      
      return date.getDate() + "/" + month + "/" + date.getFullYear() + "  " + hours + ":" + minutes + ":" + seconds;
 }
+
+function formatUtcDate(strdate){
+	
+	 if (strdate == null || strdate == "") return "";
+	 
+	 var date = new Date(strdate + "Z");
+	 date = new Date(date.toString());
+	 var seconds = date.getSeconds();
+     var minutes = date.getMinutes();
+     var hours = date.getHours();
+     var month = date.getMonth() + 1;
+     
+     if ( minutes < 10 ) minutes = "0" + minutes;
+     if ( seconds < 10 ) seconds = "0" + seconds;
+     if ( hours < 10 ) hours = "0" + hours;
+     
+     return date.getDate() + "/" + month + "/" + date.getFullYear() + "  " + hours + ":" + minutes + ":" + seconds;
+}

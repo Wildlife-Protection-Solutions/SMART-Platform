@@ -437,6 +437,8 @@ public class DataQueue {
 			up.setType(Type.UP_DATAQUEUE);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(""); //$NON-NLS-1$
+			up.setUsername(request.getUserPrincipal().getName());
+			up.setIp(request.getRemoteAddr());
 			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(FILE_STORE_LOCATION);

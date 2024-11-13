@@ -629,6 +629,8 @@ public class CyberTracker extends HttpServlet{
 			up.setType(Type.UP_CTPACKAGE);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(ctpackage.getFilename()); 
+			up.setUsername(request.getUserPrincipal().getName());
+			up.setIp(request.getRemoteAddr());
 			s.persist(up);
 			
 			ctpackage.setWorkItem(up.getUuid());
@@ -767,7 +769,9 @@ public class CyberTracker extends HttpServlet{
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_NAVIGATION);
 			up.setTotalBytes(totalBytes);
-			up.setLocalFilename(ctpackage.getFilename()); 
+			up.setLocalFilename(ctpackage.getFilename());
+			up.setUsername(request.getUserPrincipal().getName());
+			up.setIp(request.getRemoteAddr());
 			s.persist(up);
 			
 			ctpackage.setWorkItem(up.getUuid());

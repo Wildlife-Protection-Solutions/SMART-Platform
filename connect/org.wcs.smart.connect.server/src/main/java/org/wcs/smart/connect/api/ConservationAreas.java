@@ -551,7 +551,8 @@ public class ConservationAreas extends HttpServlet{
 				item.setStatus(WorkItem.Status.PROCESSING);
 				item.setTotalBytes(-1);
 				item.setType(WorkItem.Type.RECOVERY_CA);
-	
+				item.setUsername(request.getUserPrincipal().getName());
+				item.setIp(request.getRemoteAddr());
 				s.persist(item);
 				s.flush();
 				
@@ -785,7 +786,8 @@ public class ConservationAreas extends HttpServlet{
 			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_CA);
-			
+			item.setUsername(request.getUserPrincipal().getName());
+			item.setIp(request.getRemoteAddr());
 			s.persist(item);
 
 			s.getTransaction().commit();
@@ -869,6 +871,8 @@ public class ConservationAreas extends HttpServlet{
 			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_SYNC);
+			item.setUsername(request.getUserPrincipal().getName());
+			item.setIp(request.getRemoteAddr());
 			s.persist(item);
 
 			s.getTransaction().commit();
@@ -1218,6 +1222,8 @@ public class ConservationAreas extends HttpServlet{
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename(""); //$NON-NLS-1$
 			up.setPercentComplete(0);
+			up.setUsername(request.getUserPrincipal().getName());
+			up.setIp(request.getRemoteAddr());
 			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
@@ -1293,6 +1299,8 @@ public class ConservationAreas extends HttpServlet{
 			up.setTotalBytes(totalBytes);
 			up.setPercentComplete(0);
 			up.setLocalFilename(""); //$NON-NLS-1$
+			up.setUsername(request.getUserPrincipal().getName());
+			up.setIp(request.getRemoteAddr());
 			s.persist(up);
 			
 			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
