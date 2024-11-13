@@ -33,10 +33,12 @@ import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.IGeometryColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -104,7 +106,10 @@ public class QueryFeatureSource extends ContentFeatureSource {
 	
 	private synchronized List<QueryColumn> getCachedColumns(){
 		if (this.cachedColumns != null) return this.cachedColumns;
-		this.cachedColumns = ((IStyledQuery)((QueryDataSource)entry.getDataStore()).getQuery()).computeQueryColumns(Locale.getDefault(), null, ((QueryDataSource)entry.getDataStore()).getProjectionProvider());
+		try(Session session = HibernateManager.openSession()){
+			this.cachedColumns = ((IStyledQuery)((QueryDataSource)entry.getDataStore()).getQuery())
+					.computeQueryColumns(Locale.getDefault(), session, ((QueryDataSource)entry.getDataStore()).getProjectionProvider());
+		}
 		return this.cachedColumns;
 	}
 	

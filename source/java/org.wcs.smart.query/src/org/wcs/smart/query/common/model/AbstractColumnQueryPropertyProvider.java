@@ -26,13 +26,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -40,16 +46,23 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnConfiguration;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Query property provider that lists the columns associated with the query.
@@ -58,7 +71,11 @@ import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
  */
 public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryPropertyProvider {
 
+	private static final Object CUSTOM = new Object();
+	
 	protected CheckboxTableViewer columnViewer;
+	protected ComboViewer cmbConfiguration;
+
 	protected Button btnShowDataColumnsOnly;
 	
 	protected Link selectAll;
@@ -75,14 +92,73 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	@Override
 	public abstract boolean isValid(IQueryType query);
 
+	private void enableAll(Composite parent, boolean enabled) {
+		List<Control> kids = new ArrayList<>();
+		kids.add(parent);
+		while(!kids.isEmpty()) {
+			Control kid = kids.remove(0);
+			kid.setEnabled(enabled);
+			if (kid instanceof Composite) {
+				for (Control c : ((Composite)kid).getChildren()) {
+					kids.add(c);
+				}
+			}
+		}
+	}
+	
 	@Override
 	public Composite createComposite(Composite parent, Query query){
 		Composite panel = new Composite(parent, SWT.NONE);
-		panel.setLayout(new GridLayout(1, false));
+		panel.setLayout(new GridLayout(3, false));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		Label lblTableColumns = new Label(panel, SWT.NONE);
+		lblTableColumns.setText("Column Configuration:");
+		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		cmbConfiguration = new ComboViewer(panel, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbConfiguration.setContentProvider(ArrayContentProvider.getInstance());
+		cmbConfiguration.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		cmbConfiguration.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element == CUSTOM) return " -- Custom -- ";
+				if (element instanceof QueryColumnConfiguration cc) return cc.getName();
+				return super.getText(element);
+			}
+		});
+		cmbConfiguration.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		
+		
+		Label lblInfo = new Label(panel, SWT.NONE);
+		lblInfo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.INFO_ICON));
+		lblInfo.setToolTipText("Configurations can be modified or added using the Query -> Column Configurations... menu" );
+		
+		new Label(panel, SWT.NONE);
+		
+		Composite customOp = new Composite(panel, SWT.NONE);
+		customOp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		customOp.setLayout(new GridLayout());
+		((GridLayout)customOp.getLayout()).marginWidth = 0;
+		((GridLayout)customOp.getLayout()).marginHeight = 0;
+		
+		cmbConfiguration.addSelectionChangedListener(e->{
+			Object x = cmbConfiguration.getStructuredSelection().getFirstElement();
+			if (x == CUSTOM) {
+				enableAll(customOp, true);
+				updateColumnTableState();				
+			}else {
+				enableAll(customOp, false);
+			}
+			fireChangeMade();
+		});
 		
 		btnShowDataColumnsOnly = null;
 		if (query instanceof IColumnAutoConfigQuery) {
-			btnShowDataColumnsOnly = new Button(panel, SWT.CHECK);
+			btnShowDataColumnsOnly = new Button(customOp, SWT.CHECK);
+			btnShowDataColumnsOnly.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			btnShowDataColumnsOnly.setText(Messages.AbstractColumnQueryPropertyProvider_ShowDataColumnsOnly);		
 			btnShowDataColumnsOnly.setToolTipText(Messages.AbstractColumnQueryPropertyProvider_ShowDataColumnsOnlyTooltip);
 			boolean isShowOnlyDataColumns = ((IColumnAutoConfigQuery) query).isShowDataColumnsOnly();
@@ -96,17 +172,14 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			});
 		}
 		
-		Label lblTableColumns = new Label(panel, SWT.NONE);
-		lblTableColumns.setText(Messages.QueryPropertiesDialog_ColumnsLabel);
-		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		createColumnTable(panel, query);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		createColumnTable(customOp, query);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 		gd.heightHint = 150;
 		columnViewer.getTable().setLayoutData(gd);
 		
-		Composite hyperlinkComposite = new Composite(panel, SWT.NONE);
-		hyperlinkComposite.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false) );
+		Composite hyperlinkComposite = new Composite(customOp, SWT.NONE);
+		hyperlinkComposite.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1) );
 		hyperlinkComposite.setLayout(new GridLayout(3, false));
 		
 		selectAll = new Link(hyperlinkComposite, SWT.NONE);
@@ -133,6 +206,54 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		});
 		
 		updateColumnTableState();
+		
+		
+		
+		Job j = new Job("load configs") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<Object> inputs = new ArrayList<>();
+				QueryColumnConfiguration defaultConfig = null;
+				try(Session session = HibernateManager.openSession()){
+					List<QueryColumnConfiguration> configs = QueryColumnConfigurationManager.INSTANCE.getColumnConfigurations(query.getConservationArea(), session);
+					for (Iterator<QueryColumnConfiguration> iterator = configs.iterator(); iterator.hasNext();) {
+						QueryColumnConfiguration config =  iterator.next();
+						if (!config.getQueryTypeKey().equals(query.getTypeKey())) {
+							iterator.remove();
+						}
+					}
+					inputs.addAll(configs);		
+					
+					if (query instanceof SimpleQuery sq) {
+						defaultConfig = sq.getQueryColumnConfiguration(session);
+					}
+				}
+				
+				
+				QueryColumnConfiguration fdefaultConfig = defaultConfig;
+
+				Display.getDefault().asyncExec(()->{
+					if (cmbConfiguration.getControl().isDisposed()) return;
+				
+					inputs.add(CUSTOM);
+					cmbConfiguration.setInput(inputs);
+					if (fdefaultConfig != null) {
+						cmbConfiguration.setSelection(new StructuredSelection(fdefaultConfig));
+					}else {
+						cmbConfiguration.setSelection(new StructuredSelection(CUSTOM));
+					}
+				});
+				
+
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.schedule();
+		
+		
+		
 		return panel;
 	}
 	
@@ -153,8 +274,21 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			}
 		});
 
-		//we don't care about projection here; this is just for visibility
-		List<QueryColumn> cols = new ArrayList<>(((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null));
+		//if config is selected then we want to populate this with all the columns that can
+		//happen with the query
+		//if config is not selected then we want to populate selected columns
+		SimpleQuery squery = (SimpleQuery)query;
+		
+		List<QueryColumn> cols = new ArrayList<>();
+		try(Session session = HibernateManager.openSession()){
+			if (squery.getQueryColumnConfiguration(session) != null) {
+				QueryColumn[] cols2 = SmartContext.INSTANCE.getClass(squery.getColumnProviderClass())
+						.getQueryColumns(squery, Locale.getDefault(), false, session);
+				for (QueryColumn c : cols2) cols.add(c);
+			}else {
+				cols.addAll(((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), session, null));
+			}
+		}
 		//remove geometry columns from the list as they are not visible to user
 		for (Iterator<QueryColumn> iterator = cols.iterator(); iterator.hasNext();) {
 			QueryColumn queryColumn = iterator.next();
@@ -194,13 +328,19 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	 */
 	@Override
 	public String save(Query query, Session session){
-		@SuppressWarnings("unchecked")
-		List<QueryColumn> cols = (List<QueryColumn>) columnViewer.getInput();
-		for (QueryColumn col : cols){
-			col.setVisible( columnViewer.getChecked(col) );
+
+		Object xconfig = cmbConfiguration.getStructuredSelection().getFirstElement();
+		if (xconfig == CUSTOM) {
+			List<QueryColumn> cols = (List<QueryColumn>) columnViewer.getInput();
+			for (QueryColumn col : cols){
+				col.setVisible( columnViewer.getChecked(col) );
+			}
+			persistShowDataColumnsOption(query, session);
+			((SimpleQuery) query).updateVisibleColumns(cols);
+		}else if (xconfig instanceof QueryColumnConfiguration qc){
+			((SimpleQuery) query).updateVisibleColumns(qc);
+
 		}
-		persistShowDataColumnsOption(query, session);
-		((SimpleQuery) query).updateVisibleColumns(cols);
 		return null;
 	}
 	
@@ -209,5 +349,9 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			IColumnAutoConfigQuery q = (IColumnAutoConfigQuery) query;
 			q.setShowDataColumnsOnly(btnShowDataColumnsOnly.getSelection());
 		}
+		
+		
 	}	
+	
+	
 }

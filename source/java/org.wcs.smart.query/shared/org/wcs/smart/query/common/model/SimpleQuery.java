@@ -22,18 +22,23 @@
 package org.wcs.smart.query.common.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnConfiguration;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.util.UuidUtils;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -138,6 +143,31 @@ public abstract class SimpleQuery extends StyledQuery {
 		}
 	}
 	
+	public boolean hasColumnConfig() {
+		String v = getVisibleColumns();
+		if (v == null) return false;
+		if (v.startsWith("config:")) return true;
+		return false;
+	}
+	
+	@Transient
+	public void updateVisibleColumns(QueryColumnConfiguration config){
+		if (config == null) {
+			setVisibleColumns(null);
+		}else {
+			setVisibleColumns("config:" + UuidUtils.uuidToString(config.getUuid()) );
+		}		
+	}
+	
+	@Transient
+	public QueryColumnConfiguration getQueryColumnConfiguration(Session session){
+		if (hasColumnConfig()) {
+			UUID qcuuid = UuidUtils.stringToUuid(getVisibleColumns().substring(7));
+			return session.get(QueryColumnConfiguration.class, qcuuid);
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * 
@@ -226,11 +256,17 @@ public abstract class SimpleQuery extends StyledQuery {
 	 * Returns all columns that can be included in the query if they
 	 * are visible or not.
 	 * 
+	 * 
 	 * @param l
-	 * @param session
+	 * @param session 
 	 * @param prjProvider the projection provider for reprojecting column data.  Can be null if no reprojection
 	 * to take place
 	 * @return
+	 */
+	/*
+	 * Generally session should not be null. If session is null
+	 * then all possible columns will be visible; visibility will not be set
+	 * nor will the columns be sorted. 
 	 */
 	@Transient
 	public List<QueryColumn> computeQueryColumns(Locale l, Session session, 
@@ -238,6 +274,8 @@ public abstract class SimpleQuery extends StyledQuery {
 		return computeQueryColumns(l, session, prjProvider, false);
 		
 	}
+	
+	
 	@Transient
 	public List<QueryColumn> computeQueryColumns(Locale l, Session session, 
 			IProjectionProvider prjProvider, boolean includeIdColumns){
@@ -246,24 +284,60 @@ public abstract class SimpleQuery extends StyledQuery {
 				.getQueryColumns(this, l, includeIdColumns, session);
 		
 		List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
-		HashSet<String> visible = null;
-		if (visibleColumns != null){
-			String[] bits = visibleColumns.split(COLUMN_SPLITTER);
-			visible = new HashSet<String>();
+		
+		HashMap<String,Integer> visibleInOrder = null;
+		Set<String> visible = null;
+		
+		
+		if (visibleColumns != null && session != null){
+			
+			visibleInOrder = new HashMap<>();
+			visible = new HashSet<>();
+			
+			QueryColumnConfiguration config = getQueryColumnConfiguration(session);
+			String[] bits = null;
+			if (config == null) {
+				bits = visibleColumns.split(COLUMN_SPLITTER);
+			}else {
+				bits = config.getColumnConfiguration().split(COLUMN_SPLITTER);				
+			}
 			for (int i = 0; i < bits.length; i ++){
+				if (config != null) visibleInOrder.put(bits[i], i);
 				visible.add(bits[i]);
 			}
 		}
+		
 		for (int i = 0; i < cols.length; i ++){
 			queryColumns.add(cols[i]);
-			if (visible == null){
-				cols[i].setVisible(true);
-			}else if (visible.contains(cols[i].getKey())){
+			if (visible == null || visible.contains(cols[i].getKey())){
 				cols[i].setVisible(true);
 			}else{
 				cols[i].setVisible(false);
 			}
 			cols[i].setProjectionProvider(prjProvider);
+		}
+		
+		if (visibleInOrder != null) {
+			//sort 
+			HashMap<QueryColumn,Integer> currentOrder = new HashMap<>();
+			for (int i = 0; i < queryColumns.size(); i ++) {
+				currentOrder.put(queryColumns.get(i), i);
+			}
+			final HashMap<String,Integer> fvisibleInOrder = visibleInOrder;
+			
+			queryColumns.sort((a,b)->{
+				if (fvisibleInOrder.keySet().contains(a.getKey()) && fvisibleInOrder.keySet().contains(b.getKey())) {
+					return fvisibleInOrder.get(a.getKey()).compareTo(fvisibleInOrder.get(b.getKey()));
+				}else if (fvisibleInOrder.keySet().contains(a.getKey())) {
+					return -1;
+				}else if (fvisibleInOrder.keySet().contains(b.getKey())) {
+					return 1;
+				}else {
+					//sort based on existing order
+					return currentOrder.get(a).compareTo(currentOrder.get(b));
+				}
+				
+			});
 		}
 		return queryColumns;
 		
@@ -276,5 +350,5 @@ public abstract class SimpleQuery extends StyledQuery {
 	
 	
 	@Transient
-	protected abstract Class<? extends IQueryColumnProvider> getColumnProviderClass();
+	public abstract Class<? extends IQueryColumnProvider> getColumnProviderClass();
 }

@@ -49,8 +49,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
+import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -131,24 +133,43 @@ public abstract class QueryResultsTable {
 	}
 
 	public void updateColumnsVisibility(final SimpleQuery query, final IProjectionProvider prjProvider) {
-		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
+		List<QueryColumn> cols = null;
+		
+		try(Session session = HibernateManager.openSession()){  
+			cols = query.computeQueryColumns(Locale.getDefault(), session, prjProvider);
+		}
+		
 		if (table == null || tableViewerColumns == null) return;
 			
 		table.getControl().setVisible(false);
 		try {
-		for (QueryTableViewerColumn column : tableViewerColumns){
-			column.getColumn().setProjectionProvider(prjProvider);
-			for (QueryColumn c : cols){
-				if (column.getColumn().equals(c)){
-					if (isColumnDisplayed(query, c)){
-						column.show();
-					}else{
-						column.hide();
-					}
-					break;
-				}
+			
+			for (QueryTableViewerColumn column : tableViewerColumns){
+				column.getColumn().setProjectionProvider(prjProvider);
 			}
-		}
+			
+			int[] order = new int[tableViewerColumns.length];
+			int index = 0;
+			
+			for (int i = 0; i < cols.size(); i ++) {
+				QueryColumn c = cols.get(i);
+				
+				if (c.isDefaultGeometryColumn()) continue;//geometry column is skipped
+				
+				for (int k = 0; k < tableViewerColumns.length; k++) {
+					if (tableViewerColumns[k].getColumn().equals(c)) {
+						if (isColumnDisplayed(query, c)){
+							tableViewerColumns[k].show();
+						}else{
+							tableViewerColumns[k].hide();
+						}
+						order[index++] = k;
+						break;
+					}
+				}				
+			}
+
+			table.getTable().setColumnOrder(order);
 		}finally {
 			table.getControl().setVisible(true);
 		}
@@ -267,9 +288,13 @@ public abstract class QueryResultsTable {
 		Job j = new Job("initialize table columns") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
+				List<QueryColumn> cols = null;
+				try(Session session = HibernateManager.openSession()){
+					cols = query.computeQueryColumns(Locale.getDefault(), session, prjProvider);
+				}
+				List<QueryColumn> fcols = cols;
 				Display.getDefault().syncExec(()->{
-					tableViewerColumns = createColumns(table,cols);
+					tableViewerColumns = createColumns(table,fcols);
 					table.refresh(true);	
 				});
 				return Status.OK_STATUS;
@@ -353,7 +378,6 @@ public abstract class QueryResultsTable {
 				//query columns
 				sorter = null;
 			}
-			
 			viewers.add(new QueryTableViewerColumn(viewer,c, sorter, getLabelProvider(c, columns)));
 		}
 		return viewers.toArray(new QueryTableViewerColumn[viewers.size()]);

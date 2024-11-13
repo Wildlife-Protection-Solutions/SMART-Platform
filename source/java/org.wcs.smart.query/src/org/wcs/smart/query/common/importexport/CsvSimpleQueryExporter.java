@@ -32,11 +32,13 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.config.ICsvDataExporter;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IColumnInfoProvider;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -190,7 +192,9 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		
 		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
 		if (columns == null) {
-			columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+			try(Session session = HibernateManager.openSession()){
+				columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+			}
 		}
 		this.geometryColumn = (QueryColumn) parameters.get(IQueryExporter.GEOMETRY_COLUMN_KEY);
 		if (this.geometryColumn == null) {

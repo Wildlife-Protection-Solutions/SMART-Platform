@@ -140,7 +140,7 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return ISurveyQueryColumnProvider.class;
 	}
 }

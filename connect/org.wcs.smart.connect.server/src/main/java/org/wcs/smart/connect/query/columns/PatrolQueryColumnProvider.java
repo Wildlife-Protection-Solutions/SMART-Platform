@@ -73,7 +73,6 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 				cols = getPatrolQueryColumns(query, l, includeIds, session);
 			}
 			if (cols != null){
-				QueryColumnUtils.filterQueryColumns(cols, query);
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
@@ -108,18 +107,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
-		keys.addAll(getPatrolAttributeQueryColumns(q, session));
-//		keys.add(new QueryColumn("Patrol Track", "track",ColumnType.STRING){
-//			@Override
-//			public QueryColumn clone() {
-//				return null;
-//			}
-//
-//			@Override
-//			public Object getValue(IResultItem arg0) {
-//				return null;
-//			}});
-		
+		keys.addAll(getPatrolAttributeQueryColumns(q, session));		
 		keys.add(new TrackGeometryQueryColumn(l));
 		
 		if (includeIds) {

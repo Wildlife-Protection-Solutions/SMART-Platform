@@ -100,7 +100,7 @@ public class PatrolWaypointQuery extends WaypointQuery{
 
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return IPatrolQueryColumnProvider.class;
 	}
 }

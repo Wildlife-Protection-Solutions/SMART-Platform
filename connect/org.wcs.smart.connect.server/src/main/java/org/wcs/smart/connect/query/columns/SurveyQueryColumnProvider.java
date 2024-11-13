@@ -85,7 +85,6 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 				cols = getMissionTrackQueryColumns(query, l, session);
 			}
 			if (cols != null){
-				QueryColumnUtils.filterQueryColumns(cols, query);
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){

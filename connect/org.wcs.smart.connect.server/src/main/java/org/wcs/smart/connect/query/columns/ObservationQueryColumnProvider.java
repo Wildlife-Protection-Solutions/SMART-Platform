@@ -65,7 +65,6 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				cols = getGriddedQueryColumns(query, l, session);
 			}
 			if (cols != null){
-				QueryColumnUtils.filterQueryColumns(cols, query);
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){

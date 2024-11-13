@@ -22,6 +22,7 @@
 package org.wcs.smart.query;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +33,10 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.QueryColumnConfiguration;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.udig.style.SmartLayerStyle;
 import org.wcs.smart.udig.style.StyleManager;
@@ -59,14 +63,38 @@ public class QueryTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.QueryTemplateCloner_ProgressQuery, 1);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.QueryTemplateCloner_ProgressQuery, 2);
 		
 		//	need to clone: shared query folders
 		progress.subTask(Messages.QueryTemplateCloner_ProgressCopyFolders);
 		cloneFolders(engine);		
 		progress.worked(1);
+		
+		progress.subTask(Messages.QueryTemplateCloner_ProgressColumnConfig);
+		cloneQueryColumnConfigurations(engine);		
+		progress.worked(1);
 	}
 	
+	private void cloneQueryColumnConfigurations(ConservationAreaClonerEngine engine){
+		List<QueryColumnConfiguration> configs = QueryFactory.buildQuery(engine.getSession(), 
+				QueryColumnConfiguration.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
+		
+		
+		for (QueryColumnConfiguration q : configs){
+			QueryColumnConfiguration copy = new QueryColumnConfiguration();
+			copy.setConservationArea(engine.getNewCa());
+			copy.setNames(new HashSet<>());
+			copy.setColumnConfiguration(q.getColumnConfiguration());
+			copy.setQueryTypeKey(q.getQueryTypeKey());
+			engine.copyLabels(q, copy);
+			
+			engine.getSession().persist(copy);
+			
+			engine.addConservationItemMapping(q, copy);
+		}
+		engine.getSession().flush();
+	}
 	
 	private void cloneFolders(ConservationAreaClonerEngine engine){
 		CriteriaBuilder cb = engine.getSession().getCriteriaBuilder();
@@ -130,5 +158,15 @@ public class QueryTemplateCloner implements
 			QueryPlugIn.log(ex.getMessage(), ex);
 		}
 		return queryString;
+	}
+	
+	
+	
+	public static void updateColumnConfiguration(ConservationAreaClonerEngine engine, SimpleQuery query){
+		QueryColumnConfiguration config = query.getQueryColumnConfiguration(engine.getSession());
+		if (config == null) return;
+		
+		QueryColumnConfiguration copy = engine.getNewConservationItem(config);
+		query.updateVisibleColumns(copy);
 	}
 }

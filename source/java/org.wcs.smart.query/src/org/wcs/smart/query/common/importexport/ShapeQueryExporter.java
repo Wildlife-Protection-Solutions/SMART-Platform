@@ -45,6 +45,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
@@ -52,6 +53,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IColumnInfoProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
@@ -235,7 +237,9 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		
 		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
 		if (columns == null) {
-			columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+			try(Session session = HibernateManager.openSession()){
+				columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), session, provider);
+			}
 		}
 		
 		this.geometryColumn = (QueryColumn) parameters.get(IQueryExporter.GEOMETRY_COLUMN_KEY);

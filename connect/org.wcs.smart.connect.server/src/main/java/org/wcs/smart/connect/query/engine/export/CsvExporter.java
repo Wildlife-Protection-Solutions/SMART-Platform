@@ -181,8 +181,7 @@ public class CsvExporter extends AbstractQueryExporter {
 		//remove the default query column from the query results
 		for (Iterator<QueryColumn> iterator = cols.iterator(); iterator.hasNext();) {
 			QueryColumn queryColumn = (QueryColumn) iterator.next();
-			if (queryColumn.isDefaultGeometryColumn()) iterator.remove();
-			
+			if (queryColumn.isDefaultGeometryColumn() || !queryColumn.isVisible()) iterator.remove();
 		}
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8), delimiter)) {
 

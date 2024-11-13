@@ -135,8 +135,7 @@ public class HtmlStreamingExporter extends AbstractQueryExporter{
 				//remove the default query column from the query results
 				for (Iterator<QueryColumn> iterator = cols.iterator(); iterator.hasNext();) {
 					QueryColumn queryColumn = (QueryColumn) iterator.next();
-					if (queryColumn.isDefaultGeometryColumn()) iterator.remove();
-					
+					if (queryColumn.isDefaultGeometryColumn() || !queryColumn.isVisible()) iterator.remove();
 				}
 				
 				printHeader();

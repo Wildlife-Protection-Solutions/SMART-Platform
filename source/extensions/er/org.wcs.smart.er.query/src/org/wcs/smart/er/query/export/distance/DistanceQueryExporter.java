@@ -200,7 +200,10 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		
 		// query columns
 		SimpleQuery simpleQuery = (SimpleQuery) query;
-		List<QueryColumn> columns = simpleQuery.computeQueryColumns(Locale.getDefault(), null, provider);
+		List<QueryColumn> columns = null;
+		try(Session session = HibernateManager.openSession()){
+			columns = simpleQuery.computeQueryColumns(Locale.getDefault(), session, provider);
+		}
 		boolean isDataFiltering = query instanceof IColumnAutoConfigQuery && results instanceof IColumnInfoProvider && ((IColumnAutoConfigQuery)simpleQuery).isShowDataColumnsOnly();
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			QueryColumn column = iterator.next();

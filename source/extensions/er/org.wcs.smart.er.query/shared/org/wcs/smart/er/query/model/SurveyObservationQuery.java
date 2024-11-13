@@ -150,7 +150,7 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 	}
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return ISurveyQueryColumnProvider.class;
 	}
 }

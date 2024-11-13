@@ -30,7 +30,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,13 +42,10 @@ import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
-import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
-import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.AttributeQueryColumn.GeometryProperty;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GeometryAttributeQueryColumn;
-import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -98,38 +94,7 @@ public class QueryColumnUtils {
 		return op.getTrackObserver();
 	}
 	
-	/**
-	 * Removes columns from the list that are not visible in the query.
-	 * This function updates the columns list.
-	 * 
-	 * @param columns
-	 * @param query
-	 */
-	public static void filterQueryColumns(List<QueryColumn> columns, Query query){
-		
-		if (query instanceof IColumnAutoConfigQuery) {
-			//data only must be filtered later
-			if (((IColumnAutoConfigQuery)query).isShowDataColumnsOnly()) return;
-		}
-		if (query instanceof SimpleQuery){
-			SimpleQuery sq = (SimpleQuery)query;
-			
-			if (sq.getVisibleColumns() != null){
-				HashSet<String> keys = new HashSet<String>();
-				String[] bits = sq.getVisibleColumns().split(","); //$NON-NLS-1$
-				for (String key : bits){
-					keys.add(key);
-				}
-				for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
-					QueryColumn column = (QueryColumn) iterator.next();
-					if (!keys.contains(column.getKey())){
-						iterator.remove();
-					}	
-				}
-			}
-		}
-	}
-	
+
 	/**
 	 * Gets all data model columns for a given locale
 	 * @param session

@@ -78,7 +78,10 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 				QueryPlugIn.log(e.getMessage(), e);
 			}	
 		}else if (query instanceof IMemoryQuery) {
-			fIterator = ((MemoryQueryResult<IResultItem>)query.getCachedResults()).getData().iterator();
+			IQueryResult cachedResults = query.getCachedResults();
+			if (cachedResults != null){
+				fIterator = ((MemoryQueryResult<IResultItem>)cachedResults).getData().iterator();
+			}
 		}
 	}
 	

@@ -100,7 +100,7 @@ public class ObservationWaypointQuery extends WaypointQuery {
 	}
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return IObservationQueryColumnProvider.class;
 	}
 }

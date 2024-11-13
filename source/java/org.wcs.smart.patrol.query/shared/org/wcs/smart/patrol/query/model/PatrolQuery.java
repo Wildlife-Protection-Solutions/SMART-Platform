@@ -99,7 +99,7 @@ public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return IPatrolQueryColumnProvider.class;
 	}
 }

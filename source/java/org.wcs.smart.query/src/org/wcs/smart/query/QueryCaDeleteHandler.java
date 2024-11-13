@@ -54,9 +54,16 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 		}
 		
 		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingQueryFolders);
-		deleteQueryFolders(ca, session);		
+		deleteQueryFolders(ca, session);	
+		deleteColumnConfigurations(ca, session);
 	}
 
+	
+	private void deleteColumnConfigurations(ConservationArea ca, Session session) throws Exception{
+		session.createMutationQuery("delete QueryColumnConfiguration from where conservationArea = :ca") //$NON-NLS-1$ 
+			.setParameter("ca", ca) //$NON-NLS-1$
+			.executeUpdate();
+	}
 	
 	private void deleteQueries(IQueryType queryType, ConservationArea ca, Session session) throws Exception{
 		session.createMutationQuery("delete from " + queryType.getHibernateClass().getSimpleName() + " where conservationArea = :ca") //$NON-NLS-1$ //$NON-NLS-2$

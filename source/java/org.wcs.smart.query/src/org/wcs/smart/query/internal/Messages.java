@@ -378,6 +378,7 @@ public class Messages extends NLS {
 	public static String QueryPropertiesDialog_DialogTitle;
 	public static String QueryPropertiesDialog_QueryNameLabel;
 	public static String QueryPropertiesDialog_TranslateLink;
+	public static String QueryTemplateCloner_ProgressColumnConfig;
 	public static String QueryTemplateCloner_ProgressCopyFolders;
 	public static String QueryTemplateCloner_ProgressQuery;
 	public static String QueryServiceInfo_Description;

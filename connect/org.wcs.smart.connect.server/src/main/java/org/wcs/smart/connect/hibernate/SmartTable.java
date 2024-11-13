@@ -234,6 +234,7 @@ import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
+import org.wcs.smart.query.model.QueryColumnConfiguration;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
@@ -350,6 +351,7 @@ public enum SmartTable {
 	PLANTARGET(PlanTarget.class,null),
 	PROJECTION(Projection.class,null),
 	QUERYFOLDER(QueryFolder.class,null),
+	QUERYCOLUMNCONFIG(QueryColumnConfiguration.class,null),
 	CONNECTQUICKLINK(Quicklink.class, null),
 	RANK(Rank.class,".agency.conservationArea"),
 	REPORT(Report.class, null),

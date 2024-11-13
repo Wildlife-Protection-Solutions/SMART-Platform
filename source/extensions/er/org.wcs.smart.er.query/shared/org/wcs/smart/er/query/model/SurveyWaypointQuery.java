@@ -147,7 +147,7 @@ public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 	
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return ISurveyQueryColumnProvider.class;
 	}
 

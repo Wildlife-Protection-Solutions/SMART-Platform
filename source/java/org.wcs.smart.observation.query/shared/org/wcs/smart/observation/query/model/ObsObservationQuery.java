@@ -104,7 +104,7 @@ public class ObsObservationQuery extends ObservationQuery implements IPagedQuery
 	
 	@Override
 	@Transient
-	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+	public Class<? extends IQueryColumnProvider> getColumnProviderClass() {
 		return IObservationQueryColumnProvider.class;
 	}
 }

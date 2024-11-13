@@ -89,9 +89,8 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 	
 	@Override
 	public boolean isColumnDisplayed(SimpleQuery query, QueryColumn c) {
-		if (query instanceof IColumnAutoConfigQuery) {
-			IColumnAutoConfigQuery q = (IColumnAutoConfigQuery) query;
-			if (q.isShowDataColumnsOnly()) {
+		if (!query.hasColumnConfig() && query instanceof IColumnAutoConfigQuery autoquery) {
+			if (autoquery.isShowDataColumnsOnly()) {
 				return contentProvider.isColumnDisplayed(c);
 			}
 		}

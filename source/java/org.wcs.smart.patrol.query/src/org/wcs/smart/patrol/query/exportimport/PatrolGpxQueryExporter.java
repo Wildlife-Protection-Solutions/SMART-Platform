@@ -36,6 +36,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
@@ -46,6 +47,7 @@ import org.wcs.smart.gpx.xml.ObjectFactory;
 import org.wcs.smart.gpx.xml.TrkType;
 import org.wcs.smart.gpx.xml.TrksegType;
 import org.wcs.smart.gpx.xml.WptType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
@@ -120,7 +122,9 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 		
 		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
 		if (columns == null) {
-			columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null);
+			try(Session session = HibernateManager.openSession()){
+				columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), session, null);
+			}
 		}
 		
 		//set data

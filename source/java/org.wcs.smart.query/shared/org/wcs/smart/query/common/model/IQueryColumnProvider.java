@@ -39,7 +39,8 @@ public interface IQueryColumnProvider {
 	 * 
 	 * @param query the query to get columns for
 	 * @param l the locale for the column names
-	 * @param session current db session
+	 * @param includeIdColumns
+	 * @param session current db session - used on connect; maybe null on desktop
 	 * @return
 	 */
 	public QueryColumn[] getQueryColumns(Query query, Locale l, 

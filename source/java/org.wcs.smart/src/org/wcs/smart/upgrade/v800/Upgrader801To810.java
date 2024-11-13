@@ -387,8 +387,12 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 			
 			//to support different incident types
 			//TODO: fk ?
-			"alter table smart.waypoint add column incident_type_uuid char(16) for bit data"
+			"alter table smart.waypoint add column incident_type_uuid char(16) for bit data", //$NON-NLS-1$
 			
+			//query column orders
+			"create table smart.query_column_config(uuid char(16) for bit data not null,ca_uuid char(16) for bit data not null,query_type_key varchar(64) not null,column_config varchar(32672),primary key (uuid))", //$NON-NLS-1$
+			"alter table smart.query_column_config add constraint query_column_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
+
 		};
 		
 		for (String s : sql) {

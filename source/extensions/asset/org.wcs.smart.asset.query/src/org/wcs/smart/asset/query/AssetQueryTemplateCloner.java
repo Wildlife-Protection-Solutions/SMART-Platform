@@ -140,6 +140,7 @@ public class AssetQueryTemplateCloner implements
 			if (queryFilter != null) {
 				clone.setQueryFilter(queryFilter);
 				clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+				QueryTemplateCloner.updateColumnConfiguration(engine, clone);
 				
 				engine.getSession().persist(clone);
 				engine.addConservationItemMapping(query, clone);
@@ -175,6 +176,7 @@ public class AssetQueryTemplateCloner implements
 			if (queryFilter != null) {
 				clone.setQueryFilter(queryFilter);
 				clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+				QueryTemplateCloner.updateColumnConfiguration(engine, clone);
 				
 				engine.getSession().persist(clone);
 				engine.addConservationItemMapping(query, clone);

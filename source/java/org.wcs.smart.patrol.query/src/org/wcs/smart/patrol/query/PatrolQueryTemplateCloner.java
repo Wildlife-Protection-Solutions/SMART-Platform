@@ -182,6 +182,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+			QueryTemplateCloner.updateColumnConfiguration(engine, clone);
 			
 			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -214,6 +215,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+			QueryTemplateCloner.updateColumnConfiguration(engine, clone);
 			
 			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -246,6 +248,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+			QueryTemplateCloner.updateColumnConfiguration(engine, clone);
 			
 			engine.getSession().persist(clone);
 			engine.addConservationItemMapping(query, clone);

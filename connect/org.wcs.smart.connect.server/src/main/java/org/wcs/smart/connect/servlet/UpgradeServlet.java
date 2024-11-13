@@ -2222,6 +2222,11 @@ public class UpgradeServlet extends HttpServlet {
 									where extract(hour from a.ts) || ':' || extract(minute from a.ts) || ':' || extract(second from a.ts) != '23:59:59.000000'
 							)""", //$NON-NLS-1$
 							
+							//query column orders
+							"create table smart.query_column_config(uuid uuid not null,ca_uuid uuid not null, query_type_key varchar(64) not null, column_config varchar(32672),primary key (uuid))", //$NON-NLS-1$
+							"alter table smart.query_column_config add constraint query_column_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+							"CREATE TRIGGER trg_query_column_config AFTER INSERT OR UPDATE OR DELETE ON smart.query_column_config FOR EACH ROW execute procedure connect.trg_changelog_common()", //$NON-NLS-1$
+
 							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
