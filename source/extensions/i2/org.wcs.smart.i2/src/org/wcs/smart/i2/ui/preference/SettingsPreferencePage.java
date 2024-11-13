@@ -89,7 +89,11 @@ public class SettingsPreferencePage extends PreferencePage implements IIntelPref
 					if (n.op.getUuid() != null) session.remove(n.op);
 				}
 				for (Name n : items) {
-					session.merge(n.op);
+					if (n.op.getUuid() == null) {
+						session.persist(n.op);
+					}else {
+						n.op = session.merge(n.op);
+					}
 				}
 				session.getTransaction().commit();
 				toDelete.clear();
