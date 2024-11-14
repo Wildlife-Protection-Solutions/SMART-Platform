@@ -456,7 +456,12 @@ public class SmartConnect {
 			if (r.getStatus() == Status.ACCEPTED.getStatusCode()){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{
-				throw new WebApplicationException(Messages.SmartConnect_NoUrlError, r);
+				String message = Messages.SmartConnect_NoUrlError;
+				if (r.getStatus() == Status.UNAUTHORIZED.getStatusCode() || r.getStatus() == Status.FORBIDDEN.getStatusCode()) {
+					message = Messages.SmartConnect_NoUrlPermissionError;
+				}
+				
+				throw new WebApplicationException(message, r);
 			}
 		}
 	}

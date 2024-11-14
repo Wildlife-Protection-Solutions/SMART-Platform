@@ -379,6 +379,7 @@ public class Messages extends NLS {
 	public static String SmartConnect_GeneralError;
 	public static String SmartConnect_InvalidUserNameError;
 	public static String SmartConnect_NoUrlError;
+	public static String SmartConnect_NoUrlPermissionError;
 	public static String SmartConnect_ServerErrorMsg;
 	public static String SmartConnect_SizeConfirmMessage;
 	public static String SmartConnect_SshError1;

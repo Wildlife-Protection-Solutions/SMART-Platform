@@ -32,6 +32,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -190,11 +191,6 @@ public class SmartInfo extends HttpServlet{
 				}	
 			}
 			
-			for (WorkItemSummary i : allitems) {
-				IpAlias a = session.get(IpAlias.class, i.getIp());
-				if (a != null) i.setAlias(a.getAlias());
-			}
-			
 			allitems.sort((a,b)->{
 				if (a.getConservationAreaInfo().equals(b.getConservationAreaInfo())) {
 					if (a.getUsername().equals(b.getUsername())) {
@@ -218,22 +214,30 @@ public class SmartInfo extends HttpServlet{
 		@PathParam("ip") String ip,
 			@RequestBody(description ="New name") String newAlias){
 
-		//TODO: do we want to do any validation on these?
-		//ip address length; newalias length?
-		
+		newAlias = newAlias.trim();
+		if (ip.isEmpty() || ip.length() > 128) throw new BadRequestException("Invalid ip address");
+		if (newAlias.length() > 512) throw new BadRequestException("Invalid alias value");
 		
 		//must be admin user
 		Session session = HibernateManager.getSession(context);
 		session.beginTransaction();
 		try{
 			IpAlias alias = session.get(IpAlias.class, ip);
-			if (alias == null) {
-				alias = new IpAlias();
-				alias.setIp(ip);
-				
-				session.persist(alias);
+			if (newAlias.isBlank()) {
+				//remove alias
+				if (alias != null) {
+					session.remove(alias);
+				}				
+			}else {
+				//new/update alias
+				if (alias == null) {
+					alias = new IpAlias();
+					alias.setIp(ip);
+					
+					session.persist(alias);
+				}
+				alias.setAlias(newAlias);
 			}
-			alias.setAlias(newAlias);
 			session.getTransaction().commit();
 			
 			return Response.ok().build();

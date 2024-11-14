@@ -51,9 +51,7 @@ public class WorkItemSummary extends ConnectUuidItem {
 	private LocalDateTime lastCaUp;
 	private LocalDateTime lastCaDown;
 	
-	//to support api
-	@Transient
-	private String alias;
+	private IpAlias alias;
 	
 	public WorkItemSummary(){
 		
@@ -69,7 +67,15 @@ public class WorkItemSummary extends ConnectUuidItem {
 		this.caInfo = info;
 	}
 	
+	@ManyToOne
+	@JoinColumn(name = "ip", insertable=false, updatable=false)
+	public IpAlias getAlias(){
+		return this.alias;
+	}
 	
+	public void setAlias(IpAlias alias){
+		this.alias = alias;
+	}
 	
 	@Column(name="username")
 	public String getUsername(){
@@ -148,12 +154,5 @@ public class WorkItemSummary extends ConnectUuidItem {
 		return getLastCaDownUtc().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 	
-	@Transient
-	public String getAlias(){
-		return this.alias;
-	}
-	@Transient
-	public void setAlias(String alias){
-		this.alias = alias;
-	}
+
 }

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -40,6 +42,7 @@ public class IpAlias{
 	
 	@Id
 	@Column(name="ip")
+	@JsonIgnore
 	public String getIp() {
 		return ip;
 	}

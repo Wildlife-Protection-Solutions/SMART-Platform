@@ -542,7 +542,7 @@ function createSyncHistoryTable(){
  			[name,
 			cas[i].username, 
 			cas[i].ip,
-			cas[i].alias,
+			cas[i].alias ? cas[i].alias.alias : "",
 			"",  
 			formatUtcDate(cas[i].lastSyncDown), 
 			formatUtcDate(cas[i].lastSyncUp), 
@@ -566,7 +566,16 @@ function editalias(){
 	
 	//TODO: if this update fails
 	var oReq = new XMLHttpRequest();
-	oReq.onload = refreshSyncHistory;
+	oReq.onload = onAliasEdit;
 	oReq.open("Put", SYNC_HISTORY + "/" + ip, true);
 	oReq.send(alias);
+}
+
+function onAliasEdit(){
+	if (this.status != 200) {
+		displayError(parseError("Alias Update Error: " , this.responseText));
+		return;
+	}else{
+		refreshSyncHistory();
+	}
 }
