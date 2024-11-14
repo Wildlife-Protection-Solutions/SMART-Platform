@@ -538,14 +538,35 @@ function createSyncHistoryTable(){
  	var cas = JSON.parse(this.responseText);
  	for (var i = 0; i < cas.length; i ++){
 		var name = cas[i].conservationAreaInfo.label;
- 		tableCreateRow(parent, 
+ 		var row = tableCreateRow(parent, 
  			[name,
 			cas[i].username, 
-			cas[i].ip, 
+			cas[i].ip,
+			cas[i].alias,
+			"",  
 			formatUtcDate(cas[i].lastSyncDown), 
 			formatUtcDate(cas[i].lastSyncUp), 
 			formatUtcDate(cas[i].lastCaDown), 
 			formatUtcDate(cas[i].lastCaUp)],  
- 			"syncrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff")); 		 		
+ 			"syncrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+			
+			var editicon = document.createElement("i");
+			 editicon.className="fa-solid fa-xl fa-pen icon-btn-default";
+			 editicon.title="edit alias...";
+			 editicon.dataset.ip = cas[i].ip;
+			 editicon.onclick = editalias;
+			 row.childNodes[4].appendChild(editicon); 		 		
  	}
+}
+
+function editalias(){
+	let ip = this.dataset.ip;
+	let alias = prompt("Enter the alias for ip: " + ip, "");
+	if (alias == null) return;
+	
+	//TODO: if this update fails
+	var oReq = new XMLHttpRequest();
+	oReq.onload = refreshSyncHistory;
+	oReq.open("Put", SYNC_HISTORY + "/" + ip, true);
+	oReq.send(alias);
 }

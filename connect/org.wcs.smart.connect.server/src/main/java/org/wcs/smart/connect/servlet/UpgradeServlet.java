@@ -2281,6 +2281,7 @@ public class UpgradeServlet extends HttpServlet {
 
 							"drop trigger trg_work_item on connect.work_item", //$NON-NLS-1$
 							"create trigger trg_work_item after update of status on connect.work_item for each row execute function connect.update_workitem_summary()", //$NON-NLS-1$
+							"create table connect.ip_alias(ip varchar, alias varchar, primary key(ip))", //$NON-NLS-1$
 							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$

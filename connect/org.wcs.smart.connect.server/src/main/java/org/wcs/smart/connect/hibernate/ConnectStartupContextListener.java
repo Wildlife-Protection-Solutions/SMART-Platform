@@ -116,6 +116,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
+import org.wcs.smart.connect.model.IpAlias;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartCollectConnectUser;
@@ -413,6 +414,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(ConservationAreaInfo.class);
 		config.addAnnotatedClass(WorkItem.class);
 		config.addAnnotatedClass(WorkItemSummary.class);
+		config.addAnnotatedClass(IpAlias.class);
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
 		config.addAnnotatedClass(Alert.class);

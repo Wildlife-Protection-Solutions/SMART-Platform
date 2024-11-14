@@ -51,6 +51,9 @@ public class WorkItemSummary extends ConnectUuidItem {
 	private LocalDateTime lastCaUp;
 	private LocalDateTime lastCaDown;
 	
+	//to support api
+	@Transient
+	private String alias;
 	
 	public WorkItemSummary(){
 		
@@ -65,6 +68,7 @@ public class WorkItemSummary extends ConnectUuidItem {
 	public void setConservationAreaInfo(ConservationAreaInfo info){
 		this.caInfo = info;
 	}
+	
 	
 	
 	@Column(name="username")
@@ -121,26 +125,35 @@ public class WorkItemSummary extends ConnectUuidItem {
 	
 	@Transient
 	public String getLastSyncUp() {
-		if (getLastSyncUpUtc() == null) return "";
+		if (getLastSyncUpUtc() == null) return ""; //$NON-NLS-1$
 		return getLastSyncUpUtc().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 	
 	@Transient
 	public String getLastSyncDown() {
-		if (getLastSyncDownUtc() == null) return "";
+		if (getLastSyncDownUtc() == null) return ""; //$NON-NLS-1$
 		return getLastSyncDownUtc().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 	
 
 	@Transient
 	public String getLastCaUp() {
-		if (getLastCaUpUtc() == null) return "";
+		if (getLastCaUpUtc() == null) return ""; //$NON-NLS-1$
 		return getLastCaUpUtc().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 	
 	@Transient
 	public String getLastCaDown() {
-		if (getLastCaDownUtc() == null) return "";
+		if (getLastCaDownUtc() == null) return ""; //$NON-NLS-1$
 		return getLastCaDownUtc().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+	
+	@Transient
+	public String getAlias(){
+		return this.alias;
+	}
+	@Transient
+	public void setAlias(String alias){
+		this.alias = alias;
 	}
 }

@@ -33,7 +33,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -48,12 +50,15 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.IpAlias;
 import org.wcs.smart.connect.model.WorkItemSummary;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.persistence.Tuple;
 
 /**
@@ -174,7 +179,6 @@ public class SmartInfo extends HttpServlet{
 	public List<WorkItemSummary> getSyncInfo(){
 
 		//must be admin user
-		
 		Session session = HibernateManager.getSession(context);
 		session.beginTransaction();
 		try{
@@ -183,12 +187,60 @@ public class SmartInfo extends HttpServlet{
 				WorkItemSummary workItemSummary = (WorkItemSummary) iterator.next();
 				if (!validateRead(workItemSummary.getConservationAreaInfo().getUuid(), session)) {
 					iterator.remove();
-				}
-				
+				}	
 			}
+			
+			for (WorkItemSummary i : allitems) {
+				IpAlias a = session.get(IpAlias.class, i.getIp());
+				if (a != null) i.setAlias(a.getAlias());
+			}
+			
+			allitems.sort((a,b)->{
+				if (a.getConservationAreaInfo().equals(b.getConservationAreaInfo())) {
+					if (a.getUsername().equals(b.getUsername())) {
+						return a.getIp().compareTo(b.getIp());
+					}
+					return a.getUsername().compareTo(b.getUsername());
+				}
+				return a.getConservationAreaInfo().getLabel().compareTo(b.getConservationAreaInfo().getLabel());
+			});
 			return allitems;
 		}finally{
 			session.getTransaction().rollback();
+		}
+	
+	}
+	
+	@PUT
+    @Path("/sync/{ip}")
+	@Operation(description="Update alias associated with ip address")
+	public Response updateAlias(@Parameter(description="the ip address to update")
+		@PathParam("ip") String ip,
+			@RequestBody(description ="New name") String newAlias){
+
+		//TODO: do we want to do any validation on these?
+		//ip address length; newalias length?
+		
+		
+		//must be admin user
+		Session session = HibernateManager.getSession(context);
+		session.beginTransaction();
+		try{
+			IpAlias alias = session.get(IpAlias.class, ip);
+			if (alias == null) {
+				alias = new IpAlias();
+				alias.setIp(ip);
+				
+				session.persist(alias);
+			}
+			alias.setAlias(newAlias);
+			session.getTransaction().commit();
+			
+			return Response.ok().build();
+			
+		}catch (Exception ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 	
 	}
