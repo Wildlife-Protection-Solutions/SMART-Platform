@@ -536,18 +536,26 @@ function createSyncHistoryTable(){
 	}
 	
  	var cas = JSON.parse(this.responseText);
+	
+	var now = new Date();
+	now.setHours(0);
+	now.setMinutes(0);
+	now.setSeconds(0);
+	now.setMilliseconds(0);
+	
  	for (var i = 0; i < cas.length; i ++){
 		var name = cas[i].conservationAreaInfo.label;
+		
  		var row = tableCreateRow(parent, 
  			[name,
-			cas[i].username, 
 			cas[i].ip,
 			cas[i].alias ? cas[i].alias.alias : "",
-			"",  
-			formatUtcDate(cas[i].lastSyncDown), 
-			formatUtcDate(cas[i].lastSyncUp), 
-			formatUtcDate(cas[i].lastCaDown), 
-			formatUtcDate(cas[i].lastCaUp)],  
+			"",
+			cas[i].username,   
+			processDate(cas[i].lastSyncDown, now), 
+			processDate(cas[i].lastSyncUp, now), 
+			processDate(cas[i].lastCaDown, now), 
+			processDate(cas[i].lastCaUp, now)],  
  			"syncrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 			
 			var editicon = document.createElement("i");
@@ -555,8 +563,31 @@ function createSyncHistoryTable(){
 			 editicon.title="edit alias...";
 			 editicon.dataset.ip = cas[i].ip;
 			 editicon.onclick = editalias;
-			 row.childNodes[4].appendChild(editicon); 		 		
+			 row.childNodes[3].appendChild(editicon); 		 		
  	}
+}
+
+
+function processDate(date, now){
+	if (date == null || date == "") return "";
+	
+	date = new Date(date+ "Z");
+	date = new Date(date.toString());
+
+	if (date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear()){
+		return "Today (" + formatDate(date) + ")";
+	}else{
+		date2 = new Date(date);
+		date2.setHours(0);
+		date2.setMinutes(0);
+		date2.setSeconds(0);
+		date2.setMilliseconds(0);
+
+		
+		var days = Math.ceil((now.getTime() - date2.getTime()) / (1000 * 24 * 60 * 60));
+		if (days == 1) return "Yesterday (" + formatDate(date) + ")"; 
+		return days + " days ago (" + formatDate(date) + ")";
+	}
 }
 
 function editalias(){

@@ -2241,7 +2241,7 @@ public class UpgradeServlet extends HttpServlet {
 								last_sync_down timestamp,
 								last_ca_up timestamp,
 								last_ca_down timestamp,
-								primary key (ca_uuid, username, ip)
+								primary key (ca_uuid, ip)
 							)
 							""", //$NON-NLS-1$
 							"alter table connect.work_item_summary add constraint work_item_summary_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area(uuid) on delete cascade", //$NON-NLS-1$
@@ -2256,22 +2256,22 @@ public class UpgradeServlet extends HttpServlet {
 									    IF (NEW.type = 'UP_CA') THEN
 											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
 											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, null, nowutc, null)
-											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = nowutc, last_ca_down = null;
+											ON CONFLICT (ca_uuid, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = nowutc, last_ca_down = null, username=NEW.username;
 									    END IF; 
 									    IF (NEW.type = 'DOWN_CA' OR NEW.type = 'RECOVERY_CA') THEN
 											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
 											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, null, null, nowutc)
-											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = null, last_ca_down = nowutc;
+											ON CONFLICT (ca_uuid, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = null, last_ca_down = nowutc, username=NEW.username;
 									    END IF; 
 									    IF (NEW.type = 'DOWN_SYNC') THEN
 											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
 											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, nowutc, null, null)
-											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_down = nowutc;
+											ON CONFLICT (ca_uuid, ip) DO UPDATE SET last_sync_down = nowutc, username=NEW.username;
 									    END IF; 
 									    IF (NEW.type = 'UP_SYNC') THEN
 											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
 											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, nowutc, null, null, null)
-											ON CONFLICT (ca_uuid, username, ip) DO UPDATE SET last_sync_up = nowutc;
+											ON CONFLICT (ca_uuid, ip) DO UPDATE SET last_sync_up = nowutc, username=NEW.username;
 									    END IF;
 									  END IF; 
 									  RETURN NEW; 

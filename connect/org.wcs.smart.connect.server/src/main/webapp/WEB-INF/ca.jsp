@@ -92,11 +92,11 @@
 		
 			 <div id="synctable" class="table-cell smart-table">
 		  	  	<div class="table-row smart-table-header">
-				  <div class="table-cell smart-table-cell">Conservation Area</div>
-				  <div class="table-cell smart-table-cell">Username</div>
+				  <div class="table-cell smart-table-cell">Conservation Area</div>				  
 				  <div class="table-cell smart-table-cell">IP</div>
 				  <div class="table-cell smart-table-cell">IP Alias</div>
 				  <div class="table-cell smart-table-cell"></div>
+				  <div class="table-cell smart-table-cell">Last Username</div>
 				  <div class="table-cell smart-table-cell">Last Sync Download</div>
 				  <div class="table-cell smart-table-cell">Last Sync Upload</div>
 				  <div class="table-cell smart-table-cell">Last CA Download</div>
