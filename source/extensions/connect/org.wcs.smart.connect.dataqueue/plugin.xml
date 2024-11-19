@@ -94,6 +94,12 @@
       <handler
             class="org.wcs.smart.connect.dataqueue.internal.ui.ProcessDataQueueHandler$ProcessDataQueueHandlerWrapper"
             commandId="org.wcs.smart.connect.dataqueue.process">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.connect.dataqueue.internal.ui.config.ShowDataQueueProcessingOptionHandler$ShowDataQueueProcessingOptionHandlerWrapper"
