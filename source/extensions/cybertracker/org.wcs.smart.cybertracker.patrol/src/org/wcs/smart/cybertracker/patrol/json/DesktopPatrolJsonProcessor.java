@@ -134,6 +134,7 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 	@Override
 	public void afterSave() {
 		for (Patrol p : modifiedPatrols){
+			if (p.getUuid() == null) continue;
 			try{
 				PatrolEventManager.getInstance().patrolSaved(p, true);
 			}catch (Exception ex){
