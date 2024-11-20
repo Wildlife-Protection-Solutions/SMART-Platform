@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.internal.server;
 
 import java.nio.file.FileSystems;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -60,7 +61,7 @@ public class UploadCaJob extends FileUploaderJob {
 		try{
 			super.uploadFile(monitor);
 		}catch (Exception ex){
-			ConnectPlugIn.log("Error uploading conservation area to connect.", ex); //$NON-NLS-1$
+			ConnectPlugIn.displayLog(MessageFormat.format("Error uploading Conservation Area to Connect: {0}", ex.getMessage()), ex); //$NON-NLS-1$
 		}
 		return org.eclipse.core.runtime.Status.OK_STATUS;
 

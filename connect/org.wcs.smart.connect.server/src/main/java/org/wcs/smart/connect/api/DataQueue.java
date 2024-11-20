@@ -735,6 +735,7 @@ public class DataQueue {
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
+		boolean launchDqProcessor = false;
 		try{
 			
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
@@ -757,7 +758,8 @@ public class DataQueue {
 					updatedValue = Boolean.FALSE;
 				}
 				cainfo.setSmartMobileDqProcessor(updatedValue);
-				
+				launchDqProcessor = updatedValue;
+
 			}else {
 				
 				ConnectSetting.Setting key = null;
@@ -803,6 +805,9 @@ public class DataQueue {
 			logger.log(Level.SEVERE, "Unable to update settings." + ex.getMessage(), ex); //$NON-NLS-1$
 			throw new SmartConnectException(Response.Status.BAD_REQUEST);
 			
+		}
+		if (launchDqProcessor) {
+			SmartMobileJsonProcessorManager.INSTANCE.startProcessing(HibernateManager.getSessionFactory(context));
 		}
 	}
 	

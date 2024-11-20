@@ -73,10 +73,13 @@ public abstract class FileUploaderJob extends Job {
 	 */
 	protected void uploadFile(IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_TaskName, 70);
-		// get current status
-		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
+		
+		WorkItemStatus serverStatus = null;
 		
 		try{
+			// get current status
+			serverStatus = connect.getWorkItemStatus(url);
+			
 			if (checkServerStatus(serverStatus, progress.split(10))) return;
 			
 			int cnt = 0;			
@@ -122,6 +125,8 @@ public abstract class FileUploaderJob extends Job {
 					Thread.sleep(waitTime);
 				}catch (OperationCanceledException ex) {
 					if (doUploadCancelled()) return;
+				}catch (Exception ex) {
+					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
 			}
 			

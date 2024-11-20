@@ -57,6 +57,7 @@ import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
+import org.wcs.smart.connect.ui.server.UploadChangeLogHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -335,7 +336,12 @@ public class PostWindowOpenLoginHandler implements ILoginHandler {
 					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.LoginHandler_SyncDialogTitle, Messages.LoginHandler_SyncDialogTitleResume);
 					SmartConnect connect = getSmartConnect();
 					if (connect != null){
-						UploadChangeLogEngine e = new UploadChangeLogEngine(ca, connect);
+						UploadChangeLogEngine e = new UploadChangeLogEngine(ca, connect) {
+							protected void processComplete(){
+								super.processComplete();
+								UploadChangeLogHandler.showStatusMessage(record);
+							}
+						};
 						try{
 							e.createUpload(new NullProgressMonitor());
 						}catch (NothingToUpdateException ex){

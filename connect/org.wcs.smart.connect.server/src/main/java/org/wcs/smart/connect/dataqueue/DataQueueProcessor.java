@@ -115,12 +115,9 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
 				logger.log(Level.WARNING, ex.getMessage(), ex);
-			}
-						
+			}			
 		}
 
-				
-		
 		//immediately start processing json file
 		SmartMobileJsonProcessorManager.INSTANCE.startProcessing(session.getFactory());
 	}
