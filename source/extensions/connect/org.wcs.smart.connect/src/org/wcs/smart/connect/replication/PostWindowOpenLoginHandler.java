@@ -339,7 +339,7 @@ public class PostWindowOpenLoginHandler implements ILoginHandler {
 						UploadChangeLogEngine e = new UploadChangeLogEngine(ca, connect) {
 							protected void processComplete(){
 								super.processComplete();
-								UploadChangeLogHandler.displayStatus(record);
+								UploadChangeLogHandler.showStatusMessage(record);
 							}
 						};
 						try{

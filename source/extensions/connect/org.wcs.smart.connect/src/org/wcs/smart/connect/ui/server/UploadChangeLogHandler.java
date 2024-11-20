@@ -100,7 +100,11 @@ public class UploadChangeLogHandler {
 	/*
 	 * displays upload status once complete
 	 */
-	public static void displayStatus(final ConnectSyncHistoryRecord record){
+	protected void displayStatus(final ConnectSyncHistoryRecord record){
+		showStatusMessage(record);
+	}
+	
+	public static void showStatusMessage(final ConnectSyncHistoryRecord record){
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
@@ -120,7 +124,6 @@ public class UploadChangeLogHandler {
 			}});
 		
 	}
-	
 	public static class UploadChangeLogHandlerWrapper extends DIHandler<UploadChangeLogHandler>{
 		public UploadChangeLogHandlerWrapper() {
 			super(UploadChangeLogHandler.class);
