@@ -127,6 +127,8 @@ public class Uploader extends HttpServlet {
 				status.setCurrentSize(size);
 			}
 			return status;
+		}catch (SmartConnectException ex){
+			throw ex;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);

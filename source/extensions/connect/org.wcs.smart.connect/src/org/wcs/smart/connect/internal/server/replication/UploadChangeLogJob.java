@@ -65,25 +65,31 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		//that will happen if another job was processing the item
 		//before this job started.
 		
-		String url = null;
-		try{
-			url = connect.getSyncUploadUrl(item.getConservationArea().getUuid(), file);
-		}catch (Exception ex){
-			ConnectPlugIn.log(ex.getMessage(), ex);
-			onError(ex.getMessage());
-			return Status.OK_STATUS;
+		if(item.getStatusUrl() == null) {
+			String url = null;
+			try{
+				url = connect.getSyncUploadUrl(item.getConservationArea().getUuid(), file);
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+				onError(ex.getMessage());
+				return Status.OK_STATUS;
+			}
+			
+			if (url == null){
+				String error = Messages.UploadChangeLogJob_NoUrlError;
+				ConnectPlugIn.log(error, null);
+				onError(error);
+				return Status.OK_STATUS;
+			}
+			item.setStatusUrl(url);
+			saveHistoryRecord();
+		
+		
+			super.url = url;
+		}else {
+			super.url = item.getStatusUrl();
 		}
 		
-		if (url == null){
-			String error = Messages.UploadChangeLogJob_NoUrlError;
-			ConnectPlugIn.log(error, null);
-			onError(error);
-			return Status.OK_STATUS;
-		}
-		item.setStatusUrl(url);
-		saveHistoryRecord();
-		
-		super.url = url;
 		try {
 			super.uploadFile(monitor);
 		} catch (Exception e) {
@@ -94,7 +100,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 	}
 
 	@Override
-	protected void onUploadComplete(WorkItemStatus upstatus) {
+	protected void onUploadComplete(WorkItemStatus upstatus) { 
 		deleteLocalFile();
 	}
 	

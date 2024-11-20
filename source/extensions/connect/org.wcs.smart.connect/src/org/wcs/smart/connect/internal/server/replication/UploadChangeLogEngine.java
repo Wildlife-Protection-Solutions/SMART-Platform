@@ -100,7 +100,7 @@ public class UploadChangeLogEngine {
 
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.UPLOAD);
 			if ((previous == null && currentRevisionNo == -1) ||
-				(previous != null && previous.getEndRevision() >= currentRevisionNo)){
+				(previous != null && previous.getStatus() != Status.ACTIVE && previous.getEndRevision() >= currentRevisionNo)){
 				throw nothingtoUpdate;
 			}
 			if (previous != null && 

@@ -100,7 +100,7 @@ public class UploadChangeLogHandler {
 	/*
 	 * displays upload status once complete
 	 */
-	protected void displayStatus(final ConnectSyncHistoryRecord record){
+	public static void displayStatus(final ConnectSyncHistoryRecord record){
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {

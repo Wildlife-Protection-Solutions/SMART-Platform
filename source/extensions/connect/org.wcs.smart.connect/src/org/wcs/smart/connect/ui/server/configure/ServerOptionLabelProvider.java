@@ -91,7 +91,7 @@ public enum ServerOptionLabelProvider {
 		case MAX_RETRY_UPLOAD:
 			return Messages.ServerOptionLabelProvider_UploadRetryTooltip1; 
 		case RETY_WAIT_TIME:
-			return Messages.ServerOptionLabelProvider_WaitTimeTooltip1;
+			return Messages.ServerOptionLabelProvider_WaitTimeTooltip2;
 		case SYNC_AUTOMATICALLY:
 			return Messages.ServerOptionLabelProvider_AutoTooltip;
 		case SYNC_PROMPT_PASSWORD:
