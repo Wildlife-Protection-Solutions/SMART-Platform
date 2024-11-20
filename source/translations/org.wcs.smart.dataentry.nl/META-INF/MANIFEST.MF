@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: SMART Dataentry Fragment
 Bundle-SymbolicName: org.wcs.smart.dataentry.nl
 Bundle-Version: 8.0.0.qualifier
-Fragment-Host: org.wcs.smart.dataentry;bundle-version="8.0.0"
+Fragment-Host: org.wcs.smart.dataentry;bundle-version="8.0.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.dataentry.nl
