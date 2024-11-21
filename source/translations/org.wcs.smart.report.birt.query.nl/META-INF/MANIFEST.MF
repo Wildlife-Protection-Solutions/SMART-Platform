@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Query NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.birt.query.nl
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.0.2.qualifier
 Bundle-Vendor: org.wcs.smart
 Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="8.0.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-17

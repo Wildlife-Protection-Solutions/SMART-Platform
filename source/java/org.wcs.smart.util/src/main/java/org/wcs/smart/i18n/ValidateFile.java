@@ -20,7 +20,7 @@ import java.util.Properties;
 import java.util.Map.Entry;
 
 public class ValidateFile {
-	private static final String ROOT = "C:\\data\\SMART\\Source\\Trunk\\";
+	private static final String ROOT = "C:\\data\\SMART\\Source\\Version8.0.X\\";
 
 	public static final String IN_DIR[] = { 
 			ROOT + "svn\\source\\java", 
@@ -48,7 +48,7 @@ public class ValidateFile {
 			ROOT + "svn\\source\\extensions\\qa\\translations",
 			ROOT + "svn\\source\\extensions\\r\\translations", };
 
-    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
+    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh", "tg"};
 
 	public static final String LINE_SEP = "\n";
 
@@ -145,8 +145,7 @@ public class ValidateFile {
 	 * files.
 	 */
 	private void testFile(Path file) throws Exception {
-//		System.out.println(file.toString());
-		
+	
 		boolean print = false;
 		int cnt = 1;
 		for (String s : Files.readAllLines(file, StandardCharsets.UTF_8)) {
