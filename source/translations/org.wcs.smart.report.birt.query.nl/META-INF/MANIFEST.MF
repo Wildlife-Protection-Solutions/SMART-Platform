@@ -4,6 +4,6 @@ Bundle-Name: SMART Query NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.birt.query.nl
 Bundle-Version: 8.0.2.qualifier
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="8.0.2"
+Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="8.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.wcs.smart.report.birt.query.nl

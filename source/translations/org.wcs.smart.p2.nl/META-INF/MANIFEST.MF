@@ -4,6 +4,6 @@ Bundle-Name: P2 Translation
 Bundle-SymbolicName: org.wcs.smart.p2.nl
 Bundle-Version: 8.0.2.qualifier
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.p2;bundle-version="8.0.2"
+Fragment-Host: org.wcs.smart.p2;bundle-version="8.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.wcs.smart.p2.nl
